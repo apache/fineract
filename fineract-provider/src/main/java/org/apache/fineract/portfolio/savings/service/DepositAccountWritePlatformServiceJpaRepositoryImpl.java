@@ -2061,7 +2061,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             return charge.getAmount();
         }
 
-        List<ChargeSlab> slab = chargeSlabRepository.findCorrectChargeByPeriodNumberAndChargeId(periodNumber, charge.getId(),
+        List<ChargeSlab> slab = chargeSlabRepository.findCorrectChargeByPeriodNumberAndChargeId(periodNumber + 1, charge.getId(),
                 PageRequest.of(0, 1));
 
         if (!slab.isEmpty()) {

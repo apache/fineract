@@ -71,8 +71,10 @@ public class SavingsAccountChargeDataValidator {
         final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, element);
         baseDataValidator.reset().parameter(chargeIdParamName).value(chargeId).notNull().integerGreaterThanZero();
 
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, element);
-        baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
+        if (fromApiJsonHelper.parameterExists(amountParamName, element)) {
+            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, element);
+            baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
+        }
 
         if (this.fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
             final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);

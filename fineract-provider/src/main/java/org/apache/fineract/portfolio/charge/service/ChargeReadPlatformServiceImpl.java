@@ -499,8 +499,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         @Override
         public ChargeSlabData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
-            final Integer fromPeriod = rs.getInt("fromPeriod");
-            final Integer toPeriod = rs.getInt("toPeriod");
+            final Integer fromPeriod = JdbcSupport.getInteger(rs, "fromPeriod");
+            final Integer toPeriod = JdbcSupport.getInteger(rs, "toPeriod");
             final BigDecimal value = rs.getBigDecimal("value");
 
             return new ChargeSlabData(id, fromPeriod, toPeriod, value);
