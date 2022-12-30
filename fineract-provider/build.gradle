@@ -314,7 +314,7 @@ task migrateDatabase {
         liquibase {
             activities {
                 main {
-                    changeLogFile changeLogFilePath 
+                    changeLogFile changeLogFilePath
                     url dbUrl
                     username project.ext.mysqlUser
                     password project.ext.mysqlPassword
