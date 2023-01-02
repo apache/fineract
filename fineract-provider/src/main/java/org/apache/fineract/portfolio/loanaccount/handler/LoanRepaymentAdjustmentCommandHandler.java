@@ -37,7 +37,6 @@ public class LoanRepaymentAdjustmentCommandHandler implements NewCommandSourceHa
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-
         return this.writePlatformService.adjustLoanTransaction(command.getLoanId(), command.entityId(), command);
     }
 }

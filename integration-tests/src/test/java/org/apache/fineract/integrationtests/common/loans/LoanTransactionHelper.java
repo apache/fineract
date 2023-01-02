@@ -504,7 +504,14 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public HashMap reverseRepayment(final Integer loanId, final Integer transactionId, String date) {
-        return (HashMap) performLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date), "");
+        return (HashMap) performLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId),
+                getAdjustTransactionJsonBody(date, "0"), "");
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final String repaymentTypeCommand, final String date,
+            final Float amountToBePaid, final Integer loanID) {
+        log.info("Repayment with amount {} in {} for Loan {}", amountToBePaid, date, loanID);
+        return postLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID), getRepaymentBodyAsJSON(date, amountToBePaid));
     }
 
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final String date, final Float amountToBePaid, final Integer loanID) {
@@ -701,9 +708,16 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.adjustLoanTransaction1(loanId, transactionExternalId, request, "adjust"));
     }
 
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(final Integer loanId, final Long transactionId, String date,
+            ResponseSpecification responseSpec) {
+        return postLoanTransaction(createLoanTransactionURL(null, loanId, transactionId.intValue()),
+                getAdjustTransactionJsonBody(date, "10"), responseSpec);
+    }
+
     public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Integer loanId, final Long transactionId, String date,
             ResponseSpecification responseSpec) {
-        return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId.intValue()), getUndoJsonBody(date), responseSpec);
+        return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId.intValue()),
+                getAdjustTransactionJsonBody(date, "0"), responseSpec);
     }
 
     public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Long loanId, final Long transactionId,
@@ -1074,10 +1088,10 @@ public class LoanTransactionHelper extends IntegrationTest {
         return new Gson().toJson(map);
     }
 
-    private String getUndoJsonBody(String date) {
+    private String getAdjustTransactionJsonBody(String date, String amount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("transactionDate", date);
-        map.put("transactionAmount", "0");
+        map.put("transactionAmount", amount);
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         return new Gson().toJson(map);
@@ -1257,8 +1271,11 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     private String createLoanTransactionURL(final String command, final Integer loanID, final Integer transactionId) {
-        return "/fineract-provider/api/v1/loans/" + loanID + "/transactions/" + transactionId + "?command=" + command + "&"
-                + Utils.TENANT_IDENTIFIER;
+        String url = "/fineract-provider/api/v1/loans/" + loanID + "/transactions/" + transactionId + "?";
+        if (command != null) {
+            url = url + "command=" + command + "&";
+        }
+        return url + Utils.TENANT_IDENTIFIER;
     }
 
     private String createGlimAccountURL(final String command, final Integer glimID) {
