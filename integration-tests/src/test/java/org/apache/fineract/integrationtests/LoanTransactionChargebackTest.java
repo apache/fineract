@@ -57,6 +57,7 @@ public class LoanTransactionChargebackTest {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecErr400;
+    private ResponseSpecification responseSpecErr403;
     private ResponseSpecification responseSpecErr503;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -71,6 +72,7 @@ public class LoanTransactionChargebackTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
+        this.responseSpecErr403 = new ResponseSpecBuilder().expectStatusCode(403).build();
         this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
@@ -114,10 +116,28 @@ public class LoanTransactionChargebackTest {
 
         // Try to reverse a Loan Transaction charge back
         PostLoansLoanIdTransactionsResponse reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId,
-                chargebackTransactionId, operationDate, responseSpecErr503);
+                chargebackTransactionId, operationDate, responseSpecErr403);
 
         // Try to reverse a Loan Transaction repayment with linked transactions
         reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId, transactionId, operationDate, responseSpecErr503);
+    }
+
+    @Test
+    public void applyAndAdjustLoanTransactionChargeback() {
+        // Client and Loan account creation
+        final Integer loanId = createAccounts(15, 1);
+
+        Float amount = Float.valueOf(amountVal);
+        PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanTransactionResponse);
+        final Long transactionId = loanTransactionResponse.getResourceId();
+
+        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "1000.00", 0,
+                responseSpec);
+
+        // Then
+        loanTransactionHelper.adjustLoanTransaction(loanId, chargebackTransactionId, operationDate, responseSpecErr403);
     }
 
     @Test
@@ -141,7 +161,6 @@ public class LoanTransactionChargebackTest {
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
         loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "0.00", 0, responseSpecErr400);
-
     }
 
     @Test

@@ -163,6 +163,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
+import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanMultiDisbursementException;
@@ -1066,15 +1067,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     transactionId);
         }
 
-        if (transactionToAdjust.isChargeback()) {
-            throw new PlatformServiceUnavailableException("error.msg.loan.transaction.update.not.allowed", "Loan transaction:"
-                    + transactionId + " update not allowed as loan transaction is charge back and is linked to other transaction",
-                    transactionId);
-        }
-
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
         final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
+
+        final boolean isAdjustCommand = (transactionAmount.compareTo(BigDecimal.ZERO) > 0);
+        if (isAdjustCommand && !transactionToAdjust.isEditable()) {
+            final String errorMessage = "Loan transaction: " + transactionId + " update not allowed as loan transaction is a "
+                    + transactionToAdjust.getTypeOf().getCode();
+            throw new InvalidLoanTransactionTypeException("transaction", "error.msg.loan.transaction.update.not.allowed", errorMessage);
+        }
 
         // We dont need auto generation for reversal external id... if it is not provided, it remains null (empty)
         final String reversalExternalId = command.stringValueOfParameterNamedAllowingNull(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);

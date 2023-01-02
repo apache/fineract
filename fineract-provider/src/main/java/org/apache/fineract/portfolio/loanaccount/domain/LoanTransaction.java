@@ -651,6 +651,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return getTypeOf().isChargeback() && isNotReversed();
     }
 
+    public boolean isEditable() {
+        return !(isChargeback() || isGoodwillCredit() || isPayoutRefund() || isMerchantIssuedRefund());
+    }
+
     public boolean isPenaltyPayment() {
         boolean isPenalty = false;
         if (isChargePayment()) {
