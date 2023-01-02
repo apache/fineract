@@ -24,12 +24,12 @@ dependencyManagement {
     imports {
         mavenBom 'org.springframework:spring-framework-bom:5.3.24'
         mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.7'
-        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.7.22'
+        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.8.0'
         mavenBom 'org.junit:junit-bom:5.9.1'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.1'
         mavenBom 'io.cucumber:cucumber-bom:7.10.1'
         mavenBom 'io.netty:netty-bom:4.1.86.Final'
-        mavenBom 'org.mockito:mockito-bom:4.10.0'
+        mavenBom 'org.mockito:mockito-bom:4.11.0'
     }
 
     dependencies {
@@ -61,7 +61,7 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
         }
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.372'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.376'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
