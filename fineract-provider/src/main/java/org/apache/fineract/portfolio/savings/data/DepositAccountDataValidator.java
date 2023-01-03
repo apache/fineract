@@ -812,25 +812,25 @@ public class DepositAccountDataValidator {
                                         element);
                                 final Integer depositPeriodFrequencyId = fromApiJsonHelper.extractIntegerSansLocaleNamed(depositPeriodFrequencyIdParamName, element);
                                 Integer freeWithdrawalCount = charge.getFrequencyFreeWithdrawalCharge();
-                                if ((depositPeriod <= 3 && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.MONTHS))
+                                if ((depositPeriod < 3 && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.MONTHS))
                                         && !freeWithdrawalCount.equals(1)) {
                                     Log.info("charge is wrong " + depositPeriod);
                                     throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
                                             freeWithdrawalCount);
-                                }else if ((depositPeriod <= 90 && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.DAYS))
+                                }else if ((depositPeriod < 90 && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.DAYS))
                                             && !freeWithdrawalCount.equals(1)) {
                                     Log.info("charge is wrong " + depositPeriod);
                                     throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
                                             freeWithdrawalCount);
                                 }
 
-                                if (((depositPeriod > 3 && depositPeriod <= 12)
+                                if (((depositPeriod >= 3 && depositPeriod <= 12)
                                         && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.MONTHS))
                                         && !freeWithdrawalCount.equals(2)) {
                                     Log.info("charge is wrong " + depositPeriod);
                                     throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
                                             freeWithdrawalCount);
-                                }else if (((depositPeriod > 90 && depositPeriod <= 365) && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.DAYS))
+                                }else if (((depositPeriod >= 90 && depositPeriod <= 365) && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.DAYS))
                                              && !freeWithdrawalCount.equals(2)) {
                                     Log.info("charge is wrong " + depositPeriod);
                                     throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
