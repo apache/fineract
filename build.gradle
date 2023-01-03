@@ -37,6 +37,7 @@ buildscript {
         }
         fineractPublishProjects = subprojects.findAll{
             [
+                'fineract-provider',
                 'fineract-avro-schemas',
                 'fineract-client'
             ].contains(it.name)
