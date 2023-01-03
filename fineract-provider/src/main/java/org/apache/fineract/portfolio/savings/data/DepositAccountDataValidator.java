@@ -201,7 +201,7 @@ public class DepositAccountDataValidator {
         validateSavingsCharges(element, baseDataValidator);
         validateFreeWithdrawalCharges(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateWithHoldTax(element, baseDataValidator);
-        featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
+       // featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -226,7 +226,7 @@ public class DepositAccountDataValidator {
         // validateSavingsCharges(element, baseDataValidator);
         validateFreeWithdrawalCharges(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateWithHoldTax(element, baseDataValidator);
-        featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
+        //featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
