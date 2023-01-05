@@ -71,8 +71,8 @@ public class NotesApiResource {
     public static final String GROUPNOTE = "GROUPNOTE";
     public static final String INVALIDNOTE = "INVALIDNOTE";
     private static final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("id", "clientId", "groupId", "loanId", "loanTransactionId", "depositAccountId", "savingAccountId", "noteType",
-                    "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
+            Arrays.asList("id", "resourceId", "clientId", "groupId", "loanId", "loanTransactionId", "depositAccountId", "savingAccountId",
+                    "noteType", "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
     private final PlatformSecurityContext context;
     private final NoteReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<NoteData> toApiJsonSerializer;
