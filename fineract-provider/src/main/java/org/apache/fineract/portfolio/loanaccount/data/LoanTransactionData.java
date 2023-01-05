@@ -96,6 +96,8 @@ public class LoanTransactionData {
 
     private List<LoanTransactionRelationData> transactionRelations;
 
+    private Collection<CodeValueData> chargeOffReasonOptions = null;
+
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate lastRepaymentDate, Long repaymentTypeId,
             Integer rowIndex, String locale, String dateFormat) {
         return new LoanTransactionData(repaymentAmount, lastRepaymentDate, repaymentTypeId, rowIndex, locale, dateFormat);
@@ -367,6 +369,10 @@ public class LoanTransactionData {
 
     public void setWriteOffReasonOptions(Collection<CodeValueData> writeOffReasonOptions) {
         this.writeOffReasonOptions = writeOffReasonOptions;
+    }
+
+    public void setChargeOffReasonOptions(Collection<CodeValueData> chargeOffReasonOptions) {
+        this.chargeOffReasonOptions = chargeOffReasonOptions;
     }
 
     public void setLoanChargePaidByList(Collection<LoanChargePaidByData> loanChargePaidByList) {

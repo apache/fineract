@@ -3606,4 +3606,12 @@ public class CommandWrapperBuilder {
         this.href = "/externaleventconfiguration";
         return this;
     }
+
+    public CommandWrapperBuilder chargeOff(final Long loanId) {
+        this.actionName = "CHARGEOFF";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=charge-off";
+        return this;
+    }
 }

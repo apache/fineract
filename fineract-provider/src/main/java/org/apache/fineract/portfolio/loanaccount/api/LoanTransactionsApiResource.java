@@ -76,6 +76,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Loan Transactions", description = "Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.")
 public class LoanTransactionsApiResource {
 
+    public static final String CHARGE_OFF_COMMAND_VALUE = "charge-off";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
@@ -103,7 +104,8 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=recoverypayment" + "\n" + "loans/1/transactions/template?command=prepayLoan" + "\n"
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
             + "loans/1/transactions/template?command=foreclosure" + "\n"
-            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)")
+            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)" + "\n"
+            + "loans/1/transactions/template?command=charge-off" + "\n")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(@PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
@@ -129,7 +131,8 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=recoverypayment" + "\n" + "loans/1/transactions/template?command=prepayLoan" + "\n"
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
             + "loans/1/transactions/template?command=foreclosure" + "\n"
-            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)")
+            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)" + "\n"
+            + "loans/1/transactions/template?command=charge-off" + "\n")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(
@@ -224,7 +227,8 @@ public class LoanTransactionsApiResource {
             + " | Undo Loan Write-off | \n" + "loans/1/transactions?command=recoverypayment" + " | Make Recovery Payment | \n"
             + "loans/1/transactions?command=refundByCash" + " | Make a Refund of an Active Loan by Cash | \n"
             + "loans/1/transactions?command=foreclosure" + " | Foreclosure of an Active Loan | \n"
-            + "loans/1/transactions?command=creditBalanceRefund" + " | Credit Balance Refund" + " |  \n")
+            + "loans/1/transactions?command=creditBalanceRefund" + " | Credit Balance Refund" + " |  \n"
+            + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=charge-off" + " | Charge-off Loan" + " |  \n")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsResponse.class))) })
@@ -257,6 +261,7 @@ public class LoanTransactionsApiResource {
             + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=foreclosure"
             + " | Foreclosure of an Active Loan | \n"
             + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=creditBalanceRefund" + " | Credit Balance Refund"
+            + " |  \n" + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=charge-off" + " | Charge-off Loan"
             + " |  \n")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     @ApiResponses({
@@ -456,6 +461,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.loanForeclosure(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "creditBalanceRefund")) {
             commandRequest = builder.creditBalanceRefund(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, CHARGE_OFF_COMMAND_VALUE)) {
+            commandRequest = builder.chargeOff(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {
@@ -529,6 +536,8 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveLoanForeclosureTemplate(resolvedLoanId, transactionDate);
         } else if (CommandParameterUtil.is(commandParam, "creditBalanceRefund")) {
             transactionData = this.loanReadPlatformService.retrieveCreditBalanceRefundTemplate(resolvedLoanId);
+        } else if (CommandParameterUtil.is(commandParam, CHARGE_OFF_COMMAND_VALUE)) {
+            transactionData = this.loanReadPlatformService.retrieveLoanChargeOffTemplate(resolvedLoanId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

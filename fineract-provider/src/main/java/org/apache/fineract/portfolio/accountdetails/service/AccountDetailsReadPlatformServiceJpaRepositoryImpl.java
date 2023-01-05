@@ -470,15 +470,17 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     .append(" l.closedon_date as closedOnDate,")
                     .append(" cbu.username as closedByUsername, cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname,")
                     .append(" la.overdue_since_date_derived as overdueSinceDate, ")
-                    .append(" l.writtenoffon_date as writtenOffOnDate, l.expected_maturedon_date as expectedMaturityDate")
-
-                    .append(" from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id")
+                    .append(" l.writtenoffon_date as writtenOffOnDate, l.expected_maturedon_date as expectedMaturityDate, ")
+                    .append(" l.charged_off_on_date as chargedOffOnDate, cobu.username as chargedOffByUsername, ")
+                    .append(" cobu.firstname as chargedOffByFirstname, cobu.lastname as chargedOffByLastname ").append(" from m_loan l ")
+                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id")
                     .append(" left join m_appuser sbu on sbu.id = l.created_by")
                     .append(" left join m_appuser rbu on rbu.id = l.rejectedon_userid")
                     .append(" left join m_appuser wbu on wbu.id = l.withdrawnon_userid")
                     .append(" left join m_appuser abu on abu.id = l.approvedon_userid")
                     .append(" left join m_appuser dbu on dbu.id = l.disbursedon_userid")
                     .append(" left join m_appuser cbu on cbu.id = l.closedon_userid")
+                    .append(" left join m_appuser cobu on cobu.id = l.charged_off_by_userid")
                     .append(" left join m_loan_arrears_aging la on la.loan_id = l.id")
                     .append(" left join glim_accounts glim on glim.id=l.glim_id");
 
@@ -541,6 +543,12 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final LocalDate expectedMaturityDate = JdbcSupport.getLocalDate(rs, "expectedMaturityDate");
 
             final LocalDate overdueSinceDate = JdbcSupport.getLocalDate(rs, "overdueSinceDate");
+
+            final LocalDate chargedOffOnDate = JdbcSupport.getLocalDate(rs, "chargedOffOnDate");
+            final String chargedOffByUsername = rs.getString("chargedOffByUsername");
+            final String chargedOffByFirstname = rs.getString("chargedOffByFirstname");
+            final String chargedOffByLastname = rs.getString("chargedOffByLastname");
+
             Boolean inArrears = (overdueSinceDate != null);
 
             final LoanApplicationTimelineData timeline = new LoanApplicationTimelineData(submittedOnDate, submittedByUsername,
@@ -548,7 +556,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     withdrawnOnDate, withdrawnByUsername, withdrawnByFirstname, withdrawnByLastname, approvedOnDate, approvedByUsername,
                     approvedByFirstname, approvedByLastname, expectedDisbursementDate, actualDisbursementDate, disbursedByUsername,
                     disbursedByFirstname, disbursedByLastname, closedOnDate, closedByUsername, closedByFirstname, closedByLastname,
-                    expectedMaturityDate, writtenOffOnDate, closedByUsername, closedByFirstname, closedByLastname);
+                    expectedMaturityDate, writtenOffOnDate, closedByUsername, closedByFirstname, closedByLastname, chargedOffOnDate,
+                    chargedOffByUsername, chargedOffByFirstname, chargedOffByLastname);
 
             return new LoanAccountSummaryData(id, accountNo, parentAccountNumber, externalId, productId, loanProductName,
                     shortLoanProductName, loanStatus, loanType, loanCycle, timeline, inArrears, originalLoan, loanBalance, amountPaid);

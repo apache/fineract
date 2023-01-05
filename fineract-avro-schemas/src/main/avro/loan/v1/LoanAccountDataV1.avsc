@@ -724,6 +724,30 @@
                 "null",
                 "org.apache.fineract.avro.loan.v1.DelinquencyRangeDataV1"
             ]
+        },
+        {
+            "default": null,
+            "name": "overpaidOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "lastClosedBusinessDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "chargedOff",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }

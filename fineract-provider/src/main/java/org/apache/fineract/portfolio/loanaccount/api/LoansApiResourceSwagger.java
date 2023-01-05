@@ -247,6 +247,14 @@ final class LoansApiResourceSwagger {
             public LocalDate expectedMaturityDate;
             @Schema(example = "[2012, 4, 3]")
             public LocalDate closedOnDate;
+            @Schema(example = "[2012, 4, 10]")
+            public LocalDate chargedOffOnDate;
+            @Schema(example = "admin")
+            public String chargedOffByUsername;
+            @Schema(example = "App")
+            public String chargedOffByFirstname;
+            @Schema(example = "Administrator")
+            public String chargedOffByLastname;
         }
 
         static final class GetLoansLoanIdRepaymentSchedule {
@@ -601,6 +609,10 @@ final class LoansApiResourceSwagger {
             @Schema(example = "0.000000")
             public Double totalRepaymentTransactionReversed;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
+            @Schema(example = "1")
+            public Long chargeOffReasonId;
+            @Schema(example = "reason")
+            public String chargeOffReason;
         }
 
         static final class GetLoansLoanIdPaymentType {
@@ -1028,6 +1040,8 @@ final class LoansApiResourceSwagger {
         public LocalDate lastClosedBusinessDate;
         @Schema(example = "[2013, 11, 1]")
         public LocalDate overpaidOnDate;
+        @Schema(example = "false")
+        public Boolean chargedOff;
     }
 
     @Schema(description = "GetLoansResponse")

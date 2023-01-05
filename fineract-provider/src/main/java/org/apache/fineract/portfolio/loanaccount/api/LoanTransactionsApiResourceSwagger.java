@@ -258,7 +258,10 @@ final class LoanTransactionsApiResourceSwagger {
         public Integer loanChargeId;
         @Schema(example = "28 June 2022")
         public String dueDate;
-
+        @Schema(example = "1")
+        public Long chargeOffReasonId;
+        @Schema(example = "1")
+        public Long writeoffReasonId;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsResponse")

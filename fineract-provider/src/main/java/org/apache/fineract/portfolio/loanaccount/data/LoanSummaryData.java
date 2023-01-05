@@ -87,6 +87,8 @@ public class LoanSummaryData {
     private BigDecimal totalCreditBalanceRefundReversed;
     private BigDecimal totalRepaymentTransaction;
     private BigDecimal totalRepaymentTransactionReversed;
+    private final Long chargeOffReasonId;
+    private final String chargeOffReason;
 
     public LoanSummaryData(final CurrencyData currency, final BigDecimal principalDisbursed, final BigDecimal principalAdjustments,
             final BigDecimal principalPaid, final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding,
@@ -100,7 +102,7 @@ public class LoanSummaryData {
             final BigDecimal totalRepayment, final BigDecimal totalExpectedCostOfLoan, final BigDecimal totalCostOfLoan,
             final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
             final BigDecimal totalOverdue, final LocalDate overdueSinceDate, final Long writeoffReasonId, final String writeoffReason,
-            final BigDecimal totalRecovered) {
+            final BigDecimal totalRecovered, final Long chargeOffReasonId, final String chargeOffReason) {
         this.currency = currency;
         this.principalDisbursed = principalDisbursed;
         this.principalAdjustments = principalAdjustments;
@@ -139,6 +141,8 @@ public class LoanSummaryData {
         this.writeoffReasonId = writeoffReasonId;
         this.writeoffReason = writeoffReason;
         this.totalRecovered = totalRecovered;
+        this.chargeOffReasonId = chargeOffReasonId;
+        this.chargeOffReason = chargeOffReason;
     }
 
     public static LoanSummaryData withTransactionAmountsSummary(final LoanSummaryData defaultSummaryData,
@@ -193,12 +197,13 @@ public class LoanSummaryData {
                 defaultSummaryData.totalExpectedRepayment, defaultSummaryData.totalRepayment, defaultSummaryData.totalExpectedCostOfLoan,
                 defaultSummaryData.totalCostOfLoan, defaultSummaryData.totalWaived, defaultSummaryData.totalWrittenOff,
                 defaultSummaryData.totalOutstanding, defaultSummaryData.totalOverdue, defaultSummaryData.overdueSinceDate,
-                defaultSummaryData.writeoffReasonId, defaultSummaryData.writeoffReason, defaultSummaryData.totalRecovered)
-                        .setTotalMerchantRefund(totalMerchantRefund).setTotalMerchantRefundReversed(totalMerchantRefundReversed)
-                        .setTotalPayoutRefund(totalPayoutRefund).setTotalPayoutRefundReversed(totalPayoutRefundReversed)
-                        .setTotalGoodwillCredit(totalGoodwillCredit).setTotalGoodwillCreditReversed(totalGoodwillCreditReversed)
-                        .setTotalChargeAdjustment(totalChargeAdjustment).setTotalChargeAdjustmentReversed(totalChargeAdjustmentReversed)
-                        .setTotalChargeback(totalChargeback).setTotalCreditBalanceRefund(totalCreditBalanceRefund)
+                defaultSummaryData.writeoffReasonId, defaultSummaryData.writeoffReason, defaultSummaryData.totalRecovered,
+                defaultSummaryData.chargeOffReasonId, defaultSummaryData.chargeOffReason).setTotalMerchantRefund(totalMerchantRefund)
+                        .setTotalMerchantRefundReversed(totalMerchantRefundReversed).setTotalPayoutRefund(totalPayoutRefund)
+                        .setTotalPayoutRefundReversed(totalPayoutRefundReversed).setTotalGoodwillCredit(totalGoodwillCredit)
+                        .setTotalGoodwillCreditReversed(totalGoodwillCreditReversed).setTotalChargeAdjustment(totalChargeAdjustment)
+                        .setTotalChargeAdjustmentReversed(totalChargeAdjustmentReversed).setTotalChargeback(totalChargeback)
+                        .setTotalCreditBalanceRefund(totalCreditBalanceRefund)
                         .setTotalCreditBalanceRefundReversed(totalCreditBalanceRefundReversed)
                         .setTotalRepaymentTransaction(totalRepaymentTransaction)
                         .setTotalRepaymentTransactionReversed(totalRepaymentTransactionReversed);
