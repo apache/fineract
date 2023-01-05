@@ -410,6 +410,22 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "chargeOffReasonId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "chargeOffReason",
+            "type": [
+                "null",
+                "string"
+            ]
         }
     ]
 }

@@ -34,6 +34,7 @@ public final class CodeHelper {
     private static final String COUNTRY_CODE_NAME = "COUNTRY";
     private static final String STATE_CODE_NAME = "STATE";
     private static final String ADDRESS_TYPE_CODE_NAME = "ADDRESS_TYPE";
+    private static final String CHARGE_OFF_REASONS_CODE_NAME = "ChargeOffReasons";
 
     private CodeHelper() {
 
@@ -173,6 +174,13 @@ public final class CodeHelper {
         HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, COUNTRY_CODE_NAME);
         Integer countryCode = (Integer) code.get("id");
         return createCodeValue(requestSpec, responseSpec, countryCode, countryName, position);
+    }
+
+    public static Integer createChargeOffCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String value, final Integer position) {
+        HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, CHARGE_OFF_REASONS_CODE_NAME);
+        Integer countryCode = (Integer) code.get("id");
+        return createCodeValue(requestSpec, responseSpec, countryCode, value, position);
     }
 
     public static Integer createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
