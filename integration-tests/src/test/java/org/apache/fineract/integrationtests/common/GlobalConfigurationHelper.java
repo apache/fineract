@@ -119,9 +119,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 46 global configurations.
-        Assertions.assertEquals(46, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(46, actualGlobalConfigurations.size());
+        // There are currently 47 global configurations.
+        Assertions.assertEquals(47, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(47, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -524,6 +524,14 @@ public class GlobalConfigurationHelper {
         purgeProcessCommandDaysDefault.put("enabled", false);
         purgeProcessCommandDaysDefault.put("trapDoor", false);
         defaults.add(purgeProcessCommandDaysDefault);
+
+        HashMap<String, Object> isCOBBulkEventEnabled = new HashMap<>();
+        isCOBBulkEventEnabled.put("id", 52);
+        isCOBBulkEventEnabled.put("name", "enable-cob-bulk-event");
+        isCOBBulkEventEnabled.put("value", 0);
+        isCOBBulkEventEnabled.put("enabled", false);
+        isCOBBulkEventEnabled.put("trapDoor", false);
+        defaults.add(isCOBBulkEventEnabled);
         return defaults;
     }
 

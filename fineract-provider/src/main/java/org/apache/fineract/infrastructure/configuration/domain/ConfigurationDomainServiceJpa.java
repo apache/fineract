@@ -47,6 +47,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     private static final String DAYS_AFTER_REPAYMENT_IS_OVERDUE = "days-after-repayment-is-overdue";
     private static final String ENABLE_EXTERNAL_ID_AUTO_GENERATION = "enable-auto-generated-external-id";
     private static final String ENABLE_ADDRESS = "Enable-Address";
+    private static final String ENABLE_COB_BULK_EVENT = "enable-cob-bulk-event";
 
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
@@ -495,6 +496,12 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     @Override
     public boolean isAddressEnabled() {
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(ENABLE_ADDRESS);
+        return property.isEnabled();
+    }
+
+    @Override
+    public boolean isCOBBulkEventEnabled() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(ENABLE_COB_BULK_EVENT);
         return property.isEnabled();
     }
 

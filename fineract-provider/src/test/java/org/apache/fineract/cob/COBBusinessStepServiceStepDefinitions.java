@@ -35,6 +35,7 @@ import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -51,8 +52,9 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private ListableBeanFactory beanFactory = mock(ListableBeanFactory.class);
     private BatchBusinessStepRepository batchBusinessStepRepository = mock(BatchBusinessStepRepository.class);
     private BusinessEventNotifierService businessEventNotifierService = mock(BusinessEventNotifierService.class);
+    private ConfigurationDomainService configurationDomainService = mock(ConfigurationDomainService.class);
     private final COBBusinessStepService businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository,
-            applicationContext, beanFactory, businessEventNotifierService);
+            applicationContext, beanFactory, businessEventNotifierService, configurationDomainService);
     private COBBusinessStep cobBusinessStep = mock(COBBusinessStep.class);
     private COBBusinessStep notRegistereCobBusinessStep = mock(COBBusinessStep.class);
     private TreeMap<Long, String> executionMap;
@@ -88,6 +90,7 @@ public class COBBusinessStepServiceStepDefinitions implements En {
             lenient().when(this.applicationContext.getBean("test")).thenReturn(cobBusinessStep);
             lenient().when(this.applicationContext.getBean("notExist")).thenThrow(BeanCreationException.class);
             lenient().when(this.cobBusinessStep.execute(this.item)).thenReturn(outputItem);
+            lenient().when(this.configurationDomainService.isCOBBulkEventEnabled()).thenReturn(true);
 
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
