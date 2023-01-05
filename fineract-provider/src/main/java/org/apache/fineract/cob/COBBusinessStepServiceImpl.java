@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -45,15 +46,19 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
     private final ApplicationContext applicationContext;
     private final ListableBeanFactory beanFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {
             throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
         }
+        boolean bulkEventEnabled = configurationDomainService.isCOBBulkEventEnabled();
         // Extra safety net to avoid event leaking
         try {
-            businessEventNotifierService.startExternalEventRecording();
+            if (bulkEventEnabled) {
+                businessEventNotifierService.startExternalEventRecording();
+            }
 
             for (String businessStep : executionMap.values()) {
                 try {
@@ -67,9 +72,13 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
                     ThreadLocalContextUtil.setActionContext(ActionContext.COB);
                 }
             }
-            businessEventNotifierService.stopExternalEventRecording();
+            if (bulkEventEnabled) {
+                businessEventNotifierService.stopExternalEventRecording();
+            }
         } catch (Exception e) {
-            businessEventNotifierService.resetEventRecording();
+            if (bulkEventEnabled) {
+                businessEventNotifierService.resetEventRecording();
+            }
             throw e;
         }
         return item;

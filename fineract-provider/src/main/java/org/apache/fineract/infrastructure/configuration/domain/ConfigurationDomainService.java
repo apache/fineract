@@ -131,4 +131,6 @@ public interface ConfigurationDomainService {
 
     boolean isAddressEnabled();
 
+    boolean isCOBBulkEventEnabled();
+
 }
