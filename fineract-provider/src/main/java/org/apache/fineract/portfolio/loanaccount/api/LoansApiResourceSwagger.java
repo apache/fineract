@@ -1329,6 +1329,8 @@ final class LoansApiResourceSwagger {
             public Long principal;
             @Schema(example = "en")
             public String locale;
+            @Schema(example = "false")
+            public Boolean fraud;
         }
 
         @Schema(example = "2")
@@ -1465,11 +1467,11 @@ final class LoansApiResourceSwagger {
         @Schema(example = "2")
         public Integer officeId;
         @Schema(example = "6")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "3")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String resourceExternalId;
         @Schema(description = "PostLoansLoanIdChanges")
