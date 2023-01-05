@@ -2014,8 +2014,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final Integer totalLiquidationsAllowed = account.getAccountTermAndPreClosure().getTotalLiquidationAllowed();
 
-        if (totalLiquidationsAllowed == null || totalLiquidationsAllowed < 1
-                || account.getAccountTermAndPreClosure().getLinkedOriginAccountId() == null) {
+        if ((totalLiquidationsAllowed == null || totalLiquidationsAllowed < 1
+                || account.getAccountTermAndPreClosure().getLinkedOriginAccountId() == null) && dataValidationErrors.isEmpty())  {
             return;
         }
 
@@ -2037,14 +2037,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         if (charge != null) {
             List<SavingsAccountCharge> preclosureCharges = this.savingsAccountChargeRepositoryWrapper.findFdaPreclosureCharges(
                     account.getId(), Collections.singletonList(ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE.getValue()));
-            if (preclosureCharges.isEmpty()) {
-                SavingsAccountChargeReq savingsAccountChargeReq = new SavingsAccountChargeReq();
-                savingsAccountChargeReq.setAmount(charge.getAmount());
-                SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNew(account, charge, savingsAccountChargeReq);
-                account.addCharge(DateUtils.getDefaultFormatter(), savingsAccountCharge, charge);
-                this.savingsAccountChargeRepositoryWrapper.save(savingsAccountCharge);
-                this.savingAccountRepositoryWrapper.saveAndFlush(account);
-            } else {
+            if (!preclosureCharges.isEmpty()) {
                 preclosureCharges.stream().filter(t -> t.getCharge().getHasVaryingCharge()).forEach(k -> {
                     final BigDecimal ch = determineChargeAmount(k.getCharge(), currentTotalLiquidationCount);
                     k.setAmount(ch);
