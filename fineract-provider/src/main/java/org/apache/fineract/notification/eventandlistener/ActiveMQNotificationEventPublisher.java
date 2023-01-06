@@ -21,7 +21,7 @@ package org.apache.fineract.notification.eventandlistener;
 import javax.jms.Queue;
 import lombok.RequiredArgsConstructor;
 import org.apache.activemq.command.ActiveMQQueue;
-import org.apache.fineract.infrastructure.core.config.EnableFineractEventsCondition;
+import org.apache.fineract.infrastructure.core.condition.EnableFineractEventsCondition;
 import org.apache.fineract.notification.data.NotificationData;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Profile;

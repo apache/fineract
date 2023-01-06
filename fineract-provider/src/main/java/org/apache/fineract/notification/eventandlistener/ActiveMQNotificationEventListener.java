@@ -23,7 +23,7 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.config.EnableFineractEventListenerCondition;
+import org.apache.fineract.infrastructure.core.condition.EnableFineractEventListenerCondition;
 import org.apache.fineract.notification.data.NotificationData;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Profile;

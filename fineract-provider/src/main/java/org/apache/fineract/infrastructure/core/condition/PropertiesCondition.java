@@ -16,23 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.core.condition;
 
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
-import org.springframework.context.annotation.Conditional;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 
-public class FineractValidationCondition extends AnyNestedCondition {
+public abstract class PropertiesCondition implements Condition {
 
-    public FineractValidationCondition() {
-        super(ConfigurationPhase.PARSE_CONFIGURATION);
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        FineractProperties properties = SpringPropertiesFactory.get(context.getEnvironment(), FineractProperties.class);
+        return matches(properties);
     }
 
-    @Conditional(FineractModeValidationCondition.class)
-    static class FineractModeValidation {}
-
-    @Conditional(FineractPartitionJobConfigValidationCondition.class)
-    static class FineractPartitionedJobValidation {}
-
-    @Conditional(FineractRemoteJobMessageHandlerCondition.class)
-    static class FineractRemoteJobMessageHandlerValidation {}
+    protected abstract boolean matches(FineractProperties properties);
 }
