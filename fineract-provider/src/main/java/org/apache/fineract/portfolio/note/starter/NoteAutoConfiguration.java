@@ -28,6 +28,7 @@ import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformServiceJpaRepositoryImpl;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,8 +47,8 @@ public class NoteAutoConfiguration {
     @ConditionalOnMissingBean
     public NoteWritePlatformService noteWritePlatformService(NoteRepository noteRepository, ClientRepositoryWrapper clientRepository,
             GroupRepository groupRepository, LoanRepositoryWrapper loanRepository, LoanTransactionRepository loanTransactionRepository,
-            NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer, SavingsAccountRepository savingsAccountRepository) {
         return new NoteWritePlatformServiceJpaRepositoryImpl(noteRepository, clientRepository, groupRepository, loanRepository,
-                loanTransactionRepository, fromApiJsonDeserializer);
+                loanTransactionRepository, fromApiJsonDeserializer, savingsAccountRepository);
     }
 }
