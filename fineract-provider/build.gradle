@@ -304,6 +304,26 @@ jib {
     }
 }
 
+task migrateDatabase {
+    doFirst {
+        println 'Executing liquibase database migration to version '+"$dbVersion"
+
+        def dbUrl='jdbc:'+"$dbType"+'://'+"$dbHost"+':'+"$dbPort"+'/'+"$dbName"
+        def changeLogFilePath='fineract-provider/src/main/resources/db/changelog/tenant/upgrades/0000_upgrade_to_'+"$dbVersion"+'.xml'
+
+        liquibase {
+            activities {
+                main {
+                    changeLogFile changeLogFilePath
+                    url dbUrl
+                    username project.ext.mysqlUser
+                    password project.ext.mysqlPassword
+                }
+            }
+        }
+    }
+}
+
 tasks.jibDockerBuild.dependsOn(bootJar)
 
 // Configuration for git properties gradle plugin
