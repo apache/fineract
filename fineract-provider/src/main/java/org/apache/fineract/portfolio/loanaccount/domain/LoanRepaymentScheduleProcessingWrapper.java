@@ -45,14 +45,14 @@ public class LoanRepaymentScheduleProcessingWrapper {
             final Money feeChargesDueForRepaymentPeriod = cumulativeFeeChargesDueWithin(startDate, period.getDueDate(), loanCharges,
                     currency, period, totalPrincipal, totalInterest, !period.isRecalculatedInterestComponent());
             final Money feeChargesWaivedForRepaymentPeriod = cumulativeFeeChargesWaivedWithin(startDate, period.getDueDate(), loanCharges,
-                    currency, !period.isRecalculatedInterestComponent());
+                    currency, !period.isRecalculatedInterestComponent(), period.isFirstPeriod());
             final Money feeChargesWrittenOffForRepaymentPeriod = cumulativeFeeChargesWrittenOffWithin(startDate, period.getDueDate(),
                     loanCharges, currency, !period.isRecalculatedInterestComponent());
 
             final Money penaltyChargesDueForRepaymentPeriod = cumulativePenaltyChargesDueWithin(startDate, period.getDueDate(), loanCharges,
                     currency, period, totalPrincipal, totalInterest, !period.isRecalculatedInterestComponent());
             final Money penaltyChargesWaivedForRepaymentPeriod = cumulativePenaltyChargesWaivedWithin(startDate, period.getDueDate(),
-                    loanCharges, currency, !period.isRecalculatedInterestComponent());
+                    loanCharges, currency, !period.isRecalculatedInterestComponent(), period.isFirstPeriod());
             final Money penaltyChargesWrittenOffForRepaymentPeriod = cumulativePenaltyChargesWrittenOffWithin(startDate,
                     period.getDueDate(), loanCharges, currency, !period.isRecalculatedInterestComponent());
 
@@ -129,7 +129,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Money cumulativeFeeChargesWaivedWithin(final LocalDate periodStart, final LocalDate periodEnd,
-            final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, boolean isInstallmentChargeApplicable) {
+            final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, boolean isInstallmentChargeApplicable,
+            boolean isFirstPeriod) {
 
         Money cumulative = Money.zero(currency);
 
@@ -141,6 +142,9 @@ public class LoanRepaymentScheduleProcessingWrapper {
                         cumulative = cumulative.plus(loanChargePerInstallment.getAmountWaived(currency));
                     }
                 } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
+                    cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
+                    // Special case for Loan Charges (Due Date) added the same disbursement date
+                } else if (isFirstPeriod && periodStart.equals(loanCharge.getDueDate())) {
                     cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
                 }
             }
@@ -223,7 +227,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Money cumulativePenaltyChargesWaivedWithin(final LocalDate periodStart, final LocalDate periodEnd,
-            final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, boolean isInstallmentChargeApplicable) {
+            final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, boolean isInstallmentChargeApplicable,
+            boolean isFirstPeriod) {
 
         Money cumulative = Money.zero(currency);
 
@@ -235,6 +240,9 @@ public class LoanRepaymentScheduleProcessingWrapper {
                         cumulative = cumulative.plus(loanChargePerInstallment.getAmountWaived(currency));
                     }
                 } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
+                    cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
+                    // Special case for Loan Charges (Due Date) added the same disbursement date
+                } else if (isFirstPeriod && periodStart.equals(loanCharge.getDueDate())) {
                     cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
                 }
             }
