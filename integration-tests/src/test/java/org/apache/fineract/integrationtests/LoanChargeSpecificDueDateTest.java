@@ -218,10 +218,10 @@ public class LoanChargeSpecificDueDateTest {
 
         // evaluate the outstanding
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"), true);
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("0.00"), true);
 
         // Make a full repayment to close the Loan
-        Float amount = Float.valueOf("1010.00");
+        Float amount = Float.valueOf("1000.00");
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
