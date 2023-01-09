@@ -97,11 +97,15 @@ import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.domain.DepositProductRecurringDetail;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
+import org.apache.fineract.portfolio.savings.domain.FixedDepositProduct;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
+import org.apache.fineract.portfolio.savings.domain.FixedDepositProductRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.exception.DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException;
+import org.apache.fineract.portfolio.savings.exception.FixedDepositProductNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
+import org.apache.fineract.portfolio.savings.domain.DepositProductTermAndPreClosure;
 import org.jfree.util.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -121,15 +125,18 @@ public class DepositAccountDataValidator {
 
     private final RecurringDepositProductRepository recurringDepositProductRepository;
 
+    private final FixedDepositProductRepository fixedDepositProductRepository;
+
     @Autowired
     public DepositAccountDataValidator(final FromJsonHelper fromApiJsonHelper, final DepositProductDataValidator productDataValidator,
-            final SavingsAccountFeatureValidator featureValidator, ChargeRepositoryWrapper chargeRepository,
-            RecurringDepositProductRepository recurringDepositProductRepository) {
+                                       final SavingsAccountFeatureValidator featureValidator, ChargeRepositoryWrapper chargeRepository,
+                                       RecurringDepositProductRepository recurringDepositProductRepository, FixedDepositProductRepository fixedDepositProductRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.productDataValidator = productDataValidator;
         this.featureValidator = featureValidator;
         this.chargeRepository = chargeRepository;
         this.recurringDepositProductRepository = recurringDepositProductRepository;
+        this.fixedDepositProductRepository = fixedDepositProductRepository;
     }
 
     public void validateFixedDepositForSubmit(final String json) {
@@ -152,7 +159,7 @@ public class DepositAccountDataValidator {
         validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
         validatePartialLiquidationSetting(element, baseDataValidator);
-
+        validateDepositAmountAgainstMinDepositAmount(element, baseDataValidator, DepositAccountType.FIXED_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -176,7 +183,7 @@ public class DepositAccountDataValidator {
         // validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
         validatePartialLiquidationSetting(element, baseDataValidator);
-
+        validateDepositAmountAgainstMinDepositAmount(element, baseDataValidator, DepositAccountType.FIXED_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -202,6 +209,7 @@ public class DepositAccountDataValidator {
         validateFreeWithdrawalCharges(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateWithHoldTax(element, baseDataValidator);
        // featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
+        validateDepositAmountAgainstMinDepositAmount(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -227,6 +235,7 @@ public class DepositAccountDataValidator {
         validateFreeWithdrawalCharges(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateWithHoldTax(element, baseDataValidator);
         //featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
+        validateDepositAmountAgainstMinDepositAmount(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
@@ -863,6 +872,37 @@ public class DepositAccountDataValidator {
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
+
+    public void validateDepositAmountAgainstMinDepositAmount(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+                                                             final DepositAccountType depositAccountType) {
+        final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
+        SavingsProduct product = null;
+         DepositProductTermAndPreClosure prodTermAndPreClosure = null;
+         BigDecimal amount = BigDecimal.ZERO;
+        if (depositAccountType.isFixedDeposit()) {
+            product = this.fixedDepositProductRepository.findById(productId)
+                    .orElseThrow(() -> new FixedDepositProductNotFoundException(productId));
+            prodTermAndPreClosure = ((FixedDepositProduct) product).depositProductTermAndPreClosure();
+            amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositAmountParamName, element);
+        } else if (depositAccountType.isRecurringDeposit()) {
+            product = this.recurringDepositProductRepository.findById(productId)
+                    .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
+            prodTermAndPreClosure = ((RecurringDepositProduct) product)
+                    .depositProductTermAndPreClosure();
+            amount = fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(mandatoryRecommendedDepositAmountParamName, element);
+        }
+        final boolean isLessThanMin = prodTermAndPreClosure.depositProductAmountDetails().isLessThanMinDepositAmount(amount);
+        final boolean isGreaterThanMax = prodTermAndPreClosure.depositProductAmountDetails().isGreaterThanMaxDepositAmount(amount);
+        // deposit amount should be greater min deposit amount and less than max or equal set in product
+        if (isLessThanMin) {
+            baseDataValidator.reset().parameter(depositAmountParamName).value(amount)
+                    .failWithCodeNoParameterAddedToErrorCode("deposit.amount.lessthan.min.deposit.amount");
+        }else if (isGreaterThanMax) {
+            baseDataValidator.reset().parameter(depositAmountParamName).value(amount)
+                    .failWithCodeNoParameterAddedToErrorCode("deposit.amount.greaterthan.max.deposit.amount");
         }
     }
 
