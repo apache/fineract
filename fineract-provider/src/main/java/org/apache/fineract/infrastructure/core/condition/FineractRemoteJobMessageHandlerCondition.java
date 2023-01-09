@@ -18,41 +18,50 @@
  */
 package org.apache.fineract.infrastructure.core.condition;
 
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 
 @Slf4j
-public class FineractRemoteJobMessageHandlerCondition implements Condition {
+public class FineractRemoteJobMessageHandlerCondition extends PropertiesCondition {
 
     @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        boolean isSpringEventsEnabled = Optional
-                .ofNullable(
-                        context.getEnvironment().getProperty("fineract.remote-job-message-handler.spring-events.enabled", Boolean.class))
-                .orElse(true);
-        boolean isJmsEnabled = Optional
-                .ofNullable(context.getEnvironment().getProperty("fineract.remote-job-message-handler.jms.enabled", Boolean.class))
-                .orElse(true);
-        boolean isBatchManagerModeEnabled = Optional
-                .ofNullable(context.getEnvironment().getProperty("fineract.mode.batch-manager-enabled", Boolean.class)).orElse(true);
-        boolean isBatchWorkerModeEnabled = Optional
-                .ofNullable(context.getEnvironment().getProperty("fineract.mode.batch-worker-enabled", Boolean.class)).orElse(true);
-        // TODO extend this expression with other message handlers in the future
+    protected boolean matches(FineractProperties properties) {
+        boolean isSpringEventsEnabled = properties.getRemoteJobMessageHandler().getSpringEvents().isEnabled();
+
         boolean conditionFails = false;
-        boolean onlyOneMessageHandlerEnabled = isSpringEventsEnabled ^ isJmsEnabled;
-        if (!onlyOneMessageHandlerEnabled) {
-            conditionFails = true;
-            log.error("For remote partitioning jobs exactly one Message Handler must be enabled.");
-        }
-        if (isSpringEventsEnabled) {
-            if (!(isBatchManagerModeEnabled && isBatchWorkerModeEnabled)) {
+        if (isAnyMessageHandlerConfigured(properties) && isBatchInstance(properties)) {
+            if (!isOnlyOneMessageHandlerEnabled(properties)) {
+                conditionFails = true;
+                log.error("For remote partitioning jobs exactly one Message Handler must be enabled.");
+            } else if (isSpringEventsEnabled && !isBatchManagerAndWorkerTogether(properties)) {
                 conditionFails = true;
                 log.error("If Spring Event Message Handler is enabled, the instance must be Batch Manager and Batch Worker too.");
             }
         }
         return conditionFails;
+    }
+
+    private boolean isOnlyOneMessageHandlerEnabled(FineractProperties properties) {
+        boolean isSpringEventsEnabled = properties.getRemoteJobMessageHandler().getSpringEvents().isEnabled();
+        boolean isJmsEnabled = properties.getRemoteJobMessageHandler().getJms().isEnabled();
+        return isSpringEventsEnabled ^ isJmsEnabled;
+    }
+
+    private boolean isAnyMessageHandlerConfigured(FineractProperties properties) {
+        boolean isSpringEventsEnabled = properties.getRemoteJobMessageHandler().getSpringEvents().isEnabled();
+        boolean isJmsEnabled = properties.getRemoteJobMessageHandler().getJms().isEnabled();
+        return isSpringEventsEnabled || isJmsEnabled;
+    }
+
+    private boolean isBatchInstance(FineractProperties properties) {
+        boolean isBatchManagerModeEnabled = properties.getMode().isBatchManagerEnabled();
+        boolean isBatchWorkerModeEnabled = properties.getMode().isBatchWorkerEnabled();
+        return isBatchManagerModeEnabled || isBatchWorkerModeEnabled;
+    }
+
+    private boolean isBatchManagerAndWorkerTogether(FineractProperties properties) {
+        boolean isBatchManagerModeEnabled = properties.getMode().isBatchManagerEnabled();
+        boolean isBatchWorkerModeEnabled = properties.getMode().isBatchWorkerEnabled();
+        return isBatchManagerModeEnabled && isBatchWorkerModeEnabled;
     }
 }
