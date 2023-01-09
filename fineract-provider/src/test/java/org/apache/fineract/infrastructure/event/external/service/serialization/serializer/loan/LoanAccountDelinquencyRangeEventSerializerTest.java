@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.event.external.service.serialization.
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +62,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,6 +79,9 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
     @Mock
     private LoanReadPlatformService loanReadPlatformService;
 
+    @Mock
+    private LoanChargeReadPlatformService loanChargeReadPlatformService;
+
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
@@ -88,8 +93,8 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
     public void testLoanRepaymentEventPayloadSerialization() throws IOException {
         // given
         LoanDelinquencyRangeChangeBusinessEventSerializer serializer = new LoanDelinquencyRangeChangeBusinessEventSerializer(
-                loanReadPlatformService, new LoanDelinquencyRangeDataMapperImpl(), new LoanChargeDataMapperImpl(),
-                new CurrencyDataMapperImpl());
+                loanReadPlatformService, new LoanDelinquencyRangeDataMapperImpl(), loanChargeReadPlatformService,
+                new LoanChargeDataMapperImpl(), new CurrencyDataMapperImpl());
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanAccountData loanAccountData = mock(LoanAccountData.class);
@@ -104,7 +109,6 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         when(loanAccountData.getCurrency()).thenAnswer(a -> new CurrencyData(loanCurrency.getCode(), loanCurrency.getDigitsAfterDecimal(),
                 loanCurrency.getCurrencyInMultiplesOf()));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
-
         when(loanReadPlatformService.retrieveOne(any(Long.class))).thenReturn(loanAccountData);
 
         LoanDelinquencyRangeChangeBusinessEvent event = new LoanDelinquencyRangeChangeBusinessEvent(loanForProcessing);
@@ -113,6 +117,8 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         repaymentScheduleInstallments.add(buildInstallment(loanForProcessing, loanCurrency, BigDecimal.valueOf(100), BigDecimal.valueOf(5),
                 BigDecimal.valueOf(30), BigDecimal.valueOf(50), BigDecimal.valueOf(185), new BigDecimal("100.5"), new BigDecimal("200.3")));
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
+        when(loanChargeReadPlatformService.retrieveLoanCharges(anyLong())).thenAnswer(a -> repaymentScheduleInstallments.get(0)
+                .getInstallmentCharges().stream().map(c -> c.getLoancharge().toData()).collect(Collectors.toList()));
 
         moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
 

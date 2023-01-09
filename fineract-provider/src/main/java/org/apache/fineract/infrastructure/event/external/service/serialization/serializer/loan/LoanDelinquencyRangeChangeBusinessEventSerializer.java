@@ -37,8 +37,8 @@ import org.apache.fineract.infrastructure.event.external.service.serialization.s
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -53,6 +53,8 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
 
     private final LoanDelinquencyRangeDataMapper mapper;
 
+    private final LoanChargeReadPlatformService loanChargeReadPlatformService;
+
     private final LoanChargeDataMapper chargeMapper;
 
     private final CurrencyDataMapper currencyMapper;
@@ -65,13 +67,10 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
         String accountNumber = data.getAccountNo();
         String externalId = data.getExternalId().getValue();
         MonetaryCurrency loanCurrency = event.get().getCurrency();
-        List<LoanChargeDataRangeViewV1> charges = event//
-                .get()//
-                .getRepaymentScheduleInstallments()//
+
+        List<LoanChargeDataRangeViewV1> charges = loanChargeReadPlatformService.retrieveLoanCharges(id)//
                 .stream()//
-                .flatMap(installment -> installment.getInstallmentCharges().stream())//
-                .map(LoanInstallmentCharge::getLoancharge)//
-                .map(charge -> chargeMapper.mapRangeView(charge.toData()))//
+                .map(chargeMapper::mapRangeView)//
                 .toList();
         LoanAmountDataV1 amount = LoanAmountDataV1.newBuilder()//
                 .setPrincipalAmount(calculateDataSummary(event.get(),
