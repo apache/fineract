@@ -140,7 +140,7 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         final HashMap disbursedLoanResult = this.loanTransactionHelper.disburseLoan("03 September 2022", loanId, "1000", txnExternalIdStr);
 
         // Check whether the provided external id was retrieved
-        assertEquals(txnExternalIdStr, disbursedLoanResult.get("resourceExternalId"));
+        assertEquals(txnExternalIdStr, disbursedLoanResult.get("subResourceExternalId"));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 7);
         final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
@@ -523,7 +523,7 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         final HashMap disbursedLoanWithInterestResult = this.loanTransactionHelper.disburseLoan(formattedDate, loanWithInterestId, "1000",
                 null);
         // Check whether an external id was generated
-        assertNotNull(disbursedLoanWithInterestResult.get("resourceExternalId"));
+        assertNotNull(disbursedLoanWithInterestResult.get("subResourceExternalId"));
         LocalDate aMonthBeforePlus3Days = aMonthBefore.plusDays(3);
         formattedDate = dateFormatter.format(aMonthBeforePlus3Days);
 
@@ -718,7 +718,7 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         final HashMap disbursedLoanResult = this.loanTransactionHelper.disburseLoan("03 September 2022", loanId, "1000", txnExternalIdStr);
 
         // Check whether the provided external id was retrieved
-        assertEquals(txnExternalIdStr, disbursedLoanResult.get("resourceExternalId"));
+        assertEquals(txnExternalIdStr, disbursedLoanResult.get("subResourceExternalId"));
 
         // Second loan
         final HashMap loan2 = applyForLoanApplication(client.getClientId().intValue(), loanProductID, null);
@@ -906,14 +906,14 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                     txnExternalIdStr);
 
             // Check whether the provided external id was retrieved
-            assertEquals(txnExternalIdStr, disbursedLoanResult.get("resourceExternalId"));
+            assertEquals(txnExternalIdStr, disbursedLoanResult.get("subResourceExternalId"));
 
             String txnExternalIdStr2 = UUID.randomUUID().toString();
             final HashMap disbursedLoanResult2 = this.loanTransactionHelper.disburseLoan("04 September 2022", loanId, "1000",
                     txnExternalIdStr2);
 
             // Check whether the provided external id was retrieved
-            assertEquals(txnExternalIdStr2, disbursedLoanResult2.get("resourceExternalId"));
+            assertEquals(txnExternalIdStr2, disbursedLoanResult2.get("subResourceExternalId"));
 
             PutLoansLoanIdResponse markLoanAsFraudResult = this.loanTransactionHelper.modifyLoanApplication(loanExternalIdStr,
                     "markAsFraud", new PutLoansLoanIdRequest().fraud(true));

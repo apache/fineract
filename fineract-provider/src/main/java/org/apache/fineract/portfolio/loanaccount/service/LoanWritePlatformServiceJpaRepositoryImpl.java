@@ -506,23 +506,24 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalBusinessEvent(loan));
 
-        Long entityId = loan.getId();
-        ExternalId externalId = loan.getExternalId();
+        Long disbursalTransactionId = null;
+        ExternalId disbursalTransactionExternalId = null;
 
-        // During a disbursement, the entityId should be the disbursement transaction id
         if (!isAccountTransfer) {
             // If accounting is not periodic accrual, the last transaction might be the accrual not the disbursement
             LoanTransaction disbursalTransaction = Lists.reverse(loan.getLoanTransactions()).stream()
                     .filter(e -> LoanTransactionType.DISBURSEMENT.equals(e.getTypeOf())).findFirst().orElseThrow();
-            entityId = disbursalTransaction.getId();
-            externalId = disbursalTransaction.getExternalId();
+            disbursalTransactionId = disbursalTransaction.getId();
+            disbursalTransactionExternalId = disbursalTransaction.getExternalId();
             businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursalTransaction));
         }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(entityId) //
-                .withEntityExternalId(externalId) //
+                .withEntityId(loan.getId()) //
+                .withEntityExternalId(loan.getExternalId()) //
+                .withSubEntityId(disbursalTransactionId) //
+                .withSubEntityExternalId(disbursalTransactionExternalId) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
