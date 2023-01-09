@@ -26,6 +26,7 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
@@ -57,13 +58,13 @@ public class ApproveLoanCommandStrategy implements CommandStrategy {
         response.setHeaders(request.getHeaders());
 
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
-        Long loanId = Long.parseLong(pathParameters.get(1).substring(0, pathParameters.get(1).indexOf("?")));
+        final Long loanId = Long.parseLong(pathParameters.get(1).substring(0, pathParameters.get(1).indexOf("?")));
 
         // Calls 'approve' function from 'LoansApiResource' to approve a
         // loan
         responseBody = loansApiResource.stateTransitions(loanId, "approve", request.getBody());
 
-        response.setStatusCode(200);
+        response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after the successful approval of a
         // loan
         response.setBody(responseBody);

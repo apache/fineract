@@ -68,7 +68,7 @@ public class AuditsApiResource {
             "subresourceId", "maker", "madeOnDate", "checker", "checkedOnDate", "processingResult", "commandAsJson", "officeName",
             "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId", "url"));
 
-    private final String resourceNameForPermissions = "AUDIT";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "AUDIT";
 
     private final PlatformSecurityContext context;
     private final AuditReadPlatformService auditReadPlatformService;
@@ -107,7 +107,7 @@ public class AuditsApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSIONS);
         final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
         final SQLBuilder extraCriteria = getExtraCriteria(actionName, entityName, resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
                 checkerId, checkerDateTimeFrom, checkerDateTimeTo, processingResult, officeId, groupId, clientId, loanId, savingsAccountId);
@@ -137,7 +137,7 @@ public class AuditsApiResource {
     public String retrieveAuditEntry(@PathParam("auditId") @Parameter(description = "auditId") final Long auditId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSIONS);
 
         final AuditData auditEntry = this.auditReadPlatformService.retrieveAuditEntry(auditId);
 
@@ -155,22 +155,22 @@ public class AuditsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class))) })
     public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final AuditSearchData auditSearchData = this.auditReadPlatformService.retrieveSearchTemplate("audit");
 
         final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<>(
-                Arrays.asList("appUsers", "actionNames", "entityNames", "processingResults"));
+                Arrays.asList("appUsers", "actionNames", "entityNames", "status"));
 
         return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
     }
 
     private SQLBuilder getExtraCriteria(final String actionName, final String entityName, final Long resourceId, final Long makerId,
             final String makerDateTimeFrom, final String makerDateTimeTo, final Long checkerId, final String checkerDateTimeFrom,
-            final String checkerDateTimeTo, final Integer processingResult, final Integer officeId, final Integer groupId,
-            final Integer clientId, final Integer loanId, final Integer savingsAccountId) {
+            final String checkerDateTimeTo, final Integer status, final Integer officeId, final Integer groupId, final Integer clientId,
+            final Integer loanId, final Integer savingsAccountId) {
 
         SQLBuilder extraCriteria = new SQLBuilder();
         extraCriteria.addNonNullCriteria("aud.action_name = ", actionName);
@@ -184,7 +184,7 @@ public class AuditsApiResource {
         extraCriteria.addNonNullCriteria("aud.made_on_date <= ", makerDateTimeTo);
         extraCriteria.addNonNullCriteria("aud.checked_on_date >= ", checkerDateTimeFrom);
         extraCriteria.addNonNullCriteria("aud.checked_on_date <= ", checkerDateTimeTo);
-        extraCriteria.addNonNullCriteria("aud.processing_result_enum = ", processingResult);
+        extraCriteria.addNonNullCriteria("aud.status = ", status);
         extraCriteria.addNonNullCriteria("aud.office_id = ", officeId);
         extraCriteria.addNonNullCriteria("aud.group_id = ", groupId);
         extraCriteria.addNonNullCriteria("aud.client_id = ", clientId);

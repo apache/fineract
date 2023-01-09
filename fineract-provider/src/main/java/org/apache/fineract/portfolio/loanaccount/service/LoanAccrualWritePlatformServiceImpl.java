@@ -67,7 +67,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     @Override
     @Transactional
     public void addAccrualAccounting(final Long loanId, final Collection<LoanScheduleAccrualData> loanScheduleAccrualData) {
-        Collection<LoanChargeData> chargeData = this.loanChargeReadPlatformService.retrieveLoanChargesForAccural(loanId);
+        Collection<LoanChargeData> chargeData = this.loanChargeReadPlatformService.retrieveLoanChargesForAccrual(loanId);
         Collection<LoanSchedulePeriodData> loanWaiverScheduleData = new ArrayList<>(1);
         Collection<LoanTransactionData> loanWaiverTransactionData = new ArrayList<>(1);
 
@@ -87,7 +87,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     public void addPeriodicAccruals(final LocalDate tillDate, Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualData) {
         boolean firstTime = true;
         LocalDate accruedTill = null;
-        Collection<LoanChargeData> chargeData = this.loanChargeReadPlatformService.retrieveLoanChargesForAccural(loanId);
+        Collection<LoanChargeData> chargeData = this.loanChargeReadPlatformService.retrieveLoanChargesForAccrual(loanId);
         Collection<LoanSchedulePeriodData> loanWaiverScheduleData = new ArrayList<>(1);
         Collection<LoanTransactionData> loanWaiverTransactionData = new ArrayList<>(1);
         for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualData) {

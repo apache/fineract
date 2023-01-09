@@ -41,6 +41,7 @@ task preprocessAvroSchemas() {
 task buildJavaSdk(type: GenerateAvroJavaTask) {
     source("$buildDir/generated/avro/src/main/avro")
     outputDir = file("$buildDir/generated/java/src/main/java")
+    templateDirectory = "$projectDir/src/main/resources/avro-generator-templates/"
 }
 
 spotless {

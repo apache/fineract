@@ -19,8 +19,10 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
 import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
+import org.apache.fineract.infrastructure.security.filter.InsecureTwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
@@ -40,6 +42,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
@@ -66,6 +69,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ServerProperties serverProperties;
 
+    @Autowired
+    private IdempotencyStoreFilter idempotencyStoreFilter;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http //
@@ -89,8 +95,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and() //
                 .addFilterAfter(fineractInstanceModeApiFilter, SecurityContextPersistenceFilter.class) //
                 .addFilterAfter(tenantAwareBasicAuthenticationFilter(), FineractInstanceModeApiFilter.class) //
-                .addFilterAfter(loanCOBApiFilter, TenantAwareBasicAuthenticationFilter.class) //
-                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class); //
+                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class) //
+                .addFilterAfter(loanCOBApiFilter, InsecureTwoFactorAuthenticationFilter.class)
+                .addFilterBefore(idempotencyStoreFilter, ExceptionTranslationFilter.class);
 
         if (serverProperties.getSsl().isEnabled()) {
             http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());

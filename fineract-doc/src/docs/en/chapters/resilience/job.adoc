@@ -1,0 +1,25 @@
+= Jobs
+
+== `SchedularWritePlatformService`
+
+WARNING: This service has a typo and should be called `SchedulerWritePlatformService`.
+
+TBD
+
+.Retry-able service function `processJobDetailForExecution`
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/infrastructure/jobs/service/SchedularWritePlatformServiceJpaRepositoryImpl.java[lines=135..155]
+----
+
+.Fallback function `fallbackProcessJobDetailForExecution`
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/infrastructure/jobs/service/SchedularWritePlatformServiceJpaRepositoryImpl.java[lines=156..159]
+----
+
+.Retry configuration for `processJobDetailForExecution`
+[source,properties]
+----
+include::{rootdir}/fineract-provider/src/main/resources/application.properties[lines=175..179]
+----

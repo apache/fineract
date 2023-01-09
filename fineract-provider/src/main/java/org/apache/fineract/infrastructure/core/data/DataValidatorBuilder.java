@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import static java.util.stream.Collectors.toList;
+
 import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import java.math.BigDecimal;
@@ -28,7 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import net.fortuna.ical4j.model.property.RRule;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.commons.lang3.StringUtils;
@@ -299,10 +300,11 @@ public class DataValidatorBuilder {
             return this;
         }
 
-        final List<Object> valuesList = Arrays.asList(values);
-        final String valuesListStr = StringUtils.join(valuesList, ", ");
+        final List<Object> rawValuesList = Arrays.asList(values);
 
-        if (this.value == null || !valuesList.contains(this.value)) {
+        if (this.value == null || !rawValuesList.contains(this.value)) {
+            final List<String> valuesList = Arrays.stream(values).map(Object::toString).collect(toList());
+            final String valuesListStr = String.join(", ", valuesList);
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                     .append(this.parameter).append(".is.not.one.of.expected.enumerations");
             final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
@@ -327,10 +329,11 @@ public class DataValidatorBuilder {
             return this;
         }
 
-        final List<Object> valuesList = Arrays.asList(values);
-        final String valuesListStr = StringUtils.join(valuesList, ", ");
+        final List<Object> rawValuesList = Arrays.asList(values);
 
-        if (this.value == null || !valuesList.contains(this.value.toString().toLowerCase())) {
+        if (this.value == null || !rawValuesList.contains(this.value.toString().toLowerCase())) {
+            final List<String> valuesList = Arrays.stream(values).map(Object::toString).collect(toList());
+            final String valuesListStr = String.join(", ", valuesList);
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                     .append(this.parameter).append(".is.not.one.of.expected.enumerations");
             final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
@@ -350,11 +353,10 @@ public class DataValidatorBuilder {
             return this;
         }
 
-        final String valuesListStr = StringUtils.join(valuesList, ", ");
-
-        List<String> valuesListLowercase = valuesList.stream().map(String::toLowerCase).collect(Collectors.toList());
+        List<String> valuesListLowercase = valuesList.stream().map(String::toLowerCase).toList();
 
         if (this.value == null || !valuesListLowercase.contains(this.value.toString().toLowerCase())) {
+            final String valuesListStr = String.join(", ", valuesList);
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                     .append(this.parameter).append(".is.not.one.of.expected.enumerations");
             final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
@@ -375,10 +377,11 @@ public class DataValidatorBuilder {
         }
 
         if (this.value != null) {
-            final List<Object> valuesList = Arrays.asList(values);
-            final String valuesListStr = StringUtils.join(valuesList, ", ");
+            final List<Object> rawValuesList = Arrays.asList(values);
 
-            if (valuesList.contains(this.value)) {
+            if (rawValuesList.contains(this.value)) {
+                final List<String> valuesList = Arrays.stream(values).map(Object::toString).collect(toList());
+                final String valuesListStr = String.join(", ", valuesList);
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.one.of.unwanted.enumerations");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)

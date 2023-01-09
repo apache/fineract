@@ -1,0 +1,11 @@
+= Resilience
+
+include::intro.adoc[leveloffset=+1]
+
+include::command.adoc[leveloffset=+1]
+
+include::job.adoc[leveloffset=+1]
+
+include::loan.adoc[leveloffset=+1]
+
+include::saving.adoc[leveloffset=+1]

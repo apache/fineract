@@ -80,7 +80,7 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
             case CHART_OF_ACCOUNTS:
                 importHandler = this.applicationContext.getBean("chartOfAccountsImportHandler", ImportHandler.class);
             break;
-            case CLIENTS_ENTTTY:
+            case CLIENTS_ENTITY:
                 importHandler = this.applicationContext.getBean("clientEntityImportHandler", ImportHandler.class);
             break;
             case CLIENTS_PERSON:

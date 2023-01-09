@@ -489,7 +489,8 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
     private boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date, final SavingsAccountData savingsAccountData) {
         boolean isTaxAdded = false;
-        if (savingsAccountData.getTaxGroup() != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+        if (savingsAccountData.getTaxGroup() != null && savingsAccountData.getTaxGroup().getTaxAssociations() != null
+                && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponentData, BigDecimal> taxSplit = TaxUtils.splitTaxData(amount, date,
                     savingsAccountData.getTaxGroup().getTaxAssociations().stream().collect(Collectors.toSet()), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxDataAmount(taxSplit);

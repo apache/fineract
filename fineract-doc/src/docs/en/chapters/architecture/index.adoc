@@ -18,6 +18,8 @@ include::design.adoc[leveloffset=+1]
 
 include::persistence.adoc[leveloffset=+1]
 
+include::idempotency.adoc[leveloffset=+1]
+
 include::validation.adoc[leveloffset=+1]
 
 include::batch-jobs.adoc[leveloffset=+1]

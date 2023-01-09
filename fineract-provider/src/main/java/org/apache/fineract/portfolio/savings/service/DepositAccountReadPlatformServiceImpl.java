@@ -32,6 +32,7 @@ import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -337,7 +338,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         GroupGeneralData group = null;
         if (groupId != null) {
             group = this.groupReadPlatformService.retrieveOne(groupId);
-            officeId = group.officeId();
+            officeId = group.getOfficeId();
         }
 
         final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions = this.depositsDropdownReadPlatformService
@@ -1700,8 +1701,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final LocalDate transactionDate = JdbcSupport.getLocalDate(rs, TRANSACTION_DATE);
             return new AccountTransferDTO(transactionDate, transactionAmount, PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
                     fromAccountId, toAccountId, TRANSFER_INTEREST_TO_SAVINGS, null, null, null, null, null, null, null,
-                    AccountTransferType.INTEREST_TRANSFER.getValue(), null, null, null, null, null, null, isRegularTransaction,
-                    isExceptionForBalanceCheck);
+                    AccountTransferType.INTEREST_TRANSFER.getValue(), null, null, ExternalId.empty(), null, null, null,
+                    isRegularTransaction, isExceptionForBalanceCheck);
         }
 
     }

@@ -68,7 +68,7 @@ public class CreditBureauConfiguration extends AbstractPersistableCustom {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
 
-        final String configurationKey = "configurationKey";
+        final String configurationKey = "configkey";
 
         if (command.isChangeInStringParameterNamed(configurationKey, this.configurationKey)) {
             final String newValue = command.stringValueOfParameterNamed(configurationKey);

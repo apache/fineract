@@ -26,6 +26,7 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
@@ -57,14 +58,14 @@ public class CreateChargeCommandStrategy implements CommandStrategy {
         response.setHeaders(request.getHeaders());
 
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
-        Long loanId = Long.parseLong(pathParameters.get(1));
+        final Long loanId = Long.parseLong(pathParameters.get(1));
 
         // Calls 'executeLoanCharge' function from 'LoanChargesApiResource'
         // to create
         // a new charge for a loan
         responseBody = loanChargesApiResource.executeLoanCharge(loanId, null, request.getBody());
 
-        response.setStatusCode(200);
+        response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after Charge has been successfully
         // created
         response.setBody(responseBody);

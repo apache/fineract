@@ -25,7 +25,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface LoanTransactionRelationRepository
         extends JpaRepository<LoanTransactionRelation, Long>, JpaSpecificationExecutor<LoanTransactionRelation> {
 
-    List<LoanTransactionRelation> findByFromTransactionAndRelationType(LoanTransaction loanTransaction,
-            LoanTransactionRelationTypeEnum relationType);
+    List<LoanTransactionRelation> findByFromTransaction(LoanTransaction fromTransaction);
 
 }

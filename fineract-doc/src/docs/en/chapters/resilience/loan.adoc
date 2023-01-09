@@ -1,0 +1,23 @@
+= Loan
+
+== `LoanWritePlatformService`
+
+TBD
+
+.Retry-able service function `recalculateInterest`
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java[lines=3217..3247]
+----
+
+.Fallback function `fallbackRecalculateInterest`
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java[lines=3255..3266]
+----
+
+.Retry configuration for `recalculateInterest`
+[source,properties]
+----
+include::{rootdir}/fineract-provider/src/main/resources/application.properties[lines=180..185]
+----

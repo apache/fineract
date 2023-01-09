@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 
 public interface JobRegisterService {
 
-    void executeJob(Long jobId);
+    void executeJobWithParameters(Long jobId, String jobParametersJson);
 
     void rescheduleJob(Long jobId);
 

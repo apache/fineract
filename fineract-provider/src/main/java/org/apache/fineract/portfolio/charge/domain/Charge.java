@@ -657,8 +657,11 @@ public class Charge extends AbstractPersistableCustom {
         final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(this.chargeTimeType);
         final EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
         final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
-        final EnumOptionData chargePaymentmode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
-        final EnumOptionData feeFrequencyType = ChargeEnumerations.chargePaymentMode(this.feeFrequency);
+        final EnumOptionData chargePaymentMode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
+        EnumOptionData feeFrequencyType = null;
+        if (this.feeFrequency != null) {
+            feeFrequencyType = ChargeEnumerations.feeFrequencyType(this.feeFrequency);
+        }
         GLAccountData accountData = null;
         if (account != null) {
             accountData = new GLAccountData().setId(account.getId()).setName(account.getName()).setGlCode(account.getGlCode());
@@ -675,7 +678,7 @@ public class Charge extends AbstractPersistableCustom {
 
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
-                chargePaymentmode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.enableFreeWithdrawal,
+                chargePaymentMode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.enableFreeWithdrawal,
                 this.freeWithdrawalFrequency, this.restartFrequency, this.restartFrequencyEnum, this.enablePaymentType, paymentTypeData,
                 this.minCap, this.maxCap, feeFrequencyType, accountData, taxGroupData);
     }

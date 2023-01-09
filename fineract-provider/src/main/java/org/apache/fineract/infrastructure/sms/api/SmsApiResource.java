@@ -47,14 +47,12 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.sms.data.SmsData;
 import org.apache.fineract.infrastructure.sms.service.SmsReadPlatformService;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/sms")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Scope("singleton")
 @Tag(name = "SMS", description = "")
 @RequiredArgsConstructor
 public class SmsApiResource {
@@ -69,33 +67,25 @@ public class SmsApiResource {
 
     @GET
     public String retrieveAll(@Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-
-        final Collection<SmsData> smsMessages = this.readPlatformService.retrieveAll();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, smsMessages);
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        final Collection<SmsData> smsMessages = readPlatformService.retrieveAll();
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, smsMessages);
     }
 
     @POST
     public String create(final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSms().withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @GET
     @Path("{resourceId}")
     public String retrieveOne(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
-
-        final SmsData smsMessage = this.readPlatformService.retrieveOne(resourceId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, smsMessage);
+        final SmsData smsMessage = readPlatformService.retrieveOne(resourceId);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, smsMessage);
     }
 
     @GET
@@ -106,9 +96,7 @@ public class SmsApiResource {
             @QueryParam("dateFormat") final String dateFormat, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
-
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-
         final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
 
         LocalDate fromDate = null;
@@ -130,22 +118,16 @@ public class SmsApiResource {
     @PUT
     @Path("{resourceId}")
     public String update(@PathParam("resourceId") final Long resourceId, final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSms(resourceId).withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
     @Path("{resourceId}")
     public String delete(@PathParam("resourceId") final Long resourceId) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSms(resourceId).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 }

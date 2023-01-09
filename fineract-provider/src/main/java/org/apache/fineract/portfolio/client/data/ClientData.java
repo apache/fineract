@@ -24,17 +24,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.address.data.AddressData;
-import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
@@ -42,74 +44,76 @@ import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 /**
  * Immutable data object representing client data.
  */
+@NoArgsConstructor
 @Getter
+@Setter
 public final class ClientData implements Comparable<ClientData>, Serializable {
 
-    private final Long id;
-    private final String accountNo;
-    private final String externalId;
+    private Long id;
+    private String accountNo;
+    private ExternalId externalId;
 
-    private final EnumOptionData status;
-    private final CodeValueData subStatus;
+    private EnumOptionData status;
+    private CodeValueData subStatus;
 
-    private final Boolean active;
-    private final LocalDate activationDate;
+    private Boolean active;
+    private LocalDate activationDate;
 
-    private final String firstname;
-    private final String middlename;
-    private final String lastname;
-    private final String fullname;
-    private final String displayName;
-    private final String mobileNo;
-    private final String emailAddress;
-    private final LocalDate dateOfBirth;
-    private final CodeValueData gender;
-    private final CodeValueData clientType;
-    private final CodeValueData clientClassification;
-    private final Boolean isStaff;
+    private String firstname;
+    private String middlename;
+    private String lastname;
+    private String fullname;
+    private String displayName;
+    private String mobileNo;
+    private String emailAddress;
+    private LocalDate dateOfBirth;
+    private CodeValueData gender;
+    private CodeValueData clientType;
+    private CodeValueData clientClassification;
+    private Boolean isStaff;
 
-    private final Long officeId;
-    private final String officeName;
-    private final Long transferToOfficeId;
-    private final String transferToOfficeName;
+    private Long officeId;
+    private String officeName;
+    private Long transferToOfficeId;
+    private String transferToOfficeName;
 
-    private final Long imageId;
-    private final Boolean imagePresent;
-    private final Long staffId;
-    private final String staffName;
-    private final ClientTimelineData timeline;
+    private Long imageId;
+    private Boolean imagePresent;
+    private Long staffId;
+    private String staffName;
+    private ClientTimelineData timeline;
 
-    private final Long savingsProductId;
-    private final String savingsProductName;
+    private Long savingsProductId;
+    private String savingsProductName;
 
-    private final Long savingsAccountId;
-    private final EnumOptionData legalForm;
-    private final Set<ClientCollateralManagementData> clientCollateralManagements;
+    private Long savingsAccountId;
+    private EnumOptionData legalForm;
+    private Set<ClientCollateralManagementData> clientCollateralManagements;
 
     // associations
-    private final Collection<GroupGeneralData> groups;
+    private Collection<GroupGeneralData> groups;
 
     // template
-    private final Collection<OfficeData> officeOptions;
-    private final Collection<StaffData> staffOptions;
-    private final Collection<CodeValueData> narrations;
-    private final Collection<SavingsProductData> savingProductOptions;
-    private final Collection<SavingsAccountData> savingAccountOptions;
-    private final Collection<CodeValueData> genderOptions;
-    private final Collection<CodeValueData> clientTypeOptions;
-    private final Collection<CodeValueData> clientClassificationOptions;
-    private final Collection<CodeValueData> clientNonPersonConstitutionOptions;
-    private final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions;
-    private final List<EnumOptionData> clientLegalFormOptions;
-    private final ClientFamilyMembersData familyMemberOptions;
+    private Collection<OfficeData> officeOptions;
+    private Collection<StaffData> staffOptions;
+    private Collection<CodeValueData> narrations;
+    private Collection<SavingsProductData> savingProductOptions;
+    private Collection<SavingsAccountData> savingAccountOptions;
+    private Collection<CodeValueData> genderOptions;
+    private Collection<CodeValueData> clientTypeOptions;
+    private Collection<CodeValueData> clientClassificationOptions;
+    private Collection<CodeValueData> clientNonPersonConstitutionOptions;
+    private Collection<CodeValueData> clientNonPersonMainBusinessLineOptions;
+    private List<EnumOptionData> clientLegalFormOptions;
+    private ClientFamilyMembersData familyMemberOptions;
 
-    private final ClientNonPersonData clientNonPersonDetails;
+    private ClientNonPersonData clientNonPersonDetails;
 
-    private final Collection<AddressData> address;
+    private Collection<AddressData> address;
 
-    private final Boolean isAddressEnabled;
+    private Boolean isAddressEnabled;
 
-    private final List<DatatableData> datatables;
+    private List<DatatableData> datatables;
 
     // import fields
     private transient Integer rowIndex;
@@ -123,7 +127,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
 
     public static ClientData importClientEntityInstance(Long legalFormId, Integer rowIndex, String fullname, Long officeId,
             Long clientTypeId, Long clientClassificationId, Long staffId, Boolean active, LocalDate activationDate,
-            LocalDate submittedOnDate, String externalId, LocalDate dateOfBirth, String mobileNo,
+            LocalDate submittedOnDate, ExternalId externalId, LocalDate dateOfBirth, String mobileNo,
             ClientNonPersonData clientNonPersonDetails, Collection<AddressData> address, String locale, String dateFormat) {
         return new ClientData(legalFormId, rowIndex, fullname, null, null, null, submittedOnDate, activationDate, active, externalId,
                 officeId, staffId, mobileNo, dateOfBirth, clientTypeId, null, clientClassificationId, null, address, clientNonPersonDetails,
@@ -196,7 +200,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     }
 
     public static ClientData importClientPersonInstance(Long legalFormId, Integer rowIndex, String firstname, String lastname,
-            String middlename, LocalDate submittedOn, LocalDate activationDate, Boolean active, String externalId, Long officeId,
+            String middlename, LocalDate submittedOn, LocalDate activationDate, Boolean active, ExternalId externalId, Long officeId,
             Long staffId, String mobileNo, LocalDate dob, Long clientTypeId, Long genderId, Long clientClassificationId, Boolean isStaff,
             Collection<AddressData> address, String locale, String dateFormat) {
 
@@ -210,7 +214,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     }
 
     private ClientData(Long legalFormId, Integer rowIndex, String fullname, String firstname, String lastname, String middlename,
-            LocalDate submittedOn, LocalDate activationDate, Boolean active, String externalId, Long officeId, Long staffId,
+            LocalDate submittedOn, LocalDate activationDate, Boolean active, ExternalId externalId, Long officeId, Long staffId,
             String mobileNo, LocalDate dob, Long clientTypeId, Long genderId, Long clientClassificationId, Boolean isStaff,
             Collection<AddressData> address, ClientNonPersonData clientNonPersonDetails, String locale, String dateFormat) {
         this.rowIndex = rowIndex;
@@ -293,7 +297,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         final String lastname = null;
         final String fullname = null;
         final String displayName = null;
-        final String externalId = null;
+        final ExternalId externalId = ExternalId.empty();
         final String mobileNo = null;
         final String emailAddress = null;
         final LocalDate dateOfBirth = null;
@@ -379,7 +383,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
 
         final Long transferToOfficeId = null;
         final String transferToOfficeName = null;
-        final String externalId = null;
+        final ExternalId externalId = ExternalId.empty();
         final String mobileNo = null;
         final String emailAddress = null;
         final LocalDate dateOfBirth = null;
@@ -432,7 +436,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         final String middlename = null;
         final String lastname = null;
         final String fullname = null;
-        final String externalId = null;
+        final ExternalId externalId = ExternalId.empty();
         final String mobileNo = null;
         final String emailAddress = null;
         final LocalDate dateOfBirth = null;
@@ -483,7 +487,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     public static ClientData instance(final String accountNo, final EnumOptionData status, final CodeValueData subStatus,
             final Long officeId, final String officeName, final Long transferToOfficeId, final String transferToOfficeName, final Long id,
             final String firstname, final String middlename, final String lastname, final String fullname, final String displayName,
-            final String externalId, final String mobileNo, final String emailAddress, final LocalDate dateOfBirth,
+            final ExternalId externalId, final String mobileNo, final String emailAddress, final LocalDate dateOfBirth,
             final CodeValueData gender, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
             final ClientTimelineData timeline, final Long savingsProductId, final String savingsProductName, final Long savingsAccountId,
             final CodeValueData clientType, final CodeValueData clientClassification, final EnumOptionData legalForm,
@@ -501,7 +505,6 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
         final List<EnumOptionData> clientLegalFormOptions = null;
         final ClientFamilyMembersData familyMemberOptions = null;
-        final Collection<ClientCollateralManagement> clientCollateralManagements = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate,
                 imageId, staffId, staffName, allowedOffices, groups, staffOptions, closureReasons, genderOptions, timeline,
@@ -514,7 +517,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     private ClientData(final String accountNo, final EnumOptionData status, final CodeValueData subStatus, final Long officeId,
             final String officeName, final Long transferToOfficeId, final String transferToOfficeName, final Long id,
             final String firstname, final String middlename, final String lastname, final String fullname, final String displayName,
-            final String externalId, final String mobileNo, final String emailAddress, final LocalDate dateOfBirth,
+            final ExternalId externalId, final String mobileNo, final String emailAddress, final LocalDate dateOfBirth,
             final CodeValueData gender, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
             final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups,
             final Collection<StaffData> staffOptions, final Collection<CodeValueData> narrations,
@@ -546,7 +549,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.lastname = StringUtils.defaultIfEmpty(lastname, null);
         this.fullname = StringUtils.defaultIfEmpty(fullname, null);
         this.displayName = StringUtils.defaultIfEmpty(displayName, null);
-        this.externalId = StringUtils.defaultIfEmpty(externalId, null);
+        this.externalId = externalId;
         this.mobileNo = StringUtils.defaultIfEmpty(mobileNo, null);
         this.emailAddress = StringUtils.defaultIfEmpty(emailAddress, null);
         this.activationDate = activationDate;
@@ -594,6 +597,13 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.isAddressEnabled = isAddressEnabled;
         this.datatables = datatables;
         this.clientCollateralManagements = clientCollateralManagements;
+    }
+
+    public ExternalId getExternalId() {
+        if (this.externalId == null) {
+            return ExternalId.empty();
+        }
+        return this.externalId;
     }
 
     @Override

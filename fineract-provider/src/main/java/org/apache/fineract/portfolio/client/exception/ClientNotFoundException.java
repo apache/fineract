@@ -34,8 +34,8 @@ public class ClientNotFoundException extends AbstractPlatformResourceNotFoundExc
         super("error.msg.client.not.found.with.basic.details", "Client not found with basic details.");
     }
 
-    public ClientNotFoundException(String accountNumber) {
-        super("error.msg.client.not.found.with.account.number", "Client not found with account number " + accountNumber + ".");
+    public ClientNotFoundException(String value, String valueType) {
+        super("error.msg.client.not.found.with." + valueType, "Client not found with valuer " + value + ".", value);
     }
 
     public ClientNotFoundException(Long id, EmptyResultDataAccessException e) {

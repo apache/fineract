@@ -31,11 +31,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
@@ -63,11 +66,11 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class AccountTransfersWritePlatformServiceImpl implements AccountTransfersWritePlatformService {
 
     private final AccountTransfersDataValidator accountTransfersDataValidator;
@@ -82,28 +85,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final LoanReadPlatformService loanReadPlatformService;
     private final GSIMRepositoy gsimRepository;
     private final ConfigurationDomainService configurationDomainService;
-
-    @Autowired
-    public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
-            final AccountTransferAssembler accountTransferAssembler, final AccountTransferRepository accountTransferRepository,
-            final SavingsAccountAssembler savingsAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
-            final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
-            final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService) {
-        this.accountTransfersDataValidator = accountTransfersDataValidator;
-        this.accountTransferAssembler = accountTransferAssembler;
-        this.accountTransferRepository = accountTransferRepository;
-        this.savingsAccountAssembler = savingsAccountAssembler;
-        this.savingsAccountDomainService = savingsAccountDomainService;
-        this.loanAccountAssembler = loanAssembler;
-        this.loanAccountDomainService = loanAccountDomainService;
-        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-        this.accountTransferDetailRepository = accountTransferDetailRepository;
-        this.loanReadPlatformService = loanReadPlatformService;
-        this.gsimRepository = gsimRepository;
-        this.configurationDomainService = configurationDomainService;
-    }
+    private final ExternalIdFactory externalIdFactory;
 
     @Transactional
     @Override
@@ -178,9 +160,11 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final HolidayDetailDTO holidayDetailDto = null;
             final boolean isRecoveryRepayment = false;
             final String chargeRefundChargeType = null;
+
+            ExternalId externalId = externalIdFactory.create();
             final LoanTransaction loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT,
-                    toLoanAccount, new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null,
-                    isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+                    toLoanAccount, transactionDate, transactionAmount, paymentDetail, null, externalId, isRecoveryRepayment,
+                    chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
 
             final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(command,
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
@@ -193,9 +177,9 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
             fromLoanAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
             final Loan fromLoanAccount = this.loanAccountAssembler.assembleFrom(fromLoanAccountId);
-
+            ExternalId externalId = externalIdFactory.create();
             final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefund(fromLoanAccountId,
-                    new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null);
+                    new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, externalId);
 
             final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
             final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsAccountId, backdatedTxnsAllowedTill);
@@ -329,12 +313,16 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     accountTransferDTO.getFmt(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
                     accountTransferDTO.getPaymentDetail(), transactionBooleanValues, backdatedTxnsAllowedTill);
 
-            LoanTransaction loanTransaction = null;
+            LoanTransaction loanTransaction;
+
+            ExternalId txnExternalId = accountTransferDTO.getTxnExternalId();
+            // Safety net (it might need to generate new one)
+            ExternalId externalId = externalIdFactory.create(txnExternalId.getValue());
 
             if (AccountTransferType.fromInt(accountTransferDTO.getTransferType()).isChargePayment()) {
                 loanTransaction = this.loanAccountDomainService.makeChargePayment(toLoanAccount, accountTransferDTO.getChargeId(),
                         accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
-                        accountTransferDTO.getPaymentDetail(), null, null, accountTransferDTO.getToTransferType(),
+                        accountTransferDTO.getPaymentDetail(), null, externalId, accountTransferDTO.getToTransferType(),
                         accountTransferDTO.getLoanInstallmentNumber());
 
             } else {
@@ -343,9 +331,9 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 final HolidayDetailDTO holidayDetailDto = null;
                 final String chargeRefundChargeType = null;
                 loanTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT, toLoanAccount,
-                        new CommandProcessingResultBuilder(), accountTransferDTO.getTransactionDate(),
-                        accountTransferDTO.getTransactionAmount(), accountTransferDTO.getPaymentDetail(), null, null, isRecoveryRepayment,
-                        chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+                        accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                        accountTransferDTO.getPaymentDetail(), null, externalId, isRecoveryRepayment, chargeRefundChargeType,
+                        isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
             }
 
             accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(accountTransferDTO, fromSavingsAccount,
@@ -354,8 +342,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             transferTransactionId = accountTransferDetails.getId();
         } else if (isSavingsToSavingsAccountTransfer(accountTransferDTO.getFromAccountType(), accountTransferDTO.getToAccountType())) {
 
-            SavingsAccount fromSavingsAccount = null;
-            SavingsAccount toSavingsAccount = null;
+            SavingsAccount fromSavingsAccount;
+            SavingsAccount toSavingsAccount;
             if (accountTransferDetails == null) {
                 if (accountTransferDTO.getFromSavingsAccount() == null) {
                     fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getFromAccountId(),
@@ -421,15 +409,20 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 this.savingsAccountAssembler.setHelpers(toSavingsAccount);
             }
             LoanTransaction loanTransaction = null;
+
+            ExternalId txnExternalId = accountTransferDTO.getTxnExternalId();
+            // Safety net (it might need to generate new one)
+            ExternalId externalId = externalIdFactory.create(txnExternalId.getValue());
+
             if (LoanTransactionType.DISBURSEMENT.getValue().equals(accountTransferDTO.getFromTransferType())) {
                 loanTransaction = this.loanAccountDomainService.makeDisburseTransaction(accountTransferDTO.getFromAccountId(),
                         accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
-                        accountTransferDTO.getPaymentDetail(), accountTransferDTO.getNoteText(), accountTransferDTO.getTxnExternalId());
+                        accountTransferDTO.getPaymentDetail(), accountTransferDTO.getNoteText(), externalId);
             } else {
                 loanTransaction = this.loanAccountDomainService.makeRefund(accountTransferDTO.getFromAccountId(),
                         new CommandProcessingResultBuilder(), accountTransferDTO.getTransactionDate(),
                         accountTransferDTO.getTransactionAmount(), accountTransferDTO.getPaymentDetail(), accountTransferDTO.getNoteText(),
-                        accountTransferDTO.getTxnExternalId());
+                        externalId);
             }
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,
@@ -474,13 +467,18 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             this.loanAccountAssembler.setHelpers(toLoanAccount);
         }
 
+        ExternalId externalIdForDisbursement = accountTransferDTO.getTxnExternalId();
+
         LoanTransaction disburseTransaction = this.loanAccountDomainService.makeDisburseTransaction(accountTransferDTO.getFromAccountId(),
                 accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(), accountTransferDTO.getPaymentDetail(),
-                accountTransferDTO.getNoteText(), accountTransferDTO.getTxnExternalId(), true);
+                accountTransferDTO.getNoteText(), externalIdForDisbursement, true);
         final String chargeRefundChargeType = null;
+
+        ExternalId externalIdForRepayment = externalIdFactory.create();
+
         LoanTransaction repayTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT, toLoanAccount,
-                new CommandProcessingResultBuilder(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
-                accountTransferDTO.getPaymentDetail(), null, null, false, chargeRefundChargeType, isAccountTransfer, null, false, true);
+                accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(), accountTransferDTO.getPaymentDetail(),
+                null, externalIdForRepayment, false, chargeRefundChargeType, isAccountTransfer, null, false, true);
 
         AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleLoanToLoanTransfer(accountTransferDTO,
                 fromLoanAccount, toLoanAccount, disburseTransaction, repayTransaction);
@@ -541,8 +539,10 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             throw new InvalidPaidInAdvanceAmountException(overpaid.toPlainString());
         }
 
+        ExternalId externalId = externalIdFactory.create();
+
         final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefundForActiveLoan(fromLoanAccountId,
-                new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null);
+                new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, externalId);
 
         final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
         final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsAccountId, backdatedTxnsAllowedTill);

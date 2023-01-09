@@ -38,6 +38,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -104,10 +105,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     private boolean reversed;
 
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
-    private String externalId;
+    private ExternalId externalId;
 
     @Column(name = "reversal_external_id", length = 100, nullable = true, unique = true)
-    private String reversalExternalId;
+    private ExternalId reversalExternalId;
 
     @Column(name = "reversed_on_date", nullable = true)
     private LocalDate reversedOnDate;
@@ -136,30 +137,30 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     protected LoanTransaction() {}
 
     public static LoanTransaction incomePosting(final Loan loan, final Office office, final LocalDate dateOf, final BigDecimal amount,
-            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion) {
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
+            final ExternalId externalId) {
         final Integer typeOf = LoanTransactionType.INCOME_POSTING.getValue();
         final BigDecimal principalPortion = BigDecimal.ZERO;
         final BigDecimal overPaymentPortion = BigDecimal.ZERO;
         final boolean reversed = false;
         final PaymentDetail paymentDetail = null;
-        final String externalId = null;
         return new LoanTransaction(loan, office, typeOf, dateOf, amount, principalPortion, interestPortion, feeChargesPortion,
                 penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId);
     }
 
     public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate disbursementDate, final String externalId) {
+            final LocalDate disbursementDate, final ExternalId externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.DISBURSEMENT, paymentDetail, amount.getAmount(), disbursementDate,
                 externalId);
     }
 
     public static LoanTransaction repayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate paymentDate, final String externalId) {
+            final LocalDate paymentDate, final ExternalId externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
     public static LoanTransaction chargeback(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate paymentDate, final String externalId) {
+            final LocalDate paymentDate, final ExternalId externalId) {
         LoanTransaction loanTransaction = new LoanTransaction(null, office, LoanTransactionType.CHARGEBACK, paymentDetail,
                 amount.getAmount(), paymentDate, externalId);
         loanTransaction.principalPortion = amount.getAmount();
@@ -167,9 +168,15 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction repaymentType(final LoanTransactionType repaymentType, final Office office, final Money amount,
-            final PaymentDetail paymentDetail, final LocalDate paymentDate, final String externalId, final String chargeRefundChargeType) {
+            final PaymentDetail paymentDetail, final LocalDate paymentDate, final ExternalId externalId,
+            final String chargeRefundChargeType) {
         return new LoanTransaction(null, office, repaymentType, paymentDetail, amount.getAmount(), paymentDate, externalId,
                 chargeRefundChargeType);
+    }
+
+    public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
+            final ExternalId externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, amount, transactionDate, externalId);
     }
 
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
@@ -184,32 +191,32 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction recoveryRepayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate paymentDate, final String externalId) {
+            final LocalDate paymentDate, final ExternalId externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.RECOVERY_REPAYMENT, paymentDetail, amount.getAmount(), paymentDate,
                 externalId);
     }
 
     public static LoanTransaction loanPayment(final Loan loan, final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate paymentDate, final String externalId, final LoanTransactionType transactionType) {
+            final LocalDate paymentDate, final ExternalId externalId, final LoanTransactionType transactionType) {
         return new LoanTransaction(loan, office, transactionType, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
     public static LoanTransaction repaymentAtDisbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate paymentDate, final String externalId) {
+            final LocalDate paymentDate, final ExternalId externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, paymentDetail, amount.getAmount(),
                 paymentDate, externalId);
     }
 
     public static LoanTransaction waiver(final Office office, final Loan loan, final Money amount, final LocalDate waiveDate,
-            final Money waived, final Money unrecognizedPortion) {
+            final Money waived, final Money unrecognizedPortion, final ExternalId externalId) {
         LoanTransaction loanTransaction = new LoanTransaction(loan, office, LoanTransactionType.WAIVE_INTEREST, amount.getAmount(),
-                waiveDate, null);
+                waiveDate, externalId);
         loanTransaction.updateInterestComponent(waived, unrecognizedPortion);
         return loanTransaction;
     }
 
     public static LoanTransaction accrueInterest(final Office office, final Loan loan, final Money amount,
-            final LocalDate interestAppliedDate) {
+            final LocalDate interestAppliedDate, final ExternalId externalId) {
         BigDecimal principalPortion = null;
         BigDecimal feesPortion = null;
         BigDecimal penaltiesPortion = null;
@@ -217,51 +224,53 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         BigDecimal overPaymentPortion = null;
         boolean reversed = false;
         PaymentDetail paymentDetail = null;
-        String externalId = null;
         return new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL.getValue(), interestAppliedDate, interestPortion,
                 principalPortion, interestPortion, feesPortion, penaltiesPortion, overPaymentPortion, reversed, paymentDetail, externalId);
     }
 
     public static LoanTransaction accrual(final Loan loan, final Office office, final Money amount, final Money interest,
-            final Money feeCharges, final Money penaltyCharges, final LocalDate transactionDate) {
+            final Money feeCharges, final Money penaltyCharges, final LocalDate transactionDate, final ExternalId externalId) {
         return accrueTransaction(loan, office, transactionDate, amount.getAmount(), interest.getAmount(), feeCharges.getAmount(),
-                penaltyCharges.getAmount());
+                penaltyCharges.getAmount(), externalId);
     }
 
     public static LoanTransaction accrueTransaction(final Loan loan, final Office office, final LocalDate dateOf, final BigDecimal amount,
-            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion) {
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
+            final ExternalId externalId) {
         BigDecimal principalPortion = null;
         BigDecimal overPaymentPortion = null;
         boolean reversed = false;
         PaymentDetail paymentDetail = null;
-        String externalId = null;
         return new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL.getValue(), dateOf, amount, principalPortion, interestPortion,
                 feeChargesPortion, penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId);
     }
 
-    public static LoanTransaction initiateTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
+    public static LoanTransaction initiateTransfer(final Office office, final Loan loan, final LocalDate transferDate,
+            final ExternalId externalId) {
         return new LoanTransaction(loan, office, LoanTransactionType.INITIATE_TRANSFER.getValue(), transferDate,
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(),
                 loan.getSummary().getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(),
-                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, null);
+                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
     }
 
-    public static LoanTransaction approveTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
+    public static LoanTransaction approveTransfer(final Office office, final Loan loan, final LocalDate transferDate,
+            final ExternalId externalId) {
         return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate,
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(),
                 loan.getSummary().getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(),
-                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, null);
+                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
     }
 
-    public static LoanTransaction withdrawTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
+    public static LoanTransaction withdrawTransfer(final Office office, final Loan loan, final LocalDate transferDate,
+            final ExternalId externalId) {
         return new LoanTransaction(loan, office, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), transferDate,
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(),
                 loan.getSummary().getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(),
-                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, null);
+                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
     }
 
     public static LoanTransaction refund(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate paymentDate, final String externalId) {
+            final LocalDate paymentDate, final ExternalId externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.REFUND, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
@@ -273,8 +282,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction accrueLoanCharge(final Loan loan, final Office office, final Money amount, final LocalDate applyDate,
-            final Money feeCharges, final Money penaltyCharges) {
-        String externalId = null;
+            final Money feeCharges, final Money penaltyCharges, final ExternalId externalId) {
         final LoanTransaction applyCharge = new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL, amount.getAmount(), applyDate,
                 externalId);
         applyCharge.updateChargesComponents(feeCharges, penaltyCharges);
@@ -282,35 +290,32 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction creditBalanceRefund(final Loan loan, final Office office, final Money amount, final LocalDate paymentDate,
-            final String externalId) {
+            final ExternalId externalId) {
         final PaymentDetail paymentDetail = null;
         return new LoanTransaction(loan, office, LoanTransactionType.CREDIT_BALANCE_REFUND, paymentDetail, amount.getAmount(), paymentDate,
                 externalId);
     }
 
     public static LoanTransaction refundForActiveLoan(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate paymentDate, final String externalId) {
+            final LocalDate paymentDate, final ExternalId externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, paymentDetail, amount.getAmount(), paymentDate,
                 externalId);
     }
 
     public static boolean transactionAmountsMatch(final MonetaryCurrency currency, final LoanTransaction loanTransaction,
             final LoanTransaction newLoanTransaction) {
-        if (loanTransaction.getAmount(currency).isEqualTo(newLoanTransaction.getAmount(currency))
+        return loanTransaction.getAmount(currency).isEqualTo(newLoanTransaction.getAmount(currency))
                 && loanTransaction.getPrincipalPortion(currency).isEqualTo(newLoanTransaction.getPrincipalPortion(currency))
                 && loanTransaction.getInterestPortion(currency).isEqualTo(newLoanTransaction.getInterestPortion(currency))
                 && loanTransaction.getFeeChargesPortion(currency).isEqualTo(newLoanTransaction.getFeeChargesPortion(currency))
                 && loanTransaction.getPenaltyChargesPortion(currency).isEqualTo(newLoanTransaction.getPenaltyChargesPortion(currency))
-                && loanTransaction.getOverPaymentPortion(currency).isEqualTo(newLoanTransaction.getOverPaymentPortion(currency))) {
-            return true;
-        }
-        return false;
+                && loanTransaction.getOverPaymentPortion(currency).isEqualTo(newLoanTransaction.getOverPaymentPortion(currency));
     }
 
     private LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final LocalDate dateOf, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overPaymentPortion, final boolean reversed,
-            final PaymentDetail paymentDetail, final String externalId) {
+            final PaymentDetail paymentDetail, final ExternalId externalId) {
 
         this.loan = loan;
         this.typeOf = typeOf;
@@ -329,20 +334,40 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction waiveLoanCharge(final Loan loan, final Office office, final Money waived, final LocalDate waiveDate,
-            final Money feeChargesWaived, final Money penaltyChargesWaived, final Money unrecognizedCharge) {
+            final Money feeChargesWaived, final Money penaltyChargesWaived, final Money unrecognizedCharge, final ExternalId externalId) {
         final LoanTransaction waiver = new LoanTransaction(loan, office, LoanTransactionType.WAIVE_CHARGES, waived.getAmount(), waiveDate,
-                null);
+                externalId);
         waiver.updateChargesComponents(feeChargesWaived, penaltyChargesWaived, unrecognizedCharge);
 
         return waiver;
     }
 
-    public static LoanTransaction writeoff(final Loan loan, final Office office, final LocalDate writeOffDate, final String externalId) {
+    public static LoanTransaction writeoff(final Loan loan, final Office office, final LocalDate writeOffDate,
+            final ExternalId externalId) {
         return new LoanTransaction(loan, office, LoanTransactionType.WRITEOFF, null, writeOffDate, externalId);
     }
 
+    public static LoanTransaction chargeOff(final Loan loan, final LocalDate chargeOffDate, final ExternalId externalId) {
+        BigDecimal principalPortion = loan.getLoanSummary().getTotalPrincipalOutstanding().compareTo(BigDecimal.ZERO) != 0
+                ? loan.getLoanSummary().getTotalPrincipalOutstanding()
+                : null;
+        BigDecimal interestPortion = loan.getLoanSummary().getTotalInterestOutstanding().compareTo(BigDecimal.ZERO) != 0
+                ? loan.getLoanSummary().getTotalInterestOutstanding()
+                : null;
+        BigDecimal feePortion = loan.getLoanSummary().getTotalFeeChargesOutstanding().compareTo(BigDecimal.ZERO) != 0
+                ? loan.getLoanSummary().getTotalFeeChargesOutstanding()
+                : null;
+        BigDecimal penaltyPortion = loan.getLoanSummary().getTotalPenaltyChargesOutstanding().compareTo(BigDecimal.ZERO) != 0
+                ? loan.getLoanSummary().getTotalPenaltyChargesOutstanding()
+                : null;
+        BigDecimal totalOutstanding = loan.getLoanSummary().getTotalOutstanding();
+
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_OFF.getValue(), chargeOffDate, totalOutstanding,
+                principalPortion, interestPortion, feePortion, penaltyPortion, null, false, null, externalId);
+    }
+
     private LoanTransaction(final Loan loan, final Office office, final LoanTransactionType type, final BigDecimal amount,
-            final LocalDate date, final String externalId) {
+            final LocalDate date, final ExternalId externalId) {
         this.loan = loan;
         this.typeOf = type.getValue();
         this.amount = amount;
@@ -353,7 +378,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private LoanTransaction(final Loan loan, final Office office, final LoanTransactionType type, final PaymentDetail paymentDetail,
-            final BigDecimal amount, final LocalDate date, final String externalId) {
+            final BigDecimal amount, final LocalDate date, final ExternalId externalId) {
         this.loan = loan;
         this.typeOf = type.getValue();
         this.paymentDetail = paymentDetail;
@@ -365,7 +390,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private LoanTransaction(final Loan loan, final Office office, final LoanTransactionType type, final PaymentDetail paymentDetail,
-            final BigDecimal amount, final LocalDate date, final String externalId, final String chargeRefundChargeType) {
+            final BigDecimal amount, final LocalDate date, final ExternalId externalId, final String chargeRefundChargeType) {
         this.loan = loan;
         this.typeOf = type.getValue();
         this.paymentDetail = paymentDetail;
@@ -384,7 +409,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.loanTransactionToRepaymentScheduleMappings.clear();
     }
 
-    public void reverse(final String reversalExternalId) {
+    public void reverse(final ExternalId reversalExternalId) {
         this.reverse();
         this.reversalExternalId = reversalExternalId;
     }
@@ -473,6 +498,18 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return this.principalPortion;
     }
 
+    public BigDecimal getInterestPortion() {
+        return this.interestPortion;
+    }
+
+    public BigDecimal getPenaltyChargesPortion() {
+        return this.penaltyChargesPortion;
+    }
+
+    public BigDecimal getFeeChargesPortion() {
+        return this.feeChargesPortion;
+    }
+
     public Money getInterestPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.interestPortion);
     }
@@ -526,7 +563,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean isRepaymentType() {
-        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund();
+        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
+                || isChargeAdjustment();
     }
 
     public boolean isRepayment() {
@@ -547,6 +585,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isChargeRefund() {
         return LoanTransactionType.CHARGE_REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isChargeAdjustment() {
+        return LoanTransactionType.CHARGE_ADJUSTMENT.equals(getTypeOf()) && isNotReversed();
     }
 
     public boolean isNotRepaymentType() {
@@ -624,6 +666,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return getTypeOf().isWriteOff() && isNotReversed();
     }
 
+    public boolean isChargeOff() {
+        return getTypeOf().isChargeOff() && isNotReversed();
+    }
+
     public boolean isIdentifiedBy(final Long identifier) {
         return getId().equals(identifier);
     }
@@ -673,7 +719,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return new LoanTransactionData(getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
                 currencyData, getTransactionDate(), this.amount, this.loan.getNetDisbursalAmount(), this.principalPortion,
                 this.interestPortion, this.feeChargesPortion, this.penaltyChargesPortion, this.overPaymentPortion, this.externalId,
-                transfer, null, outstandingLoanBalance, this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed, this.loan.getId());
+                transfer, null, outstandingLoanBalance, this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed, this.loan.getId(),
+                this.loan.getExternalId());
     }
 
     public Map<String, Object> toMapData(final String currencyCode) {
@@ -716,6 +763,13 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
             thisTransactionData.put("loanChargesPaid", loanChargesPaidData);
         }
 
+        LoanTransactionRelation loanTransactionRelation = loanTransactionRelations.stream()
+                .filter(e -> LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT.equals(e.getRelationType())).findAny().orElse(null);
+        if (loanTransactionRelation != null) {
+            LoanCharge loanCharge = loanTransactionRelation.getToCharge();
+            thisTransactionData.put("loanChargeData", loanCharge.toData());
+        }
+
         return thisTransactionData;
     }
 
@@ -731,7 +785,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.loanChargesPaid = loanChargesPaid;
     }
 
-    public String getExternalId() {
+    public ExternalId getExternalId() {
         return this.externalId;
     }
 
@@ -743,7 +797,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return LoanTransactionType.CREDIT_BALANCE_REFUND.equals(getTypeOf()) && isNotReversed();
     }
 
-    public void updateExternalId(final String externalId) {
+    public void updateExternalId(final ExternalId externalId) {
         this.externalId = externalId;
     }
 
@@ -755,7 +809,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return isNotReversed() && (LoanTransactionType.CONTRA.equals(getTypeOf())
                 || LoanTransactionType.MARKED_FOR_RESCHEDULING.equals(getTypeOf())
                 || LoanTransactionType.APPROVE_TRANSFER.equals(getTypeOf()) || LoanTransactionType.INITIATE_TRANSFER.equals(getTypeOf())
-                || LoanTransactionType.REJECT_TRANSFER.equals(getTypeOf()) || LoanTransactionType.WITHDRAW_TRANSFER.equals(getTypeOf()));
+                || LoanTransactionType.REJECT_TRANSFER.equals(getTypeOf()) || LoanTransactionType.WITHDRAW_TRANSFER.equals(getTypeOf())
+                || LoanTransactionType.CHARGE_OFF.equals(getTypeOf()));
     }
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {
@@ -873,8 +928,20 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return (loanTransactionRelations != null && loanTransactionRelations.size() > 0);
     }
 
+    public boolean hasChargebackLoanTransactionRelations() {
+        return (loanTransactionRelations != null
+                && loanTransactionRelations.stream().anyMatch(e -> LoanTransactionRelationTypeEnum.CHARGEBACK.equals(e.getRelationType())));
+    }
+
     public Set<LoanTransactionRelation> getLoanTransactionRelations() {
         return loanTransactionRelations;
+    }
+
+    public void copyLoanTransactionRelations(Set<LoanTransactionRelation> sourceLoanTransactionRelations) {
+        for (LoanTransactionRelation existingLoanTransactionRelation : sourceLoanTransactionRelations) {
+            loanTransactionRelations.add(new LoanTransactionRelation(this, existingLoanTransactionRelation.getToTransaction(),
+                    existingLoanTransactionRelation.getToCharge(), existingLoanTransactionRelation.getRelationType()));
+        }
     }
 
     public BigDecimal getAmount() {

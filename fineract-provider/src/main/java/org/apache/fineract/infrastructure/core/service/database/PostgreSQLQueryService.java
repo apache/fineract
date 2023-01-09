@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.service.database;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Objects;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,18 @@ public class PostgreSQLQueryService implements DatabaseQueryService {
         final SqlRowSet columnDefinitions = jdbcTemplate.queryForRowSet(sql); // NOSONAR
         if (columnDefinitions.next()) {
             return columnDefinitions;
+        } else {
+            throw new IllegalArgumentException("Table " + tableName + " is not found");
+        }
+    }
+
+    @Override
+    public List<IndexDetail> getTableIndexes(DataSource dataSource, String tableName) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        String sql = "SELECT indexname FROM pg_indexes WHERE schemaname = 'public' AND tablename = '" + tableName + "'";
+        final SqlRowSet indexDefinitions = jdbcTemplate.queryForRowSet(sql); // NOSONAR
+        if (indexDefinitions.next()) {
+            return DatabaseIndexMapper.getIndexDetails(indexDefinitions);
         } else {
             throw new IllegalArgumentException("Table " + tableName + " is not found");
         }

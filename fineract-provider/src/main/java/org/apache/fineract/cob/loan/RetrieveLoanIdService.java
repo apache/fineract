@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface RetrieveLoanIdService {
 
-    List<Long> retrieveLoanIds();
+    List<Long> retrieveLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate);
 }

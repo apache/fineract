@@ -45,6 +45,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -63,14 +64,12 @@ import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/staff")
 @Component
-@Scope("singleton")
 @Tag(name = "Staff", description = "Allows you to model staff members. At present the key role of significance is whether this staff member is a loan officer or not.")
+@RequiredArgsConstructor
 public class StaffApiResource {
 
     /**
@@ -90,23 +89,6 @@ public class StaffApiResource {
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
 
-    @Autowired
-    public StaffApiResource(final PlatformSecurityContext context, final StaffReadPlatformService readPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final DefaultToApiJsonSerializer<StaffData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-    }
-
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -122,18 +104,15 @@ public class StaffApiResource {
             @DefaultValue("false") @QueryParam("staffInOfficeHierarchy") @Parameter(description = "staffInOfficeHierarchy") final boolean staffInOfficeHierarchy,
             @DefaultValue("false") @QueryParam("loanOfficersOnly") @Parameter(description = "loanOfficersOnly") final boolean loanOfficersOnly,
             @DefaultValue("active") @QueryParam("status") @Parameter(description = "status") final String status) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final Collection<StaffData> staff;
         if (staffInOfficeHierarchy) {
-            staff = this.readPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, loanOfficersOnly);
+            staff = readPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, loanOfficersOnly);
         } else {
-            staff = this.readPlatformService.retrieveAllStaff(officeId, loanOfficersOnly, status);
+            staff = readPlatformService.retrieveAllStaff(officeId, loanOfficersOnly, status);
         }
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, staff, RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, staff, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -145,12 +124,9 @@ public class StaffApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.CreateStaffResponse.class))) })
     public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createStaff().withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -163,17 +139,14 @@ public class StaffApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.RetrieveOneResponse.class))) })
     public String retrieveOne(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        StaffData staff = this.readPlatformService.retrieveStaff(staffId);
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        StaffData staff = readPlatformService.retrieveStaff(staffId);
         if (settings.isTemplate()) {
-            final Collection<OfficeData> allowedOffices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+            final Collection<OfficeData> allowedOffices = officeReadPlatformService.retrieveAllOfficesForDropdown();
             staff = StaffData.templateData(staff, allowedOffices);
         }
-        return this.toApiJsonSerializer.serialize(settings, staff, RESPONSE_DATA_PARAMETERS);
+        return toApiJsonSerializer.serialize(settings, staff, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT
@@ -186,12 +159,9 @@ public class StaffApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.UpdateStaffResponse.class))) })
     public String update(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateStaff(staffId).withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -209,8 +179,8 @@ public class StaffApiResource {
     public String postTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.STAFF.toString(), uploadedInputStream,
+        final Long importDocumentId = bulkImportWorkbookService.importWorkbook(GlobalEntityType.STAFF.toString(), uploadedInputStream,
                 fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        return toApiJsonSerializer.serialize(importDocumentId);
     }
 }

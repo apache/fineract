@@ -46,10 +46,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GetChargeByIdCommandStrategy implements CommandStrategy {
 
+    /**
+     * Loan charges api resource {@link LoanChargesApiResource}.
+     */
     private final LoanChargesApiResource loanChargesApiResource;
 
     @Override
-    public BatchResponse execute(final BatchRequest request, UriInfo uriInfo) {
+    public BatchResponse execute(final BatchRequest request, final UriInfo uriInfo) {
         final MutableUriInfo parameterizedUriInfo = new MutableUriInfo(uriInfo);
 
         final BatchResponse response = new BatchResponse();

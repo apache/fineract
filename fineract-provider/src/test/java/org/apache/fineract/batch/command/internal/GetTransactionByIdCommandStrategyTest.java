@@ -37,6 +37,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Test class for {@link GetTransactionByIdCommandStrategy}.
+ */
 public class GetTransactionByIdCommandStrategyTest {
 
     private static Stream<Arguments> provideQueryParameters() {
@@ -110,13 +113,26 @@ public class GetTransactionByIdCommandStrategyTest {
      */
     private static class TestContext {
 
+        /**
+         * The Mock UriInfo
+         */
         @Mock
         private UriInfo uriInfo;
 
+        /**
+         * The Mock {@link LoanTransactionsApiResource}
+         */
         @Mock
         private LoanTransactionsApiResource loanTransactionsApiResource;
 
+        /**
+         * The class under test.
+         */
         private final GetTransactionByIdCommandStrategy subjectToTest;
+
+        /**
+         * Constructor.
+         */
 
         TestContext() {
             MockitoAnnotations.openMocks(this);

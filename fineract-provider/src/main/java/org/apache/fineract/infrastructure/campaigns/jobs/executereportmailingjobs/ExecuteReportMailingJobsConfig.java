@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.jobs.executereportmailingjobs;
 
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
@@ -54,6 +55,8 @@ public class ExecuteReportMailingJobsConfig {
     private ReportMailingJobEmailService reportMailingJobEmailService;
     @Autowired
     private ReportMailingJobRunHistoryRepository reportMailingJobRunHistoryRepository;
+    @Autowired
+    private FineractProperties fineractProperties;
 
     @Bean
     protected Step executeReportMailingJobsStep() {
@@ -69,6 +72,6 @@ public class ExecuteReportMailingJobsConfig {
     @Bean
     public ExecuteReportMailingJobsTasklet executeReportMailingJobsTasklet() {
         return new ExecuteReportMailingJobsTasklet(reportMailingJobRepository, reportMailingJobValidator, readReportingService,
-                reportingProcessServiceProvider, reportMailingJobEmailService, reportMailingJobRunHistoryRepository);
+                reportingProcessServiceProvider, reportMailingJobEmailService, reportMailingJobRunHistoryRepository, fineractProperties);
     }
 }

@@ -34,10 +34,10 @@ import javax.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailAttachmentFileFormat;
@@ -68,6 +68,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
     private final ReportMailingJobEmailService reportMailingJobEmailService;
     private final ReportMailingJobRunHistoryRepository reportMailingJobRunHistoryRepository;
+    private final FineractProperties fineractProperties;
 
     private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
@@ -133,7 +134,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
 
                 if (responseObject != null && responseObject.getClass().equals(ByteArrayOutputStream.class)) {
                     final ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) responseObject;
-                    final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
+                    final String fileLocation = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "";
                     final String fileNameWithoutExtension = fileLocation + File.separator + reportName;
 
                     if (!new File(fileLocation).isDirectory()) {

@@ -66,7 +66,6 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final TellerLookupMapper lookupMapper = new TellerLookupMapper();
-    private final TellerInOfficeHierarchyMapper tellerInOfficeHierarchyMapper = new TellerInOfficeHierarchyMapper();
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
@@ -110,33 +109,6 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
             return TellerData.instance(id, officeId, debitAccountId, creditAccountId, tellerName, description, startDate, endDate,
                     tellerStatus, officeName, null, null);
-        }
-    }
-
-    private static final class TellerInOfficeHierarchyMapper implements RowMapper<TellerData> {
-
-        @Override
-        public TellerData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String tellerName = rs.getString("teller_name");
-            final String description = rs.getString("description");
-            final String officeName = rs.getString("office_name");
-            final Long officeId = rs.getLong("office_id");
-            TellerStatus tellerStatus = null;
-            final Integer status = rs.getInt("status");
-            if (status != null) {
-                tellerStatus = TellerStatus.fromInt(status);
-            }
-            final Long debitAccountId = rs.getLong("debit_account_id");
-            final Long creditAccountId = rs.getLong("credit_account_id");
-
-            final LocalDate startDate = JdbcSupport.getLocalDate(rs, "start_date");
-            final LocalDate endDate = JdbcSupport.getLocalDate(rs, "end_date");
-
-            return TellerData.instance(id, officeId, debitAccountId, creditAccountId, tellerName, description, startDate, endDate,
-                    tellerStatus, officeName, null, null);
-
         }
     }
 
@@ -377,8 +349,6 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         if (tellerData != null) {
             tellerName = tellerData.getName();
         }
-
-        final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
         Collection<StaffData> staffOptions = null;
 

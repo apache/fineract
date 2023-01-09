@@ -27,7 +27,17 @@ import org.springframework.data.repository.query.Param;
 public interface EntityDatatableChecksRepository
         extends JpaRepository<EntityDatatableChecks, Long>, JpaSpecificationExecutor<EntityDatatableChecks> {
 
-    List<EntityDatatableChecks> findByEntityAndStatus(String entityName, Long status);
+    List<EntityDatatableChecks> findByEntityAndStatus(String entityName, Integer status);
+
+    @Query("""
+                SELECT dt
+                FROM EntityDatatableChecks dt
+                INNER JOIN RegisteredDatatable rdt ON rdt.datatableName = dt.datatableName
+                WHERE dt.entity = :entity
+                AND dt.status = :status
+                AND rdt.subtype = :subtype
+            """)
+    List<EntityDatatableChecks> findByEntityAndStatusAndSubtype(String entity, Integer status, String subtype);
 
     @Query("select t from  EntityDatatableChecks t WHERE t.status =:status and t.entity=:entity and t.productId = :productId ")
     List<EntityDatatableChecks> findByEntityStatusAndProduct(@Param("entity") String entity, @Param("status") Long status,

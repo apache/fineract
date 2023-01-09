@@ -43,6 +43,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Test class for {@link GetLoanByIdCommandStrategy}.
+ */
 public class GetLoanByIdCommandStrategyTest {
 
     private static Stream<Arguments> provideQueryParameters() {

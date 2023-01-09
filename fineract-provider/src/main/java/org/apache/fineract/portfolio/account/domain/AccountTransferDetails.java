@@ -158,4 +158,8 @@ public class AccountTransferDetails extends AbstractPersistableCustom {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, null, toLoanAccount,
                 transferType, null);
     }
+
+    public List<AccountTransferTransaction> getAccountTransferTransactions() {
+        return accountTransferTransactions;
+    }
 }

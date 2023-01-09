@@ -25,10 +25,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.SingleRepaymentCommand;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -90,6 +92,8 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
                     final JsonObject loanTransactionElement = array.get(i).getAsJsonObject();
 
                     final Long loanId = this.fromApiJsonHelper.extractLongNamed("loanId", loanTransactionElement);
+                    final String externalIdStr = this.fromApiJsonHelper.extractStringNamed("externalId", loanTransactionElement);
+                    final ExternalId externalId = ExternalIdFactory.produce(externalIdStr);
                     final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalNamed("transactionAmount",
                             loanTransactionElement, locale);
                     PaymentDetail detail = paymentDetail;
@@ -97,7 +101,8 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(loanTransactionElement);
                     }
                     if (transactionAmount != null && transactionAmount.intValue() > 0) {
-                        loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, transactionAmount, transactionDate, detail);
+                        loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, externalId, transactionAmount, transactionDate,
+                                detail);
                     }
                 }
             }

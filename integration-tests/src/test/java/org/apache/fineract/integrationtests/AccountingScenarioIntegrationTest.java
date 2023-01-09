@@ -369,26 +369,22 @@ public class AccountingScenarioIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(requestSpec, responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -3);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(3);
+        final String VALID_FROM = dateFormat.format(todaysDate);
+        todaysDate = todaysDate.plusYears(10);
+        final String VALID_TO = dateFormat.format(todaysDate);
 
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate);
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
 
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
-        todaysDate.add(Calendar.DATE, numberOfDaysLeft);
-        final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = todaysDate.plusMonths(1).withDayOfMonth(1);
+        final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate);
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -451,27 +447,23 @@ public class AccountingScenarioIntegrationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -3);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(3);
+        final String VALID_FROM = dateFormat.format(todaysDate);
+        todaysDate = todaysDate.plusYears(10);
+        final String VALID_TO = dateFormat.format(todaysDate);
 
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate);
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
+        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate);
 
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
-        todaysDate.add(Calendar.DATE, numberOfDaysLeft);
-        final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = todaysDate.plusMonths(1).withDayOfMonth(1);
+        final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate);
 
         Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);

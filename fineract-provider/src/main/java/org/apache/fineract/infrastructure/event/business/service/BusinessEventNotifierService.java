@@ -50,4 +50,6 @@ public interface BusinessEventNotifierService {
     void startExternalEventRecording();
 
     void stopExternalEventRecording();
+
+    void resetEventRecording();
 }

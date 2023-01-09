@@ -42,6 +42,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -58,14 +59,12 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Path("/creditBureauIntegration")
 @Component
-@Scope("singleton")
+@RequiredArgsConstructor
 public class CreditBureauIntegrationAPI {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "creditBureauId", "nrc", "creditReport"));
@@ -79,28 +78,12 @@ public class CreditBureauIntegrationAPI {
     private final DefaultToApiJsonSerializer<CreditReportData> toApiJsonSerializer;
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauIntegrationAPI.class);
 
-    @Autowired
-    public CreditBureauIntegrationAPI(final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<CreditReportData> toCreditReportApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final CreditReportWritePlatformService creditReportWritePlatformService,
-            final CreditReportReadPlatformService creditReportReadPlatformService,
-            final DefaultToApiJsonSerializer<CreditReportData> toApiJsonSerializer) {
-        this.context = context;
-        this.toCreditReportApiJsonSerializer = toCreditReportApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.creditReportWritePlatformService = creditReportWritePlatformService;
-        this.creditReportReadPlatformService = creditReportReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-
-    }
-
     @POST
     @Path("creditReport")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(description = "Fetch credit report", content = {
+            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Object.class)) })
     public String fetchCreditReport(@Context final UriInfo uriInfo, @RequestParam("params") final Map<String, Object> params) {
 
         Gson gson = new Gson();

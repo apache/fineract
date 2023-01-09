@@ -26,12 +26,13 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.dataqueries.api.DatatablesApiResource;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} and updates a datatable entry for a given loan. It passes the contents of the body
- * from the BatchRequest to {@link DatatablesApiResource} and gets back the response. This class will also catch any
- * errors raised by {@link DatatablesApiResource} and map those errors to appropriate status codes in BatchResponse.
+ * Implements {@link CommandStrategy} and updates a datatable entry for a given entity. It passes the contents of the
+ * body from the BatchRequest to {@link DatatablesApiResource} and gets back the response. This class will also catch
+ * any errors raised by {@link DatatablesApiResource} and map those errors to appropriate status codes in BatchResponse.
  *
  * @see CommandStrategy
  * @see BatchRequest
@@ -53,16 +54,16 @@ public class UpdateDatatableEntryOneToManyCommandStrategy implements CommandStra
         response.setHeaders(request.getHeaders());
 
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
-        // Pluck out the datatable name, loanId & datatable entry id out of the relative path
+        // Pluck out the datatable name, entity id & datatable entry id out of the relative path
         final String datatableName = pathParameters.get(1);
-        final Long loanId = Long.parseLong(pathParameters.get(2));
+        final Long entityId = Long.parseLong(pathParameters.get(2));
         final Long datatableEntryId = Long.parseLong(pathParameters.get(3));
 
         // Calls 'updateDatatableEntryOneToMany' function from
-        // 'DatatablesApiResource' to update a datatable entry on an existing loan in a one-many relationship
-        responseBody = datatablesApiResource.updateDatatableEntryOneToMany(datatableName, loanId, datatableEntryId, request.getBody());
+        // 'DatatablesApiResource' to update a datatable entry on an existing entity in a one-many relationship
+        responseBody = datatablesApiResource.updateDatatableEntryOneToMany(datatableName, entityId, datatableEntryId, request.getBody());
 
-        response.setStatusCode(200);
+        response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after datatable entry is successfully
         // updated
         response.setBody(responseBody);

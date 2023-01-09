@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LoanAccountLock;
@@ -35,13 +37,18 @@ import org.springframework.batch.repeat.RepeatStatus;
 @RequiredArgsConstructor
 public class FetchAndLockLoanTasklet implements Tasklet {
 
+    private static final Long NUMBER_OF_DAYS_BEHIND = 1L;
+
     private final LoanAccountLockRepository loanAccountLockRepository;
 
     private final RetrieveLoanIdService retrieveLoanIdService;
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
-        List<Long> allNonClosedLoanIds = retrieveLoanIdService.retrieveLoanIds();
+        String businessDateParameter = (String) contribution.getStepExecution().getJobExecution().getExecutionContext()
+                .get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);
+        LocalDate businessDate = LocalDate.parse(Objects.requireNonNull(businessDateParameter));
+        List<Long> allNonClosedLoanIds = retrieveLoanIdService.retrieveLoanIdsNDaysBehind(NUMBER_OF_DAYS_BEHIND, businessDate);
         if (allNonClosedLoanIds.isEmpty()) {
             return RepeatStatus.FINISHED;
         }

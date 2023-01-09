@@ -140,6 +140,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "installment")
     private Set<LoanInstallmentCharge> installmentCharges = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "installment")
+    private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
+
     public LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
@@ -637,10 +640,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
-            this.obligationsMet = getCredits(currency).isZero();
-            if (this.obligationsMet) {
-                this.obligationsMetOnDate = transactionDate;
-            }
+            this.obligationsMetOnDate = transactionDate;
         } else {
             this.obligationsMetOnDate = null;
         }
@@ -892,6 +892,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public boolean isFirstPeriod() {
         return (this.installmentNumber == 1);
+    }
+
+    public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
+        return this.loanTransactionToRepaymentScheduleMappings;
     }
 
 }

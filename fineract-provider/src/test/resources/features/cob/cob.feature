@@ -37,6 +37,14 @@ Feature: COB
     Examples:
       |executionMap|
       |null|
+
+  @cob
+  Scenario Outline: COB Business Step Service - run test failure
+    Given The COBBusinessStepService.run method with executeMap <executionMap>
+    Then throw exception COBBusinessStepService.run method with verification
+
+    Examples:
+      |executionMap|
       |2,notExist|
       |3,|
 

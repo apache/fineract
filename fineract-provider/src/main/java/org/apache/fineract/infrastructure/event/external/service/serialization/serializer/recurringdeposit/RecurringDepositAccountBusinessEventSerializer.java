@@ -18,16 +18,14 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.recurringdeposit;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.recurringdeposit.v1.RecurringDepositAccountDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.RecurringDepositAccountBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.recurringdeposit.RecurringDepositAccountDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.RecurringDepositAccountData;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
@@ -35,11 +33,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RecurringDepositAccountBusinessEventSerializer implements BusinessEventSerializer {
+public class RecurringDepositAccountBusinessEventSerializer extends AbstractBusinessEventSerializer {
 
     private final DepositAccountReadPlatformService service;
     private final RecurringDepositAccountDataMapper mapper;
-    private final ByteBufferConverter byteBufferConverter;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -47,13 +44,11 @@ public class RecurringDepositAccountBusinessEventSerializer implements BusinessE
     }
 
     @Override
-    public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
+    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         RecurringDepositAccountBusinessEvent event = (RecurringDepositAccountBusinessEvent) rawEvent;
         RecurringDepositAccountData data = (RecurringDepositAccountData) service.retrieveOne(DepositAccountType.RECURRING_DEPOSIT,
                 event.get().getId());
-        RecurringDepositAccountDataV1 avroDto = mapper.map(data);
-        ByteBuffer buffer = avroDto.toByteBuffer();
-        return byteBufferConverter.convert(buffer);
+        return mapper.map(data);
     }
 
     @Override

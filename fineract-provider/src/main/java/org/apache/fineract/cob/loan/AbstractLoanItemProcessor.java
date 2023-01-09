@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.TreeMap;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,17 +43,27 @@ public abstract class AbstractLoanItemProcessor implements ItemProcessor<Loan, L
 
     @Setter(AccessLevel.PROTECTED)
     private ExecutionContext executionContext;
+    private LocalDate businessDate;
 
     @Override
     public Loan process(@NotNull Loan item) throws Exception {
         TreeMap<Long, String> businessStepMap = (TreeMap<Long, String>) executionContext.get(LoanCOBConstant.BUSINESS_STEP_MAP);
 
-        return cobBusinessStepService.run(businessStepMap, item);
+        Loan alreadyProcessedLoan = cobBusinessStepService.run(businessStepMap, item);
+        alreadyProcessedLoan.setLastClosedBusinessDate(businessDate);
+        return alreadyProcessedLoan;
     }
 
     @AfterStep
     public ExitStatus afterStep(@NotNull StepExecution stepExecution) {
         return ExitStatus.COMPLETED;
+    }
+
+    protected void setBusinessDate(StepExecution stepExecution) {
+        this.businessDate = LocalDate.parse(
+                Objects.requireNonNull(
+                        (String) stepExecution.getJobExecution().getExecutionContext().get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)),
+                DateTimeFormatter.ISO_DATE);
     }
 
 }

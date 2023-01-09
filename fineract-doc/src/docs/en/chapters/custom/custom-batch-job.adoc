@@ -1,0 +1,79 @@
+= Custom Batch Jobs
+
+Fineract provides extension points to define custom batch jobs using module system. Using this approach custom batch jobs can be defined and configured along with Fineract's default batch jobs to extend or customize batch processing.
+
+The batch jobs in Fineract are implemented using https://docs.spring.io/spring-batch/docs/current/reference/html/[Spring Batch]. In addition to the Spring Batch ecosystem, automatic scheduling is done by http://www.quartz-scheduler.org/[Quartz Scheduler] but it's also possible to trigger batch jobs via regular APIs.
+
+For defining custom job:
+
+1. Create custom module (e. g. `custom/acme/loan/job`), follow the instructions on how to create a custom module.
+2. Create job configuration to register job, job steps, tasklet with job builder factory. (e. g. `com.acme.fineract.loan.job.AcmeNoopJobConfiguration`)
+3. Create tasklet for job execution functionality. (e.g. `com.acme.fineract.loan.job.AcmeNoopJobTasklet`)
+4. Provide the custom database migration to add necessary information about your job in table `job`. (e.g. `custom/acme/loan/job/src/main/resources/db/custom-changelog/0001_acme_loan_job.xml`)
+5. New job name should be registered along with default jobs so that it can be scheduled at startup. For registering job name with Fineract job scheduler, create an enum with job name details (e.g. `com.acme.fineract.loan.job.AcmeJobName`) and a job name provider configuration which is accessed by Fineract job scheduler at startup to retrieve job name (e.g. `com.acme.fineract.loan.job.AcmeJobNameConfig`).
+
+== Job Configuration
+
+.Job Configuration Example
+[source,java]
+----
+include::{rootdir}/custom/acme/loan/job/src/main/java/com/acme/fineract/loan/job/AcmeNoopJobConfiguration.java[lines=19..]
+----
+
+== Tasklet Definition
+
+.Job Tasklet Example
+[source,java]
+----
+include::{rootdir}/custom/acme/loan/job/src/main/java/com/acme/fineract/loan/job/AcmeNoopJobTasklet.java[lines=19..]
+----
+
+== Database Migration Script for Job
+
+.Database Migration Script Example
+[source,xml]
+----
+include::{rootdir}/custom/acme/loan/job/src/main/resources/db/custom-changelog/0001_acme_loan_job.xml[lines=22..]
+----
+
+== Job Name Configuration
+
+.Job Name Enum Example
+[source,java]
+----
+include::{rootdir}/custom/acme/loan/job/src/main/java/com/acme/fineract/loan/job/AcmeJobName.java[lines=19..]
+----
+
+.Job Name Provider Configuration Example
+[source,java]
+----
+include::{rootdir}/custom/acme/loan/job/src/main/java/com/acme/fineract/loan/job/AcmeJobNameConfig.java[lines=19..]
+----
+
+== Gradle Build Files
+
+Please make sure that your module libraries have proper `build.gradle` and `dependencies.gradle` files:
+
+.Example (`build.gradle`)
+[source,groovy]
+----
+include::{rootdir}/custom/acme/loan/job/build.gradle[lines=19..]
+----
+
+.Example (`dependencies.gradle`)
+[source,groovy]
+----
+include::{rootdir}/custom/acme/loan/job/dependencies.gradle[lines=19..]
+----
+
+== Deployment
+
+Custom modules can be deployed using docker image. See chapter about deploying custom modules in this documentation.
+
+.Example command to build docker image
+[source,bash]
+----
+./gradlew :custom:docker:jibDockerBuild
+----
+
+NOTE: See also chapter about batch jobs in this documentation.

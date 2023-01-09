@@ -36,21 +36,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPoster;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -59,15 +53,9 @@ public class PostInterestForSavingTasklet implements Tasklet {
 
     private final SavingsAccountReadPlatformService savingAccountReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
-    private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    private final SavingsAccountRepositoryWrapper savingsAccountRepository;
-    private final SavingsAccountAssembler savingAccountAssembler;
-    private final JdbcTemplate jdbcTemplate;
-    private final TransactionTemplate transactionTemplate;
     private final Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
     private final ApplicationContext applicationContext;
     private final int queueSize = 1;
-    private final PlatformSecurityContext securityContext;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -147,19 +135,11 @@ public class PostInterestForSavingTasklet implements Tasklet {
 
         for (long i = 0; i < loopCount; i++) {
             List<SavingsAccountData> subList = safeSubList(savingsAccounts, fromIndex, toIndex);
-            SavingsSchedularInterestPoster savingsSchedularInterestPoster = (SavingsSchedularInterestPoster) applicationContext
-                    .getBean("savingsSchedularInterestPoster");
+            SavingsSchedularInterestPoster savingsSchedularInterestPoster = applicationContext
+                    .getBean(SavingsSchedularInterestPoster.class);
             savingsSchedularInterestPoster.setSavingAccounts(subList);
-            savingsSchedularInterestPoster.setContext(ThreadLocalContextUtil.getContext());
-            savingsSchedularInterestPoster.setSavingsAccountWritePlatformService(savingsAccountWritePlatformService);
-            savingsSchedularInterestPoster.setSavingsAccountReadPlatformService(savingAccountReadPlatformService);
-            savingsSchedularInterestPoster.setSavingsAccountRepository(savingsAccountRepository);
-            savingsSchedularInterestPoster.setSavingAccountAssembler(savingAccountAssembler);
-            savingsSchedularInterestPoster.setJdbcTemplate(jdbcTemplate);
             savingsSchedularInterestPoster.setBackdatedTxnsAllowedTill(backdatedTxnsAllowedTill);
-            savingsSchedularInterestPoster.setTransactionTemplate(transactionTemplate);
-            savingsSchedularInterestPoster.setConfigurationDomainService(configurationDomainService);
-            savingsSchedularInterestPoster.setPlatformSecurityContext(securityContext);
+            savingsSchedularInterestPoster.setContext(ThreadLocalContextUtil.getContext());
 
             posters.add(savingsSchedularInterestPoster);
 

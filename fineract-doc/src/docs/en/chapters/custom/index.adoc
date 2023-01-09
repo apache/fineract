@@ -10,6 +10,8 @@ include::business-step.adoc[leveloffset=+1]
 
 include::loan-transaction-processor.adoc[leveloffset=+1]
 
+include::custom-batch-job.adoc[leveloffset=+1]
+
 include::database-migration.adoc[leveloffset=+1]
 
 include::deployment.adoc[leveloffset=+1]

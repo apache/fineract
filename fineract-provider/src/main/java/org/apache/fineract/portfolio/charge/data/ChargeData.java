@@ -28,6 +28,7 @@ import java.util.Map;
 import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
@@ -308,7 +309,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
         }
 
         return LoanChargeData.newLoanChargeDetails(this.id, this.name, this.currency, this.amount, percentage, this.chargeTimeType,
-                this.chargeCalculationType, this.penalty, this.chargePaymentMode, this.minCap, this.maxCap);
+                this.chargeCalculationType, this.penalty, this.chargePaymentMode, this.minCap, this.maxCap, ExternalId.empty());
     }
 
     public SavingsAccountChargeData toSavingsAccountChargeData() {

@@ -180,7 +180,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         final Workbook workbook = new HSSFWorkbook();
         if (entityType != null) {
             if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())
-                    || entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTTTY.toString())) {
+                    || entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTITY.toString())) {
                 populator = populateClientWorkbook(entityType, officeId, staffId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CENTERS.toString())) {
                 populator = populateCenterWorkbook(officeId, staffId);
@@ -241,7 +241,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             return new ClientPersonWorkbookPopulator(new OfficeSheetPopulator(offices), new PersonnelSheetPopulator(staff, offices),
                     clientTypeCodeValues, genderCodeValues, clientClassification, addressTypesCodeValues, stateProvinceCodeValues,
                     countryCodeValues);
-        } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTTTY.toString())) {
+        } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTITY.toString())) {
             List<CodeValueData> constitutionCodeValues = fetchCodeValuesByCodeName("Constitution");
             List<CodeValueData> mainBusinessline = fetchCodeValuesByCodeName("Main Business Line");
             return new ClientEntityWorkbookPopulator(new OfficeSheetPopulator(offices), new PersonnelSheetPopulator(staff, offices),

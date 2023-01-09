@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.infrastructure.event.external.config;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +31,6 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
-import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.jms.dsl.Jms;
 
 @Configuration
@@ -45,12 +46,10 @@ public class ExternalEventJMSProducerConfiguration {
     private FineractProperties fineractProperties;
 
     @Bean
-    public IntegrationFlow outboundFlowEvents(ActiveMQConnectionFactory connectionFactory) {
+    public IntegrationFlow outboundFlowEvents(ConnectionFactory connectionFactory,
+            @Qualifier("eventDestination") Destination eventDestination) {
         return IntegrationFlows.from(outboundRequestsEvents) //
-                .log(LoggingHandler.Level.DEBUG) //
-                .handle(Jms.outboundAdapter(connectionFactory)
-                        .destination(fineractProperties.getEvents().getExternal().getProducer().getJms().getEventQueueName()))
-                .get();
+                .handle(Jms.outboundAdapter(connectionFactory).destination(eventDestination)).get();
     }
 
 }

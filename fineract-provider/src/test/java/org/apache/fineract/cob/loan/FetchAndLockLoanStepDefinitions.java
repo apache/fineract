@@ -19,16 +19,22 @@
 package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.cucumber.java8.En;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mockito.Mockito;
@@ -50,23 +56,26 @@ public class FetchAndLockLoanStepDefinitions implements En {
     public FetchAndLockLoanStepDefinitions() {
         Given("/^The FetchAndLockLoanTasklet.execute method with action (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+            HashMap<BusinessDateType, LocalDate> businessDateMap = new HashMap<>();
+            businessDateMap.put(BusinessDateType.COB_DATE, LocalDate.now(ZoneId.systemDefault()));
+            ThreadLocalContextUtil.setBusinessDates(businessDateMap);
             this.action = action;
 
             if ("empty loanIds".equals(action)) {
-                lenient().when(retrieveLoanIdService.retrieveLoanIds()).thenReturn(Collections.emptyList());
+                lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(Collections.emptyList());
             } else if ("good".equals(action)) {
-                lenient().when(retrieveLoanIdService.retrieveLoanIds()).thenReturn(List.of(1L, 2L, 3L));
+                lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(Collections.emptyList());
             } else if ("soft lock".equals(action)) {
-                lenient().when(retrieveLoanIdService.retrieveLoanIds()).thenReturn(List.of(1L, 2L, 3L));
+                lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
                         .thenReturn(List.of(new LoanAccountLock(1L, LockOwner.LOAN_COB_PARTITIONING)));
             } else if ("inline cob".equals(action)) {
-                lenient().when(retrieveLoanIdService.retrieveLoanIds()).thenReturn(List.of(1L, 2L, 3L));
+                lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
                         .thenReturn(List.of(new LoanAccountLock(2L, LockOwner.LOAN_INLINE_COB_PROCESSING)));
             } else if ("chunk processing".equals(action)) {
-                lenient().when(retrieveLoanIdService.retrieveLoanIds()).thenReturn(List.of(1L, 2L, 3L));
+                lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
                         .thenReturn(List.of(new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING)));
             }
@@ -74,7 +83,8 @@ public class FetchAndLockLoanStepDefinitions implements En {
             JobExecution jobExecution = new JobExecution(1L);
             StepExecution stepExecution = new StepExecution("step", jobExecution);
             contribution = new StepContribution(stepExecution);
-
+            contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
+                    LocalDate.now(ZoneId.systemDefault()).toString());
             fetchAndLockLoanTasklet = new FetchAndLockLoanTasklet(loanAccountLockRepository, retrieveLoanIdService);
         });
 

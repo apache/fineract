@@ -65,7 +65,7 @@ public class ClientEntityWorkbookPopulatorTest {
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        Workbook workbook = clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTTTY, "dd MMMM yyyy");
+        Workbook workbook = clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTITY, "dd MMMM yyyy");
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row firstOfficeRow = officeSheet.getRow(1);
         Assertions.assertNotNull(firstOfficeRow.getCell(1), "No offices found for given OfficeId ");

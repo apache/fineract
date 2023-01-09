@@ -44,7 +44,7 @@ public class ExecuteAllDirtyJobsTasklet implements Tasklet {
 
         for (ScheduledJobDetail scheduledJobDetail : jobDetails) {
             if (scheduledJobDetail.getNodeId().toString().equals(fineractProperties.getNodeId())) {
-                jobRegisterService.executeJob(scheduledJobDetail.getId());
+                jobRegisterService.executeJobWithParameters(scheduledJobDetail.getId(), null);
             }
         }
         return RepeatStatus.FINISHED;

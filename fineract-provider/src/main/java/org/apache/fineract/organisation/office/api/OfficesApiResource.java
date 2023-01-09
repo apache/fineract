@@ -45,6 +45,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -62,14 +63,12 @@ import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/offices")
 @Component
-@Scope("singleton")
 @Tag(name = "Offices", description = "Offices are used to model an MFIs structure. A hierarchical representation of offices is supported. There will always be at least one office (which represents the MFI or an MFIs head office). All subsequent offices added must have a parent office.")
+@RequiredArgsConstructor
 public class OfficesApiResource {
 
     /**
@@ -88,21 +87,6 @@ public class OfficesApiResource {
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
 
-    @Autowired
-    public OfficesApiResource(final PlatformSecurityContext context, final OfficeReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<OfficeData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-    }
-
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -114,15 +98,11 @@ public class OfficesApiResource {
             @DefaultValue("false") @QueryParam("includeAllOffices") @Parameter(description = "includeAllOffices") final boolean onlyManualEntries,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final SearchParameters searchParameters = SearchParameters.forOffices(orderBy, sortOrder);
-
-        final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices(onlyManualEntries, searchParameters);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, offices, RESPONSE_DATA_PARAMETERS);
+        final Collection<OfficeData> offices = readPlatformService.retrieveAllOffices(onlyManualEntries, searchParameters);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, offices, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -134,16 +114,12 @@ public class OfficesApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesTemplateResponse.class))) })
     public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
-        OfficeData office = this.readPlatformService.retrieveNewOfficeTemplate();
-
-        final Collection<OfficeData> allowedParents = this.readPlatformService.retrieveAllOfficesForDropdown();
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        OfficeData office = readPlatformService.retrieveNewOfficeTemplate();
+        final Collection<OfficeData> allowedParents = readPlatformService.retrieveAllOfficesForDropdown();
         office = OfficeData.appendedTemplate(office, allowedParents);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -154,15 +130,12 @@ public class OfficesApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PostOfficesResponse.class))) })
     public String createOffice(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createOffice() //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -173,20 +146,16 @@ public class OfficesApiResource {
             + "offices/1?template=true\n" + "\n" + "\n" + "offices/1?fields=id,name,parentName")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesResponse.class))) })
-    public String retreiveOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
+    public String retrieveOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        OfficeData office = this.readPlatformService.retrieveOffice(officeId);
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        OfficeData office = readPlatformService.retrieveOffice(officeId);
         if (settings.isTemplate()) {
-            final Collection<OfficeData> allowedParents = this.readPlatformService.retrieveAllowedParents(officeId);
+            final Collection<OfficeData> allowedParents = readPlatformService.retrieveAllowedParents(officeId);
             office = OfficeData.appendedTemplate(office, allowedParents);
         }
-
-        return this.toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);
+        return toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT
@@ -199,15 +168,12 @@ public class OfficesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.class))) })
     public String updateOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateOffice(officeId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -225,8 +191,8 @@ public class OfficesApiResource {
     public String postOfficeTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.OFFICES.toString(),
-                uploadedInputStream, fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        final Long importDocumentId = bulkImportWorkbookService.importWorkbook(GlobalEntityType.OFFICES.toString(), uploadedInputStream,
+                fileDetail, locale, dateFormat);
+        return toApiJsonSerializer.serialize(importDocumentId);
     }
 }

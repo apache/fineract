@@ -21,6 +21,14 @@
         },
         {
             "default": null,
+            "name": "externalLoanId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "officeId",
             "type": [
                 "null",
@@ -195,6 +203,17 @@
                 {
                     "type": "array",
                     "items": "org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1"
+                }
+            ]
+        },
+        {
+            "default": null,
+            "name": "transactionRelations",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanTransactionRelationDataV1"
                 }
             ]
         }

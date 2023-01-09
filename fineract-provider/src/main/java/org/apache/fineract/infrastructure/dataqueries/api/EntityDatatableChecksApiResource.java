@@ -38,6 +38,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -50,37 +51,19 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecks
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
-import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/entityDatatableChecks")
+@AllArgsConstructor
 @Component
 @Scope("singleton")
 @Tag(name = "Entity Data Table", description = "This defines Entity-Datatable Check.")
 public class EntityDatatableChecksApiResource {
 
-    private final PlatformSecurityContext context;
-    private final GenericDataService genericDataService;
     private final EntityDatatableChecksReadService readEntityDatatableChecksService;
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksApiResource.class);
-
-    @Autowired
-    public EntityDatatableChecksApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,
-            final EntityDatatableChecksReadService readEntityDatatableChecksService,
-            final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.genericDataService = genericDataService;
-        this.readEntityDatatableChecksService = readEntityDatatableChecksService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

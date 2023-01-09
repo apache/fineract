@@ -41,7 +41,7 @@ class DefaultLoanLifecycleStateMachineTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new DefaultLoanLifecycleStateMachine(LoanStatus.values(), businessEventNotifierService);
+        underTest = new DefaultLoanLifecycleStateMachine(businessEventNotifierService);
     }
 
     @Test

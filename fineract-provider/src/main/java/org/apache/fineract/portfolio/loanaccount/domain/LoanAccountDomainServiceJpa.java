@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,10 +33,12 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargePaymentPostBusinessEvent;
@@ -89,6 +90,7 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
+import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -123,17 +125,18 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final PostDatedChecksRepository postDatedChecksRepository;
     private final LoanCollateralManagementRepository loanCollateralManagementRepository;
     private final DelinquencyWritePlatformService delinquencyWritePlatformService;
+    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final ExternalIdFactory externalIdFactory;
+    private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
 
     @Transactional
     @Override
     public LoanTransaction makeRepayment(final LoanTransactionType repaymentTransactionType, final Loan loan,
-            final CommandProcessingResultBuilder builderResult, final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final boolean isRecoveryRepayment,
-            final String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
-            Boolean isHolidayValidationDone) {
-        return makeRepayment(repaymentTransactionType, loan, builderResult, transactionDate, transactionAmount, paymentDetail, noteText,
-                txnExternalId, isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone,
-                false);
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
+            final ExternalId txnExternalId, final boolean isRecoveryRepayment, final String chargeRefundChargeType,
+            boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone) {
+        return makeRepayment(repaymentTransactionType, loan, transactionDate, transactionAmount, paymentDetail, noteText, txnExternalId,
+                isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false);
     }
 
     @Transactional
@@ -154,10 +157,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Transactional
     @Override
     public LoanTransaction makeRepayment(final LoanTransactionType repaymentTransactionType, final Loan loan,
-            final CommandProcessingResultBuilder builderResult, final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final boolean isRecoveryRepayment,
-            final String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
-            Boolean isHolidayValidationDone, final boolean isLoanToLoanTransfer) {
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
+            final ExternalId txnExternalId, final boolean isRecoveryRepayment, final String chargeRefundChargeType,
+            boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone,
+            final boolean isLoanToLoanTransfer) {
         checkClientOrGroupActive(loan);
 
         LoanBusinessEvent repaymentEvent = getLoanRepaymentTypeBusinessEvent(repaymentTransactionType, isRecoveryRepayment, loan);
@@ -176,7 +179,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money repaymentAmount = Money.of(loan.getCurrency(), transactionAmount);
-        LoanTransaction newRepaymentTransaction = null;
+        LoanTransaction newRepaymentTransaction;
         if (isRecoveryRepayment) {
             newRepaymentTransaction = LoanTransaction.recoveryRepayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
                     txnExternalId);
@@ -193,7 +196,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 holidayDetailDto);
 
         final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
-                defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, isRecoveryRepayment,
+                defaultLoanLifecycleStateMachine, existingTransactionIds, existingReversedTransactionIds, isRecoveryRepayment,
                 scheduleGeneratorDTO, isHolidayValidationDone);
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
@@ -208,11 +211,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+
                 saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
                 // update loan with references to the newly created transactions
                 loan.addLoanTransaction(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
+            // Trigger transaction replayed event
+            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
         }
 
         if (StringUtils.isNotBlank(noteText)) {
@@ -236,9 +242,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         // disable all active standing orders linked to this loan if status
         // changes to closed
         disableStandingInstructionsLinkedToClosedLoan(loan);
-
-        builderResult.withEntityId(newRepaymentTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
-                .withGroupId(loan.getGroupId());
 
         if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
             // Mark Post Dated Check as paid.
@@ -310,38 +313,23 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         return repaymentEvent;
     }
 
-    private void saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
+    @Override
+    public void saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
         try {
             this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter("externalId").value(newRepaymentTransaction.getExternalId())
-                        .failWithCode("value.must.be.unique");
-            }
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors, e);
-            }
+            raiseValidationExceptionForUniqueConstraintViolation(e);
+            throw e;
         }
     }
 
-    private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
+    @Override
+    public void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
             this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
-            }
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors, e);
-            }
+            raiseValidationExceptionForUniqueConstraintViolation(e);
+            throw e;
         }
     }
 
@@ -350,23 +338,29 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         try {
             this.loanRepositoryWrapper.save(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
-            }
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors, e);
-            }
+            raiseValidationExceptionForUniqueConstraintViolation(e);
+            throw e;
+        }
+    }
+
+    private void raiseValidationExceptionForUniqueConstraintViolation(Exception e) {
+        final Throwable realCause = e.getCause();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+        if (realCause.getMessage().toLowerCase().contains("external_id_unique") || realCause.getMessage()
+                .contains("duplicate key value violates unique constraint \"m_loan_transaction_external_id_key\"")) {
+            baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+        }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors, e);
         }
     }
 
     @Override
     @Transactional
     public LoanTransaction makeChargePayment(final Loan loan, final Long chargeId, final LocalDate transactionDate,
-            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText, final String txnExternalId,
+            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText, final ExternalId txnExternalId,
             final Integer transactionType, Integer installmentNumber) {
         boolean isAccountTransfer = true;
         checkClientOrGroupActive(loan);
@@ -393,7 +387,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
                     allowTransactionsOnNonWorkingDay);
 
-            loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
+            loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine, existingTransactionIds, existingReversedTransactionIds,
                     holidayDetailDTO, newPaymentTransaction, installmentNumber);
         }
         saveLoanTransactionWithDataIntegrityViolationChecks(newPaymentTransaction);
@@ -427,10 +421,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 
-    private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-        return new DefaultLoanLifecycleStateMachine(LoanStatus.values(), businessEventNotifierService);
-    }
-
     private void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
         if (client != null) {
@@ -449,7 +439,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public LoanTransaction makeRefund(final Long accountId, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
-            final String txnExternalId) {
+            final ExternalId txnExternalId) {
         boolean isAccountTransfer = true;
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
@@ -466,7 +456,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 
-        loan.makeRefund(newRefundTransaction, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
+        loan.makeRefund(newRefundTransaction, defaultLoanLifecycleStateMachine, existingTransactionIds, existingReversedTransactionIds,
                 allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRefundTransaction);
@@ -489,14 +479,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Transactional
     @Override
     public LoanTransaction makeDisburseTransaction(final Long loanId, final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final PaymentDetail paymentDetail, final String noteText, final String txnExternalId) {
+            final PaymentDetail paymentDetail, final String noteText, final ExternalId txnExternalId) {
         return makeDisburseTransaction(loanId, transactionDate, transactionAmount, paymentDetail, noteText, txnExternalId, false);
     }
 
     @Transactional
     @Override
     public LoanTransaction makeDisburseTransaction(final Long loanId, final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final boolean isLoanToLoanTransfer) {
+            final PaymentDetail paymentDetail, final String noteText, final ExternalId txnExternalId, final boolean isLoanToLoanTransfer) {
         final Loan loan = this.loanAccountAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         boolean isAccountTransfer = true;
@@ -648,9 +638,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public CommandProcessingResultBuilder creditBalanceRefund(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
-            String noteText, String externalId) {
-        final Loan loan = this.loanAccountAssembler.assembleFrom(loanId);
+    public LoanTransaction creditBalanceRefund(final Loan loan, final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final String noteText, final ExternalId externalId) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanCreditBalanceRefundPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -659,7 +648,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final LoanTransaction newCreditBalanceRefundTransaction = LoanTransaction.creditBalanceRefund(loan, loan.getOffice(), refundAmount,
                 transactionDate, externalId);
 
-        loan.creditBalanceRefund(newCreditBalanceRefundTransaction, defaultLoanLifecycleStateMachine(), existingTransactionIds,
+        loan.creditBalanceRefund(newCreditBalanceRefundTransaction, defaultLoanLifecycleStateMachine, existingTransactionIds,
                 existingReversedTransactionIds);
 
         this.loanTransactionRepository.saveAndFlush(newCreditBalanceRefundTransaction);
@@ -675,15 +664,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         businessEventNotifierService
                 .notifyPostBusinessEvent(new LoanCreditBalanceRefundPostBusinessEvent(newCreditBalanceRefundTransaction));
 
-        return new CommandProcessingResultBuilder().withEntityId(newCreditBalanceRefundTransaction.getId()) //
-                .withOfficeId(loan.getOfficeId()) //
-                .withClientId(loan.getClientId()) //
-                .withGroupId(loan.getGroupId());
+        return newCreditBalanceRefundTransaction;
     }
 
     @Override
     public LoanTransaction makeRefundForActiveLoan(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId) {
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId) {
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanRefundPreBusinessEvent(loan));
@@ -699,7 +685,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 
-        loan.makeRefundForActiveLoan(newRefundTransaction, defaultLoanLifecycleStateMachine(), existingTransactionIds,
+        loan.makeRefundForActiveLoan(newRefundTransaction, defaultLoanLifecycleStateMachine, existingTransactionIds,
                 existingReversedTransactionIds, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
         this.loanTransactionRepository.saveAndFlush(newRefundTransaction);
@@ -721,10 +707,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public Map<String, Object> foreCloseLoan(final Loan loan, final LocalDate foreClosureDate, final String noteText) {
+    public LoanTransaction foreCloseLoan(final Loan loan, final LocalDate foreClosureDate, final String noteText,
+            final ExternalId externalId, Map<String, Object> changes) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanForeClosurePreBusinessEvent(loan));
         MonetaryCurrency currency = loan.getCurrency();
-        final Map<String, Object> changes = new LinkedHashMap<>();
         List<LoanTransaction> newTransactions = new ArrayList<>();
 
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -742,8 +728,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             Money penaltyPortion = foreCloseDetail.getPenaltyChargesCharged(currency).minus(accruedReceivables[2]);
             Money total = interestPortion.plus(feePortion).plus(penaltyPortion);
             if (total.isGreaterThanZero()) {
+                ExternalId accrualExternalId = externalIdFactory.create();
                 LoanTransaction accrualTransaction = LoanTransaction.accrueTransaction(loan, loan.getOffice(), foreClosureDate,
-                        total.getAmount(), interestPortion.getAmount(), feePortion.getAmount(), penaltyPortion.getAmount());
+                        total.getAmount(), interestPortion.getAmount(), feePortion.getAmount(), penaltyPortion.getAmount(),
+                        accrualExternalId);
                 LocalDate fromDate = loan.getDisbursementDate();
                 if (loan.getAccruedTill() != null) {
                     fromDate = loan.getAccruedTill();
@@ -773,7 +761,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable).isGreaterThanZero()) {
             final PaymentDetail paymentDetail = null;
-            String externalId = null;
             payment = LoanTransaction.repayment(loan.getOffice(), payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable),
                     paymentDetail, foreClosureDate, externalId);
             payment.updateLoan(loan);
@@ -782,7 +769,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         List<Long> transactionIds = new ArrayList<>();
         final ChangedTransactionDetail changedTransactionDetail = loan.handleForeClosureTransactions(payment,
-                defaultLoanLifecycleStateMachine(), scheduleGeneratorDTO);
+                defaultLoanLifecycleStateMachine, scheduleGeneratorDTO);
 
         /***
          * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
@@ -804,6 +791,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 loan.getLoanTransactions().add(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
+            // Trigger transaction replayed event
+            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
         }
 
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -817,8 +806,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanForeClosurePostBusinessEvent(payment));
-        return changes;
-
+        return payment;
     }
 
     @Override

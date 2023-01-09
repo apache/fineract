@@ -18,22 +18,19 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.springframework.stereotype.Component;
 
 // TODO: introduce tests for the state machine
+@Component
 @RequiredArgsConstructor
 public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachine {
 
-    private final List<LoanStatus> allowedLoanStatuses;
+    private static final List<LoanStatus> ALLOWED_LOAN_STATUSES = List.of(LoanStatus.values());
     private final BusinessEventNotifierService businessEventNotifierService;
-
-    public DefaultLoanLifecycleStateMachine(LoanStatus[] allowedLoanStatuses, BusinessEventNotifierService businessEventNotifierService) {
-        this(Arrays.asList(allowedLoanStatuses), businessEventNotifierService);
-    }
 
     @Override
     public LoanStatus dryTransition(final LoanEvent loanEvent, final Loan loan) {
@@ -164,6 +161,11 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                     newState = activeTransition();
                 }
             break;
+            case LOAN_CHARGE_ADJUSTMENT:
+                if (from.hasStateOf(LoanStatus.CLOSED_OBLIGATIONS_MET)) {
+                    newState = overpaidTransition();
+                }
+            break;
             default:
             break;
         }
@@ -171,47 +173,47 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
     }
 
     private LoanStatus transferOnHold() {
-        return stateOf(LoanStatus.TRANSFER_ON_HOLD, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.TRANSFER_ON_HOLD, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus transferInProgress() {
-        return stateOf(LoanStatus.TRANSFER_IN_PROGRESS, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.TRANSFER_IN_PROGRESS, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus overpaidTransition() {
-        return stateOf(LoanStatus.OVERPAID, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.OVERPAID, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus closedRescheduleOutstandingAmountTransition() {
-        return stateOf(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus closedWrittenOffTransition() {
-        return stateOf(LoanStatus.CLOSED_WRITTEN_OFF, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.CLOSED_WRITTEN_OFF, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus closeObligationsMetTransition() {
-        return stateOf(LoanStatus.CLOSED_OBLIGATIONS_MET, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.CLOSED_OBLIGATIONS_MET, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus activeTransition() {
-        return stateOf(LoanStatus.ACTIVE, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.ACTIVE, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus withdrawnByClientTransition() {
-        return stateOf(LoanStatus.WITHDRAWN_BY_CLIENT, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.WITHDRAWN_BY_CLIENT, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus approvedTransition() {
-        return stateOf(LoanStatus.APPROVED, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.APPROVED, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus rejectedTransition() {
-        return stateOf(LoanStatus.REJECTED, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.REJECTED, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus submittedTransition() {
-        return stateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, this.allowedLoanStatuses);
+        return stateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus stateOf(final LoanStatus state, final List<LoanStatus> allowedLoanStatuses) {

@@ -425,6 +425,21 @@ public class ExternalEventConfigurationHelper {
         shareProductDividentsCreateBusinessEvent.put("enabled", false);
         defaults.add(shareProductDividentsCreateBusinessEvent);
 
+        Map<String, Object> loanChargeAdjustmentPostBusinessEvent = new HashMap<>();
+        loanChargeAdjustmentPostBusinessEvent.put("type", "LoanChargeAdjustmentPostBusinessEvent");
+        loanChargeAdjustmentPostBusinessEvent.put("enabled", false);
+        defaults.add(loanChargeAdjustmentPostBusinessEvent);
+
+        Map<String, Object> loanChargeAdjustmentPreBusinessEvent = new HashMap<>();
+        loanChargeAdjustmentPreBusinessEvent.put("type", "LoanChargeAdjustmentPreBusinessEvent");
+        loanChargeAdjustmentPreBusinessEvent.put("enabled", false);
+        defaults.add(loanChargeAdjustmentPreBusinessEvent);
+
+        Map<String, Object> loanDelinquencyRangeChangeBusinessEvent = new HashMap<>();
+        loanDelinquencyRangeChangeBusinessEvent.put("type", "LoanDelinquencyRangeChangeBusinessEvent");
+        loanDelinquencyRangeChangeBusinessEvent.put("enabled", false);
+        defaults.add(loanDelinquencyRangeChangeBusinessEvent);
+
         return defaults;
 
     }

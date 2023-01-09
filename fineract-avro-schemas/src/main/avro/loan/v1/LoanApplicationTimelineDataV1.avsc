@@ -242,6 +242,38 @@
                 "null",
                 "string"
             ]
+        },
+        {
+            "default": null,
+            "name": "chargedOffOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "chargedOffByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "chargedOffByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "chargedOffByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
         }
     ]
 }

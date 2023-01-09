@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # tag=v3
       - name: Set up JDK 17
-        uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc # tag=v3
+        uses: actions/setup-java@1df8dbefe2a8cbc99770194893dd902763bee34b # v3
         with:
           java-version: '17'
           distribution: 'zulu'
@@ -22,7 +22,7 @@ jobs:
       - name: Start the stack
         run: docker-compose -f docker-compose-postgresql.yml up -d
       - name: Wait for stack to come up
-        run: sleep 60
+        run: sleep 120
       - name: Check health
         run: curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
       - name: Check info

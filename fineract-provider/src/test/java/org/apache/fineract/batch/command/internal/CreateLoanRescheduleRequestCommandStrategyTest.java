@@ -35,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Test class fpr {@link CreateLoanRescheduleRequestCommandStrategy}.
+ * Test class for {@link CreateLoanRescheduleRequestCommandStrategy}.
  */
 public class CreateLoanRescheduleRequestCommandStrategyTest {
 

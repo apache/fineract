@@ -23,7 +23,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRepaymentDueBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentDueBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -44,7 +44,7 @@ public class CheckLoanRepaymentDueBusinessStep implements LoanCOBBusinessStep {
         for (LoanRepaymentScheduleInstallment repaymentSchedule : loanRepaymentScheduleInstallments) {
             LocalDate repaymentDate = repaymentSchedule.getDueDate();
             if (repaymentDate.minusDays(numberOfDaysBeforeDueDateToRaiseEvent).equals(currentDate)) {
-                businessEventNotifierService.notifyPostBusinessEvent(new LoanRepaymentDueBusinessEvent(loan));
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanRepaymentDueBusinessEvent(repaymentSchedule));
                 break;
             }
         }

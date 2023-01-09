@@ -109,8 +109,9 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     @Override
     public ProvisioningEntryData retrieveProvisioningEntryData(Long entryId) {
         ProvisioningEntryDataMapperWithSumReserved mapper1 = new ProvisioningEntryDataMapperWithSumReserved();
+        // Programmatic query, disable sonar
         final String sql = "select" + mapper1.getSchema() + " where entry.id = ? group by entry.id, created.username, modified.username";
-        return this.jdbcTemplate.queryForObject(sql, mapper1, entryId);
+        return this.jdbcTemplate.queryForObject(sql, mapper1, entryId);// NOSONAR
     }
 
     private static final class ProvisioningEntryDataMapper implements RowMapper<ProvisioningEntryData> {

@@ -18,27 +18,24 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.share;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.share.v1.ShareAccountDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareAccountBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.share.ShareAccountDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ShareAccountBusinessEventSerializer implements BusinessEventSerializer {
+public class ShareAccountBusinessEventSerializer extends AbstractBusinessEventSerializer {
 
     private final ShareAccountReadPlatformService service;
     private final ShareAccountDataMapper mapper;
-    private final ByteBufferConverter byteBufferConverter;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -46,12 +43,10 @@ public class ShareAccountBusinessEventSerializer implements BusinessEventSeriali
     }
 
     @Override
-    public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
+    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         ShareAccountBusinessEvent event = (ShareAccountBusinessEvent) rawEvent;
         ShareAccountData data = service.retrieveOne(event.get().getId(), false);
-        ShareAccountDataV1 avroDto = mapper.map(data);
-        ByteBuffer buffer = avroDto.toByteBuffer();
-        return byteBufferConverter.convert(buffer);
+        return mapper.map(data);
     }
 
     @Override

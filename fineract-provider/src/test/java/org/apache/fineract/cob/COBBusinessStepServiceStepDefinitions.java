@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Splitter;
 import io.cucumber.java8.En;
@@ -34,11 +35,13 @@ import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.mix.data.MixTaxonomyData;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -49,8 +52,9 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private ListableBeanFactory beanFactory = mock(ListableBeanFactory.class);
     private BatchBusinessStepRepository batchBusinessStepRepository = mock(BatchBusinessStepRepository.class);
     private BusinessEventNotifierService businessEventNotifierService = mock(BusinessEventNotifierService.class);
+    private ConfigurationDomainService configurationDomainService = mock(ConfigurationDomainService.class);
     private final COBBusinessStepService businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository,
-            applicationContext, beanFactory, businessEventNotifierService);
+            applicationContext, beanFactory, businessEventNotifierService, configurationDomainService);
     private COBBusinessStep cobBusinessStep = mock(COBBusinessStep.class);
     private COBBusinessStep notRegistereCobBusinessStep = mock(COBBusinessStep.class);
     private TreeMap<Long, String> executionMap;
@@ -86,6 +90,7 @@ public class COBBusinessStepServiceStepDefinitions implements En {
             lenient().when(this.applicationContext.getBean("test")).thenReturn(cobBusinessStep);
             lenient().when(this.applicationContext.getBean("notExist")).thenThrow(BeanCreationException.class);
             lenient().when(this.cobBusinessStep.execute(this.item)).thenReturn(outputItem);
+            lenient().when(this.configurationDomainService.isCOBBulkEventEnabled()).thenReturn(true);
 
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
@@ -144,6 +149,14 @@ public class COBBusinessStepServiceStepDefinitions implements En {
             assertThrows(BusinessStepException.class, () -> {
                 resultItem = this.businessStepService.run(this.executionMap, this.item);
             });
+            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        });
+
+        Then("throw exception COBBusinessStepService.run method with verification", () -> {
+            assertThrows(BusinessStepException.class, () -> {
+                resultItem = this.businessStepService.run(this.executionMap, this.item);
+            });
+            verify(businessEventNotifierService, Mockito.times(1)).resetEventRecording();
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
 

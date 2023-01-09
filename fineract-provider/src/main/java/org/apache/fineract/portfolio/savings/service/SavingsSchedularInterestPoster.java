@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,11 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
-import org.apache.fineract.batch.command.CommandStrategyProvider;
-import org.apache.fineract.batch.service.ResolutionHelper;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -43,119 +40,61 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author manoj
  */
 
+@Slf4j
+@RequiredArgsConstructor
+@Setter
 @Component
 @Scope("prototype")
-@Setter
 public class SavingsSchedularInterestPoster implements Callable<Void> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsSchedularInterestPoster.class);
-    private static final SecureRandom random = new SecureRandom();
     private static final String SAVINGS_TRANSACTION_IDENTIFIER = "S";
 
+    private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    private final List<SavingsAccountData> savingsAccountDataList = new ArrayList<>();
+    private final JdbcTemplate jdbcTemplate;
+    private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+    private final PlatformSecurityContext platformSecurityContext;
     private Collection<SavingsAccountData> savingAccounts;
-    private SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    private SavingsAccountRepositoryWrapper savingsAccountRepository;
-    private SavingsAccountAssembler savingAccountAssembler;
     private FineractContext context;
-    private ConfigurationDomainService configurationDomainService;
     private boolean backdatedTxnsAllowedTill;
-    private List<SavingsAccountData> savingsAccountDataList = new ArrayList<>();
-    private JdbcTemplate jdbcTemplate;
-    private TransactionTemplate transactionTemplate;
-    private CommandStrategyProvider strategyProvider;
-    private ResolutionHelper resolutionHelper;
-    private SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private PlatformSecurityContext platformSecurityContext;
 
     @Override
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
     public Void call() throws org.apache.fineract.infrastructure.jobs.exception.JobExecutionException {
         ThreadLocalContextUtil.init(this.context);
-        Integer maxNumberOfRetries = this.context.getTenantContext().getConnection().getMaxRetriesOnDeadlock();
-        Integer maxIntervalBetweenRetries = this.context.getTenantContext().getConnection().getMaxIntervalBetweenRetries();
 
-        // List<BatchResponse> responseList = new ArrayList<>();
-        long start = System.currentTimeMillis();
-        LOG.debug("Thread Execution Started at {}", start);
-
-        List<Throwable> errors = new ArrayList<>();
-        int i = 0;
         if (!savingAccounts.isEmpty()) {
+            List<Throwable> errors = new ArrayList<>();
             for (SavingsAccountData savingsAccountData : savingAccounts) {
-                Integer numberOfRetries = 0;
-                while (numberOfRetries <= maxNumberOfRetries) {
-                    try {
-                        boolean postInterestAsOn = false;
-                        LocalDate transactionDate = null;
-                        long startPosting = System.currentTimeMillis();
-                        SavingsAccountData savingsAccountDataRet = savingsAccountWritePlatformService.postInterest(savingsAccountData,
-                                postInterestAsOn, transactionDate, backdatedTxnsAllowedTill);
-                        long endPosting = System.currentTimeMillis();
-                        savingsAccountDataList.add(savingsAccountDataRet);
-
-                        LOG.debug("Posting Completed Within {}", endPosting - startPosting);
-
-                        numberOfRetries = maxNumberOfRetries + 1;
-                    } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                        LOG.debug("Interest posting job for savings ID {} has been retried {} time(s)", savingsAccountData.getId(),
-                                numberOfRetries);
-                        // Fail if the transaction has been retired for
-                        // maxNumberOfRetries
-                        if (numberOfRetries >= maxNumberOfRetries) {
-                            LOG.error(
-                                    "Interest posting job for savings ID {} has been retried for the max allowed attempts of {} and will be rolled back",
-                                    savingsAccountData.getId(), numberOfRetries);
-                            errors.add(exception);
-                            break;
-                        }
-                        // Else sleep for a random time (between 1 to 10
-                        // seconds) and continue
-                        try {
-                            int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
-                            Thread.sleep(1000 + (randomNum * 1000));
-                            numberOfRetries = numberOfRetries + 1;
-                        } catch (InterruptedException e) {
-                            LOG.error("Interest posting job for savings retry failed due to InterruptedException", e);
-                            errors.add(e);
-                            break;
-                        }
-                    } catch (Exception e) {
-                        LOG.error("Interest posting job for savings failed for account {}", savingsAccountData.getId(), e);
-                        numberOfRetries = maxNumberOfRetries + 1;
-                        errors.add(e);
-                    }
+                boolean postInterestAsOn = false;
+                LocalDate transactionDate = null;
+                try {
+                    SavingsAccountData savingsAccountDataRet = savingsAccountWritePlatformService.postInterest(savingsAccountData,
+                            postInterestAsOn, transactionDate, backdatedTxnsAllowedTill);
+                    savingsAccountDataList.add(savingsAccountDataRet);
+                } catch (Exception e) {
+                    errors.add(e);
                 }
-                i++;
             }
-
             if (errors.isEmpty()) {
                 try {
                     batchUpdate(savingsAccountDataList);
                 } catch (DataAccessException exception) {
-                    LOG.error("Batch update failed due to DataAccessException", exception);
+                    log.error("Batch update failed due to DataAccessException", exception);
                     errors.add(exception);
                 } catch (NullPointerException exception) {
-                    LOG.error("Batch update failed due to NullPointerException", exception);
+                    log.error("Batch update failed due to NullPointerException", exception);
                     errors.add(exception);
                 }
             }
@@ -165,9 +104,6 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
             }
         }
 
-        long end = System.currentTimeMillis();
-        LOG.debug("Time To Finish the batch {} by thread {} for accounts {}", end - start, Thread.currentThread().getId(),
-                savingAccounts.size());
         return null;
     }
 
@@ -297,10 +233,10 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
             this.jdbcTemplate.batchUpdate(queryForSavingsUpdate, paramsForSavingsSummary);
             this.jdbcTemplate.batchUpdate(queryForTransactionInsertion, paramsForTransactionInsertion);
             this.jdbcTemplate.batchUpdate(queryForTransactionUpdate, paramsForTransactionUpdate);
-            LOG.debug("`Total No Of Interest Posting:` {}", transRefNo.size());
+            log.debug("`Total No Of Interest Posting:` {}", transRefNo.size());
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = fetchTransactionsFromIds(transRefNo);
             if (savingsAccountDataList != null) {
-                LOG.debug("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());
+                log.debug("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());
             }
 
             HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionMap = new HashMap<>();

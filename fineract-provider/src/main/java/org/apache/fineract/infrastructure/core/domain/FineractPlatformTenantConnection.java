@@ -54,8 +54,6 @@ public class FineractPlatformTenantConnection implements Serializable {
     private final int suspectTimeout;
     private final int timeBetweenEvictionRunsMillis;
     private final int minEvictableIdleTimeMillis;
-    private final int maxRetriesOnDeadlock;
-    private final int maxIntervalBetweenRetries;
     private final boolean testOnBorrow;
 
     public FineractPlatformTenantConnection(final Long connectionId, final String schemaName, String schemaServer,
@@ -63,10 +61,9 @@ public class FineractPlatformTenantConnection implements Serializable {
             final String schemaPassword, final boolean autoUpdateEnabled, final int initialSize, final long validationInterval,
             final boolean removeAbandoned, final int removeAbandonedTimeout, final boolean logAbandoned,
             final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle, final int suspectTimeout,
-            final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis, final int maxRetriesOnDeadlock,
-            final int maxIntervalBetweenRetries, final boolean tesOnBorrow, final String readOnlySchemaServer,
-            final String readOnlySchemaServerPort, final String readOnlySchemaName, final String readOnlySchemaUsername,
-            final String readOnlySchemaPassword, final String readOnlySchemaConnectionParameters) {
+            final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis, final boolean tesOnBorrow,
+            final String readOnlySchemaServer, final String readOnlySchemaServerPort, final String readOnlySchemaName,
+            final String readOnlySchemaUsername, final String readOnlySchemaPassword, final String readOnlySchemaConnectionParameters) {
 
         this.connectionId = connectionId;
         this.schemaName = schemaName;
@@ -88,8 +85,6 @@ public class FineractPlatformTenantConnection implements Serializable {
         this.suspectTimeout = suspectTimeout;
         this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
         this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
-        this.maxRetriesOnDeadlock = maxRetriesOnDeadlock;
-        this.maxIntervalBetweenRetries = maxIntervalBetweenRetries;
         this.testOnBorrow = tesOnBorrow;
         this.readOnlySchemaServer = readOnlySchemaServer;
         this.readOnlySchemaServerPort = readOnlySchemaServerPort;
@@ -169,14 +164,6 @@ public class FineractPlatformTenantConnection implements Serializable {
 
     public int getMinEvictableIdleTimeMillis() {
         return this.minEvictableIdleTimeMillis;
-    }
-
-    public int getMaxRetriesOnDeadlock() {
-        return this.maxRetriesOnDeadlock;
-    }
-
-    public int getMaxIntervalBetweenRetries() {
-        return this.maxIntervalBetweenRetries;
     }
 
     public boolean isTestOnBorrow() {

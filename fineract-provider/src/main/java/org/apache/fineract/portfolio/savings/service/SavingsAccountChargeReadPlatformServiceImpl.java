@@ -264,7 +264,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                 + " where sac.charge_due_date is not null and sac.charge_due_date <= ? and sac.waived = false and sac.is_paid_derived=false and sac.is_active=true and sa.status_enum = ? "
                 + " order by sac.charge_due_date ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper,
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, // NOSONAR
                 new Object[] { DateUtils.getBusinessLocalDate(), SavingsAccountStatusType.ACTIVE.getValue() }); // NOSONAR
     }
 

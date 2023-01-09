@@ -23,6 +23,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
@@ -36,11 +37,17 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Table(name = "m_loan_transaction_relation")
 public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCustom {
 
+    @ManyToOne
     @JoinColumn(name = "from_loan_transaction_id", nullable = false)
     private LoanTransaction fromTransaction;
 
-    @JoinColumn(name = "to_loan_transaction_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "to_loan_transaction_id")
     private LoanTransaction toTransaction;
+
+    @ManyToOne
+    @JoinColumn(name = "to_loan_charge_id")
+    private LoanCharge toCharge;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "relation_type_enum", nullable = false)
@@ -51,15 +58,21 @@ public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCus
 
     protected LoanTransactionRelation() {}
 
-    protected LoanTransactionRelation(@NotNull LoanTransaction fromTransaction, @NotNull LoanTransaction toTransaction,
+    protected LoanTransactionRelation(@NotNull LoanTransaction fromTransaction, LoanTransaction toTransaction, LoanCharge toCharge,
             LoanTransactionRelationTypeEnum relationType) {
         this.fromTransaction = fromTransaction;
         this.toTransaction = toTransaction;
+        this.toCharge = toCharge;
         this.relationType = relationType;
     }
 
-    public static LoanTransactionRelation instance(@NotNull LoanTransaction fromTransaction, @NotNull LoanTransaction toTransaction,
+    public static LoanTransactionRelation linkToTransaction(@NotNull LoanTransaction fromTransaction,
+            @NotNull LoanTransaction toTransaction, LoanTransactionRelationTypeEnum relation) {
+        return new LoanTransactionRelation(fromTransaction, toTransaction, null, relation);
+    }
+
+    public static LoanTransactionRelation linkToCharge(@NotNull LoanTransaction fromTransaction, @NotNull LoanCharge loanCharge,
             LoanTransactionRelationTypeEnum relation) {
-        return new LoanTransactionRelation(fromTransaction, toTransaction, relation);
+        return new LoanTransactionRelation(fromTransaction, null, loanCharge, relation);
     }
 }

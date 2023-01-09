@@ -18,27 +18,24 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.share;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.share.v1.ShareProductDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareProductDividentsCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.share.ShareProductDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ShareProductDividentsCreateBusinessEventSerializer implements BusinessEventSerializer {
+public class ShareProductDividentsCreateBusinessEventSerializer extends AbstractBusinessEventSerializer {
 
     private final ShareProductReadPlatformService service;
     private final ShareProductDataMapper mapper;
-    private final ByteBufferConverter byteBufferConverter;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -46,12 +43,10 @@ public class ShareProductDividentsCreateBusinessEventSerializer implements Busin
     }
 
     @Override
-    public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
+    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         ShareProductDividentsCreateBusinessEvent event = (ShareProductDividentsCreateBusinessEvent) rawEvent;
         ShareProductData data = (ShareProductData) service.retrieveOne(event.get(), false);
-        ShareProductDataV1 avroDto = mapper.map(data);
-        ByteBuffer buffer = avroDto.toByteBuffer();
-        return byteBufferConverter.convert(buffer);
+        return mapper.map(data);
     }
 
     @Override

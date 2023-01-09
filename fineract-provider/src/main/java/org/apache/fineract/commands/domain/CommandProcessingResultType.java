@@ -28,7 +28,9 @@ public enum CommandProcessingResultType {
     INVALID(0, "commandProcessingResultType.invalid"), //
     PROCESSED(1, "commandProcessingResultType.processed"), //
     AWAITING_APPROVAL(2, "commandProcessingResultType.awaiting.approval"), //
-    REJECTED(3, "commandProcessingResultType.rejected");
+    REJECTED(3, "commandProcessingResultType.rejected"), //
+    UNDER_PROCESSING(4, "commandProcessingResultType.underProcessing"), //
+    ERROR(5, "commandProcessingResultType.error");
 
     private final Integer value;
     private final String code;

@@ -79,6 +79,8 @@ public class LoanApplicationTestBuilder {
     private List<Map<String, Object>> approvalFormData = null;
     private String fixedPrincipalPercentagePerInstallment;
     private String interestChargedFromDate;
+    private String linkAccountId;
+    private String inArrearsTolerance;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -169,6 +171,14 @@ public class LoanApplicationTestBuilder {
             map.put("linkAccountId", savingsID);
         }
 
+        if (this.linkAccountId != null) {
+            map.put("linkAccountId", this.linkAccountId);
+        }
+
+        if (this.inArrearsTolerance != null) {
+            map.put("inArrearsTolerance", this.inArrearsTolerance);
+        }
+
         if (graceOnPrincipalPayment != null) {
             map.put("graceOnPrincipalPayment", graceOnPrincipalPayment);
         }
@@ -207,6 +217,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withLoanTermFrequencyAsDays() {
         this.loanTermFrequencyType = DAYS;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withLinkedAccount(String linkAccountId) {
+        this.linkAccountId = linkAccountId;
         return this;
     }
 
@@ -396,6 +411,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withinterestChargedFromDate(String interestChargedFromDate) {
         this.interestChargedFromDate = interestChargedFromDate;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withInArrearsTolerance(String amount) {
+        this.inArrearsTolerance = amount;
         return this;
     }
 }

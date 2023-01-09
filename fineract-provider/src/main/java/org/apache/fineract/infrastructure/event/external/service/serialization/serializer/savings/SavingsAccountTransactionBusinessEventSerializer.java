@@ -18,16 +18,14 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.savings;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.savings.v1.SavingsAccountTransactionDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.savings.transaction.SavingsAccountTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.savings.SavingsAccountTransactionDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
@@ -35,11 +33,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SavingsAccountTransactionBusinessEventSerializer implements BusinessEventSerializer {
+public class SavingsAccountTransactionBusinessEventSerializer extends AbstractBusinessEventSerializer {
 
     private final SavingsAccountReadPlatformService service;
     private final SavingsAccountTransactionDataMapper mapper;
-    private final ByteBufferConverter byteBufferConverter;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -47,14 +44,12 @@ public class SavingsAccountTransactionBusinessEventSerializer implements Busines
     }
 
     @Override
-    public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
+    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         SavingsAccountTransactionBusinessEvent event = (SavingsAccountTransactionBusinessEvent) rawEvent;
         SavingsAccountTransaction tx = event.get();
         SavingsAccountTransactionData data = service.retrieveSavingsTransaction(tx.getSavingsAccount().getId(), tx.getId(),
                 tx.getSavingsAccount().depositAccountType());
-        SavingsAccountTransactionDataV1 avroDto = mapper.map(data);
-        ByteBuffer buffer = avroDto.toByteBuffer();
-        return byteBufferConverter.convert(buffer);
+        return mapper.map(data);
     }
 
     @Override

@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -46,6 +47,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanSc
 public interface LoanReadPlatformService {
 
     LoanAccountData retrieveOne(Long loanId);
+
+    LoanAccountData fetchRepaymentScheduleData(LoanAccountData accountData);
 
     LoanScheduleData retrieveRepaymentSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData,
             Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges);
@@ -113,6 +116,8 @@ public interface LoanReadPlatformService {
 
     Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(LocalDate tillDate);
 
+    LoanTransactionData retrieveLoanChargeOffTemplate(Long loanId);
+
     Collection<Long> fetchLoansForInterestRecalculation();
 
     List<Long> fetchLoansForInterestRecalculation(Integer pageSize, Long maxLoanIdInList, String officeHierarchy);
@@ -155,4 +160,7 @@ public interface LoanReadPlatformService {
 
     List<LoanTransactionRelationData> retrieveLoanTransactionRelationsByLoanTransactionId(Long loanTransactionId);
 
+    Long retrieveLoanTransactionIdByExternalId(ExternalId externalId);
+
+    Long retrieveLoanIdByExternalId(ExternalId externalId);
 }

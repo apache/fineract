@@ -39003,12 +39003,16 @@ Request Body:
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/api/v1/authentication?username={username}&password={password}
+POST https://DomainName/api/v1/authentication
 					</code>
 					<code class="method-request">
-POST authentication?username=mifos&password=password
+POST authentication
 Content-Type: application/json
-No Request Body
+Request Body
+{
+    "username": "mifos",
+    "password": "password"
+}
 					</code>
 					<p>Example response of autentication for user that is not linked with any staff.</p>
 					<code class="method-response">
@@ -46956,12 +46960,16 @@ No Request Body
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/api/v1/self/authentication?username={username}&password={password}
+POST https://DomainName/api/v1/self/authentication
 					</code>
 					<code class="method-request">
-POST self/authentication?username=mifos&password=password
+POST self/authentication
 Content-Type: application/json
-No Request Body
+Request Body
+{
+    "username": "mifos",
+    "password": "password"
+}
 					</code>
 					<p>Example response of autentication for user</p>
 <code class="method-response">

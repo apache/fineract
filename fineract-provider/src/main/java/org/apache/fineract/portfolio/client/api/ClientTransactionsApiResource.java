@@ -35,6 +35,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -49,12 +50,12 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.service.ClientTransactionReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Path("/clients/{clientId}/transactions")
 @Component
-@Tag(name = "Client Transaction", description = "Client Transactions refer to transactions made directly againt a Client's internal account. Currently, these transactions are only created as a result of charge payments/waivers. You are allowed to undo a transaction, however you cannot explicitly create one. ")
+@Tag(name = "Client Transaction", description = "Client Transactions refer to transactions made directly against a Client's internal account. Currently, these transactions are only created as a result of charge payments/waivers. You are allowed to undo a transaction, however you cannot explicitly create one. ")
+@RequiredArgsConstructor
 public class ClientTransactionsApiResource {
 
     private final PlatformSecurityContext context;
@@ -62,19 +63,6 @@ public class ClientTransactionsApiResource {
     private final DefaultToApiJsonSerializer<ClientTransactionData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public ClientTransactionsApiResource(final PlatformSecurityContext context,
-            final ClientTransactionReadPlatformService clientTransactionReadPlatformService,
-            final DefaultToApiJsonSerializer<ClientTransactionData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.clientTransactionReadPlatformService = clientTransactionReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -86,15 +74,14 @@ public class ClientTransactionsApiResource {
     public String retrieveAllClientTransactions(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
         SearchParameters searchParameters = SearchParameters.forPagination(offset, limit);
-        final Page<ClientTransactionData> clientTransactions = this.clientTransactionReadPlatformService.retrieveAllTransactions(clientId,
+        final Page<ClientTransactionData> clientTransactions = clientTransactionReadPlatformService.retrieveAllTransactions(clientId,
                 searchParameters);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, clientTransactions,
-                ClientApiConstants.CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, clientTransactions, ClientApiConstants.CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -109,14 +96,12 @@ public class ClientTransactionsApiResource {
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
-        final ClientTransactionData clientTransaction = this.clientTransactionReadPlatformService.retrieveTransaction(clientId,
-                transactionId);
+        final ClientTransactionData clientTransaction = clientTransactionReadPlatformService.retrieveTransaction(clientId, transactionId);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, clientTransaction,
-                ClientApiConstants.CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, clientTransaction, ClientApiConstants.CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -131,19 +116,16 @@ public class ClientTransactionsApiResource {
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
-        String json = "";
         if (is(commandParam, ClientApiConstants.CLIENT_TRANSACTION_COMMAND_UNDO)) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().undoClientTransaction(clientId, transactionId)
                     .withJson(apiRequestBodyAsJson).build();
 
-            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-            json = this.toApiJsonSerializer.serialize(result);
+            return toApiJsonSerializer.serialize(result);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam, ClientApiConstants.CLIENT_TRANSACTION_COMMAND_UNDO);
         }
-
-        return json;
     }
 
     private boolean is(final String commandParam, final String commandValue) {

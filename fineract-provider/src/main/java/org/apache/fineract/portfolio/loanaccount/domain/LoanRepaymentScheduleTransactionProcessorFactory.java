@@ -21,13 +21,11 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.springframework.beans.factory.annotation.Value;
 
-@Slf4j
 @RequiredArgsConstructor
 public class LoanRepaymentScheduleTransactionProcessorFactory {
 

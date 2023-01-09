@@ -31,6 +31,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,6 +203,15 @@ public class SchedulerJobHelper {
         // PS: Checking getSchedulerJobHistory() [/runhistory] is pointless,
         // because the lastRunHistory JobDetailHistoryData is already part of
         // JobDetailData anyway.
+    }
+
+    public void fastForwardTime(LocalDate lastBusinessDateBeforeFastForward, LocalDate dateToFastForward, String jobName,
+            ResponseSpecification responseSpec) {
+        while (lastBusinessDateBeforeFastForward.isBefore(dateToFastForward)) {
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, lastBusinessDateBeforeFastForward);
+            executeAndAwaitJob(jobName);
+            lastBusinessDateBeforeFastForward = lastBusinessDateBeforeFastForward.plusDays(1);
+        }
     }
 
     @SuppressWarnings("unchecked")

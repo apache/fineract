@@ -23,13 +23,17 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 
 @Slf4j
-public final class BusinessDateHelper {
+public final class BusinessDateHelper extends IntegrationTest {
 
-    private BusinessDateHelper() {}
+    public BusinessDateHelper() {}
 
     public static HashMap updateBusinessDate(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final BusinessDateType type, final LocalDate date) {
@@ -37,6 +41,20 @@ public final class BusinessDateHelper {
         log.info("------------------UPDATE BUSINESS DATE----------------------");
         log.info("------------------Type: {}, date: {}----------------------", type, date);
         return Utils.performServerPost(requestSpec, responseSpec, BUSINESS_DATE_API, buildBusinessDateRequest(type, date), "changes");
+    }
+
+    public BusinessDateResponse updateBusinessDate(final BusinessDateRequest request) {
+        log.info("------------------UPDATE BUSINESS DATE----------------------");
+        log.info("------------------Type: {}, date: {}----------------------", request.getType(), request.getDate());
+        return ok(fineract().businessDateManagement.updateBusinessDate(request));
+    }
+
+    public BusinessDateResponse getBusinessDate(final String type) {
+        return ok(fineract().businessDateManagement.getBusinessDate(type));
+    }
+
+    public List<BusinessDateResponse> getBusinessDates() {
+        return ok(fineract().businessDateManagement.getBusinessDates());
     }
 
     private static String buildBusinessDateRequest(BusinessDateType type, LocalDate date) {

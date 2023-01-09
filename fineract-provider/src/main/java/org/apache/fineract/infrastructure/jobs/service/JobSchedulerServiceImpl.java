@@ -72,6 +72,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
                 schedulerDetail.setSuspended(false);
                 schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             }
+            ThreadLocalContextUtil.reset();
         }
         log.info("Scheduling batch jobs has finished");
     }

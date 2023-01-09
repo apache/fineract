@@ -43,6 +43,7 @@ import org.apache.fineract.client.services.AuditsApi;
 import org.apache.fineract.client.services.AuthenticationHttpBasicApi;
 import org.apache.fineract.client.services.BatchApiApi;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
+import org.apache.fineract.client.services.BusinessStepConfigurationApi;
 import org.apache.fineract.client.services.CacheApi;
 import org.apache.fineract.client.services.CashierJournalsApi;
 import org.apache.fineract.client.services.CashiersApi;
@@ -177,6 +178,7 @@ public final class FineractClient {
     public final AuthenticationHttpBasicApi authentication;
     public final BatchApiApi batches;
     public final BusinessDateManagementApi businessDateManagement;
+    public final BusinessStepConfigurationApi businessStepConfiguration;
     public final CacheApi caches;
     public final CashierJournalsApi cashiersJournal;
     public final CashiersApi cashiers;
@@ -291,6 +293,7 @@ public final class FineractClient {
         authentication = retrofit.create(AuthenticationHttpBasicApi.class);
         batches = retrofit.create(BatchApiApi.class);
         businessDateManagement = retrofit.create(BusinessDateManagementApi.class);
+        businessStepConfiguration = retrofit.create(BusinessStepConfigurationApi.class);
         caches = retrofit.create(CacheApi.class);
         cashiersJournal = retrofit.create(CashierJournalsApi.class);
         cashiers = retrofit.create(CashiersApi.class);

@@ -150,8 +150,8 @@ configurations {
     driver
 }
 dependencies {
-    driver 'org.mariadb.jdbc:mariadb-java-client:3.0.8'
-    driver 'org.postgresql:postgresql:42.5.0'
+    driver 'org.mariadb.jdbc:mariadb-java-client'
+    driver 'org.postgresql:postgresql'
     driver 'mysql:mysql-connector-java:8.0.31'
 }
 
@@ -222,8 +222,8 @@ bootRun {
     ]
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.8'
-        implementation 'org.postgresql:postgresql:42.5.0'
+        implementation 'org.mariadb.jdbc:mariadb-java-client'
+        implementation 'org.postgresql:postgresql'
     }
 }
 
@@ -286,8 +286,8 @@ jib {
     allowInsecureRegistries = true
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.8'
-        implementation 'org.postgresql:postgresql:42.5.0'
+        implementation 'org.mariadb.jdbc:mariadb-java-client'
+        implementation 'org.postgresql:postgresql'
     }
 
     pluginExtensions {
@@ -298,6 +298,26 @@ jib {
                     filter {
                         glob = '/app/resources/**'
                     }
+                }
+            }
+        }
+    }
+}
+
+task migrateDatabase {
+    doFirst {
+        println 'Executing liquibase database migration to version '+"$dbVersion"
+
+        def dbUrl='jdbc:'+"$dbType"+'://'+"$dbHost"+':'+"$dbPort"+'/'+"$dbName"
+        def changeLogFilePath='fineract-provider/src/main/resources/db/changelog/tenant/upgrades/0000_upgrade_to_'+"$dbVersion"+'.xml'
+
+        liquibase {
+            activities {
+                main {
+                    changeLogFile changeLogFilePath
+                    url dbUrl
+                    username project.ext.mysqlUser
+                    password project.ext.mysqlPassword
                 }
             }
         }

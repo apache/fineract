@@ -26,6 +26,7 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,8 +36,6 @@ import org.springframework.stereotype.Component;
  * will also catch any errors raised by {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and
  * map those errors to appropriate status codes in BatchResponse.
  *
- * @author Rishabh Shukla
- *
  * @see org.apache.fineract.batch.command.CommandStrategy
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.batch.domain.BatchResponse
@@ -45,10 +44,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CollectChargesCommandStrategy implements CommandStrategy {
 
+    /**
+     * Loan charges api resource {@link LoanChargesApiResource}.
+     */
     private final LoanChargesApiResource loanChargesApiResource;
 
     @Override
-    public BatchResponse execute(BatchRequest request, UriInfo uriInfo) {
+    public BatchResponse execute(BatchRequest request, final UriInfo uriInfo) {
 
         final BatchResponse response = new BatchResponse();
         final String responseBody;
@@ -59,14 +61,14 @@ public class CollectChargesCommandStrategy implements CommandStrategy {
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
 
         // Pluck out the loanId out of the relative path
-        Long loanId = Long.parseLong(pathParameters.get(1));
+        final Long loanId = Long.parseLong(pathParameters.get(1));
 
         // Calls 'retrieveAllLoanCharges' function from
         // 'LoanChargesApiResource' to Collect
         // Charges for a loan
         responseBody = loanChargesApiResource.retrieveAllLoanCharges(loanId, uriInfo);
 
-        response.setStatusCode(200);
+        response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after Charges have been
         // successfully collected
         response.setBody(responseBody);

@@ -789,6 +789,8 @@ public class ClientSavingsIntegrationTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSavingsAccountWithOverdraft() {
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
         final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
@@ -831,14 +833,13 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.set(Calendar.DAY_OF_MONTH, 1);
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
-        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
+        todaysDate = todaysDate.withDayOfMonth(1);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
+        final Integer lastDayOfMonth = todaysDate.lengthOfMonth();
+        todaysDate = todaysDate.withDayOfMonth(lastDayOfMonth);
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate);
 
         /***
          * Activate the application and verify account status
@@ -912,13 +913,14 @@ public class ClientSavingsIntegrationTest {
         actualInterestPosted = Float.parseFloat(decimalFormat.format(actualInterestPosted));
         assertEquals(interestPosted, actualInterestPosted, "Verifying interest posted");
 
-        todaysDate = Calendar.getInstance();
-        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = Utils.getLocalDateOfTenant();
+        final String CLOSEDON_DATE = dateFormat.format(todaysDate);
         String withdrawBalance = "false";
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
                 .closeSavingsAccountAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
     }
 
     @SuppressWarnings("unchecked")
@@ -964,11 +966,12 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
+
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
 
         /***
          * Activate the application and verify account status
@@ -986,16 +989,16 @@ public class ClientSavingsIntegrationTest {
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         assertEquals(summaryBefore, summary);
 
-        final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
-        final String WITHDRAWAL_DATE = dateFormat.format(todaysDate.getTime());
+        final Integer lastDayOfMonth = todaysDate.lengthOfMonth();
+        todaysDate = todaysDate.withDayOfMonth(lastDayOfMonth);
+        final String WITHDRAWAL_DATE = dateFormat.format(todaysDate);
         Float balance = Float.parseFloat(zeroOpeningBalance);
 
         // DateFormat transactionDateFormat = new SimpleDateFormat("dd MMMM
         // yyyy",Locale.US);
-        Calendar transactionDate = Calendar.getInstance();
-        transactionDate.set(Calendar.DAY_OF_MONTH, 2);
-        String transactionDateValue = dateFormat.format(transactionDate.getTime());
+        LocalDate transactionDate = Utils.getLocalDateOfTenant();
+        transactionDate = transactionDate.withDayOfMonth(2);
+        String transactionDateValue = dateFormat.format(transactionDate);
 
         /***
          * Perform Deposit transaction on last day of month and verify account balance.
@@ -1059,8 +1062,8 @@ public class ClientSavingsIntegrationTest {
         assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked----------");
 
-        transactionDate.set(Calendar.DAY_OF_MONTH, 3);
-        transactionDateValue = dateFormat.format(transactionDate.getTime());
+        transactionDate = transactionDate.withDayOfMonth(3);
+        transactionDateValue = dateFormat.format(transactionDate);
 
         this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
@@ -1085,12 +1088,8 @@ public class ClientSavingsIntegrationTest {
         assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked-------");
 
-        // DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy",
-        // Locale.US);
-        Calendar transactionCalendarDateFormat = Calendar.getInstance();
-        transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
-        transactionDate.set(Calendar.DAY_OF_MONTH, 22);
-        transactionDateValue = dateFormat.format(transactionDate.getTime());
+        transactionDate = transactionDate.withDayOfMonth(22);
+        transactionDateValue = dateFormat.format(transactionDate);
         if (Calendar.DAY_OF_MONTH >= 22) {
             this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
             accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
@@ -1115,10 +1114,10 @@ public class ClientSavingsIntegrationTest {
             assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
             LOG.info("-----Post Interest As on Successfully Worked----------");
         }
-        DateFormat lastTransactionDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Calendar postedLastDate = Calendar.getInstance();
-        int numberOfDateOfMonth = postedLastDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        transactionDateValue = lastTransactionDateFormat.format(transactionDate.getTime());
+
+        LocalDate postedLastDate = Utils.getLocalDateOfTenant();
+        int numberOfDateOfMonth = postedLastDate.lengthOfMonth();
+        transactionDateValue = dateFormat.format(transactionDate);
 
         if (Calendar.DAY_OF_MONTH == numberOfDateOfMonth) {
 
@@ -1146,8 +1145,8 @@ public class ClientSavingsIntegrationTest {
             LOG.info("-----Post Interest As on Successfully Worked----------");
 
         }
-        transactionDate.set(Calendar.DAY_OF_MONTH, 1);
-        transactionDateValue = dateFormat.format(transactionDate.getTime());
+        transactionDate = transactionDate.withDayOfMonth(1);
+        transactionDateValue = dateFormat.format(transactionDate);
         this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountTransactionDetails.get("summary");
@@ -1176,6 +1175,7 @@ public class ClientSavingsIntegrationTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSavingsAccountPostInterestOnLastDayWithdrawalWithOverdraft() {
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         /***
@@ -1216,11 +1216,10 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
 
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
 
         /***
          * Activate the application and verify account status
@@ -1238,16 +1237,16 @@ public class ClientSavingsIntegrationTest {
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         assertEquals(summaryBefore, summary);
 
-        final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
-        final String WITHDRAWAL_DATE = dateFormat.format(todaysDate.getTime());
+        final Integer lastDayOfMonth = todaysDate.lengthOfMonth();
+        todaysDate = todaysDate.withDayOfMonth(lastDayOfMonth);
+        final String WITHDRAWAL_DATE = dateFormat.format(todaysDate);
         Float balance = Float.parseFloat(zeroOpeningBalance);
 
         // DateFormat transactionDateFormat = new SimpleDateFormat("dd MMMM
         // yyyy", Locale.US);
-        Calendar transactionDate = Calendar.getInstance();
-        transactionDate.set(Calendar.DAY_OF_MONTH, 2);
-        String transactionDateValue = dateFormat.format(transactionDate.getTime());
+        LocalDate transactionDate = Utils.getLocalDateOfTenant();
+        transactionDate = transactionDate.withDayOfMonth(2);
+        String transactionDateValue = dateFormat.format(transactionDate);
 
         /***
          * Perform withdraw transaction, verify account balance(account balance will go to negative as no deposits are
@@ -1322,8 +1321,8 @@ public class ClientSavingsIntegrationTest {
         assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked----------");
 
-        transactionDate.set(Calendar.DAY_OF_MONTH, 3);
-        transactionDateValue = dateFormat.format(transactionDate.getTime());
+        transactionDate = transactionDate.withDayOfMonth(3);
+        transactionDateValue = dateFormat.format(transactionDate);
 
         this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
@@ -1350,10 +1349,9 @@ public class ClientSavingsIntegrationTest {
 
         // DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy",
         // Locale.US);
-        Calendar transactionCalendarDateFormat = Calendar.getInstance();
-        transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
-        transactionDate.set(Calendar.DAY_OF_MONTH, 22);
-        transactionDateValue = dateFormat.format(transactionDate.getTime());
+
+        transactionDate = transactionDate.withDayOfMonth(22);
+        transactionDateValue = dateFormat.format(transactionDate);
         if (Calendar.DAY_OF_MONTH >= 22) {
             this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
             accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
@@ -1378,10 +1376,9 @@ public class ClientSavingsIntegrationTest {
             assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
             LOG.info("-----Post Interest As on Successfully Worked----------");
         }
-        DateFormat lastTransactionDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Calendar postedLastDate = Calendar.getInstance();
-        int numberOfDateOfMonth = postedLastDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        transactionDateValue = lastTransactionDateFormat.format(transactionDate.getTime());
+        LocalDate postedLastDate = Utils.getLocalDateOfTenant();
+        int numberOfDateOfMonth = postedLastDate.lengthOfMonth();
+        transactionDateValue = dateFormat.format(transactionDate);
 
         if (Calendar.DAY_OF_MONTH == numberOfDateOfMonth) {
 
@@ -1409,8 +1406,8 @@ public class ClientSavingsIntegrationTest {
             LOG.info("-----Post Interest As on Successfully Worked----------");
 
         }
-        transactionDate.set(Calendar.DAY_OF_MONTH, 1);
-        transactionDateValue = dateFormat.format(transactionDate.getTime());
+        transactionDate = transactionDate.withDayOfMonth(1);
+        transactionDateValue = dateFormat.format(transactionDate);
         this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountTransactionDetails.get("summary");
@@ -1433,11 +1430,13 @@ public class ClientSavingsIntegrationTest {
         accountDetailsPostInterestPosted = Float.parseFloat(decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked----------");
+
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testSavingsAccountPostInterestWithOverdraft() {
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
 
@@ -1479,19 +1478,18 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.set(Calendar.DAY_OF_MONTH, 1);
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
-        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
+        todaysDate = todaysDate.withDayOfMonth(1);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
+        final Integer lastDayOfMonth = todaysDate.lengthOfMonth();
+        todaysDate = todaysDate.withDayOfMonth(lastDayOfMonth);
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate);
 
-        Calendar postedDate = Calendar.getInstance();
-        postedDate.set(Calendar.DAY_OF_MONTH, 2);
+        LocalDate postedDate = Utils.getLocalDateOfTenant();
+        postedDate = postedDate.withDayOfMonth(2);
 
-        final String POSTED_TRANSACTION_DATE = dateFormat.format(postedDate.getTime());
+        final String POSTED_TRANSACTION_DATE = dateFormat.format(postedDate);
 
         /***
          * Activate the application and verify account status
@@ -1577,15 +1575,15 @@ public class ClientSavingsIntegrationTest {
         assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
         LOG.info("------Post Interest As On After doing a post interest Successfully worked--------");
 
-        todaysDate = Calendar.getInstance();
-        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = Utils.getLocalDateOfTenant();
+        final String CLOSEDON_DATE = dateFormat.format(todaysDate);
 
-        Calendar interestPostingDate = Calendar.getInstance();
-        Calendar todysDate = Calendar.getInstance();
-        interestPostingDate.set((int) interestPostingTransaction.get(0), (int) interestPostingTransaction.get(1) - 1,
+        LocalDate interestPostingDate = LocalDate.of((int) interestPostingTransaction.get(0), (int) interestPostingTransaction.get(1),
                 (int) interestPostingTransaction.get(2));
-        final String INTEREST_POSTING_DATE = dateFormat.format(interestPostingDate.getTime());
-        final String TODYS_POSTING_DATE = dateFormat.format(todysDate.getTime());
+        LocalDate todysDate = Utils.getLocalDateOfTenant();
+
+        final String INTEREST_POSTING_DATE = dateFormat.format(interestPostingDate);
+        final String TODYS_POSTING_DATE = dateFormat.format(todysDate);
         String withdrawBalance = "true";
 
         if (TODYS_POSTING_DATE.equalsIgnoreCase(INTEREST_POSTING_DATE)) {
@@ -1599,7 +1597,6 @@ public class ClientSavingsIntegrationTest {
                             CLOSEDON_DATE);
             assertEquals("error.msg.postInterest.notDone", savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
         }
-
     }
 
     @Test
@@ -1648,24 +1645,25 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.set(Calendar.DAY_OF_MONTH, 1);
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
-        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
-        Calendar postedDate = Calendar.getInstance();
-        postedDate.set(Calendar.DAY_OF_MONTH, 1);
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
+        todaysDate = todaysDate.withDayOfMonth(1);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
+        final Integer lastDayOfMonth = todaysDate.lengthOfMonth();
+        todaysDate = todaysDate.withDayOfMonth(lastDayOfMonth);
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate);
 
-        final String POSTED_TRANSACTION_DATE = dateFormat.format(postedDate.getTime());
-        Calendar postedLastDate = Calendar.getInstance();
-        int countOfDate = postedDate.getActualMaximum(Calendar.DAY_OF_MONTH);
+        LocalDate postedDate = Utils.getLocalDateOfTenant();
+        postedDate = postedDate.withDayOfMonth(1);
+
+        final String POSTED_TRANSACTION_DATE = dateFormat.format(postedDate);
+        LocalDate postedLastDate = Utils.getLocalDateOfTenant();
+        int countOfDate = postedDate.lengthOfMonth();
         LOG.info("count Of Date---> {}", countOfDate);
-        postedLastDate.set(Calendar.DAY_OF_MONTH, countOfDate);
-        final String POSTED_LAST_TRANSACTION_DATE = dateFormat.format(postedLastDate.getTime());
+        postedLastDate.withDayOfMonth(countOfDate);
+        final String POSTED_LAST_TRANSACTION_DATE = dateFormat.format(postedLastDate);
 
         /***
          * Activate the application and verify account status

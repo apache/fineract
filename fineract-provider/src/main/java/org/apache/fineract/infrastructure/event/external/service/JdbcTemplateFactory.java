@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -34,5 +35,10 @@ public class JdbcTemplateFactory {
     public JdbcTemplate create(FineractPlatformTenant tenant) {
         DataSource tenantDataSource = tenantDataSourceFactory.create(tenant);
         return new JdbcTemplate(tenantDataSource);
+    }
+
+    public NamedParameterJdbcTemplate createNamedParameterJdbcTemplate(FineractPlatformTenant tenant) {
+        DataSource tenantDataSource = tenantDataSourceFactory.create(tenant);
+        return new NamedParameterJdbcTemplate(tenantDataSource);
     }
 }

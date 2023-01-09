@@ -133,7 +133,8 @@ public interface LoanApiConstants {
     String installmentAmountParamName = "installmentAmount";
     // loan write off
     String WRITEOFFREASONS = "WriteOffReasons";
-
+    // loan charge-off
+    String CHARGE_OFF_REASONS = "ChargeOffReasons";
     // fore closure constants
     String transactionDateParamName = "transactionDate";
     String noteParamName = "note";
@@ -153,6 +154,7 @@ public interface LoanApiConstants {
     String fixedPrincipalPercentagePerInstallmentParamName = "fixedPrincipalPercentagePerInstallment";
 
     String LOAN_ASSOCIATIONS_ALL = "all";
+    String chargeOffReasonIdParamName = "chargeOffReasonId";
 
     // Reversal Transation Data
     String REVERSAL_EXTERNAL_ID_PARAMNAME = "reversalExternalId";

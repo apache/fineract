@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -45,26 +46,41 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
     private final ApplicationContext applicationContext;
     private final ListableBeanFactory beanFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {
             throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
         }
-        businessEventNotifierService.startExternalEventRecording();
-        for (String businessStep : executionMap.values()) {
-            try {
-                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
-                COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
-                item = businessStepBean.execute(item);
-            } catch (Exception e) {
-                throw new BusinessStepException("Error happened during business step execution", e);
-            } finally {
-                // Fallback to COB action context after each business step
-                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+        boolean bulkEventEnabled = configurationDomainService.isCOBBulkEventEnabled();
+        // Extra safety net to avoid event leaking
+        try {
+            if (bulkEventEnabled) {
+                businessEventNotifierService.startExternalEventRecording();
             }
+
+            for (String businessStep : executionMap.values()) {
+                try {
+                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+                    COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
+                    item = businessStepBean.execute(item);
+                } catch (Exception e) {
+                    throw new BusinessStepException("Error happened during business step execution", e);
+                } finally {
+                    // Fallback to COB action context after each business step
+                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+                }
+            }
+            if (bulkEventEnabled) {
+                businessEventNotifierService.stopExternalEventRecording();
+            }
+        } catch (Exception e) {
+            if (bulkEventEnabled) {
+                businessEventNotifierService.resetEventRecording();
+            }
+            throw e;
         }
-        businessEventNotifierService.stopExternalEventRecording();
         return item;
     }
 

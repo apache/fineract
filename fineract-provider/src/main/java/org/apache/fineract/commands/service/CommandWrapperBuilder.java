@@ -787,6 +787,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder adjustmentForLoanCharge(final Long loanId, final Long loanChargeId) {
+        this.actionName = "ADJUSTMENT";
+        this.entityName = "LOANCHARGE";
+        this.entityId = loanChargeId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/charges/" + loanChargeId;
+        return this;
+    }
+
     public CommandWrapperBuilder deleteLoanCharge(final Long loanId, final Long loanChargeId) {
         this.actionName = "DELETE";
         this.entityName = "LOANCHARGE";
@@ -3595,6 +3604,14 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "EXTERNAL_EVENT_CONFIGURATION";
         this.href = "/externaleventconfiguration";
+        return this;
+    }
+
+    public CommandWrapperBuilder chargeOff(final Long loanId) {
+        this.actionName = "CHARGEOFF";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=charge-off";
         return this;
     }
 }

@@ -29,10 +29,13 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.dataqueries.api.DatatablesApiResource;
 import org.apache.http.HttpStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Test class for {@link UpdateDatatableEntryOneToManyCommandStrategy}.
+ */
 public class UpdateDatatableEntryOneToManyCommandStrategyTest {
 
     /**
@@ -56,10 +59,10 @@ public class UpdateDatatableEntryOneToManyCommandStrategyTest {
         final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
 
         // then
-        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
-        assertEquals(response.getRequestId(), request.getRequestId());
-        assertEquals(response.getHeaders(), request.getHeaders());
-        assertEquals(response.getBody(), responseBody);
+        assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+        assertEquals(request.getRequestId(), response.getRequestId());
+        assertEquals(request.getHeaders(), response.getHeaders());
+        assertEquals(responseBody, response.getBody());
     }
 
     /**

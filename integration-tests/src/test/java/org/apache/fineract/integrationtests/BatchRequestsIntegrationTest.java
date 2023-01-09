@@ -25,9 +25,13 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.batch.domain.Header;
+import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
@@ -143,6 +147,96 @@ public class BatchRequestsIntegrationTest {
 
         // Verify that each loan has been applied successfully
         for (BatchResponse res : response) {
+            Assertions.assertEquals(200L, (long) res.getStatusCode(), "Verify Status Code 200");
+        }
+    }
+
+    @Test
+    public void shouldReturnOkStatusWithIdempotencySupport() {
+
+        // Generate a random count of number of clients to be created
+        final Integer clientsCount = (int) Math.ceil(secureRandom.nextDouble() * 7) + 3;
+        final Integer[] clientIDs = new Integer[clientsCount];
+
+        // Create a new group and get its groupId
+        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+
+        // Create new clients and add those to this group
+        for (Integer i = 0; i < clientsCount; i++) {
+            clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+            groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
+            LOG.info("client {} has been added to the group {}", clientIDs[i], groupID);
+        }
+
+        // Generate a random count of number of new loan products to be created
+        final Integer loansCount = (int) Math.ceil(secureRandom.nextDouble() * 4) + 1;
+        final Integer[] loanProducts = new Integer[loansCount];
+
+        // Create new loan Products
+        LoanTransactionHelper helper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        for (Integer i = 0; i < loansCount; i++) {
+            final String loanProductJSON = new LoanProductTestBuilder() //
+                    .withPrincipal(String.valueOf(10000.00 + Math.ceil(secureRandom.nextDouble() * 1000000.00))) //
+                    .withNumberOfRepayments(String.valueOf(2 + (int) Math.ceil(secureRandom.nextDouble() * 36))) //
+                    .withRepaymentAfterEvery(String.valueOf(1 + (int) Math.ceil(secureRandom.nextDouble() * 3))) //
+                    .withRepaymentTypeAsMonth() //
+                    .withinterestRatePerPeriod(String.valueOf(1 + (int) Math.ceil(secureRandom.nextDouble() * 4))) //
+                    .withInterestRateFrequencyTypeAsMonths() //
+                    .withAmortizationTypeAsEqualPrincipalPayment() //
+                    .withInterestTypeAsDecliningBalance() //
+                    .currencyDetails("0", "100").build(null);
+
+            loanProducts[i] = helper.getLoanProductId(loanProductJSON);
+        }
+
+        // Select anyone of the loan products at random
+        final Integer loanProductID = loanProducts[(int) Math.floor(secureRandom.nextDouble() * (loansCount - 1))];
+
+        final List<BatchRequest> batchRequests = new ArrayList<>();
+
+        // Select a few clients from created group at random
+        Integer selClientsCount = (int) Math.ceil(secureRandom.nextDouble() * clientsCount) + 2;
+        for (int i = 0; i < selClientsCount; i++) {
+
+            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+            Assertions.assertNotNull(collateralId);
+            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                    String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))]), collateralId);
+            Assertions.assertNotNull(clientCollateralId);
+
+            BatchRequest br = BatchHelper.applyLoanRequest((long) selClientsCount, null, loanProductID, clientCollateralId);
+            br.setBody(br.getBody().replace("$.clientId",
+                    String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))])));
+            br.setHeaders(new HashSet<>());
+            br.getHeaders().add(new Header("Idempotency-Key", UUID.randomUUID().toString()));
+            batchRequests.add(br);
+        }
+
+        // Send the request to Batch - API
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        // Verify that each loan has been applied successfully
+        for (BatchResponse res : response) {
+            Assertions.assertFalse(
+                    res.getHeaders().stream()
+                            .anyMatch(header -> header.getName().equals(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER)),
+                    "First can not be cached!");
+            Assertions.assertEquals(200L, (long) res.getStatusCode(), "Verify Status Code 200");
+        }
+
+        final List<BatchResponse> secondResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
+
+        // Verify that each loan has been applied successfully
+        for (BatchResponse res : secondResponse) {
+            Assertions.assertEquals("true",
+                    res.getHeaders().stream()
+                            .filter(header -> header.getName().equals(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER))
+                            .map(Header::getValue).findAny().get(),
+                    "Not cached by idempotency key!");
             Assertions.assertEquals(200L, (long) res.getStatusCode(), "Verify Status Code 200");
         }
     }

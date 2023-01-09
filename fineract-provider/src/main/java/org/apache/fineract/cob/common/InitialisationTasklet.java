@@ -18,8 +18,14 @@
  */
 package org.apache.fineract.cob.common;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -41,11 +47,18 @@ public class InitialisationTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
+        HashMap<BusinessDateType, LocalDate> businessDates = ThreadLocalContextUtil.getBusinessDates();
         AppUser user = userRepository.fetchSystemUser();
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
                 new NullAuthoritiesMapper().mapAuthorities(user.getAuthorities()));
         SecurityContextHolder.getContext().setAuthentication(auth);
         ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+        String businessDateString = Objects.requireNonNull((String) chunkContext.getStepContext().getStepExecution().getJobExecution()
+                .getExecutionContext().get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME));
+        LocalDate businessDate = LocalDate.parse(businessDateString, DateTimeFormatter.ISO_DATE);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate);
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate.plusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
         return RepeatStatus.FINISHED;
     }
 }

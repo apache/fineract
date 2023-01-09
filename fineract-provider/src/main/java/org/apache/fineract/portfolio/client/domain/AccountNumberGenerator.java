@@ -21,11 +21,11 @@ package org.apache.fineract.portfolio.client.domain;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
-import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
@@ -35,7 +35,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,6 +42,7 @@ import org.springframework.stereotype.Component;
  * it ensuring the identifier is always of a given <code>maxLength</code>.
  */
 @Component
+@AllArgsConstructor
 public class AccountNumberGenerator {
 
     private static final int maxLength = 9;
@@ -55,22 +55,10 @@ public class AccountNumberGenerator {
     private static final String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
     private static final String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName";
     private static final String PREFIX_SHORT_NAME = "prefixShortName";
-    private final AccountNumberFormatRepository accountNumberFormatRepository;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final ClientRepository clientRepository;
     private final LoanRepository loanRepository;
     private final SavingsAccountRepository savingsAccountRepository;
-
-    @Autowired
-    public AccountNumberGenerator(final ConfigurationReadPlatformService configurationReadPlatformService,
-            final AccountNumberFormatRepository accountNumberFormatRepository, final ClientRepository clientRepository,
-            final LoanRepository loanRepository, final SavingsAccountRepository savingsAccountRepository) {
-        this.configurationReadPlatformService = configurationReadPlatformService;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
-        this.clientRepository = clientRepository;
-        this.loanRepository = loanRepository;
-        this.savingsAccountRepository = savingsAccountRepository;
-    }
 
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();

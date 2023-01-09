@@ -26,4 +26,6 @@ public interface LoanAccountLockService {
     List<LoanAccountLock> getLockedLoanAccountByPage(int page, int limit);
 
     boolean isLoanHardLocked(Long loanId);
+
+    boolean isLoanSoftLocked(Long loanId);
 }

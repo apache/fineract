@@ -42,7 +42,9 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSe
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOptionDataValueSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
@@ -140,7 +142,7 @@ public class LoanImportHandler implements ImportHandler {
 
     private LoanAccountData readLoan(final Workbook workbook, final Row row, final List<String> statuses, final String locale,
             final String dateFormat) {
-        String externalId = ImportHandlerUtils.readAsString(LoanConstants.EXTERNAL_ID_COL, row);
+        ExternalId externalId = ExternalIdFactory.produce(ImportHandlerUtils.readAsString(LoanConstants.EXTERNAL_ID_COL, row));
         String status = ImportHandlerUtils.readAsString(LoanConstants.STATUS_COL, row);
         String productName = ImportHandlerUtils.readAsString(LoanConstants.PRODUCT_COL, row);
         Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME), productName);

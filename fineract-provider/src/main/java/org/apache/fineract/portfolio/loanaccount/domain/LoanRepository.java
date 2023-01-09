@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -71,9 +72,13 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_ALL_NON_CLOSED = "select loan.id from Loan loan where loan.loanStatus in (100,200,300,303,304)";
 
+    String FIND_ALL_NON_CLOSED_ONE_DAY_BEHIND = "select loan.id from Loan loan where loan.loanStatus in (100,200,300,303,304) and (:last_closed_business_date = loan.lastClosedBusinessDate or loan.lastClosedBusinessDate is NULL)";
+
     String FIND_NON_CLOSED_LOAN_THAT_BELONGS_TO_CLIENT = "select loan from Loan loan where loan.id = :loanId and loan.loanStatus = 300 and loan.client.id = :clientId";
 
     String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber";
+
+    String FIND_ID_BY_EXTERNAL_ID = "SELECT loan.id FROM Loan loan WHERE loan.externalId = :externalId";
 
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
@@ -163,9 +168,15 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_BY_ACCOUNT_NUMBER)
     Loan findLoanAccountByAccountNumber(@Param("accountNumber") String accountNumber);
 
-    boolean existsByExternalId(@Param("externalId") String externalId);
+    boolean existsByExternalId(@Param("externalId") ExternalId externalId);
 
     @Query(FIND_ALL_NON_CLOSED)
     List<Long> findAllNonClosedLoanIds();
+
+    @Query(FIND_ID_BY_EXTERNAL_ID)
+    Long findIdByExternalId(@Param("externalId") ExternalId externalId);
+
+    @Query(FIND_ALL_NON_CLOSED_ONE_DAY_BEHIND)
+    List<Long> findAllNonClosedLoanIdsOneDayBehind(@Param("last_closed_business_date") LocalDate businessDate);
 
 }

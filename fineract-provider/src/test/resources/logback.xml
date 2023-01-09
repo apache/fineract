@@ -34,6 +34,7 @@
     <logger name="org.springframework.transaction" level="INFO" />
     <logger name="org.springframework.data.convert" level="ERROR" />
     <logger name="org.springframework.http.converter.json" level="ERROR" />
+    <logger name="io.github.resilience4j.retry" level="DEBUG" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

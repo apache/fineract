@@ -110,15 +110,20 @@ task buildAsciidoc(type: org.openapitools.generator.gradle.plugin.tasks.Generate
     dependsOn(':fineract-provider:resolve')
 }
 
-task cleanupJodaImports() {
-    // This is a temporary step to get rid of joda imports in the generated code
-    // At this point it's unknown why it's even generated, probably it's a bug in the generator
+task cleanupGeneratedJavaFiles() {
     doLast {
         copy {
             from "$buildDir/generated/temp-java".toString()
             into "$buildDir/generated/java".toString()
             filter { line ->
-                line.replaceAll("import org\\.joda\\.time\\.\\*;", "")
+                line
+                        // This is a temporary step to get rid of joda imports in the generated code
+                        // At this point it's unknown why it's even generated, probably it's a bug in the generator
+                        .replaceAll("import org\\.joda\\.time\\.\\*;", "")
+                        // The 3 lines below handles the cases when a request body is not required
+                        .replaceAll(", \\)", ")")
+                        .replaceAll(", , @HeaderMap", ", @HeaderMap")
+                        .replaceAll("\\(, ", "(")
             }
         }
     }
@@ -127,7 +132,7 @@ task cleanupJodaImports() {
 }
 
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
-compileJava.dependsOn(buildJavaSdk, buildTypescriptAngularSdk, buildAsciidoc, cleanupJodaImports, licenseFormatMain, spotlessMiscApply)
+compileJava.dependsOn(buildJavaSdk, buildTypescriptAngularSdk, buildAsciidoc, cleanupGeneratedJavaFiles, licenseFormatMain, spotlessMiscApply)
 
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214

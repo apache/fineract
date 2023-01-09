@@ -128,9 +128,11 @@ public class SchedulerJobApiResource {
     @POST
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @Operation(summary = "Run a Job", description = "Manually Execute Specific Job.")
+    @RequestBody(content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.ExecuteJobRequest.class)))
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "POST: jobs/1?command=executeJob") })
     public Response executeJob(@PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
-            @QueryParam(SchedulerJobApiConstants.COMMAND) @Parameter(description = "command") final String commandParam) {
+            @QueryParam(SchedulerJobApiConstants.COMMAND) @Parameter(description = "command") final String commandParam,
+            @Parameter(hidden = true) final String jsonRequestBody) {
         // check the logged in user have permissions to execute scheduler jobs
         Response response;
         if (fineractProperties.getMode().isBatchManagerEnabled()) {
@@ -142,7 +144,7 @@ public class SchedulerJobApiResource {
             }
             response = Response.status(400).build();
             if (is(commandParam, SchedulerJobApiConstants.COMMAND_EXECUTE_JOB)) {
-                this.jobRegisterService.executeJob(jobId);
+                jobRegisterService.executeJobWithParameters(jobId, jsonRequestBody);
                 response = Response.status(202).build();
             } else {
                 throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);

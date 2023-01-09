@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -37,30 +38,20 @@ import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientChargeData;
 import org.apache.fineract.portfolio.client.exception.ClientChargeNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlatformService {
 
     private final PaginationHelper paginationHelper;
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PlatformSecurityContext context;
-    private final ClientChargeMapper clientChargeMapper;
-
-    @Autowired
-    public ClientChargeReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.sqlGenerator = sqlGenerator;
-        this.clientChargeMapper = new ClientChargeMapper();
-        this.paginationHelper = paginationHelper;
-    }
+    private final ClientChargeMapper clientChargeMapper = new ClientChargeMapper();
 
     public static final class ClientChargeMapper implements RowMapper<ClientChargeData> {
 

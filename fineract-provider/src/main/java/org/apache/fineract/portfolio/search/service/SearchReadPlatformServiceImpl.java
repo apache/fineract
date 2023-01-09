@@ -110,9 +110,11 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName,null as entityMobileNo, c.status_enum as entityStatusEnum, null as subEntityType, null as parentType "
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like :hierarchy and ci.document_key like :search ) ";
-            final String groupMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, g.account_no as entityAccountNo "
-                    + " , g.office_id as parentId, o.name as parentName, null as entityMobileNo, g.status_enum as entityStatusEnum, null as subEntityType, null as parentType "
+
+            final String groupMatchSql = " (select CASE WHEN g.level_id=1 THEN 'CENTER' ELSE 'GROUP' END as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, g.account_no as entityAccountNo, "
+                    + " g.office_id as parentId, o.name as parentName, null as entityMobileNo, g.status_enum as entityStatusEnum, null as subEntityType, null as parentType "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.account_no like :search or g.display_name like :search or g.external_id like :search or g.id like :search )) ";
+
             final StringBuilder sql = new StringBuilder();
 
             if (searchConditions.isClientSearch()) {
@@ -139,9 +141,9 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 sql.append(groupMatchSql).append(union);
             }
 
+            // remove last occurrence of "union all" string
             sql.replace(sql.lastIndexOf(union), sql.length(), "");
 
-            // remove last occurrence of "union all" string
             return sql.toString();
         }
 

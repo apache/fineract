@@ -307,9 +307,9 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         Assertions.assertNotNull(resourceId);
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, creditBalanceRefundDate,
-                new JournalEntry(refund, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, creditBalanceRefundDate,
                 new JournalEntry(refund, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, creditBalanceRefundDate,
+                new JournalEntry(refund, JournalEntry.TransactionType.DEBIT));
 
     }
 
@@ -328,9 +328,9 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         Assertions.assertNotNull(resourceId);
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, creditBalanceRefundDate,
-                new JournalEntry(refund, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, creditBalanceRefundDate,
                 new JournalEntry(refund, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, creditBalanceRefundDate,
+                new JournalEntry(refund, JournalEntry.TransactionType.DEBIT));
 
     }
 

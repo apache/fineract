@@ -125,8 +125,8 @@ public class DelinquencyBucketsHelper {
         if (getCollectionData != null) {
             log.info("Loan Delinquency Data in Days {} and Amount {}", getCollectionData.getPastDueDays(),
                     getCollectionData.getDelinquentAmount());
-            assertEquals(pastDueDays, getCollectionData.getPastDueDays());
-            assertEquals(amountExpected, getCollectionData.getDelinquentAmount());
+            assertEquals(pastDueDays, getCollectionData.getPastDueDays(), "Past due days");
+            assertEquals(amountExpected, getCollectionData.getDelinquentAmount(), "Amount expected");
         } else {
             log.info("Loan Delinquency Data is null");
         }
@@ -135,8 +135,8 @@ public class DelinquencyBucketsHelper {
         if (delinquencyRange != null) {
             log.info("Loan Delinquency Classification is {} : ({} - {}) {}", delinquencyRange.getClassification(),
                     delinquencyRange.getMinimumAgeDays(), delinquencyRange.getMaximumAgeDays(), pastDueDays);
-            assertTrue(delinquencyRange.getMinimumAgeDays() <= pastDueDays);
-            assertTrue(delinquencyRange.getMaximumAgeDays() >= pastDueDays);
+            assertTrue(delinquencyRange.getMinimumAgeDays() <= pastDueDays, "Min Age Days");
+            assertTrue(delinquencyRange.getMaximumAgeDays() >= pastDueDays, "Max Age Days");
         } else {
             log.info("Loan Delinquency Classification is null");
         }

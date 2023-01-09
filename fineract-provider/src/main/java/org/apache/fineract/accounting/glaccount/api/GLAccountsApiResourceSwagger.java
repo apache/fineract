@@ -120,16 +120,16 @@ final class GLAccountsApiResourceSwagger {
         public Boolean manualEntriesAllowed;
 
         @Schema(example = "1")
-        public String type;
+        public Integer type;
 
         @Schema(example = "10")
-        public String tagId;
+        public Long tagId;
 
         @Schema(example = "1")
         public Long parentId;
 
         @Schema(example = "1")
-        public String usage;
+        public Integer usage;
 
         @Schema(example = "Desc")
         public String description;
@@ -144,7 +144,7 @@ final class GLAccountsApiResourceSwagger {
         }
 
         @Schema(example = "22")
-        public int resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutGLAccountsRequest")
@@ -175,7 +175,7 @@ final class GLAccountsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public int resourceId;
+        public Long resourceId;
         public PutGLAccountsResponsechangesSwagger changes;
     }
 
@@ -193,7 +193,7 @@ final class GLAccountsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public int resourceId;
+        public Long resourceId;
 
         private DeleteGLAccountsRequestchangesSwagger changes;
     }

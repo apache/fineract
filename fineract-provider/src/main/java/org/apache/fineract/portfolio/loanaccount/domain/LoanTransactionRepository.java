@@ -21,12 +21,16 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LoanTransactionRepository extends JpaRepository<LoanTransaction, Long>, JpaSpecificationExecutor<LoanTransaction> {
+
+    String FIND_ID_BY_EXTERNAL_ID = "SELECT lt.id FROM LoanTransaction lt WHERE lt.externalId = :externalId";
 
     Optional<LoanTransaction> findByIdAndLoanId(Long transactionId, Long loanId);
 
@@ -44,4 +48,6 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             """)
     Collection<LoanScheduleDelinquencyData> fetchLoanTransactionsByTypeAndLessOrEqualDate(Integer transactionType, LocalDate businessDate);
 
+    @Query(FIND_ID_BY_EXTERNAL_ID)
+    Long findIdByExternalId(@Param("externalId") ExternalId externalId);
 }

@@ -1,0 +1,43 @@
+{
+    "name": "LoanRepaymentDueDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "loanId",
+            "type": ["long"]
+        },
+        {
+            "name": "loanAccountNo",
+            "type": ["string"]
+        },
+        {
+            "default": null,
+            "name": "loanExternalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "name": "installment",
+            "type": ["org.apache.fineract.avro.loan.v1.RepaymentDueDataV1"]
+        },
+        {
+            "default": null,
+            "name": "pastDueAmount",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.RepaymentPastDueDataV1"
+            ]
+        }
+    ]
+}

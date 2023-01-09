@@ -22,6 +22,7 @@ package org.apache.fineract.infrastructure.core.config;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
@@ -44,6 +45,8 @@ public class FineractProperties {
     private FineractRemoteJobMessageHandlerProperties remoteJobMessageHandler;
 
     private FineractEventsProperties events;
+
+    private FineractContentProperties content;
 
     @Getter
     @Setter
@@ -153,6 +156,43 @@ public class FineractProperties {
 
         private boolean enabled;
         private String eventQueueName;
+        private String eventTopicName;
         private String brokerUrl;
+        private String brokerUsername;
+        private String brokerPassword;
+
+        public boolean isBrokerPasswordProtected() {
+            return StringUtils.isNotBlank(brokerUsername) || StringUtils.isNotBlank(brokerPassword);
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class FineractContentProperties {
+
+        private boolean regexWhitelistEnabled;
+        private List<String> regexWhitelist;
+        private boolean mimeWhitelistEnabled;
+        private List<String> mimeWhitelist;
+        private FineractContentFilesystemProperties filesystem;
+        private FineractContentS3Properties s3;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractContentFilesystemProperties {
+
+        private Boolean enabled;
+        private String rootFolder;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractContentS3Properties {
+
+        private Boolean enabled;
+        private String bucketName;
+        private String accessKey;
+        private String secretKey;
     }
 }

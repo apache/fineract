@@ -31,8 +31,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
-import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -44,7 +44,7 @@ public class ApplyChargeToOverdueLoanInstallmentTasklet implements Tasklet {
 
     private final ConfigurationDomainService configurationDomainService;
     private final LoanReadPlatformService loanReadPlatformService;
-    private final LoanWritePlatformService loanWritePlatformService;
+    private final LoanChargeWritePlatformService loanChargeWritePlatformService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -68,7 +68,7 @@ public class ApplyChargeToOverdueLoanInstallmentTasklet implements Tasklet {
             List<Throwable> exceptions = new ArrayList<>();
             for (final Long loanId : overdueScheduleData.keySet()) {
                 try {
-                    loanWritePlatformService.applyOverdueChargesForLoan(loanId, overdueScheduleData.get(loanId));
+                    loanChargeWritePlatformService.applyOverdueChargesForLoan(loanId, overdueScheduleData.get(loanId));
 
                 } catch (final PlatformApiDataValidationException e) {
                     final List<ApiParameterError> errors = e.getErrors();

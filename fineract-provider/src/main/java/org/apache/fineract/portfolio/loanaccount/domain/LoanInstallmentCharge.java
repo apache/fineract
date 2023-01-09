@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 
 @Entity
 @Table(name = "m_loan_installment_charge")
@@ -321,5 +322,10 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
 
     public void setInstallment(LoanRepaymentScheduleInstallment installment) {
         this.installment = installment;
+    }
+
+    public LoanInstallmentChargeData toData() {
+        return LoanInstallmentChargeData.builder().installmentNumber(installment.getInstallmentNumber()).dueDate(installment.getDueDate())
+                .amount(amount).amountOutstanding(amountOutstanding).amountWaived(amountWaived).paid(paid).waived(waived).build();
     }
 }

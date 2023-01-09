@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
@@ -59,6 +60,8 @@ class LoanCOBApiFilterTest {
     private GLIMAccountInfoRepository glimAccountInfoRepository;
     @Mock
     private PlatformSecurityContext context;
+    @Mock
+    private InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
 
     @Test
     void shouldProceedWhenUrlDoesNotMatch() throws ServletException, IOException {
@@ -82,7 +85,7 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/jobs/2/inline");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(context.authenticatedUser()).willReturn(appUser);
         given(appUser.isBypassUser()).willReturn(true);
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -99,14 +102,15 @@ class LoanCOBApiFilterTest {
         given(request.getPathInfo()).willReturn("/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
+        given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
     }
 
     @Test
-    void shouldProceedWhenLoanIsSoftLocked() throws ServletException, IOException {
+    void shouldRunInlineCOBAndProceedWhenLoanIsSoftLocked() throws ServletException, IOException {
         MockHttpServletRequest request = mock(MockHttpServletRequest.class);
         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
@@ -115,9 +119,11 @@ class LoanCOBApiFilterTest {
         given(request.getPathInfo()).willReturn("/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(true);
+        given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
+        verify(inlineLoanCOBExecutorService, times(1)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
         verify(filterChain, times(1)).doFilter(request, response);
     }
 
@@ -133,7 +139,7 @@ class LoanCOBApiFilterTest {
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(true);
         given(response.getWriter()).willReturn(writer);
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(response, times(1)).setStatus(HttpStatus.SC_CONFLICT);
@@ -157,7 +163,7 @@ class LoanCOBApiFilterTest {
         given(loan.getId()).willReturn(loanId);
         given(loanAccountLockService.isLoanHardLocked(loanId)).willReturn(true);
         given(response.getWriter()).willReturn(writer);
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(response, times(1)).setStatus(HttpStatus.SC_CONFLICT);

@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import org.apache.fineract.infrastructure.core.condition.EnableFineractEventListenerCondition;
 import org.apache.fineract.infrastructure.instancemode.api.FineractInstanceModeConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

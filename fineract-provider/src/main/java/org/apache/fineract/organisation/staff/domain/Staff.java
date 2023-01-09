@@ -28,6 +28,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -35,6 +36,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
 import org.apache.fineract.organisation.office.domain.Office;
 
+@Getter
 @Entity
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
@@ -53,7 +55,7 @@ public class Staff extends AbstractPersistableCustom {
     @Column(name = "mobile_no", length = 50, nullable = false, unique = true)
     private String mobileNo;
 
-    @Column(name = "external_id", length = 100, nullable = true, unique = true)
+    @Column(name = "external_id", length = 100, unique = true)
     private String externalId;
 
     @Column(name = "email_address", length = 50, unique = true)
@@ -66,21 +68,21 @@ public class Staff extends AbstractPersistableCustom {
     @Column(name = "is_loan_officer", nullable = false)
     private boolean loanOfficer;
 
-    @Column(name = "organisational_role_enum", nullable = true)
+    @Column(name = "organisational_role_enum")
     private Integer organisationalRoleType;
 
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
-    @Column(name = "joining_date", nullable = true)
+    @Column(name = "joining_date")
     private LocalDate joiningDate;
 
     @ManyToOne
-    @JoinColumn(name = "organisational_role_parent_staff_id", nullable = true)
+    @JoinColumn(name = "organisational_role_parent_staff_id")
     private Staff organisationalRoleParentStaff;
 
     @OneToOne(optional = true)
-    @JoinColumn(name = "image_id", nullable = true)
+    @JoinColumn(name = "image_id")
     private Image image;
 
     public static Staff fromJson(final Office staffOffice, final JsonCommand command) {
@@ -264,7 +266,4 @@ public class Staff extends AbstractPersistableCustom {
         this.image = image;
     }
 
-    public Image getImage() {
-        return this.image;
-    }
 }

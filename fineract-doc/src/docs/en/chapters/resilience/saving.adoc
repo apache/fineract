@@ -1,0 +1,23 @@
+= Savings
+
+== `SavingsAccountWritePlatformService`
+
+TBD
+
+.Retry-able service function `postInterest`
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountWritePlatformServiceJpaRepositoryImpl.java[lines=586..627]
+----
+
+.Fallback function `fallbackPostInterest`
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountWritePlatformServiceJpaRepositoryImpl.java[lines=1402..1414]
+----
+
+.Retry configuration for `postInterest`
+[source,properties]
+----
+include::{rootdir}/fineract-provider/src/main/resources/application.properties[lines=186..191]
+----

@@ -1125,7 +1125,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         GroupGeneralData group = null;
         if (groupId != null) {
             group = this.groupReadPlatformService.retrieveOne(groupId);
-            officeId = group.officeId();
+            officeId = group.getOfficeId();
         }
 
         final Collection<SavingsProductData> productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();

@@ -146,7 +146,7 @@ public class GuarantorData {
     public static GuarantorData mergeClientData(final ClientData clientData, final GuarantorData guarantorData) {
         return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.clientRelationshipType, guarantorData.entityId,
                 guarantorData.guarantorType, clientData.getFirstname(), clientData.getLastname(), null, null, null, null, null, null, null,
-                null, null, null, clientData.getOfficeName(), clientData.getActivationDate(), clientData.getExternalId(),
+                null, null, null, clientData.getOfficeName(), clientData.getActivationDate(), clientData.getExternalId().getValue(),
                 guarantorData.status, guarantorData.guarantorFundingDetails, null, guarantorData.allowedClientRelationshipTypes,
                 guarantorData.accountLinkingOptions);
     }

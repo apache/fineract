@@ -34,5 +34,5 @@ public final class AuditSearchData {
     private final Collection<AppUserData> appUsers;
     private final List<String> actionNames;
     private final List<String> entityNames;
-    private final Collection<ProcessingResultLookup> processingResults;
+    private final Collection<ProcessingResultLookup> statuses;
 }

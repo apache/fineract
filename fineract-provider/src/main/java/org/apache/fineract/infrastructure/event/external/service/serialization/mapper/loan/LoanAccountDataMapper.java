@@ -19,8 +19,10 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
 
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
+import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -33,4 +35,6 @@ public interface LoanAccountDataMapper {
     @Mapping(source = "topup", target = "isTopup")
     @Mapping(source = "interestRecalculationEnabled", target = "isInterestRecalculationEnabled")
     LoanAccountDataV1 map(LoanAccountData source);
+
+    LoanTransactionDataV1 map(LoanTransactionData source);
 }

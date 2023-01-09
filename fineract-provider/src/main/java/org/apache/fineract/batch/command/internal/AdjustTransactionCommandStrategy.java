@@ -44,10 +44,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AdjustTransactionCommandStrategy implements CommandStrategy {
 
+    /**
+     * Loan transactions api resource {@link LoanTransactionsApiResource}.
+     */
     private final LoanTransactionsApiResource loanTransactionsApiResource;
 
     @Override
-    public BatchResponse execute(final BatchRequest request, UriInfo uriInfo) {
+    public BatchResponse execute(final BatchRequest request, final UriInfo uriInfo) {
         final BatchResponse response = new BatchResponse();
         final String responseBody;
 
@@ -58,10 +61,18 @@ public class AdjustTransactionCommandStrategy implements CommandStrategy {
 
         // Get the loan and transaction ids for use in loanTransactionsApiResource
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
-        Long loanId = Long.parseLong(pathParameters.get(1));
-        Long transactionId = Long.parseLong(pathParameters.get(3));
-        Map<String, String> queryParameters = CommandStrategyUtils.getQueryParameters(relativeUrl);
-        String command = queryParameters.get("command");
+        final Long loanId = Long.parseLong(pathParameters.get(1));
+
+        final String transactionIdPathParameter = pathParameters.get(3);
+        Long transactionId;
+        if (transactionIdPathParameter.contains("?")) {
+            transactionId = Long.parseLong(pathParameters.get(3).substring(0, pathParameters.get(3).indexOf("?")));
+        } else {
+            transactionId = Long.parseLong(pathParameters.get(3));
+        }
+
+        final Map<String, String> queryParameters = CommandStrategyUtils.getQueryParameters(relativeUrl);
+        final String command = queryParameters.get("command");
 
         // Calls 'adjustLoanTransaction' function from 'loanTransactionsApiResource'
         responseBody = loanTransactionsApiResource.adjustLoanTransaction(loanId, transactionId, request.getBody(), command);

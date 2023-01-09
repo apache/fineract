@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <!-- V366_remove_leading_or_trailing_spaces_in_reportnames.sql -->
+    <changeSet author="fineract" id="366">
+        <sql>
+            UPDATE stretchy_report SET report_name = TRIM(report_name) WHERE id IN (SELECT id FROM (SELECT id FROM stretchy_report WHERE CHAR_LENGTH(report_name) != CHAR_LENGTH(TRIM(report_name)))Y);
+        </sql>
+    </changeSet>
+    <!-- V367__reports_for_email_campaigns.sql -->
+    <changeSet author="fineract" id="367">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM stretchy_report WHERE report_name IN ('Loan Approved - Email','Loan Rejected - Email','Loan Repayment - Email');
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="stretchy_report">
+            <column name="report_name" value="Loan Approved - Email"/>
+            <column name="report_type" value="Email"/>
+            <column name="report_subtype" value="Triggered"/>
+            <column name="report_category"/>
+            <column name="report_sql"
+                    value="select  ml.id as loanId,  ifnull(mc.id,mc2.id) as id,  ifnull(mc.firstname,mc2.firstname) as firstname,  &#10;ifnull(mc.middlename,ifnull(mc2.middlename,(''))) as middlename,  ifnull(mc.lastname,mc2.lastname) as lastname,  &#10;ifnull(mc.display_name,mc2.display_name) as display_name,  ifnull(mc.status_enum,mc2.status_enum) as status_enum, &#10;ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no, ifnull(mg.office_id,mc2.office_id) as office_id, ifnull(mg.staff_id,mc2.staff_id) as staff_id, &#10;mg.id as group_id, mg.display_name as group_name, ifnull(mc.email_address,mc2.email_address) as emailAddress&#10;from m_loan ml left join m_group mg on mg.id = ml.group_id &#10;left join m_group_client mgc on mgc.group_id = mg.id &#10;left join m_client mc on mc.id = mgc.client_id &#10;left join m_client mc2 on mc2.id = ml.client_id&#10;WHERE (mc.status_enum = 300 or mc2.status_enum = 300) and (mc.email_address is not null or mc2.email_address is not null) and ml.id = ${loanId}&#10;"/>
+            <column name="description" value="Loan and client data of approved loan"/>
+            <column name="core_report" valueBoolean="false"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+        <insert tableName="stretchy_report">
+            <column name="report_name" value="Loan Rejected - Email"/>
+            <column name="report_type" value="Email"/>
+            <column name="report_subtype" value="Triggered"/>
+            <column name="report_category"/>
+            <column name="report_sql"
+                    value="select  ml.id as loanId,  ifnull(mc.id,mc2.id) as id,  ifnull(mc.firstname,mc2.firstname) as firstname,  &#10;ifnull(mc.middlename,ifnull(mc2.middlename,(''))) as middlename,  ifnull(mc.lastname,mc2.lastname) as lastname,  &#10;ifnull(mc.display_name,mc2.display_name) as display_name,  ifnull(mc.status_enum,mc2.status_enum) as status_enum, &#10;ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no, ifnull(mg.office_id,mc2.office_id) as office_id, ifnull(mg.staff_id,mc2.staff_id) as staff_id, &#10;mg.id as group_id, mg.display_name as group_name, ifnull(mc.email_address,mc2.email_address) as emailAddress&#10;from m_loan ml left join m_group mg on mg.id = ml.group_id &#10;left join m_group_client mgc on mgc.group_id = mg.id &#10;left join m_client mc on mc.id = mgc.client_id &#10;left join m_client mc2 on mc2.id = ml.client_id&#10;WHERE (mc.status_enum = 300 or mc2.status_enum = 300) and (mc.email_address is not null or mc2.email_address is not null) and ml.id = ${loanId}&#10;"/>
+            <column name="description" value="Loan and client data of rejected loan"/>
+            <column name="core_report" valueBoolean="false"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+        <insert tableName="stretchy_report">
+            <column name="report_name" value="Loan Repayment - Email"/>
+            <column name="report_type" value="Email"/>
+            <column name="report_subtype" value="Triggered"/>
+            <column name="report_category"/>
+            <column name="report_sql"
+                    value="select  ml.id as loanId,  ifnull(mc.id,mc2.id) as id,  ifnull(mc.firstname,mc2.firstname) as firstname,  &#10;ifnull(mc.middlename,ifnull(mc2.middlename,(''))) as middlename,  ifnull(mc.lastname,mc2.lastname) as lastname,  &#10;ifnull(mc.display_name,mc2.display_name) as display_name,  ifnull(mc.status_enum,mc2.status_enum) as status_enum, &#10;ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no, ifnull(mg.office_id,mc2.office_id) as office_id, ifnull(mg.staff_id,mc2.staff_id) as staff_id, &#10;mg.id as group_id, mg.display_name as group_name, ifnull(mc.email_address,mc2.email_address) as emailAddress, lt.amount as repaymentAmount &#10;from m_loan_transaction lt join m_loan ml on ml.id=lt.loan_id left join m_group mg on mg.id = ml.group_id &#10;left join m_group_client mgc on mgc.group_id = mg.id &#10;left join m_client mc on mc.id = mgc.client_id &#10;left join m_client mc2 on mc2.id = ml.client_id&#10;WHERE (mc.status_enum = 300 or mc2.status_enum = 300) and (mc.email_address is not null or mc2.email_address is not null) and ml.id = ${loanId} and lt.id = ${loanTransactionId}&#10;"/>
+            <column name="description" value="Loan and client data of rejected loan"/>
+            <column name="core_report" valueBoolean="false"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+        <modifyDataType tableName="scheduled_email_campaign" columnName="email_attachment_file_format" newDataType="VARCHAR(10) NULL"/>
+        <modifyDataType tableName="scheduled_email_campaign" columnName="stretchy_report_id" newDataType="INT NULL"/>
+    </changeSet>
+    <!-- V368__collateral_management.sql -->
+    <changeSet author="fineract" id="368">
+        <createTable tableName="m_collateral_management">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quality" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_price" type="DECIMAL(20, 5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_type" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pct_to_base" type="DECIMAL(20, 5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="NULL" name="currency" type="BIGINT"/>
+        </createTable>
+        <createIndex indexName="fkCurrencyCode" tableName="m_collateral_management">
+            <column defaultValueComputed="NULL" name="currency"/>
+        </createIndex>
+        <createTable tableName="m_client_collateral_management">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="quantity" type="DECIMAL(20, 5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="NULL" name="client_id" type="BIGINT"/>
+            <column defaultValueComputed="NULL" name="collateral_id" type="BIGINT"/>
+        </createTable>
+        <createIndex indexName="fkClient" tableName="m_client_collateral_management">
+            <column defaultValueComputed="NULL" name="client_id"/>
+        </createIndex>
+        <createIndex indexName="fkCollateral" tableName="m_client_collateral_management">
+            <column defaultValueComputed="NULL" name="collateral_id"/>
+        </createIndex>
+        <createTable tableName="m_loan_collateral_management">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="quantity" type="DECIMAL(20, 5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="NULL" name="loan_id" type="BIGINT"/>
+            <column defaultValueComputed="NULL" name="client_collateral_id" type="BIGINT"/>
+            <column defaultValueBoolean="false" name="is_released" type="boolean"/>
+            <column defaultValueComputed="NULL" name="transaction_id" type="BIGINT"/>
+        </createTable>
+        <createIndex indexName="fkClientCollateral" tableName="m_loan_collateral_management">
+            <column defaultValueComputed="NULL" name="client_collateral_id"/>
+        </createIndex>
+        <createIndex indexName="fkLoan" tableName="m_loan_collateral_management">
+            <column defaultValueComputed="NULL" name="loan_id"/>
+        </createIndex>
+        <createIndex indexName="fkTransaction" tableName="m_loan_collateral_management">
+            <column defaultValueComputed="NULL" name="transaction_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="collateral_id" baseTableName="m_client_collateral_management"
+                constraintName="fkCollateral" deferrable="false" initiallyDeferred="false"
+                onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                referencedTableName="m_collateral_management" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="currency" baseTableName="m_collateral_management"
+                constraintName="fkCurrencyCode" deferrable="false" initiallyDeferred="false"
+                onDelete="CASCADE" onUpdate="RESTRICT" referencedColumnNames="id"
+                referencedTableName="m_currency" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="client_id" baseTableName="m_client_collateral_management"
+                constraintName="fkClient" deferrable="false" initiallyDeferred="false"
+                onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                referencedTableName="m_client" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="client_collateral_id" baseTableName="m_loan_collateral_management"
+                constraintName="fkClientCollateral" deferrable="false" initiallyDeferred="false"
+                onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                referencedTableName="m_client_collateral_management" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_loan_collateral_management"
+                constraintName="fkLoan" deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+                onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="m_loan"
+                validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="transaction_id" baseTableName="m_loan_collateral_management"
+                constraintName="fkTransaction" deferrable="false" initiallyDeferred="false"
+                onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                referencedTableName="m_loan_transaction" validate="true"/>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="CREATE_CLIENT_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="CLIENT_COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="CREATE_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DELETE_CLIENT_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="CLIENT_COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DELETE_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DELETE_LOAN_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="LOAN_COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_CLIENT_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="CLIENT_COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <!-- V369__repayment_with_post_dated_checks.sql -->
+    <changeSet author="fineract" id="369">
+        <createTable tableName="m_repayment_with_post_dated_checks">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="check_no" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="amount" type="DECIMAL(20, 5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="NULL" name="loan_id" type="BIGINT"/>
+            <column defaultValueComputed="NULL" name="repayment_id" type="BIGINT"/>
+            <column name="account_no" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repayment_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="status" type="SMALLINT"/>
+        </createTable>
+        <createIndex indexName="fkloanrepayment" tableName="m_repayment_with_post_dated_checks">
+            <column defaultValueComputed="NULL" name="loan_id"/>
+        </createIndex>
+        <createIndex indexName="fkrepaymentwithpostdated" tableName="m_repayment_with_post_dated_checks">
+            <column defaultValueComputed="NULL" name="repayment_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_repayment_with_post_dated_checks"
+                                 constraintName="fkloanrepayment" deferrable="false" initiallyDeferred="false"
+                                 onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                                 referencedTableName="m_loan" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="repayment_id" baseTableName="m_repayment_with_post_dated_checks"
+                                 constraintName="fkrepaymentwithpostdated" deferrable="false" initiallyDeferred="false"
+                                 onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                                 referencedTableName="m_loan_repayment_schedule" validate="true"/>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_REPAYMENT_WITH_POSTDATEDCHECKS"/>
+            <column name="entity_name" value="REPAYMENT_WITH_POSTDATEDCHECKS"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DELETE_REPAYMENT_WITH_POSTDATEDCHECKS"/>
+            <column name="entity_name" value="REPAYMENT_WITH_POSTDATEDCHECKS"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="BOUNCE_REPAYMENT_WITH_POSTDATEDCHECKS"/>
+            <column name="entity_name" value="REPAYMENT_WITH_POSTDATEDCHECKS"/>
+            <column name="action_name" value="BOUNCE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <!-- V370__message_gateway_hook_template.sql -->
+    <changeSet author="fineract" id="370">
+        <insert tableName="m_hook_templates">
+            <column name="id" valueNumeric="4"/>
+            <column name="name" value="Message Gateway"/>
+        </insert>
+        <insert tableName="m_hook_schema">
+            <column name="id" valueNumeric="11"/>
+            <column name="hook_template_id" valueNumeric="4"/>
+            <column name="field_type" value="string"/>
+            <column name="field_name" value="SMS Provider Id"/>
+            <column name="placeholder"/>
+            <column name="optional" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <!-- V371__loan_net_disbursal_amount.sql -->
+    <changeSet author="fineract" id="371">
+        <addColumn tableName="m_loan">
+            <column name="net_disbursal_amount"
+                type="DECIMAL(19, 6)">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+        <addColumn tableName="m_loan_disbursement_detail">
+            <column name="net_disbursal_amount"
+                type="DECIMAL(19, 6)" defaultValueComputed="NULL" />
+        </addColumn>
+    </changeSet>
+    <!-- V372__fixed_principal_percentage.sql -->
+    <changeSet author="fineract" id="372">
+        <addColumn tableName="m_product_loan">
+            <column name="fixed_principal_percentage_per_installment"
+                type="DECIMAL(5, 2)" defaultValueComputed="NULL" />
+        </addColumn>
+        <addColumn tableName="m_loan">
+            <column name="fixed_principal_percentage_per_installment"
+                type="DECIMAL(5, 2)" defaultValueComputed="NULL" />
+        </addColumn>
+    </changeSet>
+    <!-- V373__node_aware_scheduler_jobs.sql -->
+    <changeSet author="fineract" id="373">
+        <addColumn tableName="job">
+            <column name="node_id"
+                type="INT" defaultValueComputed="1" />
+        </addColumn>
+        <addColumn tableName="job">
+            <column name="is_mismatched_job"
+                type="boolean" defaultValueBoolean="true" />
+        </addColumn>
+        <insert tableName="job">
+            <column name="id" valueNumeric="31"/>
+            <column name="name" value="Execute All Dirty Jobs"/>
+            <column name="display_name" value="Execute All Dirty Jobs"/>
+            <column name="cron_expression" value="0 1 0 1/1 * ? *"/>
+            <column name="create_time" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="task_priority" valueNumeric="5"/>
+            <column name="group_name"/>
+            <column name="previous_run_start_time"/>
+            <column name="job_key" value="Execute All Dirty JobsJobDetail1 _ DEFAULT"/>
+            <column name="initializing_errorlog"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="currently_running" valueBoolean="false"/>
+            <column name="updates_allowed" valueBoolean="true"/>
+            <column name="scheduler_group" valueNumeric="0"/>
+            <column name="is_misfired" valueBoolean="false"/>
+            <column name="node_id" valueNumeric="0"/>
+            <column name="is_mismatched_job" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <!-- V374__adding_expenseliablity_to_paymentorfeetype.sql -->
+    <changeSet author="fineract" id="374">
+        <addColumn tableName="c_configuration">
+            <column name="string_value"
+                type="VARCHAR(100)" defaultValueComputed="NULL" position="5"/>
+        </addColumn>
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="35"/>
+            <column name="name" value="account-mapping-for-payment-type"/>
+            <column name="value"/>
+            <column name="date_value"/>
+            <column name="string_value" value="Asset"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description"
+                    value="Asset: default for asset, Use comma seperated values for Liability, Asset and Expense accounts"/>
+        </insert>
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="36"/>
+            <column name="name" value="account-mapping-for-charge"/>
+            <column name="value"/>
+            <column name="date_value"/>
+            <column name="string_value" value="Income"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description"
+                    value="Income: default for Income, Use comma seperated values for Income, Liability and Expense accounts"/>
+        </insert>
+    </changeSet>
+    <!-- V375__transfer_fixed_deposit_interest_next_day_for_period_end_posting.sql -->
+    <changeSet author="fineract" id="375">
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="37"/>
+            <column name="name" value="fixed-deposit-transfer-interest-next-day-for-period-end-posting"/>
+            <column name="value"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="false"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description" value="Transfer fixed transfer interest next day(t+1) for period end posting"/>
+        </insert>
+    </changeSet>
+    <!-- V376__savings_last_transaction_date.sql -->
+    <changeSet author="fineract" id="376">
+        <addColumn tableName="m_savings_account">
+            <column name="interest_posted_till_date"
+                type="date" defaultValueComputed="NULL" />
+        </addColumn>
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="38"/>
+            <column name="name" value="allow-backdated-transaction-before-interest-posting"/>
+            <column name="value" valueNumeric="0"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description" value="Avoid retrieving all transactions in a savings account"/>
+        </insert>
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="39"/>
+            <column name="name" value="allow-backdated-transaction-before-interest-posting-date-for-days"/>
+            <column name="value" valueNumeric="0"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="false"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description" value="One time configuration to relax the backdated transactions"/>
+        </insert>
+    </changeSet>
+    <!-- V377__job_prams_for_parallelizing_savings_interest_posting.sql -->
+    <changeSet author="fineract" id="377">
+        <insert tableName="job_parameters">
+            <column name="id" valueNumeric="4"/>
+            <column name="job_id" valueNumeric="6"/>
+            <column name="parameter_name" value="thread-pool-size"/>
+            <column name="parameter_value" valueNumeric="10"/>
+        </insert>
+        <insert tableName="job_parameters">
+            <column name="id" valueNumeric="5"/>
+            <column name="job_id" valueNumeric="6"/>
+            <column name="parameter_name" value="batch-size"/>
+            <column name="parameter_value" valueNumeric="100"/>
+        </insert>
+    </changeSet>
+    <!-- V378__configuration_for_variable_length_acoountNumber.sql -->
+    <changeSet author="fineract" id="378">
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="40"/>
+            <column name="name" value="custom-account-number-length"/>
+            <column name="value"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="false"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description"
+                    value="if enabled, the value if this configuration will set accounnumber length"/>
+        </insert>
+    </changeSet>
+    <!-- V379__user_cannot_change_password.sql -->
+    <changeSet author="fineract" id="379">
+        <addColumn tableName="m_appuser">
+            <column defaultValueBoolean="false" name="cannot_change_password" type="boolean"/>
+        </addColumn>
+    </changeSet>
+    <!-- V380__configuration_for_random_account_number.sql -->
+    <changeSet author="fineract" id="380">
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="41"/>
+            <column name="name" value="random-account-number"/>
+            <column name="value"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="false"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description"
+                    value="if enabled, the client accounts, saving accounts, loan accounts will be created with Random Account Number"/>
+        </insert>
+    </changeSet>
+    <!-- V381__update_currencies_new_currencies.sql -->
+    <changeSet author="fineract" id="381">
+        <insert tableName="m_currency">
+            <column name="id" valueNumeric="164"/>
+            <column name="code" value="SSP"/>
+            <column name="decimal_places" valueNumeric="2"/>
+            <column name="currency_multiplesof"/>
+            <column name="display_symbol" value="SS£"/>
+            <column name="name" value="South Sudanese Pound"/>
+            <column name="internationalized_name_code" value="currency.SSP"/>
+        </insert>
+        <update tableName="m_currency">
+            <column name="name" value="Eswatini Lilangeni"/>
+            <where>code = 'SZL'</where>
+        </update>
+        <update tableName="m_organisation_currency">
+            <column name="name" value="Eswatini Lilangeni"/>
+            <where>code = 'SZL'</where>
+        </update>
+    </changeSet>
+    <!-- V390__clientdoc-code.sql -->
+    <changeSet author="fineract" id="390">
+        <insert tableName="m_code">
+            <column name="id" valueNumeric="34"/>
+            <column name="code_name" value="Customer Documents"/>
+            <column name="is_system_defined" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <!-- V391__add_transaction_ref_column.sql -->
+    <changeSet author="fineract" id="391">
+        <addColumn tableName="m_savings_account_transaction">
+            <column name="ref_no" type="VARCHAR(128)">
+                <constraints unique="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <!-- V392__interest_recovery_conf_for_rescedule.sql -->
+    <changeSet author="fineract" id="392">
+        <delete tableName="c_configuration">
+            <where>name = 'is-interest-to-be-appropriated-equally-when-greater-than-emi'</where>
+        </delete>
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="42"/>
+            <column name="name" value="is-interest-to-be-recovered-first-when-greater-than-emi"/>
+            <column name="value" valueNumeric="0"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="false"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description"
+                    value="If enabled, when interest amount is greater than EMI, the additional interest is recovered first before principal"/>
+        </insert>
+        <insert tableName="c_configuration">
+            <column name="id" valueNumeric="43"/>
+            <column name="name" value="is-principal-compounding-disabled-for-overdue-loans"/>
+            <column name="value" valueNumeric="0"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="false"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description"
+                    value="If enabled, it donot consider principal of an unpaid installment for calculating interest of next installment. this is for testing back-dated loan schedule"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

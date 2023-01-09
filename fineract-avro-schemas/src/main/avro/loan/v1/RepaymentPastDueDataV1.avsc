@@ -1,0 +1,47 @@
+{
+    "name": "RepaymentPastDueDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "totalAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "principalAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "interestAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "feeAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "penaltyAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        }
+    ]
+}

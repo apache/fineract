@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.service.database;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -56,6 +57,18 @@ public class MySQLQueryService implements DatabaseQueryService {
         final SqlRowSet columnDefinitions = jdbcTemplate.queryForRowSet(sql, new Object[] { tableName }); // NOSONAR
         if (columnDefinitions.next()) {
             return columnDefinitions;
+        } else {
+            throw new IllegalArgumentException("Table " + tableName + " is not found");
+        }
+    }
+
+    @Override
+    public List<IndexDetail> getTableIndexes(DataSource dataSource, String tableName) {
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        final String sql = "SELECT i.INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS i WHERE TABLE_SCHEMA = schema() AND TABLE_NAME = ?";
+        final SqlRowSet indexDefinitions = jdbcTemplate.queryForRowSet(sql, new Object[] { tableName }); // NOSONAR
+        if (indexDefinitions.next()) {
+            return DatabaseIndexMapper.getIndexDetails(indexDefinitions);
         } else {
             throw new IllegalArgumentException("Table " + tableName + " is not found");
         }

@@ -1,0 +1,23 @@
+{
+    "name": "LoanChargeDataRangeViewV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": "long"
+        },
+        {
+            "name": "name",
+            "type": "string"
+        },
+        {
+            "name": "currency",
+            "type": ["org.apache.fineract.avro.generic.v1.CurrencyDataV1"]
+        },
+        {
+            "name": "amount",
+            "type": "bigdecimal"
+        }
+    ]
+}

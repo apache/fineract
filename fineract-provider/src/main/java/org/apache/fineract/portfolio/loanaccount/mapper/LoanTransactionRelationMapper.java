@@ -30,6 +30,7 @@ public interface LoanTransactionRelationMapper {
 
     @Mapping(target = "fromLoanTransaction", source = "source.fromTransaction.id")
     @Mapping(target = "toLoanTransaction", source = "source.toTransaction.id")
+    @Mapping(target = "toLoanCharge", source = "source.toCharge.id")
     @Mapping(target = "amount", source = "source.toTransaction.amount")
     @Mapping(target = "paymentType", source = "source.toTransaction.paymentDetail.paymentType.name")
     LoanTransactionRelationData map(LoanTransactionRelation source);

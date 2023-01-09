@@ -17,7 +17,7 @@
 # under the License.
 #
 
-Feature: Commands Service
+Feature: Commands Provider
 
   @template
   Scenario Outline: Verify that command providers are injected

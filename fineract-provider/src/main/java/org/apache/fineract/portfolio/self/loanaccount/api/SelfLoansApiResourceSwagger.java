@@ -165,9 +165,9 @@ final class SelfLoansApiResourceSwagger {
             public String description;
         }
 
-        static final class GetLoansLoanIdTimeline {
+        static final class GetSelfLoanIdTimeline {
 
-            private GetLoansLoanIdTimeline() {}
+            private GetSelfLoanIdTimeline() {}
 
             @Schema(example = "[2012, 4, 3]")
             public LocalDate submittedOnDate;
@@ -201,9 +201,9 @@ final class SelfLoansApiResourceSwagger {
             public LocalDate closedOnDate;
         }
 
-        static final class GetLoansLoanIdSummary {
+        static final class GetSelfLoanIdSummary {
 
-            private GetLoansLoanIdSummary() {}
+            private GetSelfLoanIdSummary() {}
 
             static final class GetLoansLoanIdEmiVariations {
 
@@ -434,6 +434,32 @@ final class SelfLoansApiResourceSwagger {
             public Boolean inArrears;
             @Schema(example = "false")
             public Boolean isNPA;
+            @Schema(example = "0.000000")
+            public Double totalMerchantRefund;
+            @Schema(example = "0.000000")
+            public Double totalMerchantRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalPayoutRefund;
+            @Schema(example = "0.000000")
+            public Double totalPayoutRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalGoodwillCredit;
+            @Schema(example = "0.000000")
+            public Double totalGoodwillCreditReversed;
+            @Schema(example = "0.000000")
+            public Double totalChargeAdjustment;
+            @Schema(example = "0.000000")
+            public Double totalChargeAdjustmentReversed;
+            @Schema(example = "0.000000")
+            public Double totalChargeback;
+            @Schema(example = "0.000000")
+            public Double totalCreditBalanceRefund;
+            @Schema(example = "0.000000")
+            public Double totalCreditBalanceRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalRepaymentTransaction;
+            @Schema(example = "0.000000")
+            public Double totalRepaymentTransactionReversed;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
         }
 
@@ -484,8 +510,8 @@ final class SelfLoansApiResourceSwagger {
         public GetLoansLoanIdInterestCalculationPeriodType interestCalculationPeriodType;
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
-        public GetLoansLoanIdTimeline timeline;
-        public GetLoansLoanIdSummary summary;
+        public GetSelfLoanIdTimeline timeline;
+        public GetSelfLoanIdSummary summary;
     }
 
     @Schema(description = "GetSelfLoansLoanIdTransactionsTransactionIdResponse")
@@ -528,7 +554,7 @@ final class SelfLoansApiResourceSwagger {
         public LocalDate date;
         @Schema(example = "false")
         public Boolean manuallyReversed;
-        public GetSelfLoansLoanIdResponse.GetLoansLoanIdSummary.GetLoansLoanIdOverdueCharges.GetLoanCurrency currency;
+        public GetSelfLoansLoanIdResponse.GetSelfLoanIdSummary.GetLoansLoanIdOverdueCharges.GetLoanCurrency currency;
         @Schema(example = "559.88")
         public Float amount;
         @Schema(example = "559.88")
@@ -576,7 +602,7 @@ final class SelfLoansApiResourceSwagger {
         public Double percentage;
         @Schema(example = "0")
         public Double amountPercentageAppliedTo;
-        public GetSelfLoansLoanIdResponse.GetLoansLoanIdSummary.GetLoansLoanIdOverdueCharges.GetLoanCurrency currency;
+        public GetSelfLoansLoanIdResponse.GetSelfLoanIdSummary.GetLoansLoanIdOverdueCharges.GetLoanCurrency currency;
         @Schema(example = "100")
         public Float amount;
         @Schema(example = "0")

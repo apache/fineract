@@ -1,0 +1,47 @@
+{
+    "name": "LoanTransactionRelationDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "fromLoanTransaction",
+            "type": "long"
+        },
+        {
+            "default": null,
+            "name": "toLoanTransaction",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "toLoanCharge",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "amount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "relationType",
+            "type": "string"
+        },
+        {
+            "default": null,
+            "name": "paymentType",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

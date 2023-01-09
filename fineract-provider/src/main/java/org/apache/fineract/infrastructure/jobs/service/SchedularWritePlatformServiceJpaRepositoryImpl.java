@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +134,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
 
     @Transactional
     @Override
+    @Retry(name = "processJobDetailForExecution", fallbackMethod = "fallbackProcessJobDetailForExecution")
     public boolean processJobDetailForExecution(final String jobKey, final String triggerType) {
         boolean isStopExecution = false;
         final ScheduledJobDetail scheduledJobDetail = this.scheduledJobDetailsRepository.findByJobKeyWithLock(jobKey);
@@ -149,6 +151,11 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
         }
         this.scheduledJobDetailsRepository.save(scheduledJobDetail);
         return isStopExecution;
+    }
+
+    @SuppressWarnings("unused")
+    private boolean fallbackProcessJobDetailForExecution(Exception e) {
+        return false;
     }
 
 }
