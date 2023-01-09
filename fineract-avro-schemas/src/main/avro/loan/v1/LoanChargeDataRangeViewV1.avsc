@@ -13,7 +13,7 @@
         },
         {
             "name": "currency",
-            "type": ["org.apache.fineract.avro.generic.v1.CurrencyDataV1"]
+            "type": "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
         },
         {
             "name": "amount",
