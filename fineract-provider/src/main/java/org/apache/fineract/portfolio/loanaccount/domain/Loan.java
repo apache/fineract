@@ -3253,10 +3253,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (this.loanProduct.isMultiDisburseLoan() && adjustedTransaction == null) {
             BigDecimal totalDisbursed = getDisbursedAmount();
-            if (totalDisbursed.compareTo(this.summary.getTotalPrincipalRepaid()) < 0) {
-                final String errorMessage = "The transaction cannot be done before the loan disbursement: "
-                        + getApprovedOnDate().toString();
-                throw new InvalidLoanStateTransitionException("transaction", "cannot.be.done.before.disbursement", errorMessage);
+            BigDecimal totalPrincipalAdjusted = this.summary.getTotalPrincipalAdjustments();
+            BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted);
+            if (totalPrincipalCredited.compareTo(this.summary.getTotalPrincipalRepaid()) < 0) {
+                final String errorMessage = "The transaction amount cannot exceed threshold.";
+                throw new InvalidLoanStateTransitionException("transaction", "amount.exceeds.threshold", errorMessage);
             }
         }
 
@@ -3318,11 +3319,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (this.loanProduct.isMultiDisburseLoan()) {
             BigDecimal totalDisbursed = getDisbursedAmount();
-            if (totalDisbursed.compareTo(this.summary.getTotalPrincipalRepaid()) < 0
+            BigDecimal totalPrincipalAdjusted = this.summary.getTotalPrincipalAdjustments();
+            BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted);
+            if (totalPrincipalCredited.compareTo(this.summary.getTotalPrincipalRepaid()) < 0
                     && this.repaymentScheduleDetail().getPrincipal().minus(totalDisbursed).isGreaterThanZero()) {
-                final String errorMessage = "The transaction cannot be done before the loan disbursement: "
-                        + getApprovedOnDate().toString();
-                throw new InvalidLoanStateTransitionException("transaction", "cannot.be.done.before.disbursement", errorMessage);
+                final String errorMessage = "The transaction amount cannot exceed threshold.";
+                throw new InvalidLoanStateTransitionException("transaction", "amount.exceeds.threshold", errorMessage);
             }
         }
 
@@ -6197,10 +6199,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (this.loanProduct.isMultiDisburseLoan() && adjustedTransaction == null) {
             BigDecimal totalDisbursed = getDisbursedAmount();
-            if (totalDisbursed.compareTo(this.summary.getTotalPrincipalRepaid()) < 0) {
-                final String errorMessage = "The transaction cannot be done before the loan disbursement: "
-                        + getApprovedOnDate().toString();
-                throw new InvalidLoanStateTransitionException("transaction", "cannot.be.done.before.disbursement", errorMessage);
+            BigDecimal totalPrincipalAdjusted = this.summary.getTotalPrincipalAdjustments();
+            BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted);
+            if (totalPrincipalCredited.compareTo(this.summary.getTotalPrincipalRepaid()) < 0) {
+                final String errorMessage = "The transaction amount cannot exceed threshold.";
+                throw new InvalidLoanStateTransitionException("transaction", "amount.exceeds.threshold", errorMessage);
             }
         }
 
