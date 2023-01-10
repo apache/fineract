@@ -256,6 +256,7 @@ jib {
     container {
         creationTime = 'USE_CURRENT_TIMESTAMP'
         mainClass = 'org.apache.fineract.ServerApplication'
+        extraClasspath = ['/app/plugins/*']
         jvmFlags = [
             '-Xms1G',
             '-XshowSettings:vm',
