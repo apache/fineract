@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,15 +71,15 @@ public class PurgeProcessedCommandsTaskletTest {
     @Test
     public void givenEventsForPurgeWhenTaskExecutionThenEventsPurgeForDaysCriteria() {
         // given
-        ArgumentCaptor<LocalDate> dateCriteriaCaptor = ArgumentCaptor.forClass(LocalDate.class);
+        ArgumentCaptor<OffsetDateTime> dateCriteriaCaptor = ArgumentCaptor.forClass(OffsetDateTime.class);
         when(configurationDomainService.retrieveProcessedCommandsPurgeDaysCriteria()).thenReturn(2L);
         // when
         resultStatus = underTest.execute(stepContribution, chunkContext);
         // then
         verify(repository, times(1)).deleteOlderEventsWithStatus(Mockito.any(), Mockito.any());
         verify(repository).deleteOlderEventsWithStatus(Mockito.any(), dateCriteriaCaptor.capture());
-        LocalDate expectedDateForPurgeCriteriaTest = DateUtils.getBusinessLocalDate().minusDays(2);
-        LocalDate actualDateForPurgeCriteria = dateCriteriaCaptor.getValue();
+        OffsetDateTime expectedDateForPurgeCriteriaTest = DateUtils.getOffsetDateTimeOfTenant().minusDays(2);
+        OffsetDateTime actualDateForPurgeCriteria = dateCriteriaCaptor.getValue();
         assertEquals(expectedDateForPurgeCriteriaTest, actualDateForPurgeCriteria);
         assertEquals(RepeatStatus.FINISHED, resultStatus);
     }

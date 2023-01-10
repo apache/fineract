@@ -71,6 +71,10 @@
     "allowedVersions": "<=3.0.9"
   },
   {
+    "matchPackageNames": ["org.apache.tomcat:tomcat"],
+    "allowedVersions": "<=9.0.69"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"

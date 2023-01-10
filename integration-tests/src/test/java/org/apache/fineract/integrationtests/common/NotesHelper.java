@@ -18,11 +18,17 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.apache.fineract.client.models.GetResourceTypeResourceIdNotesNoteIdResponse;
+import org.apache.fineract.client.models.PostResourceTypeResourceIdNotesResponse;
+import org.apache.fineract.client.util.JSON;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class NotesHelper {
+
+    private static final Gson GSON = new JSON().getGson();
 
     private NotesHelper() {
 
@@ -132,6 +138,22 @@ public final class NotesHelper {
         String deleteLoanTransactionNoteURL = LOAN_TRANSACTION_URL + "/" + loanTransactionId + "/notes/" + noteId + "?"
                 + Utils.TENANT_IDENTIFIER;
         Utils.performServerDelete(requestSpec, responseSpec, deleteLoanTransactionNoteURL, "");
+    }
+
+    private static final String SAVINGS_URL = "/fineract-provider/api/v1/savings";
+
+    public static PostResourceTypeResourceIdNotesResponse createSavingsNote(RequestSpecification requestSpec,
+            ResponseSpecification responseSpec, Integer savingsId, String request) {
+        final String noteURL = SAVINGS_URL + "/" + savingsId + "/notes?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerPost(requestSpec, responseSpec, noteURL, request);
+        return GSON.fromJson(response, PostResourceTypeResourceIdNotesResponse.class);
+    }
+
+    public static GetResourceTypeResourceIdNotesNoteIdResponse getSavingsNote(RequestSpecification requestSpec,
+            ResponseSpecification responseSpec, Integer savingsId, Integer noteId) {
+        final String noteURL = SAVINGS_URL + "/" + savingsId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, noteURL);
+        return GSON.fromJson(response, GetResourceTypeResourceIdNotesNoteIdResponse.class);
     }
 
 }

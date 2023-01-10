@@ -27,10 +27,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.exception.ExternalEventConfigurationNotFoundException;
+import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventSourceService;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -41,11 +43,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExternalEventConfigurationValidationService implements InitializingBean {
 
-    private static final String EXTERNAL_EVENT_CLASSES_BASE_PACKAGE = "org.apache.fineract.infrastructure.event.business.domain";
     private static final String EXTERNAL_EVENT_BUSINESS_INTERFACE = BusinessEvent.class.getName();
     private static final String BULK_BUSINESS_EVENT = BulkBusinessEvent.class.getName();
     private final TenantDetailsService tenantDetailsService;
     private final JdbcTemplateFactory jdbcTemplateFactory;
+    private final ExternalEventSourceService externalEventSourceService;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -67,6 +69,10 @@ public class ExternalEventConfigurationValidationService implements Initializing
             throws ExternalEventConfigurationNotFoundException {
         log.info("Validating external event configuration for {}", tenant.getTenantIdentifier());
         List<String> eventConfigurations = getExternalEventConfigurationsForTenant(tenant);
+        if (log.isDebugEnabled()) {
+            log.debug("Missing from eventClasses: {}", CollectionUtils.subtract(eventClasses, eventConfigurations));
+            log.debug("Missing from eventConfigurations: {}", CollectionUtils.subtract(eventConfigurations, eventClasses));
+        }
 
         if (eventClasses.size() != eventConfigurations.size()) {
             throw new ExternalEventConfigurationNotFoundException();
@@ -88,7 +94,13 @@ public class ExternalEventConfigurationValidationService implements Initializing
     }
 
     private List<String> getAllEventClasses() {
-        try (ScanResult scanResult = new ClassGraph().enableAllInfo().acceptPackages(EXTERNAL_EVENT_CLASSES_BASE_PACKAGE).scan()) {
+        List<String> sourcePackages = externalEventSourceService.getSourcePackages();
+        if (log.isDebugEnabled()) {
+            log.debug("Packages {}", sourcePackages);
+        }
+        String[] sourcePackagesForScan = new String[sourcePackages.size()];
+        try (ScanResult scanResult = new ClassGraph().enableAllInfo().acceptPackages(sourcePackages.toArray(sourcePackagesForScan))
+                .scan()) {
             ClassInfoList businessEventClasses = scanResult.getClassesImplementing(EXTERNAL_EVENT_BUSINESS_INTERFACE)
                     .filter(classInfo -> (!classInfo.isInterface() && !classInfo.isAbstract()
                             && !classInfo.getName().equalsIgnoreCase(BULK_BUSINESS_EVENT)));

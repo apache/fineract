@@ -16,27 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.core.condition;
 
-import java.util.Optional;
-import org.apache.fineract.infrastructure.instancemode.api.FineractInstanceModeConstants;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
-public class EnableFineractEventsCondition implements Condition {
+public abstract class PropertiesCondition implements Condition {
 
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        boolean isReadModeEnabled = Optional.ofNullable(
-                context.getEnvironment().getProperty(FineractInstanceModeConstants.FINERACT_MODE_READ_ENABLE_PROPERTY, Boolean.class))
-                .orElse(true);
-        boolean isWriteModeEnabled = Optional.ofNullable(
-                context.getEnvironment().getProperty(FineractInstanceModeConstants.FINERACT_MODE_WRITE_ENABLE_PROPERTY, Boolean.class))
-                .orElse(true);
-        boolean isBatchModeEnabled = Optional.ofNullable(
-                context.getEnvironment().getProperty(FineractInstanceModeConstants.FINERACT_MODE_BATCH_ENABLE_PROPERTY, Boolean.class))
-                .orElse(true);
-        return !isReadModeEnabled && (isWriteModeEnabled || isBatchModeEnabled);
+        FineractProperties properties = SpringPropertiesFactory.get(context.getEnvironment(), FineractProperties.class);
+        return matches(properties);
     }
+
+    protected abstract boolean matches(FineractProperties properties);
 }

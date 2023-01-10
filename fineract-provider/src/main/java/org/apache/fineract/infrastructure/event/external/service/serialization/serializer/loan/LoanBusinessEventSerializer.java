@@ -18,15 +18,23 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
+import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanAccountDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +44,8 @@ public class LoanBusinessEventSerializer extends AbstractBusinessEventSerializer
 
     private final LoanReadPlatformService service;
     private final LoanAccountDataMapper mapper;
+    private final LoanChargeReadPlatformService loanChargeReadPlatformService;
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -45,8 +55,25 @@ public class LoanBusinessEventSerializer extends AbstractBusinessEventSerializer
     @Override
     protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         LoanBusinessEvent event = (LoanBusinessEvent) rawEvent;
-        LoanAccountData data = service.retrieveOne(event.get().getId());
+        Long loanId = event.get().getId();
+        LoanAccountData data = service.retrieveOne(loanId);
+
         data = service.fetchRepaymentScheduleData(data);
+
+        Collection<LoanChargeData> loanCharges = loanChargeReadPlatformService.retrieveLoanCharges(loanId);
+        if (CollectionUtils.isNotEmpty(loanCharges)) {
+            data.setCharges(loanCharges);
+        }
+
+        if (data.isActive()) {
+            CollectionData delinquentData = delinquencyReadPlatformService.calculateLoanCollectionData(loanId);
+            data.setDelinquent(delinquentData);
+        }
+
+        if (data.getSummary() != null) {
+            final Collection<LoanTransactionData> currentLoanTransactions = service.retrieveLoanTransactions(loanId);
+            data.setSummary(LoanSummaryData.withTransactionAmountsSummary(data.getSummary(), currentLoanTransactions));
+        }
         return mapper.map(data);
     }
 

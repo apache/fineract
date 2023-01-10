@@ -22,6 +22,7 @@ package org.apache.fineract.infrastructure.core.config;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
@@ -155,7 +156,14 @@ public class FineractProperties {
 
         private boolean enabled;
         private String eventQueueName;
+        private String eventTopicName;
         private String brokerUrl;
+        private String brokerUsername;
+        private String brokerPassword;
+
+        public boolean isBrokerPasswordProtected() {
+            return StringUtils.isNotBlank(brokerUsername) || StringUtils.isNotBlank(brokerPassword);
+        }
     }
 
     @Getter

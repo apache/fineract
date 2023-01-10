@@ -58,7 +58,8 @@ public enum LoanTransactionType {
     GOODWILL_CREDIT(23, "loanTransactionType.goodwillCredit"), //
     CHARGE_REFUND(24, "loanTransactionType.chargeRefund"), //
     CHARGEBACK(25, "loanTransactionType.chargeback"), //
-    CHARGE_ADJUSTMENT(26, "loanTransactionType.chargeAdjustment");
+    CHARGE_ADJUSTMENT(26, "loanTransactionType.chargeAdjustment"), //
+    CHARGE_OFF(27, "loanTransactionType.chargeOff");
 
     private final Integer value;
     private final String code;
@@ -100,6 +101,7 @@ public enum LoanTransactionType {
             case 24 -> LoanTransactionType.CHARGE_REFUND;
             case 25 -> LoanTransactionType.CHARGEBACK;
             case 26 -> LoanTransactionType.CHARGE_ADJUSTMENT;
+            case 27 -> LoanTransactionType.CHARGE_OFF;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -184,4 +186,7 @@ public enum LoanTransactionType {
         return this.equals(LoanTransactionType.CHARGE_ADJUSTMENT);
     }
 
+    public boolean isChargeOff() {
+        return this.equals(LoanTransactionType.CHARGE_OFF);
+    }
 }

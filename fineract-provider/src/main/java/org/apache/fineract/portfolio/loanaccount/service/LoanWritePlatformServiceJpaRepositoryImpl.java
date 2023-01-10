@@ -506,23 +506,24 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalBusinessEvent(loan));
 
-        Long entityId = loan.getId();
-        ExternalId externalId = loan.getExternalId();
+        Long disbursalTransactionId = null;
+        ExternalId disbursalTransactionExternalId = null;
 
-        // During a disbursement, the entityId should be the disbursement transaction id
         if (!isAccountTransfer) {
             // If accounting is not periodic accrual, the last transaction might be the accrual not the disbursement
             LoanTransaction disbursalTransaction = Lists.reverse(loan.getLoanTransactions()).stream()
                     .filter(e -> LoanTransactionType.DISBURSEMENT.equals(e.getTypeOf())).findFirst().orElseThrow();
-            entityId = disbursalTransaction.getId();
-            externalId = disbursalTransaction.getExternalId();
+            disbursalTransactionId = disbursalTransaction.getId();
+            disbursalTransactionExternalId = disbursalTransaction.getExternalId();
             businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursalTransaction));
         }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(entityId) //
-                .withEntityExternalId(externalId) //
+                .withEntityId(loan.getId()) //
+                .withEntityExternalId(loan.getExternalId()) //
+                .withSubEntityId(disbursalTransactionId) //
+                .withSubEntityExternalId(disbursalTransactionExternalId) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -1226,9 +1227,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     transactionId);
         }
 
-        final List<Long> existingTransactionIds = new ArrayList<>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<>();
-
         checkClientOrGroupActive(loan);
 
         if (loanTransaction.isReversed()) {
@@ -1243,6 +1241,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             + " chargeback not allowed as loan transaction is not repayment, is " + loanTransaction.getTypeOf().getCode(),
                     transactionId);
         }
+
+        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargebackTransactionBusinessEvent(loanTransaction));
 
@@ -2642,6 +2643,58 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withEntityExternalId(foreclosureTransaction.getExternalId()) //
                 .with(changes) //
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult chargeOff(JsonCommand command) {
+
+        loanEventApiJsonValidator.validateChargeOffTransaction(command.json());
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put(LoanApiConstants.transactionDateParamName,
+                command.stringValueOfParameterNamed(LoanApiConstants.transactionDateParamName));
+        changes.put(LoanApiConstants.localeParameterName, command.locale());
+        changes.put(LoanApiConstants.dateFormatParameterName, command.dateFormat());
+
+        // TODO: add business logic validation (transaction date cannot be future, cannot be earlier than latest
+        // transactions, etc)
+        Loan loan = loanAssembler.assembleFrom(command.getLoanId());
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(LoanApiConstants.transactionDateParamName);
+        final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
+        final AppUser currentUser = getAppUserIfPresent();
+
+        if (command.hasParameter(LoanApiConstants.chargeOffReasonIdParamName)) {
+            Long chargeOffReasonId = command.longValueOfParameterNamed(LoanApiConstants.chargeOffReasonIdParamName);
+            CodeValue chargeOffReason = this.codeValueRepository
+                    .findOneByCodeNameAndIdWithNotFoundDetection(LoanApiConstants.CHARGE_OFF_REASONS, chargeOffReasonId);
+            changes.put(LoanApiConstants.chargeOffReasonIdParamName, chargeOffReasonId);
+            loan.markAsChargedOff(transactionDate, currentUser, chargeOffReason);
+        } else {
+            loan.markAsChargedOff(transactionDate, currentUser, null);
+        }
+
+        LoanTransaction chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
+        loanTransactionRepository.saveAndFlush(chargeOffTransaction);
+
+        String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParameterName);
+        if (StringUtils.isNotBlank(noteText)) {
+            changes.put(LoanApiConstants.noteParameterName, noteText);
+            final Note note = Note.loanTransactionNote(loan, chargeOffTransaction, noteText);
+            this.noteRepository.save(note);
+        }
+
+        // TODO: add accounting
+        // TODO: add external events
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(chargeOffTransaction.getId()) //
+                .withEntityExternalId(chargeOffTransaction.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(command.getLoanId()) //
+                .with(changes).build();
     }
 
     private void validateIsMultiDisbursalLoanAndDisbursedMoreThanOneTranche(Loan loan) {

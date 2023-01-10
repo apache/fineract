@@ -291,6 +291,8 @@ public final class LoanEnumerations {
                     LoanTransactionType.CHARGEBACK.getCode(), "Chargeback");
             case CHARGE_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.CHARGE_ADJUSTMENT.getValue().longValue(),
                     LoanTransactionType.CHARGE_ADJUSTMENT.getCode(), "Charge Adjustment");
+            case CHARGE_OFF -> new LoanTransactionEnumData(LoanTransactionType.CHARGE_OFF.getValue().longValue(),
+                    LoanTransactionType.CHARGE_OFF.getCode(), "Charge-off");
         };
     }
 

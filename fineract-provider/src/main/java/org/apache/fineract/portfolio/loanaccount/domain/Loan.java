@@ -439,6 +439,20 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "last_closed_business_date")
     private LocalDate lastClosedBusinessDate;
 
+    @Column(name = "is_charged_off", nullable = false)
+    private boolean chargedOff;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "charge_off_reason_cv_id")
+    private CodeValue chargeOffReason;
+
+    @Column(name = "charged_off_on_date")
+    private LocalDate chargedOffOnDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "charged_off_by_userid")
+    private AppUser chargedOffBy;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final String transactionProcessingStrategyCode, final LoanProductRelatedDetail loanRepaymentScheduleDetail,
@@ -6949,4 +6963,23 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void setLastClosedBusinessDate(LocalDate lastClosedBusinessDate) {
         this.lastClosedBusinessDate = lastClosedBusinessDate;
     }
+
+    public void markAsChargedOff(final LocalDate chargedOffOn, final AppUser chargedOffBy, final CodeValue chargeOffReason) {
+        this.chargedOff = true;
+        this.chargedOffBy = chargedOffBy;
+        this.chargedOffOnDate = chargedOffOn;
+        this.chargeOffReason = chargeOffReason;
+    }
+
+    public void liftChargeOff() {
+        this.chargedOff = false;
+        this.chargedOffBy = null;
+        this.chargedOffOnDate = null;
+        this.chargeOffReason = null;
+    }
+
+    public boolean isChargedOff() {
+        return this.chargedOff;
+    }
+
 }

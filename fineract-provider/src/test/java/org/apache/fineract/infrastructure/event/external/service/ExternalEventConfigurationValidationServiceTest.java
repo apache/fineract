@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.event.external.exception.ExternalEventConfigurationNotFoundException;
+import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventSourceService;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,11 +51,14 @@ public class ExternalEventConfigurationValidationServiceTest {
     @Mock
     private TenantDetailsService tenantDetailsService;
 
+    @Mock
+    private ExternalEventSourceService externalEventSourceService;
+
     private ExternalEventConfigurationValidationService underTest;
 
     @BeforeEach
     public void setUp() {
-        underTest = new ExternalEventConfigurationValidationService(tenantDetailsService, jdbcTemplateFactory);
+        underTest = new ExternalEventConfigurationValidationService(tenantDetailsService, jdbcTemplateFactory, externalEventSourceService);
     }
 
     @Test
@@ -98,7 +102,8 @@ public class ExternalEventConfigurationValidationServiceTest {
         when(tenantDetailsService.findAllTenants()).thenReturn(tenants);
         when(jdbcTemplateFactory.create(any())).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(configurations);
-
+        List<String> sourcePackage = Arrays.asList("org.apache.fineract.infrastructure.event.business.domain");
+        when(externalEventSourceService.getSourcePackages()).thenReturn(sourcePackage);
         // when
         underTest.afterPropertiesSet();
 
@@ -117,7 +122,8 @@ public class ExternalEventConfigurationValidationServiceTest {
         when(tenantDetailsService.findAllTenants()).thenReturn(tenants);
         when(jdbcTemplateFactory.create(any())).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(new ArrayList<>());
-
+        List<String> sourcePackage = Arrays.asList("org.apache.fineract.infrastructure.event.business.domain");
+        when(externalEventSourceService.getSourcePackages()).thenReturn(sourcePackage);
         // when
         ExternalEventConfigurationNotFoundException exceptionThrown = assertThrows(ExternalEventConfigurationNotFoundException.class,
                 () -> underTest.afterPropertiesSet());
@@ -171,7 +177,8 @@ public class ExternalEventConfigurationValidationServiceTest {
         when(tenantDetailsService.findAllTenants()).thenReturn(tenants);
         when(jdbcTemplateFactory.create(any())).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(configurationWithMissingCentersCreateBusinessEvent);
-
+        List<String> sourcePackage = Arrays.asList("org.apache.fineract.infrastructure.event.business.domain");
+        when(externalEventSourceService.getSourcePackages()).thenReturn(sourcePackage);
         // when
         ExternalEventConfigurationNotFoundException exceptionThrown = assertThrows(ExternalEventConfigurationNotFoundException.class,
                 () -> underTest.afterPropertiesSet());

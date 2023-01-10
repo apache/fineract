@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.commands.jobs;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
@@ -43,8 +43,8 @@ public class PurgeProcessedCommandsTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         try {
             Long numberOfDaysForPurgeCriteria = configurationDomainService.retrieveProcessedCommandsPurgeDaysCriteria();
-            LocalDate dateForPurgeCriteria = DateUtils.getBusinessLocalDate().minusDays(numberOfDaysForPurgeCriteria);
-            repository.deleteOlderEventsWithStatus(CommandProcessingResultType.PROCESSED, dateForPurgeCriteria);
+            OffsetDateTime dateForPurgeCriteria = DateUtils.getOffsetDateTimeOfTenant().minusDays(numberOfDaysForPurgeCriteria);
+            repository.deleteOlderEventsWithStatus(CommandProcessingResultType.PROCESSED.getValue(), dateForPurgeCriteria);
         } catch (Exception e) {
             log.error("Error occurred while purging processed commands: ", e);
         }

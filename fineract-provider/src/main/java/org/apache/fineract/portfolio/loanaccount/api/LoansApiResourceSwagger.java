@@ -247,6 +247,14 @@ final class LoansApiResourceSwagger {
             public LocalDate expectedMaturityDate;
             @Schema(example = "[2012, 4, 3]")
             public LocalDate closedOnDate;
+            @Schema(example = "[2012, 4, 10]")
+            public LocalDate chargedOffOnDate;
+            @Schema(example = "admin")
+            public String chargedOffByUsername;
+            @Schema(example = "App")
+            public String chargedOffByFirstname;
+            @Schema(example = "Administrator")
+            public String chargedOffByLastname;
         }
 
         static final class GetLoansLoanIdRepaymentSchedule {
@@ -601,6 +609,10 @@ final class LoansApiResourceSwagger {
             @Schema(example = "0.000000")
             public Double totalRepaymentTransactionReversed;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
+            @Schema(example = "1")
+            public Long chargeOffReasonId;
+            @Schema(example = "reason")
+            public String chargeOffReason;
         }
 
         static final class GetLoansLoanIdPaymentType {
@@ -1028,6 +1040,8 @@ final class LoansApiResourceSwagger {
         public LocalDate lastClosedBusinessDate;
         @Schema(example = "[2013, 11, 1]")
         public LocalDate overpaidOnDate;
+        @Schema(example = "false")
+        public Boolean chargedOff;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1315,6 +1329,8 @@ final class LoansApiResourceSwagger {
             public Long principal;
             @Schema(example = "en")
             public String locale;
+            @Schema(example = "false")
+            public Boolean fraud;
         }
 
         @Schema(example = "2")
@@ -1451,11 +1467,11 @@ final class LoansApiResourceSwagger {
         @Schema(example = "2")
         public Integer officeId;
         @Schema(example = "6")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "3")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String resourceExternalId;
         @Schema(description = "PostLoansLoanIdChanges")

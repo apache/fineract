@@ -19,7 +19,9 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -89,6 +91,7 @@ import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -6937,6 +6940,58 @@ public class ClientLoanIntegrationTest {
         assertEquals(0.0f, loanSummary.get("feeChargesWaived"));
         assertEquals(1020.0f, loanSummary.get("totalOutstanding"));
         assertEquals(0.0f, loanSummary.get("totalWaived"));
+    }
+
+    @Test
+    public void chargeOff() {
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
+        Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingNoInterest(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2011");
+
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+
+        HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("02 September 2022", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanID, "1000");
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+        assertTrue(loanDetails.getStatus().getActive());
+        assertEquals(1000.0, loanDetails.getSummary().getTotalOutstanding());
+        assertFalse(loanDetails.getChargedOff());
+        assertNull(loanDetails.getSummary().getChargeOffReasonId());
+        assertNull(loanDetails.getSummary().getChargeOffReason());
+        assertNull(loanDetails.getTimeline().getChargedOffOnDate());
+        assertNull(loanDetails.getTimeline().getChargedOffByUsername());
+        assertNull(loanDetails.getTimeline().getChargedOffByFirstname());
+        assertNull(loanDetails.getTimeline().getChargedOffByLastname());
+
+        String transactionExternalId = UUID.randomUUID().toString();
+        this.loanTransactionHelper.chargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022")
+                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+
+        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+        assertTrue(loanDetails.getStatus().getActive());
+        assertEquals(1000.0, loanDetails.getSummary().getTotalOutstanding());
+        assertTrue(loanDetails.getChargedOff());
+        assertEquals((long) chargeOffReasonId, loanDetails.getSummary().getChargeOffReasonId());
+        assertEquals(randomText, loanDetails.getSummary().getChargeOffReason());
+        assertEquals(LocalDate.of(2022, 9, 4), loanDetails.getTimeline().getChargedOffOnDate());
+        assertEquals("mifos", loanDetails.getTimeline().getChargedOffByUsername());
+        assertEquals("App", loanDetails.getTimeline().getChargedOffByFirstname());
+        assertEquals("Administrator", loanDetails.getTimeline().getChargedOffByLastname());
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {

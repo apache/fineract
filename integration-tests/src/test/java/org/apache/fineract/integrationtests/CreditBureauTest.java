@@ -37,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 import org.apache.fineract.integrationtests.common.CreditBureauConfigurationHelper;
 import org.apache.fineract.integrationtests.common.CreditBureauIntegrationHelper;
@@ -80,9 +81,8 @@ public class CreditBureauTest {
         List<Map<String, Object>> configurations = CreditBureauConfigurationHelper.getCreditBureauConfiguration(requestSpec, responseSpec,
                 "1");
         Assertions.assertNotNull(configurations);
-        Map<String, Integer> currentConfiguration = io.vavr.collection.List.ofAll(configurations)
-                .toMap(k -> String.valueOf(k.get("configurationKey")).toUpperCase(), v -> (int) v.get("creditBureauConfigurationId"))
-                .toJavaMap();
+        Map<String, Integer> currentConfiguration = configurations.stream().collect(Collectors
+                .toMap(k -> String.valueOf(k.get("configurationKey")).toUpperCase(), v -> (int) v.get("creditBureauConfigurationId")));
         final Object usernameConfigurationId = CreditBureauConfigurationHelper.updateCreditBureauConfiguration(this.requestSpec,
                 this.responseSpec, currentConfiguration.get("USERNAME").intValue(), "USERNAME", "testUser");
         Assertions.assertNotNull(usernameConfigurationId);

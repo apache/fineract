@@ -19,10 +19,14 @@
 package org.apache.fineract.infrastructure.event.external.config;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.config.FineractProperties.FineractExternalEventsProducerJmsProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -37,6 +41,23 @@ public class ExternalEventJMSBrokerConfiguration {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
         connectionFactory.setBrokerURL(fineractProperties.getEvents().getExternal().getProducer().getJms().getBrokerUrl());
         connectionFactory.setTrustAllPackages(true);
+        FineractExternalEventsProducerJmsProperties jmsProps = fineractProperties.getEvents().getExternal().getProducer().getJms();
+        if (jmsProps.isBrokerPasswordProtected()) {
+            connectionFactory.setUserName(jmsProps.getBrokerUsername());
+            connectionFactory.setPassword(jmsProps.getBrokerPassword());
+        }
         return connectionFactory;
+    }
+
+    @Conditional(EnableExternalEventTopicCondition.class)
+    @Bean(name = "eventDestination")
+    public ActiveMQTopic activeMqTopic() {
+        return new ActiveMQTopic(fineractProperties.getEvents().getExternal().getProducer().getJms().getEventTopicName());
+    }
+
+    @Conditional(EnableExternalEventQueueCondition.class)
+    @Bean(name = "eventDestination")
+    public ActiveMQQueue activeMqQueue() {
+        return new ActiveMQQueue(fineractProperties.getEvents().getExternal().getProducer().getJms().getEventQueueName());
     }
 }

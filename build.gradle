@@ -56,17 +56,17 @@ buildscript {
 }
 
 plugins {
-    id "org.barfuin.gradle.taskinfo" version "1.4.0"
+    id "org.barfuin.gradle.taskinfo" version "2.1.0"
     id 'com.adarshr.test-logger' version '3.2.0'
-    id 'com.diffplug.spotless' version '6.12.0' apply false
+    id 'com.diffplug.spotless' version '6.12.1' apply false
     id 'org.nosphere.apache.rat' version '0.8.0' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
     id 'org.openapi.generator' version '6.2.1' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.12' apply false
-    id 'org.springframework.boot' version '2.7.6' apply false
+    id 'org.springframework.boot' version '2.7.7' apply false
     id 'net.ltgt.errorprone' version '3.0.1' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.7' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.8' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
@@ -397,7 +397,7 @@ configure(project.fineractJavaProjects) {
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
         checkstyle 'com.puppycrawl.tools:checkstyle:10.5.0'
-        checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.0'
+        checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.1'
     }
 
     // Configuration for JaCoCo code coverage task

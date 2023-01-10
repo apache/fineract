@@ -54,6 +54,7 @@ public class LiquibaseStepDefinitions implements En {
     private ExtendedSpringLiquibase tenantStoreLiquibase;
     private ExtendedSpringLiquibase initialTenantLiquibase;
     private ExtendedSpringLiquibase tenantLiquibase;
+    private ExtendedSpringLiquibase customChangeLogLiquibase;
     private FineractPlatformTenant defaultTenant;
     private DataSource tenantStoreDataSource;
     private TenantDatabaseUpgradeService tenantDatabaseUpgradeService;
@@ -158,6 +159,7 @@ public class LiquibaseStepDefinitions implements En {
 
         initialTenantLiquibase = mock(ExtendedSpringLiquibase.class);
         tenantLiquibase = mock(ExtendedSpringLiquibase.class);
+        customChangeLogLiquibase = mock(ExtendedSpringLiquibase.class);
         initialTenantStoreLiquibase = mock(ExtendedSpringLiquibase.class);
         tenantStoreLiquibase = mock(ExtendedSpringLiquibase.class);
 
@@ -171,6 +173,7 @@ public class LiquibaseStepDefinitions implements En {
         given(tenantDataSourceFactory.create(defaultTenant)).willReturn(defaultTenantDataSource);
         given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db", "initial_switch")).willReturn(initialTenantLiquibase);
         given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db")).willReturn(tenantLiquibase);
+        given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db", "custom_changelog")).willReturn(customChangeLogLiquibase);
 
         tenantDatabaseUpgradeService = new TenantDatabaseUpgradeService(tenantDetailsService, tenantStoreDataSource, fineractProperties,
                 databaseStateVerifier, liquibaseFactory, tenantDataSourceFactory);
