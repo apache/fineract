@@ -164,7 +164,7 @@ task createDB {
     description= "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
         def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
-        sql.execute( 'create database '+"`$dbName`" )
+        sql.execute( 'CREATE DATABASE '+"`$dbName` CHARACTER SET utf8mb4 " )
     }
 }
 
