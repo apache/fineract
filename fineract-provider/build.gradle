@@ -196,7 +196,7 @@ task createMySQLDB {
     description= "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
         def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
-        sql.execute( 'create database '+"`$dbName`" )
+        sql.execute( 'create database '+"`$dbName` character set utf8mb4" )
     }
 }
 
