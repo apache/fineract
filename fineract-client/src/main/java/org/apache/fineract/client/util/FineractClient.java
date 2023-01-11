@@ -63,6 +63,7 @@ import org.apache.fineract.client.services.DelinquencyRangeAndBucketsManagementA
 import org.apache.fineract.client.services.DocumentsApiFixed;
 import org.apache.fineract.client.services.EntityDataTableApi;
 import org.apache.fineract.client.services.EntityFieldConfigurationApi;
+import org.apache.fineract.client.services.ExternalEventConfigurationApi;
 import org.apache.fineract.client.services.ExternalServicesApi;
 import org.apache.fineract.client.services.FetchAuthenticatedUserDetailsApi;
 import org.apache.fineract.client.services.FixedDepositAccountApi;
@@ -198,6 +199,7 @@ public final class FineractClient {
     public final DelinquencyRangeAndBucketsManagementApi delinquencyRangeAndBucketsManagement;
     public final EntityDataTableApi entityDatatableChecks;
     public final EntityFieldConfigurationApi entityFieldConfigurations;
+    public final ExternalEventConfigurationApi externalEventConfigurationApi;
     public final ExternalServicesApi externalServices;
     public final FetchAuthenticatedUserDetailsApi userDetails;
     public final FixedDepositAccountApi fixedDepositAccounts;
@@ -294,6 +296,7 @@ public final class FineractClient {
         batches = retrofit.create(BatchApiApi.class);
         businessDateManagement = retrofit.create(BusinessDateManagementApi.class);
         businessStepConfiguration = retrofit.create(BusinessStepConfigurationApi.class);
+        externalEventConfigurationApi = retrofit.create(ExternalEventConfigurationApi.class);
         caches = retrofit.create(CacheApi.class);
         cashiersJournal = retrofit.create(CashierJournalsApi.class);
         cashiers = retrofit.create(CashiersApi.class);
