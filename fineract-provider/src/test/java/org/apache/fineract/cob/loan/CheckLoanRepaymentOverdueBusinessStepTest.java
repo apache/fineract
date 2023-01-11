@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentDueBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentOverdueBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -68,8 +68,8 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
 
     @Test
     public void givenLoanWithInstallmentOverdueAfterConfiguredDaysWhenStepExecutionThenBusinessEventIsRaised() {
-        ArgumentCaptor<LoanRepaymentDueBusinessEvent> loanRepaymentDueBusinessEventArgumentCaptor = ArgumentCaptor
-                .forClass(LoanRepaymentDueBusinessEvent.class);
+        ArgumentCaptor<LoanRepaymentOverdueBusinessEvent> loanRepaymentDueBusinessEventArgumentCaptor = ArgumentCaptor
+                .forClass(LoanRepaymentOverdueBusinessEvent.class);
         // given
         when(configurationDomainService.retrieveRepaymentOverdueDays()).thenReturn(1L);
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().minusDays(1);
