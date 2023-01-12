@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.fineract.infrastructure.event.business.annotation.BulkEventSupport;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
@@ -46,6 +47,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
+@BulkEventSupport
 public class RecalculateInterestForLoanTasklet implements Tasklet {
 
     private final LoanReadPlatformService loanReadPlatformService;

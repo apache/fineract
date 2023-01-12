@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.annotation.BulkEventSupport;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.DepositAccountData;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
@@ -36,6 +37,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
+@BulkEventSupport
 public class UpdateDepositsAccountMaturityDetailsTasklet implements Tasklet {
 
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;

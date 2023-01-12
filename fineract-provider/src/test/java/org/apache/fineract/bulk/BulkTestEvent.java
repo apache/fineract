@@ -16,34 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.group.handler;
+package org.apache.fineract.bulk;
 
-import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.event.business.annotation.BulkEventSupport;
-import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
-@Service
-@CommandType(entity = "CENTER", action = "SAVECOLLECTIONSHEET")
+@Component
 @BulkEventSupport
-public class SaveCenterCollectionSheetCommandHandler implements NewCommandSourceHandler {
+public class BulkTestEvent implements NewCommandSourceHandler {
 
-    private final CollectionSheetWritePlatformService writePlatformService;
-
-    @Autowired
-    public SaveCenterCollectionSheetCommandHandler(final CollectionSheetWritePlatformService collectionSheetWritePlatformService) {
-        this.writePlatformService = collectionSheetWritePlatformService;
-    }
-
-    @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.writePlatformService.updateCollectionSheet(command);
+    public CommandProcessingResult processCommand(JsonCommand command) {
+        throw new IllegalStateException("Not implemented");
     }
 }

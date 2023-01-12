@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -27,6 +26,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -41,19 +42,13 @@ public class ReplayedTransactionBusinessEventServiceImpl implements ReplayedTran
             return;
         }
         // Extra safety net to avoid event leaking
-        try {
-            businessEventNotifierService.startExternalEventRecording();
-            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                LoanTransaction oldTransaction = loanTransactionRepository.findById(mapEntry.getKey())
-                        .orElseThrow(() -> new LoanTransactionNotFoundException(mapEntry.getKey()));
-                LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(oldTransaction);
-                data.setNewTransactionDetail(mapEntry.getValue());
-                businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
-            }
-            businessEventNotifierService.stopExternalEventRecording();
-        } catch (Exception e) {
-            businessEventNotifierService.resetEventRecording();
-            throw e;
+        for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+            LoanTransaction oldTransaction = loanTransactionRepository.findById(mapEntry.getKey())
+                    .orElseThrow(() -> new LoanTransactionNotFoundException(mapEntry.getKey()));
+            LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(oldTransaction);
+            data.setNewTransactionDetail(mapEntry.getValue());
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
         }
     }
+
 }

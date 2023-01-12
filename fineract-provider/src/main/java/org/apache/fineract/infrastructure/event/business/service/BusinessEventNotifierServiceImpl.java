@@ -161,4 +161,5 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         eventRecordingEnabled.set(false);
         recordedEvents.remove();
     }
+
 }
