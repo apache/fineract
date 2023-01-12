@@ -41,19 +41,13 @@ public class ReplayedTransactionBusinessEventServiceImpl implements ReplayedTran
             return;
         }
         // Extra safety net to avoid event leaking
-        try {
-            businessEventNotifierService.startExternalEventRecording();
-            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                LoanTransaction oldTransaction = loanTransactionRepository.findById(mapEntry.getKey())
-                        .orElseThrow(() -> new LoanTransactionNotFoundException(mapEntry.getKey()));
-                LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(oldTransaction);
-                data.setNewTransactionDetail(mapEntry.getValue());
-                businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
-            }
-            businessEventNotifierService.stopExternalEventRecording();
-        } catch (Exception e) {
-            businessEventNotifierService.resetEventRecording();
-            throw e;
+        for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+            LoanTransaction oldTransaction = loanTransactionRepository.findById(mapEntry.getKey())
+                    .orElseThrow(() -> new LoanTransactionNotFoundException(mapEntry.getKey()));
+            LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(oldTransaction);
+            data.setNewTransactionDetail(mapEntry.getValue());
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
         }
     }
+
 }
