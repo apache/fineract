@@ -23,7 +23,6 @@ import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 
 /**
  * Implemented class is responsible for notifying the business event to registered listeners.
- *
  */
 public interface BusinessEventNotifierService {
 
@@ -47,9 +46,12 @@ public interface BusinessEventNotifierService {
      */
     <T extends BusinessEvent<?>> void addPostBusinessEventListener(Class<T> eventType, BusinessEventListener<T> listener);
 
+    boolean isExternalEventRecordingEnabled();
+
     void startExternalEventRecording();
 
     void stopExternalEventRecording();
 
     void resetEventRecording();
+
 }

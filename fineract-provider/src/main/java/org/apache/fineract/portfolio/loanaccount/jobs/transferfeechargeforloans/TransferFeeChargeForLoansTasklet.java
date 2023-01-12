@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.business.annotation.BulkEventSupport;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
@@ -45,6 +46,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
+@BulkEventSupport
 public class TransferFeeChargeForLoansTasklet implements Tasklet {
 
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;

@@ -110,7 +110,8 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         businessEventListeners.add(listener);
     }
 
-    private boolean isExternalEventRecordingEnabled() {
+    @Override
+    public boolean isExternalEventRecordingEnabled() {
         return eventRecordingEnabled.get();
     }
 
@@ -161,4 +162,5 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         eventRecordingEnabled.set(false);
         recordedEvents.remove();
     }
+
 }

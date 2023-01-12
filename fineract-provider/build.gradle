@@ -150,6 +150,7 @@ configurations {
     driver
 }
 dependencies {
+    testImplementation 'org.projectlombok:lombok:1.18.22'
     driver 'org.mariadb.jdbc:mariadb-java-client'
     driver 'org.postgresql:postgresql'
     driver 'mysql:mysql-connector-java:8.0.31'

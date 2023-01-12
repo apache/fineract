@@ -24,6 +24,7 @@ import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.DataIntegrityErrorHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.event.business.annotation.BulkEventSupport;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @CommandType(entity = "LOAN", action = "DISBURSE")
+@BulkEventSupport
 public class DisburseLoanCommandHandler implements NewCommandSourceHandler {
 
     private final LoanWritePlatformService writePlatformService;
