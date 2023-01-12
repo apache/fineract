@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformService
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.event.business.annotation.BulkEventSupport;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
@@ -52,6 +53,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
+@BulkEventSupport
 public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
