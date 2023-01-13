@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.exceptionmapper;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,11 @@ public class IdempotentCommandProcessSucceedExceptionMapper implements Exception
     @Override
     public Response toResponse(final IdempotentCommandProcessSucceedException exception) {
         log.debug("Idempotent processing success request: {}", exception.getMessage());
-        return Response.status(Status.OK).entity(exception.getResponse())
-                .header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER, "true").type(MediaType.APPLICATION_JSON).build();
+        Response.ResponseBuilder responseBuilder = Response.status(exception.getStatusCode());
+        if (exception.getResponse() != null) {
+            responseBuilder.entity(exception.getResponse());
+        }
+        return responseBuilder.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER, "true").type(MediaType.APPLICATION_JSON)
+                .build();
     }
 }

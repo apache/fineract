@@ -18,10 +18,8 @@
  */
 package org.apache.fineract.cob.api;
 
-import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -40,8 +38,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.cob.data.ConfiguredJobNamesDTO;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
 import org.apache.fineract.cob.data.JobBusinessStepDetail;
 import org.apache.fineract.cob.service.ConfigJobParameterService;
@@ -49,7 +49,6 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.springframework.stereotype.Component;
@@ -67,6 +66,7 @@ public class ConfigureBusinessStepResource {
 
     private final DefaultToApiJsonSerializer<JobBusinessStepConfigData> businessStepConfigSerializeService;
     private final DefaultToApiJsonSerializer<JobBusinessStepDetail> businessStepDetailSerializeService;
+    private final DefaultToApiJsonSerializer<ConfiguredJobNamesDTO> configuredJobNamesSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ConfigJobParameterService configJobParameterService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
@@ -76,13 +76,13 @@ public class ConfigureBusinessStepResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Business Jobs", description = "Returns the configured Business Jobs")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessJobConfigResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessJobConfigResponse.class))) })
     public String retrieveAllConfiguredBusinessJobs(@Context final UriInfo uriInfo) {
 
         List<String> businessJobNames = configJobParameterService.getAllConfiguredJobNames();
-        final Gson gson = new Gson();
+        ConfiguredJobNamesDTO result = new ConfiguredJobNamesDTO(businessJobNames);
 
-        return gson.toJson(businessJobNames);
+        return configuredJobNamesSerializer.serialize(result);
     }
 
     @GET
@@ -91,7 +91,7 @@ public class ConfigureBusinessStepResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Business Step Configurations for a Job", description = "Returns the configured Business Steps for a job")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessStepConfigResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessStepConfigResponse.class))) })
     public String retrieveAllConfiguredBusinessStep(@Context final UriInfo uriInfo,
             @PathParam("jobName") @Parameter(description = "jobName") final String jobName) {
 
@@ -108,15 +108,14 @@ public class ConfigureBusinessStepResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Business Step Configurations for a Job", description = "Updates the Business steps execution order for a job")
     @RequestBody(content = @Content(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.UpdateBusinessStepConfigRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessStepConfigResponse.class)))) })
-    public String updateJobBusinessStepConfig(@PathParam("jobName") @Parameter(description = "jobName") final String jobName,
+    @ApiResponses({ @ApiResponse(responseCode = "204", description = "NO_CONTENT") })
+    public Response updateJobBusinessStepConfig(@PathParam("jobName") @Parameter(description = "jobName") final String jobName,
             @Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateBusinessStepConfig(jobName).withJson(jsonRequestBody)
                 .build();
-        CommandProcessingResult result = commandWritePlatformService.logCommandSource(commandRequest);
-        return businessStepConfigSerializeService.serialize(result);
+        commandWritePlatformService.logCommandSource(commandRequest);
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @GET
@@ -125,7 +124,7 @@ public class ConfigureBusinessStepResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Business Step Configurations for a Job", description = "Returns the available Business Steps for a job")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessStepConfigResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessStepConfigResponse.class))) })
     public String retrieveAllAvailableBusinessStep(@Context final UriInfo uriInfo,
             @PathParam("jobName") @Parameter(description = "jobName") final String jobName) {
 
