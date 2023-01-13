@@ -58,6 +58,7 @@ public class IdempotencyTest {
 
     @Test
     public void shouldUpdateStepOrder() {
+        ResponseSpecification updateResponseSpec = new ResponseSpecBuilder().expectStatusCode(204).build();
         JobBusinessStepConfigData originalStepConfig = IdempotencyHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec,
                 LOAN_JOB_NAME);
 
@@ -65,9 +66,9 @@ public class IdempotencyTest {
 
         List<BusinessStep> requestBody = new ArrayList<>();
         requestBody.add(getBusinessSteps(1L, APPLY_CHARGE_TO_OVERDUE_LOANS));
-        Response response = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        Response response = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
-        Response responseSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        Response responseSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
         Assertions.assertEquals(response.getBody().asString(), responseSecond.getBody().asString());
         Assertions.assertNull(response.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
@@ -84,9 +85,9 @@ public class IdempotencyTest {
 
         requestBody.add(getBusinessSteps(2L, LOAN_DELINQUENCY_CLASSIFICATION));
 
-        Response update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        Response update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
-        Response updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        Response updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
         Assertions.assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
         Assertions.assertNotNull(updateSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
@@ -103,9 +104,9 @@ public class IdempotencyTest {
 
         requestBody.remove(1);
         idempotencyKeyHeader = UUID.randomUUID().toString();
-        update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
-        updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
 
         Assertions.assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
@@ -120,9 +121,9 @@ public class IdempotencyTest {
 
         idempotencyKeyHeader = UUID.randomUUID().toString();
 
-        update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(originalStepConfig.getBusinessSteps()), idempotencyKeyHeader);
-        updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(originalStepConfig.getBusinessSteps()), idempotencyKeyHeader);
 
         Assertions.assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));

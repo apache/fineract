@@ -165,7 +165,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                     command -> new IdempotentCommandProcessUnderProcessingException(wrapper));
             idempotentExceptionByStatus(ERROR, existingCommand, command -> new IdempotentCommandProcessFailedException(wrapper, command));
             idempotentExceptionByStatus(PROCESSED, existingCommand,
-                    command -> new IdempotentCommandProcessSucceedException(wrapper, command.getResult()));
+                    command -> new IdempotentCommandProcessSucceedException(wrapper, command.getResult(), command.getResultStatusCode()));
         }
     }
 

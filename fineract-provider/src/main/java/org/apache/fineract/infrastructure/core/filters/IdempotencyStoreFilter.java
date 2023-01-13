@@ -70,7 +70,8 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter implements Batc
         boolean isSuccessWithoutStored = isStoreIdempotencyKey(request) && commandId.isPresent() && isAllowedContentTypeResponse(response)
                 && wrapper.getValue() != null;
         if (isSuccessWithoutStored) {
-            storeCommandResult(response.getStatus(), new String(wrapper.getValue().getContentAsByteArray(), StandardCharsets.UTF_8),
+            storeCommandResult(response.getStatus(), Optional.ofNullable(wrapper.getValue())
+                    .map(ContentCachingResponseWrapper::getContentAsByteArray).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null),
                     commandId);
         }
         if (wrapper.getValue() != null) {
@@ -92,7 +93,7 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter implements Batc
 
     private boolean isAllowedContentTypeResponse(HttpServletResponse response) {
         return Optional.ofNullable(response.getContentType()).map(String::toLowerCase).map(ct -> ct.contains("application/json"))
-                .orElse(false);
+                .orElse(false) || (response.getStatus() > 200 && response.getStatus() < 300);
     }
 
     private boolean isAllowedContentTypeRequest(HttpServletRequest request) {

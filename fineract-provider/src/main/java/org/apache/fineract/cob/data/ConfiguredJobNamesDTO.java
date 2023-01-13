@@ -16,23 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.exception;
+package org.apache.fineract.cob.data;
 
-import org.apache.fineract.commands.domain.CommandWrapper;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-/**
- * Exception thrown when command is sent with same action, entity and idempotency key
- */
-public class IdempotentCommandProcessSucceedException extends AbstractIdempotentCommandException {
+@Data
+@AllArgsConstructor
+public class ConfiguredJobNamesDTO {
 
-    private final Integer statusCode;
-
-    public IdempotentCommandProcessSucceedException(CommandWrapper wrapper, String response, Integer statusCode) {
-        super(wrapper.actionName(), wrapper.entityName(), wrapper.getIdempotencyKey(), response);
-        this.statusCode = statusCode;
-    }
-
-    public Integer getStatusCode() {
-        return statusCode;
-    }
+    private List<String> businessJobs;
 }
