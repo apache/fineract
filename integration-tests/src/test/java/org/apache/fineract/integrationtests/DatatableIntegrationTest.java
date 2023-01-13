@@ -41,7 +41,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
+import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
+import org.apache.fineract.client.models.PutDataTablesResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -61,6 +64,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(DatatableIntegrationTest.class);
 
     private static final String CLIENT_APP_TABLE_NAME = "m_client";
+    private static final String CLIENT_PERSON_SUBTYPE_NAME = "Person";
     private static final String LOAN_APP_TABLE_NAME = "m_loan";
 
     private static final Float LP_PRINCIPAL = 10000.0f;
@@ -424,6 +428,95 @@ public class DatatableIntegrationTest extends IntegrationTest {
                 loanID, 1, datatableEntryRequestJsonString);
         assertNotNull(updatedDatatableEntryResponse);
         assertEquals(0, updatedDatatableEntryResponse.getChanges().size());
+    }
+
+    @Test
+    public void validateCreateAndEditDatatable() {
+        // Creating client
+        final Integer clientId = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+        final Integer randomNumber = Utils.randomNumberGenerator(3);
+
+        // Creating datatable for Client Person
+        final String datatableName = Utils.randomNameGenerator(CLIENT_APP_TABLE_NAME + "_", 5);
+        final boolean genericResultSet = true;
+
+        HashMap<String, Object> columnMap = new HashMap<>();
+        List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+        columnMap.put("datatableName", datatableName);
+        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+        columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
+        columnMap.put("multiRow", false);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsANumber", "Number", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAString", "String", false, 10, null);
+        columnMap.put("columns", datatableColumnsList);
+        String datatabelRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("map : {}", datatabelRequestJsonString);
+
+        PostDataTablesResponse datatableCreateResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString);
+        assertEquals(datatableName, datatableCreateResponse.getResourceIdentifier());
+        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+
+        // Insert first values
+        final String value = Utils.randomStringGenerator("Q", 8);
+        HashMap<String, Object> datatableEntryMap = new HashMap<>();
+        datatableEntryMap.put("itsANumber", randomNumber);
+        datatableEntryMap.put("itsAString", value);
+
+        datatableEntryMap.put("locale", "en");
+        datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
+
+        String datatableEntryRequestJsonString = new GsonBuilder().serializeNulls().create().toJson(datatableEntryMap);
+        PostDataTablesAppTableIdResponse datatableEntryResponse = this.datatableHelper.addDatatableEntry(datatableName, clientId,
+                genericResultSet, datatableEntryRequestJsonString);
+        assertNotNull(datatableEntryResponse.getResourceId(), "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+
+        // Read the Datatable entry generated with genericResultSet in true (default)
+        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, clientId, genericResultSet, null, "");
+        assertNotNull(items);
+        assertEquals(1, ((List) items.get("data")).size());
+        LOG.info("Record created at {}", ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(3));
+        LOG.info("Record updated at {}", ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(4));
+
+        assertEquals(clientId, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(0));
+        assertEquals(value, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(2));
+
+        // Update DataTable
+        columnMap = new HashMap<>();
+        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+        columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
+        datatableColumnsList = new ArrayList<>();
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAText", "Text", false, null, null);
+        columnMap.put("addColumns", datatableColumnsList);
+        datatabelRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("map to update : {}", datatabelRequestJsonString);
+        PutDataTablesResponse datatableUpdateResponse = this.datatableHelper.updateDatatable(datatableName, datatabelRequestJsonString);
+        assertNotNull(datatableUpdateResponse);
+        assertEquals(datatableName, datatableUpdateResponse.getResourceIdentifier());
+
+        // Update DataTable Entry after Update DataTable schema
+        datatableEntryMap = new HashMap<>();
+        final String textValue = Utils.randomStringGenerator(value, 120);
+        datatableEntryMap.put("itsAText", textValue);
+        datatableEntryMap.put("locale", "en");
+        datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
+
+        datatableEntryRequestJsonString = new GsonBuilder().serializeNulls().create().toJson(datatableEntryMap);
+        LOG.info("map to update : {}", datatableEntryRequestJsonString);
+        PutDataTablesAppTableIdDatatableIdResponse updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName,
+                clientId, datatableEntryRequestJsonString);
+        assertNotNull(updatedDatatableEntryResponse);
+        assertEquals(1, updatedDatatableEntryResponse.getChanges().size());
+
+        // Read the Datatable entry generated with genericResultSet in true (default)
+        items = this.datatableHelper.readDatatableEntry(datatableName, clientId, genericResultSet, null, "");
+        assertNotNull(items);
+        assertEquals(1, ((List) items.get("data")).size());
+        LOG.info("Record created at {}", ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(3));
+        LOG.info("Record updated at {}", ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(4));
+
+        assertEquals(clientId, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(0));
+        assertEquals(value, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(2));
+        assertEquals(textValue, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(5));
     }
 
     @Test

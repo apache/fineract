@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import org.apache.fineract.client.models.GetDataTablesResponse;
+import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
@@ -73,6 +74,13 @@ public class DatatableHelper extends IntegrationTest {
                 + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
     }
 
+    public PostDataTablesAppTableIdResponse addDatatableEntry(final String datatableName, final Integer apptableId,
+            final boolean genericResultSet, final String json) {
+        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
+                + apptableId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json);
+        return GSON.fromJson(response, PostDataTablesAppTableIdResponse.class);
+    }
+
     public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
             final String json) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
@@ -89,6 +97,13 @@ public class DatatableHelper extends IntegrationTest {
             final Integer entryId, final String json) {
         final String response = Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
                 + apptableId + "/" + entryId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
+        return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
+    }
+
+    public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
+            final String json) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
+                DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
         return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
     }
 
@@ -251,6 +266,18 @@ public class DatatableHelper extends IntegrationTest {
 
     public PutDataTablesResponse updateDatatable(String dataTableName, PutDataTablesRequest request) {
         return ok(fineract().dataTables.updateDatatable(dataTableName, request));
+    }
+
+    public PostDataTablesResponse createDatatable(final String json) {
+        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER,
+                json);
+        return GSON.fromJson(response, PostDataTablesResponse.class);
+    }
+
+    public PutDataTablesResponse updateDatatable(String dataTableName, final String json) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
+                DATATABLE_URL + "/" + dataTableName + "?" + Utils.TENANT_IDENTIFIER, json);
+        return GSON.fromJson(response, PutDataTablesResponse.class);
     }
 
 }

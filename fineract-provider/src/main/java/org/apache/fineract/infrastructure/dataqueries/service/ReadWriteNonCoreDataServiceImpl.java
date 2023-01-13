@@ -2059,7 +2059,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 sql += sqlGenerator.escape(key) + " = " + pValueWrite;
             } else {
                 if (key.equalsIgnoreCase(DataTableApiConstant.UPDATEDAT_FIELD_NAME)) {
-                    sql += ", " + sqlGenerator.escape(key) + " = " + sqlGenerator.currentTenantDateTime();
+                    if (firstColumn) {
+                        sql += " set ";
+                        firstColumn = false;
+                    } else {
+                        sql += ", ";
+                    }
+                    sql += sqlGenerator.escape(key) + " = " + sqlGenerator.currentTenantDateTime();
                 }
             }
         }
