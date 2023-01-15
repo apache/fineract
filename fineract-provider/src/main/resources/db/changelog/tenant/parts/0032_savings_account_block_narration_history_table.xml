@@ -20,24 +20,31 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="deepika@fiter.io" id="add_codes_for_freeze">
+    <changeSet author="deepika@fiter.io" id="add_codes_for_freeze_1">
+        <preConditions>
+            <not>
+                <tableExists tableName="m_savings_account_block_narration_history" />
+            </not>
+        </preConditions>
 
-        <sql>CREATE TABLE `m_savings_account_block_narration_history` (
-            `id` BIGINT NOT NULL AUTO_INCREMENT,
-            `account_id` BIGINT NOT NULL,
-            `block_narration_comment` varchar(500) DEFAULT NULL,
-            `block_narration_id` bigint(20) DEFAULT NULL,
-            `start_date` datetime NOT NULL,
-            `end_date` datetime DEFAULT NULL,
-            `sub_status` varchar(50) DEFAULT NULL,
-            `createdby_id` BIGINT DEFAULT NULL,
-            `created_date` datetime DEFAULT NULL,
-            `lastmodified_date` datetime DEFAULT NULL,
-            `lastmodifiedby_id` BIGINT DEFAULT NULL,
-            PRIMARY KEY (`id`),
-            KEY `fk_m_savings_account_block_narration_history_0001` (`account_id`),
-            CONSTRAINT `fk_m_savings_account_block_narration_history_0001` FOREIGN KEY (`account_id`) REFERENCES `m_savings_account` (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-        </sql>
+        <createTable tableName="m_savings_account_block_narration_history">
+            <column name="id" autoIncrement="true" type="bigint"></column>
+            <column name="account_id" type="bigint">
+                <constraints references="m_savings_account(id)" foreignKeyName="fk_m_savings_account_block_narration_history_0001" nullable="false"/>
+            </column>
+            <column name="block_narration_comment" type="VARCHAR(500)" />
+            <column name="block_narration_id" type="bigint"/>
+            <column name="start_date" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="end_date" type="datetime" />
+
+            <column name="sub_status" type="varchar(50)" />
+            <column name="createdby_id" type="bigint" />
+            <column name="created_date" type="datetime"/>
+            <column name="lastmodified_date" type="datetime" />
+            <column name="lastmodifiedby_id" type="bigint" />
+        </createTable>
+        <addPrimaryKey tableName="m_savings_account_block_narration_history" columnNames="id" constraintName="PK_m_savings_account_block_narration_history" />
     </changeSet>
 </databaseChangeLog>

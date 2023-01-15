@@ -75,14 +75,14 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="bosco@fiter.io" id="add_m_permissions_UNLOCK_SAVINGSACCOUNT">
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_UNLOCK_SAVINGSACCOUNT_2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM `m_permission` WHERE `code` = 'UNLOCK_SAVINGSACCOUNT'
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UNLOCK_SAVINGSACCOUNT'
             </sqlCheck>
         </preConditions>
         <sql>
-            INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_savings', 'UNLOCK_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNLOCK', '0');
+            INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('transaction_savings', 'UNLOCK_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNLOCK', '0');
         </sql>
     </changeSet>
     <changeSet author="bosco@fiter.io" id="add_m_payment_detail_actual_transaction_type">
@@ -98,7 +98,7 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="bosco@fiter.io" id="add_m_savings_account_transaction_parent_savings_account_transaction_id_1">
+    <changeSet author="bosco@fiter.io" id="add_m_savings_account_transaction_parent_savings_account_transaction_id_2">
 
         <preConditions onFail="MARK_RAN">
             <not>
@@ -106,13 +106,13 @@
             </not>
         </preConditions>
         <addColumn tableName="m_payment_detail">
-            <column name="parent_savings_account_transaction_id" type="bigint(20)">
+            <column name="parent_savings_account_transaction_id" type="bigint">
                 <constraints nullable="true" foreignKeyName="FK_m_savings_account_transaction_parent_sa_tx_id_X" references="m_savings_account_transaction(id)"/>
             </column>
         </addColumn>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="add_m_payment_detail_parent_transaction_payment_details_id">
+    <changeSet author="bosco@fiter.io" id="add_m_payment_detail_parent_transaction_payment_details_id_1">
 
         <preConditions onFail="MARK_RAN">
             <not>
@@ -120,7 +120,7 @@
             </not>
         </preConditions>
         <addColumn tableName="m_payment_detail">
-            <column name="parent_transaction_payment_details_id" type="bigint(20)">
+            <column name="parent_transaction_payment_details_id" type="bigint">
                 <constraints nullable="true" foreignKeyName="FK_m_payment_detail_parent_transaction_payment_details_id" references="m_payment_detail(id)"/>
             </column>
         </addColumn>
