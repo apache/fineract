@@ -50,6 +50,7 @@ import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdCollectionData;
+import org.apache.fineract.client.models.GetLoansLoanIdDisbursementDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -1615,6 +1616,18 @@ public class LoanTransactionHelper extends IntegrationTest {
             log.info("Loan with Total Outstanding Balance {} expected {}", getLoansLoanIdSummary.getTotalOutstanding(), amountExpected);
             assertEquals(amountExpected, getLoansLoanIdSummary.getTotalOutstanding());
         }
+    }
+
+    public void evaluateLoanDisbursementDetails(GetLoansLoanIdResponse getLoansLoanIdResponse, Integer numItems, Double amountExpected) {
+        log.info("Disbursement details items: {}", getLoansLoanIdResponse.getDisbursementDetails().size());
+        assertEquals(numItems, getLoansLoanIdResponse.getDisbursementDetails().size());
+        Double amount = Double.valueOf("0.0");
+        for (GetLoansLoanIdDisbursementDetails disbursementDetails : getLoansLoanIdResponse.getDisbursementDetails()) {
+            amount = amount + disbursementDetails.getPrincipal();
+            log.info("Disbursement details with principal {} {}", disbursementDetails.getExpectedDisbursementDate(),
+                    disbursementDetails.getPrincipal());
+        }
+        assertEquals(amountExpected, amount);
     }
 
     public Long applyChargebackTransaction(final Integer loanId, final Long transactionId, final String amount,
