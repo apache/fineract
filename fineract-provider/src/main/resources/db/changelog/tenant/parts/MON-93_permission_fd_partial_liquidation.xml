@@ -20,26 +20,26 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="naphlin@fiter.io" id="MON-93_add_partial_liquidation_permission">
+    <changeSet author="naphlin@fiter.io" id="MON-93_add_partial_liquidation_permission_1">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 Select count(1) from m_permission where code = 'PARTIALLY_LIQUIDATE_FIXEDDEPOSITACCOUNT';
             </sqlCheck>
         </preConditions>
         <sql>
-            INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`) VALUES ('transaction_savings', 'PARTIALLY_LIQUIDATE_FIXEDDEPOSITACCOUNT', 'FIXEDDEPOSITACCOUNT', 'PARTIALLY_LIQUIDATE');
+            INSERT INTO m_permission (grouping, code, entity_name, action_name) VALUES ('transaction_savings', 'PARTIALLY_LIQUIDATE_FIXEDDEPOSITACCOUNT', 'FIXEDDEPOSITACCOUNT', 'PARTIALLY_LIQUIDATE');
         </sql>
 
     </changeSet>
-    <changeSet author="naphlin@fiter.io" id="MON-93_add_preclosure_charge_id">
+    <changeSet author="naphlin@fiter.io" id="MON-93_add_preclosure_charge_id_1">
         <preConditions>
             <not>
                 <columnExists tableName="m_deposit_product_term_and_preclosure" columnName="pre_closure_charge_id"/>
             </not>
         </preConditions>
         <sql>
-            ALTER TABLE `m_deposit_product_term_and_preclosure` ADD `pre_closure_charge_id` BIGINT(20) NULL DEFAULT NULL;
-            ALTER TABLE `m_deposit_product_term_and_preclosure` ADD CONSTRAINT `m_deposit_product_term_and_preclosure_charge_ibfk_1` FOREIGN KEY (`pre_closure_charge_id`) REFERENCES `m_charge` (`id`);
+            ALTER TABLE m_deposit_product_term_and_preclosure ADD pre_closure_charge_id BIGINT NULL DEFAULT NULL;
+            ALTER TABLE m_deposit_product_term_and_preclosure ADD CONSTRAINT m_deposit_product_term_and_preclosure_charge_ibfk_1 FOREIGN KEY (pre_closure_charge_id) REFERENCES m_charge (id);
 
         </sql>
     </changeSet>
@@ -84,17 +84,17 @@
 
     </changeSet>
 
-    <changeSet author="naphlin@fiter.io" id="MON-93_add_varying_charge_slab">
+    <changeSet author="naphlin@fiter.io" id="MON-93_add_varying_charge_slab_1">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_fee_charge_slab"/>
             </not>
         </preConditions>
      <createTable tableName="m_fee_charge_slab">
-         <column name="id"  type="bigint(20)" autoIncrement="true">
+         <column name="id"  type="BIGINT" autoIncrement="true">
             <constraints primaryKey="true"/>
          </column>
-         <column name="charge_id" type="bigint(20)">
+         <column name="charge_id" type="BIGINT">
              <constraints references="m_charge(id)" foreignKeyName="FK_charge_id_charge_slab_id" nullable="false"/>
          </column>
          <column name="description" type="text"></column>
