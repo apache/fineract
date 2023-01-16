@@ -97,6 +97,7 @@ import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
@@ -123,6 +124,7 @@ import org.apache.fineract.portfolio.savings.domain.VaultTribeCustomSavingsAccou
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException.PostInterestAsOnExceptionType;
 import org.apache.fineract.portfolio.savings.exception.PostInterestClosingDateException;
+import org.apache.fineract.portfolio.savings.exception.VaultTribeTransactionBeforePivotDateNotAllowed;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountClosingNotAllowedException;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.SavingsOfficerAssignmentException;
@@ -175,6 +177,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountInterestPostingService savingsAccountInterestPostingService;
 
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+    private final PaymentTypeRepositoryWrapper repositoryWrapper;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -199,7 +202,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository,
             final JdbcTemplate jdbcTemplate, final SavingsAccountInterestPostingService savingsAccountInterestPostingService,
             final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
-            final VaultTribeCustomSavingsAccountTransactionRepository vaultTribeCustomSavingsAccountTransactionRepository) {
+            final VaultTribeCustomSavingsAccountTransactionRepository vaultTribeCustomSavingsAccountTransactionRepository,
+            final PaymentTypeRepositoryWrapper repositoryWrapper ) {
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -230,6 +234,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountInterestPostingService = savingsAccountInterestPostingService;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.vaultTribeCustomSavingsAccountTransactionRepository = vaultTribeCustomSavingsAccountTransactionRepository;
+        this.repositoryWrapper = repositoryWrapper;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
@@ -334,7 +339,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult gsimDeposit(final Long gsimId, final JsonCommand command) {
 
         Long parentSavingId = gsimId;
-        // GroupSavingsIndividualMonitoringparentSavings=gsimRepository.findById(parentSavingId).get();
         List<SavingsAccount> childSavings = this.savingAccountRepositoryWrapper.findByGsimId(gsimId);
 
         JsonArray savingsArray = command.arrayOfParameterNamed("savingsArray");
@@ -388,6 +392,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (isGsim && (deposit.getId() != null)) {
 
             LOG.debug("Deposit account has been created: {} ", deposit);
+            validateValtTribeTransactionShouldNotBeBeforeExistingTransaction(transactionDate, account);
 
             GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(account.getGsim().getId()).orElseThrow();
             LOG.info("parent deposit : {} ", gsim.getParentDeposit());
@@ -462,29 +467,26 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 transactionAmount, paymentDetail, transactionBooleanValues, backdatedTxnsAllowedTill);
 
         if (isGsim && (withdrawal.getId() != null)) {
+
+            validateValtTribeTransactionShouldNotBeBeforeExistingTransaction(transactionDate, account);
+
             GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(account.getGsim().getId()).orElseThrow();
             BigDecimal currentBalance = gsim.getParentDeposit().subtract(transactionAmount);
             gsim.setParentDeposit(currentBalance);
             gsimRepository.save(gsim);
-            // This Implementation is deactivated due to double posting. https://fiterio.atlassian.net/browse/MON-123
 
-            // if (account.getLockedInUntilDate() != null &&
-            // account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
-            // final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService
-            // .createAndPersistPaymentDetailForVaultTribe(command, changes,
-            // SavingsAccountTransactionType.REVOKED_INTEREST,
-            // withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
-            // // Revoke Accrued Interest if the locked date is not yet due and the account is subscribed to gsim
-            // final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId,
-            // backdatedTxnsAllowedTill);
-            // BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);
-            //
-            // if (amount.compareTo(BigDecimal.ZERO) > 0) {
-            // final SavingsAccountTransaction revokedInterestTx =
-            // this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
-            // fmt, transactionDate, amount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
-            // }
-            // }
+            if (account.getLockedInUntilDate() != null && account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
+                final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService.createAndPersistPaymentDetailForVaultTribe(command, changes, SavingsAccountTransactionType.REVOKED_INTEREST, withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
+
+                final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId,
+                        backdatedTxnsAllowedTill);
+                BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);
+
+                if (amount.compareTo(BigDecimal.ZERO) > 0) {
+                   this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
+                                    fmt, transactionDate, amount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
+                }
+            }
 
         }
 
@@ -502,6 +504,22 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .with(changes)//
                 .build();
+    }
+
+    private void validateValtTribeTransactionShouldNotBeBeforeExistingTransaction(LocalDate transactionDate, SavingsAccount account) {
+
+        /*
+        * Block Transactions to go before any of the existing to prevent re-computation of
+        * Interest_Posting.
+        * We Need to track the interest posting Transaction on REVOKE_INTEREST  Transactions so if it's recomputed, we shall lose  the audit trail
+        * */
+
+        List<SavingsAccountTransaction> transactionsBeforeCurrent = this.savingsAccountTransactionRepository
+                .findTransactionsAfterTransactionCurrentDate(account, transactionDate);
+
+        if(!CollectionUtils.isEmpty(transactionsBeforeCurrent)){
+            throw new VaultTribeTransactionBeforePivotDateNotAllowed(transactionDate);
+        }
     }
 
     @Transactional
@@ -639,6 +657,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 postInterestOnDate = transactionDate;
             }
             account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
+            account.setPaymentDetailWritePlatformService(this.paymentDetailWritePlatformService);
+            account.setRepositoryWrapper(this.repositoryWrapper);
+
             account.postAccrualInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth, postInterestOnDate, null);
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,

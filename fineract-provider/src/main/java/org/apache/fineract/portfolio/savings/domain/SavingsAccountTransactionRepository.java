@@ -59,4 +59,9 @@ public interface SavingsAccountTransactionRepository
     @Query("SELECT sat FROM SavingsAccountTransaction sat WHERE sat.savingsAccount.id = :savingsId and sat.typeOf = :type ORDER BY sat.dateOf, sat.createdDate, sat.id")
     List<SavingsAccountTransaction> getTransactionsByAccountIdAndType(@Param("savingsId") Long savingsId, @Param("type") Integer type);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select st from SavingsAccountTransaction st where st.savingsAccount = :savingsAccount and st.dateOf > :transactionDate order by st.dateOf DESC")
+    List<SavingsAccountTransaction> findTransactionsAfterTransactionCurrentDate(@Param("savingsAccount") SavingsAccount savingsAccount,
+                                                                   @Param("transactionDate") LocalDate transactionDate);
+
 }

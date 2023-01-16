@@ -98,6 +98,8 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -127,6 +129,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
@@ -366,6 +369,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     @Transient
     protected SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    @Transient
+    protected PaymentTypeRepositoryWrapper repositoryWrapper;
+    @Transient
+    protected PaymentDetailWritePlatformService paymentDetailWritePlatformService;
 
     @Column(name = "start_interest_accrual_calculation_date")
     protected LocalDate startInterestAccrualCalculationDate;
@@ -752,6 +759,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                             }
                         }
                         if (newPostingTransaction != null && newPostingTransaction.getAmount(currency).isGreaterThanZero()) {
+                            addPaymentDetailsToInterestPostingTransaction(newPostingTransaction);
                             newPostingTransaction.updateCumulativeBalanceAndDates(this.currency, interestPostingTransactionDate);
                             this.addNewTransaction(newPostingTransaction);
                         }
@@ -769,8 +777,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
                         }
                         if (correctionRequired) {
                             boolean applyWithHoldTaxForOldTransaction = false;
+                            Integer x = 0;
                             for (SavingsAccountTransaction postingTransaction : postingTransactions) {
                                 postingTransaction.reverse();
+                                LOG.info("Index :> "+ x + " Transaction Amount "+postingTransaction.getAmount());
                                 this.savingsAccountTransactionRepository.save(postingTransaction);
                             }
                             postingTransactions.clear();
@@ -821,6 +831,13 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
         this.recalculateRunningBalances();
         this.updateSummary();
+    }
+
+    private void addPaymentDetailsToInterestPostingTransaction(SavingsAccountTransaction newPostingTransaction) {
+        PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(1L); // Default payment Type for Interest Posting
+        PaymentDetail paymentDetail = PaymentDetail.paymentDetails(paymentType, newPostingTransaction.getSavingsAccount().getAccountNumber());
+        final PaymentDetail savedPaymentDetails = this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+        newPostingTransaction.setPaymentDetail(savedPaymentDetails);
     }
 
     protected boolean isInterestPostingDue(LocalDate interestPostingUpToDate) {
@@ -4502,6 +4519,14 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public void setSavingsAccountTransactionRepository(SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
+    }
+
+    public void setRepositoryWrapper(PaymentTypeRepositoryWrapper repositoryWrapper) {
+        this.repositoryWrapper = repositoryWrapper;
+    }
+
+    public void setPaymentDetailWritePlatformService(PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
     }
 
     protected List<SavingsAccountTransaction> retrieveListOfTransactions() {

@@ -158,4 +158,19 @@ public final class PaymentDetail extends AbstractPersistableCustom {
     public Integer getParentSavingsAccountTransactionId() {
         return parentSavingsAccountTransactionId;
     }
+
+    public void setPaymentType(PaymentType paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
+    public static PaymentDetail paymentDetails(PaymentType paymentType,String accountNumber) {
+        PaymentDetail pay = new PaymentDetail();
+        pay.setPaymentType(paymentType);
+        pay.setAccountNumber(accountNumber);
+        return pay;
+    }
 }
