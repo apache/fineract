@@ -21,12 +21,12 @@ package org.apache.fineract.cob.loan;
 import java.util.List;
 import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
 
-public class LoanAccountStayedLockedBusinessEvent extends AbstractBusinessEvent<List<Long>> {
+public class LoanAccountsStayedLockedBusinessEvent extends AbstractBusinessEvent<List<Long>> {
 
     private static final String CATEGORY = "Loan COB";
     private static final String TYPE = "LoanAccountsStayedLockedBusinessEvent";
 
-    public LoanAccountStayedLockedBusinessEvent(List<Long> value) {
+    public LoanAccountsStayedLockedBusinessEvent(List<Long> value) {
         super(value);
     }
 

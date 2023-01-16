@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ExternalEventSourceProviderConfig {
 
-    private static final String EXTERNAL_EVENT_CLASSES_BASE_PACKAGE = "org.apache.fineract.infrastructure.event.business.domain";
+    private static final String EXTERNAL_EVENT_CLASSES_BASE_PACKAGE = "org.apache.fineract";
 
     @Bean
     public ExternalEventSourceProvider fineractExternalEventSourceProvider() {

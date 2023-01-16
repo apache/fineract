@@ -99,4 +99,5 @@
     <include file="parts/0077_add_overpaid_date_for_loan.xml" relativeToChangelogFile="true" />
     <include file="parts/0078_add_configuration_cob_bulk_event.xml" relativeToChangelogFile="true" />
     <include file="parts/0079_add_charge_off_details_to_loan.xml" relativeToChangelogFile="true" />
+    <include file="parts/0080_add_external_event_configuration_for_stayed_locked_loans_business_event.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

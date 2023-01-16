@@ -440,6 +440,11 @@ public class ExternalEventConfigurationHelper {
         loanDelinquencyRangeChangeBusinessEvent.put("enabled", false);
         defaults.add(loanDelinquencyRangeChangeBusinessEvent);
 
+        Map<String, Object> loanAccountsStayedLockedBusinessEvent = new HashMap<>();
+        loanAccountsStayedLockedBusinessEvent.put("type", "LoanAccountsStayedLockedBusinessEvent");
+        loanAccountsStayedLockedBusinessEvent.put("enabled", false);
+        defaults.add(loanAccountsStayedLockedBusinessEvent);
+
         return defaults;
 
     }

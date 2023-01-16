@@ -41,7 +41,7 @@ public class StayedLockedLoansTasklet implements Tasklet {
         List<LoanAccountLock> loanAccountLocks = loanAccountLockRepository.findAll();
         if (!loanAccountLocks.isEmpty()) {
             List<Long> loanIds = loanAccountLocks.stream().map(LoanAccountLock::getLoanId).toList();
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountStayedLockedBusinessEvent(loanIds));
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountsStayedLockedBusinessEvent(loanIds));
         }
         return RepeatStatus.FINISHED;
     }
