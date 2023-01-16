@@ -20,8 +20,8 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="deepika@fiter.io" id="add_codes_for_freeze_1">
-        <preConditions>
+    <changeSet author="deepika@fiter.io" id="add_codes_for_freeze_2">
+        <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_savings_account_block_narration_history" />
             </not>
