@@ -29,7 +29,7 @@ dependencyManagement {
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.1'
         mavenBom 'io.cucumber:cucumber-bom:7.10.1'
         mavenBom 'io.netty:netty-bom:4.1.86.Final'
-        mavenBom 'org.mockito:mockito-bom:4.11.0'
+        mavenBom 'org.mockito:mockito-bom:5.0.0'
     }
 
     dependencies {
