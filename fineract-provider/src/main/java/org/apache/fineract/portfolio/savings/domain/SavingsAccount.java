@@ -777,10 +777,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
                         }
                         if (correctionRequired) {
                             boolean applyWithHoldTaxForOldTransaction = false;
-                            Integer x = 0;
+
                             for (SavingsAccountTransaction postingTransaction : postingTransactions) {
                                 postingTransaction.reverse();
-                                LOG.info("Index :> "+ x + " Transaction Amount "+postingTransaction.getAmount());
                                 this.savingsAccountTransactionRepository.save(postingTransaction);
                             }
                             postingTransactions.clear();
