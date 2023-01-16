@@ -93,7 +93,8 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "SavingsCloseBusinessEvent", "SavingsCreateBusinessEvent", "SavingsDepositBusinessEvent",
                 "SavingsPostInterestBusinessEvent", "SavingsRejectBusinessEvent", "SavingsWithdrawalBusinessEvent",
                 "ShareAccountApproveBusinessEvent", "ShareAccountCreateBusinessEvent", "ShareProductDividentsCreateBusinessEvent",
-                "LoanChargeAdjustmentPostBusinessEvent", "LoanChargeAdjustmentPreBusinessEvent", "LoanDelinquencyRangeChangeBusinessEvent");
+                "LoanChargeAdjustmentPostBusinessEvent", "LoanChargeAdjustmentPreBusinessEvent", "LoanDelinquencyRangeChangeBusinessEvent",
+                "LoanAccountsStayedLockedBusinessEvent", "MockBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays
                 .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
@@ -102,7 +103,7 @@ public class ExternalEventConfigurationValidationServiceTest {
         when(tenantDetailsService.findAllTenants()).thenReturn(tenants);
         when(jdbcTemplateFactory.create(any())).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(configurations);
-        List<String> sourcePackage = Arrays.asList("org.apache.fineract.infrastructure.event.business.domain");
+        List<String> sourcePackage = Arrays.asList("org.apache.fineract");
         when(externalEventSourceService.getSourcePackages()).thenReturn(sourcePackage);
         // when
         underTest.afterPropertiesSet();
@@ -122,7 +123,7 @@ public class ExternalEventConfigurationValidationServiceTest {
         when(tenantDetailsService.findAllTenants()).thenReturn(tenants);
         when(jdbcTemplateFactory.create(any())).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(new ArrayList<>());
-        List<String> sourcePackage = Arrays.asList("org.apache.fineract.infrastructure.event.business.domain");
+        List<String> sourcePackage = Arrays.asList("org.apache.fineract");
         when(externalEventSourceService.getSourcePackages()).thenReturn(sourcePackage);
         // when
         ExternalEventConfigurationNotFoundException exceptionThrown = assertThrows(ExternalEventConfigurationNotFoundException.class,
@@ -140,21 +141,21 @@ public class ExternalEventConfigurationValidationServiceTest {
     public void givenMissingEventConfigurationWhenValidatedThenThrowException() throws Exception {
 
         // given
-        List<String> configurationWithMissingCentersCreateBusinessEvent = Arrays.asList("MockBusinessEvent", "ClientActivateBusinessEvent",
-                "ClientCreateBusinessEvent", "ClientRejectBusinessEvent", "FixedDepositAccountCreateBusinessEvent",
-                "GroupsCreateBusinessEvent", "LoanAcceptTransferBusinessEvent", "LoanAddChargeBusinessEvent",
-                "LoanAdjustTransactionBusinessEvent", "LoanApplyOverdueChargeBusinessEvent", "LoanApprovedBusinessEvent",
-                "LoanBalanceChangedBusinessEvent", "LoanChargebackTransactionBusinessEvent", "LoanChargePaymentPostBusinessEvent",
-                "LoanChargePaymentPreBusinessEvent", "LoanChargeRefundBusinessEvent", "LoanCloseAsRescheduleBusinessEvent",
-                "LoanCloseBusinessEvent", "LoanCreatedBusinessEvent", "LoanCreditBalanceRefundPostBusinessEvent",
-                "LoanCreditBalanceRefundPreBusinessEvent", "LoanDeleteChargeBusinessEvent", "LoanDisbursalBusinessEvent",
-                "LoanDisbursalTransactionBusinessEvent", "LoanForeClosurePostBusinessEvent", "LoanForeClosurePreBusinessEvent",
-                "LoanInitiateTransferBusinessEvent", "LoanInterestRecalculationBusinessEvent", "LoanProductCreateBusinessEvent",
-                "LoanReassignOfficerBusinessEvent", "LoanRefundPostBusinessEvent", "LoanRefundPreBusinessEvent",
-                "LoanRejectedBusinessEvent", "LoanRejectTransferBusinessEvent", "LoanRemoveOfficerBusinessEvent",
-                "LoanRepaymentDueBusinessEvent", "LoanRepaymentOverdueBusinessEvent", "LoanRescheduledDueCalendarChangeBusinessEvent",
-                "LoanRescheduledDueHolidayBusinessEvent", "LoanScheduleVariationsAddedBusinessEvent",
-                "LoanScheduleVariationsDeletedBusinessEvent", "LoanStatusChangedBusinessEvent",
+        List<String> configurationWithMissingCentersCreateBusinessEvent = Arrays.asList("MockBusinessEvent", "MockBusinessEvent",
+                "ClientActivateBusinessEvent", "ClientCreateBusinessEvent", "ClientRejectBusinessEvent",
+                "FixedDepositAccountCreateBusinessEvent", "GroupsCreateBusinessEvent", "LoanAcceptTransferBusinessEvent",
+                "LoanAddChargeBusinessEvent", "LoanAdjustTransactionBusinessEvent", "LoanApplyOverdueChargeBusinessEvent",
+                "LoanApprovedBusinessEvent", "LoanBalanceChangedBusinessEvent", "LoanChargebackTransactionBusinessEvent",
+                "LoanChargePaymentPostBusinessEvent", "LoanChargePaymentPreBusinessEvent", "LoanChargeRefundBusinessEvent",
+                "LoanCloseAsRescheduleBusinessEvent", "LoanCloseBusinessEvent", "LoanCreatedBusinessEvent",
+                "LoanCreditBalanceRefundPostBusinessEvent", "LoanCreditBalanceRefundPreBusinessEvent", "LoanDeleteChargeBusinessEvent",
+                "LoanDisbursalBusinessEvent", "LoanDisbursalTransactionBusinessEvent", "LoanForeClosurePostBusinessEvent",
+                "LoanForeClosurePreBusinessEvent", "LoanInitiateTransferBusinessEvent", "LoanInterestRecalculationBusinessEvent",
+                "LoanProductCreateBusinessEvent", "LoanReassignOfficerBusinessEvent", "LoanRefundPostBusinessEvent",
+                "LoanRefundPreBusinessEvent", "LoanRejectedBusinessEvent", "LoanRejectTransferBusinessEvent",
+                "LoanRemoveOfficerBusinessEvent", "LoanRepaymentDueBusinessEvent", "LoanRepaymentOverdueBusinessEvent",
+                "LoanRescheduledDueCalendarChangeBusinessEvent", "LoanRescheduledDueHolidayBusinessEvent",
+                "LoanScheduleVariationsAddedBusinessEvent", "LoanScheduleVariationsDeletedBusinessEvent", "LoanStatusChangedBusinessEvent",
                 "LoanTransactionGoodwillCreditPostBusinessEvent", "LoanTransactionGoodwillCreditPreBusinessEvent",
                 "LoanTransactionMakeRepaymentPostBusinessEvent", "LoanTransactionMakeRepaymentPreBusinessEvent",
                 "LoanTransactionMerchantIssuedRefundPostBusinessEvent", "LoanTransactionMerchantIssuedRefundPreBusinessEvent",
@@ -168,7 +169,8 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "SavingsCloseBusinessEvent", "SavingsCreateBusinessEvent", "SavingsDepositBusinessEvent",
                 "SavingsPostInterestBusinessEvent", "SavingsRejectBusinessEvent", "SavingsWithdrawalBusinessEvent",
                 "ShareAccountApproveBusinessEvent", "ShareAccountCreateBusinessEvent", "ShareProductDividentsCreateBusinessEvent",
-                "LoanChargeAdjustmentPostBusinessEvent", "LoanChargeAdjustmentPreBusinessEvent", "LoanDelinquencyRangeChangeBusinessEvent");
+                "LoanChargeAdjustmentPostBusinessEvent", "LoanChargeAdjustmentPreBusinessEvent", "LoanDelinquencyRangeChangeBusinessEvent",
+                "LoanAccountsStayedLockedBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays
                 .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
@@ -177,7 +179,7 @@ public class ExternalEventConfigurationValidationServiceTest {
         when(tenantDetailsService.findAllTenants()).thenReturn(tenants);
         when(jdbcTemplateFactory.create(any())).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(configurationWithMissingCentersCreateBusinessEvent);
-        List<String> sourcePackage = Arrays.asList("org.apache.fineract.infrastructure.event.business.domain");
+        List<String> sourcePackage = Arrays.asList("org.apache.fineract");
         when(externalEventSourceService.getSourcePackages()).thenReturn(sourcePackage);
         // when
         ExternalEventConfigurationNotFoundException exceptionThrown = assertThrows(ExternalEventConfigurationNotFoundException.class,
