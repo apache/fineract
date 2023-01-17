@@ -19,14 +19,13 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Slf4j
 @Configuration
@@ -34,11 +33,10 @@ public class ContentS3Config {
 
     @Bean
     @ConditionalOnProperty("fineract.content.s3.enabled")
-    public AmazonS3 contentS3Client(FineractProperties fineractProperties) {
-        return AmazonS3ClientBuilder.standard()
-                .withCredentials(
-                        new AWSStaticCredentialsProvider(new BasicAWSCredentials(fineractProperties.getContent().getS3().getAccessKey(),
-                                fineractProperties.getContent().getS3().getSecretKey())))
+    public S3Client contentS3Client(FineractProperties fineractProperties) {
+        return S3Client
+                .builder()
+                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(fineractProperties.getContent().getS3().getAccessKey(), fineractProperties.getContent().getS3().getSecretKey())))
                 .build();
     }
 }

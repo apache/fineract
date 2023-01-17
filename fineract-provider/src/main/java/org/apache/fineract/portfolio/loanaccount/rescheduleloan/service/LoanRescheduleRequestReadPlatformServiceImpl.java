@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
-import com.amazonaws.util.StringUtils;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,6 +25,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -274,7 +275,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     public List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command) {
         LoanRescheduleRequestRowMapperForBulkApproval loanRescheduleRequestRowMapperForBulkApproval = new LoanRescheduleRequestRowMapperForBulkApproval();
         String sql = "select " + loanRescheduleRequestRowMapperForBulkApproval.schema();
-        if (!StringUtils.isNullOrEmpty(command) && !command.equalsIgnoreCase(RescheduleLoansApiConstants.allCommandParamName)) {
+        if (!StringUtils.isEmpty(command) && !command.equalsIgnoreCase(RescheduleLoansApiConstants.allCommandParamName)) {
             sql = sql + " where lrr.status_enum = ? ";
             Integer statusParam = 100;
             if (command.equalsIgnoreCase(RescheduleLoansApiConstants.approveCommandParamName)) {
