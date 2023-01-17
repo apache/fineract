@@ -133,4 +133,5 @@ public interface ConfigurationDomainService {
 
     boolean isCOBBulkEventEnabled();
 
+    Long retrieveExternalEventBatchSize();
 }

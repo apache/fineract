@@ -152,7 +152,6 @@ public class FineractProperties {
     @Setter
     public static class FineractExternalEventsProducerProperties {
 
-        private int readBatchSize;
         private FineractExternalEventsProducerJmsProperties jms;
     }
 
