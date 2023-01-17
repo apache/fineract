@@ -475,39 +475,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             gsim.setParentDeposit(currentBalance);
             gsimRepository.save(gsim);
 
-                if (account.getLockedInUntilDate() != null && account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
-                    final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService.createAndPersistPaymentDetailForVaultTribe(command, changes, SavingsAccountTransactionType.REVOKED_INTEREST, withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
-
-                    final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId,
-                            backdatedTxnsAllowedTill);
-
-                    List<SavingsAccountTransaction> savingsAccountTransactionList = savingsAccountTransactionRepository.findInterestPostingToBeRevokedOnVaultTribe(savingsAccount,transactionDate);
-                    LOG.info("Transaction Size  :> "+savingsAccountTransactionList.size());
-                    BigDecimal totalAmount = BigDecimal.ZERO;
-                    if(!CollectionUtils.isEmpty(savingsAccountTransactionList)){
-                        for (final SavingsAccountTransaction transaction : savingsAccountTransactionList) {
-
-
-                            PaymentDetail interestPostingPaymentDetails = this.paymentDetailWritePlatformService.getPaymentDetail(transaction.getPaymentDetail().getId()).orElseThrow();
-
-                            interestPostingPaymentDetails.setParentTransactionPaymentDetailsId(paymentDetail.getId().intValue());
-                            interestPostingPaymentDetails.setParentSavingsAccountTransactionId(withdrawal.getId().intValue());
-                            interestPostingPaymentDetails.setTransactionDate(transactionDate);
-                            interestPostingPaymentDetails.setActualTransactionType(SavingsAccountTransactionType.REVOKED_INTEREST.name());
-                            this.paymentDetailWritePlatformService.persistPaymentDetail(interestPostingPaymentDetails);
-
-
-                            totalAmount = totalAmount.add(transaction.getAmount());
-                                LOG.info("Transaction :> "+transaction.getId() + " Amount :>> "+ transaction.getAmount()+ " Date :>> "+transaction.getTransactionLocalDate() + " Total Now  >> {"+totalAmount + "}");
-                        }
-                    }
-
-                    if (totalAmount.compareTo(BigDecimal.ZERO) > 0) {
-                       this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
-                                        fmt, transactionDate, totalAmount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
-                    }
-                }
-
+            applyRevokedInterestTransaction(savingsId, command, transactionDate, fmt, changes, paymentDetail, backdatedTxnsAllowedTill, account, transactionBooleanValues, withdrawal);
         }
 
         final String noteText = command.stringValueOfParameterNamed("note");
@@ -524,6 +492,39 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .with(changes)//
                 .build();
+    }
+
+    private void applyRevokedInterestTransaction(Long savingsId, JsonCommand command, LocalDate transactionDate, DateTimeFormatter fmt, Map<String, Object> changes, PaymentDetail paymentDetail, boolean backdatedTxnsAllowedTill, SavingsAccount account, SavingsTransactionBooleanValues transactionBooleanValues, SavingsAccountTransaction withdrawal) {
+        if (account.getLockedInUntilDate() != null && account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
+            final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService.createAndPersistPaymentDetailForVaultTribe(command, changes, SavingsAccountTransactionType.REVOKED_INTEREST, withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
+
+            final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId,
+                    backdatedTxnsAllowedTill);
+
+            List<SavingsAccountTransaction> savingsAccountTransactionList = savingsAccountTransactionRepository.findInterestPostingToBeRevokedOnVaultTribe(savingsAccount, transactionDate);
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            if(!CollectionUtils.isEmpty(savingsAccountTransactionList)){
+                for (final SavingsAccountTransaction transaction : savingsAccountTransactionList) {
+                    updateInterestPostingPaymentDetailsToLinkRevokedIntestTransaction(transactionDate, paymentDetail, withdrawal, transaction);
+                    totalAmount = totalAmount.add(transaction.getAmount());
+                    LOG.info("Transaction :> "+transaction.getId() + " Amount :>> "+ transaction.getAmount()+ " Date :>> "+transaction.getTransactionLocalDate() + " Total Now  >> {"+totalAmount + "}");
+                }
+            }
+
+            if (totalAmount.compareTo(BigDecimal.ZERO) > 0) {
+               this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
+                       fmt, transactionDate, totalAmount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
+            }
+        }
+    }
+
+    private void updateInterestPostingPaymentDetailsToLinkRevokedIntestTransaction(LocalDate transactionDate, PaymentDetail paymentDetail, SavingsAccountTransaction withdrawal, SavingsAccountTransaction transaction) {
+        PaymentDetail interestPostingPaymentDetails = this.paymentDetailWritePlatformService.getPaymentDetail(transaction.getPaymentDetail().getId()).orElseThrow();
+        interestPostingPaymentDetails.setParentTransactionPaymentDetailsId(paymentDetail.getId().intValue());
+        interestPostingPaymentDetails.setParentSavingsAccountTransactionId(withdrawal.getId().intValue());
+        interestPostingPaymentDetails.setTransactionDate(transactionDate);
+        interestPostingPaymentDetails.setActualTransactionType(SavingsAccountTransactionType.REVOKED_INTEREST.name());
+        this.paymentDetailWritePlatformService.persistPaymentDetail(interestPostingPaymentDetails);
     }
 
     private void validateValtTribeTransactionShouldNotBeBeforeExistingTransaction(LocalDate transactionDate, SavingsAccount account) {
