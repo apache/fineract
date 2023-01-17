@@ -85,7 +85,7 @@ public class ExternalEventService {
         byte[] data = byteBufferConverter.convert(avroDto.toByteBuffer());
 
         return new ExternalEvent(bulkBusinessEvent.getType(), bulkBusinessEvent.getCategory(), BulkMessagePayloadV1.class.getName(), data,
-                idempotencyKey);
+                idempotencyKey, bulkBusinessEvent.getAggregateRootId());
     }
 
     private <T> ExternalEvent handleRegularBusinessEvent(BusinessEvent<T> event) throws IOException {
@@ -95,8 +95,9 @@ public class ExternalEventService {
         BusinessEventSerializer serializer = serializerFactory.create(event);
         String schema = serializer.getSupportedSchema().getName();
         byte[] data = serializer.serialize(event);
+        Long aggregateRootId = event.getAggregateRootId();
 
-        return new ExternalEvent(eventType, eventCategory, schema, data, idempotencyKey);
+        return new ExternalEvent(eventType, eventCategory, schema, data, idempotencyKey, aggregateRootId);
     }
 
     private void flushChangesBeforeSerialization() {

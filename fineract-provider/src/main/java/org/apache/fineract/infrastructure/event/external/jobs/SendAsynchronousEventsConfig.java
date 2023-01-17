@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.event.external.jobs;
 
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.jobs.service.StepName;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -40,7 +41,7 @@ public class SendAsynchronousEventsConfig {
 
     @Bean
     protected Step sendAsynchronousEventsStep() {
-        return steps.get(JobName.SEND_ASYNCHRONOUS_EVENTS.name()).tasklet(tasklet).build();
+        return steps.get(StepName.SEND_ASYNCHRONOUS_EVENTS_STEP.name()).tasklet(tasklet).build();
     }
 
     @Bean

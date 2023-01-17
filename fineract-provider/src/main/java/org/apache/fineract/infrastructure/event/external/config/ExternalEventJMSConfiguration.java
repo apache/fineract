@@ -28,10 +28,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 @ConditionalOnProperty(value = "fineract.events.external.producer.jms.enabled", havingValue = "true")
-public class ExternalEventJMSBrokerConfiguration {
+public class ExternalEventJMSConfiguration {
 
     @Autowired
     private FineractProperties fineractProperties;
@@ -59,5 +60,14 @@ public class ExternalEventJMSBrokerConfiguration {
     @Bean(name = "eventDestination")
     public ActiveMQQueue activeMqQueue() {
         return new ActiveMQQueue(fineractProperties.getEvents().getExternal().getProducer().getJms().getEventQueueName());
+    }
+
+    @Bean("externalEventJmsProducerExecutor")
+    public ThreadPoolTaskExecutor externalEventJmsProducerExecutor() {
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+        threadPoolTaskExecutor.setCorePoolSize(10);
+        threadPoolTaskExecutor.setMaxPoolSize(100);
+        threadPoolTaskExecutor.setThreadNamePrefix("externalEventJms");
+        return threadPoolTaskExecutor;
     }
 }

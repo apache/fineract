@@ -226,6 +226,11 @@ class BusinessEventNotifierServiceImplTest {
         public String getCategory() {
             return null;
         }
+
+        @Override
+        public Long getAggregateRootId() {
+            return null;
+        }
     }
 
 }

@@ -19,5 +19,5 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 public enum StepName {
-    PURGE_PROCESSED_COMMANDS_STEP;
+    PURGE_PROCESSED_COMMANDS_STEP, SEND_ASYNCHRONOUS_EVENTS_STEP
 }

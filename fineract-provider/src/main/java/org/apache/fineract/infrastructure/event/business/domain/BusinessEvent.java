@@ -25,4 +25,6 @@ public interface BusinessEvent<T> {
     String getType();
 
     String getCategory();
+
+    Long getAggregateRootId();
 }

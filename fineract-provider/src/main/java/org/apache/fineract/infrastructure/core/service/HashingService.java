@@ -16,18 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.producer;
+package org.apache.fineract.infrastructure.core.service;
 
-import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
+import com.google.common.hash.Hashing;
+import org.springframework.stereotype.Component;
 
-@Service
-@ConditionalOnProperty(value = "fineract.events.external.enabled", havingValue = "false")
-public class DummyExternalEventProducerImpl implements ExternalEventProducer {
+@Component
+public class HashingService {
 
-    @Override
-    public void sendEvent(byte[] message) throws AcknowledgementTimeoutException {
-        return;
+    public int consistentHash(long input, int buckets) {
+        return Hashing.consistentHash(input, buckets);
     }
 }

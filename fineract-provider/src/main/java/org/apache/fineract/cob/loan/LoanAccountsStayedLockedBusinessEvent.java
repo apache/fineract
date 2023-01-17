@@ -39,4 +39,9 @@ public class LoanAccountsStayedLockedBusinessEvent extends AbstractBusinessEvent
     public String getCategory() {
         return CATEGORY;
     }
+
+    @Override
+    public Long getAggregateRootId() {
+        return null;
+    }
 }

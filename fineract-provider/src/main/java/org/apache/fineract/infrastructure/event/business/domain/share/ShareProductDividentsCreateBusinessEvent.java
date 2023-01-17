@@ -38,4 +38,9 @@ public class ShareProductDividentsCreateBusinessEvent extends AbstractBusinessEv
     public String getCategory() {
         return CATEGORY;
     }
+
+    @Override
+    public Long getAggregateRootId() {
+        return get();
+    }
 }

@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.event.external.jobs;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -43,8 +43,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
 import org.apache.fineract.infrastructure.event.external.producer.ExternalEventProducer;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
-import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
-import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
+import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventView;
 import org.apache.fineract.infrastructure.event.external.service.message.MessageFactory;
 import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,12 +53,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class SendAsynchronousEventsTaskletTest {
 
     @Mock
@@ -80,6 +82,8 @@ class SendAsynchronousEventsTaskletTest {
     private ConfigurationDomainService configurationDomainService;
     private SendAsynchronousEventsTasklet underTest;
     private RepeatStatus resultStatus;
+
+    private Random rnd = new Random();
 
     @BeforeEach
     public void setUp() {
@@ -108,8 +112,9 @@ class SendAsynchronousEventsTaskletTest {
     @Test
     public void givenBatchSize2WhenTaskExecutionThenSend2Events() throws Exception {
         // given
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"),
-                new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"));
+        List<ExternalEventView> events = Arrays.asList(
+                createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L),
+                createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
         // Dummy Message
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
@@ -117,64 +122,95 @@ class SendAsynchronousEventsTaskletTest {
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
-        doNothing().when(eventProducer).sendEvent(Mockito.any());
         // when
-        resultStatus = this.underTest.execute(stepContribution, chunkContext);
+        resultStatus = underTest.execute(stepContribution, chunkContext);
         // then
-        verify(eventProducer, times(2)).sendEvent(new byte[0]);
-        verify(repository, times(2)).save(Mockito.any(ExternalEvent.class));
+        verify(eventProducer).sendEvents(Mockito.any());
+        verify(repository).markEventsSent(Mockito.eq(events.stream().map(ExternalEventView::getId).toList()), Mockito.any());
         assertEquals(RepeatStatus.FINISHED, resultStatus);
     }
 
     @Test
     public void givenBatchSize2WhenEventSendFailsThenExecutionStops() throws Exception {
         // given
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"),
-                new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"));
+        List<ExternalEventView> events = Arrays.asList(
+                createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L),
+                createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
         doThrow(new AcknowledgementTimeoutException("Event Send Exception", new RuntimeException())).when(eventProducer)
-                .sendEvent(Mockito.any());
+                .sendEvents(Mockito.any());
         // when
-        resultStatus = this.underTest.execute(stepContribution, chunkContext);
+        resultStatus = underTest.execute(stepContribution, chunkContext);
         // then
-        verify(repository, times(0)).save(Mockito.any(ExternalEvent.class));
+        verify(repository, times(0)).markEventsSent(Mockito.any(), Mockito.any());
         assertEquals(RepeatStatus.FINISHED, resultStatus);
     }
 
     @Test
     public void givenOneEventWhenEventSentThenEventStatusUpdates() throws Exception {
         // given
-        ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"));
+        List<ExternalEventView> events = Arrays
+                .asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
-        doNothing().when(eventProducer).sendEvent(Mockito.any());
         // when
-        resultStatus = this.underTest.execute(stepContribution, chunkContext);
+        resultStatus = underTest.execute(stepContribution, chunkContext);
         // then
         verify(messageFactory).createMessage(Mockito.any());
-        verify(repository).save(externalEventArgumentCaptor.capture());
-        ExternalEvent externalEvent = externalEventArgumentCaptor.getValue();
-        assertThat(externalEvent.getStatus()).isEqualTo(ExternalEventStatus.SENT);
+        verify(eventProducer).sendEvents(Mockito.any());
+        verify(repository).markEventsSent(Mockito.eq(events.stream().map(ExternalEventView::getId).toList()), Mockito.any());
+        assertEquals(RepeatStatus.FINISHED, resultStatus);
+    }
+
+    @Test
+    public void testExecuteShouldHandleNullAggregateId() throws Exception {
+        // given
+        List<ExternalEventView> events = Arrays
+                .asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", null));
+        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+                "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
+        when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
+        byte[] byteMsg = new byte[0];
+        when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(byteMsg);
+        // when
+        resultStatus = underTest.execute(stepContribution, chunkContext);
+        // then
+        verify(messageFactory).createMessage(Mockito.any());
+        verify(eventProducer).sendEvents(Map.of(-1L, List.of(byteMsg)));
+        verify(repository).markEventsSent(Mockito.eq(events.stream().map(ExternalEventView::getId).toList()), Mockito.any());
         assertEquals(RepeatStatus.FINISHED, resultStatus);
     }
 
     @Test
     public void givenEventBatchSizeIsConfiguredAs10WhenTaskExecutionThenEventReadPageSizeIsCorrect() {
         ArgumentCaptor<Pageable> externalEventPageSizeArgumentCaptor = ArgumentCaptor.forClass(Pageable.class);
-        List<ExternalEvent> events = new ArrayList<>();
+        List<ExternalEventView> events = new ArrayList<>();
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
         // when
-        resultStatus = this.underTest.execute(stepContribution, chunkContext);
+        resultStatus = underTest.execute(stepContribution, chunkContext);
         // then
         verify(repository).findByStatusOrderById(Mockito.any(), externalEventPageSizeArgumentCaptor.capture());
         assertThat(externalEventPageSizeArgumentCaptor.getValue().getPageSize()).isEqualTo(10);
+    }
+
+    private ExternalEventView createExternalEventView(String type, String category, String schema, byte[] data, String idempotencyKey,
+            Long aggregateRootId) {
+        ExternalEventView result = Mockito.mock(ExternalEventView.class);
+        Mockito.when(result.getId()).thenReturn(rnd.nextLong());
+        Mockito.when(result.getType()).thenReturn(type);
+        Mockito.when(result.getCategory()).thenReturn(category);
+        Mockito.when(result.getSchema()).thenReturn(schema);
+        Mockito.when(result.getData()).thenReturn(data);
+        Mockito.when(result.getIdempotencyKey()).thenReturn(idempotencyKey);
+        Mockito.when(result.getAggregateRootId()).thenReturn(aggregateRootId);
+        return result;
     }
 }
