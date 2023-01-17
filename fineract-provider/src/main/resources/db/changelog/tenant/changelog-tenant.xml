@@ -103,4 +103,5 @@
     <include file="parts/0081_add_configuration_event_producer_batch_size.xml" relativeToChangelogFile="true" />
     <include file="parts/0082_add_external_event_default_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0083_add_loan_transaction_enum_values.xml" relativeToChangelogFile="true" />
+    <include file="parts/0084_add_general_accounting_table_reports.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
