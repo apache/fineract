@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
+import org.apache.fineract.portfolio.loanaccount.data.UnpaidChargeData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -50,4 +52,17 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
 
     @Query(FIND_ID_BY_EXTERNAL_ID)
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);
+
+    @Query("""
+                    SELECT new org.apache.fineract.portfolio.loanaccount.data.UnpaidChargeData(
+                        lc.charge.id,
+                        lc.charge.name,
+                        SUM(lc.amountOutstanding)
+                    ) FROM LoanCharge lc
+                    WHERE lc.loan = :loan
+                    AND lc.active = true
+                    AND lc.amountOutstanding > 0
+                    GROUP BY lc.charge.id, lc.charge.name
+            """)
+    List<UnpaidChargeData> fetchTotalUnpaidChargesForLoan(Loan loan);
 }
