@@ -100,24 +100,6 @@ public final class ApiParameterHelper {
         return locale;
     }
 
-    public static boolean exportCsv(final MultivaluedMap<String, String> queryParams) {
-        boolean exportCsv = false;
-        if (queryParams.getFirst("exportCSV") != null) {
-            final String exportCsvValue = queryParams.getFirst("exportCSV");
-            exportCsv = "true".equalsIgnoreCase(exportCsvValue);
-        }
-        return exportCsv;
-    }
-
-    public static boolean exportPdf(final MultivaluedMap<String, String> queryParams) {
-        boolean exportPDF = false;
-        if (queryParams.getFirst("exportPDF") != null) {
-            final String exportPdfValue = queryParams.getFirst("exportPDF");
-            exportPDF = "true".equalsIgnoreCase(exportPdfValue);
-        }
-        return exportPDF;
-    }
-
     public static boolean parameterType(final MultivaluedMap<String, String> queryParams) {
         boolean parameterType = false;
         if (queryParams.getFirst("parameterType") != null) {
