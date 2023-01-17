@@ -2510,7 +2510,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
         // final List<SavingsAccountTransaction> transactionsSortedByDate = retrieveListOfTransactions();
         Money runningBalance = this.summary.getAccountBalance(getCurrency());
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
-        org.joda.time.LocalDate lastSavingsDate = null;
         final BigDecimal withdrawalFee = null;
 
         // check last txn date

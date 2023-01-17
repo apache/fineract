@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.exception;
 
-import com.amazonaws.AmazonClientException;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import software.amazon.awssdk.core.exception.SdkException;
 
 public class DocumentNotFoundException extends AbstractPlatformResourceNotFoundException {
 
@@ -34,7 +34,7 @@ public class DocumentNotFoundException extends AbstractPlatformResourceNotFoundE
                 "Document with identifier " + id + " does not exist for the " + entityType + " with Identifier " + entityId, id, e);
     }
 
-    public DocumentNotFoundException(String entityType, Long entityId, Long id, AmazonClientException ace) {
+    public DocumentNotFoundException(String entityType, Long entityId, Long id, SdkException ace) {
         super("error.msg.document.id.invalid",
                 "Document with identifier " + id + " does not exist for the " + entityType + " with Identifier " + entityId, id, ace);
     }
