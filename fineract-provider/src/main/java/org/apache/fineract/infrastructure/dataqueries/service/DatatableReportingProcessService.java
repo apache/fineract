@@ -56,55 +56,67 @@ public class DatatableReportingProcessService implements ReportingProcessService
     public Response processRequest(String reportName, MultivaluedMap<String, String> queryParams) {
         boolean isSelfServiceUserReport = Boolean.parseBoolean(
                 queryParams.getOrDefault(RunreportsApiResource.IS_SELF_SERVICE_USER_REPORT_PARAMETER, List.of("false")).get(0));
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(queryParams);
-        final boolean exportCsv = ApiParameterHelper.exportCsv(queryParams);
-        final boolean exportPdf = ApiParameterHelper.exportPdf(queryParams);
+
+        DatatableExportTargetParameter exportMode = DatatableExportTargetParameter.checkTarget(queryParams);
         final String parameterTypeValue = ApiParameterHelper.parameterType(queryParams) ? "parameter" : "report";
-
-        // PDF format
-        if (exportPdf) {
-            final Map<String, String> reportParams = getReportParams(queryParams);
-            final String pdfFileName = this.readExtraDataAndReportingService.retrieveReportPDF(reportName, parameterTypeValue, reportParams,
-                    isSelfServiceUserReport);
-
-            final File file = new File(pdfFileName);
-
-            final ResponseBuilder response = Response.ok(file);
-            response.header("Content-Disposition", "attachment; filename=\"" + pdfFileName + "\"");
-            response.header("content-Type", "application/pdf");
-
-            return response.build();
-        }
-
-        // JSON format
-        if (!exportCsv) {
-            final Map<String, String> reportParams = getReportParams(queryParams);
-
-            final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName,
-                    parameterTypeValue, reportParams, isSelfServiceUserReport);
-
-            String json;
-            final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(queryParams);
-            final boolean genericResultSet = ApiParameterHelper.genericResultSet(queryParams);
-            if (genericResultSetIsPassed) {
-                if (genericResultSet) {
-                    json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
-                } else {
-                    json = this.genericDataService.generateJsonFromGenericResultsetData(result);
-                }
-            } else {
-                json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
-            }
-
-            return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
-        }
-
-        // CSV format
         final Map<String, String> reportParams = getReportParams(queryParams);
+        return switch (exportMode) {
+            case CSV -> exportCSV(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
+            case PDF -> exportPDF(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
+            case S3 -> exportS3(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
+            default -> exportJSON(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue,
+                    exportMode == DatatableExportTargetParameter.PRETTY_JSON);
+        };
+    }
+
+    private Response exportJSON(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
+            boolean isSelfServiceUserReport, String parameterTypeValue, boolean prettyPrint) {
+        final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue,
+                reportParams, isSelfServiceUserReport);
+
+        String json;
+        final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(queryParams);
+        final boolean genericResultSet = ApiParameterHelper.genericResultSet(queryParams);
+        if (genericResultSetIsPassed) {
+            if (genericResultSet) {
+                json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+            } else {
+                json = this.genericDataService.generateJsonFromGenericResultsetData(result);
+            }
+        } else {
+            json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+        }
+
+        return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    private Response exportS3(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
+            boolean isSelfServiceUserReport, String parameterTypeValue) {
+        throw new UnsupportedOperationException("S3 export not supported for datatables");
+    }
+
+    private Response exportPDF(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
+            boolean isSelfServiceUserReport, String parameterTypeValue) {
+
+        final String pdfFileName = this.readExtraDataAndReportingService.retrieveReportPDF(reportName, parameterTypeValue, reportParams,
+                isSelfServiceUserReport);
+
+        final File file = new File(pdfFileName);
+
+        final ResponseBuilder response = Response.ok(file);
+        response.header("Content-Disposition", "attachment; filename=\"" + pdfFileName + "\"");
+        response.header("content-Type", "application/pdf");
+
+        return response.build();
+    }
+
+    private Response exportCSV(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
+            boolean isSelfServiceUserReport, String parameterTypeValue) {
         final StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams,
                 isSelfServiceUserReport);
 
         return Response.ok().entity(result).type("text/csv")
                 .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
+
     }
 }

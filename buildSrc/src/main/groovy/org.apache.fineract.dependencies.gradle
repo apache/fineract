@@ -60,6 +60,7 @@ dependencyManagement {
         dependency ('org.mnode.ical4j:ical4j:3.2.8') {
             exclude 'com.sun.mail:javax.mail'
         }
+        dependency 'org.apache.commons:commons-csv:1.9.0'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
         dependency 'software.amazon.awssdk:bom:2.15.0'
         dependency 'org.ehcache:ehcache:3.10.8'
