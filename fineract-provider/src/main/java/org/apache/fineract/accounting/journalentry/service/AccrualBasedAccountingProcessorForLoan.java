@@ -365,7 +365,14 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 } else {
                     accountMap.put(account, feesAmount);
                 }
+                if (!writeOff) {
+                    totalDebitAmount = totalDebitAmount.subtract(feesAmount);
+                    this.helper.createDebitJournalEntryOrReversalForLoanCharges(office, currencyCode,
+                            AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, loanId, transactionId,
+                            transactionDate, feesAmount, isReversal);
+                }
             }
+
         }
 
         // handle penalties payment of writeOff (and reversals)
@@ -388,6 +395,12 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     accountMap.put(account, amount);
                 } else {
                     accountMap.put(account, penaltiesAmount);
+                }
+                if (!writeOff) {
+                    totalDebitAmount = totalDebitAmount.subtract(penaltiesAmount);
+                    this.helper.createDebitJournalEntryOrReversalForLoanCharges(office, currencyCode,
+                            AccrualAccountsForLoan.INCOME_FROM_PENALTIES.getValue(), loanProductId, loanId, loanId, transactionId,
+                            transactionDate, penaltiesAmount, isReversal);
                 }
             }
         }
