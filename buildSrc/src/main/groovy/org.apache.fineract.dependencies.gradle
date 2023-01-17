@@ -61,7 +61,7 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
         }
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.385'
+        dependency 'software.amazon.awssdk:bom:2.15.0'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'

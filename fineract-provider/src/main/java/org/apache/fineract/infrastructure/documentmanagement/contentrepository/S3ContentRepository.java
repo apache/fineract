@@ -18,14 +18,6 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 import com.google.common.io.ByteSource;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -34,6 +26,7 @@ import java.io.InputStream;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
@@ -46,6 +39,14 @@ import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentN
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty("fineract.content.s3.enabled")
 public class S3ContentRepository implements ContentRepository {
 
-    private final AmazonS3 s3Client;
+    private final S3Client s3Client;
     private final FineractProperties fineractProperties;
 
     @Override
@@ -106,8 +107,8 @@ public class S3ContentRepository implements ContentRepository {
 
             @Override
             public InputStream openStream() throws IOException {
-                final S3Object s3object = getObject(documentData.fileLocation());
-                return s3object.getObjectContent();
+                return s3Client.getObject(GetObjectRequest.builder().bucket(fineractProperties.getContent().getS3().getBucketName())
+                        .key(documentData.fileLocation()).build(), ResponseTransformer.toBytes()).asInputStream();
             }
         }, documentData.fileName(), documentData.contentType());
     }
@@ -118,8 +119,8 @@ public class S3ContentRepository implements ContentRepository {
 
             @Override
             public InputStream openStream() throws IOException {
-                final S3Object s3object = getObject(imageData.location());
-                return s3object.getObjectContent();
+                return s3Client.getObject(GetObjectRequest.builder().bucket(fineractProperties.getContent().getS3().getBucketName())
+                        .key(imageData.location()).build(), ResponseTransformer.toBytes()).asInputStream();
             }
         }, imageData.getEntityDisplayName(), imageData.contentType().getValue());
     }
@@ -140,33 +141,36 @@ public class S3ContentRepository implements ContentRepository {
 
     private void deleteObject(final String location) {
         try {
-            this.s3Client.deleteObject(new DeleteObjectRequest(fineractProperties.getContent().getS3().getBucketName(), location));
-        } catch (final AmazonServiceException ase) {
-            throw new ContentManagementException(location, "message=" + ase.getMessage() + ", Error Type=" + ase.getErrorType(), ase);
-        } catch (final AmazonClientException ace) {
+            this.s3Client.deleteObject(builder -> builder.bucket(fineractProperties.getContent().getS3().getBucketName()).key(location));
+        } catch (final AwsServiceException ase) {
+            throw new ContentManagementException(location,
+                    "message=" + ase.getMessage() + ", Error Code=" + ase.awsErrorDetails().errorCode(), ase);
+        } catch (final SdkException ace) {
             throw new ContentManagementException(location, ace.getMessage(), ace);
         }
     }
 
-    private void putObject(final String filename, final InputStream inputStream, final String s3UploadLocation)
+    public void putObject(final String filename, final InputStream inputStream, final String s3UploadLocation)
             throws ContentManagementException {
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Uploading a new object to S3 {}", LogParameterEscapeUtil.escapeLogParameter(s3UploadLocation));
             }
-            this.s3Client.putObject(new PutObjectRequest(fineractProperties.getContent().getS3().getBucketName(), s3UploadLocation,
-                    inputStream, new ObjectMetadata()));
-        } catch (AmazonClientException ase) {
+            this.s3Client.putObject(
+                    builder -> builder.bucket(fineractProperties.getContent().getS3().getBucketName()).key(s3UploadLocation),
+                    RequestBody.fromBytes(IOUtils.toByteArray(inputStream)));
+        } catch (AwsServiceException | IOException ase) {
             throw new ContentManagementException(filename, ase.getMessage(), ase);
         }
     }
 
-    private S3Object getObject(String key) {
+    public ResponseBytes<GetObjectResponse> getObject(String key) {
         try {
             log.debug("Downloading an object from Amazon S3 Bucket: {}, location: {}",
                     fineractProperties.getContent().getS3().getBucketName(), key);
-            return this.s3Client.getObject(new GetObjectRequest(fineractProperties.getContent().getS3().getBucketName(), key));
-        } catch (AmazonClientException ase) {
+            return this.s3Client.getObject(builder -> builder.bucket(fineractProperties.getContent().getS3().getBucketName()).key(key),
+                    ResponseTransformer.toBytes());
+        } catch (SdkException ase) {
             throw new ContentManagementException(key, ase.getMessage(), ase);
         }
     }
