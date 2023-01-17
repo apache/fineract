@@ -119,9 +119,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 47 global configurations.
-        Assertions.assertEquals(47, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(47, actualGlobalConfigurations.size());
+        // There are currently 48 global configurations.
+        Assertions.assertEquals(48, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(48, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -532,6 +532,14 @@ public class GlobalConfigurationHelper {
         isCOBBulkEventEnabled.put("enabled", false);
         isCOBBulkEventEnabled.put("trapDoor", false);
         defaults.add(isCOBBulkEventEnabled);
+
+        HashMap<String, Object> externalEventBatchSize = new HashMap<>();
+        externalEventBatchSize.put("id", 53);
+        externalEventBatchSize.put("name", "external-event-batch-size");
+        externalEventBatchSize.put("value", 1000);
+        externalEventBatchSize.put("enabled", false);
+        externalEventBatchSize.put("trapDoor", false);
+        defaults.add(externalEventBatchSize);
         return defaults;
     }
 

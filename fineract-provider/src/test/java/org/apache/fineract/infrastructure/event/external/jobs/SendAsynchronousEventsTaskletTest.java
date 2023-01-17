@@ -29,12 +29,14 @@ import static org.mockito.Mockito.when;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -55,6 +57,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class SendAsynchronousEventsTaskletTest {
@@ -73,6 +76,8 @@ class SendAsynchronousEventsTaskletTest {
     private ChunkContext chunkContext;
     @Mock
     private ByteBufferConverter byteBufferConverter;
+    @Mock
+    private ConfigurationDomainService configurationDomainService;
     private SendAsynchronousEventsTasklet underTest;
     private RepeatStatus resultStatus;
 
@@ -81,22 +86,23 @@ class SendAsynchronousEventsTaskletTest {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
-        configureExternalEventsProducerReadBatchSizeProperty(1000);
-        underTest = new SendAsynchronousEventsTasklet(fineractProperties, repository, eventProducer, messageFactory, byteBufferConverter);
+        configureExternalEventsProducerReadBatchSizeProperty();
+        underTest = new SendAsynchronousEventsTasklet(fineractProperties, repository, eventProducer, messageFactory, byteBufferConverter,
+                configurationDomainService);
     }
 
-    private void configureExternalEventsProducerReadBatchSizeProperty(int readBatchSize) {
+    private void configureExternalEventsProducerReadBatchSizeProperty() {
         FineractProperties.FineractEventsProperties eventsProperties = new FineractProperties.FineractEventsProperties();
         FineractProperties.FineractExternalEventsProperties externalProperties = new FineractProperties.FineractExternalEventsProperties();
         FineractProperties.FineractExternalEventsProducerProperties externalEventsProducerProperties = new FineractProperties.FineractExternalEventsProducerProperties();
         FineractProperties.FineractExternalEventsProducerJmsProperties externalEventsProducerJMSProperties = new FineractProperties.FineractExternalEventsProducerJmsProperties();
         externalEventsProducerJMSProperties.setEnabled(true);
         externalProperties.setEnabled(true);
-        externalEventsProducerProperties.setReadBatchSize(readBatchSize);
         externalEventsProducerProperties.setJms(externalEventsProducerJMSProperties);
         externalProperties.setProducer(externalEventsProducerProperties);
         eventsProperties.setExternal(externalProperties);
         when(fineractProperties.getEvents()).thenReturn(eventsProperties);
+        when(configurationDomainService.retrieveExternalEventBatchSize()).thenReturn(10L);
     }
 
     @Test
@@ -158,5 +164,17 @@ class SendAsynchronousEventsTaskletTest {
         ExternalEvent externalEvent = externalEventArgumentCaptor.getValue();
         assertThat(externalEvent.getStatus()).isEqualTo(ExternalEventStatus.SENT);
         assertEquals(RepeatStatus.FINISHED, resultStatus);
+    }
+
+    @Test
+    public void givenEventBatchSizeIsConfiguredAs10WhenTaskExecutionThenEventReadPageSizeIsCorrect() {
+        ArgumentCaptor<Pageable> externalEventPageSizeArgumentCaptor = ArgumentCaptor.forClass(Pageable.class);
+        List<ExternalEvent> events = new ArrayList<>();
+        when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
+        // when
+        resultStatus = this.underTest.execute(stepContribution, chunkContext);
+        // then
+        verify(repository).findByStatusOrderById(Mockito.any(), externalEventPageSizeArgumentCaptor.capture());
+        assertThat(externalEventPageSizeArgumentCaptor.getValue().getPageSize()).isEqualTo(10);
     }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.MessageV1;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.external.producer.ExternalEventProducer;
@@ -49,6 +50,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     private final ExternalEventProducer eventProducer;
     private final MessageFactory messageFactory;
     private final ByteBufferConverter byteBufferConverter;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
@@ -85,7 +87,8 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     }
 
     private int getBatchSize() {
-        return fineractProperties.getEvents().getExternal().getProducer().getReadBatchSize();
+        Long externalEventBatchSize = configurationDomainService.retrieveExternalEventBatchSize();
+        return externalEventBatchSize.intValue();
     }
 
 }

@@ -48,6 +48,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     private static final String ENABLE_EXTERNAL_ID_AUTO_GENERATION = "enable-auto-generated-external-id";
     private static final String ENABLE_ADDRESS = "Enable-Address";
     private static final String ENABLE_COB_BULK_EVENT = "enable-cob-bulk-event";
+    private static final String EXTERNAL_EVENT_BATCH_SIZE = "external-event-batch-size";
 
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
@@ -503,6 +504,12 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public boolean isCOBBulkEventEnabled() {
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(ENABLE_COB_BULK_EVENT);
         return property.isEnabled();
+    }
+
+    @Override
+    public Long retrieveExternalEventBatchSize() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(EXTERNAL_EVENT_BATCH_SIZE);
+        return property.getValue();
     }
 
 }
