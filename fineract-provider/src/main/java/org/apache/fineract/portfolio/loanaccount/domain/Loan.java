@@ -3202,8 +3202,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (loanTransaction.isRecoveryRepayment()) {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_RECOVERY_PAYMENT, this);
-        } else {
-            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
 
         if (loanTransaction.isRecoveryRepayment()
@@ -3433,6 +3431,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         } else if (this.summary.isRepaidInFull(loanCurrency())) {
             handleLoanRepaymentInFull(transactionDate, loanLifecycleStateMachine);
             statusChanged = true;
+        } else {
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
         if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
             this.overpaidOnDate = null;
