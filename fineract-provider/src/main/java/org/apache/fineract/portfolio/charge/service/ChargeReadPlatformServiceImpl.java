@@ -100,7 +100,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {ChargeTimeType.INTEREST_FORFEITED.getValue()}); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeTimeType.INTEREST_FORFEITED.getValue() }); // NOSONAR
     }
 
     @Override
@@ -414,7 +414,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     public Collection<ChargeData> retrieveSavingsProductApplicableCharges(final boolean feeChargesOnly) {
         final ChargeMapper rm = new ChargeMapper();
 
-        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? and c.charge_time_enum <> ? ";
+        String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? and c.charge_time_enum <> ? ";
         if (feeChargesOnly) {
             sql = "select " + rm.chargeSchema()
                     + " where c.is_deleted=false and c.is_active=true and c.is_penalty=false and c.charge_applies_to_enum=? and c.charge_time_enum <> ? ";
@@ -422,7 +423,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue(), ChargeTimeType.INTEREST_FORFEITED.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm,
+                new Object[] { ChargeAppliesTo.SAVINGS.getValue(), ChargeTimeType.INTEREST_FORFEITED.getValue() }); // NOSONAR
     }
 
     @Override
@@ -463,10 +465,12 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema() + " join m_savings_account sa on sa.currency_code = c.currency_code"
-                + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? and c.charge_time_enum <> ?  " + " and sa.id = ?";
+                + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? and c.charge_time_enum <> ?  "
+                + " and sa.id = ?";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue(), ChargeTimeType.INTEREST_FORFEITED.getValue(), savingsAccountId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm,
+                new Object[] { ChargeAppliesTo.SAVINGS.getValue(), ChargeTimeType.INTEREST_FORFEITED.getValue(), savingsAccountId }); // NOSONAR
 
     }
 

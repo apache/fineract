@@ -96,16 +96,16 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.domain.DepositProductRecurringDetail;
-import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
+import org.apache.fineract.portfolio.savings.domain.DepositProductTermAndPreClosure;
 import org.apache.fineract.portfolio.savings.domain.FixedDepositProduct;
-import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
 import org.apache.fineract.portfolio.savings.domain.FixedDepositProductRepository;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.exception.DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException;
 import org.apache.fineract.portfolio.savings.exception.FixedDepositProductNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
-import org.apache.fineract.portfolio.savings.domain.DepositProductTermAndPreClosure;
 import org.jfree.util.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -129,8 +129,9 @@ public class DepositAccountDataValidator {
 
     @Autowired
     public DepositAccountDataValidator(final FromJsonHelper fromApiJsonHelper, final DepositProductDataValidator productDataValidator,
-                                       final SavingsAccountFeatureValidator featureValidator, ChargeRepositoryWrapper chargeRepository,
-                                       RecurringDepositProductRepository recurringDepositProductRepository, FixedDepositProductRepository fixedDepositProductRepository) {
+            final SavingsAccountFeatureValidator featureValidator, ChargeRepositoryWrapper chargeRepository,
+            RecurringDepositProductRepository recurringDepositProductRepository,
+            FixedDepositProductRepository fixedDepositProductRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.productDataValidator = productDataValidator;
         this.featureValidator = featureValidator;
@@ -208,7 +209,8 @@ public class DepositAccountDataValidator {
         validateSavingsCharges(element, baseDataValidator);
         validateFreeWithdrawalCharges(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateWithHoldTax(element, baseDataValidator);
-       // featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
+        // featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator,
+        // DepositAccountType.RECURRING_DEPOSIT);
         validateDepositAmountAgainstMinDepositAmount(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -234,7 +236,8 @@ public class DepositAccountDataValidator {
         // validateSavingsCharges(element, baseDataValidator);
         validateFreeWithdrawalCharges(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateWithHoldTax(element, baseDataValidator);
-        //featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
+        // featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator,
+        // DepositAccountType.RECURRING_DEPOSIT);
         validateDepositAmountAgainstMinDepositAmount(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -819,28 +822,30 @@ public class DepositAccountDataValidator {
                             if (charge.isActive() && charge.isEnableFreeWithdrawal()) {
                                 final Integer depositPeriod = fromApiJsonHelper.extractIntegerSansLocaleNamed(depositPeriodParamName,
                                         element);
-                                final Integer depositPeriodFrequencyId = fromApiJsonHelper.extractIntegerSansLocaleNamed(depositPeriodFrequencyIdParamName, element);
+                                final Integer depositPeriodFrequencyId = fromApiJsonHelper
+                                        .extractIntegerSansLocaleNamed(depositPeriodFrequencyIdParamName, element);
                                 Integer freeWithdrawalCount = charge.getFrequencyFreeWithdrawalCharge();
-                                if ((depositPeriod < 3 && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.MONTHS))
-                                        && !freeWithdrawalCount.equals(1)) {
+                                if ((depositPeriod < 3 && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId)
+                                        .equals(SavingsPeriodFrequencyType.MONTHS)) && !freeWithdrawalCount.equals(1)) {
                                     Log.info("charge is wrong " + depositPeriod);
                                     throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
                                             freeWithdrawalCount);
-                                }else if ((depositPeriod < 90 && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.DAYS))
-                                            && !freeWithdrawalCount.equals(1)) {
+                                } else if ((depositPeriod < 90 && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId)
+                                        .equals(SavingsPeriodFrequencyType.DAYS)) && !freeWithdrawalCount.equals(1)) {
                                     Log.info("charge is wrong " + depositPeriod);
                                     throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
                                             freeWithdrawalCount);
                                 }
 
-                                if (((depositPeriod >= 3 && depositPeriod <= 12)
-                                        && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.MONTHS))
+                                if (((depositPeriod >= 3 && depositPeriod <= 12) && SavingsPeriodFrequencyType
+                                        .fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.MONTHS))
                                         && !freeWithdrawalCount.equals(2)) {
                                     Log.info("charge is wrong " + depositPeriod);
                                     throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
                                             freeWithdrawalCount);
-                                }else if (((depositPeriod >= 90 && depositPeriod <= 365) && SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.DAYS))
-                                             && !freeWithdrawalCount.equals(2)) {
+                                } else if (((depositPeriod >= 90 && depositPeriod <= 365) && SavingsPeriodFrequencyType
+                                        .fromInt(depositPeriodFrequencyId).equals(SavingsPeriodFrequencyType.DAYS))
+                                        && !freeWithdrawalCount.equals(2)) {
                                     Log.info("charge is wrong " + depositPeriod);
                                     throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
                                             freeWithdrawalCount);
@@ -876,11 +881,11 @@ public class DepositAccountDataValidator {
     }
 
     public void validateDepositAmountAgainstMinDepositAmount(final JsonElement element, final DataValidatorBuilder baseDataValidator,
-                                                             final DepositAccountType depositAccountType) {
+            final DepositAccountType depositAccountType) {
         final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
         SavingsProduct product = null;
-         DepositProductTermAndPreClosure prodTermAndPreClosure = null;
-         BigDecimal amount = BigDecimal.ZERO;
+        DepositProductTermAndPreClosure prodTermAndPreClosure = null;
+        BigDecimal amount = BigDecimal.ZERO;
         if (depositAccountType.isFixedDeposit()) {
             product = this.fixedDepositProductRepository.findById(productId)
                     .orElseThrow(() -> new FixedDepositProductNotFoundException(productId));
@@ -889,10 +894,8 @@ public class DepositAccountDataValidator {
         } else if (depositAccountType.isRecurringDeposit()) {
             product = this.recurringDepositProductRepository.findById(productId)
                     .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
-            prodTermAndPreClosure = ((RecurringDepositProduct) product)
-                    .depositProductTermAndPreClosure();
-            amount = fromApiJsonHelper
-                    .extractBigDecimalWithLocaleNamed(mandatoryRecommendedDepositAmountParamName, element);
+            prodTermAndPreClosure = ((RecurringDepositProduct) product).depositProductTermAndPreClosure();
+            amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(mandatoryRecommendedDepositAmountParamName, element);
         }
         final boolean isLessThanMin = prodTermAndPreClosure.depositProductAmountDetails().isLessThanMinDepositAmount(amount);
         final boolean isGreaterThanMax = prodTermAndPreClosure.depositProductAmountDetails().isGreaterThanMaxDepositAmount(amount);
@@ -900,7 +903,7 @@ public class DepositAccountDataValidator {
         if (isLessThanMin) {
             baseDataValidator.reset().parameter(depositAmountParamName).value(amount)
                     .failWithCodeNoParameterAddedToErrorCode("deposit.amount.lessthan.min.deposit.amount");
-        }else if (isGreaterThanMax) {
+        } else if (isGreaterThanMax) {
             baseDataValidator.reset().parameter(depositAmountParamName).value(amount)
                     .failWithCodeNoParameterAddedToErrorCode("deposit.amount.greaterthan.max.deposit.amount");
         }

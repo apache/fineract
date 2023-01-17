@@ -754,17 +754,17 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         if (savingsAccountTransaction.isWithdrawal()) {
             SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
                     .findOneByIdAndSavingsAccountId(transactionId + 1, savingsId);
-            if(nextSavingsAccountTransaction == null) {
-                nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
-                        .findOneByIdAndSavingsAccountId(transactionId - 1, savingsId);
+            if (nextSavingsAccountTransaction == null) {
+                nextSavingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(transactionId - 1,
+                        savingsId);
             }
             if (nextSavingsAccountTransaction != null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
                 Long tranId = nextSavingsAccountTransaction.getId();
                 account.undoTransaction(tranId);
             }
-            if(savingsAccountTransaction.getPaymentDetail() != null){
+            if (savingsAccountTransaction.getPaymentDetail() != null) {
                 PaymentDetail detail = savingsAccountTransaction.getPaymentDetail();
-                if(detail.getActualTransactionType().equals(SavingsAccountTransactionType.PAY_CHARGE.getCode())){
+                if (detail.getActualTransactionType().equals(SavingsAccountTransactionType.PAY_CHARGE.getCode())) {
                     final SavingsAccountTransaction interestForfeitedTran = this.savingsAccountTransactionRepository
                             .findOneByIdAndSavingsAccountId(detail.getParentSavingsAccountTransactionId().longValue(), savingsId);
                     if (interestForfeitedTran != null && interestForfeitedTran.isNotReversed()) {
@@ -2015,7 +2015,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Integer totalLiquidationsAllowed = account.getAccountTermAndPreClosure().getTotalLiquidationAllowed();
 
         if ((totalLiquidationsAllowed == null || totalLiquidationsAllowed < 1
-                || account.getAccountTermAndPreClosure().getLinkedOriginAccountId() == null) && dataValidationErrors.isEmpty())  {
+                || account.getAccountTermAndPreClosure().getLinkedOriginAccountId() == null) && dataValidationErrors.isEmpty()) {
             return;
         }
 
@@ -2279,9 +2279,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 LocalDate date = account.getActivationLocalDate();
                 BigDecimal amount = account.findAccrualInterestPostingTransactionFromTo(date, transactionDate);
                 for (SavingsAccountCharge chargeDef : interestForfeitedCharges) {
-                    if(chargeDef.isPaid()) {
+                    if (chargeDef.isPaid()) {
                         date = chargeDef.getDueLocalDate();
-                    }else{
+                    } else {
                         account.inactivateCharge(chargeDef, transactionDate);
                     }
                     amount = account.findAccrualInterestPostingTransactionFromTo(date, transactionDate);
@@ -2314,9 +2314,10 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 charge.setAmountOutstanding(amount);
                 this.savingsAccountWritePlatformService.payCharge(charge, closedDate, amount, DateUtils.getDefaultFormatter(), user);
                 charge.setAmountOutstanding(BigDecimal.ZERO);
-                if(paymentDetail != null) {
+                if (paymentDetail != null) {
                     paymentDetail.setActualTransactionType(SavingsAccountTransactionType.PAY_CHARGE.getCode());
-                    paymentDetail.setParentSavingsAccountTransactionId(account.getTransactions().get(account.getTransactions().size() - 1).getId().intValue());
+                    paymentDetail.setParentSavingsAccountTransactionId(
+                            account.getTransactions().get(account.getTransactions().size() - 1).getId().intValue());
                 }
             }
         }
