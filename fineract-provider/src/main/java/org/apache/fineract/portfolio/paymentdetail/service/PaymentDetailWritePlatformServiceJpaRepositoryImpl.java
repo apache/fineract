@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.paymentdetail.service;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -77,6 +79,12 @@ public class PaymentDetailWritePlatformServiceJpaRepositoryImpl implements Payme
             return persistPaymentDetail(paymentDetail);
         }
         return paymentDetail;
+    }
+
+    @Override
+    @Transactional
+    public Optional<PaymentDetail> getPaymentDetail(Long id) {
+        return paymentDetailRepository.findById(id);
     }
 
     @Override

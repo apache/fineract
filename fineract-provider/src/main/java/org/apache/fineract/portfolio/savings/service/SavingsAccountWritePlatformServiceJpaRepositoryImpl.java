@@ -475,18 +475,38 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             gsim.setParentDeposit(currentBalance);
             gsimRepository.save(gsim);
 
-            if (account.getLockedInUntilDate() != null && account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
-                final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService.createAndPersistPaymentDetailForVaultTribe(command, changes, SavingsAccountTransactionType.REVOKED_INTEREST, withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
+                if (account.getLockedInUntilDate() != null && account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
+                    final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService.createAndPersistPaymentDetailForVaultTribe(command, changes, SavingsAccountTransactionType.REVOKED_INTEREST, withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
 
-                final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId,
-                        backdatedTxnsAllowedTill);
-                BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);
+                    final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId,
+                            backdatedTxnsAllowedTill);
 
-                if (amount.compareTo(BigDecimal.ZERO) > 0) {
-                   this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
-                                    fmt, transactionDate, amount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
+                    List<SavingsAccountTransaction> savingsAccountTransactionList = savingsAccountTransactionRepository.findInterestPostingToBeRevokedOnVaultTribe(savingsAccount,transactionDate);
+                    LOG.info("Transaction Size  :> "+savingsAccountTransactionList.size());
+                    BigDecimal totalAmount = BigDecimal.ZERO;
+                    if(!CollectionUtils.isEmpty(savingsAccountTransactionList)){
+                        for (final SavingsAccountTransaction transaction : savingsAccountTransactionList) {
+
+
+                            PaymentDetail interestPostingPaymentDetails = this.paymentDetailWritePlatformService.getPaymentDetail(transaction.getPaymentDetail().getId()).orElseThrow();
+
+                            interestPostingPaymentDetails.setParentTransactionPaymentDetailsId(paymentDetail.getId().intValue());
+                            interestPostingPaymentDetails.setParentSavingsAccountTransactionId(withdrawal.getId().intValue());
+                            interestPostingPaymentDetails.setTransactionDate(transactionDate);
+                            interestPostingPaymentDetails.setActualTransactionType(SavingsAccountTransactionType.REVOKED_INTEREST.name());
+                            this.paymentDetailWritePlatformService.persistPaymentDetail(interestPostingPaymentDetails);
+
+
+                            totalAmount = totalAmount.add(transaction.getAmount());
+                                LOG.info("Transaction :> "+transaction.getId() + " Amount :>> "+ transaction.getAmount()+ " Date :>> "+transaction.getTransactionLocalDate() + " Total Now  >> {"+totalAmount + "}");
+                        }
+                    }
+
+                    if (totalAmount.compareTo(BigDecimal.ZERO) > 0) {
+                       this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
+                                        fmt, transactionDate, totalAmount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
+                    }
                 }
-            }
 
         }
 

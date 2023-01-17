@@ -5088,19 +5088,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return amount;
     }
 
-    public BigDecimal findAccrualInterestPostingTransactionToBeRevoked(final LocalDate postingDate) {
-        BigDecimal amount = BigDecimal.ZERO;
-        List<SavingsAccountTransaction> trans = getTransactions();
-        for (final SavingsAccountTransaction transaction : trans) {
-
-            if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
-                    && transaction.getTransactionLocalDate().isBefore(postingDate)) {
-                amount = amount.add(transaction.getAmount());
-            }
-        }
-        return amount;
-    }
-
     public void setUnlockDate(LocalDate unlockDate) {
         this.unlockDate = unlockDate;
     }
