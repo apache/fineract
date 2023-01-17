@@ -5057,7 +5057,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         List<SavingsAccountTransaction> trans = getTransactions();
         for (final SavingsAccountTransaction transaction : trans) {
             if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
-                    && transaction.isAfter(startDate) && (transaction.isBefore(transactionDate) || transaction.getDateOf().isEqual(transactionDate))) {
+                    && transaction.isAfter(startDate)
+                    && (transaction.isBefore(transactionDate) || transaction.getDateOf().isEqual(transactionDate))) {
                 amount = amount.add(transaction.getAmount());
             }
         }

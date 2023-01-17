@@ -1093,6 +1093,4 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance);
     }
 
-
-
 }

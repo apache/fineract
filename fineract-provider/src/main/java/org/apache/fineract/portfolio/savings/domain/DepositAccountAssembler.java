@@ -410,7 +410,8 @@ public class DepositAccountAssembler {
         final DepositPreClosureDetail productPreClosure = (productTermAndPreclosure == null) ? null
                 : productTermAndPreclosure.depositPreClosureDetail();
         final DepositTermDetail productTerm = (productTermAndPreclosure == null) ? null : productTermAndPreclosure.depositTermDetail();
-        final DepositProductAmountDetails productAmountDetails = (productTermAndPreclosure == null) ? null : productTermAndPreclosure.depositProductAmountDetails();
+        final DepositProductAmountDetails productAmountDetails = (productTermAndPreclosure == null) ? null
+                : productTermAndPreclosure.depositProductAmountDetails();
 
         final DepositPreClosureDetail updatedProductPreClosure = this.depositProductAssembler.assemblePreClosureDetail(command,
                 productPreClosure);
