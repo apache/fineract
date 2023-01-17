@@ -104,4 +104,5 @@
     <include file="parts/0082_add_external_event_default_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0083_add_loan_transaction_enum_values.xml" relativeToChangelogFile="true" />
     <include file="parts/0084_add_general_accounting_table_reports.xml" relativeToChangelogFile="true" />
+    <include file="parts/0085_add_aggregate_root_id_external_events.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

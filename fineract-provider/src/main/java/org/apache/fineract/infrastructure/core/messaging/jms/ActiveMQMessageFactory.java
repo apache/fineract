@@ -16,13 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.producer;
+package org.apache.fineract.infrastructure.core.messaging.jms;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import org.apache.activemq.command.ActiveMQBytesMessage;
+import org.springframework.stereotype.Component;
 
-public interface ExternalEventProducer {
+@Component
+public class ActiveMQMessageFactory implements MessageFactory {
 
-    void sendEvents(Map<Long, List<byte[]>> partitions) throws AcknowledgementTimeoutException;
+    @Override
+    public BytesMessage createByteMessage(byte[] msg) throws JMSException {
+        ActiveMQBytesMessage result = new ActiveMQBytesMessage();
+        result.writeBytes(msg);
+        return result;
+    }
 }

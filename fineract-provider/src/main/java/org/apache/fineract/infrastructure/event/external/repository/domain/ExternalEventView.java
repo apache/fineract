@@ -16,13 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.producer;
+package org.apache.fineract.infrastructure.event.external.repository.domain;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
-public interface ExternalEventProducer {
+public interface ExternalEventView {
 
-    void sendEvents(Map<Long, List<byte[]>> partitions) throws AcknowledgementTimeoutException;
+    Long getId();
+
+    String getType();
+
+    String getCategory();
+
+    String getSchema();
+
+    byte[] getData();
+
+    OffsetDateTime getCreatedAt();
+
+    ExternalEventStatus getStatus();
+
+    OffsetDateTime getSentAt();
+
+    String getIdempotencyKey();
+
+    LocalDate getBusinessDate();
+
+    Long getAggregateRootId();
 }

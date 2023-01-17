@@ -165,6 +165,7 @@ public class FineractProperties {
         private String brokerUrl;
         private String brokerUsername;
         private String brokerPassword;
+        private int producerCount;
 
         public boolean isBrokerPasswordProtected() {
             return StringUtils.isNotBlank(brokerUsername) || StringUtils.isNotBlank(brokerPassword);

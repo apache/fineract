@@ -20,9 +20,16 @@ package org.apache.fineract.infrastructure.event.external.producer;
 
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
-public interface ExternalEventProducer {
+@Component
+@ConditionalOnProperty(value = "fineract.events.external.producer.jms.enabled", havingValue = "false")
+@Slf4j
+public class NoopExternalEventProducer implements ExternalEventProducer {
 
-    void sendEvents(Map<Long, List<byte[]>> partitions) throws AcknowledgementTimeoutException;
+    @Override
+    public void sendEvents(Map<Long, List<byte[]>> messages) throws AcknowledgementTimeoutException {}
 }

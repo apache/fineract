@@ -70,7 +70,10 @@ public class ExternalEvent extends AbstractPersistableCustom {
     @Column(name = "business_date", nullable = false)
     private LocalDate businessDate;
 
-    public ExternalEvent(String type, String category, String schema, byte[] data, String idempotencyKey) {
+    @Column(name = "aggregate_root_id", nullable = true)
+    private Long aggregateRootId;
+
+    public ExternalEvent(String type, String category, String schema, byte[] data, String idempotencyKey, Long aggregateRootId) {
         this.type = type;
         this.category = category;
         this.schema = schema;

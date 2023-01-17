@@ -43,6 +43,11 @@ public class LoanAdjustTransactionBusinessEvent extends AbstractBusinessEvent<Lo
         return CATEGORY;
     }
 
+    @Override
+    public Long getAggregateRootId() {
+        return get().getTransactionToAdjust().getLoan().getId();
+    }
+
     @RequiredArgsConstructor
     @Getter
     public static class Data {

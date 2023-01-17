@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
+import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventView;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageBusinessDate;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageCategory;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageCreatedAt;
@@ -66,7 +66,7 @@ public class MessageFactory implements InitializingBean {
         return result;
     }
 
-    public MessageV1 createMessage(ExternalEvent event) {
+    public MessageV1 createMessage(ExternalEventView event) {
         MessageId id = new MessageId(event.getId().intValue());
         MessageSource source = new MessageSource(SOURCE_UUID);
         MessageType type = new MessageType(event.getType());

@@ -33,4 +33,9 @@ public abstract class SavingsAccountTransactionBusinessEvent extends AbstractBus
     public String getCategory() {
         return CATEGORY;
     }
+
+    @Override
+    public Long getAggregateRootId() {
+        return get().getSavingsAccount().getId();
+    }
 }
