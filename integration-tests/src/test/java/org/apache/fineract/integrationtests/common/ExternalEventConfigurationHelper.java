@@ -445,6 +445,16 @@ public class ExternalEventConfigurationHelper {
         loanAccountsStayedLockedBusinessEvent.put("enabled", false);
         defaults.add(loanAccountsStayedLockedBusinessEvent);
 
+        Map<String, Object> loanChargeOffPreBusinessEvent = new HashMap<>();
+        loanChargeOffPreBusinessEvent.put("type", "LoanChargeOffPreBusinessEvent");
+        loanChargeOffPreBusinessEvent.put("enabled", false);
+        defaults.add(loanChargeOffPreBusinessEvent);
+
+        Map<String, Object> loanChargeOffPostBusinessEvent = new HashMap<>();
+        loanChargeOffPostBusinessEvent.put("type", "LoanChargeOffPostBusinessEvent");
+        loanChargeOffPostBusinessEvent.put("enabled", false);
+        defaults.add(loanChargeOffPostBusinessEvent);
+
         return defaults;
 
     }

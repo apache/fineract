@@ -216,6 +216,18 @@
                     "items": "org.apache.fineract.avro.loan.v1.LoanTransactionRelationDataV1"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "unpaidCharges",
+            "doc": "Only used for Charge-off transaction",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.UnpaidChargeDataV1"
+                }
+            ]
         }
     ]
 }

@@ -16,18 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
+package org.apache.fineract.infrastructure.event.business.domain.loan.transaction;
 
-import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
-import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-@Mapper(config = AvroMapperConfig.class)
-public interface LoanTransactionDataMapper {
+public class LoanChargeOffPostBusinessEvent extends LoanTransactionBusinessEvent {
 
-    // unpaidCharges are calculated and set explicitly based on if needed (only for charge-off transaction yet)
-    @Mapping(target = "unpaidCharges", ignore = true)
-    LoanTransactionDataV1 map(LoanTransactionData source);
+    private static final String TYPE = "LoanChargeOffPostBusinessEvent";
+
+    public LoanChargeOffPostBusinessEvent(LoanTransaction value) {
+        super(value);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }

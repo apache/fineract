@@ -18,19 +18,16 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
 
-import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
+import java.util.List;
+import org.apache.fineract.avro.loan.v1.UnpaidChargeDataV1;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
-import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.UnpaidChargeData;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
-@Mapper(config = AvroMapperConfig.class, uses = { LoanTransactionDataMapper.class })
-public interface LoanAccountDataMapper {
+@Mapper(config = AvroMapperConfig.class)
+public interface UnpaidChargeDataMapper {
 
-    // TODO: avoid prefix "is" in class attributes; I would recommend to fix this also in the Avro structures
-    @Mapping(source = "loanProductLinkedToFloatingRate", target = "isLoanProductLinkedToFloatingRate")
-    @Mapping(source = "floatingInterestRate", target = "isFloatingInterestRate")
-    @Mapping(source = "topup", target = "isTopup")
-    @Mapping(source = "interestRecalculationEnabled", target = "isInterestRecalculationEnabled")
-    LoanAccountDataV1 map(LoanAccountData source);
+    UnpaidChargeDataV1 map(UnpaidChargeData source);
+
+    List<UnpaidChargeDataV1> map(List<UnpaidChargeData> source);
 }
