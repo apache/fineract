@@ -809,16 +809,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final boolean allowAccountTransferModification) {
         final RevokedInterestTransactionData principalTransaction = this.vaultTribeCustomSavingsAccountTransactionRepository
                 .findSavingsAccountTransaction(transactionId, savingsId);
+        if(principalTransaction.getClientId() != null && principalTransaction.getGroupId() != null && principalTransaction.getGsimId() != null){
+            //It's a GSIM Account.
+            //Run GSIM Account RULES Here Like Block
+            //Block All Reversal of Transactions that are not latest
+        }
 
-        if (principalTransaction.getReversed()) {
-            throw new PlatformServiceUnavailableException("error.msg.saving.account.transaction.reversal.not.allowed",
-                    "Savings account transaction :" + transactionId + " is already reversed. This action is not Allowed", transactionId);
-        }
-        if (principalTransaction.getActualTransactionType() != null
-                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.REVOKED_INTEREST.name())) {
-            throw new PlatformServiceUnavailableException("error.msg.reversal.revoked.interest.savingsAccount.transaction.not.allowed",
-                    "Reversal of [ Revoked Interest ] Transaction :" + transactionId + "  is not Allowed", transactionId);
-        }
+        validateTransactionsToBeReversed(transactionId, principalTransaction);
 
         CommandProcessingResult undoPrincipalTransaction = undoTransaction(savingsId, transactionId, allowAccountTransferModification);
 
@@ -839,6 +836,33 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     allowAccountTransferModification);
         }
         return undoPrincipalTransaction;
+    }
+
+    private static void validateTransactionsToBeReversed(Long transactionId, RevokedInterestTransactionData principalTransaction) {
+        if (principalTransaction.getReversed()) {
+            throw new PlatformServiceUnavailableException("error.msg.saving.account.transaction.reversal.not.allowed",
+                    "Savings account transaction :" + transactionId + " is already reversed. This action is not Allowed", transactionId);
+        }
+        if (principalTransaction.getActualTransactionType() != null
+                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.REVOKED_INTEREST.name())) {
+            throw new PlatformServiceUnavailableException("error.msg.reversal.REVOKED_INTEREST.interest.savingsAccount.transaction.not.allowed",
+                    "Reversal of [ REVOKED_INTEREST ] Transaction :" + transactionId + "  is not Allowed", transactionId);
+        }
+        if (principalTransaction.getActualTransactionType() != null
+                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.INTEREST_POSTING.name())) {
+            throw new PlatformServiceUnavailableException("error.msg.reversal.of.INTEREST_POSTING.savingsAccount.transaction.not.allowed",
+                    "Reversal of [ INTEREST_POSTING ] Transaction :" + transactionId + "  is not Allowed", transactionId);
+        }
+        if (principalTransaction.getActualTransactionType() != null
+                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.name())) {
+            throw new PlatformServiceUnavailableException("error.msg.reversal.of.ACCRUAL_INTEREST_POSTING.savingsAccount.transaction.not.allowed",
+                    "Reversal of [ ACCRUAL_INTEREST_POSTING ] Transaction :" + transactionId + "  is not Allowed", transactionId);
+        }
+        if (principalTransaction.getActualTransactionType() != null
+                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.name())) {
+            throw new PlatformServiceUnavailableException("error.msg.reversal.of.OVERDRAFT_ACCRUAL_INTEREST.savingsAccount.transaction.not.allowed",
+                    "Reversal of [ OVERDRAFT_ACCRUAL_INTEREST ] Transaction :" + transactionId + "  is not Allowed", transactionId);
+        }
     }
 
     public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId,

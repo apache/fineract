@@ -60,7 +60,7 @@ public interface SavingsAccountTransactionRepository
     List<SavingsAccountTransaction> getTransactionsByAccountIdAndType(@Param("savingsId") Long savingsId, @Param("type") Integer type);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select st from SavingsAccountTransaction st where st.savingsAccount = :savingsAccount and st.dateOf <= :transactionDate order by st.dateOf DESC")
+    @Query("select st from SavingsAccountTransaction st where st.savingsAccount = :savingsAccount and st.dateOf > :transactionDate order by st.dateOf DESC")
     List<SavingsAccountTransaction> findTransactionsAfterTransactionCurrentDate(@Param("savingsAccount") SavingsAccount savingsAccount,
                                                                    @Param("transactionDate") LocalDate transactionDate);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
