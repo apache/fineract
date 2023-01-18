@@ -86,7 +86,6 @@ public class ExternalEventConfigurationApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalEventConfigurationApiResourceSwagger.PutExternalEventConfigurationsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class))) })
-
     public String updateExternalEventConfigurationsDetails(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         context.authenticatedUser().validateHasUpdatePermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //

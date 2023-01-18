@@ -47,7 +47,7 @@ final class GlobalConfigurationApiResourceSwagger {
         @Schema(example = "true")
         public boolean enabled;
         @Schema(example = "2")
-        public Long description;
+        public Long value;
     }
 
     @Schema(description = "PutGlobalConfigurationsResponse")
