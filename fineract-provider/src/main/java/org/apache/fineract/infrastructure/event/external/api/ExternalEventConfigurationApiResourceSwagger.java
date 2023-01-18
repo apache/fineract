@@ -41,7 +41,7 @@ final class ExternalEventConfigurationApiResourceSwagger {
         private PutExternalEventConfigurationsRequest() {}
 
         @Schema(example = "\"CentersCreateBusinessEvent\":true,\n" + "\"ClientActivateBusinessEvent\":true")
-        public Map<String, Map<String, Boolean>> externalEventConfigurations;
+        public Map<String, Boolean> externalEventConfigurations;
 
     }
 
