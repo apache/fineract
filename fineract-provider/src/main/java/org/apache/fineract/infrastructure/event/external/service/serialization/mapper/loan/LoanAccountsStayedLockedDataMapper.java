@@ -16,32 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
 
+import org.apache.fineract.avro.loan.v1.LoanAccountsStayedLockedDataV1;
 import org.apache.fineract.cob.data.LoanAccountsStayedLockedData;
-import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
+import org.mapstruct.Mapper;
 
-public class LoanAccountsStayedLockedBusinessEvent extends AbstractBusinessEvent<LoanAccountsStayedLockedData> {
+@Mapper(config = AvroMapperConfig.class)
+public interface LoanAccountsStayedLockedDataMapper {
 
-    private static final String CATEGORY = "Loan COB";
-    private static final String TYPE = "LoanAccountsStayedLockedBusinessEvent";
-
-    public LoanAccountsStayedLockedBusinessEvent(LoanAccountsStayedLockedData value) {
-        super(value);
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public String getCategory() {
-        return CATEGORY;
-    }
-
-    @Override
-    public Long getAggregateRootId() {
-        return null;
-    }
+    LoanAccountsStayedLockedDataV1 map(LoanAccountsStayedLockedData loanAccountStayedLockedData);
 }

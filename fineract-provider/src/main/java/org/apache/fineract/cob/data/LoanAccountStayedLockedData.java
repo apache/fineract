@@ -16,32 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.data;
 
-import org.apache.fineract.cob.data.LoanAccountsStayedLockedData;
-import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
-public class LoanAccountsStayedLockedBusinessEvent extends AbstractBusinessEvent<LoanAccountsStayedLockedData> {
+@Getter
+@AllArgsConstructor
+public class LoanAccountStayedLockedData {
 
-    private static final String CATEGORY = "Loan COB";
-    private static final String TYPE = "LoanAccountsStayedLockedBusinessEvent";
-
-    public LoanAccountsStayedLockedBusinessEvent(LoanAccountsStayedLockedData value) {
-        super(value);
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public String getCategory() {
-        return CATEGORY;
-    }
-
-    @Override
-    public Long getAggregateRootId() {
-        return null;
-    }
+    private Long id;
+    private ExternalId externalId;
+    private String accountNo;
 }

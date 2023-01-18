@@ -105,4 +105,5 @@
     <include file="parts/0083_add_loan_transaction_enum_values.xml" relativeToChangelogFile="true" />
     <include file="parts/0084_add_general_accounting_table_reports.xml" relativeToChangelogFile="true" />
     <include file="parts/0085_add_aggregate_root_id_external_events.xml" relativeToChangelogFile="true" />
+    <include file="parts/0086_add_cob_business_date_to_loan_account_locks.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

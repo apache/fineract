@@ -18,12 +18,18 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.domain.LoanAccountLock;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.data.LoanAccountStayedLockedData;
+import org.apache.fineract.cob.data.LoanAccountsStayedLockedData;
+import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -33,16 +39,25 @@ import org.springframework.batch.repeat.RepeatStatus;
 @RequiredArgsConstructor
 public class StayedLockedLoansTasklet implements Tasklet {
 
-    private final LoanAccountLockRepository loanAccountLockRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanRepository loanRepository;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<LoanAccountLock> loanAccountLocks = loanAccountLockRepository.findAll();
-        if (!loanAccountLocks.isEmpty()) {
-            List<Long> loanIds = loanAccountLocks.stream().map(LoanAccountLock::getLoanId).toList();
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountsStayedLockedBusinessEvent(loanIds));
+        LoanAccountsStayedLockedData lockedLoanAccounts = buildLoanAccountData();
+        if (!lockedLoanAccounts.getLoanAccounts().isEmpty()) {
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountsStayedLockedBusinessEvent(lockedLoanAccounts));
         }
         return RepeatStatus.FINISHED;
+    }
+
+    private LoanAccountsStayedLockedData buildLoanAccountData() {
+        LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        List<LoanIdAndExternalIdAndAccountNo> stayedLockedLoanAccounts = loanRepository.findAllStayedLockedByLoanIds(cobBusinessDate);
+        List<LoanAccountStayedLockedData> loanAccounts = new ArrayList<>();
+        stayedLockedLoanAccounts.forEach(loanAccount -> {
+            loanAccounts.add(new LoanAccountStayedLockedData(loanAccount.getId(), loanAccount.getExternalId(), loanAccount.getAccountNo()));
+        });
+        return new LoanAccountsStayedLockedData(loanAccounts);
     }
 }

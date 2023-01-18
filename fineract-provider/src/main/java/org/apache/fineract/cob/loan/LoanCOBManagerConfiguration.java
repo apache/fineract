@@ -26,6 +26,7 @@ import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -76,6 +77,8 @@ public class LoanCOBManagerConfiguration {
     private BusinessEventNotifierService businessEventNotifierService;
     @Autowired
     private CustomJobParameterResolver customJobParameterResolver;
+    @Autowired
+    private LoanRepository loanRepository;
 
     @Bean
     @JobScope
@@ -120,7 +123,7 @@ public class LoanCOBManagerConfiguration {
     @Bean
     @JobScope
     public StayedLockedLoansTasklet stayedLockedTasklet() {
-        return new StayedLockedLoansTasklet(accountLockRepository, businessEventNotifierService);
+        return new StayedLockedLoansTasklet(businessEventNotifierService, loanRepository);
     }
 
     @Bean(name = "loanCOBJob")

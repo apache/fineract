@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -87,6 +88,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_ALL_NON_CLOSED_LOANS_BEHIND_BY_LOAN_IDS = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in (100,200,300,303,304) and (loan.lastClosedBusinessDate <> :cobBusinessDate or "
             + "loan.lastClosedBusinessDate is null)";
+
+    String FIND_ALL_STAYED_LOCKED_BY_LOAN_IDS = "select loan.id, loan.externalId, loan.accountNumber from LoanAccountLock lock left join Loan loan on lock.loanId = loan.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate";
 
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
@@ -193,5 +196,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query(FIND_OLDEST_COB_PROCESSED_LOAN)
     List<LoanIdAndLastClosedBusinessDate> findOldestCOBProcessedLoan(@Param("cobBusinessDate") LocalDate cobBusinessDate);
+
+    @Query(FIND_ALL_STAYED_LOCKED_BY_LOAN_IDS)
+    List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
 }
