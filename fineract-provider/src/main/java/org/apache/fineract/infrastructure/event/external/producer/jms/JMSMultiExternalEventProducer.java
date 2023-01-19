@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.messaging.jms.MessageFactory;
 import org.apache.fineract.infrastructure.core.service.HashingService;
 import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
 import org.apache.fineract.infrastructure.event.external.producer.ExternalEventProducer;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -49,7 +50,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "fineract.events.external.producer.jms.enabled", havingValue = "true")
-public class JMSMultiExternalEventProducer implements ExternalEventProducer, InitializingBean {
+public class JMSMultiExternalEventProducer implements ExternalEventProducer, InitializingBean, DisposableBean {
 
     @Qualifier("eventDestination")
     private final Destination destination;
@@ -67,20 +68,28 @@ public class JMSMultiExternalEventProducer implements ExternalEventProducer, Ini
 
     private final List<MessageProducer> producers = new ArrayList<>();
 
+    private Connection connection;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         int producerCount = getProducerCount();
-        try (Connection connection = connectionFactory.createConnection()) {
-            for (int i = 0; i < producerCount; i++) {
-                // It's crucial to create the session within the loop, otherwise the producers won't be handled as
-                // parallel
-                // producers
-                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                MessageProducer producer = session.createProducer(destination);
-                producers.add(producer);
-            }
+        connection = connectionFactory.createConnection();
+        for (int i = 0; i < producerCount; i++) {
+            // It's crucial to create the session within the loop, otherwise the producers won't be handled as
+            // parallel
+            // producers
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            MessageProducer producer = session.createProducer(destination);
+            producers.add(producer);
         }
         log.info("Initialized JMS multi producer for external events with {} parallel producers", producerCount);
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        if (connection != null) {
+            connection.close();
+        }
     }
 
     private int getProducerCount() {

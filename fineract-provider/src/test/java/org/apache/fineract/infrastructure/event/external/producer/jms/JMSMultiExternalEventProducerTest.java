@@ -101,7 +101,6 @@ class JMSMultiExternalEventProducerTest {
         verify(session1).createProducer(destination);
         verify(session2).createProducer(destination);
         verify(session3).createProducer(destination);
-        verify(connection).close();
     }
 
     @Test
