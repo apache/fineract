@@ -99,6 +99,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -129,7 +130,6 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
@@ -833,8 +833,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     private void addPaymentDetailsToInterestPostingTransaction(SavingsAccountTransaction newPostingTransaction) {
-        PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(1L); // Default payment Type for Interest Posting
-        PaymentDetail paymentDetail = PaymentDetail.paymentDetails(paymentType, newPostingTransaction.getSavingsAccount().getAccountNumber());
+        PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(1L); // Default payment Type for
+                                                                                           // Interest Posting
+        PaymentDetail paymentDetail = PaymentDetail.paymentDetails(paymentType,
+                newPostingTransaction.getSavingsAccount().getAccountNumber());
         final PaymentDetail savedPaymentDetails = this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
         newPostingTransaction.setPaymentDetail(savedPaymentDetails);
     }
@@ -5081,7 +5083,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         List<SavingsAccountTransaction> trans = getTransactions();
         for (final SavingsAccountTransaction transaction : trans) {
             if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
-                    && transaction.isAfter(startDate) && (transaction.isBefore(transactionDate) || transaction.getDateOf().isEqual(transactionDate))) {
+                    && transaction.isAfter(startDate)
+                    && (transaction.isBefore(transactionDate) || transaction.getDateOf().isEqual(transactionDate))) {
                 amount = amount.add(transaction.getAmount());
             }
         }

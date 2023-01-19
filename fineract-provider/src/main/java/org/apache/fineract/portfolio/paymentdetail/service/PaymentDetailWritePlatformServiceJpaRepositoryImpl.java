@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.paymentdetail.service;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;

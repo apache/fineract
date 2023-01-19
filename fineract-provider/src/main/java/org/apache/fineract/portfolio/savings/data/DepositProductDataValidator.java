@@ -748,7 +748,8 @@ public class DepositProductDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(allowFreeWithdrawalParamName, element)) {
             final Boolean allowFreeWithdrawal = this.fromApiJsonHelper.extractBooleanNamed(allowFreeWithdrawalParamName, element);
-            baseDataValidator.reset().parameter(allowFreeWithdrawalParamName).value(allowFreeWithdrawal).ignoreIfNull().validateForBooleanValue();
+            baseDataValidator.reset().parameter(allowFreeWithdrawalParamName).value(allowFreeWithdrawal).ignoreIfNull()
+                    .validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(adjustAdvanceTowardsFuturePaymentsParamName, element)) {

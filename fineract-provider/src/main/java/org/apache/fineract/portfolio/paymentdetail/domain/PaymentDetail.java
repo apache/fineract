@@ -167,7 +167,7 @@ public final class PaymentDetail extends AbstractPersistableCustom {
         this.accountNumber = accountNumber;
     }
 
-    public static PaymentDetail paymentDetails(PaymentType paymentType,String accountNumber) {
+    public static PaymentDetail paymentDetails(PaymentType paymentType, String accountNumber) {
         PaymentDetail pay = new PaymentDetail();
         pay.setPaymentType(paymentType);
         pay.setAccountNumber(accountNumber);

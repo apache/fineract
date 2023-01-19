@@ -62,10 +62,11 @@ public interface SavingsAccountTransactionRepository
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select st from SavingsAccountTransaction st where st.savingsAccount = :savingsAccount and st.dateOf > :transactionDate order by st.dateOf DESC")
     List<SavingsAccountTransaction> findTransactionsAfterTransactionCurrentDate(@Param("savingsAccount") SavingsAccount savingsAccount,
-                                                                   @Param("transactionDate") LocalDate transactionDate);
+            @Param("transactionDate") LocalDate transactionDate);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select st from SavingsAccountTransaction st  INNER JOIN FETCH st.paymentDetail where st.savingsAccount = :savingsAccount and st.dateOf <= :transactionDate and st.typeOf = 3 and st.reversed = false  and st.paymentDetail.parentSavingsAccountTransactionId IS NULL and st.paymentDetail.parentTransactionPaymentDetailsId  IS NULL  order by st.dateOf DESC")
     List<SavingsAccountTransaction> findInterestPostingToBeRevokedOnVaultTribe(@Param("savingsAccount") SavingsAccount savingsAccount,
-                                                                                @Param("transactionDate") LocalDate transactionDate);
+            @Param("transactionDate") LocalDate transactionDate);
 
 }

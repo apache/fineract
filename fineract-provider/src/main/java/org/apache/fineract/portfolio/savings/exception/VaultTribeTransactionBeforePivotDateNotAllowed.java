@@ -19,14 +19,13 @@
 
 package org.apache.fineract.portfolio.savings.exception;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
-
 import java.time.LocalDate;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 public class VaultTribeTransactionBeforePivotDateNotAllowed extends AbstractPlatformDomainRuleException {
 
     public VaultTribeTransactionBeforePivotDateNotAllowed(final LocalDate transactionDate) {
         super("Vault Tribe Wallet transaction date " + transactionDate + " should be after the lastest Existing Transaction ",
-                "Vault Tribe Wallet transaction date " + transactionDate + " should be after the lastest Existing Transaction " );
+                "Vault Tribe Wallet transaction date " + transactionDate + " should be after the lastest Existing Transaction ");
     }
 }
