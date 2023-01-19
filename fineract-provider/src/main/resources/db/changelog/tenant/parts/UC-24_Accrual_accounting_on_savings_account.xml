@@ -20,7 +20,7 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="bosco@fiter.io" id="add-accrual-accounting-on-savings-job">
+    <changeSet author="bosco@fiter.io" id="add-accrual-accounting-on-savings-job_1">
 
         <preConditions onFail="MARK_RAN">
             <not>
@@ -35,7 +35,7 @@
             <column name="display_name" value="Post Accrual Interest for Savings" />
             <column name="cron_expression" value="0 0 22 1/1 * ? *" />
             <column name="create_time" value="now()" />
-            <column name="task_priority" valueBoolean="5" />
+            <column name="task_priority" value="5" />
             <column name="group_name" value="null" />
             <column name="previous_run_start_time" value="null" />
             <column name="next_run_time" value="null" />
@@ -44,7 +44,7 @@
             <column name="is_active" valueBoolean="true" />
             <column name="currently_running" valueBoolean="false" />
             <column name="updates_allowed" valueBoolean="true" />
-            <column name="scheduler_group" valueBoolean="true" />
+            <column name="scheduler_group" value="1" />
             <column name="is_misfired" valueBoolean="false" />
             <column name="node_id" value="0" />
             <column name="is_mismatched_job" valueBoolean="false" />
@@ -94,34 +94,34 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="add_m_permissions_m_permissions">
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_m_permissions_2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM `m_permission` WHERE `code` = 'POSTACCRUALINTEREST_SAVINGSACCOUNT'
+                SELECT COUNT(*) FROM m_permission WHERE code = 'POSTACCRUALINTEREST_SAVINGSACCOUNT'
             </sqlCheck>
         </preConditions>
         <sql>
-            INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_savings', 'POSTACCRUALINTEREST_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'POSTACCRUALINTEREST', '0');
+            INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('transaction_savings', 'POSTACCRUALINTEREST_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'POSTACCRUALINTEREST', '0');
         </sql>
     </changeSet>
-    <changeSet author="bosco@fiter.io" id="add_m_permissions_POSTACCRUALINTEREST_FIXEDDEPOSITACCOUNT">
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_POSTACCRUALINTEREST_FIXEDDEPOSITACCOUNT_2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM `m_permission` WHERE `code` = 'POSTACCRUALINTEREST_FIXEDDEPOSITACCOUNT'
+                SELECT COUNT(*) FROM m_permission WHERE code = 'POSTACCRUALINTEREST_FIXEDDEPOSITACCOUNT'
             </sqlCheck>
         </preConditions>
         <sql>
-            INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_savings', 'POSTACCRUALINTEREST_FIXEDDEPOSITACCOUNT', 'FIXEDDEPOSITACCOUNT', 'POSTACCRUALINTEREST', '0');
+            INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('transaction_savings', 'POSTACCRUALINTEREST_FIXEDDEPOSITACCOUNT', 'FIXEDDEPOSITACCOUNT', 'POSTACCRUALINTEREST', '0');
         </sql>
     </changeSet>
-    <changeSet author="bosco@fiter.io" id="add_m_permissions_POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT_1">
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT_3">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM `m_permission` WHERE `code` = 'POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT'
+                SELECT COUNT(*) FROM m_permission WHERE code = 'POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT'
             </sqlCheck>
         </preConditions>
         <sql>
-            INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_savings', 'POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT', 'RECURRINGDEPOSITACCOUNT', 'POSTACCRUALINTEREST', '0');
+            INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('transaction_savings', 'POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT', 'RECURRINGDEPOSITACCOUNT', 'POSTACCRUALINTEREST', '0');
         </sql>
     </changeSet>
 

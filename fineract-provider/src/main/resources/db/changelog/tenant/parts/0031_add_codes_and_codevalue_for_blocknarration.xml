@@ -20,16 +20,22 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="deepika@fiter.io" id="add_codes_for_freeze">
+    <changeSet author="deepika@fiter.io" id="add_codes_for_freeze_4">
 
-        <sql>INSERT INTO `m_code` ( `code_name`, `is_system_defined`) VALUES ('SavingsAccountBlockUnblockNarration', 1);
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                Select count(1) from m_code where code_name = 'SavingsAccountBlockUnblockNarration';
+            </sqlCheck>
+        </preConditions>
 
-            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Compliance', 'Compliance', 1, null, 1, 0);
-            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Fraud', 'Fraud', 2, null, 1, 0);
-            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Legal', 'Legal', 3, null, 1, 0);
-            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Suspicious', 'Suspicious', 4, null, 1, 0);
+        <sql>INSERT INTO m_code ( code_name, is_system_defined) VALUES ('SavingsAccountBlockUnblockNarration', true);
 
-            alter table `m_savings_account` add `block_narration_id` BIGINT(20);
+            INSERT INTO m_code_value ( code_id, code_value, code_description, order_position, code_score, is_active, is_mandatory) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Compliance', 'Compliance', 1, null, true,false);
+            INSERT INTO m_code_value ( code_id, code_value, code_description, order_position, code_score, is_active, is_mandatory) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Fraud', 'Fraud', 2, null, true,false);
+            INSERT INTO m_code_value ( code_id, code_value, code_description, order_position, code_score, is_active, is_mandatory) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Legal', 'Legal', 3, null, true,false);
+            INSERT INTO m_code_value ( code_id, code_value, code_description, order_position, code_score, is_active, is_mandatory) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Suspicious', 'Suspicious', 4, null, true,false);
+
+            alter table m_savings_account add block_narration_id BIGINT;
         </sql>
     </changeSet>
 </databaseChangeLog>

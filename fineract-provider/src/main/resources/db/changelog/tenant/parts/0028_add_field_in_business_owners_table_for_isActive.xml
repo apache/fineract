@@ -33,4 +33,17 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet author="naphlin@fiter.io" id="add_m_middle_name_in_m_business_owners">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_business_owners" />
+            <not>
+                <columnExists tableName="m_business_owners" columnName="middlename"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_business_owners">
+            <column name="middlename" type="VARCHAR" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

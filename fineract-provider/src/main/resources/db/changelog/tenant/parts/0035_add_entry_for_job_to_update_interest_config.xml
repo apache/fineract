@@ -20,9 +20,9 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="deepika@fiter.io" id="0035_add_job_for_interest_posting_config">
+    <changeSet author="deepika@fiter.io" id="0035_add_job_for_interest_posting_config_3">
 
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
                 <sqlCheck expectedResult="1">
                     SELECT COUNT(1) FROM job WHERE name = 'Update Savings Interest Posting Qualify Config'
@@ -35,7 +35,7 @@
             <column name="display_name" value="Update Savings Interest Posting Qualify Config" />
             <column name="cron_expression" value="0 0 12 1/1 * ? *" />
             <column name="create_time" value="now()" />
-            <column name="task_priority" valueBoolean="5" />
+            <column name="task_priority" value="5" />
             <column name="group_name" value="null" />
             <column name="previous_run_start_time" value="null" />
             <column name="next_run_time" value="null" />
@@ -44,7 +44,7 @@
             <column name="is_active" valueBoolean="true" />
             <column name="currently_running" valueBoolean="false" />
             <column name="updates_allowed" valueBoolean="true" />
-            <column name="scheduler_group" valueBoolean="true" />
+            <column name="scheduler_group" value="1" />
             <column name="is_misfired" valueBoolean="false" />
             <column name="node_id" value="0" />
             <column name="is_mismatched_job" valueBoolean="false" />

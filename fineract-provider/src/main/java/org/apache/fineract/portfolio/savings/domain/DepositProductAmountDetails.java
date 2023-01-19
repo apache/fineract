@@ -102,4 +102,18 @@ public class DepositProductAmountDetails {
         return this.depositAmount;
     }
 
+    public boolean isLessThanMinDepositAmount(BigDecimal accountDepositAmount) {
+        if (this.minDepositAmount != null) {
+            return accountDepositAmount.compareTo(minDepositAmount) < 0;
+        }
+        return false;
+    }
+
+    public boolean isGreaterThanMaxDepositAmount(BigDecimal accountDepositAmount) {
+        if (this.maxDepositAmount != null) {
+            return accountDepositAmount.compareTo(maxDepositAmount) > 0;
+        }
+        return false;
+    }
+
 }
