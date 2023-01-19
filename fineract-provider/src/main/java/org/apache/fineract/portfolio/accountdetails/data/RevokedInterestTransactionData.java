@@ -30,6 +30,9 @@ public class RevokedInterestTransactionData {
     private Long savingsAccountId;
     private String actualTransactionType;
     private Boolean isReversed;
+    private Long groupId;
+    private Long clientId;
+    private Long gsimId;
 
     public Long getId() {
         return id;
@@ -69,5 +72,29 @@ public class RevokedInterestTransactionData {
 
     public void setReversed(Boolean reversed) {
         isReversed = reversed;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
+    }
+
+    public Long getGsimId() {
+        return gsimId;
+    }
+
+    public void setGsimId(Long gsimId) {
+        this.gsimId = gsimId;
     }
 }

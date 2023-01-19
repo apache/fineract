@@ -992,6 +992,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return reversalTransaction;
     }
 
+    public void setPaymentDetail(PaymentDetail paymentDetail) {
+        this.paymentDetail = paymentDetail;
+    }
+
     public static SavingsAccountTransaction overdraftAccrualInterest(final SavingsAccount savingsAccount, final Office office,
             final LocalDate date, final Money amount, final boolean isManualTransaction, final Boolean isAccountTransfer) {
         final boolean isReversed = false;

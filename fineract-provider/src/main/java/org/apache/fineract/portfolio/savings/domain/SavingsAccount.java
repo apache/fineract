@@ -98,6 +98,9 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -366,6 +369,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     @Transient
     protected SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    @Transient
+    protected PaymentTypeRepositoryWrapper repositoryWrapper;
+    @Transient
+    protected PaymentDetailWritePlatformService paymentDetailWritePlatformService;
 
     @Column(name = "start_interest_accrual_calculation_date")
     protected LocalDate startInterestAccrualCalculationDate;
@@ -752,6 +759,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                             }
                         }
                         if (newPostingTransaction != null && newPostingTransaction.getAmount(currency).isGreaterThanZero()) {
+                            addPaymentDetailsToInterestPostingTransaction(newPostingTransaction);
                             newPostingTransaction.updateCumulativeBalanceAndDates(this.currency, interestPostingTransactionDate);
                             this.addNewTransaction(newPostingTransaction);
                         }
@@ -769,6 +777,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                         }
                         if (correctionRequired) {
                             boolean applyWithHoldTaxForOldTransaction = false;
+
                             for (SavingsAccountTransaction postingTransaction : postingTransactions) {
                                 postingTransaction.reverse();
                                 this.savingsAccountTransactionRepository.save(postingTransaction);
@@ -821,6 +830,15 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
         this.recalculateRunningBalances();
         this.updateSummary();
+    }
+
+    private void addPaymentDetailsToInterestPostingTransaction(SavingsAccountTransaction newPostingTransaction) {
+        PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(1L); // Default payment Type for
+                                                                                           // Interest Posting
+        PaymentDetail paymentDetail = PaymentDetail.paymentDetails(paymentType,
+                newPostingTransaction.getSavingsAccount().getAccountNumber());
+        final PaymentDetail savedPaymentDetails = this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+        newPostingTransaction.setPaymentDetail(savedPaymentDetails);
     }
 
     protected boolean isInterestPostingDue(LocalDate interestPostingUpToDate) {
@@ -4504,6 +4522,14 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
     }
 
+    public void setRepositoryWrapper(PaymentTypeRepositoryWrapper repositoryWrapper) {
+        this.repositoryWrapper = repositoryWrapper;
+    }
+
+    public void setPaymentDetailWritePlatformService(PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
+    }
+
     protected List<SavingsAccountTransaction> retrieveListOfTransactions() {
         return this.transactions;
     }
@@ -5059,19 +5085,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
             if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
                     && transaction.isAfter(startDate)
                     && (transaction.isBefore(transactionDate) || transaction.getDateOf().isEqual(transactionDate))) {
-                amount = amount.add(transaction.getAmount());
-            }
-        }
-        return amount;
-    }
-
-    public BigDecimal findAccrualInterestPostingTransactionToBeRevoked(final LocalDate postingDate) {
-        BigDecimal amount = BigDecimal.ZERO;
-        List<SavingsAccountTransaction> trans = getTransactions();
-        for (final SavingsAccountTransaction transaction : trans) {
-
-            if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
-                    && transaction.getTransactionLocalDate().isBefore(postingDate)) {
                 amount = amount.add(transaction.getAmount());
             }
         }

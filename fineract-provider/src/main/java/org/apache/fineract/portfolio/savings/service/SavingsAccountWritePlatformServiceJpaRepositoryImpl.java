@@ -97,6 +97,7 @@ import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
@@ -129,6 +130,7 @@ import org.apache.fineract.portfolio.savings.exception.SavingsOfficerAssignmentE
 import org.apache.fineract.portfolio.savings.exception.SavingsOfficerUnassignmentException;
 import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllowedException;
 import org.apache.fineract.portfolio.savings.exception.UnlockSavingsAccountException;
+import org.apache.fineract.portfolio.savings.exception.VaultTribeTransactionBeforePivotDateNotAllowed;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
@@ -175,6 +177,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountInterestPostingService savingsAccountInterestPostingService;
 
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+    private final PaymentTypeRepositoryWrapper repositoryWrapper;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -199,7 +202,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository,
             final JdbcTemplate jdbcTemplate, final SavingsAccountInterestPostingService savingsAccountInterestPostingService,
             final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
-            final VaultTribeCustomSavingsAccountTransactionRepository vaultTribeCustomSavingsAccountTransactionRepository) {
+            final VaultTribeCustomSavingsAccountTransactionRepository vaultTribeCustomSavingsAccountTransactionRepository,
+            final PaymentTypeRepositoryWrapper repositoryWrapper) {
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -230,6 +234,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountInterestPostingService = savingsAccountInterestPostingService;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.vaultTribeCustomSavingsAccountTransactionRepository = vaultTribeCustomSavingsAccountTransactionRepository;
+        this.repositoryWrapper = repositoryWrapper;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
@@ -334,7 +339,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult gsimDeposit(final Long gsimId, final JsonCommand command) {
 
         Long parentSavingId = gsimId;
-        // GroupSavingsIndividualMonitoringparentSavings=gsimRepository.findById(parentSavingId).get();
         List<SavingsAccount> childSavings = this.savingAccountRepositoryWrapper.findByGsimId(gsimId);
 
         JsonArray savingsArray = command.arrayOfParameterNamed("savingsArray");
@@ -388,6 +392,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (isGsim && (deposit.getId() != null)) {
 
             LOG.debug("Deposit account has been created: {} ", deposit);
+            validateValtTribeTransactionShouldNotBeBeforeExistingTransaction(transactionDate, account);
 
             GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(account.getGsim().getId()).orElseThrow();
             LOG.info("parent deposit : {} ", gsim.getParentDeposit());
@@ -462,30 +467,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 transactionAmount, paymentDetail, transactionBooleanValues, backdatedTxnsAllowedTill);
 
         if (isGsim && (withdrawal.getId() != null)) {
+
+            validateValtTribeTransactionShouldNotBeBeforeExistingTransaction(transactionDate, account);
+
             GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(account.getGsim().getId()).orElseThrow();
             BigDecimal currentBalance = gsim.getParentDeposit().subtract(transactionAmount);
             gsim.setParentDeposit(currentBalance);
             gsimRepository.save(gsim);
-            // This Implementation is deactivated due to double posting. https://fiterio.atlassian.net/browse/MON-123
 
-            // if (account.getLockedInUntilDate() != null &&
-            // account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
-            // final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService
-            // .createAndPersistPaymentDetailForVaultTribe(command, changes,
-            // SavingsAccountTransactionType.REVOKED_INTEREST,
-            // withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
-            // // Revoke Accrued Interest if the locked date is not yet due and the account is subscribed to gsim
-            // final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId,
-            // backdatedTxnsAllowedTill);
-            // BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);
-            //
-            // if (amount.compareTo(BigDecimal.ZERO) > 0) {
-            // final SavingsAccountTransaction revokedInterestTx =
-            // this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
-            // fmt, transactionDate, amount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
-            // }
-            // }
-
+            applyRevokedInterestTransaction(savingsId, command, transactionDate, fmt, changes, paymentDetail, backdatedTxnsAllowedTill,
+                    account, transactionBooleanValues, withdrawal);
         }
 
         final String noteText = command.stringValueOfParameterNamed("note");
@@ -502,6 +493,63 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .with(changes)//
                 .build();
+    }
+
+    private void applyRevokedInterestTransaction(Long savingsId, JsonCommand command, LocalDate transactionDate, DateTimeFormatter fmt,
+            Map<String, Object> changes, PaymentDetail paymentDetail, boolean backdatedTxnsAllowedTill, SavingsAccount account,
+            SavingsTransactionBooleanValues transactionBooleanValues, SavingsAccountTransaction withdrawal) {
+        if (account.getLockedInUntilDate() != null && account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
+            final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService.createAndPersistPaymentDetailForVaultTribe(
+                    command, changes, SavingsAccountTransactionType.REVOKED_INTEREST, withdrawal.getId().intValue(), transactionDate,
+                    paymentDetail.getId().intValue());
+
+            final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+
+            List<SavingsAccountTransaction> savingsAccountTransactionList = savingsAccountTransactionRepository
+                    .findInterestPostingToBeRevokedOnVaultTribe(savingsAccount, transactionDate);
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            if (!CollectionUtils.isEmpty(savingsAccountTransactionList)) {
+                for (final SavingsAccountTransaction transaction : savingsAccountTransactionList) {
+                    updateInterestPostingPaymentDetailsToLinkRevokedIntestTransaction(transactionDate, paymentDetail, withdrawal,
+                            transaction);
+                    totalAmount = totalAmount.add(transaction.getAmount());
+                    LOG.info("Transaction :> " + transaction.getId() + " Amount :>> " + transaction.getAmount() + " Date :>> "
+                            + transaction.getTransactionLocalDate() + " Total Now  >> {" + totalAmount + "}");
+                }
+            }
+
+            if (totalAmount.compareTo(BigDecimal.ZERO) > 0) {
+                this.savingsAccountDomainService.handleWithdrawal(savingsAccount, fmt, transactionDate, totalAmount, paymentDetailRevoked,
+                        transactionBooleanValues, backdatedTxnsAllowedTill);
+            }
+        }
+    }
+
+    private void updateInterestPostingPaymentDetailsToLinkRevokedIntestTransaction(LocalDate transactionDate, PaymentDetail paymentDetail,
+            SavingsAccountTransaction withdrawal, SavingsAccountTransaction transaction) {
+        PaymentDetail interestPostingPaymentDetails = this.paymentDetailWritePlatformService
+                .getPaymentDetail(transaction.getPaymentDetail().getId()).orElseThrow();
+        interestPostingPaymentDetails.setParentTransactionPaymentDetailsId(paymentDetail.getId().intValue());
+        interestPostingPaymentDetails.setParentSavingsAccountTransactionId(withdrawal.getId().intValue());
+        interestPostingPaymentDetails.setTransactionDate(transactionDate);
+        interestPostingPaymentDetails.setActualTransactionType(SavingsAccountTransactionType.REVOKED_INTEREST.name());
+        this.paymentDetailWritePlatformService.persistPaymentDetail(interestPostingPaymentDetails);
+    }
+
+    private void validateValtTribeTransactionShouldNotBeBeforeExistingTransaction(LocalDate transactionDate, SavingsAccount account) {
+
+        /*
+         * Block Transactions to go before any of the existing to prevent re-computation of Interest_Posting. We Need to
+         * track the interest posting Transaction on REVOKE_INTEREST Transactions so if it's recomputed, we shall lose
+         * the audit trail
+         */
+
+        List<SavingsAccountTransaction> transactionsBeforeCurrent = this.savingsAccountTransactionRepository
+                .findTransactionsAfterTransactionCurrentDate(account, transactionDate);
+
+        if (!CollectionUtils.isEmpty(transactionsBeforeCurrent)) {
+            throw new VaultTribeTransactionBeforePivotDateNotAllowed(transactionDate);
+        }
     }
 
     @Transactional
@@ -639,6 +687,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 postInterestOnDate = transactionDate;
             }
             account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
+            account.setPaymentDetailWritePlatformService(this.paymentDetailWritePlatformService);
+            account.setRepositoryWrapper(this.repositoryWrapper);
+
             account.postAccrualInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth, postInterestOnDate, null);
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
@@ -767,16 +818,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final boolean allowAccountTransferModification) {
         final RevokedInterestTransactionData principalTransaction = this.vaultTribeCustomSavingsAccountTransactionRepository
                 .findSavingsAccountTransaction(transactionId, savingsId);
+        if (principalTransaction.getClientId() != null && principalTransaction.getGroupId() != null
+                && principalTransaction.getGsimId() != null) {
+            // It's a GSIM Account.
+            // Run GSIM Account RULES Here Like
+            // Block All Reversal of Transactions that are not latest
+            String message = "Vault Tribe Accounts are blocked from reversals :: Savings account transaction : %s is not allowed to be reversed. ";
+            throw new PlatformServiceUnavailableException(String.format(message, transactionId), String.format(message, transactionId));
+        }
 
-        if (principalTransaction.getReversed()) {
-            throw new PlatformServiceUnavailableException("error.msg.saving.account.transaction.reversal.not.allowed",
-                    "Savings account transaction :" + transactionId + " is already reversed. This action is not Allowed", transactionId);
-        }
-        if (principalTransaction.getActualTransactionType() != null
-                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.REVOKED_INTEREST.name())) {
-            throw new PlatformServiceUnavailableException("error.msg.reversal.revoked.interest.savingsAccount.transaction.not.allowed",
-                    "Reversal of [ Revoked Interest ] Transaction :" + transactionId + "  is not Allowed", transactionId);
-        }
+        validateTransactionsToBeReversed(transactionId, principalTransaction);
 
         CommandProcessingResult undoPrincipalTransaction = undoTransaction(savingsId, transactionId, allowAccountTransferModification);
 
@@ -797,6 +848,36 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     allowAccountTransferModification);
         }
         return undoPrincipalTransaction;
+    }
+
+    private static void validateTransactionsToBeReversed(Long transactionId, RevokedInterestTransactionData principalTransaction) {
+        if (principalTransaction.getReversed()) {
+            throw new PlatformServiceUnavailableException("error.msg.saving.account.transaction.reversal.not.allowed",
+                    "Savings account transaction :" + transactionId + " is already reversed. This action is not Allowed", transactionId);
+        }
+        if (principalTransaction.getActualTransactionType() != null
+                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.REVOKED_INTEREST.name())) {
+            throw new PlatformServiceUnavailableException(
+                    "error.msg.reversal.REVOKED_INTEREST.interest.savingsAccount.transaction.not.allowed",
+                    "Reversal of [ REVOKED_INTEREST ] Transaction :" + transactionId + "  is not Allowed", transactionId);
+        }
+        if (principalTransaction.getActualTransactionType() != null
+                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.INTEREST_POSTING.name())) {
+            throw new PlatformServiceUnavailableException("error.msg.reversal.of.INTEREST_POSTING.savingsAccount.transaction.not.allowed",
+                    "Reversal of [ INTEREST_POSTING ] Transaction :" + transactionId + "  is not Allowed", transactionId);
+        }
+        if (principalTransaction.getActualTransactionType() != null
+                && principalTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.name())) {
+            throw new PlatformServiceUnavailableException(
+                    "error.msg.reversal.of.ACCRUAL_INTEREST_POSTING.savingsAccount.transaction.not.allowed",
+                    "Reversal of [ ACCRUAL_INTEREST_POSTING ] Transaction :" + transactionId + "  is not Allowed", transactionId);
+        }
+        if (principalTransaction.getActualTransactionType() != null && principalTransaction.getActualTransactionType()
+                .equals(SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.name())) {
+            throw new PlatformServiceUnavailableException(
+                    "error.msg.reversal.of.OVERDRAFT_ACCRUAL_INTEREST.savingsAccount.transaction.not.allowed",
+                    "Reversal of [ OVERDRAFT_ACCRUAL_INTEREST ] Transaction :" + transactionId + "  is not Allowed", transactionId);
+        }
     }
 
     public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId,
