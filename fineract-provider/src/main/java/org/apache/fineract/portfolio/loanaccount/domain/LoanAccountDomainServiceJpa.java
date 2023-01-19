@@ -547,50 +547,59 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public void recalculateAccruals(Loan loan, boolean isInterestCalculationHappened) {
         LocalDate accruedTill = loan.getAccruedTill();
-        if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !isInterestCalculationHappened || accruedTill == null || loan.isNpa()
-                || !loan.getStatus().isActive()) {
-            return;
-        }
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() // Loan Product with Accrual Accounting
+                && isInterestCalculationHappened // Loan Product with Interest Recalculation enabled
+                // Loan Account accrued till is not equal to the Business Date
+                && (accruedTill == null || !accruedTill.equals(businessDate)) && !loan.isNpa() // Loan Account is not
+                                                                                               // NPA
+        ) {
+            // Loan Account is Active OR is Recently Closed with Obligations Met
+            if (loan.getStatus().isActive() || (loan.getStatus().isClosedObligationsMet() && loan.getClosedOnDate().equals(businessDate))) {
+                if (accruedTill == null) {
+                    accruedTill = businessDate;
+                }
 
-        boolean isOrganisationDateEnabled = this.configurationDomainService.isOrganisationstartDateEnabled();
-        LocalDate organisationStartDate = DateUtils.getBusinessLocalDate();
-        if (isOrganisationDateEnabled) {
-            organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
-        }
-        Collection<LoanScheduleAccrualData> loanScheduleAccrualList = new ArrayList<>();
-        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-        Long loanId = loan.getId();
-        Long officeId = loan.getOfficeId();
-        LocalDate accrualStartDate = null;
-        PeriodFrequencyType repaymentFrequency = loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType();
-        Integer repayEvery = loan.repaymentScheduleDetail().getRepayEvery();
-        LocalDate interestCalculatedFrom = loan.getInterestChargedFromDate();
-        Long loanProductId = loan.productId();
-        MonetaryCurrency currency = loan.getCurrency();
-        ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
-        CurrencyData currencyData = applicationCurrency.toData();
-        Set<LoanCharge> loanCharges = loan.getActiveCharges();
+                boolean isOrganisationDateEnabled = this.configurationDomainService.isOrganisationstartDateEnabled();
+                LocalDate organisationStartDate = businessDate;
+                if (isOrganisationDateEnabled) {
+                    organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
+                }
+                Collection<LoanScheduleAccrualData> loanScheduleAccrualList = new ArrayList<>();
+                List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+                Long loanId = loan.getId();
+                Long officeId = loan.getOfficeId();
+                LocalDate accrualStartDate = null;
+                PeriodFrequencyType repaymentFrequency = loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType();
+                Integer repayEvery = loan.repaymentScheduleDetail().getRepayEvery();
+                LocalDate interestCalculatedFrom = loan.getInterestChargedFromDate();
+                Long loanProductId = loan.productId();
+                MonetaryCurrency currency = loan.getCurrency();
+                ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+                CurrencyData currencyData = applicationCurrency.toData();
+                Set<LoanCharge> loanCharges = loan.getActiveCharges();
 
-        for (LoanRepaymentScheduleInstallment installment : installments) {
-            if (installment.getDueDate().isAfter(loan.getMaturityDate())) {
-                accruedTill = DateUtils.getBusinessLocalDate();
+                for (LoanRepaymentScheduleInstallment installment : installments) {
+                    if (installment.getDueDate().isAfter(loan.getMaturityDate())) {
+                        accruedTill = businessDate;
+                    }
+                    if (!isOrganisationDateEnabled || organisationStartDate.isBefore(installment.getDueDate())) {
+                        generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualList, loanId, officeId, accrualStartDate,
+                                repaymentFrequency, repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges,
+                                installment);
+                    }
+                }
+
+                if (!loanScheduleAccrualList.isEmpty()) {
+                    try {
+                        this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualList);
+                    } catch (MultiException e) {
+                        String globalisationMessageCode = "error.msg.accrual.exception";
+                        throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage(), e);
+                    }
+                }
             }
-            if (!isOrganisationDateEnabled || organisationStartDate.isBefore(installment.getDueDate())) {
-                generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualList, loanId, officeId, accrualStartDate,
-                        repaymentFrequency, repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges,
-                        installment);
-            }
         }
-
-        if (!loanScheduleAccrualList.isEmpty()) {
-            try {
-                this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualList);
-            } catch (MultiException e) {
-                String globalisationMessageCode = "error.msg.accrual.exception";
-                throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage(), e);
-            }
-        }
-
     }
 
     private void generateLoanScheduleAccrualData(final LocalDate accruedTill,
