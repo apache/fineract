@@ -9,8 +9,6 @@ fineract-rest:
   env:
     TZ: "UTC"
     FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
-    FINERACT_HIKARI_JDBC_URL: "jdbc:mysql://fiter-moni-africa-prod.cu8xyxecoh5g.us-east-1.rds.amazonaws.com:3306/fineract_tenants"
-    FINERACT_HIKARI_USERNAME: "admin"
     FINERACT_HIKARI_MINIMUM_IDLE: 1
     FINERACT_HIKARI_MAXIMUM_POOL_SIZE: 20
     FINERACT_HIKARI_IDLE_TIMEOUT: 120000
@@ -29,9 +27,7 @@ fineract-rest:
     FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS: "false"
     FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES: "true"
     FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION: "true"
-    FINERACT_DEFAULT_TENANTDB_HOSTNAME: "fiter-moni-africa-prod.cu8xyxecoh5g.us-east-1.rds.amazonaws.com"
     FINERACT_DEFAULT_TENANTDB_PORT: 3306
-    FINERACT_DEFAULT_TENANTDB_UID: "admin"
     FINERACT_DEFAULT_TENANTDB_TIMEZONE: "Africa/Lagos"
     FINERACT_DEFAULT_TENANTDB_IDENTIFIER: "default"
     FINERACT_DEFAULT_TENANTDB_NAME: "fineract_default"
@@ -46,6 +42,12 @@ fineract-rest:
   awsSecrets:
     FINERACT_HIKARI_PASSWORD: "arn:aws:secretsmanager:us-east-1:646245671754:secret:HIKARI_PASS-VTGNFz"
     FINERACT_DEFAULT_TENANTDB_PWD: "arn:aws:secretsmanager:us-east-1:646245671754:secret:rds-pass-6EFOTQ"
+    FINERACT_HIKARI_JDBC_URL: "arn:aws:secretsmanager:us-east-1:646245671754:secret:FINERACT_HIKARI_JDBC_URL-hR6qIz"
+    FINERACT_DEFAULT_TENANTDB_HOSTNAME: "arn:aws:secretsmanager:us-east-1:646245671754:secret:FINERACT_DEFAULT_TENANTDB_HOSTNAME-41R5R5"
+    FINERACT_DEFAULT_TENANTDB_UID: "arn:aws:secretsmanager:us-east-1:646245671754:secret:FINERACT_DEFAULT_TENANTDB_UID-vnt48o"
+    FINERACT_HIKARI_USERNAME: "arn:aws:secretsmanager:us-east-1:646245671754:secret:FINERACT_HIKARI_USERNAME-PEBHXv"
+    
+    
   
   service:
     type: ClusterIP
