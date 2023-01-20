@@ -217,7 +217,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
                 } else {
                     try {
                         List<Long> result = calculateRelevantLoanIds("/" + batchRequest.getRelativeUrl());
-                        if (!isLoanSoftLocked(result)) {
+                        if (isLoanSoftLocked(result)) {
                             executeInlineCob(result);
                         }
                         return chain.serviceCall(batchRequest, uriInfo);
