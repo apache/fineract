@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
@@ -37,27 +38,31 @@ public class ExternalEventJMSConfiguration {
     @Autowired
     private FineractProperties fineractProperties;
 
-    @Bean
-    public ActiveMQConnectionFactory connectionFactory() {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
-        connectionFactory.setBrokerURL(fineractProperties.getEvents().getExternal().getProducer().getJms().getBrokerUrl());
-        connectionFactory.setTrustAllPackages(true);
+    @Bean(name = "externalEventConnectionFactory")
+    public CachingConnectionFactory connectionFactory() {
         FineractExternalEventsProducerJmsProperties jmsProps = fineractProperties.getEvents().getExternal().getProducer().getJms();
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
+        connectionFactory.setBrokerURL(jmsProps.getBrokerUrl());
+        connectionFactory.setTrustAllPackages(true);
         if (jmsProps.isBrokerPasswordProtected()) {
             connectionFactory.setUserName(jmsProps.getBrokerUsername());
             connectionFactory.setPassword(jmsProps.getBrokerPassword());
         }
-        return connectionFactory;
+        CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory();
+        cachingConnectionFactory.setSessionCacheSize(jmsProps.getProducerCount());
+        cachingConnectionFactory.setReconnectOnException(true);
+        cachingConnectionFactory.setTargetConnectionFactory(connectionFactory);
+        return cachingConnectionFactory;
     }
 
     @Conditional(EnableExternalEventTopicCondition.class)
-    @Bean(name = "eventDestination")
+    @Bean(name = "externalEventDestination")
     public ActiveMQTopic activeMqTopic() {
         return new ActiveMQTopic(fineractProperties.getEvents().getExternal().getProducer().getJms().getEventTopicName());
     }
 
     @Conditional(EnableExternalEventQueueCondition.class)
-    @Bean(name = "eventDestination")
+    @Bean(name = "externalEventDestination")
     public ActiveMQQueue activeMqQueue() {
         return new ActiveMQQueue(fineractProperties.getEvents().getExternal().getProducer().getJms().getEventQueueName());
     }

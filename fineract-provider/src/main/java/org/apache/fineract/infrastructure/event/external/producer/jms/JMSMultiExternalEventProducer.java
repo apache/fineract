@@ -39,8 +39,6 @@ import org.apache.fineract.infrastructure.core.messaging.jms.MessageFactory;
 import org.apache.fineract.infrastructure.core.service.HashingService;
 import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
 import org.apache.fineract.infrastructure.event.external.producer.ExternalEventProducer;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -50,11 +48,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "fineract.events.external.producer.jms.enabled", havingValue = "true")
-public class JMSMultiExternalEventProducer implements ExternalEventProducer, InitializingBean, DisposableBean {
+public class JMSMultiExternalEventProducer implements ExternalEventProducer {
 
-    @Qualifier("eventDestination")
+    @Qualifier("externalEventDestination")
     private final Destination destination;
 
+    @Qualifier("externalEventConnectionFactory")
     private final ConnectionFactory connectionFactory;
 
     private final MessageFactory messageFactory;
@@ -65,32 +64,6 @@ public class JMSMultiExternalEventProducer implements ExternalEventProducer, Ini
     private final HashingService hashingService;
 
     private final FineractProperties fineractProperties;
-
-    private final List<MessageProducer> producers = new ArrayList<>();
-
-    private Connection connection;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        int producerCount = getProducerCount();
-        connection = connectionFactory.createConnection();
-        for (int i = 0; i < producerCount; i++) {
-            // It's crucial to create the session within the loop, otherwise the producers won't be handled as
-            // parallel
-            // producers
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            MessageProducer producer = session.createProducer(destination);
-            producers.add(producer);
-        }
-        log.info("Initialized JMS multi producer for external events with {} parallel producers", producerCount);
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        if (connection != null) {
-            connection.close();
-        }
-    }
 
     private int getProducerCount() {
         return fineractProperties.getEvents().getExternal().getProducer().getJms().getProducerCount();
@@ -104,29 +77,48 @@ public class JMSMultiExternalEventProducer implements ExternalEventProducer, Ini
             waitForSendingCompletion(tasks);
         }, timeTaken -> {
             if (log.isDebugEnabled()) {
-                // in case execution is faster than 1sec
-                long seconds = Math.max(timeTaken.toSeconds(), 1L);
-                Integer eventCount = partitions.values().stream().map(Collection::size).reduce(0, Integer::sum);
-                log.debug("Sent messages with {} msg/s", (eventCount / seconds));
+                int eventCount = partitions.values().stream().map(Collection::size).reduce(0, Integer::sum);
+                int msgPerSec = (int) (((double) eventCount / timeTaken.toMillis()) * 1000);
+                log.debug("Sent messages with {} msg/s", msgPerSec);
             }
         });
     }
 
+    private List<MessageProducer> obtainProducers() {
+        List<MessageProducer> result = new ArrayList<>();
+        int producerCount = getProducerCount();
+        try {
+            // No need to close the connection since it's a pooled one
+            Connection connection = connectionFactory.createConnection();
+            for (int i = 0; i < producerCount; i++) {
+                // It's crucial to create the session within the loop, otherwise the producers won't be handled as
+                // parallel
+                // producers
+                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                MessageProducer producer = session.createProducer(destination);
+                result.add(producer);
+            }
+        } catch (JMSException e) {
+            throw new RuntimeException("Error while obtaining message producers", e);
+        }
+        return result;
+    }
+
     private List<Future<?>> sendPartitions(Map<Integer, List<byte[]>> indexedPartitions) {
+        List<MessageProducer> producers = obtainProducers();
         List<Future<?>> tasks = new ArrayList<>();
         for (Map.Entry<Integer, List<byte[]>> entry : indexedPartitions.entrySet()) {
             Integer producerIndex = entry.getKey();
+            MessageProducer producer = producers.get(producerIndex);
             List<byte[]> messages = entry.getValue();
-            Future<?> future = createSendingTask(producerIndex, messages);
+            Future<?> future = createSendingTask(producer, messages);
             tasks.add(future);
         }
         return tasks;
     }
 
-    private Future<?> createSendingTask(Integer producerIndex, List<byte[]> messages) {
+    private Future<?> createSendingTask(MessageProducer messageProducer, List<byte[]> messages) {
         return taskExecutor.submit(() -> {
-            MessageProducer messageProducer = producers.get(producerIndex);
-
             for (byte[] message : messages) {
                 try {
                     messageProducer.send(destination, messageFactory.createByteMessage(message));
