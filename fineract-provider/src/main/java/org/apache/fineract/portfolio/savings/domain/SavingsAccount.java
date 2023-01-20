@@ -5067,6 +5067,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         if (vaultTargetAmount != null && vaultTargetDate != null) {
             this.vaultTargetAmount = vaultTargetAmount;
             this.vaultTargetDate = vaultTargetDate;
+        }else{
+            this.vaultTargetAmount = vaultTargetAmount;
         }
     }
 

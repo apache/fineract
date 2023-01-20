@@ -49,4 +49,6 @@ public interface SavingsApplicationProcessWritePlatformService {
     CommandProcessingResult undoGSIMApplicationApproval(Long gsimId, JsonCommand command);
 
     CommandProcessingResult modifyGSIMApplication(Long gsimId, JsonCommand command);
+
+    CommandProcessingResult addMoreMembersToGSIMApplication(Long gsimId, JsonCommand command);
 }

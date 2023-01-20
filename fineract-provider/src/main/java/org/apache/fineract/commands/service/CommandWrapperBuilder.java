@@ -3554,4 +3554,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder addMoreMembersToGSIMApplication(final Long accountId) {
+        this.actionName = "ADDMEMBERTOGSIMACCOUNT";
+        this.entityName = "GSIMACCOUNT";
+        this.entityId = accountId;
+        this.href = "/gsimaccounts/" + accountId;
+        return this;
+    }
 }
