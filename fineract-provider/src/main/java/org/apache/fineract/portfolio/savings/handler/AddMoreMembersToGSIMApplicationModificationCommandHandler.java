@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = "GSIMACCOUNT", action = "UPDATE")
+@CommandType(entity = "GSIMACCOUNT", action = "ADDMEMBER")
 public class AddMoreMembersToGSIMApplicationModificationCommandHandler implements NewCommandSourceHandler {
 
     private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;

@@ -601,7 +601,7 @@ public class SavingsAccountsApiResource {
     }
 
     @POST
-    @Path("/subscribeToGsimAccount/{gsimId}")
+    @Path("/addmember/{gsimId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String addMoreMembersToGSIMApplication(@PathParam("gsimId") final Long gsimId, final String apiRequestBodyAsJson) {
