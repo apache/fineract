@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.event.external.producer.jms;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
@@ -30,15 +29,15 @@ import java.util.Map;
 import java.util.Random;
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.messaging.jms.MessageFactory;
 import org.apache.fineract.infrastructure.core.service.HashingService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -59,7 +58,7 @@ class JMSMultiExternalEventProducerTest {
     @Mock
     private Destination destination;
     @Mock
-    private ActiveMQConnectionFactory connectionFactory;
+    private ConnectionFactory connectionFactory;
     @Mock
     private MessageFactory messageFactory;
 
@@ -88,27 +87,31 @@ class JMSMultiExternalEventProducerTest {
 
     private FineractProperties fineractProperties;
 
-    private List<MessageProducer> producers = new ArrayList<>();
+    @BeforeEach
+    public void setUp() throws Exception {
+        FineractProperties.FineractExternalEventsProducerJmsProperties jms = new FineractProperties.FineractExternalEventsProducerJmsProperties();
+        jms.setProducerCount(PRODUCER_COUNT);
+        FineractProperties.FineractExternalEventsProducerProperties producer = new FineractProperties.FineractExternalEventsProducerProperties();
+        producer.setJms(jms);
+        FineractProperties.FineractExternalEventsProperties external = new FineractProperties.FineractExternalEventsProperties();
+        external.setProducer(producer);
+        FineractProperties.FineractEventsProperties events = new FineractProperties.FineractEventsProperties();
+        events.setExternal(external);
+        fineractProperties = new FineractProperties();
+        fineractProperties.setEvents(events);
+        underTest = new JMSMultiExternalEventProducer(destination, connectionFactory, messageFactory, taskExecutor, hashingService,
+                fineractProperties);
 
-    @Test
-    public void testAfterPropertiesShouldCreateMultipleSessions() throws Exception {
-        // given
-        initializeMocks();
-        // when
-        underTest.afterPropertiesSet();
-        // then
-        verify(connection, times(3)).createSession(false, Session.AUTO_ACKNOWLEDGE);
-        verify(session1).createProducer(destination);
-        verify(session2).createProducer(destination);
-        verify(session3).createProducer(destination);
+        given(connectionFactory.createConnection()).willReturn(connection);
+        given(connection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(session1, session2, session3);
+        given(session1.createProducer(destination)).willReturn(producer1);
+        given(session2.createProducer(destination)).willReturn(producer2);
+        given(session3.createProducer(destination)).willReturn(producer3);
     }
 
     @Test
     public void testSendEventsShouldWork() throws Exception {
         // given
-        initializeMocks();
-        underTest.afterPropertiesSet();
-
         byte[] msg1 = createMessage();
         List<byte[]> messages = new ArrayList<>();
         messages.add(msg1);
@@ -116,7 +119,7 @@ class JMSMultiExternalEventProducerTest {
 
         BytesMessage bytesMsg1 = Mockito.mock(BytesMessage.class);
         given(messageFactory.createByteMessage(msg1)).willReturn(bytesMsg1);
-        given(hashingService.consistentHash(1L, producers.size())).willReturn(0);
+        given(hashingService.consistentHash(1L, PRODUCER_COUNT)).willReturn(0);
         // when
         underTest.sendEvents(partitions);
         // then
@@ -126,9 +129,6 @@ class JMSMultiExternalEventProducerTest {
     @Test
     public void testSendEventsBalancesBetweenProducers() throws Exception {
         // given
-        initializeMocks();
-        underTest.afterPropertiesSet();
-
         byte[] msg1 = createMessage();
         byte[] msg2 = createMessage();
         byte[] msg3 = createMessage();
@@ -146,9 +146,9 @@ class JMSMultiExternalEventProducerTest {
         given(messageFactory.createByteMessage(msg1)).willReturn(bytesMsg1);
         given(messageFactory.createByteMessage(msg2)).willReturn(bytesMsg2);
         given(messageFactory.createByteMessage(msg3)).willReturn(bytesMsg3);
-        given(hashingService.consistentHash(1L, producers.size())).willReturn(0);
-        given(hashingService.consistentHash(2L, producers.size())).willReturn(1);
-        given(hashingService.consistentHash(3L, producers.size())).willReturn(2);
+        given(hashingService.consistentHash(1L, PRODUCER_COUNT)).willReturn(0);
+        given(hashingService.consistentHash(2L, PRODUCER_COUNT)).willReturn(1);
+        given(hashingService.consistentHash(3L, PRODUCER_COUNT)).willReturn(2);
         // when
         underTest.sendEvents(partitions);
         // then
@@ -172,28 +172,4 @@ class JMSMultiExternalEventProducerTest {
         return messageV1.toByteBuffer().array();
     }
 
-    private void initializeMocks() throws JMSException {
-        FineractProperties.FineractExternalEventsProducerJmsProperties jms = new FineractProperties.FineractExternalEventsProducerJmsProperties();
-        jms.setProducerCount(PRODUCER_COUNT);
-        FineractProperties.FineractExternalEventsProducerProperties producer = new FineractProperties.FineractExternalEventsProducerProperties();
-        producer.setJms(jms);
-        FineractProperties.FineractExternalEventsProperties external = new FineractProperties.FineractExternalEventsProperties();
-        external.setProducer(producer);
-        FineractProperties.FineractEventsProperties events = new FineractProperties.FineractEventsProperties();
-        events.setExternal(external);
-        fineractProperties = new FineractProperties();
-        fineractProperties.setEvents(events);
-        underTest = new JMSMultiExternalEventProducer(destination, connectionFactory, messageFactory, taskExecutor, hashingService,
-                fineractProperties);
-
-        given(connectionFactory.createConnection()).willReturn(connection);
-        given(connection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(session1, session2, session3);
-        given(session1.createProducer(destination)).willReturn(producer1);
-        given(session2.createProducer(destination)).willReturn(producer2);
-        given(session3.createProducer(destination)).willReturn(producer3);
-
-        producers.add(producer1);
-        producers.add(producer2);
-        producers.add(producer3);
-    }
 }
