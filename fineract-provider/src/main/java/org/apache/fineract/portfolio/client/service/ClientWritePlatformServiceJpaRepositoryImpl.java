@@ -430,7 +430,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             final ExternalId externalId = externalIdFactory.createFromCommand(command, ClientApiConstants.externalIdParamName);
-            if (command.isChangeInStringParameterNamed(ClientApiConstants.externalIdParamName, externalId.getValue())) {
+            if (command.isChangeInStringParameterNamed(ClientApiConstants.externalIdParamName,
+                    clientForUpdate.getExternalId().getValue())) {
                 changes.put(ClientApiConstants.externalIdParamName, externalId.getValue());
                 clientForUpdate.setExternalId(externalId);
             }
