@@ -503,10 +503,9 @@ public class SavingsAccountAssembler {
         trans.addAll(transactions);
     }
 
-    public SavingsAccount assembleFrom(final JsonCommand command, final AppUser submittedBy,SavingsAccount clonedParentSavingsAccount) {
+    public SavingsAccount assembleFrom(final JsonCommand command, final AppUser submittedBy, SavingsAccount clonedParentSavingsAccount) {
 
         final JsonElement element = command.parsedJson();
-
 
         final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
 
@@ -561,11 +560,14 @@ public class SavingsAccountAssembler {
             interestRate = product.nominalAnnualInterestRate();
         }
 
-        SavingsCompoundingInterestPeriodType interestCompoundingPeriodType = SavingsCompoundingInterestPeriodType.fromInt(clonedParentSavingsAccount.interestCalculationType);
-        SavingsPostingInterestPeriodType interestPostingPeriodType = SavingsPostingInterestPeriodType.fromInt(clonedParentSavingsAccount.interestPostingPeriodType);
-        SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(clonedParentSavingsAccount.interestCalculationType);
-        SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType = SavingsInterestCalculationDaysInYearType.fromInt(clonedParentSavingsAccount.interestCalculationDaysInYearType);
-
+        SavingsCompoundingInterestPeriodType interestCompoundingPeriodType = SavingsCompoundingInterestPeriodType
+                .fromInt(clonedParentSavingsAccount.interestCalculationType);
+        SavingsPostingInterestPeriodType interestPostingPeriodType = SavingsPostingInterestPeriodType
+                .fromInt(clonedParentSavingsAccount.interestPostingPeriodType);
+        SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType
+                .fromInt(clonedParentSavingsAccount.interestCalculationType);
+        SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType = SavingsInterestCalculationDaysInYearType
+                .fromInt(clonedParentSavingsAccount.interestCalculationDaysInYearType);
 
         BigDecimal minRequiredOpeningBalance;
         if (command.parameterExists(minRequiredOpeningBalanceParamName)) {
@@ -607,12 +609,12 @@ public class SavingsAccountAssembler {
         BigDecimal maxAllowedLienLimit = BigDecimal.ZERO;
         boolean withHoldTax = product.withHoldTax();
 
-        final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, null,
-                null, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
-                interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, null, allowOverdraft,
-                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed,
-                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
+        final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, null, null,
+                accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
+                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, null, allowOverdraft, overdraftLimit,
+                enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed, nominalAnnualInterestRateOverdraft,
+                minOverdraftForInterestCalculation, withHoldTax);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
         account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), SAVINGS_ACCOUNT_RESOURCE_NAME);
         account.setVaultTribeDetails(vaultTargetAmount, null);

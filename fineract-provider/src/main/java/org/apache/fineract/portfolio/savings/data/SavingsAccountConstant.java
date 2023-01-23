@@ -42,8 +42,8 @@ public class SavingsAccountConstant extends SavingsApiConstants {
             withHoldTaxParamName, datatables, gsimApplicationId, gsimLastApplication, VAULT_TARGET_AMOUNT, VAULT_TARGET_DATE));
 
     protected static final Set<String> ADD_MORE_MEMBERS_TO_VAULT_TRIBE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            isGSIM,clientIdParamName, groupIdParamName, productIdParamName,nominalAnnualInterestRateParamName,  minRequiredOpeningBalanceParamName,
-            lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,VAULT_TARGET_AMOUNT));
+            localeParamName, isGSIM, clientIdParamName, groupIdParamName, productIdParamName, nominalAnnualInterestRateParamName,
+            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, VAULT_TARGET_AMOUNT));
 
     /**
      * These parameters will match the class level parameters of {@link SavingsAccountData}. Where possible, we try to

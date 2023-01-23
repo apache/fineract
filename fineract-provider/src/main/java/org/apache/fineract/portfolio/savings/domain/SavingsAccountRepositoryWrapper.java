@@ -185,4 +185,8 @@ public class SavingsAccountRepositoryWrapper {
         return this.repository.findByProductIdAndStatus(productId, status, numOfCredit, numOfDebit, minBalance);
     }
 
+    public List<SavingsAccount> findByClientIdAndGroupIdAndGsimId(@Param("clientId") Long clientId, @Param("groupId") Long groupId,
+            @Param("gsimId") Long gsimId) {
+        return this.repository.findByClientIdAndGroupIdAndGsimId(clientId, groupId, gsimId);
+    }
 }

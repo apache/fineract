@@ -625,7 +625,6 @@ public class SavingsAccountDataValidator {
             }
         }
 
-
         if (this.fromApiJsonHelper.parameterExists(VAULT_TARGET_AMOUNT, element)) {
 
             final BigDecimal vaultTargetAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(VAULT_TARGET_AMOUNT, element);

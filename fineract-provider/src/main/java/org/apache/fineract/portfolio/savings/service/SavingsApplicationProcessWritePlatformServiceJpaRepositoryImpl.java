@@ -726,20 +726,43 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Transactional
     @Override
     public CommandProcessingResult addMoreMembersToGSIMApplication(final Long gsimId, final JsonCommand command) {
-        try{
-        final Long parentSavingId = gsimId;
-        List<SavingsAccount> childSavings = this.savingAccountRepository.findByGsimId(parentSavingId);
-        if(CollectionUtils.isEmpty(childSavings)){
-            String message = "Vault Tribe has no Existing Member/Savings Account. Operation to Add Member is Terminated";
-            throw new PlatformServiceUnavailableException(message,message);
-        }
-        SavingsAccount cloneSavings = childSavings.get(0);
+        try {
 
-        this.savingsAccountDataValidator.validateNewMembersOnVaultTribe(command.json());
-        final AppUser submittedBy = this.context.authenticatedUser();
+            final Long parentSavingId = gsimId;
+            String accountNumber = "";
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(command, submittedBy,cloneSavings);
+            GroupSavingsIndividualMonitoring gsimAccount = null;
+            List<SavingsAccount> childSavings = this.savingAccountRepository.findByGsimId(parentSavingId);
+            if (CollectionUtils.isEmpty(childSavings)) {
+                String message = "Vault Tribe has no Existing Member/Savings Account. Operation to Add Member is Terminated";
+                throw new PlatformServiceUnavailableException(message, message);
+            }
+            SavingsAccount cloneSavings = childSavings.get(0);
+
+            this.savingsAccountDataValidator.validateNewMembersOnVaultTribe(command.json());
+
+            final Long groupId = command.longValueOfParameterNamed(SavingsApiConstants.groupIdParamName);
+            final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
+
+            List<SavingsAccount> memberAlreadyExists = this.savingAccountRepository.findByClientIdAndGroupIdAndGsimId(clientId, groupId,
+                    gsimId);
+            if (!CollectionUtils.isEmpty(memberAlreadyExists)) {
+                String memberAlreadyExistsException = "Member Already Exists on this Vault Tribe Wallet Account";
+                throw new PlatformServiceUnavailableException(memberAlreadyExistsException, memberAlreadyExistsException);
+            }
+            final AppUser submittedBy = this.context.authenticatedUser();
+
+            final SavingsAccount account = this.savingAccountAssembler.assembleFrom(command, submittedBy, cloneSavings);
+            account.setGsim(cloneSavings.getGsim());
             SavingsAccount saved = this.savingAccountRepository.save(account);
+
+            // update Account Number and add Count of member on gsim_account
+            gsimAccount = gsimRepository.findById(parentSavingId).orElseThrow();
+            accountNumber = gsimAccount.getAccountNumber() + (gsimAccount.getChildAccountsCount() + 1);
+            saved.updateAccountNo(accountNumber);
+            this.gsimWritePlatformService.incrementChildAccountCount(gsimAccount);
+
+            this.savingAccountRepository.saveAndFlush(saved);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -748,8 +771,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     .withClientId(saved.clientId()) //
                     .withGroupId(saved.groupId()) //
                     .withSavingsId(saved.getId()) //
-                    .withGsimId(saved.getGsim().getId())
-                    .build();
+                    .withGsimId(saved.getGsim().getId()).build();
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
