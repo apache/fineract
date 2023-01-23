@@ -181,7 +181,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         while (!scheduleParams.getOutstandingBalance().isZero() || !scheduleParams.getDisburseDetailMap().isEmpty()) {
             LocalDate previousRepaymentDate = scheduleParams.getActualRepaymentDate();
             scheduleParams.setActualRepaymentDate(this.scheduledDateGenerator
-                    .generateNextRepaymentDateByDisbursalDate(scheduleParams.getActualRepaymentDate(), loanApplicationTerms, isFirstRepayment, scheduleParams.getInstalmentNumber()));
+                    .generateNextRepaymentDateByDisbursalDate(scheduleParams.getActualRepaymentDate(), loanApplicationTerms, isFirstRepayment, scheduleParams.getPeriodNumber()));
             AdjustedDateDetailsDTO adjustedDateDetailsDTO = this.scheduledDateGenerator
                     .adjustRepaymentDate(scheduleParams.getActualRepaymentDate(), loanApplicationTerms, holidayDetailDTO);
             scheduleParams.setActualRepaymentDate(adjustedDateDetailsDTO.getChangedActualRepaymentDate());
