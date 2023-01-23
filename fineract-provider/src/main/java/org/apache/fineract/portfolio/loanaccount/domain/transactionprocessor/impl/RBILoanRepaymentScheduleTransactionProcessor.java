@@ -234,6 +234,9 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                 feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
             }
+        } else if (loanTransaction.isPrePayment()) {
+            principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
         } else {
 
             penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);

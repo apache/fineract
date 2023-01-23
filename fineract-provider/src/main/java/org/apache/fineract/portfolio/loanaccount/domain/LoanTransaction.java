@@ -563,8 +563,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean isRepaymentType() {
-        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
+        return isRepayment() || isPrePayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
                 || isChargeAdjustment();
+    }
+
+    public boolean isPrePayment() {
+        return LoanTransactionType.PRE_PAY_LOAN.equals(getTypeOf()) && isNotReversed();
     }
 
     public boolean isRepayment() {

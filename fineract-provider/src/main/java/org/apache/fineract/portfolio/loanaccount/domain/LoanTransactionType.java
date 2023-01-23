@@ -59,7 +59,8 @@ public enum LoanTransactionType {
     CHARGE_REFUND(24, "loanTransactionType.chargeRefund"), //
     CHARGEBACK(25, "loanTransactionType.chargeback"), //
     CHARGE_ADJUSTMENT(26, "loanTransactionType.chargeAdjustment"), //
-    CHARGE_OFF(27, "loanTransactionType.chargeOff");
+    CHARGE_OFF(27, "loanTransactionType.chargeOff"), //
+    PRE_PAY_LOAN(28, "loanTransactionType.prepayloan"); //
 
     private final Integer value;
     private final String code;
