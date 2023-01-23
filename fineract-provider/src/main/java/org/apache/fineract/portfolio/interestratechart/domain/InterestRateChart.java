@@ -170,12 +170,13 @@ public class InterestRateChart extends AbstractPersistableCustom {
                             baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.end.incorrect",
                                     iSlabs.slabFields().getAmountRangeTo());
                         }
+                        if (iSlabs.slabFields().isNotProperPriodEnd()) {
+                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect",
+                                    iSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeTo());
+                        }
 
                     }
                 }
-            } else if (iSlabs.slabFields().isNotProperPriodEnd()) {
-                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect", iSlabs.slabFields().toPeriod(),
-                        iSlabs.slabFields().getAmountRangeTo());
             }
         }
     }
