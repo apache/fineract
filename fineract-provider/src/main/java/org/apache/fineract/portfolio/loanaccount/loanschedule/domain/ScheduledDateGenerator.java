@@ -33,11 +33,14 @@ public interface ScheduledDateGenerator {
             LoanApplicationTerms loanApplicationTerms);
 
     LocalDate generateNextRepaymentDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms, boolean isFirstRepayment);
+    LocalDate generateNextRepaymentDateByDisbursalDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms, boolean isFirstRepayment, final int instalmentCounter);
 
     AdjustedDateDetailsDTO adjustRepaymentDate(LocalDate dueRepaymentPeriodDate, LoanApplicationTerms loanApplicationTerms,
             HolidayDetailDTO holidayDetailDTO);
 
     LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate);
+
+    LocalDate getRepaymentPeriodDateByDisbursalDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, final LocalDate disbursalDate, final int instalmentCounter);
 
     Boolean isDateFallsInSchedule(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, LocalDate date);
 

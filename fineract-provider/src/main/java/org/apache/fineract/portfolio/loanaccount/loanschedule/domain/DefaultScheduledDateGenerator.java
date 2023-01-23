@@ -47,7 +47,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         LocalDate lastRepaymentDate = loanApplicationTerms.getExpectedDisbursementDate();
         boolean isFirstRepayment = true;
         for (int repaymentPeriod = 1; repaymentPeriod <= numberOfRepayments; repaymentPeriod++) {
-            lastRepaymentDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment);
+            lastRepaymentDate = generateNextRepaymentDateByDisbursalDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment, repaymentPeriod);
             isFirstRepayment = false;
         }
         lastRepaymentDate = adjustRepaymentDate(lastRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
@@ -68,6 +68,53 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
             dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
                     loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
+            dueRepaymentPeriodDate = (LocalDate) CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
+                    loanApplicationTerms.getRepaymentPeriodFrequencyType());
+            if (currentCalendar != null) {
+                // If we have currentCalendar object, this means there is a
+                // calendar associated with
+                // the loan, and we should use it in order to calculate next
+                // repayment
+
+                CalendarHistory calendarHistory = null;
+                CalendarHistoryDataWrapper calendarHistoryDataWrapper = loanApplicationTerms.getCalendarHistoryDataWrapper();
+                if (calendarHistoryDataWrapper != null) {
+                    calendarHistory = loanApplicationTerms.getCalendarHistoryDataWrapper().getCalendarHistory(dueRepaymentPeriodDate);
+                }
+
+                // get the start date from the calendar history
+                if (calendarHistory == null) {
+                    seedDate = currentCalendar.getStartDateLocalDate();
+                    reccuringString = currentCalendar.getRecurrence();
+                } else {
+                    seedDate = calendarHistory.getStartDateLocalDate();
+                    reccuringString = calendarHistory.getRecurrence();
+                }
+
+                dueRepaymentPeriodDate = CalendarUtils.getNextRepaymentMeetingDate(reccuringString, seedDate, lastRepaymentDate,
+                        loanApplicationTerms.getRepaymentEvery(),
+                        CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(loanApplicationTerms.getLoanTermPeriodFrequencyType()),
+                        loanApplicationTerms.isSkipRepaymentOnFirstDayofMonth(), loanApplicationTerms.getNumberOfdays());
+            }
+        }
+
+        return dueRepaymentPeriodDate;
+    }
+
+    @Override
+    public LocalDate generateNextRepaymentDateByDisbursalDate(final LocalDate lastRepaymentDate, final LoanApplicationTerms loanApplicationTerms,
+            boolean isFirstRepayment, final int instalmentCounter) {
+        final LocalDate firstRepaymentPeriodDate = loanApplicationTerms.getCalculatedRepaymentsStartingFromLocalDate();
+        LocalDate dueRepaymentPeriodDate = null;
+        if (isFirstRepayment && firstRepaymentPeriodDate != null) {
+            dueRepaymentPeriodDate = firstRepaymentPeriodDate;
+
+        } else {
+            LocalDate seedDate = null;
+            String reccuringString = null;
+            Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
+            dueRepaymentPeriodDate = getRepaymentPeriodDateByDisbursalDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
+                    loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate, loanApplicationTerms.getExpectedDisbursementDate(), instalmentCounter);
             dueRepaymentPeriodDate = (LocalDate) CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
                     loanApplicationTerms.getRepaymentPeriodFrequencyType());
             if (currentCalendar != null) {
@@ -230,6 +277,31 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case MONTHS:
                 dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
+            break;
+            case YEARS:
+                dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
+            break;
+            case INVALID:
+            break;
+            case WHOLE_TERM:
+                LOG.error("TODO Implement getRepaymentPeriodDate for WHOLE_TERM");
+            break;
+        }
+        return dueRepaymentPeriodDate;
+    }
+
+    @Override
+    public LocalDate getRepaymentPeriodDateByDisbursalDate(final PeriodFrequencyType frequency, final int repaidEvery, final LocalDate startDate, final LocalDate disbursalDate, final int instalmentCounter) {
+        LocalDate dueRepaymentPeriodDate = startDate;
+        switch (frequency) {
+            case DAYS:
+                dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
+            break;
+            case WEEKS:
+                dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
+            break;
+            case MONTHS:
+                dueRepaymentPeriodDate = disbursalDate.plusMonths((long) repaidEvery * instalmentCounter);
             break;
             case YEARS:
                 dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
