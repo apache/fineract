@@ -152,5 +152,14 @@
                                  onDelete="RESTRICT"
                                  onUpdate="RESTRICT"/>
     </changeSet>
-
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_ADDMEMBERTOGSIMACCOUNT">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'ADDMEMBER_GSIMACCOUNT'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('portfolio', 'ADDMEMBER_GSIMACCOUNT', 'GSIMACCOUNT', 'ADDMEMBER', false);
+        </sql>
+    </changeSet>
 </databaseChangeLog>

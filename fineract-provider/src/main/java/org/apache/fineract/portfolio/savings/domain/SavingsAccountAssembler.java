@@ -502,4 +502,122 @@ public class SavingsAccountAssembler {
         trans.clear();
         trans.addAll(transactions);
     }
+
+    public SavingsAccount assembleFrom(final JsonCommand command, final AppUser submittedBy, SavingsAccount clonedParentSavingsAccount) {
+
+        final JsonElement element = command.parsedJson();
+
+        final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
+
+        final SavingsProduct product = this.savingProductRepository.findById(productId)
+                .orElseThrow(() -> new SavingsProductNotFoundException(productId));
+
+        Client client = null;
+        Group group = null;
+        Staff fieldOfficer = null;
+        AccountType accountType = AccountType.INVALID;
+
+        final Long clientId = this.fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
+        if (clientId != null) {
+            client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            accountType = AccountType.INDIVIDUAL;
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(clientId);
+            }
+        }
+
+        final Long groupId = this.fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
+        if (groupId != null) {
+            group = this.groupRepository.findOneWithNotFoundDetection(groupId);
+            accountType = AccountType.GROUP;
+            if (group.isNotActive()) {
+                if (group.isCenter()) {
+                    throw new CenterNotActiveException(groupId);
+                }
+                throw new GroupNotActiveException(groupId);
+            }
+        }
+
+        if (group != null && client != null) {
+            if (!group.hasClientAsMember(client)) {
+                throw new ClientNotInGroupException(clientId, groupId);
+            }
+            accountType = AccountType.JLG;
+        }
+
+        if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isGSIM") != null) {
+            if (command.booleanPrimitiveValueOfParameterNamed("isGSIM")) {
+                accountType = AccountType.GSIM;
+            }
+        }
+
+        final LocalDate submittedOnDate = clonedParentSavingsAccount.getSubmittedOnDate();
+
+        BigDecimal interestRate = null;
+        if (command.parameterExists(nominalAnnualInterestRateParamName)) {
+            interestRate = command.bigDecimalValueOfParameterNamed(nominalAnnualInterestRateParamName);
+        } else {
+            interestRate = product.nominalAnnualInterestRate();
+        }
+
+        SavingsCompoundingInterestPeriodType interestCompoundingPeriodType = SavingsCompoundingInterestPeriodType
+                .fromInt(clonedParentSavingsAccount.interestCalculationType);
+        SavingsPostingInterestPeriodType interestPostingPeriodType = SavingsPostingInterestPeriodType
+                .fromInt(clonedParentSavingsAccount.interestPostingPeriodType);
+        SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType
+                .fromInt(clonedParentSavingsAccount.interestCalculationType);
+        SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType = SavingsInterestCalculationDaysInYearType
+                .fromInt(clonedParentSavingsAccount.interestCalculationDaysInYearType);
+
+        BigDecimal minRequiredOpeningBalance;
+        if (command.parameterExists(minRequiredOpeningBalanceParamName)) {
+            minRequiredOpeningBalance = command.bigDecimalValueOfParameterNamed(minRequiredOpeningBalanceParamName);
+        } else {
+            minRequiredOpeningBalance = product.minRequiredOpeningBalance();
+        }
+
+        Integer lockinPeriodFrequency;
+        if (command.parameterExists(lockinPeriodFrequencyParamName)) {
+            lockinPeriodFrequency = command.integerValueOfParameterNamed(lockinPeriodFrequencyParamName);
+        } else {
+            lockinPeriodFrequency = product.lockinPeriodFrequency();
+        }
+
+        SavingsPeriodFrequencyType lockinPeriodFrequencyType = null;
+        Integer lockinPeriodFrequencyTypeValue = null;
+        if (command.parameterExists(lockinPeriodFrequencyTypeParamName)) {
+            lockinPeriodFrequencyTypeValue = command.integerValueOfParameterNamed(lockinPeriodFrequencyTypeParamName);
+            if (lockinPeriodFrequencyTypeValue != null) {
+                lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
+            }
+        } else {
+            lockinPeriodFrequencyType = product.lockinPeriodFrequencyType();
+        }
+        BigDecimal vaultTargetAmount = null;
+        if (command.parameterExists(VAULT_TARGET_AMOUNT)) {
+            vaultTargetAmount = command.bigDecimalValueOfParameterNamed(VAULT_TARGET_AMOUNT);
+        }
+
+        boolean iswithdrawalFeeApplicableForTransfer = clonedParentSavingsAccount.isWithdrawalFeeApplicableForTransfer();
+        boolean allowOverdraft = clonedParentSavingsAccount.isAllowOverdraft();
+        BigDecimal overdraftLimit = BigDecimal.ZERO;
+        BigDecimal nominalAnnualInterestRateOverdraft = BigDecimal.ZERO;
+        BigDecimal minOverdraftForInterestCalculation = BigDecimal.ZERO;
+        boolean enforceMinRequiredBalance = false;
+        BigDecimal minRequiredBalance = BigDecimal.ZERO;
+        boolean lienAllowed = false;
+        BigDecimal maxAllowedLienLimit = BigDecimal.ZERO;
+        boolean withHoldTax = product.withHoldTax();
+
+        final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, null, null,
+                accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
+                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, null, allowOverdraft, overdraftLimit,
+                enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed, nominalAnnualInterestRateOverdraft,
+                minOverdraftForInterestCalculation, withHoldTax);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), SAVINGS_ACCOUNT_RESOURCE_NAME);
+        account.setVaultTribeDetails(vaultTargetAmount, null);
+        return account;
+    }
 }

@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -47,6 +48,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
@@ -719,5 +721,64 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 .withSavingsId(account.getId()) //
                 .setRollbackTransaction(rollbackTransaction)//
                 .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult addMoreMembersToGSIMApplication(final Long gsimId, final JsonCommand command) {
+        try {
+
+            final Long parentSavingId = gsimId;
+            String accountNumber = "";
+
+            GroupSavingsIndividualMonitoring gsimAccount = null;
+            List<SavingsAccount> childSavings = this.savingAccountRepository.findByGsimId(parentSavingId);
+            if (CollectionUtils.isEmpty(childSavings)) {
+                String message = "Vault Tribe has no Existing Member/Savings Account. Operation to Add Member is Terminated";
+                throw new PlatformServiceUnavailableException(message, message);
+            }
+            SavingsAccount cloneSavings = childSavings.get(0);
+
+            this.savingsAccountDataValidator.validateNewMembersOnVaultTribe(command.json());
+
+            final Long groupId = command.longValueOfParameterNamed(SavingsApiConstants.groupIdParamName);
+            final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
+
+            List<SavingsAccount> memberAlreadyExists = this.savingAccountRepository.findByClientIdAndGroupIdAndGsimId(clientId, groupId,
+                    gsimId);
+            if (!CollectionUtils.isEmpty(memberAlreadyExists)) {
+                String memberAlreadyExistsException = "Member Already Exists on this Vault Tribe Wallet Account";
+                throw new PlatformServiceUnavailableException(memberAlreadyExistsException, memberAlreadyExistsException);
+            }
+            final AppUser submittedBy = this.context.authenticatedUser();
+
+            final SavingsAccount account = this.savingAccountAssembler.assembleFrom(command, submittedBy, cloneSavings);
+            account.setGsim(cloneSavings.getGsim());
+            SavingsAccount saved = this.savingAccountRepository.save(account);
+
+            // update Account Number and add Count of member on gsim_account
+            gsimAccount = gsimRepository.findById(parentSavingId).orElseThrow();
+            accountNumber = gsimAccount.getAccountNumber() + (gsimAccount.getChildAccountsCount() + 1);
+            saved.updateAccountNo(accountNumber);
+            this.gsimWritePlatformService.incrementChildAccountCount(gsimAccount);
+
+            this.savingAccountRepository.saveAndFlush(saved);
+
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(saved.getId()) //
+                    .withOfficeId(saved.officeId()) //
+                    .withClientId(saved.clientId()) //
+                    .withGroupId(saved.groupId()) //
+                    .withSavingsId(saved.getId()) //
+                    .withGsimId(saved.getGsim().getId()).build();
+        } catch (final DataAccessException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return new CommandProcessingResult(Long.valueOf(-1));
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
+        }
     }
 }
