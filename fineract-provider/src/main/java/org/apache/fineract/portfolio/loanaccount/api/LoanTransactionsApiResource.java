@@ -435,6 +435,8 @@ public class LoanTransactionsApiResource {
         CommandWrapper commandRequest = null;
         if (CommandParameterUtil.is(commandParam, "repayment")) {
             commandRequest = builder.loanRepaymentTransaction(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "prepayloan")) {
+            commandRequest = builder.loanPrePayLoanTransaction(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "merchantIssuedRefund")) {
             commandRequest = builder.loanMerchantIssuedRefundTransaction(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "payoutRefund")) {

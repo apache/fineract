@@ -103,6 +103,7 @@ public enum LoanTransactionType {
             case 25 -> LoanTransactionType.CHARGEBACK;
             case 26 -> LoanTransactionType.CHARGE_ADJUSTMENT;
             case 27 -> LoanTransactionType.CHARGE_OFF;
+            case 28 -> LoanTransactionType.PRE_PAY_LOAN;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -127,6 +128,10 @@ public enum LoanTransactionType {
         return this.equals(LoanTransactionType.REPAYMENT);
     }
 
+    public boolean isPrePayLoan() {
+        return this.equals(LoanTransactionType.PRE_PAY_LOAN);
+    }
+
     public boolean isMerchantIssuedRefund() {
         return this.equals(LoanTransactionType.MERCHANT_ISSUED_REFUND);
     }
@@ -144,7 +149,7 @@ public enum LoanTransactionType {
     }
 
     public boolean isRepaymentType() {
-        return (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund());
+        return (isRepayment() || isPrePayLoan() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund());
     }
 
     public boolean isRecoveryRepayment() {

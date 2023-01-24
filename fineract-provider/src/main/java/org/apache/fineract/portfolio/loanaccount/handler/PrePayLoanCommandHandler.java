@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@CommandType(entity = "LOAN", action = "PREPAYLOAN")
+@CommandType(entity = "LOAN", action = "PRE_PAY_LOAN")
 @BulkEventSupport
 public class PrePayLoanCommandHandler implements NewCommandSourceHandler {
 
