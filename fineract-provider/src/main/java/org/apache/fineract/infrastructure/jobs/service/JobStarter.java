@@ -26,8 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.core.domain.FineractContext;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
@@ -56,10 +54,9 @@ public class JobStarter {
     private final List<JobParameterProvider> jobParameterProviders;
     private final JobNameService jobNameService;
 
-    public void run(Job job, ScheduledJobDetail scheduledJobDetail, FineractContext fineractContext,
-            Set<JobParameterDTO> jobParameterDTOSet) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
-            JobParametersInvalidException, JobRestartException {
-        ThreadLocalContextUtil.init(fineractContext);
+    public void run(Job job, ScheduledJobDetail scheduledJobDetail, Set<JobParameterDTO> jobParameterDTOSet)
+            throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException,
+            JobRestartException {
         Map<String, JobParameter> jobParameterMap = getJobParameter(scheduledJobDetail);
         JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(job)
                 .addJobParameters(new JobParameters(jobParameterMap))

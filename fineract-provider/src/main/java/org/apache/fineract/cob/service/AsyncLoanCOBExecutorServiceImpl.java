@@ -92,7 +92,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
                     executingBusinessDate.format(DateTimeFormatter.ISO_DATE));
             Set<JobParameterDTO> jobParameters = Collections.singleton(jobParameterDTO);
             saveCatchUpJobParameter(scheduledJobDetail);
-            jobStarter.run(job, scheduledJobDetail, ThreadLocalContextUtil.getContext(), jobParameters);
+            jobStarter.run(job, scheduledJobDetail, jobParameters);
             executingBusinessDate = executingBusinessDate.plusDays(1);
         }
     }
