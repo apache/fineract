@@ -16,16 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.bulk;
+package org.apache.fineract;
 
-import org.apache.fineract.infrastructure.event.business.annotation.BulkEventSupport;
-import org.springframework.stereotype.Component;
+import io.cucumber.spring.CucumberContextConfiguration;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-@Component
-@BulkEventSupport
-public class NestedBulkTestEvent {
+@CucumberContextConfiguration
+@ExtendWith(SpringExtension.class)
+@TestPropertySource("classpath:application-test.properties")
+@WebAppConfiguration
+@ContextConfiguration(classes = TestConfiguration.class)
+// @SpringBootTest(classes = TestConfiguration.class)
+public class TestSuite {
 
-    public void exec() {
-        throw new IllegalStateException("Not implemented");
-    }
 }
