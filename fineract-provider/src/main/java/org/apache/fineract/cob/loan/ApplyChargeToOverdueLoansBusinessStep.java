@@ -20,7 +20,6 @@ package org.apache.fineract.cob.loan;
 
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.event.business.annotation.BulkEventSupport;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeWritePlatformService;
@@ -29,7 +28,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@BulkEventSupport
 public class ApplyChargeToOverdueLoansBusinessStep implements LoanCOBBusinessStep {
 
     private final LoanReadPlatformService loanReadPlatformService;
