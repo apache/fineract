@@ -25,14 +25,11 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 
 @Getter
-@Setter
 @Entity
 @Table(name = "m_loan_transaction_relation")
 public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCustom {
@@ -52,9 +49,6 @@ public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCus
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "relation_type_enum", nullable = false)
     private LoanTransactionRelationTypeEnum relationType;
-
-    @Version
-    private Long version;
 
     protected LoanTransactionRelation() {}
 

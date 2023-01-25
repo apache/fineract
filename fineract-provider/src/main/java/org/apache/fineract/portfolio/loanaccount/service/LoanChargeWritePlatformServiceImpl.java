@@ -165,7 +165,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         this.loanChargeApiJsonValidator.validateAddLoanCharge(command.json());
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
 
         List<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
@@ -248,8 +248,9 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 // Trigger transaction replayed event
                 replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
-            this.loanRepositoryWrapper.save(loan);
+
         }
+        loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
@@ -936,7 +937,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         }
     }
 
-    private boolean addCharge(final Loan loan, final Charge chargeDefinition, final LoanCharge loanCharge) {
+    private boolean addCharge(final Loan loan, final Charge chargeDefinition, LoanCharge loanCharge) {
 
         if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
             final String errorMessage = "Charge and Loan must have the same currency.";
@@ -970,7 +971,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         loan.addLoanCharge(loanCharge);
 
-        this.loanChargeRepository.saveAndFlush(loanCharge);
+        loanCharge = this.loanChargeRepository.saveAndFlush(loanCharge);
 
         /**
          * we want to apply charge transactions only for those loans charges that are applied when a loan is active and

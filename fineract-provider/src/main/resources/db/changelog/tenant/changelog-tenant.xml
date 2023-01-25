@@ -107,4 +107,5 @@
     <include file="parts/0085_add_aggregate_root_id_external_events.xml" relativeToChangelogFile="true" />
     <include file="parts/0086_add_cob_business_date_to_loan_account_locks.xml" relativeToChangelogFile="true" />
     <include file="parts/0087_update_dashboard_table_reports.xml" relativeToChangelogFile="true" />
+    <include file="parts/0088_drop_m_loan_transaction_version_column.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
