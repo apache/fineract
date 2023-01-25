@@ -24,7 +24,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
-import org.apache.fineract.AbstractSpringTest;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
@@ -32,85 +31,75 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-class ReplayedTransactionBusinessEventServiceIntegrationTest extends AbstractSpringTest {
+@ExtendWith(MockitoExtension.class)
+class ReplayedTransactionBusinessEventServiceIntegrationTest {
 
-    @MockBean
+    @Mock
     private BusinessEventNotifierService businessEventNotifierService;
 
-    @MockBean
+    @Mock
     private LoanTransactionRepository loanTransactionRepository;
 
-    @Autowired
-    private DummyTasklet dummyTasklet;
-
-    @Mock
-    private StepContribution stepContribution;
-
-    @Mock
-    private ChunkContext chunkContext;
+    private ReplayedTransactionBusinessEventService underTest;
 
     @BeforeEach
-    void setUp() {
-        dummyTasklet.setChangedTransactionDetail(null);
+    public void setUp() {
+        underTest = new ReplayedTransactionBusinessEventServiceImpl(businessEventNotifierService, loanTransactionRepository);
     }
 
     @Test
-    public void testWhenParamIsNull() throws Exception {
+    public void testWhenParamIsNull() {
         // given
-        dummyTasklet.setChangedTransactionDetail(null);
+        ChangedTransactionDetail changedTransactionDetail = null;
         // when
-        dummyTasklet.execute(stepContribution, chunkContext);
+        underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
-        verify(businessEventNotifierService, Mockito.times(1)).startExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).startExternalEventRecording();
         verify(businessEventNotifierService, Mockito.times(0))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
-        verify(businessEventNotifierService, Mockito.times(1)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(1)).resetEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).stopExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).resetEventRecording();
     }
 
     @Test
-    public void testWhenParamHasNoMapping() throws Exception {
+    public void testWhenParamHasNoMapping() {
         // given
         ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
-        dummyTasklet.setChangedTransactionDetail(changedTransactionDetail);
         // when
-        dummyTasklet.execute(stepContribution, chunkContext);
+        underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
-        verify(businessEventNotifierService, Mockito.times(1)).startExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).startExternalEventRecording();
         verify(businessEventNotifierService, Mockito.times(0))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
-        verify(businessEventNotifierService, Mockito.times(1)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(1)).resetEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).stopExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).resetEventRecording();
     }
 
     @Test
-    public void testWhenParamHasOneNewTransaction() throws Exception {
+    public void testWhenParamHasOneNewTransaction() {
         // given
         LoanTransaction oldLoanTransaction = Mockito.mock(LoanTransaction.class);
         LoanTransaction newLoanTransaction = Mockito.mock(LoanTransaction.class);
         lenient().when(loanTransactionRepository.findById(1L)).thenReturn(Optional.of(oldLoanTransaction));
         ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         changedTransactionDetail.getNewTransactionMappings().put(1L, newLoanTransaction);
-        dummyTasklet.setChangedTransactionDetail(changedTransactionDetail);
         // when
-        dummyTasklet.execute(stepContribution, chunkContext);
+        underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
         verify(businessEventNotifierService, Mockito.times(1)).startExternalEventRecording();
         verify(businessEventNotifierService, Mockito.times(1))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
         verify(businessEventNotifierService, Mockito.times(1)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(1)).resetEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).resetEventRecording();
     }
 
     @Test
-    public void testWhenParamHasTwoNewTransaction() throws Exception {
+    public void testWhenParamHasTwoNewTransaction() {
         // given
         LoanTransaction oldLoanTransaction = Mockito.mock(LoanTransaction.class);
         LoanTransaction newLoanTransaction = Mockito.mock(LoanTransaction.class);
@@ -119,29 +108,28 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest extends AbstractSpr
         ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         changedTransactionDetail.getNewTransactionMappings().put(1L, newLoanTransaction);
         changedTransactionDetail.getNewTransactionMappings().put(2L, newLoanTransaction);
-        dummyTasklet.setChangedTransactionDetail(changedTransactionDetail);
         // when
-        dummyTasklet.execute(stepContribution, chunkContext);
+        underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
         verify(businessEventNotifierService, Mockito.times(1)).startExternalEventRecording();
         verify(businessEventNotifierService, Mockito.times(2))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
         verify(businessEventNotifierService, Mockito.times(1)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(1)).resetEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).resetEventRecording();
     }
 
     @Test
     public void testWhenParamHasError() {
         // given
-        doThrow(new RuntimeException()).when(businessEventNotifierService).notifyPostBusinessEvent(Mockito.any());
+        doThrow(new RuntimeException()).when(businessEventNotifierService)
+                .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
         LoanTransaction oldLoanTransaction = Mockito.mock(LoanTransaction.class);
         LoanTransaction newLoanTransaction = Mockito.mock(LoanTransaction.class);
         lenient().when(loanTransactionRepository.findById(1L)).thenReturn(Optional.of(oldLoanTransaction));
         ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         changedTransactionDetail.getNewTransactionMappings().put(1L, newLoanTransaction);
-        dummyTasklet.setChangedTransactionDetail(changedTransactionDetail);
         // when
-        assertThrows(RuntimeException.class, () -> dummyTasklet.execute(stepContribution, chunkContext));
+        assertThrows(RuntimeException.class, () -> underTest.raiseTransactionReplayedEvents(changedTransactionDetail));
         // then
         verify(businessEventNotifierService, Mockito.times(1)).startExternalEventRecording();
         verify(businessEventNotifierService, Mockito.times(1))

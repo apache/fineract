@@ -150,10 +150,9 @@ configurations {
     driver
 }
 dependencies {
-    testImplementation 'org.projectlombok:lombok:1.18.24'
     driver 'org.mariadb.jdbc:mariadb-java-client'
     driver 'org.postgresql:postgresql'
-    driver 'mysql:mysql-connector-java:8.0.32'
+    driver 'mysql:mysql-connector-java:8.0.31'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
