@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <!-- V362__reschedule_interest_to_lrs.sql -->
+    <changeSet author="fineract" id="362">
+        <addColumn tableName="m_loan_repayment_schedule">
+            <column name="reschedule_interest_portion" type="decimal(19,6)" defaultValueComputed="NULL" position="14" />
+        </addColumn>
+    </changeSet>
+    <!-- V363__mnote_indexing_for_performance.sql -->
+    <changeSet author="fineract" id="363">
+        <createIndex indexName="savings_account_transaction_id" tableName="m_note">
+            <column defaultValueComputed="NULL" name="savings_account_transaction_id"/>
+        </createIndex>
+    </changeSet>
+    <!-- V364__elastic_hook_template.sql -->
+    <changeSet author="fineract" id="364">
+        <insert tableName="m_hook_templates">
+            <column name="id" valueNumeric="3"/>
+            <column name="name" value="Elastic Search"/>
+        </insert>
+        <insert tableName="m_hook_schema">
+            <column name="id" valueNumeric="8"/>
+            <column name="hook_template_id" valueNumeric="3"/>
+            <column name="field_type" value="string"/>
+            <column name="field_name" value="Payload URL"/>
+            <column name="placeholder" value="http://&lt;host&gt;/&lt;index name&gt;/&lt;type name&gt;"/>
+            <column name="optional" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_hook_schema">
+            <column name="id" valueNumeric="9"/>
+            <column name="hook_template_id" valueNumeric="3"/>
+            <column name="field_type" value="string"/>
+            <column name="field_name" value="Content Type"/>
+            <column name="placeholder" value="json"/>
+            <column name="optional" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_hook_schema">
+            <column name="id" valueNumeric="10"/>
+            <column name="hook_template_id" valueNumeric="3"/>
+            <column name="field_type" value="string"/>
+            <column name="field_name" value="Index Name"/>
+            <column name="placeholder"/>
+            <column name="optional" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <!-- V365__reportCategoryList-FINERACT-1306.sql -->
+    <changeSet author="fineract" id="365">
+        <insert tableName="stretchy_parameter">
+            <column name="id" valueNumeric="1003"/>
+            <column name="parameter_name" value="reportCategoryList"/>
+            <column name="parameter_variable"/>
+            <column name="parameter_label" value="n/a"/>
+            <column name="parameter_displayType" value="n/a"/>
+            <column name="parameter_FormatType" value="n/a"/>
+            <column name="parameter_default" value="n/a"/>
+            <column name="special" value="Y"/>
+            <column name="selectOne"/>
+            <column name="selectAll"/>
+            <column name="parameter_sql"
+                    value="select  r.id as report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,&#10;  rp.id as parameter_id, rp.report_parameter_name, p.parameter_name&#10;  from stretchy_report r&#10;  left join stretchy_report_parameter rp on rp.report_id = r.id&#10;  left join stretchy_parameter p on p.id = rp.parameter_id&#10;  where r.report_category = '${reportCategory}'&#10;  and r.use_report is true and r.self_service_user_report = '${isSelfServiceUser}'  &#10;  and exists&#10;  (select 'f'&#10;  from m_appuser_role ur &#10;  join m_role r on r.id = ur.role_id&#10;  join m_role_permission rp on rp.role_id = r.id&#10;  join m_permission p on p.id = rp.permission_id&#10;  where ur.appuser_id = ${currentUserId}&#10;  and (p.code in ('ALL_FUNCTIONS_READ', 'ALL_FUNCTIONS') or p.code = concat(&quot;READ_&quot;, r.report_name)) )&#10;  order by r.report_category, r.report_name, rp.id"/>
+            <column name="parent_id"/>
+        </insert>
+        <insert tableName="stretchy_parameter">
+            <column name="id" valueNumeric="1004"/>
+            <column name="parameter_name" value="selectAccount"/>
+            <column name="parameter_variable" value="accountNo"/>
+            <column name="parameter_label" value="Enter Account No"/>
+            <column name="parameter_displayType" value="text"/>
+            <column name="parameter_FormatType" value="string"/>
+            <column name="parameter_default" value="n/a"/>
+            <column name="special"/>
+            <column name="selectOne"/>
+            <column name="selectAll"/>
+            <column name="parameter_sql"/>
+            <column name="parent_id"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
