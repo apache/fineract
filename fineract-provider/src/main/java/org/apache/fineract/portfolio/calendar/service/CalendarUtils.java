@@ -129,7 +129,8 @@ public final class CalendarUtils {
     }
 
     private static LocalDate getNextRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate startDate) {
-        final DateTime periodStart = new DateTime(java.util.Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        final DateTime periodStart = new DateTime(
+                java.util.Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         final Date seed = convertToiCal4JCompatibleDate(seedDate.atStartOfDay());
         final Date nextRecDate = recur.getNextDate(seed, periodStart);
         return nextRecDate == null ? null : LocalDate.ofInstant(nextRecDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
@@ -183,10 +184,12 @@ public final class CalendarUtils {
         if (recur == null) {
             return null;
         }
-        
+
         final Date seed = convertToiCal4JCompatibleDate(seedDate.atStartOfDay());
-        final DateTime periodStart = new DateTime(java.util.Date.from(periodStartDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
-        final DateTime periodEnd = new DateTime(java.util.Date.from(periodEndDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        final DateTime periodStart = new DateTime(
+                java.util.Date.from(periodStartDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        final DateTime periodEnd = new DateTime(
+                java.util.Date.from(periodEndDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         final Value value = new Value(Value.DATE.getValue());
         final DateList recurringDates = recur.getDates(seed, periodStart, periodEnd, value, maxCount);
         return convertToLocalDateList(recurringDates, seedDate, getMeetingPeriodFrequencyType(recur), isSkippMeetingOnFirstDay,
