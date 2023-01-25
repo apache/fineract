@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -74,6 +75,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
+import org.apache.fineract.portfolio.accountdetails.data.GsimMemberSearch;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -615,10 +617,13 @@ public class GroupsApiResource {
             @QueryParam("parentGSIMAccountNo") final String parentGSIMAccountNo, @QueryParam("parentGSIMId") final Long parentGSIMId,
             @QueryParam("name") @Parameter(description = "name") final String name,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy, @Context final UriInfo uriInfo) {
-        List<GSIMContainer> gsimContainer;
+        List<GSIMContainer> gsimContainer = new ArrayList<>();
+        List<GsimMemberSearch> savingsSummaryCustoms = new ArrayList<>();
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
         if (parentGSIMAccountNo != null && groupId != null && name != null) {
-            gsimContainer = this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountIdAndName(groupId, parentGSIMAccountNo, name);
+            savingsSummaryCustoms = this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountIdAndName(groupId,
+                    parentGSIMAccountNo, name);
+            gsimContainer.add(new GSIMContainer(savingsSummaryCustoms));
         } else if (parentGSIMAccountNo == null && parentGSIMId != null) {
             gsimContainer = this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountId(parentGSIMId);
         } else if (parentGSIMAccountNo != null && parentGSIMId == null) {
@@ -626,7 +631,6 @@ public class GroupsApiResource {
                     .findGsimAccountContainerbyGsimAccountNumber(parentGSIMAccountNo);
         } else {
             gsimContainer = (List<GSIMContainer>) this.gsimReadPlatformService.findGSIMAccountContainerByGroupId(groupId);
-
         }
 
         final Set<String> GSIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(

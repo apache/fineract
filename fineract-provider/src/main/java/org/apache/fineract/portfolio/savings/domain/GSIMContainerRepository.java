@@ -19,16 +19,16 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.util.List;
-import org.apache.fineract.portfolio.savings.data.GSIMContainer;
+import org.apache.fineract.portfolio.accountdetails.data.GsimMemberSearch;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface GSIMContainerRepository extends JpaRepository<GSIMContainer, Long>, JpaSpecificationExecutor<GSIMContainer> {
+public interface GSIMContainerRepository extends JpaRepository<GsimMemberSearch, Long>, JpaSpecificationExecutor<GsimMemberSearch> {
 
-    @Query(value = "SELECT distinct(cl.id) AS id,cl.display_name AS name,cl.office_id AS officeId FROM m_client cl INNER JOIN m_group_client mgc on cl.id = mgc.client_id  INNER JOIN  m_group mg on mgc.group_id = mg.id  INNER  JOIN m_savings_account msa on cl.id = msa.client_id  INNER JOIN gsim_accounts ga on msa.gsim_id = ga.id  WHERE mg.id  = ?1 AND cl.display_name  LIKE %"
+    @Query(value = "SELECT distinct(cl.id) AS id,cl.display_name AS name,mo.name AS officeName FROM m_client cl INNER JOIN m_group_client mgc on cl.id = mgc.client_id  INNER JOIN  m_group mg on mgc.group_id = mg.id  INNER  JOIN m_savings_account msa on cl.id = msa.client_id  INNER JOIN gsim_accounts ga on msa.gsim_id = ga.id INNER  JOIN m_office mo on cl.office_id = mo.id WHERE mg.id  = ?1 AND cl.display_name  LIKE %"
             + "?2" + "% AND ga.account_number = ?3", nativeQuery = true)
-    List<GSIMContainer> findGsimAccountContainerbyGsimAccountIdAndName(@Param("groupId") Long groupId, @Param("name") String name,
+    List<GsimMemberSearch> findGsimAccountContainerbyGsimAccountIdAndName(@Param("groupId") Long groupId, @Param("name") String name,
             @Param("parentGSIMAccountNo") String parentGSIMAccountNo);
 }

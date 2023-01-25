@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.accountdetails.data.GsimMemberSearch;
 import org.apache.fineract.portfolio.accountdetails.data.SavingsSummaryCustom;
 import org.apache.fineract.portfolio.accountdetails.service.AccountEnumerations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -206,7 +207,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
     }
 
     @Override
-    public List<GSIMContainer> findGsimAccountContainerbyGsimAccountIdAndName(Long groupId, String parentGSIMAccountNo, String name) {
+    public List<GsimMemberSearch> findGsimAccountContainerbyGsimAccountIdAndName(Long groupId, String parentGSIMAccountNo, String name) {
         return gsimContainerRepository.findGsimAccountContainerbyGsimAccountIdAndName(groupId, name, parentGSIMAccountNo);
     }
 
