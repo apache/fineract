@@ -1474,6 +1474,10 @@ final class LoansApiResourceSwagger {
         public Long resourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String resourceExternalId;
+        @Schema(example = "22")
+        public Long subResourceId;
+        @Schema(example = "b4f8fefd-a14d-4487-8d80-6f2fb0e07836")
+        public String subResourceExternalId;
         @Schema(description = "PostLoansLoanIdChanges")
         public PostLoansLoanIdChanges changes;
     }
