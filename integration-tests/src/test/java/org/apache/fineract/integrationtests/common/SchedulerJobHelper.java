@@ -20,7 +20,6 @@ package org.apache.fineract.integrationtests.common;
 
 import static java.time.Instant.now;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -40,11 +39,14 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.hamcrest.MatcherAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SchedulerJobHelper {
+public class SchedulerJobHelper extends IntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
     private final RequestSpecification requestSpec;
@@ -106,6 +108,10 @@ public class SchedulerJobHelper {
         final Map<String, Object> response = Utils.performServerPut(requestSpec, response200Spec, UPDATE_SCHEDULER_JOB_URL,
                 updateSchedulerJobAsJSON(active), "changes");
         return response;
+    }
+
+    public void updateSchedulerJob(long jobId, PutJobsJobIDRequest request) {
+        ok(fineract().jobs.updateJobDetail(jobId, request));
     }
 
     private static String updateSchedulerJobAsJSON(final boolean active) {
@@ -191,7 +197,7 @@ public class SchedulerJobHelper {
                 });
 
         // Verify triggerType
-        assertThat(finalLastRunHistory.get("triggerType"), is("application"));
+        MatcherAssert.assertThat(finalLastRunHistory.get("triggerType"), is("application"));
 
         // Verify status & propagate jobRunErrorMessage and/or jobRunErrorLog
         // (if any)
