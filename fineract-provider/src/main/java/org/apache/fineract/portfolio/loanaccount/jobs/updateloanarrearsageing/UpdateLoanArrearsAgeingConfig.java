@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsageing;
 
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.portfolio.loanaccount.service.LoanArrearsAgingService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -29,7 +27,6 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class UpdateLoanArrearsAgeingConfig {
@@ -39,12 +36,9 @@ public class UpdateLoanArrearsAgeingConfig {
 
     @Autowired
     private StepBuilderFactory steps;
+
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private DatabaseSpecificSQLGenerator sqlGenerator;
-    @Autowired
-    private LoanArrearsAgingService loanArrearsAgingService;
+    private LoanArrearsAgeingUpdateHandler updateLoanArrearsAgingService;
 
     @Bean
     protected Step updateLoanArrearsAgeingStep() {
@@ -59,6 +53,6 @@ public class UpdateLoanArrearsAgeingConfig {
 
     @Bean
     public UpdateLoanArrearsAgeingTasklet updateLoanArrearsAgeingTasklet() {
-        return new UpdateLoanArrearsAgeingTasklet(jdbcTemplate, sqlGenerator, loanArrearsAgingService);
+        return new UpdateLoanArrearsAgeingTasklet(updateLoanArrearsAgingService);
     }
 }

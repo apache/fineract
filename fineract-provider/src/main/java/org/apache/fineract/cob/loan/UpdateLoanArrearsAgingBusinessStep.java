@@ -16,25 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsageing;
+package org.apache.fineract.cob.loan;
 
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsageing.LoanArrearsAgeingUpdateHandler;
+import org.springframework.stereotype.Component;
 
-@Slf4j
+@Component
 @RequiredArgsConstructor
-public class UpdateLoanArrearsAgeingTasklet implements Tasklet {
+public class UpdateLoanArrearsAgingBusinessStep implements LoanCOBBusinessStep {
 
     private final LoanArrearsAgeingUpdateHandler loanArrearsAgeingUpdateHandler;
 
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        loanArrearsAgeingUpdateHandler.updateLoanArrearsAgeingDetailsForAllLoans();
-        return RepeatStatus.FINISHED;
+    public Loan execute(Loan loan) {
+        Long loanId = loan.getId();
+        loanArrearsAgeingUpdateHandler.updateLoanArrearsAgeingDetails(Arrays.asList(loanId));
+        return loan;
     }
 
+    @Override
+    public String getEnumStyledName() {
+        return "UPDATE_LOAN_ARREARS_AGING";
+    }
+
+    @Override
+    public String getHumanReadableName() {
+        return "Update loan arrears aging";
+    }
 }
