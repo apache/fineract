@@ -55,6 +55,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetPaymentTypesResponse;
@@ -1578,6 +1579,37 @@ public class LoanTransactionHelper extends IntegrationTest {
         if (getLoansLoanIdCollectionData != null) {
             log.info("Loan Delinquency {}", getLoansLoanIdCollectionData.toString());
         }
+    }
+
+    public void evaluateLoanTransactionData(GetLoansLoanIdResponse getLoansLoanIdResponse, String transactionType, Double amountExpected) {
+        List<GetLoansLoanIdTransactions> transactions = getLoansLoanIdResponse.getTransactions();
+        log.info("Loan with {} transactions", transactions.size());
+        Double transactionsAmount = 0.0;
+        for (GetLoansLoanIdTransactions transaction : transactions) {
+            log.info("  Id {} code {} date {} amount {}", transaction.getId(), transaction.getType().getCode(), transaction.getDate(),
+                    transaction.getAmount());
+            if (transactionType.equals(transaction.getType().getCode())) {
+                transactionsAmount += transaction.getAmount();
+            }
+        }
+        assertEquals(amountExpected, transactionsAmount);
+    }
+
+    public Long evaluateLastLoanTransactionData(GetLoansLoanIdResponse getLoansLoanIdResponse, String transactionType,
+            String transactionExpected, Double amountExpected) {
+        List<GetLoansLoanIdTransactions> transactions = getLoansLoanIdResponse.getTransactions();
+        log.info("Loan with {} transactions", transactions.size());
+        GetLoansLoanIdTransactions lastTransaction = null;
+        for (GetLoansLoanIdTransactions transaction : transactions) {
+            log.info("  Id {} code {} date {} amount {}", transaction.getId(), transaction.getType().getCode(), transaction.getDate(),
+                    transaction.getAmount());
+            if (transactionType.equals(transaction.getType().getCode())) {
+                lastTransaction = transaction;
+            }
+        }
+        assertEquals(transactionExpected, Utils.dateFormatter.format(lastTransaction.getDate()));
+        assertEquals(amountExpected, lastTransaction.getAmount());
+        return lastTransaction.getId();
     }
 
     public void validateLoanStatus(GetLoansLoanIdResponse getLoansLoanIdResponse, final String statusCodeExpected) {

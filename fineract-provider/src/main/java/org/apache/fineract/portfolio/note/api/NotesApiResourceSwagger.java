@@ -24,7 +24,7 @@ import java.time.ZonedDateTime;
 /**
  * Created by Chirag Gupta on 12/29/17.
  */
-final class NotesApiResourceSwagger {
+public final class NotesApiResourceSwagger {
 
     private NotesApiResourceSwagger() {}
 
