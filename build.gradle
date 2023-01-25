@@ -38,8 +38,7 @@ buildscript {
         fineractPublishProjects = subprojects.findAll{
             [
                 'fineract-avro-schemas',
-                'fineract-client',
-                'fineract-provider'
+                'fineract-client'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
