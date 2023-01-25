@@ -207,7 +207,6 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
     @Override
     public List<GSIMContainer> findGsimAccountContainerbyGsimAccountIdAndName(Long groupId, String parentGSIMAccountNo, String name) {
-        System.out.println(parentGSIMAccountNo + " NAME" + name);
         return gsimContainerRepository.findGsimAccountContainerbyGsimAccountIdAndName(groupId, name, parentGSIMAccountNo);
     }
 
