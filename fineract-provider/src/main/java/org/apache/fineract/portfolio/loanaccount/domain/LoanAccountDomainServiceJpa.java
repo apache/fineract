@@ -156,11 +156,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Transactional
     @Override
-    public LoanTransaction makeRepayment(final LoanTransactionType repaymentTransactionType, final Loan loan,
-            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
-            final ExternalId txnExternalId, final boolean isRecoveryRepayment, final String chargeRefundChargeType,
-            boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone,
-            final boolean isLoanToLoanTransfer) {
+    public LoanTransaction makeRepayment(final LoanTransactionType repaymentTransactionType, Loan loan, final LocalDate transactionDate,
+            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText, final ExternalId txnExternalId,
+            final boolean isRecoveryRepayment, final String chargeRefundChargeType, boolean isAccountTransfer,
+            HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone, final boolean isLoanToLoanTransfer) {
         checkClientOrGroupActive(loan);
 
         LoanBusinessEvent repaymentEvent = getLoanRepaymentTypeBusinessEvent(repaymentTransactionType, isRecoveryRepayment, loan);
@@ -206,13 +205,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          * time being, not a major issue for now as this loop is entered only in edge cases (when a payment is made
          * before the latest payment recorded against the loan)
          ***/
-
-        saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
-
         if (changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
 
-                saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                loanTransactionRepository.save(mapEntry.getValue());
                 // update loan with references to the newly created transactions
                 loan.addLoanTransaction(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
@@ -220,6 +216,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             // Trigger transaction replayed event
             replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
         }
+        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
@@ -314,9 +311,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public void saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
+    public LoanTransaction saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
         try {
-            this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
+            return this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             raiseValidationExceptionForUniqueConstraintViolation(e);
             throw e;
@@ -324,9 +321,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
+    public Loan saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
-            this.loanRepositoryWrapper.saveAndFlush(loan);
+            return this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             raiseValidationExceptionForUniqueConstraintViolation(e);
             throw e;
@@ -334,9 +331,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public void saveLoanWithDataIntegrityViolationChecks(final Loan loan) {
+    public Loan saveLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
-            this.loanRepositoryWrapper.save(loan);
+            return this.loanRepositoryWrapper.save(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             raiseValidationExceptionForUniqueConstraintViolation(e);
             throw e;
@@ -795,7 +792,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                loanTransactionRepository.save(mapEntry.getValue());
                 // update loan with references to the newly created transactions
                 loan.getLoanTransactions().add(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());

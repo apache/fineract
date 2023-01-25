@@ -443,9 +443,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             // update the status of the request
             loanRescheduleRequest.approve(appUser, approvedOnDate);
 
-            // update the loan object
-            saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
-
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                     this.loanTransactionRepository.save(mapEntry.getValue());
@@ -457,6 +454,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 // Trigger transaction replayed event
                 replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
+            // update the loan object
+            loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
             this.loanAccountDomainService.recalculateAccruals(loan, true);
@@ -475,7 +474,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         }
     }
 
-    private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
+    private Loan saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             for (LoanRepaymentScheduleInstallment installment : installments) {
@@ -483,7 +482,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepositoryWrapper.saveAndFlush(loan);
+            return this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -495,6 +494,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                         dataValidationErrors, e);
             }
+            throw e;
         }
     }
 
