@@ -1039,110 +1039,30 @@ final class LoanProductsApiResourceSwagger {
 
             private GetLoanAccountingMappings() {}
 
-            static final class GetLoanFundSourceAccount {
+            static final class GetGlAccountMapping {
 
-                private GetLoanFundSourceAccount() {}
-
-                @Schema(example = "1")
-                public Long id;
-                @Schema(example = "fund source")
-                public String name;
-                @Schema(example = "01")
-                public Integer glCode;
-            }
-
-            static final class GetLoanPortfolioAccount {
-
-                private GetLoanPortfolioAccount() {}
-
-                @Schema(example = "2")
-                public Long id;
-                @Schema(example = "Loan portfolio")
-                public String name;
-                @Schema(example = "02")
-                public Integer glCode;
-            }
-
-            static final class GetLoanTransfersInSuspenseAccount {
-
-                private GetLoanTransfersInSuspenseAccount() {}
-
-                @Schema(example = "3")
-                public Long id;
-                @Schema(example = "transfers")
-                public String name;
-                @Schema(example = "03")
-                public Integer glCode;
-            }
-
-            static final class GetLoanInterestOnLoanAccount {
-
-                private GetLoanInterestOnLoanAccount() {}
-
-                @Schema(example = "4")
-                public Long id;
-                @Schema(example = "income from interest")
-                public String name;
-                @Schema(example = "04")
-                public Integer glCode;
-            }
-
-            static final class GetLoanIncomeFromFeeAccount {
-
-                private GetLoanIncomeFromFeeAccount() {}
-
-                @Schema(example = "8")
-                public Long id;
-                @Schema(example = "income from fees 2")
-                public String name;
-                @Schema(example = "10")
-                public Integer glCode;
-            }
-
-            static final class GetLoanIncomeFromPenaltyAccount {
-
-                private GetLoanIncomeFromPenaltyAccount() {}
-
-                @Schema(example = "9")
-                public Long id;
-                @Schema(example = "income from penalities 2")
-                public String name;
-                @Schema(example = "11")
-                public Integer glCode;
-            }
-
-            static final class GetLoanWriteOffAccount {
-
-                private GetLoanWriteOffAccount() {}
+                private GetGlAccountMapping() {}
 
                 @Schema(example = "10")
                 public Long id;
-                @Schema(example = "loans written off 2")
+                @Schema(example = "Cash Account")
                 public String name;
-                @Schema(example = "12")
-                public Integer glCode;
+                @Schema(example = "012-34-65")
+                public String glCode;
             }
 
-            static final class GetLoanOverpaymentLiabilityAccount {
-
-                private GetLoanOverpaymentLiabilityAccount() {}
-
-                @Schema(example = "11")
-                public Long id;
-                @Schema(example = "over payment")
-                public String name;
-                @Schema(example = "13")
-                public Integer glCode;
-            }
-
-            public GetLoanFundSourceAccount fundSourceAccount;
-            public GetLoanPortfolioAccount loanPortfolioAccount;
-            public GetLoanTransfersInSuspenseAccount transfersInSuspenseAccount;
-            public GetLoanInterestOnLoanAccount interestOnLoanAccount;
-            public GetLoanIncomeFromFeeAccount incomeFromFeeAccount;
-            public GetLoanIncomeFromPenaltyAccount incomeFromPenaltyAccount;
-            public GetLoanWriteOffAccount writeOffAccount;
-            public GetLoanOverpaymentLiabilityAccount overpaymentLiabilityAccount;
+            public GetGlAccountMapping fundSourceAccount;
+            public GetGlAccountMapping loanPortfolioAccount;
+            public GetGlAccountMapping transfersInSuspenseAccount;
+            public GetGlAccountMapping receivableInterestAccount;
+            public GetGlAccountMapping receivablePenaltyAccount;
+            public GetGlAccountMapping interestOnLoanAccount;
+            public GetGlAccountMapping incomeFromFeeAccount;
+            public GetGlAccountMapping incomeFromPenaltyAccount;
+            public GetGlAccountMapping incomeFromRecoveryAccount;
+            public GetGlAccountMapping writeOffAccount;
+            public GetGlAccountMapping goodwillCreditAccount;
+            public GetGlAccountMapping overpaymentLiabilityAccount;
         }
 
         static final class GetLoanPaymentChannelToFundSourceMappings {
@@ -1174,7 +1094,7 @@ final class LoanProductsApiResourceSwagger {
             }
 
             public GetLoanCharge charge;
-            public GetLoanAccountingMappings.GetLoanIncomeFromFeeAccount incomeAccount;
+            public GetLoanAccountingMappings.GetGlAccountMapping incomeAccount;
             @Schema(example = "10")
             public Long chargeId;
             @Schema(example = "39")
