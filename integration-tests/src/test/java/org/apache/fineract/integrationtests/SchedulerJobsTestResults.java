@@ -38,6 +38,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,7 +47,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -101,8 +105,10 @@ public class SchedulerJobsTestResults {
     private LoanTransactionHelper loanTransactionHelper;
     private AccountHelper accountHelper;
     private JournalEntryHelper journalEntryHelper;
-
+    private ClientHelper clientHelper;
     private TimeZone systemTimeZone;
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private BusinessDateHelper businessDateHelper;
 
     @BeforeEach
     public void setup() {
@@ -114,7 +120,8 @@ public class SchedulerJobsTestResults {
         this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
         schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-
+        clientHelper = new ClientHelper(requestSpec, responseSpec);
+        this.businessDateHelper = new BusinessDateHelper();
         this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
     }
 
@@ -960,6 +967,71 @@ public class SchedulerJobsTestResults {
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
         balance = Float.parseFloat(MINIMUM_OPENING_BALANCE) + interestPosted;
         validateNumberForEqualExcludePrecision(String.valueOf(balance), String.valueOf(summary.get("accountBalance")));
+    }
+
+    @Test
+    public void businessDateIsCorrectForCronJob() throws InterruptedException {
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2022.09.04").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account assetFeeAndPenaltyAccount = this.accountHelper.createAssetAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+
+            final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+                    .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
+                    .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
+                    .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                    .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
+                    .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(null);
+            final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+
+            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+            Integer loanId = applyForLoanApplication(client.getClientId().toString(), loanProductID.toString(), null, "02 September 2022");
+
+            this.loanTransactionHelper.approveLoan("02 September 2022", loanId);
+            this.loanTransactionHelper.disburseLoan("03 September 2022", loanId, "1000", null);
+
+            this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0/5 * * * * ?"));
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2022.09.05").dateFormat("yyyy.MM.dd").locale("en"));
+
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
+            String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+            this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10", null));
+
+            Thread.sleep(6000);
+            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(1).getDate());
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2022.09.06").dateFormat("yyyy.MM.dd").locale("en"));
+
+            targetDate = LocalDate.of(2022, 9, 6);
+            penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+            this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10", null));
+
+            Thread.sleep(6000);
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            assertEquals(LocalDate.of(2022, 9, 6), loanDetails.getTransactions().get(2).getDate());
+        } finally {
+            this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0 2 0 1/1 * ? *"));
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
