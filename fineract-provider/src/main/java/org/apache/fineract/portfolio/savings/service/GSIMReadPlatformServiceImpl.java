@@ -40,6 +40,7 @@ import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitori
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
+import org.apache.fineract.portfolio.savings.domain.GSIMContainerRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,13 +53,15 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ColumnValidator columnValidator;
+    private final GSIMContainerRepository gsimContainerRepository;
 
     @Autowired
     public GSIMReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator, final GSIMContainerRepository gsimContainerRepository) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
+        this.gsimContainerRepository = gsimContainerRepository;
 
     }
 
@@ -200,6 +203,12 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final String sql = "select " + rm.schema() + " where gsim.id=?";
 
         return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId }); // NOSONAR
+    }
+
+    @Override
+    public List<GSIMContainer> findGsimAccountContainerbyGsimAccountIdAndName(Long groupId, String parentGSIMAccountNo, String name) {
+        System.out.println(parentGSIMAccountNo + " NAME" + name);
+        return gsimContainerRepository.findGsimAccountContainerbyGsimAccountIdAndName(groupId, name, parentGSIMAccountNo);
     }
 
     @Override

@@ -21,21 +21,30 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.math.BigDecimal;
 import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import org.apache.fineract.portfolio.accountdetails.data.SavingsSummaryCustom;
 
+@Entity
 public class GSIMContainer {
 
-    private final BigDecimal gsimId;
+    private BigDecimal gsimId;
 
-    private final BigDecimal groupId;
+    private BigDecimal groupId;
 
-    private final String accountNumber;
+    private String accountNumber;
 
-    private final List<SavingsSummaryCustom> childGSIMAccounts;
+    private List<SavingsSummaryCustom> childGSIMAccounts;
 
-    private final BigDecimal parentBalance;
+    private BigDecimal parentBalance;
 
-    private final String savingsStatus;
+    private String savingsStatus;
+    @Id
+    private Long id;
+    private String name;
+    private Long officeId;
+
+    public GSIMContainer() {}
 
     public GSIMContainer(final BigDecimal gsimId, final BigDecimal groupId, final String accountNumber,
             final List<SavingsSummaryCustom> childGSIMAccounts, final BigDecimal parentBalance, final String savingsStatus) {
@@ -70,5 +79,33 @@ public class GSIMContainer {
 
     public String getSavingsStatus() {
         return savingsStatus;
+    }
+
+    public BigDecimal getParentBalance() {
+        return parentBalance;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Long getOfficeId() {
+        return officeId;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setOfficeId(Long officeId) {
+        this.officeId = officeId;
     }
 }

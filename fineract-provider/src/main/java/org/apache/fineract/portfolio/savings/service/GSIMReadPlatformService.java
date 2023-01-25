@@ -43,4 +43,6 @@ public interface GSIMReadPlatformService {
 
     GroupSavingsIndividualMonitoringAccountData findGSIMAccountByGSIMId(Long gsimId);
 
+    List<GSIMContainer> findGsimAccountContainerbyGsimAccountIdAndName(Long groupId, String parentGSIMAccountNo, String name);
+
 }

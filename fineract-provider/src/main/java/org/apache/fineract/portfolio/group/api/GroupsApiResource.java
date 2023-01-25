@@ -613,11 +613,13 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveGsimAccounts(@PathParam("groupId") final Long groupId,
             @QueryParam("parentGSIMAccountNo") final String parentGSIMAccountNo, @QueryParam("parentGSIMId") final Long parentGSIMId,
-            @Context final UriInfo uriInfo) {
+            @QueryParam("name") @Parameter(description = "name") final String name,
+            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy, @Context final UriInfo uriInfo) {
         List<GSIMContainer> gsimContainer;
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
-
-        if (parentGSIMAccountNo == null && parentGSIMId != null) {
+        if (parentGSIMAccountNo != null && groupId != null && name != null) {
+            gsimContainer = this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountIdAndName(groupId, parentGSIMAccountNo, name);
+        } else if (parentGSIMAccountNo == null && parentGSIMId != null) {
             gsimContainer = this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountId(parentGSIMId);
         } else if (parentGSIMAccountNo != null && parentGSIMId == null) {
             gsimContainer = (List<GSIMContainer>) this.gsimReadPlatformService
