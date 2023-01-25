@@ -4946,7 +4946,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LoanTransaction getLastRepaymentTransaction() {
         for (final LoanTransaction loanTransaction : this.loanTransactions) {
-            if (!loanTransaction.isReversed() && loanTransaction.isRepayment()) {
+            if (!loanTransaction.isReversed() && loanTransaction.isRepaymentType()) {
                 return loanTransaction;
             }
         }
