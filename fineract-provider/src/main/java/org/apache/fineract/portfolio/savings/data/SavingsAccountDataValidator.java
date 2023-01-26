@@ -572,15 +572,15 @@ public class SavingsAccountDataValidator {
         final Long clientId = this.fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
         if (clientId != null) {
             baseDataValidator.reset().parameter(clientIdParamName).value(clientId).longGreaterThanZero();
+        } else {
+            baseDataValidator.reset().parameter(clientIdParamName).value(clientId).notNull().integerGreaterThanZero();
         }
 
         final Long groupId = this.fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
         if (groupId != null) {
             baseDataValidator.reset().parameter(groupIdParamName).value(groupId).longGreaterThanZero();
-        }
-
-        if (clientId == null && groupId == null) {
-            baseDataValidator.reset().parameter(clientIdParamName).value(clientId).notNull().integerGreaterThanZero();
+        } else {
+            baseDataValidator.reset().parameter(groupIdParamName).value(groupId).notNull().integerGreaterThanZero();
         }
 
         final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
