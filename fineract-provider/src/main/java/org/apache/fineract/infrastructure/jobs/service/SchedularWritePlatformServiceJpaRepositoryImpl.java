@@ -148,6 +148,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
             isStopExecution = true;
         } else if (!isStopExecution) {
             scheduledJobDetail.setCurrentlyRunning(true);
+            scheduledJobDetail.setMismatchedJob(false);
         }
         this.scheduledJobDetailsRepository.save(scheduledJobDetail);
         return isStopExecution;

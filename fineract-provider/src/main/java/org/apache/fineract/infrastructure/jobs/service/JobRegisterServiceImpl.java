@@ -163,7 +163,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                 final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService
                         .retrieveAllJobs(fineractProperties.getNodeId());
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
-                    if (jobDetail.isTriggerMisfired() || jobDetail.isMismatchedJob()) {
+                    if (jobDetail.isTriggerMisfired()) {
                         if (jobDetail.isActiveSchedular()) {
                             executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON, Collections.emptySet());
                             jobDetail.setMismatchedJob(false);
@@ -216,8 +216,6 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
         if (nodeIdStored.equals(fineractProperties.getNodeId()) || nodeIdStored.equals("0")) {
             executeJob(scheduledJobDetail, null, jobParameterDTOSet);
-            scheduledJobDetail.setMismatchedJob(false);
-            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
         } else {
             scheduledJobDetail.setMismatchedJob(true);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
