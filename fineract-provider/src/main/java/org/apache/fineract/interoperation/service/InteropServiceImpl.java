@@ -544,6 +544,19 @@ public class InteropServiceImpl implements InteropService {
         return this.toApiJsonSerializer.serialize(result);
     }
 
+    @Override
+    public @NotNull String loanRepayment(@NotNull String accountId, String apiRequestBodyAsJson) {
+        Loan loan = validateAndGetLoan(accountId);
+        Long loanId = loan.getId();
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+
+        final CommandWrapper commandRequest = builder.loanRepaymentTransaction(loanId).build();
+        CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
         SavingsAccount savingsAccount = savingsAccountRepository.findByExternalId(accountId);
         if (savingsAccount == null) {
