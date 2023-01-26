@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.utils;
 
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,10 +38,17 @@ public final class SQLInjectionValidator {
 
     private static final String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9*\n\r]*";
 
+    // TODO: see here https://rails-sqli.org for and
+    // https://larrysteinle.com/2011/02/20/use-regular-expressions-to-detect-sql-code-injection more examples
+    private static final List<String> INJECTION_PATTERNS = List.of("(?i).*[or|and]\s*[\"']?-1[\"']?\\s*(-*).*",
+            "(?i).*\\s+[\"']?(\\d+)[\"']?\\s*=\\s*[\"']?(\\1)[\"']?\\s*(-*).*");
+
     public static void validateSQLInput(final String sqlSearch) {
         if (StringUtils.isBlank(sqlSearch)) {
             return;
         }
+
+        // TODO: this should be replaced by INJECTION_PATTERNS
         String lowerCaseSQL = sqlSearch.toLowerCase();
         for (String ddl : DDL_COMMANDS) {
             if (lowerCaseSQL.contains(ddl)) {
@@ -48,12 +56,14 @@ public final class SQLInjectionValidator {
             }
         }
 
+        // TODO: this should be replaced by INJECTION_PATTERNS
         for (String dml : DML_COMMANDS) {
             if (lowerCaseSQL.contains(dml)) {
                 throw new SQLInjectionException();
             }
         }
 
+        // TODO: this should be replaced by INJECTION_PATTERNS
         for (String comments : COMMENTS) {
             if (lowerCaseSQL.contains(comments)) {
                 throw new SQLInjectionException();
@@ -63,17 +73,10 @@ public final class SQLInjectionValidator {
         // Removing the space before and after '=' operator
         // String s = " \" OR 1 = 1"; For the cases like this
         boolean injectionFound = false;
-        String inputSqlString = lowerCaseSQL;
-        while (inputSqlString.indexOf(" =") > 0) { // Don't remove space before
-                                                   // = operator
-            inputSqlString = inputSqlString.replaceAll(" =", "=");
-        }
 
-        while (inputSqlString.indexOf("= ") > 0) { // Don't remove space after =
-                                                   // operator
-            inputSqlString = inputSqlString.replaceAll("= ", "=");
-        }
+        String inputSqlString = lowerCaseSQL.replaceAll("\\s*=\\s*", "=");
 
+        // TODO: this should be replaced by INJECTION_PATTERNS
         StringTokenizer tokenizer = new StringTokenizer(inputSqlString, " ");
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken().trim();
@@ -116,6 +119,14 @@ public final class SQLInjectionValidator {
         }
         if (injectionFound) {
             throw new SQLInjectionException();
+        }
+
+        for (String injectionPattern : INJECTION_PATTERNS) {
+            Pattern pattern = Pattern.compile(injectionPattern);
+            Matcher matcher = pattern.matcher(sqlSearch);
+            if (matcher.matches()) {
+                throw new SQLInjectionException();
+            }
         }
 
         Pattern pattern = Pattern.compile(SQL_PATTERN);
@@ -129,6 +140,8 @@ public final class SQLInjectionValidator {
         if (StringUtils.isBlank(sqlSearch)) {
             return;
         }
+
+        // TODO: this should be replaced by INJECTION_PATTERNS
         String lowerCaseSQL = sqlSearch.toLowerCase().trim();
         for (String ddl : DDL_COMMANDS) {
             if (lowerCaseSQL.startsWith(ddl)) {
@@ -136,6 +149,7 @@ public final class SQLInjectionValidator {
             }
         }
 
+        // TODO: this should be replaced by INJECTION_PATTERNS
         for (String comments : COMMENTS) {
             if (lowerCaseSQL.contains(comments)) {
                 throw new SQLInjectionException();
@@ -145,16 +159,8 @@ public final class SQLInjectionValidator {
         // Removing the space before and after '=' operator
         // String s = " \" OR 1 = 1"; For the cases like this
         boolean injectionFound = false;
-        String inputSqlString = lowerCaseSQL;
-        while (inputSqlString.indexOf(" =") > 0) { // Don't remove space before
-                                                   // = operator
-            inputSqlString = inputSqlString.replaceAll(" =", "=");
-        }
 
-        while (inputSqlString.indexOf("= ") > 0) { // Don't remove space after =
-                                                   // operator
-            inputSqlString = inputSqlString.replaceAll("= ", "=");
-        }
+        String inputSqlString = lowerCaseSQL.replaceAll("\\s*=\\s*", "=");
 
         StringTokenizer tokenizer = new StringTokenizer(inputSqlString, " ");
         while (tokenizer.hasMoreTokens()) {
@@ -198,6 +204,14 @@ public final class SQLInjectionValidator {
         }
         if (injectionFound) {
             throw new SQLInjectionException();
+        }
+
+        for (String injectionPattern : INJECTION_PATTERNS) {
+            Pattern pattern = Pattern.compile(injectionPattern);
+            Matcher matcher = pattern.matcher(sqlSearch);
+            if (matcher.matches()) {
+                throw new SQLInjectionException();
+            }
         }
 
         Pattern pattern = Pattern.compile(SQL_PATTERN);
