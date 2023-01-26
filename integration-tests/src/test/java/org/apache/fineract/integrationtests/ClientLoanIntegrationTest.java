@@ -3984,6 +3984,61 @@ public class ClientLoanIntegrationTest {
     }
 
     @Test
+    public void testInteroperationLoanRepaymentAPI() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", true);
+        Calendar startDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        startDate.add(Calendar.MONTH, -8);
+
+        Calendar firstRepaymentDate = (Calendar) startDate.clone();
+        firstRepaymentDate.add(Calendar.MONTH, 1);
+        firstRepaymentDate.add(Calendar.DAY_OF_MONTH, firstRepaymentDate.getActualMaximum(Calendar.DAY_OF_MONTH) - Calendar.DAY_OF_MONTH);
+        String firstRepayment = dateFormat.format(firstRepaymentDate.getTime());
+
+        final String loanDisbursementDate = dateFormat.format(startDate.getTime());
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer loanProductID = createLoanProductWithInterestRecalculationAndCompoundingDetails(
+                LoanProductTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY,
+                LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
+                LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD,
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, "12");
+
+        final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, loanDisbursementDate,
+                LoanApplicationTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY, firstRepayment);
+
+        Assertions.assertNotNull(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(loanDisbursementDate, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        Assertions.assertNotNull(loanSchedule);
+        startDate.add(Calendar.DAY_OF_MONTH, 2);
+        String loanFirstRepaymentDate = dateFormat.format(startDate.getTime());
+
+        Float earlyPayment = Float.parseFloat("3000");
+        String accountNo = JsonPath.from(loanDetails).get("accountNo").toString();
+
+        HashMap loanRepayment = this.loanTransactionHelper.makeRepaymentWithAccountNo(loanFirstRepaymentDate, earlyPayment, accountNo);
+        assertNotNull(loanRepayment);
+    }
+
+    @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_WEEKLY_INTEREST_COMPOUND_INTEREST_FEE_STRATEGY_REDUCE_NEXT_INSTALLMENTS() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
