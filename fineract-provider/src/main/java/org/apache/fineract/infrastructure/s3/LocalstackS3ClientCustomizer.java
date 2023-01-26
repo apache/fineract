@@ -16,27 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.api;
+package org.apache.fineract.infrastructure.s3;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import java.net.URI;
+import lombok.RequiredArgsConstructor;
+import org.apache.poi.util.StringUtil;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 
-/**
- * Created by sanyam on 5/8/17. Fixed ;) by Michael Vorburger.ch on 2020/11/21.
- */
-final class RunreportsApiResourceSwagger {
+@Component
+@RequiredArgsConstructor
+@Profile("test")
+public class LocalstackS3ClientCustomizer implements S3ClientCustomizer {
 
-    private RunreportsApiResourceSwagger() {}
+    private final Environment environment;
 
-    @Schema
-    public static final class RunReportsResponse {
-
-        private RunReportsResponse() {}
-
-        public List<ResultsetColumnHeaderData> columnHeaders;
-        public List<ResultsetRowData> data;
+    @Override
+    public void customize(S3ClientBuilder builder) {
+        String env = environment.getProperty("AWS_ENDPOINT_URL", "");
+        if (StringUtil.isNotBlank(env)) {
+            builder.endpointOverride(URI.create(env)).forcePathStyle(true);
+        }
     }
-
 }

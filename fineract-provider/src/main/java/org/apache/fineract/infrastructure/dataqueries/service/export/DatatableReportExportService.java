@@ -16,27 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.api;
+package org.apache.fineract.infrastructure.dataqueries.service.export;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import java.util.Map;
+import javax.ws.rs.core.MultivaluedMap;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableExportTargetParameter;
 
-/**
- * Created by sanyam on 5/8/17. Fixed ;) by Michael Vorburger.ch on 2020/11/21.
- */
-final class RunreportsApiResourceSwagger {
+public interface DatatableReportExportService {
 
-    private RunreportsApiResourceSwagger() {}
+    ResponseHolder export(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
+            boolean isSelfServiceUserReport, String parameterTypeValue);
 
-    @Schema
-    public static final class RunReportsResponse {
-
-        private RunReportsResponse() {}
-
-        public List<ResultsetColumnHeaderData> columnHeaders;
-        public List<ResultsetRowData> data;
-    }
-
+    boolean supports(DatatableExportTargetParameter exportType);
 }

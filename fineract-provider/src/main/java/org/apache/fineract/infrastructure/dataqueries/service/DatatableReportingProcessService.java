@@ -18,105 +18,71 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.core.MediaType;
+import java.util.Optional;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.StreamingOutput;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.StreamUtil;
 import org.apache.fineract.infrastructure.dataqueries.api.RunreportsApiResource;
-import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
-import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
+import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
+import org.apache.fineract.infrastructure.dataqueries.service.export.DatatableReportExportService;
+import org.apache.fineract.infrastructure.dataqueries.service.export.ResponseHolder;
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @ReportService(type = { "Table", "Chart", "SMS" })
+@RequiredArgsConstructor
+@Slf4j
 public class DatatableReportingProcessService implements ReportingProcessService {
 
-    private final ReadReportingService readExtraDataAndReportingService;
-    private final ToApiJsonSerializer<ReportData> toApiJsonSerializer;
-    private final GenericDataService genericDataService;
-
-    @Autowired
-    public DatatableReportingProcessService(final ReadReportingService readExtraDataAndReportingService,
-            final GenericDataService genericDataService, final ToApiJsonSerializer<ReportData> toApiJsonSerializer) {
-        this.readExtraDataAndReportingService = readExtraDataAndReportingService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.genericDataService = genericDataService;
-    }
+    private final List<DatatableReportExportService> exportServices;
 
     @Override
     public Response processRequest(String reportName, MultivaluedMap<String, String> queryParams) {
         boolean isSelfServiceUserReport = Boolean.parseBoolean(
                 queryParams.getOrDefault(RunreportsApiResource.IS_SELF_SERVICE_USER_REPORT_PARAMETER, List.of("false")).get(0));
 
-        DatatableExportTargetParameter exportMode = DatatableExportTargetParameter.checkTarget(queryParams);
+        DatatableExportTargetParameter exportMode = DatatableExportTargetParameter.resolverExportTarget(queryParams);
         final String parameterTypeValue = ApiParameterHelper.parameterType(queryParams) ? "parameter" : "report";
         final Map<String, String> reportParams = getReportParams(queryParams);
-        return switch (exportMode) {
-            case CSV -> exportCSV(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
-            case PDF -> exportPDF(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
-            case S3 -> exportS3(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
-            default -> exportJSON(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue,
-                    exportMode == DatatableExportTargetParameter.PRETTY_JSON);
-        };
-    }
-
-    private Response exportJSON(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue, boolean prettyPrint) {
-        final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue,
-                reportParams, isSelfServiceUserReport);
-
-        String json;
-        final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(queryParams);
-        final boolean genericResultSet = ApiParameterHelper.genericResultSet(queryParams);
-        if (genericResultSetIsPassed) {
-            if (genericResultSet) {
-                json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
-            } else {
-                json = this.genericDataService.generateJsonFromGenericResultsetData(result);
-            }
-        } else {
-            json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+        ResponseHolder response = findReportExportService(exportMode) //
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported export target: " + exportMode)) //
+                .export(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
+        Response.ResponseBuilder builder = Response.status(response.status().getStatusCode());
+        if (StringUtils.isNotBlank(response.contentType())) {
+            builder = builder.type(response.contentType());
         }
-
-        return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
+        if (StringUtils.isNotBlank(response.fileName())) {
+            builder = builder.header("Content-Disposition", "attachment; filename=" + response.fileName());
+        }
+        if (response.entity() != null) {
+            builder = builder.entity(response.entity());
+        }
+        if (response.headers() != null && !response.headers().isEmpty()) {
+            builder = response.headers().stream().collect(StreamUtil.foldLeft(builder, (b, h) -> b.header(h.getKey(), h.getValue())));
+        }
+        return builder.build();
     }
 
-    private Response exportS3(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue) {
-        throw new UnsupportedOperationException("S3 export not supported for datatables");
+    @Override
+    public List<ReportExportType> getAvailableExportTargets() {
+        return Arrays //
+                .stream(DatatableExportTargetParameter.values()) //
+                .filter(target -> findReportExportService(target).isPresent()) //
+                .map(target -> new ReportExportType(target.name(), target.getValue())) //
+                .toList();
     }
 
-    private Response exportPDF(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue) {
-
-        final String pdfFileName = this.readExtraDataAndReportingService.retrieveReportPDF(reportName, parameterTypeValue, reportParams,
-                isSelfServiceUserReport);
-
-        final File file = new File(pdfFileName);
-
-        final ResponseBuilder response = Response.ok(file);
-        response.header("Content-Disposition", "attachment; filename=\"" + pdfFileName + "\"");
-        response.header("content-Type", "application/pdf");
-
-        return response.build();
+    private Optional<DatatableReportExportService> findReportExportService(DatatableExportTargetParameter target) {
+        return exportServices.stream().filter(service -> service.supports(target)).findFirst();
     }
 
-    private Response exportCSV(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue) {
-        final StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams,
-                isSelfServiceUserReport);
-
-        return Response.ok().entity(result).type("text/csv")
-                .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
-
-    }
 }

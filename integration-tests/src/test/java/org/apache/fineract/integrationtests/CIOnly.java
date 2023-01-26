@@ -16,27 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.api;
+package org.apache.fineract.integrationtests;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
-/**
- * Created by sanyam on 5/8/17. Fixed ;) by Michael Vorburger.ch on 2020/11/21.
- */
-final class RunreportsApiResourceSwagger {
-
-    private RunreportsApiResourceSwagger() {}
-
-    @Schema
-    public static final class RunReportsResponse {
-
-        private RunReportsResponse() {}
-
-        public List<ResultsetColumnHeaderData> columnHeaders;
-        public List<ResultsetRowData> data;
-    }
-
-}
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@EnabledIfEnvironmentVariable(named = "GITHUB_ACTIONS", matches = "true")
+public @interface CIOnly {}

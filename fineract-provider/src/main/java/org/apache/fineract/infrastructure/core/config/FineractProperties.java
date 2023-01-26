@@ -48,6 +48,8 @@ public class FineractProperties {
 
     private FineractContentProperties content;
 
+    private FineractReportProperties report;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -200,5 +202,27 @@ public class FineractProperties {
         private String bucketName;
         private String accessKey;
         private String secretKey;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractReportProperties {
+
+        private FineractExportProperties export;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExportProperties {
+
+        private FineractExportS3Properties s3;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExportS3Properties {
+
+        private String bucketName;
+        private Boolean enabled;
     }
 }

@@ -52,12 +52,39 @@ jobs:
         run: |
             ./gradlew --no-daemon -q createMySQLDB -PdbName=fineract_tenants
             ./gradlew --no-daemon -q createMySQLDB -PdbName=fineract_default
+      - name: Start LocalStack
+        env:
+          AWS_ENDPOINT_URL: http://localhost:4566
+          AWS_ACCESS_KEY_ID: localstack
+          AWS_SECRET_ACCESS_KEY: localstack
+          AWS_REGION: us-east-1
+        run: |
+          echo "Update python pyopenssl"
+          pip install --upgrade pyopenssl
+          echo "Install localstack"
+          pip install localstack awscli-local[ver1] # install LocalStack cli and awslocal
+          docker pull localstack/localstack         # Make sure to pull the latest version of the image
+          localstack start -d                       # Start LocalStack in the background
+
+          echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
+          localstack wait -t 30                     # to become ready before timing out
+          echo "Startup complete"
+          echo "Create fineract S3 bucket"
+          awslocal s3api create-bucket --bucket fineract-reports
+          echo "LocalStack initialization complete"
       - name: Install additional software
         run: |
             sudo apt-get update
             sudo apt-get install ghostscript graphviz -y
 
       - name: Build & Test
+        env:
+          AWS_ENDPOINT_URL: http://localhost:4566
+          AWS_ACCESS_KEY_ID: localstack
+          AWS_SECRET_ACCESS_KEY: localstack
+          AWS_REGION: us-east-1
+          FINERACT_REPORT_EXPORT_S3_ENABLED: true
+          FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
         run: |
             ./gradlew --no-daemon --console=plain build test --fail-fast -x doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=mysql
             ./gradlew --no-daemon --console=plain :twofactor-tests:test --fail-fast -PdbType=mysql

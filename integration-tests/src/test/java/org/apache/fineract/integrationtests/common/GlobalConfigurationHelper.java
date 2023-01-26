@@ -96,9 +96,9 @@ public class GlobalConfigurationHelper {
                 // If any other column is modified by the integration test suite in
                 // the future, it needs to be reset here.
                 final Integer configDefaultId = (Integer) defaultGlobalConfiguration.get("id");
-                final Integer configDefaultValue = (Integer) defaultGlobalConfiguration.get("value");
+                final String configDefaultValue = String.valueOf(defaultGlobalConfiguration.get("value"));
 
-                updateValueForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(), configDefaultValue.toString());
+                updateValueForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(), configDefaultValue);
                 updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(),
                         (Boolean) defaultGlobalConfiguration.get("enabled"));
                 changedNo++;
@@ -119,9 +119,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 48 global configurations.
-        Assertions.assertEquals(48, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(48, actualGlobalConfigurations.size());
+        // There are currently 49 global configurations.
+        Assertions.assertEquals(49, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(49, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -540,6 +540,14 @@ public class GlobalConfigurationHelper {
         externalEventBatchSize.put("enabled", false);
         externalEventBatchSize.put("trapDoor", false);
         defaults.add(externalEventBatchSize);
+
+        HashMap<String, Object> reportExportS3FolderName = new HashMap<>();
+        reportExportS3FolderName.put("id", 54);
+        reportExportS3FolderName.put("name", "report-export-s3-folder-name");
+        reportExportS3FolderName.put("value", 0);
+        reportExportS3FolderName.put("enabled", false);
+        reportExportS3FolderName.put("trapDoor", false);
+        defaults.add(reportExportS3FolderName);
         return defaults;
     }
 
