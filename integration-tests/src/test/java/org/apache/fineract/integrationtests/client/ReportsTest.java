@@ -27,6 +27,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import retrofit2.Response;
 
 /**
  * Integration Test for /runreports/ API.
@@ -49,6 +50,14 @@ public class ReportsTest extends IntegrationTest {
     void runClientListingTableReport() {
         assertThat(ok(fineract().reportsRun.runReportGetData("Client Listing", Map.of("R_officeId", "1"), false)).getColumnHeaders().get(0)
                 .getColumnName()).isEqualTo("Office/Branch");
+    }
+
+    @Test
+    void runClientListingTableReportCSV() throws IOException {
+        Response<ResponseBody> result = okR(
+                fineract().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportCSV", "true"), false));
+        assertThat(result.body().contentType()).isEqualTo(MediaType.parse("text/csv"));
+        assertThat(result.body().string()).contains("Office/Branch");
     }
 
     @Test // see FINERACT-1306

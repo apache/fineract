@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,6 +40,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
+import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
@@ -68,6 +70,29 @@ public class RunreportsApiResource {
         this.context = context;
         this.readExtraDataAndReportingService = readExtraDataAndReportingService;
         this.reportingProcessServiceProvider = reportingProcessServiceProvider;
+    }
+
+    @GET
+    @Path("/availableExports/{reportName}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Return all available export types for the specific report", description = "Returns the list of all available export types.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class)))) })
+    public Response retrieveAllAvailableExports(@PathParam("reportName") @Parameter(description = "reportName") final String reportName,
+            @Context final UriInfo uriInfo,
+            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = IS_SELF_SERVICE_USER_REPORT_PARAMETER) final boolean isSelfServiceUserReport) {
+        MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
+        queryParams.putAll(uriInfo.getQueryParameters());
+
+        final boolean parameterType = ApiParameterHelper.parameterType(queryParams);
+        String reportType = readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterType);
+        ReportingProcessService reportingProcessService = reportingProcessServiceProvider.findReportingProcessService(reportType);
+        if (reportingProcessService == null) {
+            throw new PlatformServiceUnavailableException("err.msg.report.service.implementation.missing",
+                    ReportingProcessServiceProvider.SERVICE_MISSING + reportType, reportType);
+        }
+        return Response.ok().entity(reportingProcessService.getAvailableExportTargets()).build();
     }
 
     @GET
@@ -108,8 +133,8 @@ public class RunreportsApiResource {
         // Pass through isSelfServiceUserReport so that ReportingProcessService implementations can use it
         queryParams.putSingle(IS_SELF_SERVICE_USER_REPORT_PARAMETER, Boolean.toString(isSelfServiceUserReport));
 
-        String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterType);
-        ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
+        String reportType = readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterType);
+        ReportingProcessService reportingProcessService = reportingProcessServiceProvider.findReportingProcessService(reportType);
         if (reportingProcessService == null) {
             throw new PlatformServiceUnavailableException("err.msg.report.service.implementation.missing",
                     ReportingProcessServiceProvider.SERVICE_MISSING + reportType, reportType);

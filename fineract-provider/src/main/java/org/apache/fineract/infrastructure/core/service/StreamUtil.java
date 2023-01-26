@@ -16,27 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.api;
+package org.apache.fineract.infrastructure.core.service;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
-/**
- * Created by sanyam on 5/8/17. Fixed ;) by Michael Vorburger.ch on 2020/11/21.
- */
-final class RunreportsApiResourceSwagger {
+public final class StreamUtil {
 
-    private RunreportsApiResourceSwagger() {}
+    private StreamUtil() {}
 
-    @Schema
-    public static final class RunReportsResponse {
-
-        private RunReportsResponse() {}
-
-        public List<ResultsetColumnHeaderData> columnHeaders;
-        public List<ResultsetRowData> data;
+    public static <A, B> Collector<A, ?, B> foldLeft(final B init, final BiFunction<? super B, ? super A, ? extends B> f) {
+        return Collectors.collectingAndThen(Collectors.reducing(Function.<B>identity(), a -> b -> f.apply(b, a), Function::andThen),
+                endo -> endo.apply(init));
     }
-
 }

@@ -16,27 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.api;
+package org.apache.fineract.infrastructure.dataqueries.service.export;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import javax.ws.rs.core.Response;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
-/**
- * Created by sanyam on 5/8/17. Fixed ;) by Michael Vorburger.ch on 2020/11/21.
- */
-final class RunreportsApiResourceSwagger {
+@Data
+@Accessors(fluent = true)
+@RequiredArgsConstructor
+public class ResponseHolder {
 
-    private RunreportsApiResourceSwagger() {}
+    private String contentType;
+    private String fileName;
+    private final Response.Status status;
 
-    @Schema
-    public static final class RunReportsResponse {
+    private Object entity;
 
-        private RunReportsResponse() {}
+    private List<Header> headers = new ArrayList<>();
 
-        public List<ResultsetColumnHeaderData> columnHeaders;
-        public List<ResultsetRowData> data;
+    public ResponseHolder addHeader(String key, String value) {
+        headers.add(new Header(key, value));
+        return this;
     }
 
 }

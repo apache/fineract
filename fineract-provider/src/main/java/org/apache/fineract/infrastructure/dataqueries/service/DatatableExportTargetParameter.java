@@ -34,7 +34,7 @@ public enum DatatableExportTargetParameter {
         return this.value;
     }
 
-    public static DatatableExportTargetParameter checkTarget(final MultivaluedMap<String, String> queryParams) {
+    public static DatatableExportTargetParameter resolverExportTarget(final MultivaluedMap<String, String> queryParams) {
         for (DatatableExportTargetParameter parameter : DatatableExportTargetParameter.values()) {
             String parameterName = parameter.getValue();
             if (queryParams.getFirst(parameterName) != null) {
