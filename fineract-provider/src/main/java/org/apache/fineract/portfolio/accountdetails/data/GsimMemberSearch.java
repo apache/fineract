@@ -30,13 +30,19 @@ public class GsimMemberSearch {
     private Long id;
     private String name;
     private String officeName;
+    private String accountNumber;
+    private Long savingsAccountId;
+    private Long groupId;
 
     public GsimMemberSearch() {}
 
-    public GsimMemberSearch(Long id, String name, String officeName) {
+    public GsimMemberSearch(Long id, String name, String officeName, String accountNumber, Long savingsAccountId, Long groupId) {
         this.id = id;
         this.name = name;
         this.officeName = officeName;
+        this.accountNumber = accountNumber;
+        this.savingsAccountId = savingsAccountId;
+        this.groupId = groupId;
     }
 
     public Long getId() {
@@ -49,5 +55,17 @@ public class GsimMemberSearch {
 
     public String getOfficeName() {
         return officeName;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public Long getSavingsAccountId() {
+        return savingsAccountId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
     }
 }
