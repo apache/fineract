@@ -148,7 +148,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sp.accounting_type as accountingType, ");
             sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
-            sqlBuilder.append("sp.withhold_tax as withHoldTax, sp.is_usd_product as isUSDProduct,");
+            sqlBuilder.append("sp.withhold_tax as withHoldTax, sp.is_usd_product as isUSDProduct, sp.allow_manually_enter_interest_rate as allowManuallyEnterInterestRate,");
             sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
             this.schemaSql = sqlBuilder.toString();
         }
@@ -210,11 +210,12 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
                 taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
             }
             final boolean isUSDProduct = rs.getBoolean("isUSDProduct");
+            final boolean allowManuallyEnterInterestRate = rs.getBoolean("allowManuallyEnterInterestRate");
 
             return DepositProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, minBalanceForInterestCalculation, withHoldTax,
-                    taxGroupData, isUSDProduct);
+                    taxGroupData, isUSDProduct, allowManuallyEnterInterestRate);
         }
     }
 
@@ -363,7 +364,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
     private static final class DepositProductLookupMapper implements RowMapper<DepositProductData> {
 
         public String schema() {
-            return " sp.id as id, sp.name as name from m_savings_product sp ";
+            return " sp.id as id, sp.name as name, sp.allow_manually_enter_interest_rate as allowManuallyEnterInterestRate from m_savings_product sp ";
         }
 
         @Override
@@ -371,8 +372,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
+            final boolean allowManuallyEnterInterestRate = rs.getBoolean("allowManuallyEnterInterestRate");
 
-            return DepositProductData.lookup(id, name);
+            return DepositProductData.lookup(id, name, allowManuallyEnterInterestRate);
         }
     }
 

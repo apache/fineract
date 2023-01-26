@@ -56,6 +56,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowManuallyEnterInterestRateParamName;
 
 import com.google.gson.JsonArray;
 import java.math.BigDecimal;
@@ -225,6 +226,9 @@ public class SavingsProduct extends AbstractPersistableCustom {
     @Column(name = "is_usd_product")
     private boolean isUSDProduct;
 
+    @Column(name = "allow_manually_enter_interest_rate")
+    private boolean allowManuallyEnterInterestRate;
+
     public static SavingsProduct createNew(final String name, final String shortName, final String description,
             final MonetaryCurrency currency, final BigDecimal interestRate,
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
@@ -245,7 +249,7 @@ public class SavingsProduct extends AbstractPersistableCustom {
                 allowOverdraft, overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, lienAllowed, maxAllowedLienLimit,
                 minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax,
                 taxGroup, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, isInterestPostingConfigUpdate,
-                numOfCreditTransaction, numOfDebitTransaction, false);
+                numOfCreditTransaction, numOfDebitTransaction, false, false);
     }
 
     protected SavingsProduct() {
@@ -261,12 +265,12 @@ public class SavingsProduct extends AbstractPersistableCustom {
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, BigDecimal minBalanceForInterestCalculation, boolean withHoldTax,
             TaxGroup taxGroup, final Boolean isInterestPostingConfigUpdate, final Long numOfCreditTransaction,
-            final Long numOfDebitTransaction, boolean isUSDProduct) {
+            final Long numOfDebitTransaction, boolean isUSDProduct, boolean allowManuallyEnterInterestRate) {
         this(name, shortName, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges, allowOverdraft, overdraftLimit,
                 false, null, false, null, minBalanceForInterestCalculation, null, null, withHoldTax, taxGroup, null, null, null, null,
-                isInterestPostingConfigUpdate, numOfCreditTransaction, numOfDebitTransaction, isUSDProduct);
+                isInterestPostingConfigUpdate, numOfCreditTransaction, numOfDebitTransaction, isUSDProduct, allowManuallyEnterInterestRate);
     }
 
     protected SavingsProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency,
@@ -281,7 +285,7 @@ public class SavingsProduct extends AbstractPersistableCustom {
             final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroup taxGroup,
             final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat,
             final Boolean isInterestPostingConfigUpdate, final Long numOfCreditTransaction, final Long numOfDebitTransaction,
-            boolean isUSDProduct) {
+            boolean isUSDProduct, boolean allowManuallyEnterInterestRate) {
 
         this.name = name;
         this.shortName = shortName;
@@ -348,6 +352,7 @@ public class SavingsProduct extends AbstractPersistableCustom {
         this.numOfCreditTransaction = numOfCreditTransaction;
         this.numOfDebitTransaction = numOfDebitTransaction;
         this.isUSDProduct = isUSDProduct;
+        this.allowManuallyEnterInterestRate = allowManuallyEnterInterestRate;
     }
 
     /**
@@ -527,6 +532,12 @@ public class SavingsProduct extends AbstractPersistableCustom {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isUSDProductParamName);
             actualChanges.put(isUSDProductParamName, newValue);
             this.isUSDProduct = newValue;
+        }
+
+        if (command.isChangeInBooleanParameterNamed(allowManuallyEnterInterestRateParamName, this.allowManuallyEnterInterestRate)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(allowManuallyEnterInterestRateParamName);
+            actualChanges.put(allowManuallyEnterInterestRateParamName, newValue);
+            this.allowManuallyEnterInterestRate = newValue;
         }
 
         // charges

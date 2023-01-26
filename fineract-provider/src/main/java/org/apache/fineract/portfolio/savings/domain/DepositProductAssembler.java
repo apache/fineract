@@ -57,6 +57,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.totalLiquidationAllowed;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowManuallyEnterInterestRateParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -185,11 +186,12 @@ public class DepositProductAssembler {
         }
 
         boolean isUSDProduct = command.booleanPrimitiveValueOfParameterNamed(isUSDProductParamName);
+        boolean allowManuallyEnterInterestRate = command.booleanPrimitiveValueOfParameterNamed(allowManuallyEnterInterestRateParamName);
 
         FixedDepositProduct fixedDepositProduct = FixedDepositProduct.createNew(name, shortName, description, currency, interestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, charges, productTermAndPreClosure, charts,
-                minBalanceForInterestCalculation, withHoldTax, taxGroup, isUSDProduct);
+                minBalanceForInterestCalculation, withHoldTax, taxGroup, isUSDProduct, allowManuallyEnterInterestRate);
 
         // update product reference
         productTermAndPreClosure.updateProductReference(fixedDepositProduct);
