@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,6 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
@@ -200,25 +198,25 @@ public class LoanRescheduleRequestDataValidator {
             }
         }
 
-        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
+//        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
 
-    private void validateForOverdueCharges(DataValidatorBuilder dataValidatorBuilder, final Loan loan,
-            final LoanRepaymentScheduleInstallment installment) {
-        if (installment != null) {
-            LocalDate rescheduleFromDate = installment.getFromDate();
-            Collection<LoanCharge> charges = loan.getLoanCharges();
-            for (LoanCharge loanCharge : charges) {
-                if (loanCharge.isOverdueInstallmentCharge() && loanCharge.getDueLocalDate().isAfter(rescheduleFromDate)) {
-                    dataValidatorBuilder.failWithCodeNoParameterAddedToErrorCode("not.allowed.due.to.overdue.charges");
-                    break;
-                }
-            }
-        }
-    }
+//    private void validateForOverdueCharges(DataValidatorBuilder dataValidatorBuilder, final Loan loan,
+//            final LoanRepaymentScheduleInstallment installment) {
+//        if (installment != null) {
+//            LocalDate rescheduleFromDate = installment.getFromDate();
+//            Collection<LoanCharge> charges = loan.getLoanCharges();
+//            for (LoanCharge loanCharge : charges) {
+//                if (loanCharge.isOverdueInstallmentCharge() && loanCharge.getDueLocalDate().isAfter(rescheduleFromDate)) {
+//                    dataValidatorBuilder.failWithCodeNoParameterAddedToErrorCode("not.allowed.due.to.overdue.charges");
+//                    break;
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Validates a user request to approve a loan reschedule request
@@ -285,7 +283,7 @@ public class LoanRescheduleRequestDataValidator {
             }
         }
 
-        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
+//        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);

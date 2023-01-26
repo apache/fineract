@@ -1285,8 +1285,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     installment.getInstallmentNumber());
             if (existingInstallment != null) {
                 Set<LoanInstallmentCharge> existingCharges = existingInstallment.getInstallmentCharges();
-                installment.getInstallmentCharges().addAll(existingCharges);
+                Set<LoanOverdueInstallmentCharge> existingOverdueCharges = existingInstallment.getOverdueInstallmentCharges();
                 existingCharges.forEach(c -> c.setInstallment(installment));
+                existingOverdueCharges.forEach(c -> c.setInstallment(installment));
+                installment.getInstallmentCharges().addAll(existingCharges);
+                installment.getOverdueInstallmentCharges().addAll(existingOverdueCharges);
                 existingInstallment.getInstallmentCharges().clear();
             }
             addLoanRepaymentScheduleInstallment(installment);

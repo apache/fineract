@@ -56,4 +56,8 @@ public class LoanOverdueInstallmentCharge extends AbstractPersistableCustom {
     public void updateLoanRepaymentScheduleInstallment(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
         this.installment = loanRepaymentScheduleInstallment;
     }
+
+    public void setInstallment(LoanRepaymentScheduleInstallment installment) {
+        this.installment = installment;
+    }
 }
