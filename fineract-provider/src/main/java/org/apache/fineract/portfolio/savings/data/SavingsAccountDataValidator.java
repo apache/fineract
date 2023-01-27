@@ -572,25 +572,23 @@ public class SavingsAccountDataValidator {
         final Long clientId = this.fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
         if (clientId != null) {
             baseDataValidator.reset().parameter(clientIdParamName).value(clientId).longGreaterThanZero();
+        } else {
+            baseDataValidator.reset().parameter(clientIdParamName).value(clientId).notNull().integerGreaterThanZero();
         }
 
         final Long groupId = this.fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
         if (groupId != null) {
             baseDataValidator.reset().parameter(groupIdParamName).value(groupId).longGreaterThanZero();
-        }
-
-        if (clientId == null && groupId == null) {
-            baseDataValidator.reset().parameter(clientIdParamName).value(clientId).notNull().integerGreaterThanZero();
+        } else {
+            baseDataValidator.reset().parameter(groupIdParamName).value(groupId).notNull().integerGreaterThanZero();
         }
 
         final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
         baseDataValidator.reset().parameter(productIdParamName).value(productId).notNull().integerGreaterThanZero();
 
-        if (this.fromApiJsonHelper.parameterExists(nominalAnnualInterestRateParamName, element)) {
-            final BigDecimal interestRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName,
-                    element);
-            baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(interestRate).notNull().zeroOrPositiveAmount();
-        }
+        final BigDecimal interestRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName,
+                element);
+        baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(interestRate).notNull().zeroOrPositiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
             final BigDecimal minOpeningBalance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minRequiredOpeningBalanceParamName,
@@ -598,39 +596,24 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(minRequiredOpeningBalanceParamName).value(minOpeningBalance).zeroOrPositiveAmount();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(lockinPeriodFrequencyParamName, element)) {
+        final Integer lockinPeriodFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName, element);
+        baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull().integerZeroOrGreater();
 
-            final Integer lockinPeriodFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName,
-                    element);
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).integerZeroOrGreater();
-
-            if (lockinPeriodFrequency != null) {
-                final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper
-                        .extractIntegerSansLocaleNamed(lockinPeriodFrequencyTypeParamName, element);
-                baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
-                        .inMinMaxRange(0, 3);
-            }
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(lockinPeriodFrequencyTypeParamName, element)) {
+        if (lockinPeriodFrequency != null) {
             final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper
                     .extractIntegerSansLocaleNamed(lockinPeriodFrequencyTypeParamName, element);
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).inMinMaxRange(0, 3);
-
-            if (lockinPeriodFrequencyType != null) {
-                final Integer lockinPeriodFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName,
-                        element);
-                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull()
-                        .integerZeroOrGreater();
-            }
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
+                    .inMinMaxRange(0, 3);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(VAULT_TARGET_AMOUNT, element)) {
+        final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(lockinPeriodFrequencyTypeParamName,
+                element);
+        baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull().inMinMaxRange(0,
+                3);
 
-            final BigDecimal vaultTargetAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(VAULT_TARGET_AMOUNT, element);
-            baseDataValidator.reset().parameter(VAULT_TARGET_AMOUNT).value(vaultTargetAmount).notNull().zeroOrPositiveAmount();
+        final BigDecimal vaultTargetAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(VAULT_TARGET_AMOUNT, element);
+        baseDataValidator.reset().parameter(VAULT_TARGET_AMOUNT).value(vaultTargetAmount).notNull().zeroOrPositiveAmount();
 
-        }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 }

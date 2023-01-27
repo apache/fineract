@@ -162,7 +162,8 @@ public class FixedDepositAccount extends SavingsAccount {
         // default it to nominalAnnualInterst rate. interest chart overrrides
         // this value.
         BigDecimal applicableInterestRate = this.nominalAnnualInterestRate;
-        if (this.chart != null && (BigDecimal.ZERO.compareTo(this.nominalAnnualInterestRate) == 0 || this.nominalAnnualInterestRate == null)) {
+        if (this.chart != null
+                && (BigDecimal.ZERO.compareTo(this.nominalAnnualInterestRate) == 0 || this.nominalAnnualInterestRate == null)) {
             boolean applyPreMaturePenalty = false;
             BigDecimal penalInterest = BigDecimal.ZERO;
             LocalDate depositCloseDate = calculateMaturityDate();

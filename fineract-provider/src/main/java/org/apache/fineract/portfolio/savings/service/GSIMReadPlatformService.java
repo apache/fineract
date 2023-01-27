@@ -22,6 +22,7 @@ package org.apache.fineract.portfolio.savings.service;
 
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.portfolio.accountdetails.data.GsimMemberSearch;
 import org.apache.fineract.portfolio.savings.data.GSIMContainer;
 import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitoringAccountData;
 
@@ -42,5 +43,7 @@ public interface GSIMReadPlatformService {
     List<GSIMContainer> findGsimAccountContainerbyGsimAccountId(Long parentAccountId);
 
     GroupSavingsIndividualMonitoringAccountData findGSIMAccountByGSIMId(Long gsimId);
+
+    List<GsimMemberSearch> findGsimAccountContainerbyGsimAccountIdAndName(Long groupId, String parentGSIMAccountNo, String name);
 
 }

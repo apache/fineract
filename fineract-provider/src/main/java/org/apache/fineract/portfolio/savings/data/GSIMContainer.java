@@ -21,21 +21,23 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.apache.fineract.portfolio.accountdetails.data.GsimMemberSearch;
 import org.apache.fineract.portfolio.accountdetails.data.SavingsSummaryCustom;
 
 public class GSIMContainer {
 
-    private final BigDecimal gsimId;
+    private BigDecimal gsimId;
 
-    private final BigDecimal groupId;
+    private BigDecimal groupId;
 
-    private final String accountNumber;
+    private String accountNumber;
 
-    private final List<SavingsSummaryCustom> childGSIMAccounts;
+    private List<SavingsSummaryCustom> childGSIMAccounts;
+    private List<GsimMemberSearch> savingsSummaryCustoms;
 
-    private final BigDecimal parentBalance;
+    private BigDecimal parentBalance;
 
-    private final String savingsStatus;
+    private String savingsStatus;
 
     public GSIMContainer(final BigDecimal gsimId, final BigDecimal groupId, final String accountNumber,
             final List<SavingsSummaryCustom> childGSIMAccounts, final BigDecimal parentBalance, final String savingsStatus) {
@@ -46,6 +48,10 @@ public class GSIMContainer {
         this.parentBalance = parentBalance;
         this.savingsStatus = savingsStatus;
 
+    }
+
+    public GSIMContainer(List<GsimMemberSearch> savingsSummaryCustoms) {
+        this.savingsSummaryCustoms = savingsSummaryCustoms;
     }
 
     public BigDecimal getGsimId() {
@@ -70,5 +76,13 @@ public class GSIMContainer {
 
     public String getSavingsStatus() {
         return savingsStatus;
+    }
+
+    public BigDecimal getParentBalance() {
+        return parentBalance;
+    }
+
+    public List<GsimMemberSearch> getSavingsSummaryCustoms() {
+        return savingsSummaryCustoms;
     }
 }

@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.accountdetails.data.GsimMemberSearch;
 import org.apache.fineract.portfolio.accountdetails.data.SavingsSummaryCustom;
 import org.apache.fineract.portfolio.accountdetails.service.AccountEnumerations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -40,6 +41,7 @@ import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitori
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
+import org.apache.fineract.portfolio.savings.domain.GSIMContainerRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,13 +54,15 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ColumnValidator columnValidator;
+    private final GSIMContainerRepository gsimContainerRepository;
 
     @Autowired
     public GSIMReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator, final GSIMContainerRepository gsimContainerRepository) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
+        this.gsimContainerRepository = gsimContainerRepository;
 
     }
 
@@ -200,6 +204,11 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final String sql = "select " + rm.schema() + " where gsim.id=?";
 
         return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId }); // NOSONAR
+    }
+
+    @Override
+    public List<GsimMemberSearch> findGsimAccountContainerbyGsimAccountIdAndName(Long groupId, String parentGSIMAccountNo, String name) {
+        return gsimContainerRepository.findGsimAccountContainerbyGsimAccountIdAndName(groupId, name, parentGSIMAccountNo);
     }
 
     @Override
