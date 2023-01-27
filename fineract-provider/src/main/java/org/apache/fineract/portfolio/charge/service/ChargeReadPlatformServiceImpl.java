@@ -298,6 +298,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, "
                     + "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, "
                     + "c.charge_payment_mode_enum as chargePaymentMode, "
+                    + "c.max_occurrence as maxOccurrence, "
                     + "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, "
                     + "c.is_active as active, c.is_free_withdrawal as isFreeWithdrawal, c.free_withdrawal_charge_frequency as freeWithdrawalChargeFrequency, c.restart_frequency as restartFrequency, c.restart_frequency_enum as restartFrequencyEnum,"
                     + "oc.name as currencyName, oc.decimal_places as currencyDecimalPlaces, "
@@ -402,11 +403,12 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             if (paymentTypeId != null) {
                 paymentTypeData = PaymentTypeData.instance(paymentTypeId, paymentTypeName);
             }
+            final Integer maxOccurrence = JdbcSupport.getInteger(rs, "maxOccurrence");
 
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
                     chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, isFreeWithdrawal, freeWithdrawalChargeFrequency,
                     restartFrequency, restartFrequencyEnum, isPaymentType, paymentTypeData, minCap, maxCap, feeFrequencyType, glAccountData,
-                    taxGroupData, minAmount, maxAmount, varyAmounts);
+                    taxGroupData, minAmount, maxAmount, varyAmounts, maxOccurrence);
         }
     }
 
