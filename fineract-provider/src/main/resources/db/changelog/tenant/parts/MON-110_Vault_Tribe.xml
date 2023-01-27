@@ -152,14 +152,18 @@
                                  onDelete="RESTRICT"
                                  onUpdate="RESTRICT"/>
     </changeSet>
-    <changeSet author="bosco@fiter.io" id="add_m_permissions_ADDMEMBERTOGSIMACCOUNT">
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_ADDMEMBERTOGSIMACCOUNT_1">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM m_permission WHERE code = 'ADDMEMBER_GSIMACCOUNT'
             </sqlCheck>
         </preConditions>
-        <sql>
-            INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('portfolio', 'ADDMEMBER_GSIMACCOUNT', 'GSIMACCOUNT', 'ADDMEMBER', false);
-        </sql>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="ADDMEMBER_GSIMACCOUNT"/>
+            <column name="entity_name" value="GSIMACCOUNT"/>
+            <column name="action_name" value="ADDMEMBER"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>

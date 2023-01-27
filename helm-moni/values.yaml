@@ -37,12 +37,12 @@ fineract-rest:
     FF4J_FILE_NAME: "ff4j-feature-moniafrica.yml"
   
   awsSecrets:
-    FINERACT_HIKARI_PASSWORD: "arn:aws:secretsmanager:us-east-2:646245671754:secret:HIKARI_PASSWORD-AErcU7"
     FINERACT_DEFAULT_TENANTDB_PWD: "arn:aws:secretsmanager:us-east-2:646245671754:secret:rds/secret-FcO38N"
-    FINERACT_HIKARI_USERNAME: "arn:aws:secretsmanager:us-east-2:646245671754:secret:FINERACT_HIKARI_USERNAME-PEBHXv"
+    FINERACT_HIKARI_PASSWORD: "arn:aws:secretsmanager:us-east-2:646245671754:secret:HIKARI_PASS-FY9aDd"
     FINERACT_DEFAULT_TENANTDB_UID: "arn:aws:secretsmanager:us-east-2:646245671754:secret:FINERACT_DEFAULT_TENANTDB_UID-vnt48o"
-    FINERACT_DEFAULT_TENANTDB_HOSTNAME: "arn:aws:secretsmanager:us-east-2:646245671754:secret:FINERACT_DEFAULT_TENANTDB_HOSTNAME-wfFoGp"
+    FINERACT_HIKARI_USERNAME: "arn:aws:secretsmanager:us-east-2:646245671754:secret:FINERACT_HIKARI_USERNAME-PEBHXv"
     FINERACT_HIKARI_JDBC_URL: "arn:aws:secretsmanager:us-east-2:646245671754:secret:FINERACT_HIKARI_JDBC_URL-0OPfWs"
+    FINERACT_DEFAULT_TENANTDB_HOSTNAME: "arn:aws:secretsmanager:us-east-2:646245671754:secret:FINERACT_DEFAULT_TENANTDB_HOSTNAME-wfFoGp"
   
   service:
     type: ClusterIP
