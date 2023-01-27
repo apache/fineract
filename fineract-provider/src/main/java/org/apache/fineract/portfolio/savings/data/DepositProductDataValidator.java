@@ -63,6 +63,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroup
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.totalLiquidationAllowed;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowManuallyEnterInterestRateParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -325,6 +326,12 @@ public class DepositProductDataValidator {
             final String isUSDProduct = this.fromApiJsonHelper.extractStringNamed(isUSDProductParamName, element);
             baseDataValidator.reset().parameter(isUSDProductParamName).value(isUSDProduct).ignoreIfNull().validateForBooleanValue();
         }
+
+        if (this.fromApiJsonHelper.parameterExists(allowManuallyEnterInterestRateParamName, element)) {
+            final String allowManuallyEnterInterestRate = this.fromApiJsonHelper.extractStringNamed(allowManuallyEnterInterestRateParamName, element);
+            baseDataValidator.reset().parameter(allowManuallyEnterInterestRate).value(allowManuallyEnterInterestRate).ignoreIfNull().validateForBooleanValue();
+        }
+
 
         // accounting related data validation
         final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());

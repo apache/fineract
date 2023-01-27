@@ -218,4 +218,6 @@ public class SavingsApiConstants {
     // FD Parital Liquidation
     public static final String allowPartialLiquidation = "allowPartialLiquidation";
     public static final String totalLiquidationAllowed = "totalLiquidationAllowed";
+
+    public static final String allowManuallyEnterInterestRateParamName = "allowManuallyEnterInterestRate";
 }

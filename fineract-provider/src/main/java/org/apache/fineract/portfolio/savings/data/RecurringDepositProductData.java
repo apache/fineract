@@ -402,7 +402,7 @@ public final class RecurringDepositProductData extends DepositProductData {
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
                 accountingRuleOptions, accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
                 penaltyToIncomeAccountMappings, interestRateCharts, chartTemplate, minBalanceForInterestCalculation, withHoldTax, taxGroup,
-                taxGroupOptions, false);
+                taxGroupOptions, false, false);
 
         this.preClosurePenalApplicable = preClosurePenalApplicable;
         this.preClosurePenalInterest = preClosurePenalInterest;
