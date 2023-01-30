@@ -759,6 +759,25 @@ final class LoansApiResourceSwagger {
                 public BigDecimal amount;
             }
 
+            static final class GetLoansLoanIdLoanTransactionRelation {
+
+                private GetLoansLoanIdLoanTransactionRelation() {}
+
+                @Schema(example = "1")
+                public Long fromLoanTransaction;
+                @Schema(example = "10")
+                public Long toLoanTransaction;
+                @Schema(example = "10")
+                public Long toLoanCharge;
+                @Schema(example = "CHARGEBACK")
+                public String relationType;
+                @Schema(example = "100.00")
+                public Double amount;
+                @Schema(example = "Repayment Adjustment Chargeback")
+                public String paymentType;
+
+            }
+
             @Schema(example = "1")
             public Long id;
             @Schema(example = "1")
@@ -838,6 +857,8 @@ final class LoansApiResourceSwagger {
             public String reversalExternalId;
             @Schema(example = "[2022, 9, 19]")
             public LocalDate reversedOnDate;
+            @Schema(description = "List of GetLoansLoanIdLoanTransactionRelationData")
+            public Set<GetLoansLoanIdLoanTransactionRelation> transactionRelations;
         }
 
         static final class GetLoansLoanIdLoanChargeData {
