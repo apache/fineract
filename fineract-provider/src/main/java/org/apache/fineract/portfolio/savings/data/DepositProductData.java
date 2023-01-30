@@ -176,7 +176,8 @@ public class DepositProductData {
                 accountingMappingOptions, existingProduct.charges, chargeOptions, penaltyOptions,
                 existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings,
                 existingProduct.interestRateCharts, chartTemplate, existingProduct.minBalanceForInterestCalculation,
-                existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions, existingProduct.isUSDProduct, existingProduct.allowManuallyEnterInterestRate);
+                existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions, existingProduct.isUSDProduct,
+                existingProduct.allowManuallyEnterInterestRate);
     }
 
     public static DepositProductData withAccountingDetails(final DepositProductData existingProduct,
@@ -208,7 +209,8 @@ public class DepositProductData {
                 withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions, accountingMappingOptions, existingProduct.charges,
                 chargeOptions, penaltyOptions, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings,
                 existingProduct.interestRateCharts, existingProduct.chartTemplate, existingProduct.minBalanceForInterestCalculation,
-                existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions, existingProduct.isUSDProduct, existingProduct.allowManuallyEnterInterestRate);
+                existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions, existingProduct.isUSDProduct,
+                existingProduct.allowManuallyEnterInterestRate);
     }
 
     public static DepositProductData instance(final Long id, final String name, final String shortName, final String description,
@@ -216,7 +218,8 @@ public class DepositProductData {
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final EnumOptionData accountingType,
-            final BigDecimal minBalanceForInterestCalculation, boolean withHoldTax, TaxGroupData taxGroup, boolean isUSDProduct, boolean allowManuallyEnterInterestRate) {
+            final BigDecimal minBalanceForInterestCalculation, boolean withHoldTax, TaxGroupData taxGroup, boolean isUSDProduct,
+            boolean allowManuallyEnterInterestRate) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -315,7 +318,8 @@ public class DepositProductData {
                 existingProduct.charges, existingProduct.chargeOptions, existingProduct.penaltyOptions,
                 existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings, interestRateCharts,
                 existingProduct.chartTemplate, existingProduct.minBalanceForInterestCalculation, existingProduct.withHoldTax,
-                existingProduct.taxGroup, existingProduct.taxGroupOptions, existingProduct.isUSDProduct, existingProduct.allowManuallyEnterInterestRate);
+                existingProduct.taxGroup, existingProduct.taxGroupOptions, existingProduct.isUSDProduct,
+                existingProduct.allowManuallyEnterInterestRate);
     }
 
     protected DepositProductData(final Long id, final String name, final String shortName, final String description,

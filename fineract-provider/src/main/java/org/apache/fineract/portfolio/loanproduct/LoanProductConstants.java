@@ -29,6 +29,7 @@ public interface LoanProductConstants {
     String NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME = "numberOfRepaymentVariationsForBorrowerCycle";
 
     String DEFAULT_VALUE_PARAMETER_NAME = "defaultValue";
+    String LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM = "loanTermIncludesToppedUpLoanTerm";
     String MIN_VALUE_PARAMETER_NAME = "minValue";
     String MAX_VALUE_PARAMETER_NAME = "maxValue";
     String VALUE_CONDITION_TYPE_PARAM_NAME = "valueConditionType";

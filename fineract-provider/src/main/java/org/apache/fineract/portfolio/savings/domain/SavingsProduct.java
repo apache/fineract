@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowManuallyEnterInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
@@ -56,7 +57,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowManuallyEnterInterestRateParamName;
 
 import com.google.gson.JsonArray;
 import java.math.BigDecimal;

@@ -352,10 +352,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (loanProduct.canUseForTopup() && clientId != null) {
                 final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+                final Boolean loanTermIncludesToppedUpLoanTerm = command
+                        .booleanObjectValueOfParameterNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM);
                 if (null == isTopup) {
                     newLoanApplication.setIsTopup(false);
                 } else {
                     newLoanApplication.setIsTopup(isTopup);
+                }
+
+                if (null == loanTermIncludesToppedUpLoanTerm) {
+                    newLoanApplication.setLoanTermIncludesToppedUpLoanTerm(false);
+                } else {
+                    newLoanApplication.setLoanTermIncludesToppedUpLoanTerm(loanTermIncludesToppedUpLoanTerm);
                 }
 
                 if (newLoanApplication.isTopup()) {

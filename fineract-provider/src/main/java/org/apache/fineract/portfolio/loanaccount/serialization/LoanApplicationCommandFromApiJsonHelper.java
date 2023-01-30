@@ -94,7 +94,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
             LoanApiConstants.lastApplication, // glim specific
-            LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName));
+            LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
+            LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
