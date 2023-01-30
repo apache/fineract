@@ -152,7 +152,7 @@ configurations {
 dependencies {
     driver 'org.mariadb.jdbc:mariadb-java-client'
     driver 'org.postgresql:postgresql'
-    driver 'mysql:mysql-connector-java:8.0.31'
+    driver 'mysql:mysql-connector-java:8.0.32'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
