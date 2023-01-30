@@ -1117,6 +1117,14 @@ final class LoansApiResourceSwagger {
         public BigDecimal maxOutstandingLoanBalance;
         @Schema(example = "[2011, 10, 20]")
         public LocalDate repaymentsStartingFromDate;
+        @Schema(example = "1")
+        public Integer graceOnInterestCharged;
+        @Schema(example = "1")
+        public Integer graceOnPrincipalPayment;
+        @Schema(example = "1")
+        public Integer graceOnInterestPayment;
+        @Schema(example = "1")
+        public Integer graceOnArrearsAgeing;
     }
 
     @Schema(description = "PostLoansResponse")
