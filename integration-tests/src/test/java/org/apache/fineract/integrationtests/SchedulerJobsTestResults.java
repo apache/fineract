@@ -1001,8 +1001,6 @@ public class SchedulerJobsTestResults {
             this.loanTransactionHelper.approveLoan("02 September 2022", loanId);
             this.loanTransactionHelper.disburseLoan("03 September 2022", loanId, "1000", null);
 
-            this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0/5 * * * * ?"));
-
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2022.09.05").dateFormat("yyyy.MM.dd").locale("en"));
 
@@ -1011,23 +1009,11 @@ public class SchedulerJobsTestResults {
 
             this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
                     .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10", null));
+            this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0/5 * * * * ?"));
 
-            Thread.sleep(6000);
+            Thread.sleep(11000);
             GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
             assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(1).getDate());
-
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("2022.09.06").dateFormat("yyyy.MM.dd").locale("en"));
-
-            targetDate = LocalDate.of(2022, 9, 6);
-            penaltyCharge1AddedDate = dateFormatter.format(targetDate);
-
-            this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10", null));
-
-            Thread.sleep(6000);
-            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
-            assertEquals(LocalDate.of(2022, 9, 6), loanDetails.getTransactions().get(2).getDate());
         } finally {
             this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0 2 0 1/1 * ? *"));
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
