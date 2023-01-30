@@ -26,10 +26,10 @@ dependencyManagement {
         mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.8'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.8.0'
         mavenBom 'org.junit:junit-bom:5.9.2'
-        mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.1'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.2'
         mavenBom 'io.cucumber:cucumber-bom:7.11.0'
         mavenBom 'io.netty:netty-bom:4.1.87.Final'
-        mavenBom 'org.mockito:mockito-bom:5.0.0'
+        mavenBom 'org.mockito:mockito-bom:5.1.0'
     }
 
     dependencies {
@@ -62,7 +62,7 @@ dependencyManagement {
         }
         dependency 'org.apache.commons:commons-csv:1.9.0'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'software.amazon.awssdk:bom:2.19.21'
+        dependency 'software.amazon.awssdk:bom:2.19.26'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
@@ -165,7 +165,7 @@ dependencyManagement {
         dependency 'org.springdoc:springdoc-openapi-security:1.6.14'
         dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.14'
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.8.3'
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.9.0'
 
         dependency ('org.apache.activemq:activemq-broker:5.17.3') {
             exclude 'javax.annotation:javax.annotation-api'
