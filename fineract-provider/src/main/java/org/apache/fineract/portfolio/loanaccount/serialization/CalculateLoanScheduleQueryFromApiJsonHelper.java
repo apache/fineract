@@ -78,7 +78,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validate(final String json) {
+    public void validate(final String json,Integer schedulesToCarryForward) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -111,7 +111,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         // possible to express loan term as say 12 months whilst also saying
         // - that the repayment structure is 6 repayments every bi-monthly.
         validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentEveryType, 0);
+                repaymentEvery, repaymentEveryType, schedulesToCarryForward);
 
         final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(expectedDisbursementDateParameterName,

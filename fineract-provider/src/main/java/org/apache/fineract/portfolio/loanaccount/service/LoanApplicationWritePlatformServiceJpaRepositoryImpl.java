@@ -348,8 +348,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
             final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
             final Boolean loanTermIncludesToppedUpLoanTerm = loanProduct.getLoanTermIncludesToppedUpLoanTerm();
-
-            Integer schedulesToCarryForward = getForward(command, isTopup, loanTermIncludesToppedUpLoanTerm);
+            final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
+            Integer schedulesToCarryForward = getForward(loanIdToClose, isTopup, loanTermIncludesToppedUpLoanTerm);
 
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(),
                     newLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
@@ -371,7 +371,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
 
                 if (newLoanApplication.isTopup()) {
-                    final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
                     final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, clientId);
                     if (loanToClose == null) {
                         throw new GeneralPlatformDomainRuleException(
@@ -1073,7 +1072,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
             final Boolean loanTermIncludesToppedUpLoanTerm = loanProductForValidations.getLoanTermIncludesToppedUpLoanTerm();
-            Integer schedulesToCarryForward = getForward(command, isTopup, loanTermIncludesToppedUpLoanTerm);
+            final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
+
+            Integer schedulesToCarryForward = getForward(loanIdToClose, isTopup, loanTermIncludesToppedUpLoanTerm);
 
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(existingLoanApplication.getTermFrequency(),
                     existingLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
@@ -1281,13 +1282,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
     }
 
-    private Integer getForward(JsonCommand command, Boolean isTopup, Boolean loanTermIncludesToppedUpLoanTerm) {
+    private Integer getForward(Long loanIdToClose, Boolean isTopup, Boolean loanTermIncludesToppedUpLoanTerm) {
         Integer schedulesToCarryForward = 0;
-        final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
-        final List<LoanRepaymentScheduleInstallment> schedulesToCarryForwards = this.repaymentScheduleInstallmentRepository
-                .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
 
-        if (isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup && loanTermIncludesToppedUpLoanTerm) {
+        if (loanIdToClose != null && isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup && loanTermIncludesToppedUpLoanTerm) {
+            final List<LoanRepaymentScheduleInstallment> schedulesToCarryForwards = this.repaymentScheduleInstallmentRepository
+                    .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
 
             if (!CollectionUtils.isEmpty(schedulesToCarryForwards)) {
                 schedulesToCarryForward = schedulesToCarryForwards.size();
