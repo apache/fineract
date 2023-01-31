@@ -33,6 +33,6 @@ public class DelinquencyRangeNotFoundException extends AbstractPlatformResourceN
 
     public static DelinquencyRangeNotFoundException notFound(final Long id, Throwable... e) {
         return new DelinquencyRangeNotFoundException("error.msg.delinquency.range.not.found",
-                "Delinquency range with id `" + id + "` does not found.", id, e);
+                "Delinquency range with id `" + id + "` is not found.", id, e);
     }
 }

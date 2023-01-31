@@ -35,7 +35,7 @@ public class BusinessDateNotFoundException extends AbstractPlatformResourceNotFo
     }
 
     public static BusinessDateNotFoundException notFound(final String type, Throwable... e) {
-        return new BusinessDateNotFoundException("error.msg.businessdate.not.found",
-                "Business date with type `" + type + "` does not found.", type, e);
+        return new BusinessDateNotFoundException("error.msg.businessdate.not.found", "Business date with type `" + type + "` is not found.",
+                type, e);
     }
 }
