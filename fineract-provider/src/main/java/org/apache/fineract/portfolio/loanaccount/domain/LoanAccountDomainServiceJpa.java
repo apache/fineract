@@ -207,10 +207,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          ***/
         if (changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-
-                loanTransactionRepository.save(mapEntry.getValue());
-                // update loan with references to the newly created transactions
-                loan.addLoanTransaction(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
             // Trigger transaction replayed event
@@ -783,9 +779,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                loanTransactionRepository.save(mapEntry.getValue());
-                // update loan with references to the newly created transactions
-                loan.getLoanTransactions().add(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
             // Trigger transaction replayed event
