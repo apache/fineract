@@ -78,7 +78,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validate(final String json,Integer schedulesToCarryForward) {
+    public void validate(final String json, Integer schedulesToCarryForward) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }

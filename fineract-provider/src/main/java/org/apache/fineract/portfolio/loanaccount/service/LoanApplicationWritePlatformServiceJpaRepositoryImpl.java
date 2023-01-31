@@ -1285,7 +1285,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private Integer getForward(Long loanIdToClose, Boolean isTopup, Boolean loanTermIncludesToppedUpLoanTerm) {
         Integer schedulesToCarryForward = 0;
 
-        if (loanIdToClose != null && isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup && loanTermIncludesToppedUpLoanTerm) {
+        if (loanIdToClose != null && isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup
+                && loanTermIncludesToppedUpLoanTerm) {
             final List<LoanRepaymentScheduleInstallment> schedulesToCarryForwards = this.repaymentScheduleInstallmentRepository
                     .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
 

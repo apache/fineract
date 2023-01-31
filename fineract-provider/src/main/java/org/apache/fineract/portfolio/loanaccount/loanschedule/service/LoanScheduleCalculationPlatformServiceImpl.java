@@ -38,9 +38,9 @@ import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformSer
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
@@ -66,6 +66,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 @Transactional
 public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleCalculationPlatformService {
+
     private static final Logger LOG = LoggerFactory.getLogger(LoanScheduleCalculationPlatformServiceImpl.class);
     private final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer;
     private final LoanScheduleAssembler loanScheduleAssembler;
@@ -89,7 +90,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             final LoanAssembler loanAssembler,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final ConfigurationDomainService configurationDomainService, final CurrencyReadPlatformService currencyReadPlatformService,
-            final LoanUtilService loanUtilService,final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository) {
+            final LoanUtilService loanUtilService,
+            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanScheduleAssembler = loanScheduleAssembler;
         this.fromJsonHelper = fromJsonHelper;
@@ -125,7 +127,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
         Integer schedulesToCarryForward = getForward(loanIdToClose, isTopup, loanTermIncludesToppedUpLoanTerm);
 
-        this.fromApiJsonDeserializer.validate(query.json(),schedulesToCarryForward);
+        this.fromApiJsonDeserializer.validate(query.json(), schedulesToCarryForward);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
@@ -287,10 +289,12 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
         return loanApplicationTerms;
     }
+
     private Integer getForward(Long loanIdToClose, Boolean isTopup, Boolean loanTermIncludesToppedUpLoanTerm) {
         Integer schedulesToCarryForward = 0;
 
-        if (loanIdToClose != null && isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup && loanTermIncludesToppedUpLoanTerm) {
+        if (loanIdToClose != null && isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup
+                && loanTermIncludesToppedUpLoanTerm) {
 
             final List<LoanRepaymentScheduleInstallment> schedulesToCarryForwards = this.repaymentScheduleInstallmentRepository
                     .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
