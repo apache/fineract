@@ -239,10 +239,6 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    this.loanTransactionRepository.save(mapEntry.getValue());
-                    // update loan with references to the newly created
-                    // transactions
-                    loan.addLoanTransaction(mapEntry.getValue());
                     this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
                 // Trigger transaction replayed event
@@ -739,10 +735,6 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 if (changedTransactionDetail != null) {
                     for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings()
                             .entrySet()) {
-                        this.loanTransactionRepository.save(mapEntry.getValue());
-                        // update loan with references to the newly created
-                        // transactions
-                        loan.addLoanTransaction(mapEntry.getValue());
                         this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                     }
                     // Trigger transaction replayed event
@@ -1085,10 +1077,6 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             this.loanRepositoryWrapper.save(loan);
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    this.loanTransactionRepository.save(mapEntry.getValue());
-                    // update loan with references to the newly created
-                    // transactions
-                    loan.addLoanTransaction(mapEntry.getValue());
                     this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
                 // Trigger transaction replayed event

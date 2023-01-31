@@ -704,7 +704,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         updateLoanSummaryDerivedFields();
-        this.loanTransactions.removeAll(changedTransactionDetail.getNewTransactionMappings().values());
         return changedTransactionDetail;
     }
 
@@ -3326,9 +3325,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             }
         }
 
-        if (changedTransactionDetail != null) {
-            this.loanTransactions.removeAll(changedTransactionDetail.getNewTransactionMappings().values());
-        }
         return changedTransactionDetail;
     }
 
@@ -5390,8 +5386,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
          */
         this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         updateLoanSummaryDerivedFields();
-
-        this.loanTransactions.removeAll(changedTransactionDetail.getNewTransactionMappings().values());
 
         return changedTransactionDetail;
     }
