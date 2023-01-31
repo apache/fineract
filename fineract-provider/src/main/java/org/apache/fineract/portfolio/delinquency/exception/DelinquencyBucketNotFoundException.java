@@ -34,6 +34,6 @@ public class DelinquencyBucketNotFoundException extends AbstractPlatformResource
 
     public static DelinquencyBucketNotFoundException notFound(final Long id, Throwable... e) {
         return new DelinquencyBucketNotFoundException("error.msg.delinquency.bucket.not.found",
-                "Delinquency bucket with id `" + id + "` does not found.", id, e);
+                "Delinquency bucket with id `" + id + "` is not found.", id, e);
     }
 }

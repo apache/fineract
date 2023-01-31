@@ -64,7 +64,7 @@ public class BusinessDateReadPlatformServiceTest {
     public void notFoundByTypeNotStoredInDB() {
         BusinessDateNotFoundException businessDateNotFoundException = assertThrows(BusinessDateNotFoundException.class,
                 () -> businessDateReadPlatformService.findByType("BUSINESS_DATE"));
-        assertEquals("Business date with type `BUSINESS_DATE` does not found.", businessDateNotFoundException.getDefaultUserMessage());
+        assertEquals("Business date with type `BUSINESS_DATE` is not found.", businessDateNotFoundException.getDefaultUserMessage());
     }
 
     @Test
