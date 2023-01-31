@@ -1017,7 +1017,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
                     + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod, "
-                    + " mc.amount,mc.id as chargeId " + " from m_loan_repayment_schedule ls "
+                    + " mc.amount,mc.id as chargeId, mc.max_occurrence as maxOccurrence" + " from m_loan_repayment_schedule ls "
                     + " inner join m_loan ml on ml.id = ls.loan_id "
                     + " join m_product_loan_charge plc on plc.product_loan_id = ml.product_id "
                     + " join m_charge mc on mc.id = plc.charge_id ";
@@ -1048,9 +1048,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal interestOutstanding = interestActualDue.subtract(interestPaid);
 
             final Integer installmentNumber = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "period");
+            final Integer maxOccurrenceTillChargeApplies = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "maxOccurrence");
 
             return new OverdueLoanScheduleData(loanId, chargeId, dueDate, amount, dateFormat, locale, principalOutstanding,
-                    interestOutstanding, installmentNumber);
+                    interestOutstanding, installmentNumber, maxOccurrenceTillChargeApplies);
         }
     }
 
@@ -1534,7 +1535,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .append(" where " + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "?", "day") + " > ls.duedate ")
                 .append(" and ls.completed_derived <> true and mc.charge_applies_to_enum =1 ")
                 .append(" and ls.recalculated_interest_component <> true ")
-                .append(" and mc.charge_time_enum = 9 and ml.loan_status_id = 300 ");
+                .append(" and mc.charge_time_enum = 9 and ml.loan_status_id = 300 order by ls.installment asc");
 
         if (backdatePenalties) {
             return this.jdbcTemplate.query(sqlBuilder.toString(), rm, penaltyWaitPeriod);

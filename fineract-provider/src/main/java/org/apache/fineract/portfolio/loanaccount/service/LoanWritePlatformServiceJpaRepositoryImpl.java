@@ -34,8 +34,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -2595,6 +2598,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
     }
 
+    private Collection<OverdueLoanScheduleData> applyMaxOccurrenceWhileApplyingOverdueChargesForLoan(Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas){
+        if(CollectionUtils.isNotEmpty(overdueLoanScheduleDatas)) {
+            Integer maxOccurrenceToApply = 0;
+            Collection<OverdueLoanScheduleData> modifiedOverdueLoanScheduleDatas = null;
+            OverdueLoanScheduleData firstElement = overdueLoanScheduleDatas.stream().findFirst().orElse(null);
+            if (firstElement != null &&
+                    firstElement.getMaxOccurrenceTillChargeApplies() != null &&
+                    firstElement.getMaxOccurrenceTillChargeApplies() > 0) {
+                 maxOccurrenceToApply = firstElement.getMaxOccurrenceTillChargeApplies();
+            }
+
+            //create the sub collection and return if maxOccurrence is set to less than no. if installments
+            if(maxOccurrenceToApply > 0 && maxOccurrenceToApply < CollectionUtils.size(overdueLoanScheduleDatas)){
+                final Integer maxOccurrenceForCharge = maxOccurrenceToApply;
+                modifiedOverdueLoanScheduleDatas = overdueLoanScheduleDatas.stream().filter(
+                        loanScheduleData -> loanScheduleData.getPeriodNumber() <= maxOccurrenceForCharge ).collect(Collectors.toList());
+                return modifiedOverdueLoanScheduleDatas;
+            }
+        }
+        return overdueLoanScheduleDatas;
+    }
+
     @Override
     @Transactional
     public void applyOverdueChargesForLoan(final Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas) {
@@ -2605,6 +2630,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         boolean runInterestRecalculation = false;
         LocalDate recalculateFrom = DateUtils.getBusinessLocalDate();
         LocalDate lastChargeDate = null;
+
+        overdueLoanScheduleDatas = applyMaxOccurrenceWhileApplyingOverdueChargesForLoan(overdueLoanScheduleDatas);
+
         for (final OverdueLoanScheduleData overdueInstallment : overdueLoanScheduleDatas) {
 
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(overdueInstallment.toString());
