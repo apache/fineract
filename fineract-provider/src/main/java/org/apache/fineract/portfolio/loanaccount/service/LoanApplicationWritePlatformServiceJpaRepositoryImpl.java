@@ -51,6 +51,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -107,6 +108,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -344,16 +346,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (loanProduct.getLoanProductConfigurableAttributes() != null) {
                 updateProductRelatedDetails(productRelatedDetail, newLoanApplication);
             }
+            final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+            final Boolean loanTermIncludesToppedUpLoanTerm = loanProduct.getLoanTermIncludesToppedUpLoanTerm();
+
+            Integer schedulesToCarryForward = getForward(command, isTopup, loanTermIncludesToppedUpLoanTerm);
 
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(),
                     newLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
-                    newLoanApplication);
+                    newLoanApplication, schedulesToCarryForward);
 
             if (loanProduct.canUseForTopup() && clientId != null) {
-                final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
-                final Boolean loanTermIncludesToppedUpLoanTerm = command
-                        .booleanObjectValueOfParameterNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM);
+
                 if (null == isTopup) {
                     newLoanApplication.setIsTopup(false);
                 } else {
@@ -1067,10 +1071,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanRates(rateAssembler.fromParsedJson(command.parsedJson()));
             }
 
+            final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+            final Boolean loanTermIncludesToppedUpLoanTerm = loanProductForValidations.getLoanTermIncludesToppedUpLoanTerm();
+            Integer schedulesToCarryForward = getForward(command, isTopup, loanTermIncludesToppedUpLoanTerm);
+
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(existingLoanApplication.getTermFrequency(),
                     existingLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
-                    existingLoanApplication);
+                    existingLoanApplication, schedulesToCarryForward);
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(existingLoanApplication);
 
@@ -1271,6 +1279,22 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private Integer getForward(JsonCommand command, Boolean isTopup, Boolean loanTermIncludesToppedUpLoanTerm) {
+        Integer schedulesToCarryForward = 0;
+        final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
+        final List<LoanRepaymentScheduleInstallment> schedulesToCarryForwards = this.repaymentScheduleInstallmentRepository
+                .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
+
+        if (isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup && loanTermIncludesToppedUpLoanTerm) {
+
+            if (!CollectionUtils.isEmpty(schedulesToCarryForwards)) {
+                schedulesToCarryForward = schedulesToCarryForwards.size();
+                LOG.info("Loan Term To Be Carried Forward :-" + schedulesToCarryForward);
+            }
+        }
+        return schedulesToCarryForward;
     }
 
     /*

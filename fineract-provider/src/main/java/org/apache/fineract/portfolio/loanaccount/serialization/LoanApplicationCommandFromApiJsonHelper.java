@@ -1075,10 +1075,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     }
 
     public void validateLoanTermAndRepaidEveryValues(final Integer loanTermFrequency, final Integer loanTermFrequencyType,
-            final Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType, final Loan loan) {
+            final Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType, final Loan loan,
+            final Integer schedulesToCarryForward) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         this.apiJsonHelper.validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType,
-                numberOfRepayments, repaymentEvery, repaymentEveryType);
+                numberOfRepayments, repaymentEvery, repaymentEveryType, schedulesToCarryForward);
 
         /**
          * For multi-disbursal loans where schedules are auto-generated based on a fixed EMI, ensure the number of

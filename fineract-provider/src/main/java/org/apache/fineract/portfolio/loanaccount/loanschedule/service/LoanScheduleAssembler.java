@@ -205,14 +205,12 @@ public class LoanScheduleAssembler {
 
         if (loanProduct.canUseForTopup() && clientId != null) {
             Boolean isTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isTopup, element);
-            Boolean loanTermIncludesToppedUpLoanTerm = this.fromApiJsonHelper
-                    .extractBooleanNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, element);
+            Boolean loanTermIncludesToppedUpLoanTerm = loanProduct.getLoanTermIncludesToppedUpLoanTerm();
 
-            if (isTopup && loanTermIncludesToppedUpLoanTerm) {
+            if (isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup && loanTermIncludesToppedUpLoanTerm) {
                 final Long loanIdToClose = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.loanIdToClose, element);
-                final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, clientId);
                 final List<LoanRepaymentScheduleInstallment> schedulesToCarryForward = this.repaymentScheduleInstallmentRepository
-                        .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, expectedDisbursementDate);
+                        .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
                 if (!CollectionUtils.isEmpty(schedulesToCarryForward)) {
                     LOG.info("Loan Term To Carry Foward :-" + schedulesToCarryForward.size());
                     numberOfRepayments = numberOfRepayments + schedulesToCarryForward.size();

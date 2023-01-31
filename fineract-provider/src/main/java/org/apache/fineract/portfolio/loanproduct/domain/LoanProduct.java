@@ -1588,4 +1588,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.loanProducTrancheDetails = loanProducTrancheDetails;
     }
 
+    public Boolean getLoanTermIncludesToppedUpLoanTerm() {
+        return loanTermIncludesToppedUpLoanTerm;
+    }
 }

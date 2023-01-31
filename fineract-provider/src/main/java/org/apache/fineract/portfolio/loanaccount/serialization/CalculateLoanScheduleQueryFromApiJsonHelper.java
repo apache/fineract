@@ -111,7 +111,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         // possible to express loan term as say 12 months whilst also saying
         // - that the repayment structure is 6 repayments every bi-monthly.
         validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentEveryType);
+                repaymentEvery, repaymentEveryType, 0);
 
         final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(expectedDisbursementDateParameterName,
@@ -132,9 +132,13 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         }
     }
 
-    public void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors,
-            final Integer loanTermFrequency, final Integer loanTermFrequencyType, final Integer numberOfRepayments,
-            final Integer repaymentEvery, final Integer repaymentEveryType) {
+    public void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors, Integer loanTermFrequency,
+            final Integer loanTermFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
+            final Integer repaymentEveryType, final Integer schedulesToCarryForward) {
+
+        if (schedulesToCarryForward != null && schedulesToCarryForward > 0) {
+            loanTermFrequency = loanTermFrequency + schedulesToCarryForward;
+        }
         if (loanTermFrequencyType != null && !loanTermFrequencyType.equals(repaymentEveryType)) {
             final ApiParameterError error = ApiParameterError.parameterError(
                     "validation.msg.loan.loanTermFrequencyType.not.the.same.as.repaymentFrequencyType",
