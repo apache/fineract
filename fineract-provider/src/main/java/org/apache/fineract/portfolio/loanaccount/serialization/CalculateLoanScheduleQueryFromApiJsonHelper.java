@@ -147,7 +147,12 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             dataValidationErrors.add(error);
         } else {
             if (loanTermFrequency != null && repaymentEvery != null && numberOfRepayments != null) {
-                final int suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
+                int suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
+                if (schedulesToCarryForward != null && schedulesToCarryForward > 0) {
+                    suggestsedLoanTerm = loanTermFrequency;
+                } else {
+                    suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
+                }
                 if (loanTermFrequency.intValue() < suggestsedLoanTerm) {
                     final ApiParameterError error = ApiParameterError.parameterError(
                             "validation.msg.loan.loanTermFrequency.less.than.repayment.structure.suggests",
