@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTra
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanTopUpData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.serialization.CalculateLoanScheduleQueryFromApiJsonHelper;
@@ -125,7 +126,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         final Boolean loanTermIncludesToppedUpLoanTerm = loanProduct.getLoanTermIncludesToppedUpLoanTerm();
         final Long loanIdToClose = this.fromJsonHelper.extractLongNamed("loanIdToClose", query.parsedJson());
 
-        Integer schedulesToCarryForward = getForward(loanIdToClose, isTopup, loanTermIncludesToppedUpLoanTerm);
+        Integer schedulesToCarryForward = 0;
 
         this.fromApiJsonDeserializer.validate(query.json(), schedulesToCarryForward);
 
@@ -290,7 +291,14 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         return loanApplicationTerms;
     }
 
-    private Integer getForward(Long loanIdToClose, Boolean isTopup, Boolean loanTermIncludesToppedUpLoanTerm) {
+    @Override
+    public LoanTopUpData calculateTopUpCarryForwardSchedules(final JsonQuery query) {
+
+        final Long loanIdToClose = this.fromJsonHelper.extractLongNamed("loanIdToClose", query.parsedJson());
+        final Boolean isTopup = this.fromJsonHelper.extractBooleanNamed("isTopup", query.parsedJson());
+        final Boolean loanTermIncludesToppedUpLoanTerm = this.fromJsonHelper.extractBooleanNamed("loanTermIncludesToppedUpLoanTerm",
+                query.parsedJson());
+
         Integer schedulesToCarryForward = 0;
 
         if (loanIdToClose != null && isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup
@@ -304,6 +312,6 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
                 LOG.info("Loan Term To Be Carried Forward :-" + schedulesToCarryForward);
             }
         }
-        return schedulesToCarryForward;
+        return new LoanTopUpData(schedulesToCarryForward);
     }
 }

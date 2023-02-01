@@ -195,7 +195,7 @@ public class LoanScheduleAssembler {
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
         // loan terms
-        final Integer loanTermFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequency", element);
+        Integer loanTermFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequency", element);
         final Integer loanTermFrequencyType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequencyType", element);
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(loanTermFrequencyType);
 
@@ -213,7 +213,15 @@ public class LoanScheduleAssembler {
                         .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
                 if (!CollectionUtils.isEmpty(schedulesToCarryForward)) {
                     LOG.info("Loan Term To Carry Foward :-" + schedulesToCarryForward.size());
+                    /**
+                     *
+                     * Override the loanTermFreqency and Number of repayment when loan account to be toppedup has
+                     * carryforward repayment schedules from previous Loan Account
+                     *
+                     */
                     numberOfRepayments = numberOfRepayments + schedulesToCarryForward.size();
+                    loanTermFrequency = numberOfRepayments;
+
                 }
             }
         }

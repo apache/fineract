@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
+package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonQuery;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanTopUpData;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+public class LoanTopUpData {
 
-public interface LoanScheduleCalculationPlatformService {
+    private Integer carryForwardLoanTerm;
 
-    LoanScheduleModel calculateLoanSchedule(JsonQuery query, Boolean validateParams);
+    public LoanTopUpData(Integer carryForwardLoanTerm) {
+        this.carryForwardLoanTerm = carryForwardLoanTerm;
+    }
 
-    void updateFutureSchedule(LoanScheduleData loanScheduleData, Long loanId);
-
-    LoanScheduleData generateLoanScheduleForVariableInstallmentRequest(Long loanId, String json);
-
-    LoanTopUpData calculateTopUpCarryForwardSchedules(JsonQuery query);
-
+    public Integer getCarryForwardLoanTerm() {
+        return carryForwardLoanTerm;
+    }
 }
