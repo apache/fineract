@@ -82,25 +82,27 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
         if (!loanIds.isEmpty()) {
             List<Throwable> exceptions = new ArrayList<>();
-            for (final Long loanId : loanIds) {
-                try {
-                    applyChargeToOverdueLoansBusinessStep.execute(loanRepository.getReferenceById(loanId));
-                } catch (final PlatformApiDataValidationException e) {
-                    final List<ApiParameterError> errors = e.getErrors();
-                    for (final ApiParameterError error : errors) {
-                        log.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId,
-                                error.getDeveloperMessage(), e);
-                    }
-                    exceptions.add(e);
-                } catch (final AbstractPlatformDomainRuleException e) {
+
+            Long loanId = loanIds.stream().findFirst().orElse(null);
+
+            try {
+                applyChargeToOverdueLoansBusinessStep.execute(loanRepository.getReferenceById(loanId));
+            } catch (final PlatformApiDataValidationException e) {
+                final List<ApiParameterError> errors = e.getErrors();
+                for (final ApiParameterError error : errors) {
                     log.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId,
-                            e.getDefaultUserMessage(), e);
-                    exceptions.add(e);
-                } catch (Exception e) {
-                    log.error("Apply Charges due for overdue loans failed for account {}", loanId, e);
-                    exceptions.add(e);
+                            error.getDeveloperMessage(), e);
                 }
+                exceptions.add(e);
+            } catch (final AbstractPlatformDomainRuleException e) {
+                log.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId,
+                        e.getDefaultUserMessage(), e);
+                exceptions.add(e);
+            } catch (Exception e) {
+                log.error("Apply Charges due for overdue loans failed for account {}", loanId, e);
+                exceptions.add(e);
             }
+
             if (!exceptions.isEmpty()) {
                 throw new JobExecutionException(exceptions);
             }
