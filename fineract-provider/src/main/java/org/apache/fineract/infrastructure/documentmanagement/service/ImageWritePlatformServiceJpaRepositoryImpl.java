@@ -55,22 +55,23 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId, final String imageName,
-            final InputStream inputStream, final Long fileSize) {
+    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId,
+            final String imageName, final InputStream inputStream, final Long fileSize) {
         Object owner = deletePreviousImage(entityName, clientId);
 
         final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
-        final String imageLocation = contentRepository.saveImage(inputStream, clientId, imageName, fileSize);
+        final String imageLocation = contentRepository.saveImage(inputStream, entityName, clientId, imageName, fileSize);
         return updateImage(owner, imageLocation, contentRepository.getStorageType());
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId, final Base64EncodedImage encodedImage) {
+    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId,
+            final Base64EncodedImage encodedImage) {
         Object owner = deletePreviousImage(entityName, clientId);
 
         final ContentRepository contenRepository = this.contentRepositoryFactory.getRepository();
-        final String imageLocation = contenRepository.saveImage(encodedImage, clientId, "image");
+        final String imageLocation = contenRepository.saveImage(encodedImage, entityName, clientId, "image");
 
         return updateImage(owner, imageLocation, contenRepository.getStorageType());
     }
