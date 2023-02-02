@@ -154,6 +154,24 @@ final class LoanTransactionsApiResourceSwagger {
 
         }
 
+        static final class GetLoansLoanIdLoanChargePaidByData {
+
+            private GetLoansLoanIdLoanChargePaidByData() {}
+
+            @Schema(example = "11")
+            public Long id;
+            @Schema(example = "100.000000")
+            public Double amount;
+            @Schema(example = "9679")
+            public Integer installmentNumber;
+            @Schema(example = "1")
+            public Long chargeId;
+            @Schema(example = "636")
+            public Long transactionId;
+            @Schema(example = "name")
+            public String name;
+        }
+
         @Schema(example = "3")
         public Long id;
         public GetLoansType type;
@@ -191,6 +209,7 @@ final class LoanTransactionsApiResourceSwagger {
         @Schema(example = "[2012, 5, 18]")
         public LocalDate possibleNextRepaymentDate;
         public Set<GetLoanTransactionRelation> transactionRelations;
+        public Set<GetLoansLoanIdLoanChargePaidByData> loanChargePaidByList;
         public PaymentDetailData paymentDetailData;
 
         static final class PaymentDetailData {
