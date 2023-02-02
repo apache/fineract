@@ -1302,7 +1302,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void validateLoanTransactionAmountChargeBack(LoanTransaction loanTransaction, LoanTransaction chargebackTransaction) {
         BigDecimal actualAmount = BigDecimal.ZERO;
         for (LoanTransactionRelation loanTransactionRelation : loanTransaction.getLoanTransactionRelations()) {
-            if (loanTransactionRelation.getRelationType().equals(LoanTransactionRelationTypeEnum.CHARGEBACK)) {
+            if (loanTransactionRelation.getRelationType().equals(LoanTransactionRelationTypeEnum.CHARGEBACK)
+                    && loanTransactionRelation.getToTransaction().isNotReversed()) {
                 actualAmount = actualAmount.add(loanTransactionRelation.getToTransaction().getPrincipalPortion());
             }
         }

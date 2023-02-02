@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -1346,8 +1347,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             }
             installment.updateAccrualPortion(interest, fee, penality);
         }
-        LoanRepaymentScheduleInstallment lastInstallment = getRepaymentScheduleInstallments()
-                .get(getRepaymentScheduleInstallments().size() - 1);
+        LoanRepaymentScheduleInstallment lastInstallment = getLastLoanRepaymentScheduleInstallment();
         for (LoanTransaction loanTransaction : accruals) {
             if (loanTransaction.getTransactionDate().isAfter(lastInstallment.getDueDate()) && !loanTransaction.isReversed()) {
                 loanTransaction.reverse();
@@ -3765,9 +3765,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             if (loanTransaction.isReversed()) {
                 continue;
             }
-            if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan() || loanTransaction.isCreditBalanceRefund()
-                    || loanTransaction.isChargeback())) {
+            if (loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan()) {
                 totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
+            } else if (loanTransaction.isCreditBalanceRefund() || loanTransaction.isChargeback()) {
+                totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getOverPaymentPortion(currency));
             }
         }
 
@@ -5772,7 +5773,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             if (loanTransaction.isDisbursement() || loanTransaction.isIncomePosting()) {
                 outstanding = outstanding.plus(loanTransaction.getAmount(getCurrency()));
                 loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
-            } else if (loanTransaction.isChargeback()) {
+            } else if (loanTransaction.isChargeback() || loanTransaction.isCreditBalanceRefund()) {
                 Money transactionOutstanding = loanTransaction.getAmount(getCurrency());
                 if (!loanTransaction.getOverPaymentPortion(getCurrency()).isZero()) {
                     transactionOutstanding = loanTransaction.getAmount(getCurrency())
@@ -6244,9 +6245,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategyCode);
         final Money overpaidAmount = calculateTotalOverpayment(); // Before Transaction
-        if (overpaidAmount.isGreaterThanZero()) {
-            chargebackTransaction.setOverPayments(overpaidAmount);
-        }
 
         if (chargebackTransaction.isNotZero(loanCurrency())) {
             addLoanTransaction(chargebackTransaction);
@@ -6983,6 +6981,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isChargedOff() {
         return this.chargedOff;
+    }
+
+    public LoanRepaymentScheduleInstallment getLastLoanRepaymentScheduleInstallment() {
+        return getRepaymentScheduleInstallments().get(getRepaymentScheduleInstallments().size() - 1);
+    }
+
+    public List<LoanTransaction> getLoanTransactions(Predicate<LoanTransaction> predicate) {
+        return getLoanTransactions().stream().filter(predicate).toList();
     }
 
 }

@@ -393,6 +393,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
         this.obligationsMet = false;
         this.obligationsMetOnDate = null;
+        if (this.credits != null) {
+            this.principal = this.principal.subtract(this.credits);
+            this.credits = null;
+        }
     }
 
     public void resetAccrualComponents() {
@@ -836,7 +840,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         }
     }
 
-    public void updateDueChargeback(final LocalDate transactionDate, final Money transactionAmount) {
+    public void updateDueAndCredits(final LocalDate transactionDate, final Money transactionAmount) {
         updateDueDate(transactionDate);
         addToCredits(transactionAmount.getAmount());
         addToPrincipal(transactionDate, transactionAmount);
