@@ -7137,6 +7137,235 @@ public class ClientLoanIntegrationTest {
         }
     }
 
+    @Test
+    public void testCreditBalanceRefundAfterMaturityWithReverseReplayOfRepayments() {
+        try {
+            GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(this.requestSpec, this.responseSpec, true);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2022.10.10").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingNoInterest(assetAccount, incomeAccount,
+                    expenseAccount, overpaymentAccount);
+
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2011");
+
+            final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+
+            HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+            loanStatusHashMap = this.loanTransactionHelper.approveLoan("02 September 2022", loanID);
+            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanID, "1000");
+            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+            this.loanTransactionHelper.makeRepayment("04 September 2022", Float.parseFloat("100"), loanID);
+            this.loanTransactionHelper.makeRepayment("05 September 2022", Float.parseFloat("1100"), loanID);
+
+            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+            assertEquals(200.0, loanDetails.getTotalOverpaid());
+            assertTrue(loanDetails.getStatus().getOverpaid());
+
+            this.loanTransactionHelper.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                    .transactionAmount(200.0).transactionDate("10 October 2022").dateFormat("dd MMMM yyyy").locale("en"));
+
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
+
+            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().size());
+            assertEquals(1000, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPrincipalDue());
+
+            assertEquals(100.0, loanDetails.getTransactions().get(1).getAmount());
+            assertEquals(100.0, loanDetails.getTransactions().get(1).getPrincipalPortion());
+            assertEquals(LocalDate.of(2022, 9, 4), loanDetails.getTransactions().get(1).getDate());
+            assertEquals(900.0, loanDetails.getTransactions().get(1).getOutstandingLoanBalance());
+            assertEquals(1100.0, loanDetails.getTransactions().get(2).getAmount());
+            assertEquals(900.0, loanDetails.getTransactions().get(2).getPrincipalPortion());
+            assertEquals(200.0, loanDetails.getTransactions().get(2).getOverpaymentPortion());
+            assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(2).getDate());
+            assertEquals(0.0, loanDetails.getTransactions().get(2).getOutstandingLoanBalance());
+            assertEquals(200.0, loanDetails.getTransactions().get(3).getAmount());
+            assertEquals(200.0, loanDetails.getTransactions().get(3).getOverpaymentPortion());
+            assertEquals(LocalDate.of(2022, 10, 10), loanDetails.getTransactions().get(3).getDate());
+            assertEquals(0.0, loanDetails.getTransactions().get(3).getOutstandingLoanBalance());
+
+            this.loanTransactionHelper.reverseLoanTransaction(loanDetails.getId(), loanDetails.getTransactions().get(1).getId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionAmount(0.0)
+                            .transactionDate("10 October 2022").locale("en"));
+
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+
+            assertEquals(100.0, loanDetails.getTransactions().get(1).getAmount());
+            assertEquals(100.0, loanDetails.getTransactions().get(1).getPrincipalPortion());
+            assertEquals(LocalDate.of(2022, 9, 4), loanDetails.getTransactions().get(1).getDate());
+            assertTrue(loanDetails.getTransactions().get(1).getManuallyReversed());
+
+            assertEquals(1100.0, loanDetails.getTransactions().get(2).getAmount());
+            assertEquals(1000.0, loanDetails.getTransactions().get(2).getPrincipalPortion());
+            assertEquals(100.0, loanDetails.getTransactions().get(2).getOverpaymentPortion());
+            assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(2).getDate());
+            assertEquals(0.0, loanDetails.getTransactions().get(2).getOutstandingLoanBalance());
+            assertEquals(1, loanDetails.getTransactions().get(2).getTransactionRelations().size());
+
+            assertEquals(200.0, loanDetails.getTransactions().get(3).getAmount());
+            assertEquals(100.0, loanDetails.getTransactions().get(3).getPrincipalPortion());
+            assertEquals(100.0, loanDetails.getTransactions().get(3).getOverpaymentPortion());
+            assertEquals(100.0, loanDetails.getTransactions().get(3).getOutstandingLoanBalance());
+            assertEquals(LocalDate.of(2022, 10, 10), loanDetails.getTransactions().get(3).getDate());
+            assertEquals(1, loanDetails.getTransactions().get(3).getTransactionRelations().size());
+
+            assertTrue(loanDetails.getStatus().getActive());
+
+            assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().size());
+            assertEquals(1000, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPrincipalDue());
+            assertTrue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
+            assertEquals(200, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPrincipalDue());
+            assertFalse(loanDetails.getRepaymentSchedule().getPeriods().get(2).getComplete());
+            assertEquals(100.0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPrincipalPaid());
+            assertEquals(100.0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPrincipalOutstanding());
+
+        } finally {
+            GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, false);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(this.requestSpec, this.responseSpec, false);
+        }
+    }
+
+    @Test
+    public void testCreditBalanceRefundBeforeMaturityWithReverseReplayOfRepaymentsAndRefund() {
+        try {
+            GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(this.requestSpec, this.responseSpec, true);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2022.10.10").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingNoInterest(assetAccount, incomeAccount,
+                    expenseAccount, overpaymentAccount);
+
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2011");
+
+            final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+
+            HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+            loanStatusHashMap = this.loanTransactionHelper.approveLoan("02 September 2022", loanID);
+            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanID, "1000");
+            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+            this.loanTransactionHelper.makeRepayment("04 September 2022", Float.parseFloat("500"), loanID);
+            this.loanTransactionHelper.makeRepayment("05 September 2022", Float.parseFloat("700"), loanID);
+
+            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+            assertEquals(200.0, loanDetails.getTotalOverpaid());
+            assertTrue(loanDetails.getStatus().getOverpaid());
+
+            this.loanTransactionHelper.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                    .transactionAmount(200.0).transactionDate("06 September 2022").dateFormat("dd MMMM yyyy").locale("en"));
+
+            this.loanTransactionHelper.makeMerchantIssuedRefund((long) loanID, new PostLoansLoanIdTransactionsRequest().locale("en")
+                    .dateFormat("dd MMMM yyyy").transactionDate("07 September 2022").transactionAmount(500.0));
+
+            this.loanTransactionHelper.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                    .transactionAmount(500.0).transactionDate("08 September 2022").dateFormat("dd MMMM yyyy").locale("en"));
+
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
+
+            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().size());
+            assertEquals(1000, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPrincipalDue());
+
+            assertEquals(500.0, loanDetails.getTransactions().get(1).getAmount());
+            assertEquals(500.0, loanDetails.getTransactions().get(1).getPrincipalPortion());
+            assertEquals(LocalDate.of(2022, 9, 4), loanDetails.getTransactions().get(1).getDate());
+            assertEquals(500.0, loanDetails.getTransactions().get(1).getOutstandingLoanBalance());
+
+            assertEquals(700.0, loanDetails.getTransactions().get(2).getAmount());
+            assertEquals(500.0, loanDetails.getTransactions().get(2).getPrincipalPortion());
+            assertEquals(200.0, loanDetails.getTransactions().get(2).getOverpaymentPortion());
+            assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(2).getDate());
+            assertEquals(0.0, loanDetails.getTransactions().get(2).getOutstandingLoanBalance());
+
+            assertEquals(200.0, loanDetails.getTransactions().get(3).getAmount());
+            assertEquals(200.0, loanDetails.getTransactions().get(3).getOverpaymentPortion());
+            assertEquals(LocalDate.of(2022, 9, 6), loanDetails.getTransactions().get(3).getDate());
+            assertEquals(0.0, loanDetails.getTransactions().get(3).getOutstandingLoanBalance());
+
+            assertEquals(500.0, loanDetails.getTransactions().get(4).getAmount());
+            assertEquals(500.0, loanDetails.getTransactions().get(4).getOverpaymentPortion());
+            assertEquals(LocalDate.of(2022, 9, 7), loanDetails.getTransactions().get(4).getDate());
+            assertEquals(0.0, loanDetails.getTransactions().get(4).getOutstandingLoanBalance());
+
+            assertEquals(500.0, loanDetails.getTransactions().get(5).getAmount());
+            assertEquals(500.0, loanDetails.getTransactions().get(5).getOverpaymentPortion());
+            assertEquals(LocalDate.of(2022, 9, 8), loanDetails.getTransactions().get(5).getDate());
+            assertEquals(0.0, loanDetails.getTransactions().get(5).getOutstandingLoanBalance());
+
+            this.loanTransactionHelper.reverseLoanTransaction(loanDetails.getId(), loanDetails.getTransactions().get(2).getId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionAmount(0.0)
+                            .transactionDate("07 September 2022").locale("en"));
+
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+
+            assertEquals(500.0, loanDetails.getTransactions().get(1).getAmount());
+            assertEquals(500.0, loanDetails.getTransactions().get(1).getPrincipalPortion());
+            assertEquals(LocalDate.of(2022, 9, 4), loanDetails.getTransactions().get(1).getDate());
+            assertEquals(500.0, loanDetails.getTransactions().get(1).getOutstandingLoanBalance());
+
+            assertEquals(700.0, loanDetails.getTransactions().get(2).getAmount());
+            assertEquals(500.0, loanDetails.getTransactions().get(2).getPrincipalPortion());
+            assertEquals(200.0, loanDetails.getTransactions().get(2).getOverpaymentPortion());
+            assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(2).getDate());
+            assertEquals(0.0, loanDetails.getTransactions().get(2).getOutstandingLoanBalance());
+            assertTrue(loanDetails.getTransactions().get(2).getManuallyReversed());
+
+            assertEquals(200.0, loanDetails.getTransactions().get(3).getAmount());
+            assertEquals(200.0, loanDetails.getTransactions().get(3).getPrincipalPortion());
+            assertEquals(LocalDate.of(2022, 9, 6), loanDetails.getTransactions().get(3).getDate());
+            assertEquals(700.0, loanDetails.getTransactions().get(3).getOutstandingLoanBalance());
+            assertEquals(1, loanDetails.getTransactions().get(3).getTransactionRelations().size());
+
+            assertEquals(500.0, loanDetails.getTransactions().get(4).getAmount());
+            assertEquals(500.0, loanDetails.getTransactions().get(4).getPrincipalPortion());
+            assertEquals(LocalDate.of(2022, 9, 7), loanDetails.getTransactions().get(4).getDate());
+            assertEquals(200.0, loanDetails.getTransactions().get(4).getOutstandingLoanBalance());
+            assertEquals(1, loanDetails.getTransactions().get(4).getTransactionRelations().size());
+
+            assertEquals(500.0, loanDetails.getTransactions().get(5).getAmount());
+            assertEquals(500.0, loanDetails.getTransactions().get(5).getPrincipalPortion());
+            assertEquals(LocalDate.of(2022, 9, 8), loanDetails.getTransactions().get(5).getDate());
+            assertEquals(700.0, loanDetails.getTransactions().get(5).getOutstandingLoanBalance());
+            assertEquals(1, loanDetails.getTransactions().get(5).getTransactionRelations().size());
+
+            assertTrue(loanDetails.getStatus().getActive());
+
+            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().size());
+            assertEquals(1700, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPrincipalDue());
+            assertFalse(loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
+            assertEquals(1000.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPrincipalPaid());
+            assertEquals(700.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPrincipalOutstanding());
+
+        } finally {
+            GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, false);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(this.requestSpec, this.responseSpec, false);
+        }
+    }
+
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")

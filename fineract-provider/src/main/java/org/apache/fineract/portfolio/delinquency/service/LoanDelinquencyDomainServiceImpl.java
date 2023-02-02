@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.delinquency.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -27,7 +29,6 @@ import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,17 +44,19 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         final MonetaryCurrency loanCurrency = loan.getCurrency();
         LocalDate overdueSinceDate = null;
         CollectionData collectionData = CollectionData.template();
-        BigDecimal amountAvailable = BigDecimal.ZERO;
+        BigDecimal amountAvailable;
         BigDecimal outstandingAmount = BigDecimal.ZERO;
         boolean oldestOverdueInstallment = false;
         boolean overdueSinceDateWasSet = false;
         boolean firstNotYetDueInstallment = false;
+        LoanRepaymentScheduleInstallment latestInstallment = loan.getLastLoanRepaymentScheduleInstallment();
+
+        List<LoanTransaction> chargebackTransactions = loan.getLoanTransactions(LoanTransaction::isChargeback);
 
         log.debug("Loan id {} with {} installments", loan.getId(), loan.getRepaymentScheduleInstallments().size());
         // Get the oldest overdue installment if exists one
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             if (!installment.isObligationsMet()) {
-
                 if (installment.getDueDate().isBefore(businessDate)) {
                     log.debug("Loan Id: {} with installment {} due date {}", loan.getId(), installment.getInstallmentNumber(),
                             installment.getDueDate());
@@ -66,10 +69,17 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
 
                         amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
 
-                        for (LoanTransactionToRepaymentScheduleMapping mappingInstallment : installment
-                                .getLoanTransactionToRepaymentScheduleMappings()) {
-                            final LoanTransaction loanTransaction = mappingInstallment.getLoanTransaction();
-                            if (loanTransaction.isChargeback()) {
+                        boolean isLatestInstallment = Objects.equals(installment.getId(), latestInstallment.getId());
+                        for (LoanTransaction loanTransaction : chargebackTransactions) {
+                            boolean isLoanTransactionIsOnOrAfterInstallmentFromDate = loanTransaction.getTransactionDate().isEqual(
+                                    installment.getFromDate()) || loanTransaction.getTransactionDate().isAfter(installment.getFromDate());
+                            boolean isLoanTransactionIsBeforeNotLastInstallmentDueDate = !isLatestInstallment
+                                    && loanTransaction.getTransactionDate().isBefore(installment.getDueDate());
+                            boolean isLoanTransactionIsOnOrBeforeLastInstallmentDueDate = isLatestInstallment
+                                    && (loanTransaction.getTransactionDate().isEqual(installment.getDueDate())
+                                            || loanTransaction.getTransactionDate().isBefore(installment.getDueDate()));
+                            if (isLoanTransactionIsOnOrAfterInstallmentFromDate && (isLoanTransactionIsBeforeNotLastInstallmentDueDate
+                                    || isLoanTransactionIsOnOrBeforeLastInstallmentDueDate)) {
                                 amountAvailable = amountAvailable.subtract(loanTransaction.getAmount());
                                 if (amountAvailable.compareTo(BigDecimal.ZERO) < 0) {
                                     overdueSinceDate = loanTransaction.getTransactionDate();
@@ -78,29 +88,33 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
                             }
                         }
                     }
-                }
-            } else if (!firstNotYetDueInstallment) {
-                log.debug("Loan Id: {} with installment {} due date {}", loan.getId(), installment.getInstallmentNumber(),
-                        installment.getDueDate());
-                firstNotYetDueInstallment = true;
-                amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
-                log.debug("Amount available {}", amountAvailable);
-                for (LoanTransactionToRepaymentScheduleMapping mappingInstallment : installment
-                        .getLoanTransactionToRepaymentScheduleMappings()) {
-                    final LoanTransaction loanTransaction = mappingInstallment.getLoanTransaction();
-                    if (loanTransaction.isChargeback() && loanTransaction.getTransactionDate().isBefore(businessDate)) {
-                        log.debug("Loan CB Transaction: {} {} {}", loanTransaction.getId(), loanTransaction.getTransactionDate(),
-                                loanTransaction.getAmount());
-                        amountAvailable = amountAvailable.subtract(loanTransaction.getAmount());
-                        if (amountAvailable.compareTo(BigDecimal.ZERO) < 0 && !overdueSinceDateWasSet) {
-                            overdueSinceDate = loanTransaction.getTransactionDate();
-                            overdueSinceDateWasSet = true;
+                } else if (!firstNotYetDueInstallment) {
+                    log.debug("Loan Id: {} with installment {} due date {}", loan.getId(), installment.getInstallmentNumber(),
+                            installment.getDueDate());
+                    firstNotYetDueInstallment = true;
+                    amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
+                    log.debug("Amount available {}", amountAvailable);
+                    for (LoanTransaction loanTransaction : chargebackTransactions) {
+                        boolean isLoanTransactionIsOnOrAfterInstallmentFromDate = loanTransaction.getTransactionDate().isEqual(
+                                installment.getFromDate()) || loanTransaction.getTransactionDate().isAfter(installment.getFromDate());
+                        boolean isLoanTransactionIsBeforeInstallmentDueDate = loanTransaction.getTransactionDate()
+                                .isBefore(installment.getDueDate());
+                        boolean isLoanTransactionIsBeforeBusinessDate = loanTransaction.getTransactionDate().isBefore(businessDate);
+                        if (isLoanTransactionIsOnOrAfterInstallmentFromDate && isLoanTransactionIsBeforeInstallmentDueDate
+                                && isLoanTransactionIsBeforeBusinessDate) {
+                            log.debug("Loan CB Transaction: {} {} {}", loanTransaction.getId(), loanTransaction.getTransactionDate(),
+                                    loanTransaction.getAmount());
+                            amountAvailable = amountAvailable.subtract(loanTransaction.getAmount());
+                            if (amountAvailable.compareTo(BigDecimal.ZERO) < 0 && !overdueSinceDateWasSet) {
+                                overdueSinceDate = loanTransaction.getTransactionDate();
+                                overdueSinceDateWasSet = true;
+                            }
                         }
                     }
-                }
 
-                if (amountAvailable.compareTo(BigDecimal.ZERO) < 0) {
-                    outstandingAmount = outstandingAmount.add(amountAvailable.abs());
+                    if (amountAvailable.compareTo(BigDecimal.ZERO) < 0) {
+                        outstandingAmount = outstandingAmount.add(amountAvailable.abs());
+                    }
                 }
             }
         }
