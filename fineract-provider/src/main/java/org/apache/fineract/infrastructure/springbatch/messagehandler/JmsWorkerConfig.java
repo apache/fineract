@@ -18,42 +18,53 @@
  */
 package org.apache.fineract.infrastructure.springbatch.messagehandler;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.ConnectionFactory;
+import javax.jms.Session;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.springbatch.InputChannelInterceptor;
 import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.JmsWorkerCondition;
-import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
+import org.springframework.batch.core.step.StepLocator;
+import org.springframework.batch.integration.partition.BeanFactoryStepLocator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.integration.jms.dsl.Jms;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.config.SimpleJmsListenerEndpoint;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
-@Configuration
-@EnableBatchIntegration
+@Configuration(proxyBeanMethods = false)
 @Conditional(JmsWorkerCondition.class)
 @Import(value = { JmsBrokerConfiguration.class })
 public class JmsWorkerConfig {
 
     @Autowired
-    private QueueChannel inboundRequests;
-    @Autowired
-    private InputChannelInterceptor inputInterceptor;
-    @Autowired
     private FineractProperties fineractProperties;
 
     @Bean
-    public IntegrationFlow inboundFlow(ActiveMQConnectionFactory connectionFactory) {
-        return IntegrationFlows.from(Jms.messageDrivenChannelAdapter(connectionFactory) //
-                .configureListenerContainer(c -> c.subscriptionDurable(false)) //
-                .destination(fineractProperties.getRemoteJobMessageHandler().getJms().getRequestQueueName())) //
-                .channel(inboundRequests) //
-                .intercept(inputInterceptor).log(LoggingHandler.Level.DEBUG) //
-                .get();
+    public DefaultJmsListenerContainerFactory jmsBatchWorkerListenerContainerFactory(ConnectionFactory connectionFactory) {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        factory.setConcurrency("1-1"); // at least one consumer and at most one consumer
+        factory.setConnectionFactory(connectionFactory);
+        factory.setPubSubDomain(false);
+        factory.setSessionTransacted(false);
+        factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+        return factory;
+    }
+
+    @Bean
+    public DefaultMessageListenerContainer jmsBatchWorkerMessageListenerContainer(
+            @Qualifier("jmsBatchWorkerListenerContainerFactory") DefaultJmsListenerContainerFactory factory,
+            JmsBatchWorkerMessageListener messageListener) {
+        SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+        endpoint.setDestination(fineractProperties.getRemoteJobMessageHandler().getJms().getRequestQueueName());
+        endpoint.setMessageListener(messageListener);
+        return factory.createListenerContainer(endpoint);
+    }
+
+    @Bean
+    public StepLocator stepLocator() {
+        return new BeanFactoryStepLocator();
     }
 }
