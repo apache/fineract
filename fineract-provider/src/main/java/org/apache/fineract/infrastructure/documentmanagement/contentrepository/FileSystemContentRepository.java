@@ -72,7 +72,7 @@ public class FileSystemContentRepository implements ContentRepository {
     public String saveImage(final Base64EncodedImage base64EncodedImage, final String entityName, final Long resourceId,
             final String imageName) {
         final String fileLocation = generateImageParentDirectory(entityName, resourceId) + File.separator + imageName
-        + base64EncodedImage.getFileExtension();
+                + base64EncodedImage.getFileExtension();
         String base64EncodedImageString = base64EncodedImage.getBase64EncodedString();
         try {
             final InputStream toUploadInputStream = new ByteArrayInputStream(Base64.getMimeDecoder().decode(base64EncodedImageString));

@@ -55,8 +55,8 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId,
-            final String imageName, final InputStream inputStream, final Long fileSize) {
+    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId, final String imageName,
+            final InputStream inputStream, final Long fileSize) {
         Object owner = deletePreviousImage(entityName, clientId);
 
         final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
@@ -66,8 +66,7 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId,
-            final Base64EncodedImage encodedImage) {
+    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId, final Base64EncodedImage encodedImage) {
         Object owner = deletePreviousImage(entityName, clientId);
 
         final ContentRepository contenRepository = this.contentRepositoryFactory.getRepository();

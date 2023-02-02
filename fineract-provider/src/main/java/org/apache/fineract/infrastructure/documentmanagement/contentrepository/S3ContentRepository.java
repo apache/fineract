@@ -76,8 +76,8 @@ public class S3ContentRepository implements ContentRepository {
     }
 
     @Override
-    public String saveImage(final InputStream toUploadInputStream, final String entityName,
-            final Long resourceId, final String imageName, Long fileSize) {
+    public String saveImage(final InputStream toUploadInputStream, final String entityName, final Long resourceId, final String imageName,
+            Long fileSize) {
         ContentRepositoryUtils.validateFileSizeWithinPermissibleRange(fileSize, imageName);
         final String uploadImageLocation = generateImageParentDirectory(entityName, resourceId);
         final String fileLocation = uploadImageLocation + File.separator + imageName;
@@ -87,8 +87,7 @@ public class S3ContentRepository implements ContentRepository {
     }
 
     @Override
-    public String saveImage(Base64EncodedImage base64EncodedImage, String entityName, Long resourceId,
-        String imageName) {
+    public String saveImage(Base64EncodedImage base64EncodedImage, String entityName, Long resourceId, String imageName) {
         final String uploadImageLocation = generateImageParentDirectory(entityName, resourceId);
         final String fileLocation = uploadImageLocation + File.separator + imageName + base64EncodedImage.getFileExtension();
         final InputStream toUploadInputStream = new ByteArrayInputStream(
