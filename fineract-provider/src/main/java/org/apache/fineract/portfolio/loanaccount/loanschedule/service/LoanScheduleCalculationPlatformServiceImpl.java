@@ -122,13 +122,14 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
             this.loanApiJsonDeserializer.validateForCreate(query.json(), isMeetingMandatoryForJLGLoans, loanProduct);
         }
-        final Boolean isTopup = this.fromJsonHelper.extractBooleanNamed("isTopup", query.parsedJson());
-        final Boolean loanTermIncludesToppedUpLoanTerm = loanProduct.getLoanTermIncludesToppedUpLoanTerm();
-        final Long loanIdToClose = this.fromJsonHelper.extractLongNamed("loanIdToClose", query.parsedJson());
 
-        Integer schedulesToCarryForward = 0;
+        Long numberOfRepaymentsToCarryForward = this.fromJsonHelper.extractLongNamed("numberOfRepaymentsToCarryForward",
+                query.parsedJson());
+        if (numberOfRepaymentsToCarryForward == null) {
+            numberOfRepaymentsToCarryForward = 0L;
+        }
 
-        this.fromApiJsonDeserializer.validate(query.json(), schedulesToCarryForward);
+        this.fromApiJsonDeserializer.validate(query.json(), numberOfRepaymentsToCarryForward.intValue());
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");

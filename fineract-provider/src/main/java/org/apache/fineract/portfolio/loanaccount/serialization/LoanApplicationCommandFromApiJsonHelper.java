@@ -516,15 +516,18 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     final Long loanId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.loanIdToClose, element);
                     baseDataValidator.reset().parameter(LoanApiConstants.loanIdToClose).value(loanId).notNull().longGreaterThanZero();
 
-                    final Boolean loanTermIncludesToppedUpLoanTerm = this.fromApiJsonHelper
-                            .extractBooleanNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, element);
-                    baseDataValidator.reset().parameter(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM)
-                            .value(loanTermIncludesToppedUpLoanTerm).validateForBooleanValue();
-
-                    final Integer numberOfRepaymentsToCarryForward = this.fromApiJsonHelper
-                            .extractIntegerWithLocaleNamed(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, element);
-                    baseDataValidator.reset().parameter(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD)
-                            .value(numberOfRepaymentsToCarryForward).zeroOrPositiveAmount();
+                    if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, element)) {
+                        final Boolean loanTermIncludesToppedUpLoanTerm = this.fromApiJsonHelper
+                                .extractBooleanNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, element);
+                        baseDataValidator.reset().parameter(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM)
+                                .value(loanTermIncludesToppedUpLoanTerm).validateForBooleanValue();
+                    }
+                    if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, element)) {
+                        final Integer numberOfRepaymentsToCarryForward = this.fromApiJsonHelper
+                                .extractIntegerWithLocaleNamed(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, element);
+                        baseDataValidator.reset().parameter(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD)
+                                .value(numberOfRepaymentsToCarryForward).zeroOrPositiveAmount();
+                    }
                 }
             }
         }
