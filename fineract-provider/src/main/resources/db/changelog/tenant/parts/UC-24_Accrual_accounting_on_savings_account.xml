@@ -124,5 +124,31 @@
             INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('transaction_savings', 'POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT', 'RECURRINGDEPOSITACCOUNT', 'POSTACCRUALINTEREST', '0');
         </sql>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_term_includes_toppedup_loan_term_m_product_loan">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_product_loan" columnName="is_loan_term_includes_topped_up_loan_term"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_product_loan">
+            <column name="is_loan_term_includes_topped_up_loan_term" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_term_includes_toppedup_loan_term_m_loan">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan" columnName="is_loan_term_includes_topped_up_loan_term"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan">
+            <column name="is_loan_term_includes_topped_up_loan_term" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

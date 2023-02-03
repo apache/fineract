@@ -87,7 +87,8 @@ public class FixedDepositProduct extends SavingsProduct {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
             final SavingsPeriodFrequencyType lockinPeriodFrequencyType, final AccountingRuleType accountingRuleType,
             final Set<Charge> charges, final DepositProductTermAndPreClosure productTermAndPreClosure, final Set<InterestRateChart> charts,
-            BigDecimal minBalanceForInterestCalculation, boolean withHoldTax, TaxGroup taxGroup, boolean isUSDProduct, boolean allowManuallyEnterInterestRate) {
+            BigDecimal minBalanceForInterestCalculation, boolean withHoldTax, TaxGroup taxGroup, boolean isUSDProduct,
+            boolean allowManuallyEnterInterestRate) {
 
         final BigDecimal minRequiredOpeningBalance = null;
         final boolean withdrawalFeeApplicableForTransfer = false;
@@ -114,8 +115,7 @@ public class FixedDepositProduct extends SavingsProduct {
         super(name, shortName, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges, allowOverdraft, overdraftLimit,
-                minBalanceForInterestCalculation, withHoldTax, taxGroup, null, null, null,
-                isUSDProduct, allowManuallyEnterInterestRate);
+                minBalanceForInterestCalculation, withHoldTax, taxGroup, null, null, null, isUSDProduct, allowManuallyEnterInterestRate);
 
         if (charts != null) {
             this.charts = charts;

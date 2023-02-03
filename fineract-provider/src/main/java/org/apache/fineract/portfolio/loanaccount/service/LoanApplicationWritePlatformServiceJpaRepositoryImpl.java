@@ -344,22 +344,33 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (loanProduct.getLoanProductConfigurableAttributes() != null) {
                 updateProductRelatedDetails(productRelatedDetail, newLoanApplication);
             }
+            final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+            final Boolean loanTermIncludesToppedUpLoanTerm = command
+                    .booleanObjectValueOfParameterNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM);
+            final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
+            final Integer numberOfRepaymentsToCarryForward = command
+                    .integerValueOfParameterNamedDefaultToNullIfZero(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD);
 
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(),
                     newLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
-                    newLoanApplication);
+                    newLoanApplication, numberOfRepaymentsToCarryForward);
 
             if (loanProduct.canUseForTopup() && clientId != null) {
-                final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+
                 if (null == isTopup) {
                     newLoanApplication.setIsTopup(false);
                 } else {
                     newLoanApplication.setIsTopup(isTopup);
                 }
 
+                if (null == loanTermIncludesToppedUpLoanTerm) {
+                    newLoanApplication.setLoanTermIncludesToppedUpLoanTerm(false);
+                } else {
+                    newLoanApplication.setLoanTermIncludesToppedUpLoanTerm(loanTermIncludesToppedUpLoanTerm);
+                }
+
                 if (newLoanApplication.isTopup()) {
-                    final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
                     final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, clientId);
                     if (loanToClose == null) {
                         throw new GeneralPlatformDomainRuleException(
@@ -1059,10 +1070,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanRates(rateAssembler.fromParsedJson(command.parsedJson()));
             }
 
+            final Integer numberOfRepaymentsToCarryForward = command
+                    .integerValueOfParameterNamedDefaultToNullIfZero(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD);
+
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(existingLoanApplication.getTermFrequency(),
                     existingLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
-                    existingLoanApplication);
+                    existingLoanApplication, numberOfRepaymentsToCarryForward);
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(existingLoanApplication);
 

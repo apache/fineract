@@ -69,7 +69,8 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             LoanApiConstants.interestRateDifferentialParameterName, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
             LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
-            LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName));
+            LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
+            LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, LoanApiConstants.LOAN_TERM_TO_TOP_UP));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -78,7 +79,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validate(final String json) {
+    public void validate(final String json, Integer schedulesToCarryForward) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -111,7 +112,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         // possible to express loan term as say 12 months whilst also saying
         // - that the repayment structure is 6 repayments every bi-monthly.
         validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentEveryType);
+                repaymentEvery, repaymentEveryType, schedulesToCarryForward);
 
         final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(expectedDisbursementDateParameterName,
@@ -132,9 +133,13 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         }
     }
 
-    public void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors,
-            final Integer loanTermFrequency, final Integer loanTermFrequencyType, final Integer numberOfRepayments,
-            final Integer repaymentEvery, final Integer repaymentEveryType) {
+    public void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors, Integer loanTermFrequency,
+            final Integer loanTermFrequencyType, Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType,
+            final Integer schedulesToCarryForward) {
+        if (schedulesToCarryForward != null && schedulesToCarryForward > 0) {
+            numberOfRepayments = numberOfRepayments + schedulesToCarryForward;
+        }
+
         if (loanTermFrequencyType != null && !loanTermFrequencyType.equals(repaymentEveryType)) {
             final ApiParameterError error = ApiParameterError.parameterError(
                     "validation.msg.loan.loanTermFrequencyType.not.the.same.as.repaymentFrequencyType",
@@ -143,7 +148,12 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             dataValidationErrors.add(error);
         } else {
             if (loanTermFrequency != null && repaymentEvery != null && numberOfRepayments != null) {
-                final int suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
+                int suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
+                if (schedulesToCarryForward != null && schedulesToCarryForward > 0) {
+                    suggestsedLoanTerm = loanTermFrequency;
+                } else {
+                    suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
+                }
                 if (loanTermFrequency.intValue() < suggestsedLoanTerm) {
                     final ApiParameterError error = ApiParameterError.parameterError(
                             "validation.msg.loan.loanTermFrequency.less.than.repayment.structure.suggests",

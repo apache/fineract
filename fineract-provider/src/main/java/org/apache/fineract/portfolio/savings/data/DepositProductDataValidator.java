@@ -40,6 +40,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepo
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowManuallyEnterInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowPartialLiquidation;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
@@ -63,7 +64,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroup
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.totalLiquidationAllowed;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowManuallyEnterInterestRateParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -328,10 +328,11 @@ public class DepositProductDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(allowManuallyEnterInterestRateParamName, element)) {
-            final String allowManuallyEnterInterestRate = this.fromApiJsonHelper.extractStringNamed(allowManuallyEnterInterestRateParamName, element);
-            baseDataValidator.reset().parameter(allowManuallyEnterInterestRate).value(allowManuallyEnterInterestRate).ignoreIfNull().validateForBooleanValue();
+            final String allowManuallyEnterInterestRate = this.fromApiJsonHelper.extractStringNamed(allowManuallyEnterInterestRateParamName,
+                    element);
+            baseDataValidator.reset().parameter(allowManuallyEnterInterestRate).value(allowManuallyEnterInterestRate).ignoreIfNull()
+                    .validateForBooleanValue();
         }
-
 
         // accounting related data validation
         final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());

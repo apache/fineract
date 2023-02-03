@@ -88,6 +88,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
@@ -114,11 +116,15 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductVariableInsta
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanScheduleAssembler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoanScheduleAssembler.class);
 
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanProductRepository loanProductRepository;
@@ -137,6 +143,8 @@ public class LoanScheduleAssembler {
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final PlatformSecurityContext context;
     private final LoanUtilService loanUtilService;
+    private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Autowired
     public LoanScheduleAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
@@ -149,7 +157,8 @@ public class LoanScheduleAssembler {
             final FloatingRatesReadPlatformService floatingRatesReadPlatformService,
             final VariableLoanScheduleFromApiJsonValidator variableLoanScheduleFromApiJsonValidator,
             final CalendarInstanceRepository calendarInstanceRepository, final PlatformSecurityContext context,
-            final LoanUtilService loanUtilService) {
+            final LoanUtilService loanUtilService, final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
+            final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -167,6 +176,8 @@ public class LoanScheduleAssembler {
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.context = context;
         this.loanUtilService = loanUtilService;
+        this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
     }
 
     public LoanApplicationTerms assembleLoanTerms(final JsonElement element) {
@@ -183,11 +194,27 @@ public class LoanScheduleAssembler {
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
         // loan terms
-        final Integer loanTermFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequency", element);
+        Integer loanTermFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequency", element);
+        Integer numberOfRepaymentsToCarryForward = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, element);
         final Integer loanTermFrequencyType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequencyType", element);
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(loanTermFrequencyType);
 
-        final Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
+        Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
+        final Long clientId = this.fromApiJsonHelper.extractLongNamed("clientId", element);
+        final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
+
+        if (loanProduct.canUseForTopup() && clientId != null) {
+            Boolean isTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isTopup, element);
+            Boolean loanTermIncludesToppedUpLoanTerm = loanProduct.getLoanTermIncludesToppedUpLoanTerm();
+
+            if (isTopup != null && loanTermIncludesToppedUpLoanTerm != null && numberOfRepaymentsToCarryForward != null && isTopup
+                    && loanTermIncludesToppedUpLoanTerm && numberOfRepaymentsToCarryForward > 0) {
+                numberOfRepayments = numberOfRepayments + numberOfRepaymentsToCarryForward;
+                loanTermFrequency = numberOfRepayments;
+            }
+        }
+
         final Integer repaymentEvery = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
         final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element);
         final PeriodFrequencyType repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(repaymentFrequencyType);
@@ -233,7 +260,6 @@ public class LoanScheduleAssembler {
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         final Money principalMoney = Money.of(currency, principal);
 
-        final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
         final LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
         LocalDate calculatedRepaymentsStartingFromDate = repaymentsStartingFromDate;
 
@@ -430,7 +456,6 @@ public class LoanScheduleAssembler {
             }
         }
 
-        final Long clientId = this.fromApiJsonHelper.extractLongNamed("clientId", element);
         Client client = null;
         Long officeId = null;
         if (clientId != null) {

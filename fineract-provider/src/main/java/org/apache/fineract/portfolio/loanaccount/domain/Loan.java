@@ -396,6 +396,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
     private BigDecimal fixedPrincipalPercentagePerInstallment;
 
+    @Column(name = "is_loan_term_includes_topped_up_loan_term")
+    private Boolean loanTermIncludesToppedUpLoanTerm = false;
     @Transient
     private boolean isDisburseToSavingsLoan = false;
 
@@ -6772,6 +6774,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isTopup() {
         return this.isTopup;
+    }
+
+    public Boolean getLoanTermIncludesToppedUpLoanTerm() {
+        return loanTermIncludesToppedUpLoanTerm;
+    }
+
+    public void setLoanTermIncludesToppedUpLoanTerm(Boolean loanTermIncludesToppedUpLoanTerm) {
+        this.loanTermIncludesToppedUpLoanTerm = loanTermIncludesToppedUpLoanTerm;
     }
 
     public BigDecimal getFirstDisbursalAmount() {

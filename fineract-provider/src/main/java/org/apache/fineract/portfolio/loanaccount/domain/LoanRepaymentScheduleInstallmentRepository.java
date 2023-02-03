@@ -18,10 +18,18 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LoanRepaymentScheduleInstallmentRepository
         extends JpaRepository<LoanRepaymentScheduleInstallment, Long>, JpaSpecificationExecutor<LoanRepaymentScheduleInstallment> {
+
+    @Query("select sch from LoanRepaymentScheduleInstallment sch where sch.loan.id = :loanId and sch.dueDate >= :disbursementDate")
+    List<LoanRepaymentScheduleInstallment> findPendingLoanRepaymentScheduleInstallmentForTopUp(@Param("loanId") Long loanId,
+            @Param("disbursementDate") LocalDate disbursementDate);
 
 }
