@@ -41,4 +41,8 @@ public class LoanDTO {
     private final boolean periodicAccrualBasedAccountingEnabled;
     @Setter
     private List<LoanTransactionDTO> newLoanTransactions;
+    @Setter
+    private boolean markedAsChargeOff;
+    @Setter
+    private boolean markedAsFraud;
 }

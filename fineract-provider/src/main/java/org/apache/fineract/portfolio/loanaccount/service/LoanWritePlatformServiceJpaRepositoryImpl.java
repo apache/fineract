@@ -2675,8 +2675,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.markAsChargedOff(transactionDate, currentUser, null);
         }
 
+        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
+
         LoanTransaction chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
-        loanTransactionRepository.saveAndFlush(chargeOffTransaction);
+        loan.addLoanTransaction(chargeOffTransaction);
+        saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParameterName);
         if (StringUtils.isNotBlank(noteText)) {
@@ -2685,7 +2689,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.noteRepository.save(note);
         }
 
-        // TODO: add accounting
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargeOffPostBusinessEvent(chargeOffTransaction));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

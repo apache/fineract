@@ -277,7 +277,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 
-    public Map<String, Object> deriveAccountingBridgeData(final LoanScheduleAccrualData loanScheduleAccrualData,
+    private Map<String, Object> deriveAccountingBridgeData(final LoanScheduleAccrualData loanScheduleAccrualData,
             final Map<String, Object> transactionMap) {
 
         final Map<String, Object> accountingBridgeData = new LinkedHashMap<>();
@@ -289,6 +289,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", false);
         accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", true);
         accountingBridgeData.put("isAccountTransfer", false);
+        accountingBridgeData.put("isChargeOff", false);
+        accountingBridgeData.put("isFraud", false);
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<>();
         newLoanTransactions.add(transactionMap);

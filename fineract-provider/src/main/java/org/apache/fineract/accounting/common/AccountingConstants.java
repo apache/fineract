@@ -37,7 +37,9 @@ public final class AccountingConstants {
     public enum CashAccountsForLoan {
 
         FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(
-                6), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12), GOODWILL_CREDIT(13);
+                6), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12), GOODWILL_CREDIT(13), INCOME_FROM_CHARGE_OFF_INTEREST(
+                        14), INCOME_FROM_CHARGE_OFF_FEES(
+                                15), CHARGE_OFF_EXPENSE(16), CHARGE_OFF_FRAUD_EXPENSE(17), INCOME_FROM_CHARGE_OFF_PENALTY(18);
 
         private final Integer value;
 
@@ -75,7 +77,9 @@ public final class AccountingConstants {
 
         FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), //
         LOSSES_WRITTEN_OFF(6), INTEREST_RECEIVABLE(7), FEES_RECEIVABLE(8), PENALTIES_RECEIVABLE(9), //
-        TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12), GOODWILL_CREDIT(13);
+        TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12), GOODWILL_CREDIT(13), INCOME_FROM_CHARGE_OFF_INTEREST(
+                14), INCOME_FROM_CHARGE_OFF_FEES(
+                        15), CHARGE_OFF_EXPENSE(16), CHARGE_OFF_FRAUD_EXPENSE(17), INCOME_FROM_CHARGE_OFF_PENALTY(18);
 
         private final Integer value;
 
@@ -125,7 +129,12 @@ public final class AccountingConstants {
                                                                                         "penaltyToIncomeAccountMappings"), CHARGE_ID(
                                                                                                 "chargeId"), INCOME_ACCOUNT_ID(
                                                                                                         "incomeAccountId"), INCOME_FROM_RECOVERY(
-                                                                                                                "incomeFromRecoveryAccountId");
+                                                                                                                "incomeFromRecoveryAccountId"), INCOME_FROM_CHARGE_OFF_INTEREST(
+                                                                                                                        "incomeFromChargeOffInterestAccountId"), INCOME_FROM_CHARGE_OFF_FEES(
+                                                                                                                                "incomeFromChargeOffFeesAccountId"), CHARGE_OFF_EXPENSE(
+                                                                                                                                        "chargeOffExpenseAccountId"), CHARGE_OFF_FRAUD_EXPENSE(
+                                                                                                                                                "chargeOffFraudExpenseAccountId"), INCOME_FROM_CHARGE_OFF_PENALTY(
+                                                                                                                                                        "incomeFromChargeOffPenaltyAccountId");
 
         private final String value;
 
@@ -154,7 +163,12 @@ public final class AccountingConstants {
                                                         "transfersInSuspenseAccount"), INCOME_ACCOUNT_ID(
                                                                 "incomeAccount"), INCOME_FROM_RECOVERY(
                                                                         "incomeFromRecoveryAccount"), LIABILITY_TRANSFER_SUSPENSE(
-                                                                                "liabilityTransferInSuspenseAccount");
+                                                                                "liabilityTransferInSuspenseAccount"), INCOME_FROM_CHARGE_OFF_INTEREST(
+                                                                                        "incomeFromChargeOffInterestAccount"), INCOME_FROM_CHARGE_OFF_FEES(
+                                                                                                "incomeFromChargeOffFeesAccount"), CHARGE_OFF_EXPENSE(
+                                                                                                        "chargeOffExpenseAccount"), CHARGE_OFF_FRAUD_EXPENSE(
+                                                                                                                "chargeOffFraudExpenseAccount"), INCOME_FROM_CHARGE_OFF_PENALTY(
+                                                                                                                        "incomeFromChargeOffPenaltyAccount");
 
         private final String value;
 

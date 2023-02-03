@@ -86,6 +86,15 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(), loanProductId,
                         CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                        LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), loanProductId,
+                        CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                        LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), loanProductId,
+                        CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                        LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), loanProductId,
+                        CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue());
 
                 // expenses
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
@@ -94,6 +103,12 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
                         LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), loanProductId,
                         CashAccountsForLoan.GOODWILL_CREDIT.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                        LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(), loanProductId,
+                        CashAccountsForLoan.CHARGE_OFF_EXPENSE.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                        LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), loanProductId,
+                        CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue());
 
                 // liabilities
                 this.loanProductToGLAccountMappingHelper.saveLoanToLiabilityAccountMapping(element,
@@ -140,6 +155,15 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(), loanProductId,
                         AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                        LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                        LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                        LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue());
 
                 // expenses
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
@@ -148,6 +172,12 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
                         LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), loanProductId,
                         AccrualAccountsForLoan.GOODWILL_CREDIT.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                        LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(), loanProductId,
+                        AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                        LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), loanProductId,
+                        AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue());
 
                 // liabilities
                 this.loanProductToGLAccountMappingHelper.saveLoanToLiabilityAccountMapping(element,
