@@ -143,4 +143,6 @@ public interface LoanProductConstants {
     String OVER_APPLIED_CALCULATION_TYPE = "overAppliedCalculationType";
     String OVER_APPLIED_NUMBER = "overAppliedNumber";
 
+    String MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED = "maxNumberOfLoanExtensionsAllowed";
+
 }

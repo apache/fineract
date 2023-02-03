@@ -49,7 +49,7 @@ public class ApplyChargeToOverdueLoansBusinessStep implements LoanCOBBusinessSte
         Map<Long, List<OverdueLoanScheduleData>> groupedOverdueData = overdueLoanScheduledInstallments.stream()
                 .collect(Collectors.groupingBy(OverdueLoanScheduleData::getLoanId));
         for (Long loanId : groupedOverdueData.keySet()) {
-            loanWritePlatformService.applyOverdueChargesForLoan(input.getId(), groupedOverdueData.get(loanId));
+            loanWritePlatformService.applyOverdueChargesForLoan(loanId, groupedOverdueData.get(loanId));
         }
         return input;
     }

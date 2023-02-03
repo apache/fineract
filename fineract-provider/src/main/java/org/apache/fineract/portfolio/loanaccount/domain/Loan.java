@@ -401,6 +401,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Transient
     private boolean isDisburseToSavingsLoan = false;
 
+    @Column(name = "total_extensions", nullable = true)
+    private Integer total_extensions;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
@@ -6878,5 +6881,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         // In that case, fetch loan (before commit) will return null for the charges.
         // Return empty set instead of null to avoid NPE
         return Optional.ofNullable(this.charges).orElse(new HashSet<>());
+    }
+
+    public void setTotal_extensions(Integer total_extensions) {
+        this.total_extensions = total_extensions;
+    }
+
+    public Integer getTotal_extensions() {
+        return total_extensions;
     }
 }

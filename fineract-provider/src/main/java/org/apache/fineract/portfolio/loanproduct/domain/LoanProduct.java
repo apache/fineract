@@ -197,6 +197,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "is_loan_term_includes_topped_up_loan_term")
     private Boolean loanTermIncludesToppedUpLoanTerm;
 
+    @Column(name = "max_number_of_loan_extensions_allowed", nullable = true)
+    private Integer maxNumberOfLoanExtensionsAllowed;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
@@ -373,6 +376,8 @@ public class LoanProduct extends AbstractPersistableCustom {
                 .stringValueOfParameterNamedAllowingNull(LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE);
 
         final Integer overAppliedNumber = command.integerValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER);
+        final Integer maxNumberOfLoanExtensionsAllowed = command
+                .integerValueOfParameterNamed(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED);
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
@@ -389,6 +394,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
+                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, maxNumberOfLoanExtensionsAllowed);
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, loanTermIncludesToppedUpLoanTerm);
 
     }
@@ -626,6 +632,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
             final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
+            final Integer overAppliedNumber, final Integer maxNumberOfLoanExtensionsAllowed) {
             final Integer overAppliedNumber, final boolean loanTermIncludesToppedUpLoanTerm) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
@@ -705,6 +712,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.allowApprovedDisbursedAmountsOverApplied = allowApprovedDisbursedAmountsOverApplied;
         this.overAppliedCalculationType = overAppliedCalculationType;
         this.overAppliedNumber = overAppliedNumber;
+        this.maxNumberOfLoanExtensionsAllowed = maxNumberOfLoanExtensionsAllowed;
 
         if (rates != null) {
             this.rates = rates;
@@ -1210,6 +1218,14 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.overAppliedNumber = newValue;
         }
 
+        if (command.isChangeInIntegerParameterNamedWithNullCheck(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED,
+                this.maxNumberOfLoanExtensionsAllowed)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED);
+            actualChanges.put(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.maxNumberOfLoanExtensionsAllowed = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -1588,6 +1604,9 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.loanProducTrancheDetails = loanProducTrancheDetails;
     }
 
+    public Integer getMaxNumberOfLoanExtensionsAllowed() {
+        return maxNumberOfLoanExtensionsAllowed;
+    }
     public Boolean getLoanTermIncludesToppedUpLoanTerm() {
         return loanTermIncludesToppedUpLoanTerm;
     }

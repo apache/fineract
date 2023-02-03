@@ -111,6 +111,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
             LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS,
             LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE,
+            LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED));
             LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM));
 
     private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
@@ -649,6 +650,10 @@ public final class LoanProductDataValidator {
                     .extractBooleanNamed(LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, element);
             baseDataValidator.reset().parameter(LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM)
                     .value(loanTermIncludesToppedUpLoanTerm).validateForBooleanValue();
+        }
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED, element)) {
+            final Integer maxNumberOfLoanExtensionsAllowed = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED).value(maxNumberOfLoanExtensionsAllowed).ignoreIfNull().zeroOrPositiveAmount();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -1475,6 +1480,11 @@ public final class LoanProductDataValidator {
             if (useBorrowerCycle) {
                 validateBorrowerCycleVariations(element, baseDataValidator);
             }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED, element)) {
+            final Integer maxNumberOfLoanExtensionsAllowed = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED).value(maxNumberOfLoanExtensionsAllowed).ignoreIfNull().zeroOrPositiveAmount();
         }
 
         validateMultiDisburseLoanData(baseDataValidator, element);
