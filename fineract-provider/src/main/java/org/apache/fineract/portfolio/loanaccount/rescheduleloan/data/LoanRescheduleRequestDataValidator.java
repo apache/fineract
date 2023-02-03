@@ -203,10 +203,10 @@ public class LoanRescheduleRequestDataValidator {
                         "Loan rescheduling is not supported for multidisbursement tranche loans");
             }
         }
-        if(loan.getTotal_extensions() != null && loan.getLoanProduct().getMaxNumberOfLoanExtensionsAllowed() != null){
-            if(loan.getTotal_extensions() >= loan.getLoanProduct().getMaxNumberOfLoanExtensionsAllowed()){
-                dataValidatorBuilder.reset().parameter("totalExtensions")
-                        .failWithCode("maximum.number.of.loan.extensions.exceeded", "maximum number of loan extensions exceeded");
+        if (loan.getTotal_extensions() != null && loan.getLoanProduct().getMaxNumberOfLoanExtensionsAllowed() != null) {
+            if (loan.getTotal_extensions() >= loan.getLoanProduct().getMaxNumberOfLoanExtensionsAllowed()) {
+                dataValidatorBuilder.reset().parameter("totalExtensions").failWithCode("maximum.number.of.loan.extensions.exceeded",
+                        "maximum number of loan extensions exceeded");
             }
         }
 

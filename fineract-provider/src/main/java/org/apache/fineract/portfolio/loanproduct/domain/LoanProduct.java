@@ -394,8 +394,8 @@ public class LoanProduct extends AbstractPersistableCustom {
                 defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
-                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, maxNumberOfLoanExtensionsAllowed);
-                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, loanTermIncludesToppedUpLoanTerm);
+                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, maxNumberOfLoanExtensionsAllowed,
+                loanTermIncludesToppedUpLoanTerm);
 
     }
 
@@ -632,8 +632,8 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
             final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
-            final Integer overAppliedNumber, final Integer maxNumberOfLoanExtensionsAllowed) {
-            final Integer overAppliedNumber, final boolean loanTermIncludesToppedUpLoanTerm) {
+            final Integer overAppliedNumber, final Integer maxNumberOfLoanExtensionsAllowed,
+            final boolean loanTermIncludesToppedUpLoanTerm) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -1607,6 +1607,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     public Integer getMaxNumberOfLoanExtensionsAllowed() {
         return maxNumberOfLoanExtensionsAllowed;
     }
+
     public Boolean getLoanTermIncludesToppedUpLoanTerm() {
         return loanTermIncludesToppedUpLoanTerm;
     }

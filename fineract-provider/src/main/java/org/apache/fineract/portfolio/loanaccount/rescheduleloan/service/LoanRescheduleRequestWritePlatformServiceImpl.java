@@ -523,9 +523,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            if (loan.getTotal_extensions() != null){
+            if (loan.getTotal_extensions() != null) {
                 loan.setTotal_extensions(loan.getTotal_extensions() + 1);
-            }else{
+            } else {
                 loan.setTotal_extensions(1);
             }
             this.loanRepositoryWrapper.saveAndFlush(loan);

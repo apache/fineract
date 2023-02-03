@@ -95,8 +95,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                 }
                 exceptions.add(e);
             } catch (final AbstractPlatformDomainRuleException e) {
-                log.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId,
-                        e.getDefaultUserMessage(), e);
+                log.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId, e.getDefaultUserMessage(),
+                        e);
                 exceptions.add(e);
             } catch (Exception e) {
                 log.error("Apply Charges due for overdue loans failed for account {}", loanId, e);
