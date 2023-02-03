@@ -133,12 +133,12 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     }
 
     public void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors, Integer loanTermFrequency,
-            final Integer loanTermFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
-            final Integer repaymentEveryType, final Integer schedulesToCarryForward) {
-
+            final Integer loanTermFrequencyType, Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType,
+            final Integer schedulesToCarryForward) {
         if (schedulesToCarryForward != null && schedulesToCarryForward > 0) {
-            loanTermFrequency = loanTermFrequency + schedulesToCarryForward;
+            numberOfRepayments = numberOfRepayments + schedulesToCarryForward;
         }
+
         if (loanTermFrequencyType != null && !loanTermFrequencyType.equals(repaymentEveryType)) {
             final ApiParameterError error = ApiParameterError.parameterError(
                     "validation.msg.loan.loanTermFrequencyType.not.the.same.as.repaymentFrequencyType",

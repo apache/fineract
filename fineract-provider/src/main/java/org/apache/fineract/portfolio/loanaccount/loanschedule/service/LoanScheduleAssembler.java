@@ -120,7 +120,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class LoanScheduleAssembler {
@@ -196,6 +195,8 @@ public class LoanScheduleAssembler {
 
         // loan terms
         Integer loanTermFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequency", element);
+        Integer numberOfRepaymentsToCarryForward = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, element);
         final Integer loanTermFrequencyType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequencyType", element);
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(loanTermFrequencyType);
 
@@ -207,22 +208,10 @@ public class LoanScheduleAssembler {
             Boolean isTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isTopup, element);
             Boolean loanTermIncludesToppedUpLoanTerm = loanProduct.getLoanTermIncludesToppedUpLoanTerm();
 
-            if (isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup && loanTermIncludesToppedUpLoanTerm) {
-                final Long loanIdToClose = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.loanIdToClose, element);
-                final List<LoanRepaymentScheduleInstallment> schedulesToCarryForward = this.repaymentScheduleInstallmentRepository
-                        .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
-                if (!CollectionUtils.isEmpty(schedulesToCarryForward)) {
-                    LOG.info("Loan Term To Carry Foward :-" + schedulesToCarryForward.size());
-                    /**
-                     *
-                     * Override the loanTermFreqency and Number of repayment when loan account to be toppedup has
-                     * carryforward repayment schedules from previous Loan Account
-                     *
-                     */
-                    numberOfRepayments = numberOfRepayments + schedulesToCarryForward.size();
-                    loanTermFrequency = numberOfRepayments;
-
-                }
+            if (isTopup != null && loanTermIncludesToppedUpLoanTerm != null && numberOfRepaymentsToCarryForward != null && isTopup
+                    && loanTermIncludesToppedUpLoanTerm && numberOfRepaymentsToCarryForward > 0) {
+                numberOfRepayments = numberOfRepayments + numberOfRepaymentsToCarryForward;
+                loanTermFrequency = numberOfRepayments;
             }
         }
 

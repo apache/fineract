@@ -95,7 +95,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.applicationId, // glim specific
             LoanApiConstants.lastApplication, // glim specific
             LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
-            LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM));
+            LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD,
+            LoanApiConstants.LOAN_TERM_TO_TOP_UP));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -514,6 +515,16 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 if (isTopup != null && isTopup) {
                     final Long loanId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.loanIdToClose, element);
                     baseDataValidator.reset().parameter(LoanApiConstants.loanIdToClose).value(loanId).notNull().longGreaterThanZero();
+
+                    final Boolean loanTermIncludesToppedUpLoanTerm = this.fromApiJsonHelper
+                            .extractBooleanNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, element);
+                    baseDataValidator.reset().parameter(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM)
+                            .value(loanTermIncludesToppedUpLoanTerm).validateForBooleanValue();
+
+                    final Integer numberOfRepaymentsToCarryForward = this.fromApiJsonHelper
+                            .extractIntegerWithLocaleNamed(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, element);
+                    baseDataValidator.reset().parameter(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD)
+                            .value(numberOfRepaymentsToCarryForward).zeroOrPositiveAmount();
                 }
             }
         }
