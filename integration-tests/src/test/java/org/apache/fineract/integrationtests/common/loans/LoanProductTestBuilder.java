@@ -443,11 +443,16 @@ public class LoanProductTestBuilder {
                 map.put("incomeFromFeeAccountId", ID);
                 map.put("incomeFromPenaltyAccountId", ID);
                 map.put("incomeFromRecoveryAccountId", ID);
+                map.put("incomeFromChargeOffInterestAccountId", ID);
+                map.put("incomeFromChargeOffFeesAccountId", ID);
+                map.put("incomeFromChargeOffPenaltyAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();
                 map.put("writeOffAccountId", ID);
                 map.put("goodwillCreditAccountId", ID);
+                map.put("chargeOffExpenseAccountId", ID);
+                map.put("chargeOffFraudExpenseAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
                 final String ID = this.accountList[i].getAccountID().toString();
@@ -481,11 +486,16 @@ public class LoanProductTestBuilder {
                 map.put("incomeFromFeeAccountId", ID);
                 map.put("incomeFromPenaltyAccountId", ID);
                 map.put("incomeFromRecoveryAccountId", ID);
+                map.put("incomeFromChargeOffInterestAccountId", ID);
+                map.put("incomeFromChargeOffFeesAccountId", ID);
+                map.put("incomeFromChargeOffPenaltyAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();
                 map.put("writeOffAccountId", ID);
                 map.put("goodwillCreditAccountId", ID);
+                map.put("chargeOffExpenseAccountId", ID);
+                map.put("chargeOffFraudExpenseAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
                 final String ID = this.accountList[i].getAccountID().toString();

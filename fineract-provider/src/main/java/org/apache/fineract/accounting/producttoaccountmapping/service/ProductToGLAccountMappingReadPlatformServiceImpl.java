@@ -138,6 +138,16 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(LoanProductAccountingDataParams.OVERPAYMENT.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_RECOVERY)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_RECOVERY.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.CHARGE_OFF_EXPENSE)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_EXPENSE.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), gLAccountData);
                 }
             }
         } else if (AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(accountingType)
@@ -178,6 +188,16 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(LoanProductAccountingDataParams.PENALTIES_RECEIVABLE.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_RECOVERY)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_RECOVERY.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(AccrualAccountsForLoan.CHARGE_OFF_EXPENSE)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_EXPENSE.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), gLAccountData);
                 }
             }
 

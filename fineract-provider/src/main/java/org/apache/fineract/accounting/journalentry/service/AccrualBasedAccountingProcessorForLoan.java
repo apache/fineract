@@ -104,10 +104,208 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             else if (loanTransactionDTO.getTransactionType().isChargeAdjustment()) {
                 createJournalEntriesForChargeAdjustment(loanDTO, loanTransactionDTO, office);
             }
+            // Logic for Charge-Off
+            else if (loanTransactionDTO.getTransactionType().isChargeoff()) {
+                createJournalEntriesForChargeOff(loanDTO, loanTransactionDTO, office);
+            }
+        }
+    }
+
+    private void createJournalEntriesForChargeOff(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+        final boolean isMarkedFraud = loanDTO.isMarkedAsFraud();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
+        final BigDecimal interestAmount = loanTransactionDTO.getInterest();
+        final BigDecimal feesAmount = loanTransactionDTO.getFees();
+        final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+
+        Map<GLAccount, BigDecimal> accountMapForCredit = new LinkedHashMap<>();
+
+        Map<Integer, BigDecimal> accountMapForDebit = new LinkedHashMap<>();
+
+        // principal payment
+        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
+            if (isMarkedFraud) {
+                populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                        AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(), accountMapForCredit, accountMapForDebit);
+            } else {
+                populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                        AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue(), accountMapForCredit, accountMapForDebit);
+            }
+        }
+
+        // interest payment
+        if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
+
+            populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, AccrualAccountsForLoan.INTEREST_RECEIVABLE.getValue(),
+                    AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), accountMapForCredit, accountMapForDebit);
+        }
+
+        // handle fees payment
+        if (feesAmount != null && feesAmount.compareTo(BigDecimal.ZERO) > 0) {
+            populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(),
+                    AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue(), accountMapForCredit, accountMapForDebit);
+        }
+
+        // handle penalty payment
+        if (penaltiesAmount != null && penaltiesAmount.compareTo(BigDecimal.ZERO) > 0) {
+            populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId, AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue(),
+                    AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), accountMapForCredit, accountMapForDebit);
+        }
+
+        // create credit entries
+        for (Map.Entry<GLAccount, BigDecimal> creditEntry : accountMapForCredit.entrySet()) {
+            this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                    creditEntry.getValue(), isReversal, creditEntry.getKey());
+        }
+
+        // create debit entries
+        for (Map.Entry<Integer, BigDecimal> debitEntry : accountMapForDebit.entrySet()) {
+            this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, debitEntry.getKey().intValue(), loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, debitEntry.getValue(), isReversal);
+        }
+
+    }
+
+    private void populateCreditDebitMaps(Long loanProductId, BigDecimal transactionPartAmount, Long paymentTypeId,
+            Integer creditAccountType, Integer debitAccountType, Map<GLAccount, BigDecimal> accountMapForCredit,
+            Map<Integer, BigDecimal> accountMapForDebit) {
+        GLAccount accountCredit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, creditAccountType, paymentTypeId);
+        if (accountMapForCredit.containsKey(accountCredit)) {
+            BigDecimal amount = accountMapForCredit.get(accountCredit).add(transactionPartAmount);
+            accountMapForCredit.put(accountCredit, amount);
+        } else {
+            accountMapForCredit.put(accountCredit, transactionPartAmount);
+        }
+        Integer accountDebit = debitAccountType;
+        if (accountMapForDebit.containsKey(accountDebit)) {
+            BigDecimal amount = accountMapForDebit.get(accountDebit).add(transactionPartAmount);
+            accountMapForDebit.put(accountDebit, amount);
+        } else {
+            accountMapForDebit.put(accountDebit, transactionPartAmount);
         }
     }
 
     private void createJournalEntriesForChargeAdjustment(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
+        final boolean isMarkedAsChargeOff = loanDTO.isMarkedAsChargeOff();
+        if (isMarkedAsChargeOff) {
+            createJournalEntriesForChargeOffLoanChargeAdjustment(loanDTO, loanTransactionDTO, office);
+        } else {
+            createJournalEntriesForLoanChargeAdjustment(loanDTO, loanTransactionDTO, office);
+        }
+    }
+
+    private void createJournalEntriesForChargeOffLoanChargeAdjustment(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO,
+            Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
+        final BigDecimal interestAmount = loanTransactionDTO.getInterest();
+        final BigDecimal feesAmount = loanTransactionDTO.getFees();
+        final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
+        final BigDecimal overPaymentAmount = loanTransactionDTO.getOverPayment();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+
+        BigDecimal totalDebitAmount = new BigDecimal(0);
+
+        Map<GLAccount, BigDecimal> accountMap = new LinkedHashMap<>();
+
+        // handle principal payment
+        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(principalAmount);
+            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
+                    AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue(), paymentTypeId);
+            accountMap.put(account, principalAmount);
+        }
+
+        // handle interest payment
+        if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(interestAmount);
+            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
+                    AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue(), paymentTypeId);
+            if (accountMap.containsKey(account)) {
+                BigDecimal amount = accountMap.get(account).add(interestAmount);
+                accountMap.put(account, amount);
+            } else {
+                accountMap.put(account, interestAmount);
+            }
+
+        }
+
+        // handle fees payment
+        if (feesAmount != null && feesAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(feesAmount);
+            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
+                    AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue(), paymentTypeId);
+            if (accountMap.containsKey(account)) {
+                BigDecimal amount = accountMap.get(account).add(feesAmount);
+                accountMap.put(account, amount);
+            } else {
+                accountMap.put(account, feesAmount);
+            }
+        }
+
+        // handle penalty payment
+        if (penaltiesAmount != null && penaltiesAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
+            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
+                    AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), paymentTypeId);
+            if (accountMap.containsKey(account)) {
+                BigDecimal amount = accountMap.get(account).add(penaltiesAmount);
+                accountMap.put(account, amount);
+            } else {
+                accountMap.put(account, penaltiesAmount);
+            }
+        }
+
+        // handle overpayment
+        if (overPaymentAmount != null && overPaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(overPaymentAmount);
+            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
+                    paymentTypeId);
+            if (accountMap.containsKey(account)) {
+                BigDecimal amount = accountMap.get(account).add(overPaymentAmount);
+                accountMap.put(account, amount);
+            } else {
+                accountMap.put(account, overPaymentAmount);
+            }
+        }
+
+        for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
+            this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                    entry.getValue(), isReversal, entry.getKey());
+        }
+
+        if (totalDebitAmount.compareTo(BigDecimal.ZERO) > 0) {
+            Long chargeId = loanTransactionDTO.getLoanChargeData().getChargeId();
+            Integer accountMappingTypeId;
+            if (loanTransactionDTO.getLoanChargeData().isPenalty()) {
+                accountMappingTypeId = AccrualAccountsForLoan.INCOME_FROM_PENALTIES.getValue();
+            } else {
+                accountMappingTypeId = AccrualAccountsForLoan.INCOME_FROM_FEES.getValue();
+            }
+            this.helper.createDebitJournalEntryOrReversalForLoanCharges(office, currencyCode, accountMappingTypeId, loanProductId, chargeId,
+                    loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+        }
+    }
+
+    private void createJournalEntriesForLoanChargeAdjustment(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
@@ -305,6 +503,263 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      *
      */
     private void createJournalEntriesForRepaymentsAndWriteOffs(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office, final boolean writeOff, final boolean isIncomeFromFee) {
+        final boolean isMarkedChargeOff = loanDTO.isMarkedAsChargeOff();
+        if (isMarkedChargeOff) {
+            createJournalEntriesForChargeOffLoanRepaymentAndWriteOffs(loanDTO, loanTransactionDTO, office, writeOff, isIncomeFromFee);
+
+        } else {
+            createJournalEntriesForLoansRepaymentAndWriteOffs(loanDTO, loanTransactionDTO, office, writeOff, isIncomeFromFee);
+        }
+    }
+
+    private void createJournalEntriesForChargeOffLoanRepaymentAndWriteOffs(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO,
+            Office office, boolean writeOff, boolean isIncomeFromFee) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+        final boolean isMarkedFraud = loanDTO.isMarkedAsFraud();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
+        final BigDecimal interestAmount = loanTransactionDTO.getInterest();
+        final BigDecimal feesAmount = loanTransactionDTO.getFees();
+        final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
+        final BigDecimal overPaymentAmount = loanTransactionDTO.getOverPayment();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+
+        Map<GLAccount, BigDecimal> accountMapForCredit = new LinkedHashMap<>();
+        Map<Integer, BigDecimal> accountMapForDebit = new LinkedHashMap<>();
+
+        BigDecimal totalDebitAmount = new BigDecimal(0);
+
+        // principal payment
+        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(principalAmount);
+            if (loanTransactionDTO.getTransactionType().isMerchantIssuedRefund()) {
+                if (isMarkedFraud) {
+                    populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId,
+                            AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                            accountMapForCredit, accountMapForDebit);
+                } else {
+                    populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId,
+                            AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                            accountMapForCredit, accountMapForDebit);
+                }
+            } else if (loanTransactionDTO.getTransactionType().isPayoutRefund()) {
+                if (isMarkedFraud) {
+                    populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId,
+                            AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                            accountMapForCredit, accountMapForDebit);
+
+                } else {
+                    populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId,
+                            AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                            accountMapForCredit, accountMapForDebit);
+                }
+
+            } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), AccrualAccountsForLoan.GOODWILL_CREDIT.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
+                populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else {
+                populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
+            }
+
+        }
+
+        // interest payment
+        if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(interestAmount);
+            if (loanTransactionDTO.getTransactionType().isMerchantIssuedRefund()) {
+                populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isPayoutRefund()) {
+                populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
+                populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else {
+                populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, AccrualAccountsForLoan.INTEREST_RECEIVABLE.getValue(),
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
+            }
+
+        }
+
+        // handle fees payment
+        if (feesAmount != null && feesAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(feesAmount);
+            if (loanTransactionDTO.getTransactionType().isMerchantIssuedRefund()) {
+                populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isPayoutRefund()) {
+                populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
+                        AccrualAccountsForLoan.GOODWILL_CREDIT.getValue(), accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
+                populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
+
+            } else {
+                if (isIncomeFromFee) {
+                    this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
+                            AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate,
+                            feesAmount, isReversal, loanTransactionDTO.getFeePayments());
+                    Integer accountDebit = AccrualAccountsForLoan.FUND_SOURCE.getValue();
+                    if (accountMapForDebit.containsKey(accountDebit)) {
+                        BigDecimal amount = accountMapForDebit.get(accountDebit).add(feesAmount);
+                        accountMapForDebit.put(accountDebit, amount);
+                    } else {
+                        accountMapForDebit.put(accountDebit, feesAmount);
+                    }
+
+                } else {
+                    populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(),
+                            AccrualAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
+                }
+
+            }
+
+        }
+
+        // handle penalties
+        if (penaltiesAmount != null && penaltiesAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
+            if (loanTransactionDTO.getTransactionType().isMerchantIssuedRefund()) {
+                populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isPayoutRefund()) {
+                populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), AccrualAccountsForLoan.GOODWILL_CREDIT.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
+                populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId,
+                        AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                        accountMapForCredit, accountMapForDebit);
+
+            } else {
+                if (isIncomeFromFee) {
+                    populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId,
+                            AccrualAccountsForLoan.INCOME_FROM_PENALTIES.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                            accountMapForCredit, accountMapForDebit);
+                } else {
+                    populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId,
+                            AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue(), AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                            accountMapForCredit, accountMapForDebit);
+                }
+            }
+
+        }
+
+        // overpayment
+        if (overPaymentAmount != null && overPaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalDebitAmount = totalDebitAmount.add(overPaymentAmount);
+            if (loanTransactionDTO.getTransactionType().isMerchantIssuedRefund()) {
+                populateCreditDebitMaps(loanProductId, overPaymentAmount, paymentTypeId, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isPayoutRefund()) {
+                populateCreditDebitMaps(loanProductId, overPaymentAmount, paymentTypeId, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateCreditDebitMaps(loanProductId, overPaymentAmount, paymentTypeId, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
+                        AccrualAccountsForLoan.GOODWILL_CREDIT.getValue(), accountMapForCredit, accountMapForDebit);
+
+            } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
+                populateCreditDebitMaps(loanProductId, overPaymentAmount, paymentTypeId, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
+
+            } else {
+                populateCreditDebitMaps(loanProductId, overPaymentAmount, paymentTypeId, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
+            }
+
+        }
+
+        // create credit entries
+        for (Map.Entry<GLAccount, BigDecimal> creditEntry : accountMapForCredit.entrySet()) {
+            this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                    creditEntry.getValue(), isReversal, creditEntry.getKey());
+        }
+
+        if (totalDebitAmount.compareTo(BigDecimal.ZERO) > 0) {
+            if (writeOff) {
+                this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
+                        AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                        transactionDate, totalDebitAmount, isReversal);
+            } else {
+                if (loanTransactionDTO.isLoanToLoanTransfer()) {
+                    this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, FinancialActivity.ASSET_TRANSFER.getValue(),
+                            loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+                } else if (loanTransactionDTO.isAccountTransfer()) {
+                    this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
+                            FinancialActivity.LIABILITY_TRANSFER.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                            transactionDate, totalDebitAmount, isReversal);
+                } else {
+                    // create debit entries
+                    for (Map.Entry<Integer, BigDecimal> debitEntry : accountMapForDebit.entrySet()) {
+                        this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, debitEntry.getKey().intValue(),
+                                loanProductId, paymentTypeId, loanId, transactionId, transactionDate, debitEntry.getValue(), isReversal);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Charge Refunds (and their reversals) have an extra refund related pair of journal entries in addition to
+         * those related to the repayment above
+         ***/
+        if (totalDebitAmount.compareTo(BigDecimal.ZERO) > 0) {
+            if (loanTransactionDTO.getTransactionType().isChargeRefund()) {
+                Integer incomeAccount = this.helper.getValueForFeeOrPenaltyIncomeAccount(loanTransactionDTO.getChargeRefundChargeType());
+                this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, incomeAccount,
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                        totalDebitAmount, isReversal);
+            }
+        }
+
+    }
+
+    private void createJournalEntriesForLoansRepaymentAndWriteOffs(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
             final Office office, final boolean writeOff, final boolean isIncomeFromFee) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();

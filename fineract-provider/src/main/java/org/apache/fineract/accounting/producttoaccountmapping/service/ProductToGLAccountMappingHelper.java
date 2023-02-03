@@ -84,6 +84,11 @@ public class ProductToGLAccountMappingHelper {
             if (accountMapping == null) {
                 ArrayList<String> optionalProductToGLAccountMappingEntries = new ArrayList<String>();
                 optionalProductToGLAccountMappingEntries.add("goodwillCreditAccountId");
+                optionalProductToGLAccountMappingEntries.add("incomeFromChargeOffInterestAccountId");
+                optionalProductToGLAccountMappingEntries.add("incomeFromChargeOffFeesAccountId");
+                optionalProductToGLAccountMappingEntries.add("chargeOffAccountId");
+                optionalProductToGLAccountMappingEntries.add("chargeOffFraudAccountId");
+                optionalProductToGLAccountMappingEntries.add("incomeFromChargeOffPenaltyAccountId");
                 if (optionalProductToGLAccountMappingEntries.contains(paramName)) {
                     saveProductToAccountMapping(element, paramName, productId, accountTypeId, expectedAccountType, portfolioProductType);
                 } else {

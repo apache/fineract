@@ -119,7 +119,11 @@ public final class LoanProductDataValidator {
             LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
             LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
             LoanProductAccountingParams.FEE_INCOME_ACCOUNT_MAPPING.getValue(), LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(),
-            LoanProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(), LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
+            LoanProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(),
+            LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, LoanProductConstants.SHORT_NAME,
@@ -638,6 +642,31 @@ public final class LoanProductDataValidator {
                     element);
             baseDataValidator.reset().parameter(LoanProductAccountingParams.OVERPAYMENT.getValue()).value(overpaymentAccountId).notNull()
                     .integerGreaterThanZero();
+
+            final Long incomeFromChargeOffInterestAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue())
+                    .value(incomeFromChargeOffInterestAccountId).ignoreIfNull().integerGreaterThanZero();
+
+            final Long incomeFromChargeOffFeesAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue())
+                    .value(incomeFromChargeOffFeesAccountId).ignoreIfNull().integerGreaterThanZero();
+
+            final Long incomeFromChargeOffPenaltyAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue())
+                    .value(incomeFromChargeOffPenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
+
+            final Long chargeOffExpenseAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue()).value(chargeOffExpenseAccountId)
+                    .ignoreIfNull().integerGreaterThanZero();
+
+            final Long chargeOffFraudExpenseAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue())
+                    .value(chargeOffFraudExpenseAccountId).ignoreIfNull().integerGreaterThanZero();
 
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
             validateChargeToIncomeAccountMappings(baseDataValidator, element);
@@ -1483,6 +1512,31 @@ public final class LoanProductDataValidator {
                 .extractLongNamed(LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
         baseDataValidator.reset().parameter(LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue()).value(receivablePenaltyAccountId)
                 .ignoreIfNull().integerGreaterThanZero();
+
+        final Long incomeFromChargeOffInterestAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue())
+                .value(incomeFromChargeOffInterestAccountId).ignoreIfNull().integerGreaterThanZero();
+
+        final Long incomeFromChargeOffFeesAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue())
+                .value(incomeFromChargeOffFeesAccountId).ignoreIfNull().integerGreaterThanZero();
+
+        final Long incomeFromChargeOffPenaltyAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue())
+                .value(incomeFromChargeOffPenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
+
+        final Long chargeOffExpenseAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(), element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue()).value(chargeOffExpenseAccountId)
+                .ignoreIfNull().integerGreaterThanZero();
+
+        final Long chargeOffFraudExpenseAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue())
+                .value(chargeOffFraudExpenseAccountId).ignoreIfNull().integerGreaterThanZero();
 
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         validateChargeToIncomeAccountMappings(baseDataValidator, element);

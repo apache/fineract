@@ -4526,6 +4526,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", isUpfrontAccrualAccountingEnabledOnLoanProduct());
         accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", isPeriodicAccrualAccountingEnabledOnLoanProduct());
         accountingBridgeData.put("isAccountTransfer", isAccountTransfer);
+        accountingBridgeData.put("isChargeOff", isChargedOff());
+        accountingBridgeData.put("isFraud", isFraud());
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
