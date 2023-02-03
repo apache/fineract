@@ -63,6 +63,26 @@
     "allowedVersions": "<6.0.0"
   },
   {
+    "matchPackageNames": ["org.springframework.boot"],
+    "allowedVersions": "<3.0.0"
+  },
+  {
+    "matchPackageNames": ["jakarta.ws.rs"],
+    "allowedVersions": "<3.0.0"
+  },
+  {
+    "matchPackageNames": ["jakarta.jms"],
+    "allowedVersions": "<3.0.0"
+  },
+  {
+    "matchPackageNames": ["jakarta.annotation"],
+    "allowedVersions": "<2.0.0"
+  },
+  {
+    "matchPackageNames": ["io.rest-assured"],
+    "allowedVersions": "<5.0.0"
+  },
+  {
     "matchPackageNames": ["gradle"],
     "allowedVersions": "<=7.5.1"
   },
