@@ -746,6 +746,11 @@ public final class BatchHelper {
         return createTransactionRequest(requestId, reference, "repayment", amount, LocalDate.now(ZoneId.systemDefault()));
     }
 
+    public static BatchRequest repayLoanRequestWithGivenLoanId(final Long requestId, final Integer loanId, final String amount,
+            final LocalDate date) {
+        return createTransactionRequestWithGivenLoanId(requestId, loanId, "repayment", amount, date);
+    }
+
     /**
      * Creates and returns a {@link CreateTransactionLoanCommandStrategy} Request with given requestId.
      *
@@ -766,6 +771,21 @@ public final class BatchHelper {
         br.setRequestId(requestId);
         br.setReference(reference);
         br.setRelativeUrl(String.format("loans/$.loanId/transactions?command=%s", transactionCommand));
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
+                dateString, amount));
+
+        return br;
+    }
+
+    public static BatchRequest createTransactionRequestWithGivenLoanId(final Long requestId, final Integer loanId,
+            final String transactionCommand, final String amount, final LocalDate date) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl(String.format("loans/" + loanId + "/transactions?command=%s", transactionCommand));
         br.setMethod("POST");
         String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody(String.format(

@@ -38,10 +38,10 @@ public final class RolesHelper {
     private static final String ENABLE_ROLE_COMMAND = "enable";
 
     public static Integer createRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_ROLE_URL, getTestCreaRoleAsJSON(), "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_ROLE_URL, getTestCreateRoleAsJSON(), "resourceId");
     }
 
-    public static String getTestCreaRoleAsJSON() {
+    public static String getTestCreateRoleAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", Utils.randomNameGenerator("Role_Name_", 5));
         map.put("description", Utils.randomNameGenerator("Role_Description_", 10));
@@ -51,8 +51,7 @@ public final class RolesHelper {
     public static HashMap<String, Object> getRoleDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer roleId) {
         final String GET_ROLE_URL = "/fineract-provider/api/v1/roles/" + roleId + "?" + Utils.TENANT_IDENTIFIER;
-        HashMap<String, Object> role = Utils.performServerGet(requestSpec, responseSpec, GET_ROLE_URL, "");
-        return role;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_ROLE_URL, "");
     }
 
     public static Integer disableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -68,6 +67,18 @@ public final class RolesHelper {
     public static Integer deleteRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer roleId) {
         return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "resourceId");
+    }
+
+    public static String addPermissionsToRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer roleId, final HashMap<String, Boolean> permissionMap) {
+        return Utils.performServerPut(requestSpec, responseSpec, ROLE_URL + "/" + roleId + "/permissions?" + Utils.TENANT_IDENTIFIER,
+                getAddPermissionsToRoleJSON(permissionMap));
+    }
+
+    private static String getAddPermissionsToRoleJSON(HashMap<String, Boolean> permissionMap) {
+        final HashMap<String, HashMap<String, Boolean>> map = new HashMap<>();
+        map.put("permissions", permissionMap);
+        return new Gson().toJson(map);
     }
 
     private static String createRoleOperationURL(final String command, final Integer roleId) {
