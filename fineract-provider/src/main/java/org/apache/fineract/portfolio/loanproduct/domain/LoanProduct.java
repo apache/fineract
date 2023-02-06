@@ -200,6 +200,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "max_number_of_loan_extensions_allowed", nullable = true)
     private Integer maxNumberOfLoanExtensionsAllowed;
 
+    @Column(name = "is_account_level_arrears_tolerance_enable", nullable = false)
+    private boolean isAccountLevelArrearsToleranceEnable;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
@@ -378,6 +381,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         final Integer overAppliedNumber = command.integerValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER);
         final Integer maxNumberOfLoanExtensionsAllowed = command
                 .integerValueOfParameterNamed(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED);
+        final boolean isAccountLevelArrearsToleranceEnable = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE);
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
@@ -395,7 +400,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, maxNumberOfLoanExtensionsAllowed,
-                loanTermIncludesToppedUpLoanTerm);
+                loanTermIncludesToppedUpLoanTerm, isAccountLevelArrearsToleranceEnable);
 
     }
 
@@ -633,7 +638,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
             final Integer overAppliedNumber, final Integer maxNumberOfLoanExtensionsAllowed,
-            final boolean loanTermIncludesToppedUpLoanTerm) {
+            final boolean loanTermIncludesToppedUpLoanTerm, final boolean isAccountLevelArrearsToleranceEnable) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -713,6 +718,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.overAppliedCalculationType = overAppliedCalculationType;
         this.overAppliedNumber = overAppliedNumber;
         this.maxNumberOfLoanExtensionsAllowed = maxNumberOfLoanExtensionsAllowed;
+        this.isAccountLevelArrearsToleranceEnable = isAccountLevelArrearsToleranceEnable;
 
         if (rates != null) {
             this.rates = rates;
@@ -1226,6 +1232,12 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.maxNumberOfLoanExtensionsAllowed = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE, this.isAccountLevelArrearsToleranceEnable)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE);
+            actualChanges.put(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE, newValue);
+            this.isAccountLevelArrearsToleranceEnable = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -1610,5 +1622,9 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public Boolean getLoanTermIncludesToppedUpLoanTerm() {
         return loanTermIncludesToppedUpLoanTerm;
+    }
+
+    public boolean isAccountLevelArrearsToleranceEnable() {
+        return this.isAccountLevelArrearsToleranceEnable;
     }
 }

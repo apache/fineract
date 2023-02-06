@@ -145,4 +145,6 @@ public interface LoanProductConstants {
 
     String MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED = "maxNumberOfLoanExtensionsAllowed";
 
+    String IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE = "isAccountLevelArrearsToleranceEnable";
+
 }

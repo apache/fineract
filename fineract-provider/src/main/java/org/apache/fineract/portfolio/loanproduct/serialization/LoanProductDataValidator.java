@@ -112,7 +112,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS,
             LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE,
             LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED,
-            LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM));
+            LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE));
 
     private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
@@ -656,6 +656,13 @@ public final class LoanProductDataValidator {
                     .extractIntegerNamed(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED, element, Locale.getDefault());
             baseDataValidator.reset().parameter(LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED)
                     .value(maxNumberOfLoanExtensionsAllowed).ignoreIfNull().zeroOrPositiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE, element)) {
+            final Boolean isAccountLevelArrearsToleranceEnable = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE)
+                    .value(isAccountLevelArrearsToleranceEnable).notNull().isOneOfTheseValues(true, false);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

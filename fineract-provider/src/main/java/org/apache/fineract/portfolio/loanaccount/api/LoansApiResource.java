@@ -936,6 +936,11 @@ public class LoansApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
+        if (is(commandParam, "updateArrearsTolerance")) {
+            final CommandWrapper commandRequest = builder.updateArrearsTolerance(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
+
         if (result == null) {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
