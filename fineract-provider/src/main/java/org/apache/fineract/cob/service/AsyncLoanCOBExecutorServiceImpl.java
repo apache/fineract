@@ -101,7 +101,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
         JobParameter jobParameter = new JobParameter();
         jobParameter.setJobId(scheduledJobDetail.getId());
         jobParameter.setParameterName(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME);
-        jobParameter.setParameterValue("1");
+        jobParameter.setParameterValue("true");
         jobParameterRepository.save(jobParameter);
     }
 }
