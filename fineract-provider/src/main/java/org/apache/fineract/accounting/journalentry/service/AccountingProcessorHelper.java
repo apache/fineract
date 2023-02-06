@@ -453,6 +453,30 @@ public class AccountingProcessorHelper {
                 transactionId, transactionDate, amount);
     }
 
+    public void createSplitJournalEntriesAndReversalsForLoan(Office office, String currencyCode,
+            List<JournalAmountHolder> splitAccountsHolder, JournalAmountHolder totalAccountHolder, Long loanProductId, Long paymentTypeId,
+            Long loanId, String transactionId, LocalDate transactionDate, Boolean isReversal) {
+        splitAccountsHolder.forEach(journalItemHolder -> {
+            final GLAccount account = getLinkedGLAccountForLoanProduct(loanProductId, journalItemHolder.getAccountType(), paymentTypeId);
+            if (isReversal) {
+                createCreditJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate,
+                        journalItemHolder.getAmount());
+            } else {
+                createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate,
+                        journalItemHolder.getAmount());
+            }
+
+        });
+        final GLAccount totalAccount = getLinkedGLAccountForLoanProduct(loanProductId, totalAccountHolder.getAccountType(), paymentTypeId);
+        if (isReversal) {
+            createDebitJournalEntryForLoan(office, currencyCode, totalAccount, loanId, transactionId, transactionDate,
+                    totalAccountHolder.getAmount());
+        } else {
+            createCreditJournalEntryForLoan(office, currencyCode, totalAccount, loanId, transactionId, transactionDate,
+                    totalAccountHolder.getAmount());
+        }
+    }
+
     public void createCreditJournalEntryOrReversalForLoan(final Office office, final String currencyCode,
             final CashAccountsForLoan accountMappingType, final Long loanProductId, final Long paymentTypeId, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal) {
