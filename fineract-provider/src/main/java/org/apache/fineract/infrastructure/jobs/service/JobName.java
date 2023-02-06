@@ -51,7 +51,8 @@ public enum JobName {
                                                                                                                                                                                                                                     "Increase Business Date by 1 day"), INCREASE_COB_DATE_BY_1_DAY(
                                                                                                                                                                                                                                             "Increase COB Date by 1 day"), UPDATE_SAVINGS_INTEREST_POSTING_QUALIFY_CONFIG(
                                                                                                                                                                                                                                                     "Update Savings Interest Posting Qualify Config"), POST_ACCRUAL_INTEREST_FOR_SAVINGS(
-                                                                                                                                                                                                                                                            "Post Accrual Interest for Savings");
+                                                                                                                                                                                                                                                            "Post Accrual Interest for Savings"), POST_LOAN_REPAYMENT_REMINDER(
+                                                                                                                                                                                                                                                                    "Loan Repayment Reminder");
 
     private final String name;
 

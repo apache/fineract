@@ -39,4 +39,6 @@ public interface ScheduledJobRunnerService {
     void executeMissMatchedJobs() throws JobExecutionException;
 
     void postAccrualInterestForSavings() throws JobExecutionException;
+
+    void postLoanRepaymentReminder() throws JobExecutionException;
 }
