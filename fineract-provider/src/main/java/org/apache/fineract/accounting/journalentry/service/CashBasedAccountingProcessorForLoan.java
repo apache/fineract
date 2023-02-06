@@ -92,7 +92,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
              **/
             else if (loanTransactionDTO.getTransactionType().isWriteOff()) {
                 final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
-                if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
+                if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
                     this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode,
                             CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), CashAccountsForLoan.LOAN_PORTFOLIO.getValue(), loanProductId,
                             paymentTypeId, loanId, transactionId, transactionDate, principalAmount, loanTransactionDTO.isReversed());
@@ -140,7 +140,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         Map<GLAccount, BigDecimal> accountMap = new HashMap<>();
 
         // handle principal payment (and reversals)
-        if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
             GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                     AccountingConstants.CashAccountsForLoan.LOAN_PORTFOLIO.getValue(), paymentTypeId);
@@ -148,7 +148,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         }
 
         // handle interest payment (and reversals)
-        if (interestAmount != null && !(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(interestAmount);
             GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                     AccountingConstants.CashAccountsForLoan.INTEREST_ON_LOANS.getValue(), paymentTypeId);
@@ -161,7 +161,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         }
 
         // handle fees payment (and reversals)
-        if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (feesAmount != null && feesAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
             GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                     AccountingConstants.CashAccountsForLoan.INCOME_FROM_FEES.getValue(), paymentTypeId);
@@ -174,7 +174,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         }
 
         // handle penalties payment (and reversals)
-        if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (penaltiesAmount != null && penaltiesAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
             GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                     CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue(), paymentTypeId);
@@ -187,7 +187,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         }
 
         // handle overpayment
-        if (overPaymentAmount != null && !(overPaymentAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (overPaymentAmount != null && overPaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(overPaymentAmount);
             GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                     AccountingConstants.CashAccountsForLoan.OVERPAYMENT.getValue(), paymentTypeId);
@@ -204,7 +204,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                     entry.getValue(), isReversal, entry.getKey());
         }
 
-        if (!(totalDebitAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (totalDebitAmount.compareTo(BigDecimal.ZERO) > 0) {
             Long chargeId = loanTransactionDTO.getLoanChargeData().getChargeId();
             Integer accountMappingTypeId;
             if (loanTransactionDTO.getLoanChargeData().isPenalty()) {
@@ -342,33 +342,33 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
-        if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO, loanProductId,
                     paymentTypeId, loanId, transactionId, transactionDate, principalAmount, isReversal);
         }
 
-        if (interestAmount != null && !(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(interestAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.INTEREST_ON_LOANS,
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, interestAmount, isReversal);
         }
 
-        if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (feesAmount != null && feesAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                     CashAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate, feesAmount,
                     isReversal, loanTransactionDTO.getFeePayments());
         }
 
-        if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (penaltiesAmount != null && penaltiesAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                     CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue(), loanProductId, loanId, transactionId, transactionDate,
                     penaltiesAmount, isReversal, loanTransactionDTO.getPenaltyPayments());
         }
 
-        if (overPaymentAmount != null && !(overPaymentAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (overPaymentAmount != null && overPaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(overPaymentAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.OVERPAYMENT, loanProductId,
                     paymentTypeId, loanId, transactionId, transactionDate, overPaymentAmount, isReversal);
@@ -396,13 +396,11 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
          * Charge Refunds (and their reversals) have an extra refund related pair of journal entries in addition to
          * those related to the repayment above
          ***/
-        if (!(totalDebitAmount.compareTo(BigDecimal.ZERO) == 0)) {
-            if (loanTransactionDTO.getTransactionType().isChargeRefund()) {
-                Integer incomeAccount = this.helper.getValueForFeeOrPenaltyIncomeAccount(loanTransactionDTO.getChargeRefundChargeType());
-                this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, incomeAccount,
-                        CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
-                        totalDebitAmount, isReversal);
-            }
+        if (totalDebitAmount.compareTo(BigDecimal.ZERO) > 0 && loanTransactionDTO.getTransactionType().isChargeRefund()) {
+            Integer incomeAccount = this.helper.getValueForFeeOrPenaltyIncomeAccount(loanTransactionDTO.getChargeRefundChargeType());
+            this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, incomeAccount,
+                    CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                    totalDebitAmount, isReversal);
         }
     }
 
@@ -477,13 +475,27 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
         final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
-        final BigDecimal refundAmount = loanTransactionDTO.getAmount();
         final boolean isReversal = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
-        this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, CashAccountsForLoan.OVERPAYMENT.getValue(),
-                CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
-                refundAmount, isReversal);
+        BigDecimal overpaymentAmount = loanTransactionDTO.getOverPayment();
+        BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        List<JournalAmountHolder> journalAmountHolders = new ArrayList<>();
+
+        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalAmount = totalAmount.add(principalAmount);
+            journalAmountHolders.add(new JournalAmountHolder(CashAccountsForLoan.LOAN_PORTFOLIO.getValue(), principalAmount));
+        }
+        if (overpaymentAmount != null && overpaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalAmount = totalAmount.add(overpaymentAmount);
+            journalAmountHolders.add(new JournalAmountHolder(CashAccountsForLoan.OVERPAYMENT.getValue(), overpaymentAmount));
+        }
+
+        JournalAmountHolder totalAmountHolder = new JournalAmountHolder(CashAccountsForLoan.FUND_SOURCE.getValue(), totalAmount);
+        helper.createSplitJournalEntriesAndReversalsForLoan(office, currencyCode, journalAmountHolders, totalAmountHolder, loanProductId,
+                paymentTypeId, loanId, transactionId, transactionDate, isReversal);
     }
 
     private void createJournalEntriesForRefundForActiveLoan(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
@@ -505,19 +517,19 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
-        if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO, loanProductId,
                     paymentTypeId, loanId, transactionId, transactionDate, principalAmount, !isReversal);
         }
 
-        if (interestAmount != null && !(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(interestAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.INTEREST_ON_LOANS,
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, interestAmount, !isReversal);
         }
 
-        if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (feesAmount != null && feesAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
 
             List<ChargePaymentDTO> chargePaymentDTOs = new ArrayList<>();
@@ -533,7 +545,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                     !isReversal, chargePaymentDTOs);
         }
 
-        if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (penaltiesAmount != null && penaltiesAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
             List<ChargePaymentDTO> chargePaymentDTOs = new ArrayList<>();
 
@@ -549,7 +561,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                     penaltiesAmount, !isReversal, chargePaymentDTOs);
         }
 
-        if (overPaymentAmount != null && !(overPaymentAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (overPaymentAmount != null && overPaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(overPaymentAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.OVERPAYMENT, loanProductId,
                     paymentTypeId, loanId, transactionId, transactionDate, overPaymentAmount, !isReversal);
