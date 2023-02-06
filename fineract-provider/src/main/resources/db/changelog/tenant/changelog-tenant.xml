@@ -65,4 +65,5 @@
     <include file="parts/0039_add_free_withdrawal_in_recurring_details_product.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-140_add_allowManuallyEnterInterestRate_in_savings_product_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/OXY-37_add_maxNumberOfLoanExtensionsAllowed_in_loan_product_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-33-add-new-column-max-occurrence-in-charge.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

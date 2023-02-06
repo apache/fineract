@@ -153,6 +153,9 @@ public class Charge extends AbstractPersistableCustom {
     @Column(name = "has_varying_charge")
     private Boolean hasVaryingCharge;
 
+    @Column(name = "max_occurrence", nullable = true)
+    private Integer maxOccurrence;
+
     @OneToMany(mappedBy = "charge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ChargeSlab> chargeSlabs = new HashSet<>();
 
@@ -203,10 +206,12 @@ public class Charge extends AbstractPersistableCustom {
 
         }
 
+        final Integer maxOccurrence = command.integerValueOfParameterNamed("maxOccurrence");
+
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
                 feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, enableFreeWithdrawalCharge, freeWithdrawalFrequency,
                 restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType, minAmount, maxAmount,
-                chargeVarying);
+                chargeVarying, maxOccurrence);
     }
 
     protected Charge() {}
@@ -217,7 +222,7 @@ public class Charge extends AbstractPersistableCustom {
             final BigDecimal maxCap, final Integer feeFrequency, final boolean enableFreeWithdrawalCharge,
             final Integer freeWithdrawalFrequency, final Integer restartFrequency, final PeriodFrequencyType restartFrequencyEnum,
             final GLAccount account, final TaxGroup taxGroup, final boolean enablePaymentType, final PaymentType paymentType,
-            final BigDecimal minAmount, final BigDecimal maxAmount, Boolean hasVaryingCharge) {
+            final BigDecimal minAmount, final BigDecimal maxAmount, Boolean hasVaryingCharge, Integer maxOccurrence) {
         this.name = name;
         this.amount = amount;
         this.minAmount = minAmount;
@@ -305,6 +310,7 @@ public class Charge extends AbstractPersistableCustom {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
         this.hasVaryingCharge = hasVaryingCharge;
+        this.maxOccurrence = maxOccurrence;
     }
 
     public String getName() {
@@ -531,6 +537,14 @@ public class Charge extends AbstractPersistableCustom {
             this.restartFrequencyEnum = ChargeTimeType.fromInt(countFrequencyTypeNewValue).getValue();
         }
 
+        command.integerValueOfParameterNamed("maxOccurrence");
+        final String maxOccurrenceParamName = "maxOccurrence";
+        if (command.isChangeInIntegerParameterNamed(maxOccurrenceParamName, this.maxOccurrence)) {
+            final Integer maxOccurrenceNewValue = command.integerValueOfParameterNamed(maxOccurrenceParamName);
+            actualChanges.put(maxOccurrenceParamName, maxOccurrenceNewValue);
+            this.maxOccurrence = maxOccurrenceNewValue;
+        }
+
         final String enableFreeWithdrawalChargeParamName = "enableFreeWithdrawalCharge";
         if (command.isChangeInBooleanParameterNamed(enableFreeWithdrawalChargeParamName, this.enableFreeWithdrawal)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(enableFreeWithdrawalChargeParamName);
@@ -741,7 +755,7 @@ public class Charge extends AbstractPersistableCustom {
                 chargePaymentmode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.enableFreeWithdrawal,
                 this.freeWithdrawalFrequency, this.restartFrequency, this.restartFrequencyEnum, this.enablePaymentType, paymentTypeData,
                 this.minCap, this.maxCap, feeFrequencyType, accountData, taxGroupData, this.minAmount, this.maxAmount,
-                this.hasVaryingCharge);
+                this.hasVaryingCharge, null);
     }
 
     public void updateChargeSlabs(JsonCommand command, final Map<String, Object> actualChanges,
