@@ -31,10 +31,11 @@ public class OverdueLoanScheduleData {
     private final BigDecimal principalOverdue;
     private final BigDecimal interestOverdue;
     private final Integer periodNumber;
+    private final Integer maxOccurrenceTillChargeApplies;
 
     public OverdueLoanScheduleData(final Long loanId, final Long chargeId, final String dueDate, final BigDecimal amount,
             final String dateFormat, final String locale, final BigDecimal principalOverdue, final BigDecimal interestOverdue,
-            final Integer periodNumber) {
+            final Integer periodNumber, final Integer maxOccurrenceTillChargeApplies) {
         this.loanId = loanId;
         this.chargeId = chargeId;
         this.dueDate = dueDate;
@@ -44,6 +45,7 @@ public class OverdueLoanScheduleData {
         this.principalOverdue = principalOverdue;
         this.interestOverdue = interestOverdue;
         this.periodNumber = periodNumber;
+        this.maxOccurrenceTillChargeApplies = maxOccurrenceTillChargeApplies;
     }
 
     public Long getLoanId() {
@@ -72,6 +74,10 @@ public class OverdueLoanScheduleData {
 
     public Integer getPeriodNumber() {
         return this.periodNumber;
+    }
+
+    public Integer getMaxOccurrenceTillChargeApplies() {
+        return maxOccurrenceTillChargeApplies;
     }
 
     @Override
