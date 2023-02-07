@@ -1386,20 +1386,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             PaymentDetailData paymentDetailData = null;
 
-            if (transactionType.isPaymentOrReceipt()) {
-                final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
-                if (paymentTypeId != null) {
-                    final String typeName = rs.getString("paymentTypeName");
-                    final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
-                    final String accountNumber = rs.getString("accountNumber");
-                    final String checkNumber = rs.getString("checkNumber");
-                    final String routingCode = rs.getString("routingCode");
-                    final String receiptNumber = rs.getString("receiptNumber");
-                    final String bankNumber = rs.getString("bankNumber");
-                    paymentDetailData = new PaymentDetailData(id, paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
-                            bankNumber);
-                }
+            final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
+            if (paymentTypeId != null) {
+                final String typeName = rs.getString("paymentTypeName");
+                final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
+                final String accountNumber = rs.getString("accountNumber");
+                final String checkNumber = rs.getString("checkNumber");
+                final String routingCode = rs.getString("routingCode");
+                final String receiptNumber = rs.getString("receiptNumber");
+                final String bankNumber = rs.getString("bankNumber");
+                paymentDetailData = new PaymentDetailData(id, paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
+                        bankNumber);
             }
+
             final LocalDate date = JdbcSupport.getLocalDate(rs, "date");
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final BigDecimal totalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "total");

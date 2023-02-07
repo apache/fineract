@@ -1256,20 +1256,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("paymentTypeId", command.longValueOfParameterNamed(LoanApiConstants.PAYMENT_TYPE_PARAMNAME));
 
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
-        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
-        LoanTransaction newTransaction = LoanTransaction.chargeback(loan.getOffice(), transactionAmountAsMoney, paymentDetail,
-                transactionDate, txnExternalId);
+        PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
+        if (paymentDetail != null) {
+            paymentDetail = this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+        }
+        LoanTransaction newTransaction = LoanTransaction.chargeback(loan, transactionAmountAsMoney, paymentDetail, transactionDate,
+                txnExternalId);
 
         validateLoanTransactionAmountChargeBack(loanTransaction, newTransaction);
-
-        this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
 
         // Store the Loan Transaction Relation
         LoanTransactionRelation loanTransactionRelation = LoanTransactionRelation.linkToTransaction(loanTransaction, newTransaction,
                 LoanTransactionRelationTypeEnum.CHARGEBACK);
         this.loanTransactionRelationRepository.save(loanTransactionRelation);
 
-        this.loanTransactionRepository.save(newTransaction);
+        newTransaction = this.loanTransactionRepository.saveAndFlush(newTransaction);
 
         loan.handleChargebackTransaction(newTransaction, defaultLoanLifecycleStateMachine);
 
@@ -2439,9 +2440,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (!externalId.isEmpty()) {
             changes.put(LoanApiConstants.externalIdParameterName, externalId);
         }
+        changes.put("paymentTypeId", command.longValueOfParameterNamed(LoanApiConstants.PAYMENT_TYPE_PARAMNAME));
+
+        PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
+        if (paymentDetail != null) {
+            paymentDetail = this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+        }
 
         final LoanTransaction loanTransaction = this.loanAccountDomainService.creditBalanceRefund(loan, transactionDate, transactionAmount,
-                noteText, externalId);
+                noteText, externalId, paymentDetail);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(loanTransaction.getId()) //

@@ -6169,7 +6169,8 @@ public class ClientLoanIntegrationTest {
 
             String externalId = UUID.randomUUID().toString();
             PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = this.loanTransactionHelper.chargeAdjustment((long) loanID,
-                    (long) penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(10.0).externalId(externalId));
+                    (long) penalty1LoanChargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(10.0).externalId(externalId).paymentTypeId(1L));
 
             loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
             assertEquals(2, loanSchedule.size());
@@ -6196,6 +6197,7 @@ public class ClientLoanIntegrationTest {
             assertEquals(chargeAdjustmentResponse.getSubResourceId(), transactionRelation.getFromLoanTransaction());
             assertEquals((long) penalty1LoanChargeId, transactionRelation.getToLoanCharge());
             assertEquals("CHARGE_ADJUSTMENT", transactionRelation.getRelationType());
+            assertEquals(1L, chargeAdjustmentTransaction.getPaymentDetailData().getPaymentType().getId());
 
             PostLoansLoanIdTransactionsResponse repaymentResult = loanTransactionHelper.makeLoanRepayment((long) loanID,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("06 September 2022").locale("en")
@@ -7177,7 +7179,7 @@ public class ClientLoanIntegrationTest {
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             this.loanTransactionHelper.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()
-                    .transactionAmount(200.0).transactionDate("10 October 2022").dateFormat("dd MMMM yyyy").locale("en"));
+                    .transactionAmount(200.0).transactionDate("10 October 2022").dateFormat("dd MMMM yyyy").locale("en").paymentTypeId(1L));
 
             loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
@@ -7198,7 +7200,7 @@ public class ClientLoanIntegrationTest {
             assertEquals(200.0, loanDetails.getTransactions().get(3).getOverpaymentPortion());
             assertEquals(LocalDate.of(2022, 10, 10), loanDetails.getTransactions().get(3).getDate());
             assertEquals(0.0, loanDetails.getTransactions().get(3).getOutstandingLoanBalance());
-
+            assertEquals(1L, loanDetails.getTransactions().get(3).getPaymentDetailData().getPaymentType().getId());
             GetJournalEntriesTransactionIdResponse journalEntriesForTransaction = journalEntryHelper
                     .getJournalEntries("L" + loanDetails.getTransactions().get(3).getId());
             List<JournalEntryTransactionItem> journalItems = journalEntriesForTransaction.getPageItems();

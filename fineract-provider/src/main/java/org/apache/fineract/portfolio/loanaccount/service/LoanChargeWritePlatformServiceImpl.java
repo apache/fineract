@@ -123,6 +123,10 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeApiJson
 import org.apache.fineract.portfolio.loanproduct.data.LoanOverdueDTO;
 import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
+import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -154,6 +158,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final LoanChargeAssembler loanChargeAssembler;
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
+    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+    private final NoteRepository noteRepository;
 
     private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
         return e.getFromDate().isBefore(loanCharge.getDueDate()) && !loanCharge.getDueDate().isAfter(e.getDueDate());
@@ -640,7 +646,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     @Transactional
     @Override
     public CommandProcessingResult adjustmentForLoanCharge(Long loanId, Long loanChargeId, JsonCommand command) {
-        this.loanChargeApiJsonValidator.validateLoanAdjustmentRequest(loanId, loanChargeId, command.json());
+        this.loanChargeApiJsonValidator.validateLoanChargeAdjustmentRequest(loanId, loanChargeId, command.json());
 
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
@@ -648,12 +654,22 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final ExternalId externalId = externalIdFactory.createFromCommand(command, "externalId");
         final String locale = command.locale();
 
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("externalId", externalId);
+        changes.put("amount", transactionAmount);
+        changes.put("transactionDate", transactionDate);
+        changes.put("locale", locale);
+
         loanChargeAdjustmentEntranceValidation(loanCharge, transactionAmount);
         final Loan loan = loanAssembler.assembleFrom(loanId);
 
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
-
-        LoanTransaction loanTransaction = applyChargeAdjustment(loan, loanCharge, transactionAmount, transactionDate, externalId);
+        PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
+        if (paymentDetail != null) {
+            paymentDetail = this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+        }
+        LoanTransaction loanTransaction = applyChargeAdjustment(loan, loanCharge, transactionAmount, transactionDate, externalId,
+                paymentDetail);
 
         // Update loan transaction on repayment.
         if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
@@ -671,13 +687,17 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             }
             this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
         }
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.loanNote(loan, noteText);
+            changes.put("note", noteText);
+            this.noteRepository.save(note);
+        }
+
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargeAdjustmentPostBusinessEvent(loanTransaction));
-        Map<String, Object> changes = new HashMap<>();
-        changes.put("externalId", externalId);
-        changes.put("amount", transactionAmount);
-        changes.put("transactionDate", transactionDate);
-        changes.put("locale", locale);
+
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
                 .withEntityId(loanChargeId) //
@@ -753,13 +773,13 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     private LoanTransaction applyChargeAdjustment(final Loan loan, final LoanCharge loanCharge, final BigDecimal transactionAmount,
-            final LocalDate transactionDate, final ExternalId txnExternalId) {
+            final LocalDate transactionDate, final ExternalId txnExternalId, PaymentDetail paymentDetail) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargeAdjustmentPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
 
         LoanTransaction loanChargeAdjustmentTransaction = LoanTransaction.chargeAdjustment(loan, transactionAmount, transactionDate,
-                txnExternalId);
+                txnExternalId, paymentDetail);
         LoanTransactionRelation loanTransactionRelation = LoanTransactionRelation.linkToCharge(loanChargeAdjustmentTransaction, loanCharge,
                 LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT);
         loanChargeAdjustmentTransaction.getLoanTransactionRelations().add(loanTransactionRelation);

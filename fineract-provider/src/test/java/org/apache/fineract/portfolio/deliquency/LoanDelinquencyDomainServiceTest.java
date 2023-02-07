@@ -163,7 +163,7 @@ public class LoanDelinquencyDomainServiceTest {
         final Money zeroMoney = Money.zero(currency);
         LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, 1, fromDate, dueDate, principal,
                 zeroAmount, zeroAmount, zeroAmount, false, new HashSet<>(), zeroAmount);
-        LoanTransaction loanTransaction = LoanTransaction.chargeback(null, Money.of(currency, principal), paymentDetail, transactionDate,
+        LoanTransaction loanTransaction = LoanTransaction.chargeback(loan, Money.of(currency, principal), paymentDetail, transactionDate,
                 null);
         installment.getLoanTransactionToRepaymentScheduleMappings().add(LoanTransactionToRepaymentScheduleMapping
                 .createFrom(loanTransaction, installment, zeroMoney, zeroMoney, zeroMoney, zeroMoney));
