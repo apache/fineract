@@ -20,13 +20,17 @@ package org.apache.fineract.cob.loan;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.ExitStatus;
@@ -47,11 +51,18 @@ public abstract class AbstractLoanItemProcessor implements ItemProcessor<Loan, L
 
     @Override
     public Loan process(@NotNull Loan item) throws Exception {
-        TreeMap<Long, String> businessStepMap = (TreeMap<Long, String>) executionContext.get(LoanCOBConstant.BUSINESS_STEP_MAP);
+        Set<BusinessStepNameAndOrder> businessSteps = (Set<BusinessStepNameAndOrder>) executionContext.get(LoanCOBConstant.BUSINESS_STEPS);
+        TreeMap<Long, String> businessStepMap = getBusinessStepMap(businessSteps);
 
         Loan alreadyProcessedLoan = cobBusinessStepService.run(businessStepMap, item);
         alreadyProcessedLoan.setLastClosedBusinessDate(businessDate);
         return alreadyProcessedLoan;
+    }
+
+    private TreeMap<Long, String> getBusinessStepMap(Set<BusinessStepNameAndOrder> businessSteps) {
+        Map<Long, String> businessStepMap = businessSteps.stream()
+                .collect(Collectors.toMap(BusinessStepNameAndOrder::getStepOrder, BusinessStepNameAndOrder::getStepName));
+        return new TreeMap<>(businessStepMap);
     }
 
     @AfterStep

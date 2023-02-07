@@ -16,19 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob;
+package org.apache.fineract.cob.data;
 
-import java.util.Set;
-import java.util.TreeMap;
-import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.jetbrains.annotations.NotNull;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public interface COBBusinessStepService {
+@AllArgsConstructor
+@Getter
+@NoArgsConstructor
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+public class BusinessStepNameAndOrder {
 
-    <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item);
-
-    @NotNull
-    <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> Set<BusinessStepNameAndOrder> getCOBBusinessSteps(
-            Class<T> businessStepClass, String cobJobName);
+    private String stepName;
+    private Long stepOrder;
 }

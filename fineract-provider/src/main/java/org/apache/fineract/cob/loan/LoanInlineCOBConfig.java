@@ -122,7 +122,7 @@ public class LoanInlineCOBConfig {
     public ExecutionContextPromotionListener inlineCobPromotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
         listener.setKeys(
-                new String[] { LoanCOBConstant.LOAN_IDS, LoanCOBConstant.BUSINESS_STEP_MAP, LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME });
+                new String[] { LoanCOBConstant.LOAN_IDS, LoanCOBConstant.BUSINESS_STEPS, LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME });
         return listener;
     }
 }

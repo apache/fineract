@@ -30,7 +30,9 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
+import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
@@ -69,7 +71,7 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private Class clazz;
     private String jobName;
     private BatchBusinessStep batchBusinessStep = mock(BatchBusinessStep.class);
-    private TreeMap<Long, String> resultMap;
+    private Set<BusinessStepNameAndOrder> resultSet;
 
     public COBBusinessStepServiceStepDefinitions() {
         Given("/^The COBBusinessStepService.run method with executeMap (.*)$/", (String executionMap) -> {
@@ -136,7 +138,7 @@ public class COBBusinessStepServiceStepDefinitions implements En {
         });
 
         When("COBBusinessStepService.getCOBBusinessStepMap method executed", () -> {
-            resultMap = this.businessStepService.getCOBBusinessStepMap(this.clazz, this.jobName);
+            resultSet = this.businessStepService.getCOBBusinessSteps(this.clazz, this.jobName);
         });
 
         Then("The COBBusinessStepService.run result should match", () -> {
@@ -162,19 +164,19 @@ public class COBBusinessStepServiceStepDefinitions implements En {
 
         Then("The COBBusinessStepService.getCOBBusinessStepMap result exception", () -> {
             assertThrows(BeanCreationException.class, () -> {
-                this.businessStepService.getCOBBusinessStepMap(this.clazz, this.jobName);
+                this.businessStepService.getCOBBusinessSteps(this.clazz, this.jobName);
             });
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
 
         Then("The COBBusinessStepService.getCOBBusinessStepMap result should match", () -> {
-            assertEquals(1, resultMap.size());
-            assertEquals("test", resultMap.get(1L));
+            assertEquals(1, resultSet.size());
+            assertEquals("test", resultSet.stream().findFirst().get().getStepName());
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
 
         Then("The COBBusinessStepService.getCOBBusinessStepMap result empty", () -> {
-            assertEquals(0, resultMap.size());
+            assertEquals(0, resultSet.size());
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
 
