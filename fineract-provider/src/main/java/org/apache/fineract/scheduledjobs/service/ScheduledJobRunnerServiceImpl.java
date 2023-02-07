@@ -422,12 +422,6 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
     }
 
-    @Override
-    @CronTarget(jobName = JobName.POST_LOAN_REPAYMENT_REMINDER)
-    public void postLoanRepaymentReminder() throws JobExecutionException {
-        LOG.info("Loan Repayment Reminder. . . . ");
-    }
-
     private class SavingsAccrualInterestRunnable implements Runnable {
 
         final FineractPlatformTenant tenant;

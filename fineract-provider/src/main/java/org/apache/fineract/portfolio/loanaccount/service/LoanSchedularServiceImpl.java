@@ -48,6 +48,8 @@ import org.apache.fineract.organisation.office.exception.OfficeNotFoundException
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -58,6 +60,8 @@ import org.springframework.util.CollectionUtils;
 @RequiredArgsConstructor
 @Slf4j
 public class LoanSchedularServiceImpl implements LoanSchedularService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoanSchedularServiceImpl.class);
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -294,5 +298,11 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         } catch (ExecutionException e2) {
             log.error("Execution exception while posting IR entries", e2);
         }
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.POST_LOAN_REPAYMENT_REMINDER)
+    public void postLoanRepaymentReminder() {
+        LOG.info("Loan Repayment Reminder. . . . ");
     }
 }

@@ -28,4 +28,6 @@ public interface LoanSchedularService {
     void recalculateInterest() throws JobExecutionException;
 
     void recalculateInterest(@SuppressWarnings("unused") Map<String, String> jobParameters);
+
+    void postLoanRepaymentReminder() throws JobExecutionException;
 }
