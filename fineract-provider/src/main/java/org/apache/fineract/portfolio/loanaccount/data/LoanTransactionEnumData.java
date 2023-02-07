@@ -83,19 +83,6 @@ public class LoanTransactionEnumData {
         this.chargeAdjustment = Long.valueOf(26).equals(this.id);
     }
 
-    /**
-     * Returns true if the transaction involves either a payment (disbursement) or a receipt (repayments, repayments
-     * during disbursement etc)
-     *
-     * @return
-     */
-    public boolean isPaymentOrReceipt() {
-        if (isDisbursement() || isRepaymentType() || isRepaymentAtDisbursement() || isRecoveryRepayment()) {
-            return true;
-        }
-        return false;
-    }
-
     public boolean isRepaymentType() {
         if (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
                 || isChargeAdjustment()) {

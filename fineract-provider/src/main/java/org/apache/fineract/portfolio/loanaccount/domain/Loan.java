@@ -6272,8 +6272,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void handleChargebackTransaction(final LoanTransaction chargebackTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-        chargebackTransaction.updateLoan(this);
-
         if (!chargebackTransaction.isChargeback()) {
             final String errorMessage = "A transaction of type chargeback was expected but not received.";
             throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.chargeback.transaction", errorMessage);

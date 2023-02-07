@@ -184,13 +184,14 @@ public final class LoanChargeApiJsonValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateLoanAdjustmentRequest(final Long loanId, final Long loanChargeId, final String json) {
+    public void validateLoanChargeAdjustmentRequest(final Long loanId, final Long loanChargeId, final String json) {
 
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
 
-        Set<String> transactionParameters = new HashSet<>(List.of("amount", "externalId", "locale"));
+        Set<String> transactionParameters = new HashSet<>(List.of("amount", "externalId", "locale", "paymentTypeId", "accountNumber",
+                "checkNumber", "routingCode", "receiptNumber", "bankNumber", "note"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {
 
@@ -207,6 +208,9 @@ public final class LoanChargeApiJsonValidator {
         baseDataValidator.reset().parameter("amount").value(amount).ignoreIfNull().positiveAmount();
         baseDataValidator.reset().parameter("loanId").value(loanId).notNull().positiveAmount();
         baseDataValidator.reset().parameter("loanChargeId").value(loanChargeId).notNull().positiveAmount();
+
+        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

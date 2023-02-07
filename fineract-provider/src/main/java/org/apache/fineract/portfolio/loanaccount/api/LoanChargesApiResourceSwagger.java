@@ -261,6 +261,20 @@ final class LoanChargesApiResourceSwagger {
         public Double amount;
         @Schema(example = "786444UUUYYH7")
         public String externalId;
+        @Schema(example = "An optional note")
+        public String note;
+        @Schema(example = "3")
+        public Long paymentTypeId;
+        @Schema(example = "acc123")
+        public String accountNumber;
+        @Schema(example = "che123")
+        public String checkNumber;
+        @Schema(example = "rou123")
+        public String routingCode;
+        @Schema(example = "rec123")
+        public String receiptNumber;
+        @Schema(example = "ban123")
+        public String bankNumber;
     }
 
     @Schema(description = "PostLoansLoanIdChargesChargeIdResponse")

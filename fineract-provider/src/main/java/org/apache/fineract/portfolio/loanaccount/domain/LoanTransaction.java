@@ -159,9 +159,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
-    public static LoanTransaction chargeback(final Office office, final Money amount, final PaymentDetail paymentDetail,
+    public static LoanTransaction chargeback(final Loan loan, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final ExternalId externalId) {
-        LoanTransaction loanTransaction = new LoanTransaction(null, office, LoanTransactionType.CHARGEBACK, paymentDetail,
+        LoanTransaction loanTransaction = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGEBACK, paymentDetail,
                 amount.getAmount(), paymentDate, externalId);
         loanTransaction.principalPortion = amount.getAmount();
         return loanTransaction;
@@ -175,8 +175,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
-            final ExternalId externalId) {
-        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, amount, transactionDate, externalId);
+            final ExternalId externalId, PaymentDetail paymentDetail) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, paymentDetail, amount, transactionDate,
+                externalId);
     }
 
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
@@ -290,9 +291,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction creditBalanceRefund(final Loan loan, final Office office, final Money amount, final LocalDate paymentDate,
-            final ExternalId externalId) {
+            final ExternalId externalId, PaymentDetail paymentDetail) {
         return new LoanTransaction(loan, office, LoanTransactionType.CREDIT_BALANCE_REFUND.getValue(), paymentDate, amount.getAmount(),
-                null, null, null, null, amount.getAmount(), false, null, externalId);
+                null, null, null, null, amount.getAmount(), false, paymentDetail, externalId);
     }
 
     public static LoanTransaction refundForActiveLoan(final Office office, final Money amount, final PaymentDetail paymentDetail,
