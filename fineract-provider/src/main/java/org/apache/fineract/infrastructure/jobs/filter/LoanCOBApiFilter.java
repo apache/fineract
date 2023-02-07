@@ -18,16 +18,12 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
-import com.google.common.base.Splitter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -64,14 +60,11 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
-    private static final Pattern LOAN_PATH_PATTERN = Pattern.compile("/loans/\\d+");
+    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("\\/?loans\\/(?:external-id\\/)?(\\d+).*");
 
-    private static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("/loans/glimAccount/\\d+");
+    public static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("\\/?loans\\/glimAccount\\/(\\d+).*");
     private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find()
             || LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(s).find();
-    private static final Integer LOAN_ID_INDEX_IN_URL = 2;
-    private static final Integer GLIM_ID_INDEX_IN_URL = 3;
-    private static final Integer GLIM_STRING_INDEX_IN_URL = 2;
     private static final String JOB_NAME = "INLINE_LOAN_COB";
 
     @RequiredArgsConstructor
@@ -138,10 +131,9 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     }
 
     private List<Long> calculateRelevantLoanIds(String pathInfo) {
-        Iterable<String> split = Splitter.on('/').split(pathInfo);
-        Supplier<Stream<String>> streamSupplier = () -> StreamSupport.stream(split.spliterator(), false);
-        boolean isGlim = isGlim(streamSupplier);
-        Long loanIdFromRequest = getLoanId(isGlim, streamSupplier);
+
+        boolean isGlim = isGlim(pathInfo);
+        Long loanIdFromRequest = getLoanId(isGlim, pathInfo);
         List<Long> loanIds = isGlim ? getGlimChildLoanIds(loanIdFromRequest) : Collections.singletonList(loanIdFromRequest);
         if (isLoanHardLocked(loanIds)) {
             throw new LoanIdsHardLockedException(loanIdFromRequest);
@@ -186,11 +178,11 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
         filterChain.doFilter(request, response);
     }
 
-    private Long getLoanId(boolean isGlim, Supplier<Stream<String>> streamSupplier) {
+    private Long getLoanId(boolean isGlim, String pathInfo) {
         if (!isGlim) {
-            return streamSupplier.get().skip(LOAN_ID_INDEX_IN_URL).findFirst().map(Long::valueOf).orElse(null);
+            return Long.valueOf(LOAN_PATH_PATTERN.matcher(pathInfo).replaceAll("$1"));
         } else {
-            return streamSupplier.get().skip(GLIM_ID_INDEX_IN_URL).findFirst().map(Long::valueOf).orElse(null);
+            return Long.valueOf(LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(pathInfo).replaceAll("$1"));
         }
     }
 
@@ -201,8 +193,8 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
         return HTTP_METHODS.contains(HttpMethod.valueOf(method)) && URL_FUNCTION.test(pathInfo);
     }
 
-    private boolean isGlim(Supplier<Stream<String>> streamSupplier) {
-        return streamSupplier.get().skip(GLIM_STRING_INDEX_IN_URL).findFirst().map(s -> s.equals("glimAccount")).orElse(false);
+    private boolean isGlim(String pathInfo) {
+        return LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(pathInfo).matches();
     }
 
     @Override
