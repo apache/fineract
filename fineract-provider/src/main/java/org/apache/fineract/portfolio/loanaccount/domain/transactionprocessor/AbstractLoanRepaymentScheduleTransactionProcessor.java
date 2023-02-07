@@ -224,8 +224,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     LoanTransactionRelation newLoanTransactionRelation = null;
                     LoanTransactionRelation oldLoanTransactionRelation = null;
                     for (LoanTransactionRelation transactionRelation : loanTransaction.getLoanTransactionRelations()) {
-                        if (entry.getKey().equals(transactionRelation.getToTransaction().getId())
-                                && LoanTransactionRelationTypeEnum.CHARGEBACK.equals(transactionRelation.getRelationType())) {
+                        if (LoanTransactionRelationTypeEnum.CHARGEBACK.equals(transactionRelation.getRelationType())
+                                && entry.getKey().equals(transactionRelation.getToTransaction().getId())) {
                             newLoanTransactionRelation = LoanTransactionRelation.linkToTransaction(loanTransaction, entry.getValue(),
                                     LoanTransactionRelationTypeEnum.CHARGEBACK);
                             oldLoanTransactionRelation = transactionRelation;
