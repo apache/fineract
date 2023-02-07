@@ -151,4 +151,6 @@ public interface LoanReadPlatformService {
     List<LoanRepaymentScheduleInstallmentData> getRepaymentDataResponse(Long loanId);
 
     CollectionData retrieveLoanCollectionData(Long loanId);
+
+    List<LoanAccountData> retrieveOverDueLoansForClient(Long client);
 }

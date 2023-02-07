@@ -248,6 +248,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
+    public List<LoanAccountData> retrieveOverDueLoansForClient(Long clientId) {
+        this.context.authenticatedUser();
+        final LoanMapper rm = new LoanMapper(sqlGenerator);
+
+        final String sql = "select " + rm.loanSchema()
+                + " where l.client_id=? and l.total_outstanding_derived > 0";
+
+        return this.jdbcTemplate.query(sql, rm, clientId); // NOSONAR
+
+    }
+
+    @Override
     public LoanScheduleData retrieveRepaymentSchedule(final Long loanId,
             final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
             boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges) {

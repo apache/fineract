@@ -465,7 +465,7 @@ public class InteropServiceImpl implements InteropService {
             SavingsTransactionBooleanValues transactionValues = new SavingsTransactionBooleanValues(false, true, true, false, false);
             transaction = savingsAccountService.handleWithdrawal(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
                     instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null),
-                    transactionValues, backdatedTxnsAllowedTill);
+                    transactionValues, backdatedTxnsAllowedTill, false);
         } else {
             transaction = savingsAccountService.handleDeposit(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
                     instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null), false, true,

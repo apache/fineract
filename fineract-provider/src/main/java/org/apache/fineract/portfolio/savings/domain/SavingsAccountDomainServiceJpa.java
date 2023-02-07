@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -41,6 +43,8 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsDepositBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
@@ -62,6 +66,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     private final ConfigurationDomainService configurationDomainService;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanReadPlatformService loanReadPlatformService;
 
     @Autowired
     public SavingsAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
@@ -70,7 +75,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final ConfigurationDomainService configurationDomainService, final PlatformSecurityContext context,
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
+            final BusinessEventNotifierService businessEventNotifierService, final LoanReadPlatformService loanReadPlatformService) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -79,13 +84,28 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.context = context;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.loanReadPlatformService = loanReadPlatformService;
+    }
+
+    private BigDecimal getOverdueLoanAmountForClient(SavingsAccount savingsAccount, boolean isTransferToLoanAccount){
+        BigDecimal overdueLoanAmountForClient = BigDecimal.ZERO;
+        if(this.configurationDomainService.enforceOverdueLoansForMinBalance() && !isTransferToLoanAccount) {
+            List<LoanAccountData> loanAccountDataList = this.loanReadPlatformService.retrieveOverDueLoansForClient(savingsAccount.getClient().getId());
+            if (CollectionUtils.isNotEmpty(loanAccountDataList)) {
+                for (int i = 0; i < loanAccountDataList.size(); i++) {
+                    LoanAccountData loanAccountData = loanAccountDataList.get(0);
+                    overdueLoanAmountForClient = overdueLoanAmountForClient.add(loanAccountData.getTotalOutstandingAmount());
+                }
+            }
+        }
+        return overdueLoanAmountForClient;
     }
 
     @Transactional
     @Override
     public SavingsAccountTransaction handleWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
-            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
-            final SavingsTransactionBooleanValues transactionBooleanValues, final boolean backdatedTxnsAllowedTill) {
+                                                      final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+                                                      final SavingsTransactionBooleanValues transactionBooleanValues, final boolean backdatedTxnsAllowedTill, boolean isTransferToLoanAccount) {
         account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
         AppUser user = getAppUserIfPresent();
         account.validateForAccountBlock();
@@ -132,8 +152,9 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
 
+        //do check total loan overdue amount and consider is while applying min balance check
         account.validateAccountBalanceDoesNotBecomeNegative(transactionAmount, transactionBooleanValues.isExceptionForBalanceCheck(),
-                depositAccountOnHoldTransactions, backdatedTxnsAllowedTill);
+                depositAccountOnHoldTransactions, backdatedTxnsAllowedTill, getOverdueLoanAmountForClient(account, isTransferToLoanAccount));
 
         saveTransactionToGenerateTransactionId(withdrawal);
         if (backdatedTxnsAllowedTill) {

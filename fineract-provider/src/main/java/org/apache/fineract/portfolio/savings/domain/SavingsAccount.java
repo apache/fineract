@@ -1806,7 +1806,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isException,
-            final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions, final boolean backdatedTxnsAllowedTill) {
+            final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions, final boolean backdatedTxnsAllowedTill, final BigDecimal overdueLoanAmount) {
 
         List<SavingsAccountTransaction> transactionsSortedByDate = null;
 
@@ -1822,6 +1822,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
+
+        Money overdueLoanMoney = Money.of(getCurrency(), overdueLoanAmount);
+        minRequiredBalance = minRequiredBalance.plus(overdueLoanMoney);
+
         LocalDate lastSavingsDate = null;
         final BigDecimal withdrawalFee = null;
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
