@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,6 +52,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -152,6 +154,7 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 
 @Service
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
@@ -1820,6 +1823,23 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (!dataValidationErrors.isEmpty()) {
                     throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                             dataValidationErrors);
+                }
+                LocalDate fromDate = null;
+                LocalDate dueDate = null;
+                for (LoanRepaymentScheduleInstallment inst :  existingLoanApplication.getRepaymentScheduleInstallments()){
+                    if(inst.getDueDate().isAfter(DateUtils.getBusinessLocalDate())){
+                        if (fromDate == null) {
+                            fromDate = inst.getDueDate();
+                        }else if (dueDate == null){
+                            dueDate = inst.getDueDate();
+                            break;
+                        }
+                    }
+                }
+                int daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, dueDate));
+                if(daysInPeriod < graceOnArrearsAging){
+                    throw new GeneralPlatformDomainRuleException("error.grace.on.arrears.aging.days.should.not.be.greater.than.days.in.installment.period",
+                            "Grace on Arrears aging days should be less than from period for installment available days ." + daysInPeriod);
                 }
                 existingLoanApplication.setGraceOnArrearsAging(graceOnArrearsAging);
 
