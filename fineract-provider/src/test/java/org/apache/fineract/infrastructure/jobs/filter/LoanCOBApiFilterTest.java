@@ -38,6 +38,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonit
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,6 +63,29 @@ class LoanCOBApiFilterTest {
     private PlatformSecurityContext context;
     @Mock
     private InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
+
+    @Test
+    void shouldLoanAndExternalMatchToo() {
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/12").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/12?additional=parameter").matches());
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12").replaceAll("$1"));
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").replaceAll("$1"));
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/12").replaceAll("$1"));
+        Assertions.assertEquals("12",
+                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/12?additional=parameter").replaceAll("$1"));
+    }
+
+    @Test
+    void shouldGlimAccountMatch() {
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/loans/glimAccount/12").matches());
+        Assertions
+                .assertTrue(LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/loans/glimAccount/12?additional=parameter").matches());
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/loans/glimAccount/12").replaceAll("$1"));
+        Assertions.assertEquals("12",
+                LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/loans/glimAccount/12?additional=parameter").replaceAll("$1"));
+    }
 
     @Test
     void shouldProceedWhenUrlDoesNotMatch() throws ServletException, IOException {
@@ -100,6 +124,23 @@ class LoanCOBApiFilterTest {
         AppUser appUser = mock(AppUser.class);
 
         given(request.getPathInfo()).willReturn("/loans/2/charges");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
+        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
+        given(context.authenticatedUser()).willReturn(appUser);
+
+        testObj.doFilterInternal(request, response, filterChain);
+        verify(filterChain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void shouldProceedWhenExternalLoanIsNotLocked() throws ServletException, IOException {
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
+
+        given(request.getPathInfo()).willReturn("/loans/external-id/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
