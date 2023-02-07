@@ -252,8 +252,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.context.authenticatedUser();
         final LoanMapper rm = new LoanMapper(sqlGenerator);
 
-        final String sql = "select " + rm.loanSchema()
-                + " where l.client_id=? and l.total_outstanding_derived > 0";
+        final String sql = "select " + rm.loanSchema() + " where l.client_id=? and l.total_outstanding_derived > 0";
 
         return this.jdbcTemplate.query(sql, rm, clientId); // NOSONAR
 

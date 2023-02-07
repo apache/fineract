@@ -55,7 +55,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public boolean enforceOverdueLoansForMinBalance(){
+    public boolean enforceOverdueLoansForMinBalance() {
         return getGlobalConfigurationPropertyData(ENFORCE_OVERDUE_LOANS_FOR_MIN_BALANCE).isEnabled();
     }
 
