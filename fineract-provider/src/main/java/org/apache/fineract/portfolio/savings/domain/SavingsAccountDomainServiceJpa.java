@@ -93,7 +93,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                     .retrieveOverDueLoansForClient(savingsAccount.getClient().getId());
             if (CollectionUtils.isNotEmpty(loanAccountDataList)) {
                 for (int i = 0; i < loanAccountDataList.size(); i++) {
-                    LoanAccountData loanAccountData = loanAccountDataList.get(0);
+                    LoanAccountData loanAccountData = loanAccountDataList.get(i);
                     overdueLoanAmountForClient = overdueLoanAmountForClient.add(loanAccountData.getTotalOutstandingAmount());
                 }
             }
