@@ -237,7 +237,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, " + "lvi.minimum_gap as minimumGap, "
                     + "lvi.maximum_gap as maximumGap, "
                     + "lp.can_use_for_topup as canUseForTopup, lp.is_equal_amortization as isEqualAmortization, lp.is_loan_term_includes_topped_up_loan_term as loanTermIncludesToppedUpLoanTerm ,"
-                    + "lp.max_number_of_loan_extensions_allowed as maxNumberOfLoanExtensionsAllowed " + " from m_product_loan lp "
+                    + "lp.max_number_of_loan_extensions_allowed as maxNumberOfLoanExtensionsAllowed, "
+                    + "lp.is_account_level_arrears_tolerance_enable as isAccountLevelArrearsToleranceEnable "
+                    + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
                     + " left join m_product_loan_guarantee_details lpg on lpg.loan_product_id=lp.id "
@@ -467,6 +469,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Collection<RateData> rateOptions = null;
             final boolean isRatesEnabled = false;
             final Integer maxNumberOfLoanExtensionsAllowed = JdbcSupport.getInteger(rs, "maxNumberOfLoanExtensionsAllowed");
+            final Boolean isAccountLevelArrearsToleranceEnable = rs.getBoolean("isAccountLevelArrearsToleranceEnable");
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -486,7 +489,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
                     maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates,
                     isRatesEnabled, fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed,
-                    loanTermIncludesToppedUpLoanTerm);
+                    loanTermIncludesToppedUpLoanTerm, isAccountLevelArrearsToleranceEnable);
         }
     }
 

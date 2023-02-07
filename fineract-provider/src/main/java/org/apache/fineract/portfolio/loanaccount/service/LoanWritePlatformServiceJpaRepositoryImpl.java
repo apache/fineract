@@ -2764,6 +2764,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             lastChargeAppliedDate = installment.getDueDate();
         }
         LocalDate recalculateFrom = DateUtils.getBusinessLocalDate();
+        if(loan != null && loan.getLoanProduct().isAccountLevelArrearsToleranceEnable()
+                && loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null && loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() > 0){
+            LocalDate dateWithGrace = dueDate.plusDays(loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing());
+            if(dateWithGrace.isAfter(DateUtils.getBusinessLocalDate()) || dateWithGrace.isEqual(DateUtils.getBusinessLocalDate())){
+
+                return new LoanOverdueDTO(null, false, DateUtils.getBusinessLocalDate(), null);
+            }else if(dateWithGrace.isBefore(DateUtils.getBusinessLocalDate())){
+                loan.setGraceOnArrearsAging(0);
+                this.loanRepositoryWrapper.saveAndFlush(loan);
+            }
+
+        }
+
 
         if (loan != null) {
             businessEventNotifierService.notifyPreBusinessEvent(new LoanApplyOverdueChargeBusinessEvent(loan));

@@ -66,4 +66,5 @@
     <include file="parts/MON-140_add_allowManuallyEnterInterestRate_in_savings_product_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/OXY-37_add_maxNumberOfLoanExtensionsAllowed_in_loan_product_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/OXY-33-add-new-column-max-occurrence-in-charge.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-44_add_isAccountLevelArrearsToleranceEnable_in_loan_product_table.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

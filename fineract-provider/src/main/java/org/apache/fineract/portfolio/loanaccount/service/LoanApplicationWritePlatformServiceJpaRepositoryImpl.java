@@ -1799,4 +1799,51 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
     }
 
+    @Transactional
+    @Override
+    public CommandProcessingResult updateArrearsTolerance(final Long loanId, final JsonCommand command) {
+
+        try {
+            final Loan existingLoanApplication = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+            final Map<String, Object> changes = new HashMap<>();
+            if(existingLoanApplication.loanProduct().isAccountLevelArrearsToleranceEnable()) {
+                if(existingLoanApplication.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null
+                        && existingLoanApplication.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() == 0){
+                    throw new GeneralPlatformDomainRuleException("error.msg.arrears.tolerance.limit.exceed",
+                            "Arrears Tolerance Limit Has Exceed.");
+                }
+                final Integer graceOnArrearsAging = command.integerValueOfParameterNamed("graceOnArrearsAging");
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+                baseDataValidator.reset().parameter("graceOnArrearsAging").value(graceOnArrearsAging).ignoreIfNull()
+                        .positiveAmount();
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                            dataValidationErrors);
+                }
+                existingLoanApplication.setGraceOnArrearsAging(graceOnArrearsAging);
+
+                changes.put("graceOnArrearsAging", graceOnArrearsAging);
+                this.loanRepositoryWrapper.saveAndFlush(existingLoanApplication);
+            }else {
+                throw new GeneralPlatformDomainRuleException("error.msg.account.level.arrears.tolerance.not.enabled,can't.update.that.value",
+                        "Account level Arrears Tolerance checkbox not checked in product can't update the value for parameter GraceOnArrearsAging.");
+            }
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(loanId) //
+                    .withOfficeId(existingLoanApplication.getOfficeId()) //
+                    .withClientId(existingLoanApplication.getClientId()) //
+                    .withGroupId(existingLoanApplication.getGroupId()) //
+                    .withLoanId(existingLoanApplication.getId()) //
+                    .with(changes).build();
+        }catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
+        }
+    }
+
 }

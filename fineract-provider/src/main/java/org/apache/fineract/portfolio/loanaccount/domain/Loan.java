@@ -180,7 +180,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "loan_type_enum", nullable = false)
     private Integer loanType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
 
@@ -6889,5 +6889,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public Integer getTotal_extensions() {
         return total_extensions;
+    }
+
+    public void setGraceOnArrearsAging(Integer day){
+        this.getLoanProductRelatedDetail().setGraceOnArrearsAgeing(day);
     }
 }
