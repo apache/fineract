@@ -3509,7 +3509,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void applyIncomeAccrualTransaction(LocalDate closedDate) {
         ExternalId externalId = ExternalId.empty();
         boolean isExternalIdAutoGenerationEnabled = TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled();
-        if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+        if (isPeriodicAccrualAccountingEnabledOnLoanProduct()
+                // to avoid collision with processIncomeAccrualTransactionOnLoanClosure()
+                // TODO: review after interest calculation implemented
+                && !(this.loanInterestRecalculationDetails != null
+                        && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction())) {
             List<LoanTransaction> updatedAccrualTransactions = retrieveListOfAccrualTransactions();
             LocalDate lastAccruedDate = this.getDisbursementDate();
             if (!updatedAccrualTransactions.isEmpty()) {
