@@ -25,10 +25,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -55,10 +56,10 @@ public class InlineLoanCOBBuildExecutionContextTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         HashMap<BusinessDateType, LocalDate> businessDates = ThreadLocalContextUtil.getBusinessDates();
         ThreadLocalContextUtil.setActionContext(ActionContext.COB);
-        TreeMap<Long, String> cobBusinessStepMap = cobBusinessStepService.getCOBBusinessStepMap(LoanCOBBusinessStep.class,
+        Set<BusinessStepNameAndOrder> cobBusinessSteps = cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class,
                 LoanCOBConstant.LOAN_COB_JOB_NAME);
         contribution.getStepExecution().getExecutionContext().put(LoanCOBConstant.LOAN_IDS, getLoanIdsFromJobParameters(chunkContext));
-        contribution.getStepExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_STEP_MAP, cobBusinessStepMap);
+        contribution.getStepExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_STEPS, cobBusinessSteps);
         String businessDateString = getBusinessDateFromJobParameters(chunkContext);
         contribution.getStepExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, businessDateString);
         LocalDate businessDate = LocalDate.parse(businessDateString, DateTimeFormatter.ISO_DATE);

@@ -19,11 +19,14 @@
 package org.apache.fineract.cob;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
@@ -86,16 +89,17 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     @NotNull
     @Override
-    public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> TreeMap<Long, String> getCOBBusinessStepMap(
+    public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> Set<BusinessStepNameAndOrder> getCOBBusinessSteps(
             Class<T> businessStepClass, String cobJobName) {
         List<BatchBusinessStep> cobStepConfigs = batchBusinessStepRepository.findAllByJobName(cobJobName);
         List<String> businessSteps = Arrays.stream(beanFactory.getBeanNamesForType(businessStepClass)).toList();
-        TreeMap<Long, String> executionMap = new TreeMap<>();
+        Set<BusinessStepNameAndOrder> executionMap = new HashSet<>();
         for (String businessStep : businessSteps) {
             COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
             Optional<BatchBusinessStep> businessStepConfig = cobStepConfigs.stream()
                     .filter(stepConfig -> businessStepBean.getEnumStyledName().equals(stepConfig.getStepName())).findFirst();
-            businessStepConfig.ifPresent(batchBusinessStep -> executionMap.put(batchBusinessStep.getStepOrder(), businessStep));
+            businessStepConfig.ifPresent(
+                    batchBusinessStep -> executionMap.add(new BusinessStepNameAndOrder(businessStep, batchBusinessStep.getStepOrder())));
         }
         return executionMap;
     }

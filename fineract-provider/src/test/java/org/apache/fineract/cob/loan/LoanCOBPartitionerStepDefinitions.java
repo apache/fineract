@@ -25,13 +25,17 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.google.gson.Gson;
 import io.cucumber.java8.En;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.mockito.Mockito;
@@ -46,11 +50,12 @@ public class LoanCOBPartitionerStepDefinitions implements En {
     COBBusinessStepService cobBusinessStepService = mock(COBBusinessStepService.class);
     JobOperator jobOperator = mock(JobOperator.class);
     JobExplorer jobExplorer = mock(JobExplorer.class);
+    private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     List<Long> loanIds;
     private LoanCOBPartitioner loanCOBPartitioner;
 
-    private TreeMap<Long, String> cobBusinessMap = new TreeMap<>();
+    private Set<BusinessStepNameAndOrder> cobBusinessSteps = new HashSet<>();
 
     private Map<String, ExecutionContext> resultItem;
     private String action;
@@ -61,20 +66,20 @@ public class LoanCOBPartitionerStepDefinitions implements En {
             this.action = action;
             lenient().when(propertyService.getPartitionSize(LoanCOBConstant.JOB_NAME)).thenReturn(2);
             if ("empty steps".equals(action)) {
-                lenient().when(cobBusinessStepService.getCOBBusinessStepMap(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
-                        .thenReturn(new TreeMap<>());
+                lenient().when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
+                        .thenReturn(Collections.emptySet());
                 lenient().when(jobExplorer.findRunningJobExecutions(JobName.LOAN_COB.name())).thenReturn(Set.of(new JobExecution(3L)));
                 lenient().when(jobOperator.stop(3L)).thenReturn(Boolean.TRUE);
             } else if ("empty loanIds".equals(action)) {
-                cobBusinessMap.put(1L, "Business step");
-                lenient().when(cobBusinessStepService.getCOBBusinessStepMap(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
-                        .thenReturn(cobBusinessMap);
+                cobBusinessSteps.add(new BusinessStepNameAndOrder("Business step", 1L));
+                lenient().when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
+                        .thenReturn(cobBusinessSteps);
                 loanIds = new ArrayList<>();
                 lenient().when(jobExplorer.findRunningJobExecutions(JobName.LOAN_COB.name())).thenThrow(new RuntimeException("fail"));
             } else if ("good".equals(action)) {
-                cobBusinessMap.put(1L, "Business step");
-                lenient().when(cobBusinessStepService.getCOBBusinessStepMap(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
-                        .thenReturn(cobBusinessMap);
+                cobBusinessSteps.add(new BusinessStepNameAndOrder("Business step", 1L));
+                lenient().when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
+                        .thenReturn(cobBusinessSteps);
                 loanIds = List.of(1L, 2L, 3L);
             }
             loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, loanIds);
@@ -92,14 +97,20 @@ public class LoanCOBPartitionerStepDefinitions implements En {
                 verify(jobOperator, Mockito.times(0)).stop(Mockito.anyLong());
                 assertEquals(2, resultItem.size());
                 assertTrue(resultItem.containsKey(LoanCOBPartitioner.PARTITION_PREFIX + "1"));
-                assertEquals(cobBusinessMap,
-                        resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.BUSINESS_STEP_MAP));
+                Set<BusinessStepNameAndOrder> businessSteps = (Set<BusinessStepNameAndOrder>) resultItem
+                        .get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.BUSINESS_STEPS);
+                assertEquals(cobBusinessSteps.stream().findFirst().get().getStepOrder(),
+                        businessSteps.stream().findFirst().get().getStepOrder());
+                assertEquals(cobBusinessSteps.stream().findFirst().get().getStepName(),
+                        businessSteps.stream().findFirst().get().getStepName());
                 assertEquals(2, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.LOAN_IDS)).size());
                 assertEquals(1L, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.LOAN_IDS)).get(0));
                 assertEquals(2L, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.LOAN_IDS)).get(1));
                 assertTrue(resultItem.containsKey(LoanCOBPartitioner.PARTITION_PREFIX + "2"));
-                assertEquals(cobBusinessMap,
-                        resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "2").get(LoanCOBConstant.BUSINESS_STEP_MAP));
+                assertEquals(cobBusinessSteps.stream().findFirst().get().getStepOrder(),
+                        businessSteps.stream().findFirst().get().getStepOrder());
+                assertEquals(cobBusinessSteps.stream().findFirst().get().getStepName(),
+                        businessSteps.stream().findFirst().get().getStepName());
                 assertEquals(1, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "2").get(LoanCOBConstant.LOAN_IDS)).size());
                 assertEquals(3L, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "2").get(LoanCOBConstant.LOAN_IDS)).get(0));
             }
