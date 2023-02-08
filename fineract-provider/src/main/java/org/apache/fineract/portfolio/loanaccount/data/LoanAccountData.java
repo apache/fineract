@@ -1888,7 +1888,7 @@ public final class LoanAccountData {
         if (this.summary != null) {
             return this.summary.getTotalOverdue();
         } else {
-            return null;
+            return BigDecimal.ZERO;
         }
     }
 
