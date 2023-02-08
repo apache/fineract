@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.jobs.data.partitionedjobs.PartitionedJob;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
@@ -40,18 +39,31 @@ public class StuckJobExecutorServiceImpl implements StuckJobExecutorService {
     private final JobExecutionRepository jobExecutionRepository;
     private final TransactionTemplate transactionTemplate;
     private final JobOperator jobOperator;
-    private final JobRegisterService jobRegisterService;
 
     @Override
-    public void executeStuckJob(String jobName, Long jobId) {
+    public void resumeStuckJob(String jobName) {
+        List<Long> stuckJobIds = getStuckJobIds(jobName);
         if (isPartitionedJob(jobName) && areThereStuckJobs(jobName)) {
-            // Restarting stuck Partitioned jobs
-            List<Long> stuckJobIds = getStuckJobIds(jobName);
-            stuckJobIds.forEach(stuckJobId -> handleStuckJob(stuckJobId, getPartitionerStepName(jobName)));
+            restartPartitionedJobs(jobName, stuckJobIds);
         } else {
-            // Executing stuck Tasklet jobs
-            jobRegisterService.executeJobWithParameters(jobId, null);
+            restartTaskletJobs(stuckJobIds);
         }
+    }
+
+    private void restartTaskletJobs(List<Long> stuckJobIds) {
+        stuckJobIds.forEach(this::handleStuckTaskletJob);
+    }
+
+    private void handleStuckTaskletJob(Long stuckJobId) {
+        try {
+            jobOperator.restart(stuckJobId);
+        } catch (Exception e) {
+            throw new RuntimeException("Exception while handling a stuck job", e);
+        }
+    }
+
+    private void restartPartitionedJobs(String jobName, List<Long> stuckJobIds) {
+        stuckJobIds.forEach(stuckJobId -> handleStuckPartitionedJob(stuckJobId, getPartitionerStepName(jobName)));
     }
 
     private boolean isPartitionedJob(String jobName) {
@@ -71,14 +83,14 @@ public class StuckJobExecutorServiceImpl implements StuckJobExecutorService {
         return jobExecutionRepository.getStuckJobIdsByJobName(jobName);
     }
 
-    private void handleStuckJob(Long stuckJobId, String partitionerStepName) {
+    private void handleStuckPartitionedJob(Long stuckJobId, String partitionerStepName) {
         try {
             waitUntilAllPartitionsFinished(stuckJobId, partitionerStepName);
             transactionTemplate.setPropagationBehavior(PROPAGATION_REQUIRES_NEW);
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
                 @Override
-                protected void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
                     jobExecutionRepository.updateJobStatusToFailed(stuckJobId, partitionerStepName);
                 }
             });

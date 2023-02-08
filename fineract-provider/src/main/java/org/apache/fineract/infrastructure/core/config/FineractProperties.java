@@ -50,6 +50,8 @@ public class FineractProperties {
 
     private FineractReportProperties report;
 
+    private FineractJobProperties job;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -224,5 +226,12 @@ public class FineractProperties {
 
         private String bucketName;
         private Boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractJobProperties {
+
+        private int stuckRetryThreshold;
     }
 }

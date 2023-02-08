@@ -22,10 +22,12 @@ import static org.springframework.batch.core.BatchStatus.COMPLETED;
 import static org.springframework.batch.core.BatchStatus.FAILED;
 import static org.springframework.batch.core.BatchStatus.STARTED;
 import static org.springframework.batch.core.BatchStatus.STARTING;
+import static org.springframework.batch.core.BatchStatus.UNKNOWN;
 
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -34,68 +36,148 @@ import org.springframework.stereotype.Component;
 public class JobExecutionRepository {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final FineractProperties fineractProperties;
 
     public List<String> getStuckJobNames(NamedParameterJdbcTemplate jdbcTemplate) {
-        return jdbcTemplate.queryForList(
-                "SELECT bji.JOB_NAME as STUCK_JOB_NAME FROM BATCH_JOB_INSTANCE bji "
-                        + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
-                        + "WHERE bje.STATUS IN (:statuses) AND bje.JOB_INSTANCE_ID NOT IN ("
-                        + "SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji "
-                        + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
-                        + "WHERE bje.STATUS  = :completedStatus)",
-                Map.of("statuses", List.of(STARTED.name(), FAILED.name()), "completedStatus", COMPLETED.name()), String.class);
+        int threshold = fineractProperties.getJob().getStuckRetryThreshold();
+        return jdbcTemplate.queryForList("""
+                SELECT DISTINCT(bji.JOB_NAME) as STUCK_JOB_NAME
+                FROM BATCH_JOB_INSTANCE bji
+                INNER JOIN BATCH_JOB_EXECUTION bje
+                ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                WHERE
+                    bje.STATUS IN (:statuses)
+                    AND
+                    bje.JOB_INSTANCE_ID NOT IN (
+                        SELECT bje.JOB_INSTANCE_ID
+                        FROM BATCH_JOB_INSTANCE bji
+                        INNER JOIN BATCH_JOB_EXECUTION bje
+                        ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                        WHERE bje.STATUS IN (:completedStatuses)
+                    )
+                GROUP BY BJI.JOB_INSTANCE_ID
+                HAVING COUNT(BJI.JOB_INSTANCE_ID) <= :threshold
+                """, Map.of("statuses", List.of(STARTED.name()), "completedStatuses",
+                List.of(COMPLETED.name(), FAILED.name(), UNKNOWN.name()), "threshold", threshold), String.class);
     }
 
     public Long getStuckJobCountByJobName(String jobName) {
-        return namedParameterJdbcTemplate.queryForObject(
-                "SELECT COUNT(*) as STUCK_JOB_COUNT FROM BATCH_JOB_INSTANCE bji "
-                        + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
-                        + "WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bje.JOB_INSTANCE_ID NOT IN ("
-                        + "SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji "
-                        + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
-                        + "WHERE bje.STATUS  = :completedStatus AND bji.JOB_NAME = :jobName)",
-                Map.of("statuses", List.of(STARTED.name(), FAILED.name()), "jobName", jobName, "completedStatus", COMPLETED.name()),
-                Long.class);
+        int threshold = fineractProperties.getJob().getStuckRetryThreshold();
+        return namedParameterJdbcTemplate.queryForObject("""
+                    SELECT COUNT(DISTINCT bji.JOB_NAME) as STUCK_JOB_COUNT
+                    FROM BATCH_JOB_INSTANCE bji
+                    INNER JOIN BATCH_JOB_EXECUTION bje
+                    ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                    WHERE
+                        bje.STATUS IN (:statuses)
+                        AND
+                        bji.JOB_NAME = :jobName
+                        AND
+                        bje.JOB_INSTANCE_ID NOT IN (
+                            SELECT bje.JOB_INSTANCE_ID
+                            FROM BATCH_JOB_INSTANCE bji
+                            INNER JOIN BATCH_JOB_EXECUTION bje
+                            ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                            WHERE
+                                bje.STATUS IN (:completedStatuses)
+                                AND
+                                bji.JOB_NAME = :jobName
+                        )
+                    GROUP BY BJI.JOB_INSTANCE_ID
+                    HAVING COUNT(BJI.JOB_INSTANCE_ID) <= :threshold
+                """, Map.of("statuses", List.of(STARTED.name()), "jobName", jobName, "completedStatuses",
+                List.of(COMPLETED.name(), FAILED.name(), UNKNOWN.name()), "threshold", threshold), Long.class);
     }
 
     public List<Long> getStuckJobIdsByJobName(String jobName) {
-        return namedParameterJdbcTemplate.queryForList(
-                "SELECT bje.JOB_EXECUTION_ID FROM BATCH_JOB_INSTANCE bji "
-                        + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
-                        + "WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bje.JOB_INSTANCE_ID NOT IN ("
-                        + "SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji "
-                        + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
-                        + "WHERE bje.STATUS = :completedStatus AND bji.JOB_NAME = :jobName)",
-                Map.of("statuses", List.of(STARTED.name(), FAILED.name()), "jobName", jobName, "completedStatus", COMPLETED.name()),
-                Long.class);
+        int threshold = fineractProperties.getJob().getStuckRetryThreshold();
+        return namedParameterJdbcTemplate.queryForList("""
+                    SELECT bje.JOB_EXECUTION_ID
+                    FROM BATCH_JOB_INSTANCE bji
+                    INNER JOIN BATCH_JOB_EXECUTION bje
+                    ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                    WHERE
+                        bje.STATUS IN (:statuses)
+                        AND
+                        bji.JOB_NAME = :jobName
+                        AND
+                        bje.JOB_INSTANCE_ID NOT IN (
+                            SELECT bje.JOB_INSTANCE_ID
+                            FROM BATCH_JOB_INSTANCE bji
+                            INNER JOIN BATCH_JOB_EXECUTION bje
+                            ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                            WHERE
+                            bje.STATUS IN (:completedStatuses)
+                            AND
+                            bji.JOB_NAME = :jobName
+                        )
+                    GROUP BY BJI.JOB_INSTANCE_ID, BJE.JOB_EXECUTION_ID
+                    HAVING COUNT(BJI.JOB_INSTANCE_ID) <= :threshold
+                """, Map.of("statuses", List.of(STARTED.name()), "jobName", jobName, "completedStatuses",
+                List.of(COMPLETED.name(), FAILED.name(), UNKNOWN.name()), "threshold", threshold), Long.class);
     }
 
     public Long getNotCompletedPartitionsCount(Long jobExecutionId, String partitionerStepName) {
-        return namedParameterJdbcTemplate.queryForObject(
-                "SELECT COUNT(bse.STEP_EXECUTION_ID) FROM BATCH_STEP_EXECUTION bse "
-                        + "WHERE bse.JOB_EXECUTION_ID = :jobExecutionId AND bse.STEP_NAME <> :stepName AND bse.status <> :status",
-                Map.of("jobExecutionId", jobExecutionId, "stepName", partitionerStepName, "status", COMPLETED.name()), Long.class);
+        return namedParameterJdbcTemplate.queryForObject("""
+                    SELECT COUNT(bse.STEP_EXECUTION_ID)
+                    FROM BATCH_STEP_EXECUTION bse
+                    WHERE
+                        bse.JOB_EXECUTION_ID = :jobExecutionId
+                        AND
+                        bse.STEP_NAME <> :stepName
+                        AND
+                        bse.status <> :status
+                """, Map.of("jobExecutionId", jobExecutionId, "stepName", partitionerStepName, "status", COMPLETED.name()), Long.class);
     }
 
     public void updateJobStatusToFailed(Long stuckJobId, String partitionerStepName) {
-        namedParameterJdbcTemplate.update(
-                "UPDATE BATCH_STEP_EXECUTION SET STATUS = :status WHERE JOB_EXECUTION_ID = :jobExecutionId AND STEP_NAME = :stepName",
-                Map.of("status", FAILED.name(), "jobExecutionId", stuckJobId, "stepName", partitionerStepName));
-        namedParameterJdbcTemplate.update(
-                "UPDATE BATCH_JOB_EXECUTION SET STATUS = :status, START_TIME = null, END_TIME = null WHERE JOB_EXECUTION_ID = :jobExecutionId",
-                Map.of("status", FAILED.name(), "jobExecutionId", stuckJobId));
+        namedParameterJdbcTemplate.update("""
+                    UPDATE BATCH_STEP_EXECUTION
+                    SET STATUS = :status
+                    WHERE
+                        JOB_EXECUTION_ID = :jobExecutionId
+                        AND
+                        STEP_NAME = :stepName
+                """, Map.of("status", FAILED.name(), "jobExecutionId", stuckJobId, "stepName", partitionerStepName));
+        namedParameterJdbcTemplate.update("""
+                    UPDATE BATCH_JOB_EXECUTION
+                    SET
+                        STATUS = :status,
+                        START_TIME = null,
+                        END_TIME = null
+                    WHERE
+                        JOB_EXECUTION_ID = :jobExecutionId
+                """, Map.of("status", FAILED.name(), "jobExecutionId", stuckJobId));
     }
 
     public List<Long> getRunningJobsByExecutionParameter(String jobName, String parameterKeyName, String parameterValue) {
-        return namedParameterJdbcTemplate.queryForList("SELECT bje.JOB_EXECUTION_ID FROM BATCH_JOB_INSTANCE bji "
-                + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
-                + "INNER JOIN BATCH_JOB_EXECUTION_PARAMS bjep ON bje.JOB_EXECUTION_ID = bjep.JOB_EXECUTION_ID "
-                + "WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bjep.KEY_NAME = :parameterKeyName AND bjep.STRING_VAL = :parameterValue AND bje.JOB_INSTANCE_ID NOT IN ("
-                + "SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji "
-                + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
-                + "WHERE bje.STATUS = :completedStatus AND bji.JOB_NAME = :jobName)",
-                Map.of("statuses", List.of(STARTED.name(), STARTING.name()), "jobName", jobName, "completedStatus", COMPLETED.name(),
-                        "parameterKeyName", parameterKeyName, "parameterValue", parameterValue),
-                Long.class);
+        return namedParameterJdbcTemplate.queryForList("""
+                    SELECT bje.JOB_EXECUTION_ID
+                    FROM BATCH_JOB_INSTANCE bji
+                    INNER JOIN BATCH_JOB_EXECUTION bje
+                    ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                    INNER JOIN BATCH_JOB_EXECUTION_PARAMS bjep
+                    ON bje.JOB_EXECUTION_ID = bjep.JOB_EXECUTION_ID
+                    WHERE
+                        bje.STATUS IN (:statuses)
+                        AND
+                        bji.JOB_NAME = :jobName
+                        AND
+                        bjep.KEY_NAME = :parameterKeyName
+                        AND
+                        bjep.STRING_VAL = :parameterValue
+                        AND
+                        bje.JOB_INSTANCE_ID NOT IN (
+                            SELECT bje.JOB_INSTANCE_ID
+                            FROM BATCH_JOB_INSTANCE bji
+                            INNER JOIN BATCH_JOB_EXECUTION bje
+                            ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                            WHERE
+                                bje.STATUS = :completedStatus
+                                AND
+                                bji.JOB_NAME = :jobName
+                        )
+                """, Map.of("statuses", List.of(STARTED.name(), STARTING.name()), "jobName", jobName, "completedStatus", COMPLETED.name(),
+                "parameterKeyName", parameterKeyName, "parameterValue", parameterValue), Long.class);
     }
 }
