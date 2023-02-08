@@ -20,11 +20,11 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="deepika@fiter.io" id="add_is_account_level_arrears_tolerance_enable_in_loan_product">
+    <changeSet author="deepika@fiter.io" id="add_is_account_level_arrears_tolerance_enable_in_loan_product_1">
 
         <preConditions onFail="MARK_RAN">
             <not>
-                <columnExists tableName="m_product_loan" columnName="is_account_level_arrears_tolerance_enable_1"/>
+                <columnExists tableName="m_product_loan" columnName="is_account_level_arrears_tolerance_enable"/>
             </not>
         </preConditions>
         <addColumn tableName="m_product_loan">
@@ -34,7 +34,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="deepika@fiter.io" id="add_m_permissions_UPDATEARREARSTOLERANCE">
+    <changeSet author="deepika@fiter.io" id="add_m_permissions_UPDATEARREARSTOLERANCE_1">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATEARREARSTOLERANCE_LOAN'
