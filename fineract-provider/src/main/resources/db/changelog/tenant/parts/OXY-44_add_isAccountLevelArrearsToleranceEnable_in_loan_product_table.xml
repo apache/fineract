@@ -24,11 +24,11 @@
 
         <preConditions onFail="MARK_RAN">
             <not>
-                <columnExists tableName="m_product_loan" columnName="is_account_level_arrears_tolerance_enable"/>
+                <columnExists tableName="m_product_loan" columnName="is_account_level_arrears_tolerance_enable_1"/>
             </not>
         </preConditions>
         <addColumn tableName="m_product_loan">
-            <column name="is_account_level_arrears_tolerance_enable" type="int" defaultValue="false">
+            <column name="is_account_level_arrears_tolerance_enable" type="boolean" defaultValue="false">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
