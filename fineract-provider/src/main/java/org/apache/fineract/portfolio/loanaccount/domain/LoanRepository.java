@@ -83,8 +83,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     String FIND_ID_BY_EXTERNAL_ID = "SELECT loan.id FROM Loan loan WHERE loan.externalId = :externalId";
 
     // should follow the logic of `FIND_ALL_NON_CLOSED_LOANS_BY_LAST_CLOSED_BUSINESS_DATE` query
-    String FIND_OLDEST_COB_PROCESSED_LOAN = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.lastClosedBusinessDate = (select min(l.lastClosedBusinessDate) from Loan l where loan.loanStatus in (100,200,300,303,304) and l"
-            + ".lastClosedBusinessDate <> " + ":cobBusinessDate)";
+    String FIND_OLDEST_COB_PROCESSED_LOAN = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.loanStatus in (100,200,300,303,304) and loan.lastClosedBusinessDate = (select min(l.lastClosedBusinessDate) from Loan l where l"
+            + ".loanStatus in (100,200,300,303,304) and l.lastClosedBusinessDate <> :cobBusinessDate)";
 
     String FIND_ALL_NON_CLOSED_LOANS_BEHIND_BY_LOAN_IDS = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in (100,200,300,303,304) and (loan.lastClosedBusinessDate <> :cobBusinessDate or "
             + "loan.lastClosedBusinessDate is null)";
