@@ -21,8 +21,6 @@ package org.apache.fineract.infrastructure.jobs.service;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
@@ -31,7 +29,6 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.external.service.JdbcTemplateFactory;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
-import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameData;
 import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameProvider;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -67,18 +64,9 @@ public class StuckJobListener implements ApplicationListener<ContextRefreshedEve
                         HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
                         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
                         ThreadLocalContextUtil.setBusinessDates(businessDates);
-                        stuckJobNames.forEach(stuckJobName -> {
-                            String sql = "select id from job where name = :jobName";
-                            Optional<JobNameData> jobNameDataOptional = jobNameProvider.provide().stream()
-                                    .filter(jobNameData -> stuckJobName.equals(jobNameData.getEnumStyleName())).findFirst();
-                            JobNameData jobNameData = jobNameDataOptional
-                                    .orElseThrow(() -> new IllegalArgumentException("Job not found by name: " + stuckJobName));
-                            Long stuckJobId = namedParameterJdbcTemplate.queryForObject(sql,
-                                    Map.of("jobName", jobNameData.getHumanReadableName()), Long.class);
-                            stuckJobExecutorService.executeStuckJob(stuckJobName, stuckJobId);
-                        });
+                        stuckJobNames.forEach(stuckJobExecutorService::resumeStuckJob);
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Error while trying to restart stuck jobs", e);
                     } finally {
                         ThreadLocalContextUtil.reset();
                     }
