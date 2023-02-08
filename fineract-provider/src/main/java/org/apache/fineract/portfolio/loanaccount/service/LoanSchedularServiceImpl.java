@@ -46,6 +46,8 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.slf4j.Logger;
@@ -72,6 +74,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     private final ApplicationContext applicationContext;
     private final ApplyChargeToOverdueLoansBusinessStep applyChargeToOverdueLoansBusinessStep;
     private final LoanRepository loanRepository;
+    private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
 
     @Override
     @CronTarget(jobName = JobName.APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT)
@@ -304,5 +307,10 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     @CronTarget(jobName = JobName.POST_LOAN_REPAYMENT_REMINDER)
     public void postLoanRepaymentReminder() {
         LOG.info("Loan Repayment Reminder. . . . ");
+
+        final List<LoanRepaymentScheduleInstallment> repaymentReminders = loanRepaymentScheduleInstallmentRepository
+                .findLoanRepaymentReminder();
+        LOG.info("Size of Reminder :::->> " + repaymentReminders.size());
+
     }
 }
