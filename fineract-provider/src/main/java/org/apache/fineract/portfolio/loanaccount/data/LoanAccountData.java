@@ -1884,6 +1884,14 @@ public final class LoanAccountData {
         }
     }
 
+    public BigDecimal getTotalOverdueAmount() {
+        if (this.summary != null) {
+            return this.summary.getTotalOverdue();
+        } else {
+            return null;
+        }
+    }
+
     public boolean isInterestRecalculationEnabled() {
         return this.isInterestRecalculationEnabled;
     }

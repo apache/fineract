@@ -124,4 +124,8 @@ public class LoanSummaryData {
     public BigDecimal getTotalPaidFeeCharges() {
         return feeChargesPaid;
     }
+
+    public BigDecimal getTotalOverdue() {
+        return totalOverdue;
+    }
 }
