@@ -316,6 +316,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
                 final List<LoanRepaymentReminderData> repaymentReminders = loanReadPlatformService
                         .findLoanRepaymentReminderData(data.getDays());
+                LOG.info("- BatchID " + data.getId() + " - Days::>> " + data.getDays() + " - Reminder Size -::-> "
+                        + repaymentReminders.size());
             }
 
         } else {
