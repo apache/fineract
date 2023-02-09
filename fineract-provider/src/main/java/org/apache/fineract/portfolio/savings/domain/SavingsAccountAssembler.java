@@ -620,4 +620,8 @@ public class SavingsAccountAssembler {
         account.setVaultTribeDetails(vaultTargetAmount, null);
         return account;
     }
+
+    public List<SavingsAccount> findSavingAccountByClientId(Long clientId) {
+        return this.savingsAccountRepository.findSavingAccountByClientId(clientId);
+    }
 }

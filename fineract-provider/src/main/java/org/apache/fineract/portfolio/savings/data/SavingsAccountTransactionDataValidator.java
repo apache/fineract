@@ -54,12 +54,15 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.exception.TransactionBeforePivotDateNotAllowed;
+import org.apache.fineract.portfolio.validationlimit.domain.ValidationLimit;
+import org.apache.fineract.portfolio.validationlimit.domain.ValidationLimitRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,6 +71,8 @@ import org.springframework.stereotype.Component;
 public class SavingsAccountTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+
+    private final ValidationLimitRepository validationLimitRepository;
     private static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName, SavingsApiConstants.localeParamName,
                     transactionAmountParamName, lienAllowedParamName, SavingsApiConstants.reasonForBlockParamName));
@@ -76,10 +81,12 @@ public class SavingsAccountTransactionDataValidator {
 
     @Autowired
     public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper,
-            final ConfigurationDomainService configurationDomainService, final SavingsAccountAssembler savingAccountAssembler) {
+            final ConfigurationDomainService configurationDomainService, final SavingsAccountAssembler savingAccountAssembler,
+            final ValidationLimitRepository validationLimitRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.configurationDomainService = configurationDomainService;
         this.savingAccountAssembler = savingAccountAssembler;
+        this.validationLimitRepository = validationLimitRepository;
     }
 
     public void validateTransactionWithPivotDate(final LocalDate transactionDate, final SavingsAccount savingsAccount) {
@@ -339,5 +346,53 @@ public class SavingsAccountTransactionDataValidator {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);
         }
+    }
+
+    public void validateWithdrawLimits(SavingsAccount account, BigDecimal transactionAmount, BigDecimal totalWithdrawnToday) {
+        // Client to consider while checking limits
+        Client clientToCheckForLimit = account.getClient();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+        if (clientToCheckForLimit.getClientLevelId() != null) {
+            ValidationLimit validationLimit = this.validationLimitRepository.findByClientLevelId(clientToCheckForLimit.getClientLevelId());
+            BigDecimal dailyWithdrawLimit = validationLimit.getMaximumDailyWithdrawLimit();
+
+            if (BigDecimal.ZERO.compareTo(dailyWithdrawLimit) != 0 && dailyWithdrawLimit.compareTo(totalWithdrawnToday) < 0) {
+                baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(transactionAmount)
+                        .failWithCode("validation.msg.amount.exceeds.daily.withdraw.limit", dailyWithdrawLimit);
+            }
+
+            throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+        }
+
+    }
+
+    public void validateDailyDepositLimits(Client client, BigDecimal transactionAmount) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+        ValidationLimit validationLimit = this.validationLimitRepository.findByClientLevelId(client.getClientLevelId());
+        if (validationLimit != null && validationLimit.getMaximumSingleDepositAmount() != null) {
+            if (transactionAmount.compareTo(validationLimit.getMaximumSingleDepositAmount()) > 0) {
+                baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(transactionAmount).failWithCode(
+                        "validation.msg.amount.exceeds.single.deposit.limit", validationLimit.getMaximumSingleDepositAmount());
+            }
+        }
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateCumulativeBalanceByLimit(SavingsAccount account, BigDecimal transactionAmount) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+        ValidationLimit validationLimit = this.validationLimitRepository.findByClientLevelId(account.getClient().getClientLevelId());
+        if (validationLimit.getMaximumCumulativeBalance() != null
+                && account.getSummary().getAccountBalance().compareTo(validationLimit.getMaximumCumulativeBalance()) > 0) {
+            baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(transactionAmount)
+                    .failWithCode("validation.msg.cumulative.balance.exceeds.limit", validationLimit.getMaximumCumulativeBalance());
+        }
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 }

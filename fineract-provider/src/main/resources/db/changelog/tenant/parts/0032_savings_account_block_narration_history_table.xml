@@ -28,7 +28,8 @@
         </preConditions>
 
         <createTable tableName="m_savings_account_block_narration_history">
-            <column name="id" autoIncrement="true" type="bigint"></column>
+            <column name="id" type="BIGINT" >
+            </column>
             <column name="account_id" type="bigint">
                 <constraints references="m_savings_account(id)" foreignKeyName="fk_m_savings_account_block_narration_history_0001" nullable="false"/>
             </column>

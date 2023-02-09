@@ -27,6 +27,8 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 public class ClientApiConstants {
 
     public static final String CLIENT_RESOURCE_NAME = "client";
+
+    public static final String CLIENT_LEVELS = "clientLevels";
     public static final String CLIENT_CHARGES_RESOURCE_NAME = "CLIENTCHARGE";
 
     // Client Charge Action Names
@@ -185,6 +187,7 @@ public class ClientApiConstants {
     public static final String obligeeData = "ObligeeDetails";
 
     public static final String clientEntityName = "clients";
+    public static final String clientLevelIdParamName = "clientLevelId";
 
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get

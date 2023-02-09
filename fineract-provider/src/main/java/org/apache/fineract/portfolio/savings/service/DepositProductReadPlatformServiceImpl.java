@@ -148,7 +148,8 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sp.accounting_type as accountingType, ");
             sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
-            sqlBuilder.append("sp.withhold_tax as withHoldTax, sp.is_usd_product as isUSDProduct, sp.allow_manually_enter_interest_rate as allowManuallyEnterInterestRate,");
+            sqlBuilder.append(
+                    "sp.withhold_tax as withHoldTax, sp.is_usd_product as isUSDProduct, sp.allow_manually_enter_interest_rate as allowManuallyEnterInterestRate,");
             sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
             this.schemaSql = sqlBuilder.toString();
         }

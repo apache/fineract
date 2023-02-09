@@ -221,6 +221,13 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "proposed_transfer_date", nullable = true)
     private LocalDate proposedTransferDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_level_id", insertable = false, updatable = false)
+    private CodeValue clientLevel;
+
+    @Column(name = "client_level_id")
+    private Long clientLevelId;
+
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ClientCollateralManagement> clientCollateralManagements = new HashSet<>();
 
@@ -1025,4 +1032,20 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.proposedTransferDate = proposedTransferDate;
     }
 
+    public CodeValue getClientLevel() {
+        return clientLevel;
+    }
+
+    public void setClientLevel(CodeValue clientLevel) {
+        setClientLevelId(clientLevel == null ? null : clientLevel.getId());
+        this.clientLevel = clientLevel;
+    }
+
+    public Long getClientLevelId() {
+        return clientLevelId;
+    }
+
+    public void setClientLevelId(Long clientLevelId) {
+        this.clientLevelId = clientLevelId;
+    }
 }

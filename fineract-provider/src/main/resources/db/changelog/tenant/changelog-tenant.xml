@@ -51,7 +51,7 @@
     <include file="parts/0033_add_fields_in_m_savings_product_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0034_add_fields_in_m_savings_account_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0035_add_entry_for_job_to_update_interest_config.xml" relativeToChangelogFile="true"/>
-    <include file="parts/UC-24_Accrual_accounting_on_savings_account.xml" relativeToChangelogFile="true"/>
+<!--    <include file="parts/UC-24_Accrual_accounting_on_savings_account.xml" relativeToChangelogFile="true"/>-->
     <include file="parts/0013_create_table_for_business_owner.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-92_FD_topup.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-92_FD_topup_permission.xml" relativeToChangelogFile="true"/>
@@ -63,5 +63,6 @@
     <include file="parts/MON-110_Vault_Tribe.xml" relativeToChangelogFile="true"/>
     <include file="parts/0038_add_free_withdrawal_in_recurring_details.xml" relativeToChangelogFile="true"/>
     <include file="parts/0039_add_free_withdrawal_in_recurring_details_product.xml" relativeToChangelogFile="true"/>
+    <include file="parts/040_add_validation_limits.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-140_add_allowManuallyEnterInterestRate_in_savings_product_table.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

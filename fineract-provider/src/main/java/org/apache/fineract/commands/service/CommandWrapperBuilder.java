@@ -3561,4 +3561,20 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/addmember/" + accountId;
         return this;
     }
+
+    public CommandWrapperBuilder createValidationLimit() {
+        this.actionName = "CREATE";
+        this.entityName = "VALIDATIONLIMIT";
+        this.entityId = null;
+        this.href = "/validationlimit/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateValidationLimit(final Long validationLimitId) {
+        this.actionName = "UPDATE";
+        this.entityName = "VALIDATIONLIMIT";
+        this.entityId = validationLimitId;
+        this.href = "/validationlimit/" + validationLimitId;
+        return this;
+    }
 }

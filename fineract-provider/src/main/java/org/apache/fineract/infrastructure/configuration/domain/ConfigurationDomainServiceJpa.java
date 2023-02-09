@@ -451,4 +451,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.isEnabled();
     }
+
+    @Override
+    public boolean isClientLevelValidationEnabled() {
+        return false;
+    }
 }

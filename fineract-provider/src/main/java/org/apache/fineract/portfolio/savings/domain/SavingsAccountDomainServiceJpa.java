@@ -41,10 +41,13 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsDepositBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +66,10 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
 
+    private final SavingsAccountAssembler savingAccountAssembler;
+
+    private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
+
     @Autowired
     public SavingsAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
@@ -70,7 +77,9 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final ConfigurationDomainService configurationDomainService, final PlatformSecurityContext context,
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
+            final BusinessEventNotifierService businessEventNotifierService,
+            final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
+            final SavingsAccountAssembler savingAccountAssembler) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -79,13 +88,16 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.context = context;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.savingsAccountTransactionDataValidator = savingsAccountTransactionDataValidator;
+        this.savingAccountAssembler = savingAccountAssembler;
     }
 
     @Transactional
     @Override
     public SavingsAccountTransaction handleWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
-            final SavingsTransactionBooleanValues transactionBooleanValues, final boolean backdatedTxnsAllowedTill) {
+            final SavingsTransactionBooleanValues transactionBooleanValues, final boolean backdatedTxnsAllowedTill,
+            boolean isAccountTransfer) {
         account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
         AppUser user = getAppUserIfPresent();
         account.validateForAccountBlock();
@@ -95,6 +107,15 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
         final boolean postReversals = this.configurationDomainService.isReversalTransactionAllowed();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
+        final boolean isClientLevelValidationEnabled = this.configurationDomainService.isClientLevelValidationEnabled();
+        if (this.shouldValidateLimitDuringWithdrawal(account, !isAccountTransfer, isClientLevelValidationEnabled)) {
+            Client client = account.getClient();
+            BigDecimal totalWithdrawOnDate = this.getTotalWithdrawAmountOnDate(account.clientId(), transactionDate, transactionAmount,
+                    isAccountTransfer);
+            this.savingsAccountTransactionDataValidator.validateWithdrawLimits(account, transactionAmount, totalWithdrawOnDate);
+        }
+
         if (transactionBooleanValues.isRegularTransaction() && !account.allowWithdrawal()) {
             throw new DepositAccountTransactionNotAllowedException(account.getId(), "withdraw", account.depositAccountType());
         }
@@ -149,6 +170,29 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         return withdrawal;
     }
 
+    private BigDecimal getTotalWithdrawAmountOnDate(Long clientId, LocalDate transactionDate, BigDecimal transactionAmount,
+            boolean isAccountTransfer) {
+
+        BigDecimal totalWithdrawOnDate = transactionAmount;
+        for (SavingsAccount acc : this.savingAccountAssembler.findSavingAccountByClientId(clientId)) {
+            if (acc.depositAccountType().isSavingsDeposit()) {
+                for (SavingsAccountTransaction tran : acc.getTransactions()) {
+                    if (!tran.isReversed() && tran.isWithdrawal() && tran.getTransactionLocalDate().isEqual(transactionDate)
+                            && !isAccountTransfer) {
+                        totalWithdrawOnDate = totalWithdrawOnDate.add(tran.getAmount());
+                    }
+                }
+            }
+        }
+        return totalWithdrawOnDate;
+    }
+
+    private boolean shouldValidateLimitDuringWithdrawal(SavingsAccount account, boolean isAccountTransfer,
+            boolean isClientLevelValidationEnabled) {
+        return isClientLevelValidationEnabled && account.depositAccountType().isSavingsDeposit() && !isAccountTransfer
+                && account.getClient() != null && !LegalForm.ENTITY.getValue().equals(account.getClient().getLegalForm());
+    }
+
     private AppUser getAppUserIfPresent() {
         AppUser user = null;
         if (this.context != null) {
@@ -175,6 +219,14 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
         account.validateForAccountBlock();
         account.validateForCreditBlock();
+
+        final boolean isClientLevelValidationEnabled = this.configurationDomainService.isClientLevelValidationEnabled();
+        final boolean shouldValidateLimit = this.shouldValidateLimit(account, isAccountTransfer, isClientLevelValidationEnabled);
+
+        if (shouldValidateLimit) {
+            this.savingsAccountTransactionDataValidator.validateDailyDepositLimits(account.getClient(), transactionAmount);
+            this.savingsAccountTransactionDataValidator.validateCumulativeBalanceByLimit(account, transactionAmount);
+        }
 
         // Global configurations
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
@@ -225,6 +277,11 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
         businessEventNotifierService.notifyPostBusinessEvent(new SavingsDepositBusinessEvent(deposit));
         return deposit;
+    }
+
+    private boolean shouldValidateLimit(SavingsAccount account, boolean isAccountTransfer, boolean isClientLevelValidationEnabled) {
+        return isClientLevelValidationEnabled && account.depositAccountType().isSavingsDeposit() && !isAccountTransfer
+                && account.getClient() != null && !LegalForm.ENTITY.getValue().equals(account.getClient().getLegalForm());
     }
 
     @Transactional
