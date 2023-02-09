@@ -21,7 +21,7 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -126,7 +126,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
-        Map<GLAccount, BigDecimal> accountMap = new HashMap<>();
+        Map<GLAccount, BigDecimal> accountMap = new LinkedHashMap<>();
 
         // handle principal payment (and reversals)
         if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
@@ -324,7 +324,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
-        Map<GLAccount, BigDecimal> accountMap = new HashMap<>();
+        Map<GLAccount, BigDecimal> accountMap = new LinkedHashMap<>();
 
         // handle principal payment or writeOff (and reversals)
         if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
