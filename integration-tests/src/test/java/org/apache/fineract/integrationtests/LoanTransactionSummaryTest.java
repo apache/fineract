@@ -197,7 +197,45 @@ public class LoanTransactionSummaryTest {
         assertEquals(loanSummary.getTotalChargeAdjustment(), 10.00);
         // charge
         assertEquals(loanSummary.getTotalChargeback(), 50.00);
+    }
 
+    @Test
+    public void lastRepaymentAmountTest() {
+        // Loan ExternalId
+        String loanExternalIdStr = UUID.randomUUID().toString();
+
+        // Delinquency Bucket
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+                delinquencyBucketId);
+
+        // Client and Loan account creation
+
+        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
+                delinquencyBucketId);
+        assertNotNull(getLoanProductsProductResponse);
+
+        final Integer loanId = createLoanAccount(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr);
+
+        // Merchant Refund
+        final PostLoansLoanIdTransactionsResponse merchantIssuedRefund = loanTransactionHelper.makeMerchantIssuedRefund((long) loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
+                        .transactionAmount(20.0));
+
+        final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
+                        .transactionAmount(100.0));
+
+        final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("6 September 2022").locale("en")
+                        .transactionAmount(50.0));
+
+        // Retrieve Loan with loanId
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+
+        assertEquals(100.0, loanDetails.getDelinquent().getLastPaymentAmount());
+        assertEquals(LocalDate.of(2022, 9, 8), loanDetails.getDelinquent().getLastPaymentDate());
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,

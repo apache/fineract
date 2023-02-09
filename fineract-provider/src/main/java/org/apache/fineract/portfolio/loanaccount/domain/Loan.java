@@ -4974,12 +4974,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public LoanTransaction getLastRepaymentTransaction() {
-        for (final LoanTransaction loanTransaction : this.loanTransactions) {
-            if (!loanTransaction.isReversed() && loanTransaction.isRepaymentType()) {
-                return loanTransaction;
-            }
-        }
-        return null;
+        return loanTransactions.stream() //
+                .filter(loanTransaction -> !loanTransaction.isReversed()) //
+                .filter(LoanTransaction::isRepaymentType) //
+                .reduce((first, second) -> second) //
+                .orElse(null);
     }
 
     public LocalDate getLastUserTransactionForChargeCalc() {
