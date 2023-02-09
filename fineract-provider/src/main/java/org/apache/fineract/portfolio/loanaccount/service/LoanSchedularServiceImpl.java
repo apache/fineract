@@ -48,9 +48,8 @@ import org.apache.fineract.organisation.office.exception.OfficeNotFoundException
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentReminderSettingsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentReminderSettingsRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +75,6 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     private final ApplicationContext applicationContext;
     private final ApplyChargeToOverdueLoansBusinessStep applyChargeToOverdueLoansBusinessStep;
     private final LoanRepository loanRepository;
-    private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
     private final LoanRepaymentReminderSettingsRepository loanRepaymentReminderSettingsRepository;
 
     @Override
@@ -309,16 +307,21 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     @Override
     @CronTarget(jobName = JobName.POST_LOAN_REPAYMENT_REMINDER)
     public void postLoanRepaymentReminder() {
-        LOG.info("Loan Repayment Reminder. . . . ");
 
         final List<LoanRepaymentReminderSettingsData> settingsData = loanRepaymentReminderSettingsRepository
                 .findLoanRepaymentReminderSettings();
 
-        LOG.info("LoanRepaymentReminderSettingsData of Reminder :::->> " + settingsData.size());
+        if (!CollectionUtils.isEmpty(settingsData)) {
+            for (LoanRepaymentReminderSettingsData data : settingsData) {
 
-        final List<LoanRepaymentScheduleInstallment> repaymentReminders = loanRepaymentScheduleInstallmentRepository
-                .findLoanRepaymentReminder();
-        LOG.info("Size of Reminder :::->> " + repaymentReminders.size());
+                final List<LoanRepaymentReminderData> repaymentReminders = loanReadPlatformService
+                        .findLoanRepaymentReminderData(data.getDays());
+            }
+
+        } else {
+            LOG.info("Loan Repayment Reminders not found");
+        }
 
     }
+
 }

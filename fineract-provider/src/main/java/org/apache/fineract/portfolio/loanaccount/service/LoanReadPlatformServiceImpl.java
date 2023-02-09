@@ -105,6 +105,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -2336,6 +2337,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return collectionData;
     }
 
+    @Override
+    public List<LoanRepaymentReminderData> findLoanRepaymentReminderData(Integer numberOfDaysToDueDate) {
+        final LoanRepaymentReminderDataMapper mapper = new LoanRepaymentReminderDataMapper(sqlGenerator);
+        String sql = "select " + mapper.schema(numberOfDaysToDueDate);
+        List<LoanRepaymentReminderData> repaymentReminderData = this.jdbcTemplate.query(sql, mapper);
+        return repaymentReminderData;
+    }
+
     private static final class CollectionDataMapper implements RowMapper<CollectionData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -2381,6 +2390,56 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             return CollectionData.instance(availableDisbursementAmount, pastDueDays, nextPaymentDueDate, delinquentDays, delinquentDate,
                     delinquentAmount, lastPaymentDate, lastPaymentAmount);
+        }
+    }
+
+    private static final class LoanRepaymentReminderDataMapper implements RowMapper<LoanRepaymentReminderData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanRepaymentReminderDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String schema(Integer numberOfDaysToDueDate) {
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append(sqlGenerator.charDistinct("l.id", "as loanId, "));
+            sqlBuilder.append(
+                    " mc.id as clientId, grp.id as groupId, sch.duedate as dueDate, sch.installment as installmentNumber, sch.principal_amount as principalAmount, sch.interest_amount as interestAmount, ");
+            sqlBuilder.append(" sch.fee_charges_amount as feeChargesAmount, sch.penalty_charges_amount as penaltyChargeAmount, ");
+            sqlBuilder.append(
+                    " (COALESCE(sch.principal_amount,0.0)+ COALESCE(sch.interest_amount,0.0)+ COALESCE(sch.fee_charges_amount,0.0)+ COALESCE(sch.penalty_charges_amount,0.0)) AS totalAmount, ");
+            sqlBuilder.append(" mpl.name productName, mc.display_name as clientName, grp.display_name as groupName ");
+            sqlBuilder.append(
+                    " FROM m_loan_repayment_schedule sch   INNER JOIN m_loan l on sch.loan_id = l.id  LEFT JOIN  m_client mc on l.client_id = mc.id ");
+            sqlBuilder.append(
+                    " LEFT JOIN  m_group grp on l.group_id = grp.id   INNER JOIN m_product_loan mpl on l.product_id = mpl.id where  ");
+            sqlBuilder.append(" sch.duedate <= ");
+            sqlBuilder.append(sqlGenerator.addDate(" now() ", numberOfDaysToDueDate.toString()));
+            sqlBuilder.append(
+                    " and sch.completed_derived = false   and sch.obligations_met_on_date is null   and l.loan_status_id = 300 ORDER BY l.id ,sch.duedate,sch.installment ASC ");
+
+            return sqlBuilder.toString();
+        }
+
+        @Override
+        public LoanRepaymentReminderData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final Long loanId = rs.getLong("loanId");
+            final Long clientId = rs.getLong("clientId");
+            final Long groupId = rs.getLong("groupId");
+            final String dueDate = rs.getString("dueDate");
+            final Integer installmentNumber = rs.getInt("installmentNumber");
+            final BigDecimal principalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAmount");
+            final BigDecimal interestAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestAmount");
+            final BigDecimal feeChargesAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesAmount");
+            final BigDecimal penaltyChargeAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargeAmount");
+            final BigDecimal totalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalAmount");
+            final String productName = rs.getString("productName");
+            final String clientName = rs.getString("clientName");
+            final String groupName = rs.getString("groupName");
+
+            return new LoanRepaymentReminderData(loanId, clientId, groupId, dueDate, installmentNumber, principalAmount, interestAmount,
+                    feeChargesAmount, penaltyChargeAmount, totalAmount, productName, clientName, groupName);
         }
     }
 }

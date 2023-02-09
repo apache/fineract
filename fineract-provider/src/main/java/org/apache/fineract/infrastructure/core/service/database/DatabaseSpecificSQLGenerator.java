@@ -168,4 +168,24 @@ public class DatabaseSpecificSQLGenerator {
             throw new IllegalStateException("Database type is not supported for current schema " + databaseTypeResolver.databaseType());
         }
     }
+
+    public String charDistinct(String valueColumn, String alias) {
+        if (databaseTypeResolver.isMySQL()) {
+            return format("DISTINCT %s %s ", valueColumn, alias);
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return format("DISTINCT ON(%s) %s %s ", valueColumn, valueColumn, alias);
+        } else {
+            throw new IllegalStateException("Database type is not supported for DISTINCT " + databaseTypeResolver.databaseType());
+        }
+    }
+
+    public String addDate(String date, String days) {
+        if (databaseTypeResolver.isMySQL()) {
+            return format(" %s + INTERVAL %s DAY)", date, days);
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return format(" %s + INTERVAL '%s DAY'", date, days);
+        } else {
+            throw new IllegalStateException("Database type is not supported for Additional date " + databaseTypeResolver.databaseType());
+        }
+    }
 }

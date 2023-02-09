@@ -27,6 +27,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface LoanRepaymentReminderSettingsRepository
         extends JpaRepository<LoanRepaymentReminderSettingsData, Long>, JpaSpecificationExecutor<LoanRepaymentReminderSettingsData> {
 
-    @Query(value = "SELECT rs.id as id,rs.number_of_days_to_due_date AS numberOfDaysToDueDate FROM loan_repayment_reminder_settings rs", nativeQuery = true)
+    @Query(value = "SELECT rs.id as id, rs.number_of_days_to_due_date AS days FROM loan_repayment_reminder_settings rs", nativeQuery = true)
     List<LoanRepaymentReminderSettingsData> findLoanRepaymentReminderSettings();
 }

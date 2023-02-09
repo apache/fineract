@@ -28,13 +28,7 @@ import org.springframework.data.repository.query.Param;
 public interface LoanRepaymentScheduleInstallmentRepository
         extends JpaRepository<LoanRepaymentScheduleInstallment, Long>, JpaSpecificationExecutor<LoanRepaymentScheduleInstallment> {
 
-    String loanReminder = " SELECT DISTINCT sch.loan.id  as id , sch.dueDate as dueDate , sch.installmentNumber as installmentNumber , sch.principal as principalAmount , sch.interestCharged as interestAmount ,sch.feeChargesCharged as feeChargesAmount ,sch.penaltyCharges as penaltyChargeAmount ,(COALESCE(sch.principal,0.0) + COALESCE(sch.interestCharged,0.0) + COALESCE(sch.feeChargesCharged,0.0) + COALESCE(sch.penaltyCharges,0.0)) AS totalPaidInAdvance FROM LoanRepaymentScheduleInstallment sch INNER JOIN FETCH sch.loan where sch.obligationsMet = false and sch.obligationsMetOnDate is null and sch.loan.loanStatus = 300 ORDER BY sch.loan.id , sch.dueDate , sch.installmentNumber ASC ";
-
     @Query("select sch from LoanRepaymentScheduleInstallment sch where sch.loan.id = :loanId and sch.dueDate >= :disbursementDate")
     List<LoanRepaymentScheduleInstallment> findPendingLoanRepaymentScheduleInstallmentForTopUp(@Param("loanId") Long loanId,
             @Param("disbursementDate") LocalDate disbursementDate);
-
-    @Query(loanReminder)
-    List<LoanRepaymentScheduleInstallment> findLoanRepaymentReminder();
-
 }

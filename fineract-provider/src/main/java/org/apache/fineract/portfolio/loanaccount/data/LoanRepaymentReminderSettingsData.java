@@ -20,29 +20,26 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 
 @Entity
 public class LoanRepaymentReminderSettingsData {
 
     @Id
-    private Integer id;
-    @Transient
-    private Integer numberOfDaysToDueDate;
+    private Long id;
+    private Integer days;
 
-    public Integer getId() {
+    public LoanRepaymentReminderSettingsData() {}
+
+    public LoanRepaymentReminderSettingsData(Long id, Integer days) {
+        this.id = id;
+        this.days = days;
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getNumberOfDaysToDueDate() {
-        return numberOfDaysToDueDate;
-    }
-
-    public void setNumberOfDaysToDueDate(Integer numberOfDaysToDueDate) {
-        this.numberOfDaysToDueDate = numberOfDaysToDueDate;
+    public Integer getDays() {
+        return days;
     }
 }
