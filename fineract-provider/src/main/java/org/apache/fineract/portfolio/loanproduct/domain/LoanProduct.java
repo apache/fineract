@@ -637,8 +637,8 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
             final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
-            final Integer overAppliedNumber, final Integer maxNumberOfLoanExtensionsAllowed,
-            final boolean loanTermIncludesToppedUpLoanTerm, final boolean isAccountLevelArrearsToleranceEnable) {
+            final Integer overAppliedNumber, final Integer maxNumberOfLoanExtensionsAllowed, final boolean loanTermIncludesToppedUpLoanTerm,
+            final boolean isAccountLevelArrearsToleranceEnable) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -1232,8 +1232,10 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.maxNumberOfLoanExtensionsAllowed = newValue;
         }
 
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE, this.isAccountLevelArrearsToleranceEnable)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE);
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE,
+                this.isAccountLevelArrearsToleranceEnable)) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE);
             actualChanges.put(LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE, newValue);
             this.isAccountLevelArrearsToleranceEnable = newValue;
         }

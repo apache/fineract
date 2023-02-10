@@ -6891,7 +6891,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return total_extensions;
     }
 
-    public void setGraceOnArrearsAging(Integer day){
+    public void setGraceOnArrearsAging(Integer day) {
         this.getLoanProductRelatedDetail().setGraceOnArrearsAgeing(day);
     }
 }

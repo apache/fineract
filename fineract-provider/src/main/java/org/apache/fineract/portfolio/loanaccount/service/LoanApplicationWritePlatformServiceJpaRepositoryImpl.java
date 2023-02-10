@@ -109,6 +109,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -154,7 +155,6 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 
 @Service
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
@@ -1809,44 +1809,45 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         try {
             final Loan existingLoanApplication = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
             final Map<String, Object> changes = new HashMap<>();
-            if(existingLoanApplication.loanProduct().isAccountLevelArrearsToleranceEnable()) {
-                if(existingLoanApplication.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null
-                        && existingLoanApplication.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() == 0){
+            if (existingLoanApplication.loanProduct().isAccountLevelArrearsToleranceEnable()) {
+                if (existingLoanApplication.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null
+                        && existingLoanApplication.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() == 0) {
                     throw new GeneralPlatformDomainRuleException("error.msg.arrears.tolerance.limit.exceed",
                             "Arrears Tolerance Limit Has Exceed.");
                 }
                 final Integer graceOnArrearsAging = command.integerValueOfParameterNamed("graceOnArrearsAging");
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                 final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
-                baseDataValidator.reset().parameter("graceOnArrearsAging").value(graceOnArrearsAging).ignoreIfNull()
-                        .positiveAmount();
+                baseDataValidator.reset().parameter("graceOnArrearsAging").value(graceOnArrearsAging).ignoreIfNull().positiveAmount();
                 if (!dataValidationErrors.isEmpty()) {
                     throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                             dataValidationErrors);
                 }
                 LocalDate fromDate = null;
                 LocalDate dueDate = null;
-                for (LoanRepaymentScheduleInstallment inst :  existingLoanApplication.getRepaymentScheduleInstallments()){
-                    if(inst.getDueDate().isAfter(DateUtils.getBusinessLocalDate())){
+                for (LoanRepaymentScheduleInstallment inst : existingLoanApplication.getRepaymentScheduleInstallments()) {
+                    if (inst.getDueDate().isAfter(DateUtils.getBusinessLocalDate())) {
                         if (fromDate == null) {
                             fromDate = inst.getDueDate();
-                        }else if (dueDate == null){
+                        } else if (dueDate == null) {
                             dueDate = inst.getDueDate();
                             break;
                         }
                     }
                 }
                 int daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, dueDate));
-                if(daysInPeriod < graceOnArrearsAging){
-                    throw new GeneralPlatformDomainRuleException("error.grace.on.arrears.aging.days.should.not.be.greater.than.days.in.installment.period",
+                if (daysInPeriod < graceOnArrearsAging) {
+                    throw new GeneralPlatformDomainRuleException(
+                            "error.grace.on.arrears.aging.days.should.not.be.greater.than.days.in.installment.period",
                             "Grace on Arrears aging days should be less than from period for installment available days ." + daysInPeriod);
                 }
                 existingLoanApplication.setGraceOnArrearsAging(graceOnArrearsAging);
 
                 changes.put("graceOnArrearsAging", graceOnArrearsAging);
                 this.loanRepositoryWrapper.saveAndFlush(existingLoanApplication);
-            }else {
-                throw new GeneralPlatformDomainRuleException("error.msg.account.level.arrears.tolerance.not.enabled,can't.update.that.value",
+            } else {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.account.level.arrears.tolerance.not.enabled,can't.update.that.value",
                         "Account level Arrears Tolerance checkbox not checked in product can't update the value for parameter GraceOnArrearsAging.");
             }
             return new CommandProcessingResultBuilder() //
@@ -1856,7 +1857,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     .withGroupId(existingLoanApplication.getGroupId()) //
                     .withLoanId(existingLoanApplication.getId()) //
                     .with(changes).build();
-        }catch (final JpaSystemException | DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {

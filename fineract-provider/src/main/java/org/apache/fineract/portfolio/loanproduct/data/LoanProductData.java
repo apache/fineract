@@ -306,7 +306,8 @@ public class LoanProductData implements Serializable {
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm, isAccountLevelArrearsToleranceEnable);
+                fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm,
+                isAccountLevelArrearsToleranceEnable);
 
     }
 
@@ -411,7 +412,8 @@ public class LoanProductData implements Serializable {
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm, isAccountLevelArrearsToleranceEnable);
+                fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm,
+                isAccountLevelArrearsToleranceEnable);
 
     }
 
@@ -524,7 +526,8 @@ public class LoanProductData implements Serializable {
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm, isAccountLevelArrearsToleranceEnable);
+                fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm,
+                isAccountLevelArrearsToleranceEnable);
 
     }
 
@@ -631,7 +634,8 @@ public class LoanProductData implements Serializable {
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm, isAccountLevelArrearsToleranceEnable);
+                fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm,
+                isAccountLevelArrearsToleranceEnable);
 
     }
 

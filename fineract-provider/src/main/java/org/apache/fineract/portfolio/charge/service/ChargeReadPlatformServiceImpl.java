@@ -297,8 +297,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         public String chargeSchema() {
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, "
                     + "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, "
-                    + "c.charge_payment_mode_enum as chargePaymentMode, "
-                    + "c.max_occurrence as maxOccurrence, "
+                    + "c.charge_payment_mode_enum as chargePaymentMode, " + "c.max_occurrence as maxOccurrence, "
                     + "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, "
                     + "c.is_active as active, c.is_free_withdrawal as isFreeWithdrawal, c.free_withdrawal_charge_frequency as freeWithdrawalChargeFrequency, c.restart_frequency as restartFrequency, c.restart_frequency_enum as restartFrequencyEnum,"
                     + "oc.name as currencyName, oc.decimal_places as currencyDecimalPlaces, "

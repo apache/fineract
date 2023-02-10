@@ -55,12 +55,12 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(
-            Arrays.asList("name", "amount", "locale", "currencyCode", "currencyOptions", "chargeAppliesTo", "chargeTimeType",
-                    "chargeCalculationType", "chargeCalculationTypeOptions", "penalty", "active", "chargePaymentMode", "feeOnMonthDay",
-                    "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency", "enableFreeWithdrawalCharge",
-                    "freeWithdrawalFrequency", "restartCountFrequency", "countFrequencyType", "paymentTypeId", "enablePaymentType",
-                    "minAmount", "maxAmount", "maxOccurrence", "chart", ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("name", "amount", "locale", "currencyCode",
+            "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
+            "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency",
+            "enableFreeWithdrawalCharge", "freeWithdrawalFrequency", "restartCountFrequency", "countFrequencyType", "paymentTypeId",
+            "enablePaymentType", "minAmount", "maxAmount", "maxOccurrence", "chart", ChargesApiConstants.glAccountIdParamName,
+            ChargesApiConstants.taxGroupIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
