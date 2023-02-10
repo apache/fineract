@@ -16,24 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.core.service.tenant;
 
-import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 
-@Configuration
-public class JdbcConfig {
+public interface TenantDetailsService {
 
-    @Bean
-    public JdbcTemplate jdbcTemplate(RoutingDataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
+    FineractPlatformTenant loadTenantById(String tenantId);
 
-    @Bean
-    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(RoutingDataSource dataSource) {
-        return new NamedParameterJdbcTemplate(dataSource);
-    }
+    List<FineractPlatformTenant> findAllTenants();
 }

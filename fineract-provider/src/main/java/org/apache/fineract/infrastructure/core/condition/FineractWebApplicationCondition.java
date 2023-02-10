@@ -16,24 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.core.condition;
 
-import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 
-@Configuration
-public class JdbcConfig {
+public class FineractWebApplicationCondition extends ProfileCondition {
 
-    @Bean
-    public JdbcTemplate jdbcTemplate(RoutingDataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
-
-    @Bean
-    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(RoutingDataSource dataSource) {
-        return new NamedParameterJdbcTemplate(dataSource);
+    @Override
+    protected boolean matches(List<String> activeProfiles) {
+        return !activeProfiles.contains(FineractProfiles.LIQUIBASE_ONLY);
     }
 }

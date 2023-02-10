@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.core.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +40,7 @@ public class HikariCpConfig {
     }
 
     @Bean(destroyMethod = "close")
-    public DataSource hikariTenantDataSource(HikariConfig hikariConfig) {
+    public HikariDataSource hikariTenantDataSource(HikariConfig hikariConfig) {
         return new HikariDataSource(hikariConfig);
     }
 }

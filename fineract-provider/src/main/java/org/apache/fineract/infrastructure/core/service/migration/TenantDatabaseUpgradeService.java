@@ -20,18 +20,21 @@ package org.apache.fineract.infrastructure.core.service.migration;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import javax.sql.DataSource;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,6 +42,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TenantDatabaseUpgradeService implements InitializingBean {
 
     private static final String TENANT_STORE_DB_CONTEXT = "tenant_store_db";
@@ -47,33 +51,24 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     private static final String CUSTOM_CHANGELOG_CONTEXT = "custom_changelog";
 
     private final TenantDetailsService tenantDetailsService;
+    @Qualifier("hikariTenantDataSource")
     private final DataSource tenantDataSource;
     private final FineractProperties fineractProperties;
     private final TenantDatabaseStateVerifier databaseStateVerifier;
     private final ExtendedSpringLiquibaseFactory liquibaseFactory;
     private final TenantDataSourceFactory tenantDataSourceFactory;
-
-    @Autowired
-    public TenantDatabaseUpgradeService(final TenantDetailsService detailsService,
-            @Qualifier("hikariTenantDataSource") final DataSource tenantDataSource, final FineractProperties fineractProperties,
-            TenantDatabaseStateVerifier databaseStateVerifier, ExtendedSpringLiquibaseFactory liquibaseFactory,
-            TenantDataSourceFactory tenantDataSourceFactory) {
-        this.tenantDetailsService = detailsService;
-        this.tenantDataSource = tenantDataSource;
-        this.fineractProperties = fineractProperties;
-        this.databaseStateVerifier = databaseStateVerifier;
-        this.liquibaseFactory = liquibaseFactory;
-        this.tenantDataSourceFactory = tenantDataSourceFactory;
-    }
+    private final Environment environment;
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (databaseStateVerifier.isLiquibaseDisabled() || !fineractProperties.getMode().isWriteEnabled()) {
-            log.warn("Liquibase is disabled. Not upgrading any database.");
-            if (!fineractProperties.getMode().isWriteEnabled()) {
-                log.warn("Liquibase is disabled because the current instance is configured as a non-write Fineract instance");
+        if (notLiquibaseOnlyMode()) {
+            if (databaseStateVerifier.isLiquibaseDisabled() || !fineractProperties.getMode().isWriteEnabled()) {
+                log.warn("Liquibase is disabled. Not upgrading any database.");
+                if (!fineractProperties.getMode().isWriteEnabled()) {
+                    log.warn("Liquibase is disabled because the current instance is configured as a non-write Fineract instance");
+                }
+                return;
             }
-            return;
         }
         try {
             upgradeTenantStore();
@@ -81,6 +76,11 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
         } catch (LiquibaseException e) {
             throw new RuntimeException("Error while migrating the schema", e);
         }
+    }
+
+    private boolean notLiquibaseOnlyMode() {
+        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
+        return !activeProfiles.contains(FineractProfiles.LIQUIBASE_ONLY);
     }
 
     private void upgradeTenantStore() throws LiquibaseException {
