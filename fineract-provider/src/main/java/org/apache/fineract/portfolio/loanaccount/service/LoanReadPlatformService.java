@@ -153,5 +153,7 @@ public interface LoanReadPlatformService {
 
     CollectionData retrieveLoanCollectionData(Long loanId);
 
+    List<LoanAccountData> retrieveOverDueLoansForClient(Long client);
+
     List<LoanRepaymentReminderData> findLoanRepaymentReminderData(Integer numberOfDaysToDueDate);
 }

@@ -3561,4 +3561,13 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/addmember/" + accountId;
         return this;
     }
+
+    public CommandWrapperBuilder updateArrearsTolerance(final Long loanId) {
+        this.actionName = "UPDATEARREARSTOLERANCE";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "?command=updateArrearsTolerance";
+        return this;
+    }
 }
