@@ -2405,13 +2405,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             StringBuilder sqlBuilder = new StringBuilder();
             sqlBuilder.append(sqlGenerator.charDistinct("l.id", "as loanId, "));
             sqlBuilder.append(
-                    " mc.id as clientId, grp.id as groupId, sch.duedate as dueDate, sch.installment as installmentNumber, sch.principal_amount as principalAmount, sch.interest_amount as interestAmount, ");
-            sqlBuilder.append(" sch.fee_charges_amount as feeChargesAmount, sch.penalty_charges_amount as penaltyChargeAmount, ");
+                    " COALESCE(mc.id,null) as clientId,COALESCE(grp.id,null) as groupId,mpl.id as loanProductId,sch.id as loanScheduleId, ");
             sqlBuilder.append(
-                    " (COALESCE(sch.principal_amount,0.0)+ COALESCE(sch.interest_amount,0.0)+ COALESCE(sch.fee_charges_amount,0.0)+ COALESCE(sch.penalty_charges_amount,0.0)) AS totalAmount, ");
-            sqlBuilder.append(" mpl.name productName, mc.display_name as clientName, grp.display_name as groupName ");
+                    " sch.duedate as dueDate,sch.installment as installmentNumber, sch.principal_amount as principalAmountOutStanding,sch.interest_amount as interestAmountOutStanding,sch.fee_charges_amount as feesChargeAmountOutStanding, ");
             sqlBuilder.append(
-                    " FROM m_loan_repayment_schedule sch   INNER JOIN m_loan l on sch.loan_id = l.id  LEFT JOIN  m_client mc on l.client_id = mc.id ");
+                    " sch.penalty_charges_amount as penaltyChargeAmountOutStanding,(COALESCE(sch.principal_amount,0.0)+ COALESCE(sch.interest_amount,0.0)+ COALESCE(sch.fee_charges_amount,0.0)+ COALESCE(sch.penalty_charges_amount,0.0)) AS totalAmountOutStanding, ");
+            sqlBuilder.append(
+                    " mpl.name productName, mc.display_name as clientName, grp.display_name as groupName,aging.total_overdue_derived    as totalOverdueAmount ");
+            sqlBuilder.append(
+                    " FROM m_loan_repayment_schedule sch   INNER JOIN m_loan l on sch.loan_id = l.id  LEFT JOIN  m_client mc on l.client_id = mc.id  LEFT JOIN m_loan_arrears_aging aging on l.id = aging.loan_id  ");
             sqlBuilder.append(
                     " LEFT JOIN  m_group grp on l.group_id = grp.id   INNER JOIN m_product_loan mpl on l.product_id = mpl.id where  ");
             sqlBuilder.append(" sch.duedate <= ");
@@ -2427,19 +2429,24 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long loanId = rs.getLong("loanId");
             final Long clientId = rs.getLong("clientId");
             final Long groupId = rs.getLong("groupId");
-            final String dueDate = rs.getString("dueDate");
+            final Long loanProductId = rs.getLong("loanProductId");
+            final Long loanScheduleId = rs.getLong("loanScheduleId");
+            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
             final Integer installmentNumber = rs.getInt("installmentNumber");
-            final BigDecimal principalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAmount");
-            final BigDecimal interestAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestAmount");
-            final BigDecimal feeChargesAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesAmount");
-            final BigDecimal penaltyChargeAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargeAmount");
-            final BigDecimal totalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalAmount");
+            final BigDecimal principalAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAmountOutStanding");
+            final BigDecimal interestAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestAmountOutStanding");
+            final BigDecimal feesChargeAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feesChargeAmountOutStanding");
+            final BigDecimal penaltyChargeAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs,
+                    "penaltyChargeAmountOutStanding");
+            final BigDecimal totalAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalAmountOutStanding");
             final String productName = rs.getString("productName");
             final String clientName = rs.getString("clientName");
             final String groupName = rs.getString("groupName");
+            final BigDecimal totalOverdueAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalOverdueAmount");
 
-            return new LoanRepaymentReminderData(loanId, clientId, groupId, dueDate, installmentNumber, principalAmount, interestAmount,
-                    feeChargesAmount, penaltyChargeAmount, totalAmount, productName, clientName, groupName);
+            return new LoanRepaymentReminderData(loanId, clientId, groupId, loanProductId, loanScheduleId, dueDate, installmentNumber,
+                    principalAmountOutStanding, interestAmountOutStanding, feesChargeAmountOutStanding, penaltyChargeAmountOutStanding,
+                    totalAmountOutStanding, productName, clientName, groupName, totalOverdueAmount);
         }
     }
 }

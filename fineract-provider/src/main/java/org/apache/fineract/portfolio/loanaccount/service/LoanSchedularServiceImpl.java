@@ -39,18 +39,24 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentReminderSettingsData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanReminderStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentReminder;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentReminderRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentReminderSettingsRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -76,6 +82,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     private final ApplyChargeToOverdueLoansBusinessStep applyChargeToOverdueLoansBusinessStep;
     private final LoanRepository loanRepository;
     private final LoanRepaymentReminderSettingsRepository loanRepaymentReminderSettingsRepository;
+    private final LoanRepaymentReminderRepository loanRepaymentReminderRepository;
+    private final PlatformSecurityContext context;
 
     @Override
     @CronTarget(jobName = JobName.APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT)
@@ -307,7 +315,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     @Override
     @CronTarget(jobName = JobName.POST_LOAN_REPAYMENT_REMINDER)
     public void postLoanRepaymentReminder() {
-
+        final AppUser currentUser = getAppUserIfPresent();
         final List<LoanRepaymentReminderSettingsData> settingsData = loanRepaymentReminderSettingsRepository
                 .findLoanRepaymentReminderSettings();
 
@@ -318,12 +326,33 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                         .findLoanRepaymentReminderData(data.getDays());
                 LOG.info("- BatchID " + data.getId() + " - Days::>> " + data.getDays() + " - Reminder Size -::-> "
                         + repaymentReminders.size());
+
+                if (!CollectionUtils.isEmpty(repaymentReminders)) {
+                    for (LoanRepaymentReminderData repaymentReminderData : repaymentReminders) {
+
+                        LoanRepaymentReminder loanRepaymentReminder = new LoanRepaymentReminder(data.getId(), repaymentReminderData,
+                                LoanReminderStatus.PENDING.name());
+                        loanRepaymentReminder.setCreatedDate(DateUtils.getLocalDateTimeOfTenant());
+                        loanRepaymentReminder.setLastModifiedDate(DateUtils.getLocalDateTimeOfTenant());
+                        loanRepaymentReminder.setCreatedBy(currentUser.getId());
+
+                        loanRepaymentReminderRepository.save(loanRepaymentReminder);
+                    }
+                }
             }
 
         } else {
             LOG.info("Loan Repayment Reminders not found");
         }
 
+    }
+
+    private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
     }
 
 }

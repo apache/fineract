@@ -19,40 +19,47 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class LoanRepaymentReminderData {
 
     private final Long loanId;
     private final Long clientId;
     private final Long groupId;
-    private final String dueDate;
+    private final Long loanProductId;
+    private final Long loanScheduleId;
+    private final LocalDate dueDate;
     private final Integer installmentNumber;
-    private final BigDecimal principalAmount;
-    private final BigDecimal interestAmount;
-    private final BigDecimal feeChargesAmount;
-    private final BigDecimal penaltyChargeAmount;
-    private final BigDecimal totalAmount;
+    private final BigDecimal principalAmountOutStanding;
+    private final BigDecimal interestAmountOutStanding;
+    private final BigDecimal feesChargeAmountOutStanding;
+    private final BigDecimal penaltyChargeAmountOutStanding;
+    private final BigDecimal totalAmountOutStanding;
     private final String productName;
     private final String clientName;
     private final String groupName;
+    private BigDecimal totalOverdueAmount;
 
-    public LoanRepaymentReminderData(final Long loanId, final Long clientId, final Long groupId, final String dueDate,
-            final Integer installmentNumber, final BigDecimal principalAmount, final BigDecimal interestAmount,
-            final BigDecimal feeChargesAmount, final BigDecimal penaltyChargeAmount, final BigDecimal totalAmount, final String productName,
-            final String clientName, final String groupName) {
+    public LoanRepaymentReminderData(Long loanId, Long clientId, Long groupId, Long loanProductId, Long loanScheduleId, LocalDate dueDate,
+            Integer installmentNumber, BigDecimal principalAmountOutStanding, BigDecimal interestAmountOutStanding,
+            BigDecimal feesChargeAmountOutStanding, BigDecimal penaltyChargeAmountOutStanding, BigDecimal totalAmountOutStanding,
+            String productName, String clientName, String groupName, BigDecimal totalOverdueAmount) {
         this.loanId = loanId;
-        this.clientId = clientId;
-        this.groupId = groupId;
+        this.clientId = clientId > 0 ? clientId : null;
+        this.groupId = groupId > 0 ? groupId : null;
+        this.loanProductId = loanProductId;
+        this.loanScheduleId = loanScheduleId;
         this.dueDate = dueDate;
         this.installmentNumber = installmentNumber;
-        this.principalAmount = principalAmount;
-        this.interestAmount = interestAmount;
-        this.feeChargesAmount = feeChargesAmount;
-        this.penaltyChargeAmount = penaltyChargeAmount;
-        this.totalAmount = totalAmount;
+        this.principalAmountOutStanding = principalAmountOutStanding;
+        this.interestAmountOutStanding = interestAmountOutStanding;
+        this.feesChargeAmountOutStanding = feesChargeAmountOutStanding;
+        this.penaltyChargeAmountOutStanding = penaltyChargeAmountOutStanding;
+        this.totalAmountOutStanding = totalAmountOutStanding;
         this.productName = productName;
         this.clientName = clientName;
         this.groupName = groupName;
+        this.totalOverdueAmount = totalOverdueAmount;
     }
 
     public Long getLoanId() {
@@ -67,7 +74,15 @@ public class LoanRepaymentReminderData {
         return groupId;
     }
 
-    public String getDueDate() {
+    public Long getLoanProductId() {
+        return loanProductId;
+    }
+
+    public Long getLoanScheduleId() {
+        return loanScheduleId;
+    }
+
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
@@ -75,24 +90,24 @@ public class LoanRepaymentReminderData {
         return installmentNumber;
     }
 
-    public BigDecimal getPrincipalAmount() {
-        return principalAmount;
+    public BigDecimal getPrincipalAmountOutStanding() {
+        return principalAmountOutStanding;
     }
 
-    public BigDecimal getInterestAmount() {
-        return interestAmount;
+    public BigDecimal getInterestAmountOutStanding() {
+        return interestAmountOutStanding;
     }
 
-    public BigDecimal getFeeChargesAmount() {
-        return feeChargesAmount;
+    public BigDecimal getFeesChargeAmountOutStanding() {
+        return feesChargeAmountOutStanding;
     }
 
-    public BigDecimal getPenaltyChargeAmount() {
-        return penaltyChargeAmount;
+    public BigDecimal getPenaltyChargeAmountOutStanding() {
+        return penaltyChargeAmountOutStanding;
     }
 
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
+    public BigDecimal getTotalAmountOutStanding() {
+        return totalAmountOutStanding;
     }
 
     public String getProductName() {
@@ -107,12 +122,18 @@ public class LoanRepaymentReminderData {
         return groupName;
     }
 
+    public BigDecimal getTotalOverdueAmount() {
+        return totalOverdueAmount;
+    }
+
     @Override
     public String toString() {
-        return "LoanRepaymentReminderData{" + "loanId=" + loanId + ", clientId=" + clientId + ", groupId=" + groupId + ", dueDate='"
-                + dueDate + '\'' + ", installmentNumber=" + installmentNumber + ", principalAmount=" + principalAmount + ", interestAmount="
-                + interestAmount + ", feeChargesAmount=" + feeChargesAmount + ", penaltyChargeAmount=" + penaltyChargeAmount
-                + ", totalAmount=" + totalAmount + ", productName='" + productName + '\'' + ", clientName='" + clientName + '\''
-                + ", groupName='" + groupName + '\'' + '}';
+        return "LoanRepaymentReminderData{" + "loanId=" + loanId + ", clientId=" + clientId + ", groupId=" + groupId + ", loanProductId="
+                + loanProductId + ", loanScheduleId=" + loanScheduleId + ", dueDate='" + dueDate + '\'' + ", installmentNumber="
+                + installmentNumber + ", principalAmountOutStanding=" + principalAmountOutStanding + ", interestAmountOutStanding="
+                + interestAmountOutStanding + ", feesChargeAmountOutStanding=" + feesChargeAmountOutStanding
+                + ", penaltyChargeAmountOutStanding=" + penaltyChargeAmountOutStanding + ", totalAmountOutStanding="
+                + totalAmountOutStanding + ", productName='" + productName + '\'' + ", clientName='" + clientName + '\'' + ", groupName='"
+                + groupName + '\'' + ", totalOverdueAmount='" + totalOverdueAmount + '\'' + '}';
     }
 }
