@@ -68,4 +68,5 @@
     <include file="parts/OXY-33-add-new-column-max-occurrence-in-charge.xml" relativeToChangelogFile="true"/>
     <include file="parts/OXY-44_add_isAccountLevelArrearsToleranceEnable_in_loan_product_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/OXY-42_enforce_loan_overdue_amount_in_min_balance.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-40-Loan-Repayment-Reminder.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

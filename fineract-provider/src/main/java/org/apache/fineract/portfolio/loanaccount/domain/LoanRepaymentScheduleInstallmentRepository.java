@@ -31,5 +31,4 @@ public interface LoanRepaymentScheduleInstallmentRepository
     @Query("select sch from LoanRepaymentScheduleInstallment sch where sch.loan.id = :loanId and sch.dueDate >= :disbursementDate")
     List<LoanRepaymentScheduleInstallment> findPendingLoanRepaymentScheduleInstallmentForTopUp(@Param("loanId") Long loanId,
             @Param("disbursementDate") LocalDate disbursementDate);
-
 }

@@ -35,7 +35,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -2598,22 +2597,23 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
     }
 
-    private Collection<OverdueLoanScheduleData> applyMaxOccurrenceWhileApplyingOverdueChargesForLoan(Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas){
-        if(CollectionUtils.isNotEmpty(overdueLoanScheduleDatas)) {
+    private Collection<OverdueLoanScheduleData> applyMaxOccurrenceWhileApplyingOverdueChargesForLoan(
+            Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas) {
+        if (CollectionUtils.isNotEmpty(overdueLoanScheduleDatas)) {
             Integer maxOccurrenceToApply = 0;
             Collection<OverdueLoanScheduleData> modifiedOverdueLoanScheduleDatas = null;
             OverdueLoanScheduleData firstElement = overdueLoanScheduleDatas.stream().findFirst().orElse(null);
-            if (firstElement != null &&
-                    firstElement.getMaxOccurrenceTillChargeApplies() != null &&
-                    firstElement.getMaxOccurrenceTillChargeApplies() > 0) {
-                 maxOccurrenceToApply = firstElement.getMaxOccurrenceTillChargeApplies();
+            if (firstElement != null && firstElement.getMaxOccurrenceTillChargeApplies() != null
+                    && firstElement.getMaxOccurrenceTillChargeApplies() > 0) {
+                maxOccurrenceToApply = firstElement.getMaxOccurrenceTillChargeApplies();
             }
 
-            //create the sub collection and return if maxOccurrence is set to less than no. if installments
-            if(maxOccurrenceToApply > 0 && maxOccurrenceToApply < CollectionUtils.size(overdueLoanScheduleDatas)){
+            // create the sub collection and return if maxOccurrence is set to less than no. if installments
+            if (maxOccurrenceToApply > 0 && maxOccurrenceToApply < CollectionUtils.size(overdueLoanScheduleDatas)) {
                 final Integer maxOccurrenceForCharge = maxOccurrenceToApply;
-                modifiedOverdueLoanScheduleDatas = overdueLoanScheduleDatas.stream().filter(
-                        loanScheduleData -> loanScheduleData.getPeriodNumber() <= maxOccurrenceForCharge ).collect(Collectors.toList());
+                modifiedOverdueLoanScheduleDatas = overdueLoanScheduleDatas.stream()
+                        .filter(loanScheduleData -> loanScheduleData.getPeriodNumber() <= maxOccurrenceForCharge)
+                        .collect(Collectors.toList());
                 return modifiedOverdueLoanScheduleDatas;
             }
         }
@@ -2737,8 +2737,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LocalDate startDate = dueDate.plusDays(penaltyWaitPeriodValue.intValue() + 1);
         Loan loanData = this.loanAssembler.assembleFrom(loanId);
         LocalDate endDate = DateUtils.getBusinessLocalDate();
-        if(dueDate.isBefore(loanData.getMaturityDate())){
-            if(chargeDefinition.feeInterval() != null) {
+        if (dueDate.isBefore(loanData.getMaturityDate())) {
+            if (chargeDefinition.feeInterval() != null) {
                 endDate = scheduledDateGenerator.getRepaymentPeriodDate(PeriodFrequencyType.fromInt(feeFrequency),
                         chargeDefinition.feeInterval(), startDate);
             }
@@ -2773,19 +2773,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             lastChargeAppliedDate = installment.getDueDate();
         }
         LocalDate recalculateFrom = DateUtils.getBusinessLocalDate();
-        if(loan != null && loan.getLoanProduct().isAccountLevelArrearsToleranceEnable()
-                && loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null && loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() > 0){
+        if (loan != null && loan.getLoanProduct().isAccountLevelArrearsToleranceEnable()
+                && loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null
+                && loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() > 0) {
             LocalDate dateWithGrace = dueDate.plusDays(loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing());
-            if(dateWithGrace.isAfter(DateUtils.getBusinessLocalDate()) || dateWithGrace.isEqual(DateUtils.getBusinessLocalDate())){
+            if (dateWithGrace.isAfter(DateUtils.getBusinessLocalDate()) || dateWithGrace.isEqual(DateUtils.getBusinessLocalDate())) {
 
                 return new LoanOverdueDTO(null, false, DateUtils.getBusinessLocalDate(), null);
-            }else if(dateWithGrace.isBefore(DateUtils.getBusinessLocalDate())){
+            } else if (dateWithGrace.isBefore(DateUtils.getBusinessLocalDate())) {
                 loan.setGraceOnArrearsAging(0);
                 this.loanRepositoryWrapper.saveAndFlush(loan);
             }
 
         }
-
 
         if (loan != null) {
             businessEventNotifierService.notifyPreBusinessEvent(new LoanApplyOverdueChargeBusinessEvent(loan));

@@ -105,6 +105,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -2348,6 +2349,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return collectionData;
     }
 
+    @Override
+    public List<LoanRepaymentReminderData> findLoanRepaymentReminderData(Integer numberOfDaysToDueDate) {
+        final LoanRepaymentReminderDataMapper mapper = new LoanRepaymentReminderDataMapper(sqlGenerator);
+        String sql = "select " + mapper.schema(numberOfDaysToDueDate);
+        List<LoanRepaymentReminderData> repaymentReminderData = this.jdbcTemplate.query(sql, mapper);
+        return repaymentReminderData;
+    }
+
     private static final class CollectionDataMapper implements RowMapper<CollectionData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -2393,6 +2402,63 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             return CollectionData.instance(availableDisbursementAmount, pastDueDays, nextPaymentDueDate, delinquentDays, delinquentDate,
                     delinquentAmount, lastPaymentDate, lastPaymentAmount);
+        }
+    }
+
+    private static final class LoanRepaymentReminderDataMapper implements RowMapper<LoanRepaymentReminderData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanRepaymentReminderDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String schema(Integer numberOfDaysToDueDate) {
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append(sqlGenerator.charDistinct("l.id", "as loanId, "));
+            sqlBuilder.append(
+                    " COALESCE(mc.id,null) as clientId,COALESCE(grp.id,null) as groupId,mpl.id as loanProductId,sch.id as loanScheduleId, ");
+            sqlBuilder.append(
+                    " sch.duedate as dueDate,sch.installment as installmentNumber, sch.principal_amount as principalAmountOutStanding,sch.interest_amount as interestAmountOutStanding,sch.fee_charges_amount as feesChargeAmountOutStanding, ");
+            sqlBuilder.append(
+                    " sch.penalty_charges_amount as penaltyChargeAmountOutStanding,(COALESCE(sch.principal_amount,0.0)+ COALESCE(sch.interest_amount,0.0)+ COALESCE(sch.fee_charges_amount,0.0)+ COALESCE(sch.penalty_charges_amount,0.0)) AS totalAmountOutStanding, ");
+            sqlBuilder.append(
+                    " mpl.name productName, mc.display_name as clientName, grp.display_name as groupName,aging.total_overdue_derived    as totalOverdueAmount ");
+            sqlBuilder.append(
+                    " FROM m_loan_repayment_schedule sch   INNER JOIN m_loan l on sch.loan_id = l.id  LEFT JOIN  m_client mc on l.client_id = mc.id  LEFT JOIN m_loan_arrears_aging aging on l.id = aging.loan_id  ");
+            sqlBuilder.append(
+                    " LEFT JOIN  m_group grp on l.group_id = grp.id   INNER JOIN m_product_loan mpl on l.product_id = mpl.id where  ");
+            sqlBuilder.append(" sch.duedate <= ");
+            sqlBuilder.append(sqlGenerator.addDate(" now() ", numberOfDaysToDueDate.toString()));
+            sqlBuilder.append(
+                    " and sch.completed_derived = false   and sch.obligations_met_on_date is null   and l.loan_status_id = 300 ORDER BY l.id ,sch.duedate,sch.installment ASC ");
+
+            return sqlBuilder.toString();
+        }
+
+        @Override
+        public LoanRepaymentReminderData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final Long loanId = rs.getLong("loanId");
+            final Long clientId = rs.getLong("clientId");
+            final Long groupId = rs.getLong("groupId");
+            final Long loanProductId = rs.getLong("loanProductId");
+            final Long loanScheduleId = rs.getLong("loanScheduleId");
+            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
+            final Integer installmentNumber = rs.getInt("installmentNumber");
+            final BigDecimal principalAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAmountOutStanding");
+            final BigDecimal interestAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestAmountOutStanding");
+            final BigDecimal feesChargeAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feesChargeAmountOutStanding");
+            final BigDecimal penaltyChargeAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs,
+                    "penaltyChargeAmountOutStanding");
+            final BigDecimal totalAmountOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalAmountOutStanding");
+            final String productName = rs.getString("productName");
+            final String clientName = rs.getString("clientName");
+            final String groupName = rs.getString("groupName");
+            final BigDecimal totalOverdueAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalOverdueAmount");
+
+            return new LoanRepaymentReminderData(loanId, clientId, groupId, loanProductId, loanScheduleId, dueDate, installmentNumber,
+                    principalAmountOutStanding, interestAmountOutStanding, feesChargeAmountOutStanding, penaltyChargeAmountOutStanding,
+                    totalAmountOutStanding, productName, clientName, groupName, totalOverdueAmount);
         }
     }
 }
