@@ -42,7 +42,7 @@ jobs:
       - name: Congfigure vega-cli
         run: npm i -g vega-cli --unsafe
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@6c561573985cd8bd4d64efcfe270d51682d210e2
+        uses: gradle/wrapper-validation-action@dabb1b52d35733fde278c288e4781d4336d4c29c
       - name: Verify MariaDB connection
         run: |
             while ! mysqladmin ping -h"127.0.0.1" -P3306 ; do
