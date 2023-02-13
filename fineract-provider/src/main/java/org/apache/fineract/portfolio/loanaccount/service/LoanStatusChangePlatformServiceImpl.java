@@ -50,6 +50,9 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
                 log.debug("Loan Status {} for loan {}", loan.getStatus().getCode(), loan.getId());
                 loan.applyIncomeAccrualTransaction(loan.getClosedOnDate());
             }
+            if (loan.isOpen()) {
+                loan.handleMaturityDateActivate();
+            }
         }
     }
 }

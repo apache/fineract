@@ -56,6 +56,8 @@ public class LoanApplicationTimelineData {
     private final String closedByUsername;
     private final String closedByFirstname;
     private final String closedByLastname;
+
+    private final LocalDate actualMaturityDate;
     private final LocalDate expectedMaturityDate;
     private final LocalDate writeOffOnDate;
     private final String writeOffByUsername;
@@ -102,14 +104,15 @@ public class LoanApplicationTimelineData {
         final String chargedOffByUsername = null;
         final String chargedOffByFirstname = null;
         final String chargedOffByLastname = null;
+        final LocalDate actualMaturityDate = null;
 
         return new LoanApplicationTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
                 rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname, withdrawnOnDate, withdrawnByUsername,
                 withdrawnByFirstname, withdrawnByLastname, approvedOnDate, approvedByUsername, approvedByFirstname, approvedByLastname,
                 expectedDisbursementDate, actualDisbursementDate, disbursedByUsername, disbursedByFirstname, disbursedByLastname,
-                closedOnDate, closedByUsername, closedByFirstname, closedByLastname, expectedMaturityDate, writeOffOnDate,
-                writeOffByUsername, writeOffByFirstname, writeOffByLastname, chargedOffOnDate, chargedOffByUsername, chargedOffByFirstname,
-                chargedOffByLastname);
+                closedOnDate, closedByUsername, closedByFirstname, closedByLastname, actualMaturityDate, expectedMaturityDate,
+                writeOffOnDate, writeOffByUsername, writeOffByFirstname, writeOffByLastname, chargedOffOnDate, chargedOffByUsername,
+                chargedOffByFirstname, chargedOffByLastname);
     }
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData(final CurrencyData currency, final BigDecimal principal,

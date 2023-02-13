@@ -245,6 +245,8 @@ final class LoansApiResourceSwagger {
             public String disbursedByLastname;
             @Schema(example = "[2012, 4, 10]")
             public LocalDate expectedMaturityDate;
+            @Schema(example = "[2012, 4, 10]")
+            public LocalDate actualMaturityDate;
             @Schema(example = "[2012, 4, 3]")
             public LocalDate closedOnDate;
             @Schema(example = "[2012, 4, 10]")
