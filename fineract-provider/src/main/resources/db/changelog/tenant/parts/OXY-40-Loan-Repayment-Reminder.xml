@@ -50,39 +50,6 @@
             </column>
         </createTable>
     </changeSet>
-
-    <changeSet id="add-loan_repayment_reminder_settings-datatable-permissions" author="bosco@fiter.io">
-        <sql>
-            INSERT INTO m_permission ( grouping, CODE, entity_name, action_name, can_maker_checker )
-            VALUES
-            ( 'datatable', 'CREATE_loan_repayment_reminder_settings', 'loan_repayment_reminder_settings', 'CREATE', true );
-
-            INSERT INTO m_permission ( grouping, CODE, entity_name, action_name, can_maker_checker )
-            VALUES
-            ( 'datatable', 'CREATE_loan_repayment_reminder_settings_CHECKER', 'loan_repayment_reminder_settings', 'CREATE', false );
-
-            INSERT INTO m_permission ( grouping, CODE, entity_name, action_name, can_maker_checker )
-            VALUES
-            ( 'datatable', 'READ_loan_repayment_reminder_settings', 'loan_repayment_reminder_settings', 'READ', false );
-
-            INSERT INTO m_permission ( grouping, CODE, entity_name, action_name, can_maker_checker )
-            VALUES
-            ( 'datatable', 'UPDATE_loan_repayment_reminder_settings', 'loan_repayment_reminder_settings', 'UPDATE', true );
-
-            INSERT INTO m_permission ( grouping, CODE, entity_name, action_name, can_maker_checker )
-            VALUES
-            ( 'datatable', 'UPDATE_loan_repayment_reminder_settings_CHECKER', 'loan_repayment_reminder_settings', 'UPDATE', false );
-
-            INSERT INTO m_permission ( grouping, CODE, entity_name, action_name, can_maker_checker )
-            VALUES
-            ( 'datatable', 'DELETE_loan_repayment_reminder_settings', 'loan_repayment_reminder_settings', 'DELETE', true );
-
-            INSERT INTO m_permission ( grouping, CODE, entity_name, action_name, can_maker_checker )
-            VALUES
-            ( 'datatable', 'DELETE_loan_repayment_reminder_settings_CHECKER', 'loan_repayment_reminder_settings', 'DELETE', false );
-        </sql>
-    </changeSet>
-
     <changeSet id="create-m_loan_repayment_reminder_table" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -162,6 +129,105 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_loan_repayment_reminder_settings">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_loan_repayment_reminder_settings'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_loan_repayment_reminder_settings" />
+            <column name="entity_name" value="loan_repayment_reminder_settings" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_loan_repayment_reminder_settings_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_loan_repayment_reminder_settings_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_loan_repayment_reminder_settings_CHECKER" />
+            <column name="entity_name" value="loan_repayment_reminder_settings" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_READ_loan_repayment_reminder_settings">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_loan_repayment_reminder_settings'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="READ_loan_repayment_reminder_settings" />
+            <column name="entity_name" value="loan_repayment_reminder_settings" />
+            <column name="action_name" value="READ" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CUPDATE_loan_repayment_reminder_settings">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_loan_repayment_reminder_settings'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_loan_repayment_reminder_settings" />
+            <column name="entity_name" value="loan_repayment_reminder_settings" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_UPDATE_loan_repayment_reminder_settings_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_loan_repayment_reminder_settings_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_loan_repayment_reminder_settings_CHECKER" />
+            <column name="entity_name" value="loan_repayment_reminder_settings" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_loan_repayment_reminder_settings">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_loan_repayment_reminder_settings'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_loan_repayment_reminder_settings" />
+            <column name="entity_name" value="loan_repayment_reminder_settings" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_loan_repayment_reminder_settings_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_loan_repayment_reminder_settings_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_loan_repayment_reminder_settings_CHECKER" />
+            <column name="entity_name" value="loan_repayment_reminder_settings" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
 
 
 </databaseChangeLog>
