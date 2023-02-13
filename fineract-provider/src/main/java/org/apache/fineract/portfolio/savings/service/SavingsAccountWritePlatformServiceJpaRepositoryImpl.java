@@ -521,6 +521,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             if (totalAmount.compareTo(BigDecimal.ZERO) > 0) {
                 this.savingsAccountDomainService.handleWithdrawal(savingsAccount, fmt, transactionDate, totalAmount, paymentDetailRevoked,
                         transactionBooleanValues, backdatedTxnsAllowedTill, isAccountTransfer);
+
             }
         }
     }
@@ -1171,6 +1172,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
             this.savingsAccountDomainService.handleWithdrawal(account, fmt, closedDate, transactionAmount, paymentDetail,
                     transactionBooleanValues, false, isAccountTransfer);
+
 
         }
 

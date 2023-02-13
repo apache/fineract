@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.util.Map;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentReminderSettingsData;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
-public interface LoanSchedularService {
+public interface LoanRepaymentReminderSettingsRepository
+        extends JpaRepository<LoanRepaymentReminderSettingsData, Long>, JpaSpecificationExecutor<LoanRepaymentReminderSettingsData> {
 
-    void applyChargeForOverdueLoans() throws JobExecutionException;
-
-    void recalculateInterest() throws JobExecutionException;
-
-    void recalculateInterest(@SuppressWarnings("unused") Map<String, String> jobParameters);
-
-    void postLoanRepaymentReminder() throws JobExecutionException;
+    @Query(value = "SELECT rs.id as id, rs.number_of_days_to_due_date AS days FROM loan_repayment_reminder_settings rs", nativeQuery = true)
+    List<LoanRepaymentReminderSettingsData> findLoanRepaymentReminderSettings();
 }

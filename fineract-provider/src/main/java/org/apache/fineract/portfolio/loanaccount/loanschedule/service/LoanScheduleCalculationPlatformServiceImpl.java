@@ -40,10 +40,12 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanTopUpData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.serialization.CalculateLoanScheduleQueryFromApiJsonHelper;
@@ -55,14 +57,18 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.serialization.LoanProductDataValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Transactional
 public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleCalculationPlatformService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(LoanScheduleCalculationPlatformServiceImpl.class);
     private final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer;
     private final LoanScheduleAssembler loanScheduleAssembler;
     private final FromJsonHelper fromJsonHelper;
@@ -75,6 +81,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private final ConfigurationDomainService configurationDomainService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final LoanUtilService loanUtilService;
+    private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
 
     @Autowired
     public LoanScheduleCalculationPlatformServiceImpl(final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer,
@@ -84,7 +91,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             final LoanAssembler loanAssembler,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final ConfigurationDomainService configurationDomainService, final CurrencyReadPlatformService currencyReadPlatformService,
-            final LoanUtilService loanUtilService) {
+            final LoanUtilService loanUtilService,
+            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanScheduleAssembler = loanScheduleAssembler;
         this.fromJsonHelper = fromJsonHelper;
@@ -97,6 +105,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         this.configurationDomainService = configurationDomainService;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.loanUtilService = loanUtilService;
+        this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
     }
 
     @Override
@@ -113,7 +122,14 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
             this.loanApiJsonDeserializer.validateForCreate(query.json(), isMeetingMandatoryForJLGLoans, loanProduct);
         }
-        this.fromApiJsonDeserializer.validate(query.json());
+
+        Long numberOfRepaymentsToCarryForward = this.fromJsonHelper.extractLongNamed("numberOfRepaymentsToCarryForward",
+                query.parsedJson());
+        if (numberOfRepaymentsToCarryForward == null) {
+            numberOfRepaymentsToCarryForward = 0L;
+        }
+
+        this.fromApiJsonDeserializer.validate(query.json(), numberOfRepaymentsToCarryForward.intValue());
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
@@ -276,4 +292,27 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         return loanApplicationTerms;
     }
 
+    @Override
+    public LoanTopUpData calculateTopUpCarryForwardSchedules(final JsonQuery query) {
+
+        final Long loanIdToClose = this.fromJsonHelper.extractLongNamed("loanIdToClose", query.parsedJson());
+        final Boolean isTopup = this.fromJsonHelper.extractBooleanNamed("isTopup", query.parsedJson());
+        final Boolean loanTermIncludesToppedUpLoanTerm = this.fromJsonHelper.extractBooleanNamed("loanTermIncludesToppedUpLoanTerm",
+                query.parsedJson());
+
+        Integer schedulesToCarryForward = 0;
+
+        if (loanIdToClose != null && isTopup != null && loanTermIncludesToppedUpLoanTerm != null && isTopup
+                && loanTermIncludesToppedUpLoanTerm) {
+
+            final List<LoanRepaymentScheduleInstallment> schedulesToCarryForwards = this.repaymentScheduleInstallmentRepository
+                    .findPendingLoanRepaymentScheduleInstallmentForTopUp(loanIdToClose, DateUtils.getLocalDateOfTenant());
+
+            if (!CollectionUtils.isEmpty(schedulesToCarryForwards)) {
+                schedulesToCarryForward = schedulesToCarryForwards.size();
+                LOG.info("Loan Term To Be Carried Forward :-" + schedulesToCarryForward);
+            }
+        }
+        return new LoanTopUpData(schedulesToCarryForward);
+    }
 }

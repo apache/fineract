@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,6 +52,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -107,6 +109,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -344,22 +347,33 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (loanProduct.getLoanProductConfigurableAttributes() != null) {
                 updateProductRelatedDetails(productRelatedDetail, newLoanApplication);
             }
+            final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+            final Boolean loanTermIncludesToppedUpLoanTerm = command
+                    .booleanObjectValueOfParameterNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM);
+            final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
+            final Integer numberOfRepaymentsToCarryForward = command
+                    .integerValueOfParameterNamedDefaultToNullIfZero(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD);
 
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(),
                     newLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
-                    newLoanApplication);
+                    newLoanApplication, numberOfRepaymentsToCarryForward);
 
             if (loanProduct.canUseForTopup() && clientId != null) {
-                final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+
                 if (null == isTopup) {
                     newLoanApplication.setIsTopup(false);
                 } else {
                     newLoanApplication.setIsTopup(isTopup);
                 }
 
+                if (null == loanTermIncludesToppedUpLoanTerm) {
+                    newLoanApplication.setLoanTermIncludesToppedUpLoanTerm(false);
+                } else {
+                    newLoanApplication.setLoanTermIncludesToppedUpLoanTerm(loanTermIncludesToppedUpLoanTerm);
+                }
+
                 if (newLoanApplication.isTopup()) {
-                    final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
                     final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, clientId);
                     if (loanToClose == null) {
                         throw new GeneralPlatformDomainRuleException(
@@ -1059,10 +1073,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanRates(rateAssembler.fromParsedJson(command.parsedJson()));
             }
 
+            final Integer numberOfRepaymentsToCarryForward = command
+                    .integerValueOfParameterNamedDefaultToNullIfZero(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD);
+
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(existingLoanApplication.getTermFrequency(),
                     existingLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
-                    existingLoanApplication);
+                    existingLoanApplication, numberOfRepaymentsToCarryForward);
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(existingLoanApplication);
 
@@ -1782,6 +1799,71 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 throw new NotOfficeSpecificProductException(productId, officeId);
             }
 
+        }
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult updateArrearsTolerance(final Long loanId, final JsonCommand command) {
+
+        try {
+            final Loan existingLoanApplication = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+            final Map<String, Object> changes = new HashMap<>();
+            if (existingLoanApplication.loanProduct().isAccountLevelArrearsToleranceEnable()) {
+                if (existingLoanApplication.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null
+                        && existingLoanApplication.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() == 0) {
+                    throw new GeneralPlatformDomainRuleException("error.msg.arrears.tolerance.limit.exceed",
+                            "Arrears Tolerance Limit Has Exceed.");
+                }
+                final Integer graceOnArrearsAging = command.integerValueOfParameterNamed("graceOnArrearsAging");
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+                baseDataValidator.reset().parameter("graceOnArrearsAging").value(graceOnArrearsAging).ignoreIfNull().positiveAmount();
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                            dataValidationErrors);
+                }
+                LocalDate fromDate = null;
+                LocalDate dueDate = null;
+                for (LoanRepaymentScheduleInstallment inst : existingLoanApplication.getRepaymentScheduleInstallments()) {
+                    if (inst.getDueDate().isAfter(DateUtils.getBusinessLocalDate())) {
+                        if (fromDate == null) {
+                            fromDate = inst.getDueDate();
+                        } else if (dueDate == null) {
+                            dueDate = inst.getDueDate();
+                            break;
+                        }
+                    }
+                }
+                int daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, dueDate));
+                if (daysInPeriod < graceOnArrearsAging) {
+                    throw new GeneralPlatformDomainRuleException(
+                            "error.grace.on.arrears.aging.days.should.not.be.greater.than.days.in.installment.period",
+                            "Grace on Arrears aging days should be less than from period for installment available days ." + daysInPeriod);
+                }
+                existingLoanApplication.setGraceOnArrearsAging(graceOnArrearsAging);
+
+                changes.put("graceOnArrearsAging", graceOnArrearsAging);
+                this.loanRepositoryWrapper.saveAndFlush(existingLoanApplication);
+            } else {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.account.level.arrears.tolerance.not.enabled,can't.update.that.value",
+                        "Account level Arrears Tolerance checkbox not checked in product can't update the value for parameter GraceOnArrearsAging.");
+            }
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(loanId) //
+                    .withOfficeId(existingLoanApplication.getOfficeId()) //
+                    .withClientId(existingLoanApplication.getClientId()) //
+                    .withGroupId(existingLoanApplication.getGroupId()) //
+                    .withLoanId(existingLoanApplication.getId()) //
+                    .with(changes).build();
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 

@@ -29,6 +29,7 @@ public interface LoanProductConstants {
     String NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME = "numberOfRepaymentVariationsForBorrowerCycle";
 
     String DEFAULT_VALUE_PARAMETER_NAME = "defaultValue";
+    String LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM = "loanTermIncludesToppedUpLoanTerm";
     String MIN_VALUE_PARAMETER_NAME = "minValue";
     String MAX_VALUE_PARAMETER_NAME = "maxValue";
     String VALUE_CONDITION_TYPE_PARAM_NAME = "valueConditionType";
@@ -141,5 +142,9 @@ public interface LoanProductConstants {
     String ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED = "allowApprovedDisbursedAmountsOverApplied";
     String OVER_APPLIED_CALCULATION_TYPE = "overAppliedCalculationType";
     String OVER_APPLIED_NUMBER = "overAppliedNumber";
+
+    String MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED = "maxNumberOfLoanExtensionsAllowed";
+
+    String IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE = "isAccountLevelArrearsToleranceEnable";
 
 }

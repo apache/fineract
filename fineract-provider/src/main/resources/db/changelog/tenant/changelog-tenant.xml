@@ -66,4 +66,9 @@
     <include file="parts/040_add_validation_limits.xml" relativeToChangelogFile="true"/>
     <include file="parts/041_add_client_level_id.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-140_add_allowManuallyEnterInterestRate_in_savings_product_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-37_add_maxNumberOfLoanExtensionsAllowed_in_loan_product_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-33-add-new-column-max-occurrence-in-charge.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-44_add_isAccountLevelArrearsToleranceEnable_in_loan_product_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-42_enforce_loan_overdue_amount_in_min_balance.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-40-Loan-Repayment-Reminder.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

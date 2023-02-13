@@ -3562,6 +3562,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+
     public CommandWrapperBuilder createValidationLimit() {
         this.actionName = "CREATE";
         this.entityName = "VALIDATIONLIMIT";
@@ -3575,6 +3576,14 @@ public class CommandWrapperBuilder {
         this.entityName = "VALIDATIONLIMIT";
         this.entityId = validationLimitId;
         this.href = "/validationlimit/" + validationLimitId;
+        return this;
+    }
+    public CommandWrapperBuilder updateArrearsTolerance(final Long loanId) {
+        this.actionName = "UPDATEARREARSTOLERANCE";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "?command=updateArrearsTolerance";
         return this;
     }
 }

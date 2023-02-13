@@ -120,4 +120,7 @@ public interface ConfigurationDomainService {
     boolean isReversalTransactionAllowed();
 
     boolean isClientLevelValidationEnabled();
+
+    boolean enforceOverdueLoansForMinBalance();
+
 }

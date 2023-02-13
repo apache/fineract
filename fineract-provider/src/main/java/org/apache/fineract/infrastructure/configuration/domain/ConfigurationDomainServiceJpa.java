@@ -41,6 +41,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     public static final String ENABLE_BUSINESS_DATE = "enable_business_date";
     public static final String ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT = "enable_automatic_cob_date_adjustment";
+    public static final String ENFORCE_OVERDUE_LOANS_FOR_MIN_BALANCE = "enforce_loan_overdue_amount_min_balance_check";
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -55,6 +56,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         this.permissionRepository = permissionRepository;
         this.globalConfigurationRepository = globalConfigurationRepository;
         this.cacheTypeRepository = cacheTypeRepository;
+    }
+
+    @Override
+    public boolean enforceOverdueLoansForMinBalance() {
+        return getGlobalConfigurationPropertyData(ENFORCE_OVERDUE_LOANS_FOR_MIN_BALANCE).isEnabled();
     }
 
     @Override

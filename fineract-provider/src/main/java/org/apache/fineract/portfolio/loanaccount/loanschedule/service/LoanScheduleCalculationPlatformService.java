@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanTopUpData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 
 public interface LoanScheduleCalculationPlatformService {
@@ -29,5 +30,7 @@ public interface LoanScheduleCalculationPlatformService {
     void updateFutureSchedule(LoanScheduleData loanScheduleData, Long loanId);
 
     LoanScheduleData generateLoanScheduleForVariableInstallmentRequest(Long loanId, String json);
+
+    LoanTopUpData calculateTopUpCarryForwardSchedules(JsonQuery query);
 
 }

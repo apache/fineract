@@ -523,6 +523,11 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
+            if (loan.getTotal_extensions() != null) {
+                loan.setTotal_extensions(loan.getTotal_extensions() + 1);
+            } else {
+                loan.setTotal_extensions(1);
+            }
             this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();

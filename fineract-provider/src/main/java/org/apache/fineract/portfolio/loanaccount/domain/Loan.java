@@ -180,7 +180,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "loan_type_enum", nullable = false)
     private Integer loanType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
 
@@ -396,8 +396,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
     private BigDecimal fixedPrincipalPercentagePerInstallment;
 
+    @Column(name = "is_loan_term_includes_topped_up_loan_term")
+    private Boolean loanTermIncludesToppedUpLoanTerm = false;
     @Transient
     private boolean isDisburseToSavingsLoan = false;
+
+    @Column(name = "total_extensions", nullable = true)
+    private Integer total_extensions;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -6771,6 +6776,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.isTopup;
     }
 
+    public Boolean getLoanTermIncludesToppedUpLoanTerm() {
+        return loanTermIncludesToppedUpLoanTerm;
+    }
+
+    public void setLoanTermIncludesToppedUpLoanTerm(Boolean loanTermIncludesToppedUpLoanTerm) {
+        this.loanTermIncludesToppedUpLoanTerm = loanTermIncludesToppedUpLoanTerm;
+    }
+
     public BigDecimal getFirstDisbursalAmount() {
         BigDecimal firstDisbursalAmount;
 
@@ -6868,5 +6881,17 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         // In that case, fetch loan (before commit) will return null for the charges.
         // Return empty set instead of null to avoid NPE
         return Optional.ofNullable(this.charges).orElse(new HashSet<>());
+    }
+
+    public void setTotal_extensions(Integer total_extensions) {
+        this.total_extensions = total_extensions;
+    }
+
+    public Integer getTotal_extensions() {
+        return total_extensions;
+    }
+
+    public void setGraceOnArrearsAging(Integer day) {
+        this.getLoanProductRelatedDetail().setGraceOnArrearsAgeing(day);
     }
 }

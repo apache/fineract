@@ -94,7 +94,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
             LoanApiConstants.lastApplication, // glim specific
-            LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName));
+            LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
+            LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD,
+            LoanApiConstants.LOAN_TERM_TO_TOP_UP));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -513,6 +515,19 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 if (isTopup != null && isTopup) {
                     final Long loanId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.loanIdToClose, element);
                     baseDataValidator.reset().parameter(LoanApiConstants.loanIdToClose).value(loanId).notNull().longGreaterThanZero();
+
+                    if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, element)) {
+                        final Boolean loanTermIncludesToppedUpLoanTerm = this.fromApiJsonHelper
+                                .extractBooleanNamed(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, element);
+                        baseDataValidator.reset().parameter(LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM)
+                                .value(loanTermIncludesToppedUpLoanTerm).validateForBooleanValue();
+                    }
+                    if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, element)) {
+                        final Integer numberOfRepaymentsToCarryForward = this.fromApiJsonHelper
+                                .extractIntegerWithLocaleNamed(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD, element);
+                        baseDataValidator.reset().parameter(LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD)
+                                .value(numberOfRepaymentsToCarryForward).zeroOrPositiveAmount();
+                    }
                 }
             }
         }
@@ -1074,10 +1089,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     }
 
     public void validateLoanTermAndRepaidEveryValues(final Integer loanTermFrequency, final Integer loanTermFrequencyType,
-            final Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType, final Loan loan) {
+            final Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType, final Loan loan,
+            final Integer schedulesToCarryForward) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         this.apiJsonHelper.validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType,
-                numberOfRepayments, repaymentEvery, repaymentEveryType);
+                numberOfRepayments, repaymentEvery, repaymentEveryType, schedulesToCarryForward);
 
         /**
          * For multi-disbursal loans where schedules are auto-generated based on a fixed EMI, ensure the number of

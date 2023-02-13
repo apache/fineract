@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
-import java.util.Map;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+public class LoanTopUpData {
 
-public interface LoanSchedularService {
+    private Integer carryForwardLoanTerm;
 
-    void applyChargeForOverdueLoans() throws JobExecutionException;
+    public LoanTopUpData(Integer carryForwardLoanTerm) {
+        this.carryForwardLoanTerm = carryForwardLoanTerm;
+    }
 
-    void recalculateInterest() throws JobExecutionException;
-
-    void recalculateInterest(@SuppressWarnings("unused") Map<String, String> jobParameters);
-
-    void postLoanRepaymentReminder() throws JobExecutionException;
+    public Integer getCarryForwardLoanTerm() {
+        return carryForwardLoanTerm;
+    }
 }
