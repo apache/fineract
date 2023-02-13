@@ -1305,11 +1305,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         for (LoanTransactionRelation loanTransactionRelation : loanTransaction.getLoanTransactionRelations()) {
             if (loanTransactionRelation.getRelationType().equals(LoanTransactionRelationTypeEnum.CHARGEBACK)
                     && loanTransactionRelation.getToTransaction().isNotReversed()) {
-                actualAmount = actualAmount.add(loanTransactionRelation.getToTransaction().getPrincipalPortion());
+                actualAmount = actualAmount.add(loanTransactionRelation.getToTransaction().getAmount());
             }
         }
         actualAmount = actualAmount.add(chargebackTransaction.getAmount());
-        if (loanTransaction.getPrincipalPortion() != null && actualAmount.compareTo(loanTransaction.getPrincipalPortion()) > 0) {
+        if (loanTransaction.getAmount() != null && actualAmount.compareTo(loanTransaction.getAmount()) > 0) {
             throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
                     "Loan transaction:" + loanTransaction.getId() + " chargeback not allowed as loan transaction amount is not enough",
                     loanTransaction.getId());
