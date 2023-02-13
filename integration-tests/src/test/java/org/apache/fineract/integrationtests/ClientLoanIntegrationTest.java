@@ -7005,6 +7005,64 @@ public class ClientLoanIntegrationTest {
     }
 
     @Test
+    public void testCloseOpenMaturityDate() {
+        GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingNoInterest(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2011");
+
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+
+        HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("02 September 2022", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanID, "1000");
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+        LocalDate expectedMaturityDate = loanDetails.getTimeline().getExpectedMaturityDate();
+        LocalDate actualMaturityDate = loanDetails.getTimeline().getActualMaturityDate();
+
+        assertTrue(expectedMaturityDate.isEqual(actualMaturityDate));
+
+        this.loanTransactionHelper.makeRepayment("04 September 2022", Float.parseFloat("500"), loanID);
+        this.loanTransactionHelper.makeRepayment("05 September 2022", Float.parseFloat("700"), loanID);
+
+        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+
+        expectedMaturityDate = loanDetails.getTimeline().getExpectedMaturityDate();
+        actualMaturityDate = loanDetails.getTimeline().getActualMaturityDate();
+
+        assertNotNull(expectedMaturityDate);
+        assertNull(actualMaturityDate);
+
+        this.loanTransactionHelper.reverseLoanTransaction((long) loanID, loanDetails.getTransactions().get(1).getId(),
+                new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("04 September 2022")
+                        .transactionAmount(0.0).locale("en"));
+
+        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+
+        expectedMaturityDate = loanDetails.getTimeline().getExpectedMaturityDate();
+        actualMaturityDate = loanDetails.getTimeline().getActualMaturityDate();
+
+        assertNotNull(expectedMaturityDate);
+        assertNotNull(actualMaturityDate);
+
+        assertTrue(expectedMaturityDate.isEqual(actualMaturityDate));
+
+    }
+
+    @Test
     public void testReverseReplay() {
         try {
             GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);

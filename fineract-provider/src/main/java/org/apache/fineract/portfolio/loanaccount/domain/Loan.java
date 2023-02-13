@@ -7027,4 +7027,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return getLoanTransactions().stream().filter(predicate).toList();
     }
 
+    public void handleMaturityDateActivate() {
+        if (this.expectedMaturityDate != null && this.actualMaturityDate == null) {
+            this.actualMaturityDate = this.expectedMaturityDate;
+        }
+    }
+
 }
