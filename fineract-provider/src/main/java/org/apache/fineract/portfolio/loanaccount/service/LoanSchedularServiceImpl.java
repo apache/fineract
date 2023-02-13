@@ -45,6 +45,8 @@ import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.data.NotificationData;
+import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -57,6 +59,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -64,6 +67,8 @@ import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +89,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     private final LoanRepaymentReminderSettingsRepository loanRepaymentReminderSettingsRepository;
     private final LoanRepaymentReminderRepository loanRepaymentReminderRepository;
     private final PlatformSecurityContext context;
+    private final NotificationEventPublisher notificationEventPublisher;
+    private final AppUserRepository appUserRepository;
 
     @Override
     @CronTarget(jobName = JobName.APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT)
@@ -336,7 +343,10 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                         loanRepaymentReminder.setLastModifiedDate(DateUtils.getLocalDateTimeOfTenant());
                         loanRepaymentReminder.setCreatedBy(currentUser.getId());
 
-                        loanRepaymentReminderRepository.save(loanRepaymentReminder);
+                        LoanRepaymentReminder saved = loanRepaymentReminderRepository.save(loanRepaymentReminder);
+                        //send notification
+                        buildNotification("ALL_FUNCTION", "LoanRepaymentReminder", saved.getId(), saved.toString(), "PENDING",
+                                context.authenticatedUser().getId(), 1L);
                     }
                 }
             }
@@ -353,6 +363,25 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             user = this.context.getAuthenticatedUserIfPresent();
         }
         return user;
+    }
+    private void buildNotification(String permission, String objectType, Long objectIdentifier, String notificationContent,
+                                   String eventType, Long appUserId, Long officeId) {
+
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        Set<Long> userIds = getNotifiableUserIds(officeId, permission);
+        NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
+                false, false, tenantIdentifier, officeId, userIds);
+        try {
+            notificationEventPublisher.broadcastNotification(notificationData);
+        } catch (Exception e) {
+            // We want to avoid rethrowing the exception to stop the business transaction from rolling back
+            log.error("Error while broadcasting notification event", e);
+        }
+    }
+    private Set<Long> getNotifiableUserIds(Long officeId, String permission) {
+        Collection<AppUser> users = appUserRepository.findByOfficeId(officeId);
+        Collection<AppUser> usersWithPermission = users.stream().filter(aU -> aU.hasAnyPermission(permission, "ALL_FUNCTIONS")).toList();
+        return usersWithPermission.stream().map(AppUser::getId).collect(toSet());
     }
 
 }
