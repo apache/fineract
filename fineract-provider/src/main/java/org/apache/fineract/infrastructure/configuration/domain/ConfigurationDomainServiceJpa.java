@@ -31,6 +31,7 @@ import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
 import org.apache.fineract.useradministration.exception.PermissionNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
     private static Map<String, GlobalConfigurationPropertyData> configurations = new HashMap<>();
+
+    @Value("${client.level.limit.validation.enabled}")
+    private boolean booleanIsClientLevelEnabled;
 
     @Autowired
     public ConfigurationDomainServiceJpa(final PermissionRepository permissionRepository,
@@ -454,6 +458,6 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Override
     public boolean isClientLevelValidationEnabled() {
-        return false;
+        return this.booleanIsClientLevelEnabled;
     }
 }

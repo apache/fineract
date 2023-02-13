@@ -54,6 +54,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -348,6 +349,43 @@ public class SavingsAccountTransactionDataValidator {
         }
     }
 
+    public void validateClientSpecificSingleWithdrawLimit(Client client) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+        if (client.getSingleWithdrawLimit() != null) {
+            final String errorCode = "maximum.transaction.limit.cannot.exceed.global.limit";
+            final String defaultMessage = "Maximum transaction limit cannot exceed global validation limit";
+            ValidationLimit validationLimit = this.validationLimitRepository.findByClientLevelId(client.getClientLevelId());
+            if (validationLimit != null && validationLimit.getMaximumClientSpecificSingleWithdrawLimit() != null
+                    && client.getSingleWithdrawLimit().compareTo(validationLimit.getMaximumClientSpecificSingleWithdrawLimit()) > 0) {
+                baseDataValidator.reset().parameter(ClientApiConstants.singleWithdrawLimit).value(client.getSingleWithdrawLimit())
+                        .failWithCode(errorCode, defaultMessage);
+            }
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateClientSpecificDailyWithdrawLimit(Client client) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+        if (client.getDailyWithdrawLimit() != null) {
+            final String errorCode = "daily.withdraw.limit.cannot.exceed.global.limit";
+            final String defaultMessage = "Daily withdraw limit cannot exceed global validation limit";
+            ValidationLimit validationLimit = this.validationLimitRepository.findByClientLevelId(client.getClientLevelId());
+            if (validationLimit != null && validationLimit.getMaximumClientSpecificDailyWithdrawLimit() != null
+                    && client.getDailyWithdrawLimit().compareTo(validationLimit.getMaximumClientSpecificDailyWithdrawLimit()) > 0) {
+                baseDataValidator.reset().parameter(ClientApiConstants.dailyWithdrawLimit).value(client.getDailyWithdrawLimit())
+                        .failWithCode(errorCode, defaultMessage);
+            }
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
     public void validateWithdrawLimits(SavingsAccount account, BigDecimal transactionAmount, BigDecimal totalWithdrawnToday) {
         // Client to consider while checking limits
         Client clientToCheckForLimit = account.getClient();
@@ -357,9 +395,14 @@ public class SavingsAccountTransactionDataValidator {
         if (clientToCheckForLimit.getClientLevelId() != null) {
             ValidationLimit validationLimit = this.validationLimitRepository.findByClientLevelId(clientToCheckForLimit.getClientLevelId());
             BigDecimal dailyWithdrawLimit = validationLimit.getMaximumDailyWithdrawLimit();
+            BigDecimal singleWithdrawLimit = validationLimit.getMaximumSingleWithdrawLimit();
+            if (BigDecimal.ZERO.compareTo(singleWithdrawLimit) != 0 && singleWithdrawLimit.compareTo(transactionAmount) < 0) {
+                baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(transactionAmount)
+                        .failWithCode("validation.msg.amount.exceeds.single.withdraw.limit", dailyWithdrawLimit);
+            }
 
             if (BigDecimal.ZERO.compareTo(dailyWithdrawLimit) != 0 && dailyWithdrawLimit.compareTo(totalWithdrawnToday) < 0) {
-                baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(transactionAmount)
+                baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(totalWithdrawnToday)
                         .failWithCode("validation.msg.amount.exceeds.daily.withdraw.limit", dailyWithdrawLimit);
             }
 
@@ -388,8 +431,8 @@ public class SavingsAccountTransactionDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
         ValidationLimit validationLimit = this.validationLimitRepository.findByClientLevelId(account.getClient().getClientLevelId());
-        if (validationLimit.getMaximumCumulativeBalance() != null
-                && account.getSummary().getAccountBalance().compareTo(validationLimit.getMaximumCumulativeBalance()) > 0) {
+        if (validationLimit.getMaximumCumulativeBalance() != null && account.getSummary().getAccountBalance().add(transactionAmount)
+                .compareTo(validationLimit.getMaximumCumulativeBalance()) > 0) {
             baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(transactionAmount)
                     .failWithCode("validation.msg.cumulative.balance.exceeds.limit", validationLimit.getMaximumCumulativeBalance());
         }

@@ -41,7 +41,6 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsDepositBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
-import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -107,13 +106,14 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
         final boolean postReversals = this.configurationDomainService.isReversalTransactionAllowed();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-
         final boolean isClientLevelValidationEnabled = this.configurationDomainService.isClientLevelValidationEnabled();
-        if (this.shouldValidateLimitDuringWithdrawal(account, !isAccountTransfer, isClientLevelValidationEnabled)) {
-            Client client = account.getClient();
+
+        if (this.shouldValidateLimitDuringWithdrawal(account, isAccountTransfer, isClientLevelValidationEnabled)) {
             BigDecimal totalWithdrawOnDate = this.getTotalWithdrawAmountOnDate(account.clientId(), transactionDate, transactionAmount,
                     isAccountTransfer);
             this.savingsAccountTransactionDataValidator.validateWithdrawLimits(account, transactionAmount, totalWithdrawOnDate);
+            savingsAccountTransactionDataValidator.validateClientSpecificSingleWithdrawLimit(account.getClient());
+            savingsAccountTransactionDataValidator.validateClientSpecificDailyWithdrawLimit(account.getClient());
         }
 
         if (transactionBooleanValues.isRegularTransaction() && !account.allowWithdrawal()) {

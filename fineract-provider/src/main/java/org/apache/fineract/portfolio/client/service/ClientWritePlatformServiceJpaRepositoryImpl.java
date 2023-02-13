@@ -424,7 +424,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         try {
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
             final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
             final String clientHierarchy = clientForUpdate.getOffice().getHierarchy();
 
@@ -451,6 +450,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     gender = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER, newValue);
                 }
                 clientForUpdate.updateGender(gender);
+            }
+
+            if (changes.containsKey(ClientApiConstants.clientLevelIdParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientLevelIdParamName);
+                CodeValue clientLevel = null;
+                if (newValue != null) {
+                    clientLevel = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_LEVELS,
+                            newValue);
+                }
+                clientForUpdate.setClientLevel(clientLevel);
             }
 
             if (changes.containsKey(ClientApiConstants.savingsProductIdParamName)) {

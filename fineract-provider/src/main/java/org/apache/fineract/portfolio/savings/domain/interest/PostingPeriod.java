@@ -675,7 +675,6 @@ public final class PostingPeriod {
         // for each compounding period accumulate the amount of interest
         // to be applied to the balanced for interest calculation
         for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
-            System.out.println(this.interestCompoundingType.getCode());
             final List<BigDecimal> interestUnrounded = compoundingPeriod.calculateInterests(this.interestCompoundingType,
                     this.interestCalculationType, compoundInterestValues.getcompoundedInterest(), this.interestRateAsFraction,
                     this.daysInYear, this.minBalanceForInterestCalculation.getAmount(), this.overdraftInterestRateAsFraction,

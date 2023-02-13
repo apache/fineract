@@ -64,5 +64,6 @@
     <include file="parts/0038_add_free_withdrawal_in_recurring_details.xml" relativeToChangelogFile="true"/>
     <include file="parts/0039_add_free_withdrawal_in_recurring_details_product.xml" relativeToChangelogFile="true"/>
     <include file="parts/040_add_validation_limits.xml" relativeToChangelogFile="true"/>
+    <include file="parts/041_add_client_level_id.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-140_add_allowManuallyEnterInterestRate_in_savings_product_table.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
