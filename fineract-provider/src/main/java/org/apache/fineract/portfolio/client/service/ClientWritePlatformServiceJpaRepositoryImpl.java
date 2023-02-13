@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.client.service;
 
 import com.google.gson.JsonElement;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -307,6 +309,18 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
             }
 
+            final Long clientLevelId = command.longValueOfParameterNamed(ClientApiConstants.clientLevelIdParamName);
+            if (clientLevelId != null) {
+               CodeValue clientLevel = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_LEVELS,
+                       clientLevelId);
+                newClient.setClientLevel(clientLevel);
+            }
+
+            final BigDecimal singleWithDrawLimit = command.bigDecimalValueOfParameterNamed(ClientApiConstants.singleWithdrawLimit);
+            newClient.setSingleWithdrawLimit(singleWithDrawLimit);
+
+            final BigDecimal dailyWithDrawLimit = command.bigDecimalValueOfParameterNamed(ClientApiConstants.dailyWithdrawLimit);
+            newClient.setDailyWithdrawLimit(dailyWithDrawLimit);
             this.clientRepository.saveAndFlush(newClient);
             if (newClient.isActive()) {
                 businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(newClient));

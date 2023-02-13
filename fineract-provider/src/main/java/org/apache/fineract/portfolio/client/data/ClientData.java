@@ -370,8 +370,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 templateData.clientClassificationOptions, templateData.clientNonPersonConstitutionOptions,
                 templateData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, templateData.clientLegalFormOptions,
                 templateData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled, null, null,
-                null);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled, clientData.getClientLevel(), clientData.getDailyWithdrawLimit(),
+                clientData.singleWithdrawLimit);
 
     }
 
@@ -389,8 +389,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions,
                 clientData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,
                 clientData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled, null, null,
-                null);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled, clientData.getClientLevel(), clientData.getDailyWithdrawLimit(),
+                clientData.singleWithdrawLimit);
 
     }
 
@@ -406,8 +406,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 clientData.clientTypeOptions, clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions,
                 clientData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,
                 clientData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled, null, null,
-                null);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled, clientData.getClientLevel(), clientData.getDailyWithdrawLimit(),
+                clientData.singleWithdrawLimit);
 
     }
 
@@ -735,4 +735,15 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         return this.isAddressEnabled;
     }
 
+    public BigDecimal getDailyWithdrawLimit() {
+        return dailyWithdrawLimit;
+    }
+
+    public BigDecimal getSingleWithdrawLimit() {
+        return singleWithdrawLimit;
+    }
+
+    public CodeValueData getClientLevel() {
+        return clientLevel;
+    }
 }

@@ -308,7 +308,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     + " where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and c.id = ?";
             final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper, // NOSONAR
                     hierarchySearchString, hierarchySearchString, clientId);
-
             // Get client collaterals
             final Collection<ClientCollateralManagement> clientCollateralManagements = this.clientCollateralManagementRepositoryWrapper
                     .getCollateralsPerClient(clientId);
@@ -326,7 +325,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper, // NOSONAR
                     clientId);
-
             return ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
 
         } catch (final EmptyResultDataAccessException e) {

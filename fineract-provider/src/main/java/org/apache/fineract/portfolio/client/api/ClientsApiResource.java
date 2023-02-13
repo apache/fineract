@@ -198,7 +198,6 @@ public class ClientsApiResource {
                 clientData = ClientData.templateWithSavingAccountOptions(clientData, savingAccountOptions);
             }
         }
-
         return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
 
