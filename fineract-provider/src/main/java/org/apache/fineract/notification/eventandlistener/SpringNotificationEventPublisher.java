@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile("!activeMqEnabled")
+@Profile("activeMqEnabled")
 @RequiredArgsConstructor
 @Slf4j
 public class SpringNotificationEventPublisher implements NotificationEventPublisher {
