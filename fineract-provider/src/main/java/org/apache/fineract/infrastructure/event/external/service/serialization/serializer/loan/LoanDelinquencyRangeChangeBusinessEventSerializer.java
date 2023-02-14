@@ -33,8 +33,11 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinqu
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic.CurrencyDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanChargeDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanDelinquencyRangeDataMapper;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -55,9 +58,12 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
 
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
 
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
+
     private final LoanChargeDataMapper chargeMapper;
 
     private final CurrencyDataMapper currencyMapper;
+    private final AvroDateTimeMapper dataTimeMapper;
 
     @Override
     protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
@@ -67,6 +73,8 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
         String accountNumber = data.getAccountNo();
         String externalId = data.getExternalId().getValue();
         MonetaryCurrency loanCurrency = event.get().getCurrency();
+        CollectionData delinquentData = delinquencyReadPlatformService.calculateLoanCollectionData(id);
+        String delinquentDate = dataTimeMapper.mapLocalDate(delinquentData.getDelinquentDate());
 
         List<LoanChargeDataRangeViewV1> charges = loanChargeReadPlatformService.retrieveLoanCharges(id)//
                 .stream()//
@@ -95,6 +103,7 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
                 .setCharges(charges)//
                 .setAmount(amount)//
                 .setCurrency(currencyMapper.map(data.getCurrency()))//
+                .setDelinquentDate(delinquentDate)//
                 .build();
     }
 

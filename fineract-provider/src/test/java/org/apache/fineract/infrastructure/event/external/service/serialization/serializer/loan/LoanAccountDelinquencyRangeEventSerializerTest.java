@@ -47,6 +47,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinqu
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic.CurrencyDataMapperImpl;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanChargeDataMapperImpl;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanDelinquencyRangeDataMapperImpl;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -57,6 +58,8 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -82,6 +85,12 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
     @Mock
     private LoanChargeReadPlatformService loanChargeReadPlatformService;
 
+    @Mock
+    private DelinquencyReadPlatformService delinquencyReadPlatformService;
+
+    @Mock
+    private AvroDateTimeMapper mapper;
+
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
@@ -94,12 +103,15 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         // given
         LoanDelinquencyRangeChangeBusinessEventSerializer serializer = new LoanDelinquencyRangeChangeBusinessEventSerializer(
                 loanReadPlatformService, new LoanDelinquencyRangeDataMapperImpl(), loanChargeReadPlatformService,
-                new LoanChargeDataMapperImpl(), new CurrencyDataMapperImpl());
+                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(), new CurrencyDataMapperImpl(), mapper);
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanAccountData loanAccountData = mock(LoanAccountData.class);
+        CollectionData delinquentData = mock(CollectionData.class);
         MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
         MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
+        String delinquentDateAsStr = "2022-12-01";
+        LocalDate delinquentDate = LocalDate.parse(delinquentDateAsStr);
 
         when(loanForProcessing.getId()).thenReturn(1L);
         when(loanAccountData.getId()).thenReturn(1L);
@@ -109,7 +121,10 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         when(loanAccountData.getCurrency()).thenAnswer(a -> new CurrencyData(loanCurrency.getCode(), loanCurrency.getDigitsAfterDecimal(),
                 loanCurrency.getCurrencyInMultiplesOf()));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
+        when(delinquentData.getDelinquentDate()).thenReturn(delinquentDate);
         when(loanReadPlatformService.retrieveOne(any(Long.class))).thenReturn(loanAccountData);
+        when(delinquencyReadPlatformService.calculateLoanCollectionData(any(Long.class))).thenReturn(delinquentData);
+        when(mapper.mapLocalDate(delinquentDate)).thenReturn(delinquentDateAsStr);
 
         LoanDelinquencyRangeChangeBusinessEvent event = new LoanDelinquencyRangeChangeBusinessEvent(loanForProcessing);
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
@@ -141,8 +156,8 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         assertEquals(0, data.getAmount().getInterestAmount().compareTo(new BigDecimal("30.0")));
         assertEquals(0, data.getAmount().getFeeAmount().compareTo(new BigDecimal("5.0")));
         assertEquals(0, data.getAmount().getPenaltyAmount().compareTo(new BigDecimal("50.0")));
+        assertEquals(delinquentDateAsStr, data.getDelinquentDate());
 
-        // assertEquals(data, expectedSerializedData);
         moneyHelper.close();
     }
 
