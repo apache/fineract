@@ -42,6 +42,14 @@
             "name": "amount",
             "doc": "Contains installments  total, fee, interest, principal and penalty amount summaries",
             "type": "org.apache.fineract.avro.loan.v1.LoanAmountDataV1"
+        },
+        {
+            "default": null,
+            "name": "delinquentDate",
+            "type": [
+                "null",
+                "string"
+            ]
         }
     ]
 }
