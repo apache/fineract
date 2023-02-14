@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.client.service;
 
 import com.google.gson.JsonElement;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -311,8 +310,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Long clientLevelId = command.longValueOfParameterNamed(ClientApiConstants.clientLevelIdParamName);
             if (clientLevelId != null) {
-               CodeValue clientLevel = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_LEVELS,
-                       clientLevelId);
+                CodeValue clientLevel = this.codeValueRepository
+                        .findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_LEVELS, clientLevelId);
                 newClient.setClientLevel(clientLevel);
             }
 

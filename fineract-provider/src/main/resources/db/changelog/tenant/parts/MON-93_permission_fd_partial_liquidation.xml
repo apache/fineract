@@ -81,6 +81,7 @@
                 <constraints references="m_savings_account(id)" foreignKeyName="FK_linked_origin_m_savings"/>
             </column>
         </addColumn>
+
     </changeSet>
 
     <changeSet author="naphlin@fiter.io" id="MON-93_add_varying_charge_slab_1">

@@ -431,8 +431,8 @@ public class SavingsAccountTransactionDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
         ValidationLimit validationLimit = this.validationLimitRepository.findByClientLevelId(account.getClient().getClientLevelId());
-        if (validationLimit!=null && validationLimit.getMaximumCumulativeBalance() != null && account.getSummary().getAccountBalance().add(transactionAmount)
-                .compareTo(validationLimit.getMaximumCumulativeBalance()) > 0) {
+        if (validationLimit != null && validationLimit.getMaximumCumulativeBalance() != null && account.getSummary().getAccountBalance()
+                .add(transactionAmount).compareTo(validationLimit.getMaximumCumulativeBalance()) > 0) {
             baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(transactionAmount)
                     .failWithCode("validation.msg.cumulative.balance.exceeds.limit", validationLimit.getMaximumCumulativeBalance());
         }

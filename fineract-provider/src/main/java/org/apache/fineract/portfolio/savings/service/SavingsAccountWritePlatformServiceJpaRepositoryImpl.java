@@ -1173,7 +1173,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             this.savingsAccountDomainService.handleWithdrawal(account, fmt, closedDate, transactionAmount, paymentDetail,
                     transactionBooleanValues, false, isAccountTransfer);
 
-
         }
 
         final Map<String, Object> accountChanges = account.close(user, command, DateUtils.getBusinessLocalDate());

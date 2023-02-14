@@ -82,8 +82,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
             final BusinessEventNotifierService businessEventNotifierService,
             final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
-            final SavingsAccountAssembler savingAccountAssembler,
-            final BusinessEventNotifierService businessEventNotifierService, final LoanReadPlatformService loanReadPlatformService) {
+            final SavingsAccountAssembler savingAccountAssembler, final BusinessEventNotifierService businessEventNotifierService,
+            final LoanReadPlatformService loanReadPlatformService) {
 
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -178,8 +178,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         // do check total loan overdue amount and consider is while applying min balance check
         account.validateAccountBalanceDoesNotBecomeNegative(transactionAmount, transactionBooleanValues.isExceptionForBalanceCheck(),
-                depositAccountOnHoldTransactions, backdatedTxnsAllowedTill,
-                getOverdueLoanAmountForClient(account, isAccountTransfer));
+                depositAccountOnHoldTransactions, backdatedTxnsAllowedTill, getOverdueLoanAmountForClient(account, isAccountTransfer));
 
         saveTransactionToGenerateTransactionId(withdrawal);
         if (backdatedTxnsAllowedTill) {

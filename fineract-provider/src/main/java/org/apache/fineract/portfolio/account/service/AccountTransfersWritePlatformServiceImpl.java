@@ -188,7 +188,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     transactionDate, transactionAmount, paymentDetail, transactionBooleanValues, backdatedTxnsAllowedTill,
                     isAccountTransfer);
 
-
             final Long toLoanAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
             final Loan toLoanAccount = this.loanAccountAssembler.assembleFrom(toLoanAccountId);
 
@@ -368,7 +367,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount,
                     accountTransferDTO.getFmt(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
                     accountTransferDTO.getPaymentDetail(), transactionBooleanValues, backdatedTxnsAllowedTill, isAccountTransfer);
-
 
             LoanTransaction loanTransaction = null;
 

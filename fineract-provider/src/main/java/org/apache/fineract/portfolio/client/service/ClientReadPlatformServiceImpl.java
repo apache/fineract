@@ -548,7 +548,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
                     firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender,
                     activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
-                    clienttype, classification, legalForm, clientNonPerson, isStaff,null,null,null);
+                    clienttype, classification, legalForm, clientNonPerson, isStaff, null, null, null);
 
         }
     }
@@ -682,7 +682,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final CodeValueData gender = CodeValueData.instance(genderId, genderValue);
             final Long clientLevelId = JdbcSupport.getLong(rs, "clientLevelId");
             final String clientLevelValue = rs.getString("clientLevelValue");
-            final CodeValueData clientLevel= CodeValueData.instance(clientLevelId,clientLevelValue);
+            final CodeValueData clientLevel = CodeValueData.instance(clientLevelId, clientLevelValue);
             final BigDecimal dailyWithDrawLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "dailyWithDrawLimit");
             final BigDecimal singleWithDrawLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "singleWithDrawLimit");
 
@@ -743,7 +743,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
                     firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender,
                     activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
-                    clienttype, classification, legalForm, clientNonPerson, isStaff,clientLevel,dailyWithDrawLimit,singleWithDrawLimit);
+                    clienttype, classification, legalForm, clientNonPerson, isStaff, clientLevel, dailyWithDrawLimit, singleWithDrawLimit);
 
         }
     }
