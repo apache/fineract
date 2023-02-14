@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Profile("activeMqEnabled")
-@Conditional(EnableFineractEventsCondition.class)
+//@Conditional(EnableFineractEventsCondition.class)
 @RequiredArgsConstructor
 public class ActiveMQNotificationEventPublisher implements NotificationEventPublisher {
 
