@@ -18,11 +18,6 @@
  */
 package org.apache.fineract.notification.config;
 
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.fineract.infrastructure.core.config.EnableFineractEventsCondition;
 import org.slf4j.Logger;
@@ -35,19 +30,18 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 @Configuration
 @Profile("activeMqEnabled")
 @Conditional(EnableFineractEventsCondition.class)
-public class MessagingConfiguration {
+public class MessagingConfigurationLoanRepaymentReminders {
 
     @Autowired
     private Environment env;
 
     @Bean
     public Logger loggerBean() {
-        return LoggerFactory.getLogger(MessagingConfiguration.class);
+        return LoggerFactory.getLogger(MessagingConfigurationLoanRepaymentReminders.class);
     }
 
     private static final String DEFAULT_BROKER_URL = "tcp://localhost:61616";
@@ -58,6 +52,7 @@ public class MessagingConfiguration {
         try {
             amqConnectionFactory.setBrokerURL(DEFAULT_BROKER_URL);
             amqConnectionFactory.setTrustAllPackages(true);
+
         } catch (Exception e) {
             amqConnectionFactory.setBrokerURL(this.env.getProperty("brokerUrl"));
         }
@@ -70,36 +65,13 @@ public class MessagingConfiguration {
     }
 
     @Bean
-    public JmsTemplate jmsTemplate() {
+    public JmsTemplate jmsTemplateLoanRepaymentReminders() {
         JmsTemplate jmsTemplate;
         jmsTemplate = new JmsTemplate(connectionFactory());
         jmsTemplate.setConnectionFactory(connectionFactory());
         return jmsTemplate;
     }
 
-    @Bean
-    public DefaultMessageListenerContainer messageListenerContainer() {
 
-        DefaultMessageListenerContainer messageListenerContainer = new DefaultMessageListenerContainer();
-        messageListenerContainer.setConnectionFactory(connectionFactory());
-        messageListenerContainer.setDestinationName("NotificationQueue");
-        messageListenerContainer.setMessageListener(new MessageListener() {
-            @Override
-            public void onMessage(Message message) {
-                //TODO
-                //fixing the issue at startup not sure what to do with these messages.
-                loggerBean().info("Message Object  :: "+message.toString());
-            }
-        });
-        messageListenerContainer.setExceptionListener(new ExceptionListener() {
-
-            @Override
-            public void onException(JMSException jmse) {
-                loggerBean().error("Network Error: ActiveMQ Broker Unavailable.");
-                messageListenerContainer.shutdown();
-            }
-        });
-        return messageListenerContainer;
-    }
 
 }

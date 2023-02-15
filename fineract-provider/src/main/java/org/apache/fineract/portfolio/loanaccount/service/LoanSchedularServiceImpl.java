@@ -372,7 +372,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
                 false, false, tenantIdentifier, officeId, userIds);
         try {
-            notificationEventPublisher.broadcastNotification(notificationData);
+            notificationEventPublisher.broadcastNotificationLoanRepaymentReminders(notificationData);
         } catch (Exception e) {
             // We want to avoid rethrowing the exception to stop the business transaction from rolling back
             log.error("Error while broadcasting notification event", e);

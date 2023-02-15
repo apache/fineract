@@ -41,4 +41,9 @@ public class SpringNotificationEventPublisher implements NotificationEventPublis
                 ThreadLocalContextUtil.getContext());
         applicationEventPublisher.publishEvent(event);
     }
+    @Override
+    public void broadcastNotificationLoanRepaymentReminders(final NotificationData notificationData) {
+        log.debug("Sending Spring LoanRepaymentReminders notification event: {}", notificationData);
+
+    }
 }
