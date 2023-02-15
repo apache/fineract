@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,6 +36,8 @@ public class FineractProperties {
     private FineractModeProperties mode;
 
     private FineractCorrelationProperties correlation;
+
+    private FineractTemplateProperties template;
 
     @Getter
     @Setter
@@ -71,5 +74,13 @@ public class FineractProperties {
 
         private boolean enabled;
         private String headerName;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractTemplateProperties {
+
+        private boolean regexWhitelistEnabled;
+        private List<String> regexWhitelist;
     }
 }
