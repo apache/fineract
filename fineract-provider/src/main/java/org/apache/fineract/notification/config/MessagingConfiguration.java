@@ -22,7 +22,7 @@ import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.fineract.infrastructure.core.condition.EnableFineractEventsCondition;
-import org.apache.fineract.notification.eventandlistener.NotificationEventListener;
+import org.apache.fineract.notification.eventandlistener.ActiveMQNotificationEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class MessagingConfiguration {
     private Environment env;
 
     @Autowired
-    private NotificationEventListener notificationEventListener;
+    private ActiveMQNotificationEventListener notificationEventListener;
 
     @Bean
     public Logger loggerBean() {
