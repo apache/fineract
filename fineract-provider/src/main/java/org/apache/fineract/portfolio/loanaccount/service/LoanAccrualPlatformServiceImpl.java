@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,6 +43,13 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
     public void addPeriodicAccruals(final LocalDate tillDate) throws JobExecutionException {
         Collection<LoanScheduleAccrualData> loanScheduleAccrualDataList = this.loanReadPlatformService
                 .retrievePeriodicAccrualData(tillDate);
+        addPeriodicAccruals(tillDate, loanScheduleAccrualDataList);
+    }
+
+    @Override
+    public void addPeriodicAccruals(final LocalDate tillDate, Loan loan) throws JobExecutionException {
+        Collection<LoanScheduleAccrualData> loanScheduleAccrualDataList = this.loanReadPlatformService.retrievePeriodicAccrualData(tillDate,
+                loan);
         addPeriodicAccruals(tillDate, loanScheduleAccrualDataList);
     }
 
