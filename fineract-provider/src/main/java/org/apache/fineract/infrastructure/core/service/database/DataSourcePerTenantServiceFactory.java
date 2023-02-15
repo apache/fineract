@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.infrastructure.core.service.database;
 
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;

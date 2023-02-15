@@ -39,8 +39,10 @@ import org.apache.fineract.infrastructure.core.service.migration.SchemaUpgradeNe
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseStateVerifier;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseUpgradeService;
-import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.mock.env.MockEnvironment;
 
 public class LiquibaseStepDefinitions implements En {
 
@@ -61,6 +63,7 @@ public class LiquibaseStepDefinitions implements En {
     private List<FineractPlatformTenant> allTenants;
     private SchemaUpgradeNeededException executionException;
     private DataSource defaultTenantDataSource;
+    private Environment environment;
 
     public LiquibaseStepDefinitions() {
         Given("Liquibase is disabled with a default tenant", () -> {
@@ -148,6 +151,7 @@ public class LiquibaseStepDefinitions implements En {
         tenantDataSourceFactory = mock(TenantDataSourceFactory.class);
         tenantDetailsService = mock(TenantDetailsService.class);
         databaseStateVerifier = mock(TenantDatabaseStateVerifier.class);
+        environment = new MockEnvironment();
 
         liquibaseFactory = mock(ExtendedSpringLiquibaseFactory.class);
 
@@ -176,6 +180,6 @@ public class LiquibaseStepDefinitions implements En {
         given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db", "custom_changelog")).willReturn(customChangeLogLiquibase);
 
         tenantDatabaseUpgradeService = new TenantDatabaseUpgradeService(tenantDetailsService, tenantStoreDataSource, fineractProperties,
-                databaseStateVerifier, liquibaseFactory, tenantDataSourceFactory);
+                databaseStateVerifier, liquibaseFactory, tenantDataSourceFactory, environment);
     }
 }

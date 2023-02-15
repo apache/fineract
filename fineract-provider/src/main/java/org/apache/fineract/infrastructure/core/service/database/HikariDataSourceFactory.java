@@ -16,14 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.infrastructure.core.service.database;
 
-import javax.sql.DataSource;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.stereotype.Component;
 
-/**
- * A service for getting hold of the appropriate {@link DataSource} connection pool.
- */
-public interface RoutingDataSourceService {
+@Component
+public class HikariDataSourceFactory {
 
-    DataSource retrieveDataSource();
+    public HikariDataSource create(HikariConfig config) {
+        return new HikariDataSource(config);
+    }
 }

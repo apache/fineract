@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.updatenpa;
 
-import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.batch.core.Job;

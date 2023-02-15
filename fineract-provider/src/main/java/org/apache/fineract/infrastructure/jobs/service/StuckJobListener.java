@@ -27,10 +27,10 @@ import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadP
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.apache.fineract.infrastructure.event.external.service.JdbcTemplateFactory;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
 import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameProvider;
-import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;

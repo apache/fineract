@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.security.service;
 
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantMapper;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentifierException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

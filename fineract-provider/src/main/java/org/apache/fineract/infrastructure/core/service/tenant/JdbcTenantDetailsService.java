@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.security.service;
+package org.apache.fineract.infrastructure.core.service.tenant;
 
 import java.util.List;
 import javax.sql.DataSource;

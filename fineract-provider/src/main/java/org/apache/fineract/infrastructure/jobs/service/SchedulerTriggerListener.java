@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadP
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Trigger;

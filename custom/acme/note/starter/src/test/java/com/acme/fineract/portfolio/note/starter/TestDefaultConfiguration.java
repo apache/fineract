@@ -22,8 +22,8 @@ import static org.mockito.Mockito.mock;
 
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
