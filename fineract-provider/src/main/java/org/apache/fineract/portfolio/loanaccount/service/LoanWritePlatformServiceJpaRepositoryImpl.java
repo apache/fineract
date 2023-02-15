@@ -2679,6 +2679,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
 
         LoanTransaction chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
+        loanTransactionRepository.saveAndFlush(chargeOffTransaction);
         loan.addLoanTransaction(chargeOffTransaction);
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
