@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.jobs;
 
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;

@@ -19,10 +19,12 @@
 package org.apache.fineract;
 
 import java.io.IOException;
-import org.apache.fineract.infrastructure.core.boot.AbstractApplicationConfiguration;
+import org.apache.fineract.infrastructure.core.boot.FineractLiquibaseOnlyApplicationConfiguration;
+import org.apache.fineract.infrastructure.core.boot.FineractWebApplicationConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Import;
 
 /**
  * Fineract main() application which launches Fineract in an embedded Tomcat HTTP (using Spring Boot).
@@ -39,11 +41,12 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 
 public class ServerApplication extends SpringBootServletInitializer {
 
-    private static class Configuration extends AbstractApplicationConfiguration {}
+    @Import({ FineractWebApplicationConfiguration.class, FineractLiquibaseOnlyApplicationConfiguration.class })
+    private static class Configuration {}
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        return builder.sources(Configuration.class);
+        return configureApplication(builder);
     }
 
     private static SpringApplicationBuilder configureApplication(SpringApplicationBuilder builder) {
@@ -52,6 +55,5 @@ public class ServerApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) throws IOException {
         configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
-        // ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
     }
 }

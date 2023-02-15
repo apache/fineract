@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -41,8 +40,6 @@ public class TenantDatabaseStateVerifier {
 
     private final LiquibaseProperties liquibaseProperties;
     private final DatabaseIndependentQueryService dbQueryService;
-
-    private final FineractProperties fineractProperties;
 
     public boolean isFirstLiquibaseMigration(DataSource dataSource) {
         boolean databaseChangelogTableExists = dbQueryService.isTablePresent(dataSource, "DATABASECHANGELOG");
