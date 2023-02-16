@@ -575,8 +575,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final StringBuilder builder = new StringBuilder(400);
 
             builder.append(
-                    "c.id as id,c.client_level_id clientLevelId,clv.code_value clientLevelValue,c.daily_withdraw_limit dailyWithDrawLimit,");
-            builder.append(" c.single_withdraw_limit singleWithDrawLimit, c.account_no as accountNo,");
+                    "c.id as id,ctl.client_level_id clientLevelId,clv.code_value clientLevelValue,ctl.daily_withdraw_limit dailyWithDrawLimit,");
+            builder.append(" ctl.single_withdraw_limit singleWithDrawLimit, c.account_no as accountNo,");
             builder.append(" c.external_id as externalId, c.status_enum as statusEnum,c.sub_status as subStatus,");
             builder.append(
                     "cvSubStatus.code_value as subStatusValue,cvSubStatus.code_description as subStatusDesc,c.office_id as officeId, o.name as officeName, ");
@@ -632,7 +632,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
             builder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
             builder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
-            builder.append("left join m_code_value clv on clv.id = c.client_level_id ");
+            builder.append("left join m_client_transaction_limit ctl on ctl.client_id = c.id ");
+            builder.append("left join m_code_value clv on clv.id = ctl.client_level_id ");
             builder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
             builder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
             builder.append("left join m_code_value cvSubStatus on cvSubStatus.id = c.sub_status ");

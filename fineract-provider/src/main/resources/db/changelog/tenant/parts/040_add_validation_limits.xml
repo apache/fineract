@@ -58,7 +58,7 @@
      <sql>
          INSERT INTO `m_permission`
          (`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`)
-         VALUES ('product', 'READ_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'READ', '0),('product', 'CREATE_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'CREATE','0'),('product', 'CREATE_VALIDATIONLIMIT_CHECKER', 'VALIDATIONLIMITS', 'CREATE_CHECKER','0'), ('product', 'UPDATE_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'UPDATE','0'),('product', 'UPDATE_VALIDATIONLIMIT_CHECKER', 'VALIDATIONLIMITS', 'UPDATE_CHECKER','0');
+         VALUES ('product', 'READ_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'READ', '0'),('product', 'CREATE_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'CREATE','0'),('product', 'CREATE_VALIDATIONLIMIT_CHECKER', 'VALIDATIONLIMITS', 'CREATE_CHECKER','0'), ('product', 'UPDATE_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'UPDATE','0'),('product', 'UPDATE_VALIDATIONLIMIT_CHECKER', 'VALIDATIONLIMITS', 'UPDATE_CHECKER','0');
          INSERT INTO `m_code`(`code_name`,`is_system_defined`) VALUES('clientLevels','1');
      </sql>
     </changeSet>

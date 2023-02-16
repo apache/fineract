@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -181,12 +180,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "submittedon_date", nullable = true)
     private LocalDate submittedOnDate;
 
-    @Column(name = "daily_withdraw_limit")
-    private BigDecimal dailyWithdrawLimit;
-
-    @Column(name = "single_withdraw_limit")
-    private BigDecimal singleWithdrawLimit;
-
     /*
      * Deprecated since common Auditable fields were introduced. Columns and data left untouched to help migration.
      *
@@ -227,13 +220,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "proposed_transfer_date", nullable = true)
     private LocalDate proposedTransferDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_level_id", insertable = false, updatable = false)
-    private CodeValue clientLevel;
-
-    @Column(name = "client_level_id")
-    private Long clientLevelId;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ClientCollateralManagement> clientCollateralManagements = new HashSet<>();
@@ -548,23 +534,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         if (command.isChangeInLongParameterNamed(ClientApiConstants.savingsProductIdParamName, savingsProductId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             actualChanges.put(ClientApiConstants.savingsProductIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.clientLevelIdParamName, getClientLevelId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientLevelIdParamName);
-            actualChanges.put(ClientApiConstants.clientLevelIdParamName, newValue);
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(ClientApiConstants.dailyWithdrawLimit, getDailyWithdrawLimit())) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(ClientApiConstants.dailyWithdrawLimit);
-            actualChanges.put(ClientApiConstants.dailyWithdrawLimit, newValue);
-            this.dailyWithdrawLimit = newValue;
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(ClientApiConstants.singleWithdrawLimit, getDailyWithdrawLimit())) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(ClientApiConstants.singleWithdrawLimit);
-            actualChanges.put(ClientApiConstants.singleWithdrawLimit, newValue);
-            this.singleWithdrawLimit = newValue;
         }
 
         if (command.isChangeInLongParameterNamed(ClientApiConstants.genderIdParamName, genderId())) {
@@ -1056,36 +1025,4 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.proposedTransferDate = proposedTransferDate;
     }
 
-    public CodeValue getClientLevel() {
-        return clientLevel;
-    }
-
-    public void setClientLevel(CodeValue clientLevel) {
-        setClientLevelId(clientLevel == null ? null : clientLevel.getId());
-        this.clientLevel = clientLevel;
-    }
-
-    public Long getClientLevelId() {
-        return clientLevelId;
-    }
-
-    public void setClientLevelId(Long clientLevelId) {
-        this.clientLevelId = clientLevelId;
-    }
-
-    public void setDailyWithdrawLimit(BigDecimal dailyWithdrawLimit) {
-        this.dailyWithdrawLimit = dailyWithdrawLimit;
-    }
-
-    public void setSingleWithdrawLimit(BigDecimal singleWithdrawLimit) {
-        this.singleWithdrawLimit = singleWithdrawLimit;
-    }
-
-    public BigDecimal getDailyWithdrawLimit() {
-        return this.dailyWithdrawLimit == null ? BigDecimal.ZERO : this.dailyWithdrawLimit;
-    }
-
-    public BigDecimal getSingleWithdrawLimit() {
-        return this.singleWithdrawLimit == null ? BigDecimal.ZERO : this.singleWithdrawLimit;
-    }
 }
