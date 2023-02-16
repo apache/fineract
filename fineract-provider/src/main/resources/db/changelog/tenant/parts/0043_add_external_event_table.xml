@@ -33,13 +33,13 @@
             <column name="data" type="BLOB">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="timestamp">
+            <column name="created_at" type="datetime">
                 <constraints nullable="false"/>
             </column>
             <column name="status" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="sent_at" type="timestamp">
+            <column name="sent_at" type="datetime">
                 <constraints nullable="false"/>
             </column>
             <column name="idempotency_key" type="uuid">
