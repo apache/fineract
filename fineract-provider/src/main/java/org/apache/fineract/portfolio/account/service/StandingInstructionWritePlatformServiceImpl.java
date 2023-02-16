@@ -30,6 +30,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -37,14 +39,20 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformService
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.data.NotificationData;
+import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
+import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
+import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDataValidator;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetailRepository;
@@ -81,18 +89,22 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final StandingInstructionRepository standingInstructionRepository;
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
+    private final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final PlatformSecurityContext context;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     @Autowired
-    public StandingInstructionWritePlatformServiceImpl(final StandingInstructionDataValidator standingInstructionDataValidator,
+    public StandingInstructionWritePlatformServiceImpl(PlatformSecurityContext context, final StandingInstructionDataValidator standingInstructionDataValidator,
             final StandingInstructionAssembler standingInstructionAssembler,
             final AccountTransferDetailRepository accountTransferDetailRepository,
             final StandingInstructionRepository standingInstructionRepository,
             final StandingInstructionReadPlatformService standingInstructionReadPlatformService,
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService, final JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
+            DatabaseSpecificSQLGenerator sqlGenerator, final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService,
+            final NotificationEventPublisher notificationEventPublisher) {
         this.standingInstructionDataValidator = standingInstructionDataValidator;
         this.standingInstructionAssembler = standingInstructionAssembler;
         this.accountTransferDetailRepository = accountTransferDetailRepository;
@@ -101,6 +113,9 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
         this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
+        this.standingInstructionHistoryReadPlatformService = standingInstructionHistoryReadPlatformService;
+        this.context = context;
+        this.notificationEventPublisher = notificationEventPublisher;
     }
 
     @Transactional
@@ -197,11 +212,32 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         LOG.info("sending notification for failed SI");
 
         ///get all the standing instruction failed with insufficient balance
+        StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(null, null, null, null,
+                null, null, null, null);
+        Collection<StandingInstructionHistoryData> standingInstructionHistoryDataCollection = this.standingInstructionHistoryReadPlatformService
+                .retrieveAllFailedWithInsufficientBalance(standingInstructionDTO);
 
-        /// create the data for notification message - loan account, saving account id, client name
+        if(CollectionUtils.isNotEmpty(standingInstructionHistoryDataCollection)) {
+            for (StandingInstructionHistoryData standingInstructionHistoryData : standingInstructionHistoryDataCollection) {
+                /// create and send the data for notification message - loan account, saving account id, client name
+                buildNotification("loan", standingInstructionHistoryData.getToAccount().accountId(), "Standing Instruction failed due to insufficient fund", "standingInstructionFailed",
+                        context.authenticatedUser().getId(), standingInstructionHistoryData.getToClient().getId());
+            }
+        }
+    }
 
+    private void buildNotification(String objectType, Long objectIdentifier, String notificationContent,
+                                   String eventType, Long appUserId, Long officeId) {
 
-        ///send notification
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
+                false, false, tenantIdentifier, officeId, null);
+        try {
+            notificationEventPublisher.broadcastNotification(notificationData);
+        } catch (Exception e) {
+            // We want to avoid rethrowing the exception to stop the business transaction from rolling back
+            LOG.error("Error while broadcasting notification event", e);
+        }
     }
 
     @Override

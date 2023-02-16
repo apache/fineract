@@ -22,8 +22,12 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData;
 
+import java.util.Collection;
+
 public interface StandingInstructionHistoryReadPlatformService {
 
     Page<StandingInstructionHistoryData> retrieveAll(StandingInstructionDTO standingInstructionDTO);
+
+    Collection<StandingInstructionHistoryData> retrieveAllFailedWithInsufficientBalance(StandingInstructionDTO standingInstructionDTO);
 
 }

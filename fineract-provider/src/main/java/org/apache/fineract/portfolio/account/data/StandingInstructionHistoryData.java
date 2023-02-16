@@ -62,4 +62,59 @@ public class StandingInstructionHistoryData {
         this.executionTime = executionTime;
     }
 
+    public Long getStandingInstructionId() {
+        return standingInstructionId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public OfficeData getFromOffice() {
+        return fromOffice;
+    }
+
+    public ClientData getFromClient() {
+        return fromClient;
+    }
+
+    public EnumOptionData getFromAccountType() {
+        return fromAccountType;
+    }
+
+    public PortfolioAccountData getFromAccount() {
+        return fromAccount;
+    }
+
+    public EnumOptionData getToAccountType() {
+        return toAccountType;
+    }
+
+    public PortfolioAccountData getToAccount() {
+        return toAccount;
+    }
+
+    public OfficeData getToOffice() {
+        return toOffice;
+    }
+
+    public ClientData getToClient() {
+        return toClient;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public LocalDate getExecutionTime() {
+        return executionTime;
+    }
+
+    public String getErrorLog() {
+        return errorLog;
+    }
 }
