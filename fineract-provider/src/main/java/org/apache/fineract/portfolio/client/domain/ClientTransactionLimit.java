@@ -85,7 +85,7 @@ public class ClientTransactionLimit extends AbstractPersistableCustom {
     }
 
     public void setClient(Client client) {
-        this.setClientId(client==null?null:client.getId());
+        this.setClientId(client == null ? null : client.getId());
         this.client = client;
     }
 
