@@ -31,18 +31,22 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriInfo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.filters.BatchFilter;
 import org.apache.fineract.infrastructure.core.filters.BatchFilterChain;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.apache.http.HttpStatus;
 import org.springframework.http.HttpMethod;
@@ -57,6 +61,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     private final LoanAccountLockService loanAccountLockService;
     private final PlatformSecurityContext context;
     private final InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
+    private final LoanRepository loanRepository;
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
@@ -115,9 +120,9 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
                     proceed(filterChain, request, response);
                 } else {
                     try {
-                        List<Long> result = calculateRelevantLoanIds(request.getPathInfo());
-                        if (isLoanSoftLocked(result)) {
-                            executeInlineCob(result);
+                        List<Long> loanIds = calculateRelevantLoanIds(request.getPathInfo());
+                        if (isLoanSoftLocked(loanIds) || isLoanBehind(loanIds)) {
+                            executeInlineCob(loanIds);
                         }
                         proceed(filterChain, request, response);
                     } catch (LoanIdsHardLockedException e) {
@@ -128,6 +133,11 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
                 Reject.reject(null, HttpStatus.SC_UNAUTHORIZED).toServletResponse(response);
             }
         }
+    }
+
+    private boolean isLoanBehind(List<Long> loanIds) {
+        return CollectionUtils.isNotEmpty(loanRepository
+                .findAllNonClosedLoansBehindByLoanIds(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), loanIds));
     }
 
     private List<Long> calculateRelevantLoanIds(String pathInfo) {
