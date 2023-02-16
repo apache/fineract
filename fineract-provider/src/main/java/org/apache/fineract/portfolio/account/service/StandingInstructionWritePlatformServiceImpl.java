@@ -192,6 +192,19 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     }
 
     @Override
+    @CronTarget(jobName = JobName.NOTIFY_FAILED_STANDING_INSTRUCTIONS)
+    public void sendNotificationForFailedStandingInstructions() throws JobExecutionException{
+        LOG.info("sending notification for failed SI");
+
+        ///get all the standing instruction failed with insufficient balance
+
+        /// create the data for notification message - loan account, saving account id, client name
+
+
+        ///send notification
+    }
+
+    @Override
     @CronTarget(jobName = JobName.EXECUTE_STANDING_INSTRUCTIONS)
     public void executeStandingInstructions() throws JobExecutionException {
         Collection<StandingInstructionData> instructionDatas = this.standingInstructionReadPlatformService

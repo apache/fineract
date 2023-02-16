@@ -54,6 +54,8 @@ public enum JobName {
                                                                                                                                                                                                                                                             "Post Accrual Interest for Savings"), POST_LOAN_REPAYMENT_REMINDER(
                                                                                                                                                                                                                                                                     "Post Loan Repayment Reminder"), PROCESS_LOAN_REPAYMENT_REMINDER(
                                                                                                                                                                                                                                                                             "Process Loan Repayment Reminder");
+                                                                                                                                                                                                                                                                    "Loan Repayment Reminder"), NOTIFY_FAILED_STANDING_INSTRUCTIONS(
+                                                                                                                                                                                                                                                                            "Notify Failed Standing Instructions");
 
     private final String name;
 
