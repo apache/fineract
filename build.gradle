@@ -55,6 +55,17 @@ buildscript {
     }
 }
 
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.99.99"
+    }
+}
+
 plugins {
     id "org.barfuin.gradle.taskinfo" version "2.1.0"
     id 'com.adarshr.test-logger' version '3.2.0'
@@ -567,7 +578,7 @@ configure(project.fineractJavaProjects) {
     }
 
     testlogger {
-        logLevel 'quiet'
+        logLevel 'QUIET'
     }
 
     cucumber {
@@ -581,7 +592,7 @@ configure(project.fineractJavaProjects) {
 
     // To generate an HTML report instead of XML
     spotbugs {
-        reportLevel = 'high'
+        reportLevel = 'HIGH'
         showProgress = false
         excludeFilter = file("$rootDir/config/spotbugs/exclude.xml")
     }

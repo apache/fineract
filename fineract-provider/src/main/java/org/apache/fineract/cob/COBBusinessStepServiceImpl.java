@@ -52,6 +52,7 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
     private final ConfigurationDomainService configurationDomainService;
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {
             throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
@@ -89,6 +90,7 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     @NotNull
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> Set<BusinessStepNameAndOrder> getCOBBusinessSteps(
             Class<T> businessStepClass, String cobJobName) {
         List<BatchBusinessStep> cobStepConfigs = batchBusinessStepRepository.findAllByJobName(cobJobName);
