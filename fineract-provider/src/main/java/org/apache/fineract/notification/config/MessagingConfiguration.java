@@ -20,11 +20,9 @@ package org.apache.fineract.notification.config;
 
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.fineract.infrastructure.core.config.EnableFineractEventsCondition;
-import org.apache.fineract.notification.eventandlistener.NotificationEventListener;
+import org.apache.fineract.notification.eventandlistener.ActiveMQNotificationEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +44,7 @@ public class MessagingConfiguration {
     private Environment env;
 
     @Autowired
-    private NotificationEventListener notificationEventListener;
+    private ActiveMQNotificationEventListener notificationEventListener;
 
     @Bean
     public Logger loggerBean() {
@@ -86,15 +84,7 @@ public class MessagingConfiguration {
         DefaultMessageListenerContainer messageListenerContainer = new DefaultMessageListenerContainer();
         messageListenerContainer.setConnectionFactory(connectionFactory());
         messageListenerContainer.setDestinationName("NotificationQueue");
-        messageListenerContainer.setMessageListener(new MessageListener() {
-
-            @Override
-            public void onMessage(Message message) {
-                // TODO
-                // fixing the issue at startup not sure what to do with these messages.
-                loggerBean().info("Message Object  :: " + message.toString());
-            }
-        });
+        messageListenerContainer.setMessageListener(notificationEventListener);
         messageListenerContainer.setExceptionListener(new ExceptionListener() {
 
             @Override

@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 public class ActiveMQNotificationEventPublisher implements NotificationEventPublisher {
 
     private final JmsTemplate jmsTemplate;
-    private final JmsTemplate jmsTemplateLoanRepaymentReminders;
+    private final JmsTemplate jmsTemplateGeneralActiveMq;
 
     @Override
     public void broadcastNotification(NotificationData notificationData) {
@@ -46,7 +46,7 @@ public class ActiveMQNotificationEventPublisher implements NotificationEventPubl
     @Override
     public void broadcastNotificationLoanRepaymentReminders(NotificationData notificationData, String queueName) {
         Queue queue = new ActiveMQQueue(queueName);
-        this.jmsTemplateLoanRepaymentReminders.send(queue, session -> session.createObjectMessage(notificationData.toString()));
+        this.jmsTemplateGeneralActiveMq.send(queue, session -> session.createObjectMessage(notificationData.toString()));
     }
 
 }

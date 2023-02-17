@@ -63,7 +63,7 @@ public class MessagingConfigurationForGeneralActiveMq {
     }
 
     @Bean
-    public JmsTemplate jmsTemplateLoanRepaymentReminders() {
+    public JmsTemplate jmsTemplateGeneralActiveMq() {
         JmsTemplate jmsTemplate;
         jmsTemplate = new JmsTemplate(connectionFactory());
         jmsTemplate.setConnectionFactory(connectionFactory());

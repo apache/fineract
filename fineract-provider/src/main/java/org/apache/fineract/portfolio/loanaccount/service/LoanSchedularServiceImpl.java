@@ -70,6 +70,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Service
@@ -323,6 +324,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         }
     }
 
+    @Transactional
     @Override
     @CronTarget(jobName = JobName.PROCESS_LOAN_REPAYMENT_REMINDER)
     public void processLoanRepaymentReminder() {
@@ -352,8 +354,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
                         loanRepaymentReminderRepository.save(loanRepaymentReminder);
                     }
+                    loanRepaymentReminderSettingsRepository.updateLoanRepaymentReminderSettingsBatchId(batchId, data.getId());
                 }
-                loanRepaymentReminderSettingsRepository.updateLoanRepaymentReminderSettingsBatchId(batchId, data.getId());
             }
 
         } else {
@@ -362,6 +364,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
     }
 
+    @Transactional
     @Override
     @CronTarget(jobName = JobName.POST_LOAN_REPAYMENT_REMINDER)
     public void postLoanRepaymentReminder() {
