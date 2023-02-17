@@ -53,6 +53,8 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
+import org.apache.fineract.portfolio.savings.DepositsApiConstants;
+import org.apache.fineract.portfolio.savings.data.DepositProductDataValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -112,7 +114,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS,
             LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE,
             LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.MAX_NUMBER_OF_LOAN_EXTENSIONS_ALLOWED,
-            LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE));
+            LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, LoanProductConstants.IS_ACCOUNT_LEVEL_ARREARS_TOLERANCE_ENABLE,
+            DepositsApiConstants.chartsParamName));
 
     private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
@@ -122,9 +125,12 @@ public final class LoanProductDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
+    private final DepositProductDataValidator depositProductDataValidator;
+
     @Autowired
-    public LoanProductDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    public LoanProductDataValidator(final FromJsonHelper fromApiJsonHelper, DepositProductDataValidator depositProductDataValidator) {
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.depositProductDataValidator = depositProductDataValidator;
     }
 
     public void validateForCreate(final String json) {
@@ -600,6 +606,8 @@ public final class LoanProductDataValidator {
                     element);
             baseDataValidator.reset().parameter(LoanProductAccountingParams.OVERPAYMENT.getValue()).value(overpaymentAccountId).notNull()
                     .integerGreaterThanZero();
+
+            this.depositProductDataValidator.validateChartsData(element, baseDataValidator);
 
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
             validateChargeToIncomeAccountMappings(baseDataValidator, element);
@@ -1516,6 +1524,8 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM)
                     .value(loanTermIncludesToppedUpLoanTerm).validateForBooleanValue();
         }
+
+        this.depositProductDataValidator.validateChartsData(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

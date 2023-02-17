@@ -42,4 +42,8 @@ public interface InterestRateChartReadPlatformService {
     InterestRateChartData template();
 
     InterestRateChartData retrieveActiveChartWithTemplate(Long productId);
+
+    Collection<InterestRateChartData> retrieveAllWithSlabsForLoan(Long loanProductId);
+
+    Collection<InterestRateChartData> retrieveAllWithSlabsWithTemplateForLoan(Long loanProductId);
 }

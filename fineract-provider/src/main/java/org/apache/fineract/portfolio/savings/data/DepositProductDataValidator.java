@@ -429,7 +429,7 @@ public class DepositProductDataValidator {
         }
     }
 
-    private void validateChartsData(JsonElement element, DataValidatorBuilder baseDataValidator) {
+    public void validateChartsData(JsonElement element, DataValidatorBuilder baseDataValidator) {
         if (element.isJsonObject()) {
 
             final JsonArray array = this.fromApiJsonHelper.extractJsonArrayNamed(chartsParamName, element);

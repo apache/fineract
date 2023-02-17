@@ -41,6 +41,8 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartData;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSlabData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
@@ -239,6 +241,8 @@ public final class LoanAccountData {
     private LocalDate expectedDisbursementDate;
 
     private final CollectionData delinquent;
+
+    private Collection<InterestRateChartSlabData> interestRateChartSlabData;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -1961,4 +1965,16 @@ public final class LoanAccountData {
         return this.status.value();
     }
 
+    public Collection<InterestRateChartSlabData> getChartSlabData() {
+        return interestRateChartSlabData;
+    }
+    public void setInterestRateCharts(Collection<InterestRateChartData> interestRateCharts) {
+        if (interestRateCharts != null && interestRateCharts.size() > 0) {
+            for (InterestRateChartData chartData : interestRateCharts) {
+                if(chartData.chartSlabs().size() > 0){
+                    this.interestRateChartSlabData = chartData.chartSlabs();
+                }
+            }
+        }
+    }
 }

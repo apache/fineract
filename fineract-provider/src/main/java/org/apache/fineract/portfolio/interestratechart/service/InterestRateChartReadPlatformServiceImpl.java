@@ -59,6 +59,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
     private final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final LoanInterestRateChartExtractor loanChartExtractor;
 
     @Autowired
     public InterestRateChartReadPlatformServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
@@ -71,6 +72,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         this.interestIncentiveDropdownReadPlatformService = interestIncentiveDropdownReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.sqlGenerator = sqlGenerator;
+        this.loanChartExtractor = new LoanInterestRateChartExtractor(this.sqlGenerator);
         chartExtractor = new InterestRateChartExtractor(this.sqlGenerator);
     }
 
@@ -427,6 +429,139 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
 
             }
         }
+    }
+
+    private static final class LoanInterestRateChartExtractor implements ResultSetExtractor<Collection<InterestRateChartData>> {
+
+        LoanInterestRateChartMapper loanChartMapper = new LoanInterestRateChartMapper();
+        InterestRateChartSlabExtractor chartSlabsMapper;
+
+        private final String schemaSql;
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        private LoanInterestRateChartExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
+            chartSlabsMapper = new InterestRateChartSlabExtractor(sqlGenerator);
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+
+            sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
+                    .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
+                    .append("irc.is_primary_grouping_by_amount as isPrimaryGroupingByAmount, ")
+                    .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
+                    .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
+                    .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
+                    .append("curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
+                    .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
+                    .append("sp.id as savingsProductId, sp.name as savingsProductName, ").append("iri.id as iriId, ")
+                    .append(" iri.entiry_type as entityType, iri.attribute_name as attributeName ,")
+                    .append(" iri.condition_type as conditionType, iri.attribute_value as attributeValue, ")
+                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ").append("code.code_value as attributeValueDesc ")
+                    .append("from ")
+                    .append("m_interest_rate_chart irc left join m_interest_rate_slab ircd on irc.id=ircd.interest_rate_chart_id ")
+                    .append(" left join m_interest_incentives iri on iri.interest_rate_slab_id = ircd.id ")
+                    .append(" left join m_code_value code on " + sqlGenerator.castChar("code.id") + " = iri.attribute_value ")
+                    .append("left join m_currency curr on ircd.currency_code= curr.code ")
+                    .append("left join m_product_loan_interest_rate_chart dpirc on irc.id=dpirc.interest_rate_chart_id ")
+                    .append("left join m_product_loan sp on sp.id=dpirc.loan_product_id ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        @Override
+        public Collection<InterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+
+            List<InterestRateChartData> chartDataList = new ArrayList<>();
+
+            InterestRateChartData chartData = null;
+            Long interestRateChartId = null;
+            int ircIndex = 0;// Interest rate chart index
+
+            while (rs.next()) {
+                Long tempIrcId = rs.getLong("ircId");
+                // first row or when interest rate chart id changes
+                if (chartData == null || (interestRateChartId != null && !interestRateChartId.equals(tempIrcId))) {
+
+                    interestRateChartId = tempIrcId;
+                    chartData = loanChartMapper.mapRow(rs, ircIndex++);
+                    chartDataList.add(chartData);
+
+                }
+                final InterestRateChartSlabData chartSlabsData = chartSlabsMapper.extractData(rs);
+                if (chartSlabsData != null) {
+                    chartData.addChartSlab(chartSlabsData);
+                }
+            }
+            return chartDataList;
+        }
+
+    }
+
+    @Override
+    public Collection<InterestRateChartData> retrieveAllWithSlabsWithTemplateForLoan(Long productId) {
+        return retrieveAllWithSlabsForLoan(productId);
+    }
+
+    @Override
+    public Collection<InterestRateChartData> retrieveAllWithSlabsForLoan(Long productId) {
+        this.context.authenticatedUser();
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ");
+        sql.append(this.loanChartExtractor.schema());
+        sql.append(" where sp.id = ? order by irc.id, ");
+        sql.append("CASE ");
+        sql.append("WHEN irc.is_primary_grouping_by_amount then ircd.amount_range_from ");
+        sql.append("WHEN irc.is_primary_grouping_by_amount then ircd.amount_range_to ");
+        sql.append("END,");
+        sql.append("ircd.from_period, ircd.to_period,");
+        sql.append("CASE ");
+        sql.append("WHEN NOT irc.is_primary_grouping_by_amount then ircd.amount_range_from ");
+        sql.append("WHEN NOT irc.is_primary_grouping_by_amount then ircd.amount_range_to ");
+        sql.append("END");
+
+        return this.jdbcTemplate.query(
+                con -> con.prepareStatement(sql.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE),
+                ps -> ps.setLong(1, productId), this.loanChartExtractor);
+
+    }
+
+    public static final class LoanInterestRateChartMapper implements RowMapper<InterestRateChartData> {
+
+        private final String schemaSql;
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        private LoanInterestRateChartMapper() {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+
+            sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription, ")
+                    .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
+                    .append("irc.is_primary_grouping_by_amount as isPrimaryGroupingByAmount, ")
+                    .append("sp.id as savingsProductId, sp.name as savingsProductName ").append("from ")
+                    .append("m_interest_rate_chart irc ")
+                    .append("left join m_product_loan_interest_rate_chart dpirc on irc.id=dpirc.interest_rate_chart_id ")
+                    .append("left join m_savings_product sp on sp.id=dpirc.deposit_product_id ");
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        @Override
+        public InterestRateChartData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+            final Long id = rs.getLong("ircId");
+            final String name = rs.getString("ircName");
+            final String description = rs.getString("ircDescription");
+            final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "ircFromDate");
+            final LocalDate endDate = JdbcSupport.getLocalDate(rs, "ircEndDate");
+            final boolean isPrimaryGroupingByAmount = rs.getBoolean("isPrimaryGroupingByAmount");
+            final Long savingsProductId = JdbcSupport.getLongDefaultToNullIfZero(rs, "savingsProductId");
+            final String savingsProductName = rs.getString("savingsProductName");
+
+            return InterestRateChartData.instance(id, name, description, fromDate, endDate, isPrimaryGroupingByAmount, savingsProductId,
+                    savingsProductName);
+        }
+
     }
 
 }
