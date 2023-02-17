@@ -87,6 +87,12 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
         sqlBuilder.append(" atsih.error_log=? ");
         paramObj.add("InsufficientAccountBalance Exception ");
 
+        sqlBuilder.append(" and ");
+
+        //adding condition for getting SI for which notification is not sent
+        sqlBuilder.append(" atsih.is_notification_sent=? ");
+        paramObj.add( false );
+
         final Object[] finalObjectArray = paramObj.toArray();
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.standingInstructionHistoryMapper, finalObjectArray);
     }

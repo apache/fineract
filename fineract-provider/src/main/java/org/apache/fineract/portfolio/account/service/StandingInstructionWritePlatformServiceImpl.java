@@ -209,7 +209,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     @Override
     @CronTarget(jobName = JobName.NOTIFY_FAILED_STANDING_INSTRUCTIONS)
     public void sendNotificationForFailedStandingInstructions() throws JobExecutionException{
-        LOG.info("sending notification for failed SI");
+        LOG.info("Sending notification for failed SI with Insufficient Balance");
 
         ///get all the standing instruction failed with insufficient balance
         StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(null, null, null, null,
@@ -220,8 +220,13 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         if(CollectionUtils.isNotEmpty(standingInstructionHistoryDataCollection)) {
             for (StandingInstructionHistoryData standingInstructionHistoryData : standingInstructionHistoryDataCollection) {
                 /// create and send the data for notification message - loan account, saving account id, client name
-                buildNotification("loan", standingInstructionHistoryData.getToAccount().accountId(), "Standing Instruction failed due to insufficient fund", "standingInstructionFailed",
+                String notificationContent = String.format("Standing Instruction to transfer Amount: `%s` to  ToAccount: `%s` is failed due to insufficient fund in fromAccount: `%s`!", standingInstructionHistoryData.getAmount(), standingInstructionHistoryData.getToAccount().accountId(), standingInstructionHistoryData.getFromAccount().accountId());
+                buildNotification("Standing Instruction", standingInstructionHistoryData.getStandingInstructionId(), notificationContent, "standingInstructionFailed",
                         context.authenticatedUser().getId(), standingInstructionHistoryData.getToClient().getId());
+
+                //update the notification_sent flag in Standing Instruction History to indicate notification has been sent
+                final String updateQuery = "UPDATE m_account_transfer_standing_instructions_history SET is_notification_sent = ? where standing_instruction_id = ?";
+                this.jdbcTemplate.update(updateQuery, true, standingInstructionHistoryData.getStandingInstructionId());
             }
         }
     }

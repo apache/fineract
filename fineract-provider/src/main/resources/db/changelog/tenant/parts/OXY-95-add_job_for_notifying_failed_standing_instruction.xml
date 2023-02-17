@@ -20,8 +20,8 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="hitesh@fiter.io" id="OXY-95_add_job_for_notifying_failed_standing_instruction">
 
+    <changeSet author="hitesh@fiter.io" id="OXY-95_add_job_for_notifying_failed_standing_instruction">
         <preConditions onFail="MARK_RAN">
             <not>
                 <sqlCheck expectedResult="1">
@@ -29,7 +29,6 @@
                 </sqlCheck>
             </not>
         </preConditions>
-
         <insert tableName="job">
             <column name="name" value="Notify Failed Standing Instructions" />
             <column name="display_name" value="Notify Failed Standing Instructions" />
@@ -49,6 +48,19 @@
             <column name="node_id" value="1" />
             <column name="is_mismatched_job" valueBoolean="false" />
         </insert>
-
     </changeSet>
+
+    <changeSet author="hitesh@fiter.io" id="OXY-95_add_flag_to_track_standing_instruction_notification">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_account_transfer_standing_instructions_history" columnName="is_notification_sent"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_account_transfer_standing_instructions_history">
+            <column name="is_notification_sent" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
