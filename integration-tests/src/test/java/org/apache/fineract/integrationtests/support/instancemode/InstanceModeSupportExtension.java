@@ -43,7 +43,7 @@ public class InstanceModeSupportExtension implements BeforeTestExecutionCallback
                 boolean readEnabled = annotation.readEnabled();
                 boolean writeEnabled = annotation.writeEnabled();
                 boolean batchWorkerEnabled = annotation.batchWorkerEnabled();
-                boolean batchManagerEnabled = annotation.batchWorkerEnabled();
+                boolean batchManagerEnabled = annotation.batchManagerEnabled();
                 changeInstanceMode(context, readEnabled, writeEnabled, batchWorkerEnabled, batchManagerEnabled);
             }
         });
