@@ -52,7 +52,8 @@ public enum JobName {
                                                                                                                                                                                                                                             "Increase COB Date by 1 day"), UPDATE_SAVINGS_INTEREST_POSTING_QUALIFY_CONFIG(
                                                                                                                                                                                                                                                     "Update Savings Interest Posting Qualify Config"), POST_ACCRUAL_INTEREST_FOR_SAVINGS(
                                                                                                                                                                                                                                                             "Post Accrual Interest for Savings"), POST_LOAN_REPAYMENT_REMINDER(
-                                                                                                                                                                                                                                                                    "Loan Repayment Reminder");
+                                                                                                                                                                                                                                                                    "Post Loan Repayment Reminder"), PROCESS_LOAN_REPAYMENT_REMINDER(
+                                                                                                                                                                                                                                                                            "Process Loan Repayment Reminder");
 
     private final String name;
 

@@ -48,7 +48,6 @@ public class NotificationData implements Serializable {
     private Long officeId;
     private Set<Long> userIds;
 
-
     public NotificationData(String objectType, Long objectId, String action, Long actorId, String content, boolean isSystemGenerated,
             boolean isRead, String tenantIdentifier, Long officeId, Set<Long> userIds) {
         this.objectType = objectType;

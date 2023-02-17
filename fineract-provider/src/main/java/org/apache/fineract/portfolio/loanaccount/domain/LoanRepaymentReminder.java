@@ -66,13 +66,15 @@ public final class LoanRepaymentReminder extends AbstractAuditableCustom {
     private BigDecimal totalOverdueAmount;
     @Column(name = "message_status", nullable = true)
     private String messageStatus;
+    @Column(name = "batch_id", nullable = true)
+    private String batchId;
 
     public LoanRepaymentReminder() {
         // default
     }
 
     public LoanRepaymentReminder(Long loanRepaymentReminderSettingsId, LoanRepaymentReminderData loanRepaymentReminderData,
-            String messageStatus) {
+            String messageStatus, String batchId) {
         this.loanId = loanRepaymentReminderData.getLoanId();
         this.clientId = loanRepaymentReminderData.getClientId();
         this.groupId = loanRepaymentReminderData.getGroupId();
@@ -91,6 +93,7 @@ public final class LoanRepaymentReminder extends AbstractAuditableCustom {
         this.groupName = loanRepaymentReminderData.getGroupName();
         this.totalOverdueAmount = loanRepaymentReminderData.getTotalOverdueAmount();
         this.messageStatus = messageStatus;
+        this.batchId = batchId;
     }
 
     public Long getLoanId() {
@@ -165,27 +168,19 @@ public final class LoanRepaymentReminder extends AbstractAuditableCustom {
         return messageStatus;
     }
 
+    public String getBatchId() {
+        return batchId;
+    }
+
     @Override
     public String toString() {
-        return "LoanRepaymentReminder{" +
-                "loanId=" + loanId +
-                ", clientId=" + clientId +
-                ", groupId=" + groupId +
-                ", loanProductId=" + loanProductId +
-                ", loanScheduleId=" + loanScheduleId +
-                ", dueDate=" + dueDate +
-                ", installmentNumber=" + installmentNumber +
-                ", principalAmountOutStanding=" + principalAmountOutStanding +
-                ", interestAmountOutStanding=" + interestAmountOutStanding +
-                ", feesChargeAmountOutStanding=" + feesChargeAmountOutStanding +
-                ", penaltyChargeAmountOutStanding=" + penaltyChargeAmountOutStanding +
-                ", totalAmountOutStanding=" + totalAmountOutStanding +
-                ", loanRepaymentReminderSettingsId=" + loanRepaymentReminderSettingsId +
-                ", productName='" + productName + '\'' +
-                ", clientName='" + clientName + '\'' +
-                ", groupName='" + groupName + '\'' +
-                ", totalOverdueAmount=" + totalOverdueAmount +
-                ", messageStatus='" + messageStatus + '\'' +
-                '}';
+        return "LoanRepaymentReminder{" + "loanId=" + loanId + ", clientId=" + clientId + ", groupId=" + groupId + ", loanProductId="
+                + loanProductId + ", loanScheduleId=" + loanScheduleId + ", dueDate=" + dueDate + ", installmentNumber=" + installmentNumber
+                + ", principalAmountOutStanding=" + principalAmountOutStanding + ", interestAmountOutStanding=" + interestAmountOutStanding
+                + ", feesChargeAmountOutStanding=" + feesChargeAmountOutStanding + ", penaltyChargeAmountOutStanding="
+                + penaltyChargeAmountOutStanding + ", totalAmountOutStanding=" + totalAmountOutStanding
+                + ", loanRepaymentReminderSettingsId=" + loanRepaymentReminderSettingsId + ", productName='" + productName + '\''
+                + ", clientName='" + clientName + '\'' + ", groupName='" + groupName + '\'' + ", totalOverdueAmount=" + totalOverdueAmount
+                + ", messageStatus='" + messageStatus + '\'' + '}';
     }
 }

@@ -20,26 +20,15 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import lombok.Data;
 
+@Data
 @Entity
 public class LoanRepaymentReminderSettingsData {
 
     @Id
     private Long id;
     private Integer days;
+    private String batch;
 
-    public LoanRepaymentReminderSettingsData() {}
-
-    public LoanRepaymentReminderSettingsData(Long id, Integer days) {
-        this.id = id;
-        this.days = days;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Integer getDays() {
-        return days;
-    }
 }

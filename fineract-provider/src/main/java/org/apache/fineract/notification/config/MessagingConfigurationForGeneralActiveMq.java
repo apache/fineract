@@ -34,27 +34,25 @@ import org.springframework.jms.core.JmsTemplate;
 @Configuration
 @Profile("activeMqEnabled")
 @Conditional(EnableFineractEventsCondition.class)
-public class MessagingConfigurationLoanRepaymentReminders {
+public class MessagingConfigurationForGeneralActiveMq {
 
     @Autowired
     private Environment env;
 
     @Bean
     public Logger loggerBean() {
-        return LoggerFactory.getLogger(MessagingConfigurationLoanRepaymentReminders.class);
+        return LoggerFactory.getLogger(MessagingConfigurationForGeneralActiveMq.class);
     }
-
-    private static final String DEFAULT_BROKER_URL = "tcp://localhost:61616";
 
     @Bean
     public ActiveMQConnectionFactory amqConnectionFactory() {
         ActiveMQConnectionFactory amqConnectionFactory = new ActiveMQConnectionFactory(); // NOSONAR
         try {
-            amqConnectionFactory.setBrokerURL(DEFAULT_BROKER_URL);
+            amqConnectionFactory.setBrokerURL(this.env.getProperty("ACTIVEMQ_BLOCKER_URL"));
             amqConnectionFactory.setTrustAllPackages(true);
 
         } catch (Exception e) {
-            amqConnectionFactory.setBrokerURL(this.env.getProperty("brokerUrl"));
+            amqConnectionFactory.setBrokerURL(this.env.getProperty("ACTIVEMQ_BLOCKER_URL"));
         }
         return amqConnectionFactory;
     }
@@ -71,7 +69,5 @@ public class MessagingConfigurationLoanRepaymentReminders {
         jmsTemplate.setConnectionFactory(connectionFactory());
         return jmsTemplate;
     }
-
-
 
 }
