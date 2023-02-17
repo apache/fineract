@@ -48,11 +48,11 @@ public class MessagingConfigurationForGeneralActiveMq {
     public ActiveMQConnectionFactory amqConnectionFactory() {
         ActiveMQConnectionFactory amqConnectionFactory = new ActiveMQConnectionFactory(); // NOSONAR
         try {
-            amqConnectionFactory.setBrokerURL(this.env.getProperty("ACTIVEMQ_BLOCKER_URL"));
+            amqConnectionFactory.setBrokerURL(this.env.getProperty("fineract.activemq.blockerUrl"));
             amqConnectionFactory.setTrustAllPackages(true);
 
         } catch (Exception e) {
-            amqConnectionFactory.setBrokerURL(this.env.getProperty("ACTIVEMQ_BLOCKER_URL"));
+            amqConnectionFactory.setBrokerURL(this.env.getProperty("fineract.activemq.blockerUrl"));
         }
         return amqConnectionFactory;
     }

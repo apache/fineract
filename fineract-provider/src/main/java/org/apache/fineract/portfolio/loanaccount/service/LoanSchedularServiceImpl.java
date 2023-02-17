@@ -408,7 +408,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                 false, false, tenantIdentifier, officeId, userIds);
         try {
             notificationEventPublisher.broadcastNotificationLoanRepaymentReminders(notificationData,
-                    this.env.getProperty("LOAN_REPAYMENT_REMINDER_QUEUE"));
+                    this.env.getProperty("fineract.activemq.loanRepaymentReminderQueue"));
         } catch (Exception e) {
             // We want to avoid rethrowing the exception to stop the business transaction from rolling back
             log.error("Error while broadcasting notification event", e);
