@@ -112,4 +112,5 @@
     <include file="parts/0090_add_report_export_s3_folder_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0091_modify_parameter_value_type_in_job_parameters_table.xml" relativeToChangelogFile="true" />
     <include file="parts/0092_add_periodic_accrual_entries_business_step.xml" relativeToChangelogFile="true" />
+    <include file="parts/0093_update_general_accounting_table_reports.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
