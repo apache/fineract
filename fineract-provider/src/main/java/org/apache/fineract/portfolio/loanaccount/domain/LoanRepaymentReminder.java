@@ -181,6 +181,6 @@ public final class LoanRepaymentReminder extends AbstractAuditableCustom {
                 + penaltyChargeAmountOutStanding + ", totalAmountOutStanding=" + totalAmountOutStanding
                 + ", loanRepaymentReminderSettingsId=" + loanRepaymentReminderSettingsId + ", productName='" + productName + '\''
                 + ", clientName='" + clientName + '\'' + ", groupName='" + groupName + '\'' + ", totalOverdueAmount=" + totalOverdueAmount
-                + ", messageStatus='" + messageStatus + '\'' + '}';
+                + ", messageStatus='" + messageStatus + '\'' + ", batchId='" + batchId + '\'' + '}';
     }
 }
