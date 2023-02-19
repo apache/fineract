@@ -27,6 +27,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -385,6 +386,44 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
                     this.disbursedLoanID, "resourceId");
             Assertions.assertNotNull(resourceId);
         }
+    }
+
+    @Test
+    public void goodWillCreditWillCloseTheLoanCorrectly() {
+
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
+        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        // pay off all of principal, interest (no fees or penalties)
+        final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
+        final Float goodwillAmount = totalOutstanding;
+        final String goodwillDate = "09 March 2022";
+        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
+                goodwillAmount, this.disbursedLoanID, "");
+
+        GetLoansLoanIdResponse details = this.loanTransactionHelper.getLoan(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        Assertions.assertNull(details.getSummary().getInArrears());
+        Assertions.assertTrue(details.getStatus().getClosedObligationsMet());
+    }
+
+    @Test
+    public void paymentRefundWillCloseTheLoanCorrectly() {
+
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
+        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        // pay off all of principal, interest (no fees or penalties)
+        final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
+        final Float goodwillAmount = totalOutstanding;
+        final String goodwillDate = "09 March 2022";
+        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(PAYOUT_REFUND, goodwillDate,
+                goodwillAmount, this.disbursedLoanID, "");
+
+        GetLoansLoanIdResponse details = this.loanTransactionHelper.getLoan(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        Assertions.assertNull(details.getSummary().getInArrears());
+        Assertions.assertTrue(details.getStatus().getClosedObligationsMet());
     }
 
     @Test
