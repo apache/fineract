@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -33,6 +34,8 @@ public class FineractProperties {
     private FineractTenantProperties tenant;
 
     private FineractModeProperties mode;
+
+    private FineractTemplateProperties template;
 
     @Getter
     @Setter
@@ -60,5 +63,13 @@ public class FineractProperties {
         public boolean isReadOnlyMode() {
             return readEnabled && !writeEnabled && !batchEnabled;
         }
+    }
+
+    @Getter
+    @Setter
+    public static class FineractTemplateProperties {
+
+        private boolean regexWhitelistEnabled;
+        private List<String> regexWhitelist;
     }
 }
