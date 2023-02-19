@@ -52,6 +52,8 @@ public class FineractProperties {
 
     private FineractJobProperties job;
 
+    private FineractTemplateProperties template;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -233,5 +235,13 @@ public class FineractProperties {
     public static class FineractJobProperties {
 
         private int stuckRetryThreshold;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractTemplateProperties {
+
+        private boolean regexWhitelistEnabled;
+        private List<String> regexWhitelist;
     }
 }
