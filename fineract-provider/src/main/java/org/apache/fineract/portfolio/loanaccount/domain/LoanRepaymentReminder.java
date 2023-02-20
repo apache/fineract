@@ -172,15 +172,4 @@ public final class LoanRepaymentReminder extends AbstractAuditableCustom {
         return batchId;
     }
 
-    @Override
-    public String toString() {
-        return "LoanRepaymentReminder{" + "loanId=" + loanId + ", clientId=" + clientId + ", groupId=" + groupId + ", loanProductId="
-                + loanProductId + ", loanScheduleId=" + loanScheduleId + ", dueDate=" + dueDate + ", installmentNumber=" + installmentNumber
-                + ", principalAmountOutStanding=" + principalAmountOutStanding + ", interestAmountOutStanding=" + interestAmountOutStanding
-                + ", feesChargeAmountOutStanding=" + feesChargeAmountOutStanding + ", penaltyChargeAmountOutStanding="
-                + penaltyChargeAmountOutStanding + ", totalAmountOutStanding=" + totalAmountOutStanding
-                + ", loanRepaymentReminderSettingsId=" + loanRepaymentReminderSettingsId + ", productName='" + productName + '\''
-                + ", clientName='" + clientName + '\'' + ", groupName='" + groupName + '\'' + ", totalOverdueAmount=" + totalOverdueAmount
-                + ", messageStatus='" + messageStatus + '\'' + ", batchId='" + batchId + '\'' + '}';
-    }
 }

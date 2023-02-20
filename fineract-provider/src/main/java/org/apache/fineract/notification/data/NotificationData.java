@@ -21,16 +21,10 @@ package org.apache.fineract.notification.data;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
-@Accessors(chain = true)
 public class NotificationData implements Serializable {
 
     private static final long serialVersionUID = 1L;
