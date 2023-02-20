@@ -47,9 +47,9 @@ public class MessagingConfigurationForGeneralActiveMq {
     @Bean
     public ActiveMQConnectionFactory amqConnectionFactory() {
         ActiveMQConnectionFactory amqConnectionFactory = new ActiveMQConnectionFactory(); // NOSONAR
+        amqConnectionFactory.setTrustAllPackages(true);
         try {
             amqConnectionFactory.setBrokerURL(this.env.getProperty("fineract.activemq.blockerUrl"));
-            amqConnectionFactory.setTrustAllPackages(true);
 
         } catch (Exception e) {
             amqConnectionFactory.setBrokerURL(this.env.getProperty("fineract.activemq.blockerUrl"));

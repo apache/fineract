@@ -22,6 +22,7 @@ import javax.jms.Queue;
 import lombok.RequiredArgsConstructor;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.fineract.infrastructure.core.config.EnableFineractEventsCondition;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.notification.data.NotificationData;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Profile;
@@ -36,6 +37,7 @@ public class ActiveMQNotificationEventPublisher implements NotificationEventPubl
 
     private final JmsTemplate jmsTemplate;
     private final JmsTemplate jmsTemplateGeneralActiveMq;
+    private final FromJsonHelper fromApiJsonHelper;
 
     @Override
     public void broadcastNotification(NotificationData notificationData) {
@@ -44,9 +46,10 @@ public class ActiveMQNotificationEventPublisher implements NotificationEventPubl
     }
 
     @Override
-    public void broadcastNotificationLoanRepaymentReminders(NotificationData notificationData, String queueName) {
+    public void broadcastGenericActiveMqNotification(NotificationData notificationData, String queueName) {
         Queue queue = new ActiveMQQueue(queueName);
-        this.jmsTemplateGeneralActiveMq.send(queue, session -> session.createObjectMessage(notificationData.toString()));
+        this.jmsTemplateGeneralActiveMq.send(queue,
+                session -> session.createObjectMessage(this.fromApiJsonHelper.toJson(notificationData)));
     }
 
 }

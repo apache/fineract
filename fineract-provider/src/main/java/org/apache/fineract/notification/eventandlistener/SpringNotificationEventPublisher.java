@@ -43,7 +43,7 @@ public class SpringNotificationEventPublisher implements NotificationEventPublis
     }
 
     @Override
-    public void broadcastNotificationLoanRepaymentReminders(final NotificationData notificationData, String queueName) {
+    public void broadcastGenericActiveMqNotification(final NotificationData notificationData, String queueName) {
         broadcastNotification(notificationData);
         log.debug("Sending Spring LoanRepaymentReminders notification event: {}", notificationData, queueName);
 

@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -52,6 +53,7 @@ import org.apache.fineract.notification.eventandlistener.NotificationEventPublis
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.LoanMessageRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentReminderSettingsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanReminderStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentReminder;
@@ -94,6 +96,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     private final PlatformSecurityContext context;
     private final NotificationEventPublisher notificationEventPublisher;
     private final AppUserRepository appUserRepository;
+    private final FromJsonHelper fromApiJsonHelper;
     @Autowired
     private Environment env;
 
@@ -340,9 +343,6 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                 final List<LoanRepaymentReminderData> repaymentReminders = loanReadPlatformService
                         .findLoanRepaymentReminderData(data.getDays());
 
-                LOG.info("- BatchID " + data.getId() + " - Days::>> " + data.getDays() + " - Reminder Size -::-> "
-                        + repaymentReminders.size());
-
                 if (!CollectionUtils.isEmpty(repaymentReminders)) {
                     for (LoanRepaymentReminderData repaymentReminderData : repaymentReminders) {
 
@@ -380,8 +380,10 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
                 if (!CollectionUtils.isEmpty(reminders)) {
                     for (LoanRepaymentReminder data : reminders) {
-                        buildNotification("ALL_FUNCTION", "LoanRepaymentReminder", data.getId(), data.toString(), "PENDING",
-                                context.authenticatedUser().getId(), officeId);
+                        LoanMessageRepaymentReminderData repaymentReminderData = new LoanMessageRepaymentReminderData(data);
+                        buildNotification("ALL_FUNCTION", "LoanRepaymentReminder", data.getId(),
+                                this.fromApiJsonHelper.toJson(repaymentReminderData), "PENDING", context.authenticatedUser().getId(),
+                                officeId);
                     }
 
                 } else {
@@ -407,7 +409,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
                 false, false, tenantIdentifier, officeId, userIds);
         try {
-            notificationEventPublisher.broadcastNotificationLoanRepaymentReminders(notificationData,
+            notificationEventPublisher.broadcastGenericActiveMqNotification(notificationData,
                     this.env.getProperty("fineract.activemq.loanRepaymentReminderQueue"));
         } catch (Exception e) {
             // We want to avoid rethrowing the exception to stop the business transaction from rolling back

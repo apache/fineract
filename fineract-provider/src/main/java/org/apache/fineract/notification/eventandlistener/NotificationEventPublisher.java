@@ -24,5 +24,5 @@ public interface NotificationEventPublisher {
 
     void broadcastNotification(NotificationData notificationData);
 
-    void broadcastNotificationLoanRepaymentReminders(NotificationData notificationData, String queueName);
+    void broadcastGenericActiveMqNotification(NotificationData notificationData, String queueName);
 }
