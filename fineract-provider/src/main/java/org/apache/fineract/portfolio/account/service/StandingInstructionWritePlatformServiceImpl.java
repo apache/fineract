@@ -72,6 +72,7 @@ import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanc
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -95,6 +96,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PlatformSecurityContext context;
     private final NotificationEventPublisher notificationEventPublisher;
+    private final Environment env;
 
     @Autowired
     public StandingInstructionWritePlatformServiceImpl(PlatformSecurityContext context, final StandingInstructionDataValidator standingInstructionDataValidator,
@@ -104,7 +106,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             final StandingInstructionReadPlatformService standingInstructionReadPlatformService,
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService, final JdbcTemplate jdbcTemplate,
             DatabaseSpecificSQLGenerator sqlGenerator, final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService,
-            final NotificationEventPublisher notificationEventPublisher) {
+            final NotificationEventPublisher notificationEventPublisher, final Environment env) {
         this.standingInstructionDataValidator = standingInstructionDataValidator;
         this.standingInstructionAssembler = standingInstructionAssembler;
         this.accountTransferDetailRepository = accountTransferDetailRepository;
@@ -116,6 +118,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         this.standingInstructionHistoryReadPlatformService = standingInstructionHistoryReadPlatformService;
         this.context = context;
         this.notificationEventPublisher = notificationEventPublisher;
+        this.env = env;
     }
 
     @Transactional
@@ -220,7 +223,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         if(CollectionUtils.isNotEmpty(standingInstructionHistoryDataCollection)) {
             for (StandingInstructionHistoryData standingInstructionHistoryData : standingInstructionHistoryDataCollection) {
                 /// create and send the data for notification message - loan account, saving account id, client name
-                String notificationContent = String.format("Standing Instruction to transfer Amount: `%s` to  ToAccount: `%s` is failed due to insufficient fund in fromAccount: `%s`!", standingInstructionHistoryData.getAmount(), standingInstructionHistoryData.getToAccount().accountId(), standingInstructionHistoryData.getFromAccount().accountId());
+                String notificationContent = String.format("Standing Instruction to transfer Amount: %s to  ToAccount: %s is failed due to insufficient fund in FromAccount: %s.", standingInstructionHistoryData.getAmount(), standingInstructionHistoryData.getToAccount().accountId(), standingInstructionHistoryData.getFromAccount().accountId());
                 buildNotification("Standing Instruction", standingInstructionHistoryData.getStandingInstructionId(), notificationContent, "standingInstructionFailed",
                         context.authenticatedUser().getId(), standingInstructionHistoryData.getToClient().getId());
 
@@ -238,7 +241,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
                 false, false, tenantIdentifier, officeId, null);
         try {
-            notificationEventPublisher.broadcastNotification(notificationData);
+            notificationEventPublisher.broadcastGenericActiveMqNotification(notificationData, env.getProperty("fineract.activemq.standingInstructionInsufficientBalanceFailureQueue"));
         } catch (Exception e) {
             // We want to avoid rethrowing the exception to stop the business transaction from rolling back
             LOG.error("Error while broadcasting notification event", e);

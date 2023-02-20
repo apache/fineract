@@ -82,8 +82,7 @@
             </sqlCheck>
         </preConditions>
         <sql>
-
-            INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('transaction_savings', 'UNLOCK_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNLOCK','0');
+            INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker) VALUES ('transaction_savings', 'UNLOCK_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNLOCK', '0');
         </sql>
     </changeSet>
     <changeSet author="bosco@fiter.io" id="add_m_payment_detail_actual_transaction_type">
