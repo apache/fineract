@@ -19,12 +19,14 @@
 package org.apache.fineract.portfolio.client.service;
 
 import com.google.gson.JsonElement;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import javax.persistence.PersistenceException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -65,6 +67,8 @@ import org.apache.fineract.portfolio.client.domain.ClientNonPerson;
 import org.apache.fineract.portfolio.client.domain.ClientNonPersonRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionLimit;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionLimitRepository;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.exception.ClientActiveForUpdateException;
 import org.apache.fineract.portfolio.client.exception.ClientHasNoStaffException;
@@ -122,6 +126,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     private final BusinessOwnerWritePlatformService businessOwnerWritePlatformService;
 
+    private final ClientTransactionLimitRepository clientTransactionLimitRepository;
+
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
@@ -138,7 +144,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService,
             final BusinessEventNotifierService businessEventNotifierService,
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
-            BusinessOwnerWritePlatformService businessOwnerWritePlatformService) {
+            BusinessOwnerWritePlatformService businessOwnerWritePlatformService,
+            final ClientTransactionLimitRepository clientTransactionLimitRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientNonPersonRepository = clientNonPersonRepository;
@@ -163,6 +170,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.businessEventNotifierService = businessEventNotifierService;
         this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
         this.businessOwnerWritePlatformService = businessOwnerWritePlatformService;
+        this.clientTransactionLimitRepository = clientTransactionLimitRepository;
     }
 
     @Transactional
@@ -307,6 +315,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
             }
 
+            createClientTransactionLimits(command, newClient);
             this.clientRepository.saveAndFlush(newClient);
             if (newClient.isActive()) {
                 businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(newClient));
@@ -424,13 +433,21 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         try {
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
             final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
             final String clientHierarchy = clientForUpdate.getOffice().getHierarchy();
 
             this.context.validateAccessRights(clientHierarchy);
 
             final Map<String, Object> changes = clientForUpdate.update(command);
+            if (hasClientTransactionLimitParameter(command)) {
+                Optional<ClientTransactionLimit> clientTransactionLimitOptional = clientTransactionLimitRepository
+                        .findByClientId(clientForUpdate.getId());
+                if (clientTransactionLimitOptional.isPresent()) {
+                    updateClientTransactionLimits(command, clientTransactionLimitOptional);
+                } else {
+                    createClientTransactionLimits(command, clientForUpdate);
+                }
+            }
 
             if (changes.containsKey(ClientApiConstants.staffIdParamName)) {
 
@@ -444,7 +461,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             if (changes.containsKey(ClientApiConstants.genderIdParamName)) {
-
                 final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
                 CodeValue gender = null;
                 if (newValue != null) {
@@ -581,6 +597,29 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private void updateClientTransactionLimits(JsonCommand command, Optional<ClientTransactionLimit> clientTransactionLimitOptional) {
+        ClientTransactionLimit clientTransactionLimit = clientTransactionLimitOptional.get();
+        clientTransactionLimit.update(command);
+        clientTransactionLimitRepository.saveAndFlush(clientTransactionLimit);
+    }
+
+    private void createClientTransactionLimits(JsonCommand command, Client client) {
+        final Long clientLevelId = command.longValueOfParameterNamed(ClientApiConstants.clientLevelIdParamName);
+        final BigDecimal dailyWithDrawLimit = command
+                .bigDecimalValueOfParameterNamedDefaultToNullIfZero(ClientApiConstants.dailyWithdrawLimit);
+        final BigDecimal singleDailyWithDrawLimit = command
+                .bigDecimalValueOfParameterNamedDefaultToNullIfZero(ClientApiConstants.singleWithdrawLimit);
+        ClientTransactionLimit clientTransactionLimit = new ClientTransactionLimit(client, clientLevelId, dailyWithDrawLimit,
+                singleDailyWithDrawLimit);
+        clientTransactionLimitRepository.saveAndFlush(clientTransactionLimit);
+    }
+
+    private static boolean hasClientTransactionLimitParameter(JsonCommand command) {
+        return command.hasParameter(ClientApiConstants.clientLevelIdParamName)
+                || command.hasParameter(ClientApiConstants.dailyWithdrawLimit)
+                || command.hasParameter(ClientApiConstants.singleWithdrawLimit);
     }
 
     @Transactional
