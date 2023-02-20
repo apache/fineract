@@ -228,6 +228,94 @@
         </insert>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add-Post-loan-repayment-reminder-job">
 
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(1) FROM job WHERE name = 'Post Loan Repayment Reminder'
+                </sqlCheck>
+            </not>
+        </preConditions>
+
+        <insert tableName="job">
+            <column name="name" value="Post Loan Repayment Reminder" />
+            <column name="display_name" value="Post Loan Repayment Reminder" />
+            <column name="cron_expression" value="0 0 22 1/1 * ? *" />
+            <column name="create_time" value="now()" />
+            <column name="task_priority" value="5" />
+            <column name="group_name" value="null" />
+            <column name="previous_run_start_time" value="null" />
+            <column name="next_run_time" value="null" />
+            <column name="job_key" value="Post Loan Repayment Reminder _ DEFAULT" />
+            <column name="initializing_errorlog" value="null" />
+            <column name="is_active" valueBoolean="true" />
+            <column name="currently_running" valueBoolean="false" />
+            <column name="updates_allowed" valueBoolean="true" />
+            <column name="scheduler_group" value="1" />
+            <column name="is_misfired" valueBoolean="false" />
+            <column name="node_id" value="0" />
+            <column name="is_mismatched_job" valueBoolean="false" />
+
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add-Process-loan-repayment-reminder-job">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(1) FROM job WHERE name = 'Process Loan Repayment Reminder'
+                </sqlCheck>
+            </not>
+        </preConditions>
+
+        <insert tableName="job">
+            <column name="name" value="Process Loan Repayment Reminder" />
+            <column name="display_name" value="Process Loan Repayment Reminder" />
+            <column name="cron_expression" value="0 0 22 1/1 * ? *" />
+            <column name="create_time" value="now()" />
+            <column name="task_priority" value="5" />
+            <column name="group_name" value="null" />
+            <column name="previous_run_start_time" value="null" />
+            <column name="next_run_time" value="null" />
+            <column name="job_key" value="Process Loan Repayment Reminder _ DEFAULT" />
+            <column name="initializing_errorlog" value="null" />
+            <column name="is_active" valueBoolean="true" />
+            <column name="currently_running" valueBoolean="false" />
+            <column name="updates_allowed" valueBoolean="true" />
+            <column name="scheduler_group" value="1" />
+            <column name="is_misfired" valueBoolean="false" />
+            <column name="node_id" value="0" />
+            <column name="is_mismatched_job" valueBoolean="false" />
+
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_loan_repayment_reminder_batch_id">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_repayment_reminder" columnName="batch_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_repayment_reminder">
+            <column name="batch_id" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_repayment_reminder_settings_batch_id">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="loan_repayment_reminder_settings" columnName="batch_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="loan_repayment_reminder_settings">
+            <column name="batch_id" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

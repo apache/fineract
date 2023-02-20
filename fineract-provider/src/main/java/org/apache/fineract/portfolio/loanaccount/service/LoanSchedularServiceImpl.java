@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import static java.util.stream.Collectors.toSet;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -39,15 +41,19 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.data.NotificationData;
+import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.LoanMessageRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentReminderSettingsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanReminderStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentReminder;
@@ -57,12 +63,16 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Service
@@ -84,6 +94,11 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     private final LoanRepaymentReminderSettingsRepository loanRepaymentReminderSettingsRepository;
     private final LoanRepaymentReminderRepository loanRepaymentReminderRepository;
     private final PlatformSecurityContext context;
+    private final NotificationEventPublisher notificationEventPublisher;
+    private final AppUserRepository appUserRepository;
+    private final FromJsonHelper fromApiJsonHelper;
+    @Autowired
+    private Environment env;
 
     @Override
     @CronTarget(jobName = JobName.APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT)
@@ -312,10 +327,13 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         }
     }
 
+    @Transactional
     @Override
-    @CronTarget(jobName = JobName.POST_LOAN_REPAYMENT_REMINDER)
-    public void postLoanRepaymentReminder() {
+    @CronTarget(jobName = JobName.PROCESS_LOAN_REPAYMENT_REMINDER)
+    public void processLoanRepaymentReminder() {
         final AppUser currentUser = getAppUserIfPresent();
+        String batchId = java.util.UUID.randomUUID().toString();
+
         final List<LoanRepaymentReminderSettingsData> settingsData = loanRepaymentReminderSettingsRepository
                 .findLoanRepaymentReminderSettings();
 
@@ -324,27 +342,55 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
                 final List<LoanRepaymentReminderData> repaymentReminders = loanReadPlatformService
                         .findLoanRepaymentReminderData(data.getDays());
-                LOG.info("- BatchID " + data.getId() + " - Days::>> " + data.getDays() + " - Reminder Size -::-> "
-                        + repaymentReminders.size());
 
                 if (!CollectionUtils.isEmpty(repaymentReminders)) {
                     for (LoanRepaymentReminderData repaymentReminderData : repaymentReminders) {
 
                         LoanRepaymentReminder loanRepaymentReminder = new LoanRepaymentReminder(data.getId(), repaymentReminderData,
-                                LoanReminderStatus.PENDING.name());
+                                LoanReminderStatus.PENDING.name(), batchId);
                         loanRepaymentReminder.setCreatedDate(DateUtils.getLocalDateTimeOfTenant());
                         loanRepaymentReminder.setLastModifiedDate(DateUtils.getLocalDateTimeOfTenant());
                         loanRepaymentReminder.setCreatedBy(currentUser.getId());
 
                         loanRepaymentReminderRepository.save(loanRepaymentReminder);
                     }
+                    loanRepaymentReminderSettingsRepository.updateLoanRepaymentReminderSettingsBatchId(batchId, data.getId());
                 }
             }
 
         } else {
-            LOG.info("Loan Repayment Reminders not found");
+            LOG.info("Proccess Loan Repayment Reminders not found");
         }
 
+    }
+
+    @Transactional
+    @Override
+    @CronTarget(jobName = JobName.POST_LOAN_REPAYMENT_REMINDER)
+    public void postLoanRepaymentReminder() {
+        final AppUser currentUser = getAppUserIfPresent();
+        Long officeId = currentUser.getOffice() == null ? null : currentUser.getOffice().getId();
+        final List<LoanRepaymentReminderSettingsData> settingsData = loanRepaymentReminderSettingsRepository
+                .findLoanRepaymentReminderSettings();
+
+        if (!CollectionUtils.isEmpty(settingsData)) {
+            for (LoanRepaymentReminderSettingsData settings : settingsData) {
+                final List<LoanRepaymentReminder> reminders = loanRepaymentReminderRepository
+                        .getLoanRepaymentReminderByBatchId(settings.getBatch());
+
+                if (!CollectionUtils.isEmpty(reminders)) {
+                    for (LoanRepaymentReminder data : reminders) {
+                        LoanMessageRepaymentReminderData repaymentReminderData = new LoanMessageRepaymentReminderData(data);
+                        buildNotification("ALL_FUNCTION", "LoanRepaymentReminder", data.getId(),
+                                this.fromApiJsonHelper.toJson(repaymentReminderData), "PENDING", context.authenticatedUser().getId(),
+                                officeId);
+                    }
+
+                } else {
+                    LOG.info("Post Loan Repayment Reminders not found");
+                }
+            }
+        }
     }
 
     private AppUser getAppUserIfPresent() {
@@ -353,6 +399,28 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             user = this.context.getAuthenticatedUserIfPresent();
         }
         return user;
+    }
+
+    private void buildNotification(String permission, String objectType, Long objectIdentifier, String notificationContent,
+            String eventType, Long appUserId, Long officeId) {
+
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        Set<Long> userIds = getNotifiableUserIds(officeId, permission);
+        NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
+                false, false, tenantIdentifier, officeId, userIds);
+        try {
+            notificationEventPublisher.broadcastGenericActiveMqNotification(notificationData,
+                    this.env.getProperty("fineract.activemq.loanRepaymentReminderQueue"));
+        } catch (Exception e) {
+            // We want to avoid rethrowing the exception to stop the business transaction from rolling back
+            log.error("Error while broadcasting notification event", e);
+        }
+    }
+
+    private Set<Long> getNotifiableUserIds(Long officeId, String permission) {
+        Collection<AppUser> users = appUserRepository.findByOfficeId(officeId);
+        Collection<AppUser> usersWithPermission = users.stream().filter(aU -> aU.hasAnyPermission(permission, "ALL_FUNCTIONS")).toList();
+        return usersWithPermission.stream().map(AppUser::getId).collect(toSet());
     }
 
 }

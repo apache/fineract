@@ -23,4 +23,6 @@ import org.apache.fineract.notification.data.NotificationData;
 public interface NotificationEventPublisher {
 
     void broadcastNotification(NotificationData notificationData);
+
+    void broadcastGenericActiveMqNotification(NotificationData notificationData, String queueName);
 }
