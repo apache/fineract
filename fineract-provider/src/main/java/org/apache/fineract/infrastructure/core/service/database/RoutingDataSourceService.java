@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.infrastructure.core.service.database;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import org.apache.fineract.infrastructure.core.exception.MultiException;
-import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import javax.sql.DataSource;
 
-public interface LoanAccrualPlatformService {
+/**
+ * A service for getting hold of the appropriate {@link DataSource} connection pool.
+ */
+public interface RoutingDataSourceService {
 
-    void addPeriodicAccruals(LocalDate tilldate) throws MultiException;
-
-    void addPeriodicAccruals(LocalDate tilldate, Loan loan) throws MultiException;
-
-    void addPeriodicAccruals(LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws MultiException;
-
+    DataSource retrieveDataSource();
 }

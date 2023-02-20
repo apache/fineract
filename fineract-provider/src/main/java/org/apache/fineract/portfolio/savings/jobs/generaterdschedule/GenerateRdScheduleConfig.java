@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.jobs.generaterdschedule;
 
-import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
 import org.springframework.batch.core.Job;

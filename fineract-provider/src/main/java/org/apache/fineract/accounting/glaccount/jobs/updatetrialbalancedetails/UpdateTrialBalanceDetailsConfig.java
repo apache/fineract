@@ -19,7 +19,7 @@
 package org.apache.fineract.accounting.glaccount.jobs.updatetrialbalancedetails;
 
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;

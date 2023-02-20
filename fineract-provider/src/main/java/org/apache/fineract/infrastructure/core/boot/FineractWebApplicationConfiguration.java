@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.boot;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.condition.FineractWebApplicationCondition;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -29,6 +32,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -47,6 +51,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableConfigurationProperties({ FineractProperties.class, LiquibaseProperties.class })
 @ComponentScan(basePackages = "org.apache.fineract.**")
 @IntegrationComponentScan(basePackages = "org.apache.fineract.**")
-public abstract class AbstractApplicationConfiguration {
+@Conditional(FineractWebApplicationCondition.class)
+@Slf4j
+// The class needs to be abstract for some reason, otherwise the tests start to fail...
+public abstract class FineractWebApplicationConfiguration implements InitializingBean {
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        log.warn("Fineract is running in web application mode");
+    }
 }

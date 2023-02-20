@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.fineract.infrastructure.security.service;
+package org.apache.fineract.infrastructure.core.service.tenant;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,7 +44,7 @@ public final class TenantMapper implements RowMapper<FineractPlatformTenant> {
             + " from tenants t left join tenant_server_connections ts ";
     private final StringBuilder sqlBuilder = new StringBuilder(TENANT_SERVER_CONNECTION_BUILDER);
 
-    TenantMapper(boolean isReport) {
+    public TenantMapper(boolean isReport) {
         this.isReport = isReport;
     }
 

@@ -16,14 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.security.service;
+package org.apache.fineract.infrastructure.core.condition;
 
+import java.util.Arrays;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 
-public interface TenantDetailsService {
+public abstract class ProfileCondition implements Condition {
 
-    FineractPlatformTenant loadTenantById(String tenantId);
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        String[] activeProfiles = context.getEnvironment().getActiveProfiles();
+        return matches(Arrays.asList(activeProfiles));
+    }
 
-    List<FineractPlatformTenant> findAllTenants();
+    protected abstract boolean matches(List<String> activeProfiles);
 }

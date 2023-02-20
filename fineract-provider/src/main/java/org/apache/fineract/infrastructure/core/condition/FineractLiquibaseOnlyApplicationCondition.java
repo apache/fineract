@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.infrastructure.core.condition;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import org.springframework.stereotype.Component;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 
-@Component
-public class HikariDataSourceFactory {
+public class FineractLiquibaseOnlyApplicationCondition extends ProfileCondition {
 
-    public HikariDataSource create(HikariConfig config) {
-        return new HikariDataSource(config);
+    @Override
+    protected boolean matches(List<String> activeProfiles) {
+        return activeProfiles.contains(FineractProfiles.LIQUIBASE_ONLY);
     }
 }

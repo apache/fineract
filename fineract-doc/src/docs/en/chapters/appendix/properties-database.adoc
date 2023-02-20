@@ -48,4 +48,9 @@
 |FINERACT_DEFAULT_TENANTDB_DESCRIPTION
 |Default Demo Tenant
 |TBD
+
+|spring.liquibase.enabled
+|FINERACT_LIQUIBASE_ENABLED
+|true
+|TBD
 |===

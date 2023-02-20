@@ -16,20 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.infrastructure.core.boot;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import org.apache.fineract.infrastructure.core.exception.MultiException;
-import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+public final class FineractProfiles {
 
-public interface LoanAccrualPlatformService {
+    public static final String LIQUIBASE_ONLY = "liquibase-only";
 
-    void addPeriodicAccruals(LocalDate tilldate) throws MultiException;
-
-    void addPeriodicAccruals(LocalDate tilldate, Loan loan) throws MultiException;
-
-    void addPeriodicAccruals(LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws MultiException;
-
+    private FineractProfiles() {}
 }
