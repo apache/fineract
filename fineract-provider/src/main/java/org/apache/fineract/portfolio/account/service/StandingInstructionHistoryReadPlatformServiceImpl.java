@@ -70,28 +70,29 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
     }
 
     @Override
-    public Collection<StandingInstructionHistoryData> retrieveAllFailedWithInsufficientBalance(StandingInstructionDTO standingInstructionDTO) {
+    public Collection<StandingInstructionHistoryData> retrieveAllFailedWithInsufficientBalance(
+            StandingInstructionDTO standingInstructionDTO) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.standingInstructionHistoryMapper.schema());
         sqlBuilder.append(" where ");
         List<Object> paramObj = new ArrayList<>();
 
-        //adding condition for SI with failed status
+        // adding condition for SI with failed status
         sqlBuilder.append(" atsih.status=? ");
         paramObj.add("failed");
 
         sqlBuilder.append(" and ");
 
-        //adding condition for SI with failed status with insufficient balance
+        // adding condition for SI with failed status with insufficient balance
         sqlBuilder.append(" atsih.error_log=? ");
         paramObj.add("InsufficientAccountBalance Exception ");
 
         sqlBuilder.append(" and ");
 
-        //adding condition for getting SI for which notification is not sent
+        // adding condition for getting SI for which notification is not sent
         sqlBuilder.append(" atsih.is_notification_sent=? ");
-        paramObj.add( false );
+        paramObj.add(false);
 
         final Object[] finalObjectArray = paramObj.toArray();
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.standingInstructionHistoryMapper, finalObjectArray);
