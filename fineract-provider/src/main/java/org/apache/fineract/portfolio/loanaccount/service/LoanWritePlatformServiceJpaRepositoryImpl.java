@@ -60,6 +60,7 @@ import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.service.ActiveMqNotificationDomainServiceImpl;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
@@ -152,6 +153,7 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanaccount.data.LoanMessageRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
@@ -220,6 +222,8 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.Repaym
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -271,6 +275,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanRepository loanRepository;
     private final RepaymentWithPostDatedChecksAssembler repaymentWithPostDatedChecksAssembler;
     private final PostDatedChecksRepository postDatedChecksRepository;
+    @Autowired
+    private ActiveMqNotificationDomainServiceImpl activeMqNotificationDomainService;
+    @Autowired
+    private Environment env;
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
@@ -953,6 +961,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
         }
+        LoanMessageRepaymentReminderData data = new LoanMessageRepaymentReminderData();
+        data.setLoanId(1L);
+        data.setClientName("Sample Client");
+
+
+        activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepayment", loanTransaction.getId(),
+                this.fromApiJsonHelper.toJson(data), "PENDING", context.authenticatedUser().getId(),
+                1L,this.env.getProperty("fineract.activemq.loanRepaymentConfirmationQueue"));
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
