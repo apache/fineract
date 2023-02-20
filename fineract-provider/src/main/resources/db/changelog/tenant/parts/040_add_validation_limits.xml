@@ -20,7 +20,7 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="judiao@fiter.io" id="040_add_validation_limits_001">
+    <changeSet author="judiao@fiter.io" id="040_add_validation_limits_002">
 
         <preConditions onFail="MARK_RAN">
             <not>
@@ -54,12 +54,18 @@
 
         </createTable>
     </changeSet>
-    <changeSet  author="judiao@fiter.io" id="040_add_validation_limits_02">
-     <sql>
-         INSERT INTO `m_permission`
-         (`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`)
-         VALUES ('product', 'READ_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'READ', '0'),('product', 'CREATE_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'CREATE','0'),('product', 'CREATE_VALIDATIONLIMIT_CHECKER', 'VALIDATIONLIMITS', 'CREATE_CHECKER','0'), ('product', 'UPDATE_VALIDATIONLIMIT', 'VALIDATIONLIMITS', 'UPDATE','0'),('product', 'UPDATE_VALIDATIONLIMIT_CHECKER', 'VALIDATIONLIMITS', 'UPDATE_CHECKER','0');
-         INSERT INTO `m_code`(`code_name`,`is_system_defined`) VALUES('clientLevels','1');
-     </sql>
+    <changeSet author="judiao@fiter.io" id="040_add_validation_limits_03">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_VALIDATIONLIMIT'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="product" />
+            <column name="code" value="READ_VALIDATIONLIMIT" />
+            <column name="entity_name" value="VALIDATIONLIMITS" />
+            <column name="action_name" value="READ" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>
