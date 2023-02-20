@@ -21,6 +21,9 @@ ff4j:
   autocreate: false
   audit: false
   features:
+    - uid: client.level.limit.validation
+      enable: true
+      description: This feature will enable or disable the validations limit check on savings account withdraw
     - uid: savings.rd.minimumduration_mon94
       enable: false
       description: >-
