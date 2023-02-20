@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.infrastructure.core.service.tenant;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import org.apache.fineract.infrastructure.core.exception.MultiException;
-import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 
-public interface LoanAccrualPlatformService {
+public interface TenantDetailsService {
 
-    void addPeriodicAccruals(LocalDate tilldate) throws MultiException;
+    FineractPlatformTenant loadTenantById(String tenantId);
 
-    void addPeriodicAccruals(LocalDate tilldate, Loan loan) throws MultiException;
-
-    void addPeriodicAccruals(LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws MultiException;
-
+    List<FineractPlatformTenant> findAllTenants();
 }

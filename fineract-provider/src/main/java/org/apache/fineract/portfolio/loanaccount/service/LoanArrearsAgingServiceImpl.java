@@ -42,7 +42,9 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.charge.Loan
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargePaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanForeClosurePostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanRefundPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionGoodwillCreditPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionPayoutRefundPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoWrittenOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanWaiveInterestBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -75,6 +77,10 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
                 new AdjustTransactionBusinessEventEventListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanTransactionMakeRepaymentPostBusinessEvent.class,
                 new MakeRepaymentEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanTransactionGoodwillCreditPostBusinessEvent.class,
+                new GoodwillCreditEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanTransactionPayoutRefundPostBusinessEvent.class,
+                new PaymentRefundEventListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanUndoWrittenOffBusinessEvent.class, new UndoWrittenOffEventListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanWaiveInterestBusinessEvent.class, new WaiveInterestEventListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanAddChargeBusinessEvent.class, new AddChargeEventListener());
@@ -495,6 +501,26 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         public void onBusinessEvent(LoanDisbursalBusinessEvent event) {
             Loan loan = event.get();
             updateLoanArrearsAgeingDetails(loan);
+        }
+    }
+
+    private class GoodwillCreditEventListener implements BusinessEventListener<LoanTransactionGoodwillCreditPostBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(LoanTransactionGoodwillCreditPostBusinessEvent event) {
+            LoanTransaction loanTransaction = event.get();
+            Loan loan = loanTransaction.getLoan();
+            handleArrearsForLoan(loan);
+        }
+    }
+
+    private class PaymentRefundEventListener implements BusinessEventListener<LoanTransactionPayoutRefundPostBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(LoanTransactionPayoutRefundPostBusinessEvent event) {
+            LoanTransaction loanTransaction = event.get();
+            Loan loan = loanTransaction.getLoan();
+            handleArrearsForLoan(loan);
         }
     }
 }

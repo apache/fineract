@@ -1761,7 +1761,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(final LocalDate tillDate) {
+        return retrievePeriodicAccrualData(tillDate, null);
+    }
 
+    @Override
+    public Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(final LocalDate tillDate, final Loan loan) {
         LoanSchedulePeriodicAccrualMapper mapper = new LoanSchedulePeriodicAccrualMapper();
         LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
         final StringBuilder sqlBuilder = new StringBuilder(400);
@@ -1772,10 +1776,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .append(" or (ls.interest_amount <> COALESCE(ls.accrual_interest_derived, 0)))")
                 .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and (loan.closedon_date <= :tillDate or loan.closedon_date is null)")
                 .append(" and loan.is_npa=false and (ls.duedate <= :tillDate or (ls.duedate > :tillDate and ls.fromdate < :tillDate))) ");
-        Map<String, Object> paramMap = new HashMap<>(4);
+        Map<String, Object> paramMap = new HashMap<>(5);
         if (organisationStartDate != null) {
             sqlBuilder.append(" and ls.duedate > :organisationStartDate ");
             paramMap.put("organisationStartDate", organisationStartDate);
+        }
+        if (loan != null) {
+            sqlBuilder.append(" and loan.id= :loanId ");
+            paramMap.put("loanId", loan.getId());
         }
         sqlBuilder.append(" order by loan.id,ls.duedate ");
         paramMap.put("active", LoanStatus.ACTIVE.getValue());

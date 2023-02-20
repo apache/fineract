@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -27,15 +29,22 @@ import com.sun.research.ws.wadl.HTTPMethods;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.HashMap;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
@@ -63,6 +72,8 @@ class LoanCOBApiFilterTest {
     private PlatformSecurityContext context;
     @Mock
     private InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
+    @Mock
+    private LoanRepository loanRepository;
 
     @Test
     void shouldLoanAndExternalMatchToo() {
@@ -117,34 +128,52 @@ class LoanCOBApiFilterTest {
     }
 
     @Test
-    void shouldProceedWhenLoanIsNotLocked() throws ServletException, IOException {
+    void shouldProceedWhenLoanIsNotLockedAndNoLoanIsBehind() throws ServletException, IOException {
         MockHttpServletRequest request = mock(MockHttpServletRequest.class);
         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
         AppUser appUser = mock(AppUser.class);
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
 
         given(request.getPathInfo()).willReturn("/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
         given(context.authenticatedUser()).willReturn(appUser);
+        given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
+                eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
+                        .willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
     }
 
     @Test
-    void shouldProceedWhenExternalLoanIsNotLocked() throws ServletException, IOException {
+    void shouldProceedWhenExternalLoanIsNotLockedAndNotBehind() throws ServletException, IOException {
         MockHttpServletRequest request = mock(MockHttpServletRequest.class);
         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
         AppUser appUser = mock(AppUser.class);
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
 
         given(request.getPathInfo()).willReturn("/loans/external-id/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
         given(context.authenticatedUser()).willReturn(appUser);
+        given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
+                eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
+                        .willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);

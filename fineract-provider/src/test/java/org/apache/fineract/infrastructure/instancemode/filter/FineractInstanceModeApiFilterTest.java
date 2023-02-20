@@ -284,4 +284,88 @@ class FineractInstanceModeApiFilterTest {
         verify(filterChain).doFilter(request, response);
     }
 
+    @Test
+    void testDoFilterInternal_ShouldLetLoanCOBCatchUpApiThrough_WhenFineractIsInBatchManagerMode() throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, false, true);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/loans/catch-up");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void testDoFilterInternal_ShouldNotLetLoanCOBCatchUpApiThrough_WhenFineractIsNotInBatchManagerMode()
+            throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true, false);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/loans/catch-up");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verifyNoInteractions(filterChain);
+        verify(response).setStatus(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    void testDoFilterInternal_ShouldLetLoanCOBCatchUpStatusApiThrough_WhenFineractIsInBatchManagerMode()
+            throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, false, true);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/loans/is-catch-up-running");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void testDoFilterInternal_ShouldNotLetLoanCOBCatchUpStatusApiThrough_WhenFineractIsNotInBatchManagerMode()
+            throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true, false);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/loans/is-catch-up-running");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verifyNoInteractions(filterChain);
+        verify(response).setStatus(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    void testDoFilterInternal_ShouldLetOtherLoanCatchUpApisThrough_WhenFineractIsInBatchManagerAndReadModeAndIsGetApi()
+            throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, true);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.GET.name());
+        given(request.getPathInfo()).willReturn("/loans/oldest-cob-closed");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void testDoFilterInternal_ShouldLetOtherLoanCatchUpApisThrough_WhenFineractIsInReadModeAndIsGetApi()
+            throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, false);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.GET.name());
+        given(request.getPathInfo()).willReturn("/loans/oldest-cob-closed");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verify(filterChain).doFilter(request, response);
+    }
 }
