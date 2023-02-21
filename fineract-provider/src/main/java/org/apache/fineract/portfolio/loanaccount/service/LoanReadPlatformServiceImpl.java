@@ -107,6 +107,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentConfirmationData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -2366,6 +2367,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return repaymentConfirmationData;
     }
 
+    @Override
+    public List<LoanRepaymentScheduleData> getLoanRepaymentScheduleData(Long loanId) {
+        final LoanRepaymentScheduleDataMapper mapper = new LoanRepaymentScheduleDataMapper(sqlGenerator);
+        String sql = "select " + mapper.schema();
+        List<LoanRepaymentScheduleData> loanRepaymentScheduleData = this.jdbcTemplate.query(sql, mapper, loanId);
+        return loanRepaymentScheduleData;
+    }
+
     private static final class CollectionDataMapper implements RowMapper<CollectionData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -2542,6 +2551,71 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     principalPortionDerived, interestPortionDerived, feeChargesPortionDerived, penaltyChargePortionDerived,
                     outstandingLoanBalanceDerived, clientId, groupId, loanProductId, productName, clientName, groupName,
                     totalOverdueAmount);
+        }
+    }
+
+    private static final class LoanRepaymentScheduleDataMapper implements RowMapper<LoanRepaymentScheduleData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanRepaymentScheduleDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String schema() {
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append(" ls.id  as Id,ls.fromdate  as fromDate, ls.duedate as dueDate, ");
+            sqlBuilder.append(
+                    " ls.installment  as installmentNo, ls.principal_amount  as principalAmount, ls.principal_completed_derived  as principalPaid, ");
+
+            sqlBuilder.append(
+                    " ls.principal_writtenoff_derived    as principalWrittenOff,ls.interest_amount   as interestAmount, ls.interest_completed_derived   as interestPaid, ");
+            sqlBuilder.append(
+                    " ls.interest_waived_derived  as interestWrittenOff,ls.interest_waived_derived   as interestWaived, ls.fee_charges_amount  as feeChargesAmount, ");
+            sqlBuilder.append(
+                    " ls.fee_charges_completed_derived  as feePaid,ls.fee_charges_writtenoff_derived  as feeChargesWrittenOff,ls.fee_charges_waived_derived  as feeChargeWaived, ");
+            sqlBuilder.append(
+                    " ls.penalty_charges_amount as penaltyChargesAmount,ls.penalty_charges_completed_derived as penaltyChargePaid,ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, ");
+
+            sqlBuilder.append(
+                    " ls.penalty_charges_waived_derived as penaltyChargesWaived ,ls.completed_derived as completedDerived,ls.obligations_met_on_date as obligationMetOnDate ");
+            sqlBuilder.append("from m_loan_repayment_schedule ls where ls.loan_id = ? order by ls.installment ");
+
+            return sqlBuilder.toString();
+        }
+
+        @Override
+        public LoanRepaymentScheduleData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final Integer id = rs.getInt("id");
+            final String fromDate = rs.getString("fromDate");
+            final String dueDate = rs.getString("dueDate");
+            final Integer installmentNo = rs.getInt("installmentNo");
+            final BigDecimal principalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAmount");
+            final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPaid");
+            final BigDecimal principalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalWrittenOff");
+
+            final BigDecimal interestAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestAmount");
+            final BigDecimal interestPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestPaid");
+            final BigDecimal interestWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWrittenOff");
+            final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
+
+            final BigDecimal feeChargesAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesAmount");
+            final BigDecimal feePaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feePaid");
+            final BigDecimal feeChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWrittenOff");
+            final BigDecimal feeChargeWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargeWaived");
+
+            final BigDecimal penaltyChargesAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesAmount");
+            final BigDecimal penaltyChargePaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargePaid");
+            final BigDecimal penaltyChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWrittenOff");
+            final BigDecimal penaltyChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWaived");
+
+            final Boolean completedDerived = rs.getBoolean("completedDerived");
+            final String obligationMetOnDate = rs.getString("obligationMetOnDate");
+
+            return new LoanRepaymentScheduleData(id, fromDate, dueDate, installmentNo, principalAmount, principalPaid, principalWrittenOff,
+                    interestAmount, interestPaid, interestWrittenOff, interestWaived, feeChargesAmount, feePaid, feeChargesWrittenOff,
+                    feeChargeWaived, penaltyChargesAmount, penaltyChargePaid, penaltyChargesWrittenOff, penaltyChargesWaived,
+                    completedDerived, obligationMetOnDate);
         }
     }
 }
