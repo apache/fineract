@@ -22,11 +22,13 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistory;
+import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.quartz.JobExecutionContext;
@@ -101,6 +103,12 @@ public class SchedulerJobListener implements JobListener {
             errorLog = sb.toString();
 
         }
+
+        //If error due to InsufficientAccountBalance then mark job status as success
+        if (StringUtils.isNotBlank(errorLog) && errorLog.contains(StandingInstructionApiConstants.insufficientBalanceExceptionMessage)) {
+            status = SchedulerServiceConstants.STATUS_SUCCESS;
+        }
+
         String triggerType = SchedulerServiceConstants.TRIGGER_TYPE_CRON;
         if (context.getMergedJobDataMap().containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
             triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);

@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
+import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData;
@@ -86,7 +87,7 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
 
         // adding condition for SI with failed status with insufficient balance
         sqlBuilder.append(" atsih.error_log=? ");
-        paramObj.add("InsufficientAccountBalance Exception ");
+        paramObj.add(StandingInstructionApiConstants.insufficientBalanceExceptionMessage);
 
         sqlBuilder.append(" and ");
 
