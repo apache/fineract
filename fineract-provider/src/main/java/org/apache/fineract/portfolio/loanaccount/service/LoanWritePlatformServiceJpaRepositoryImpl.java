@@ -916,7 +916,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult makeLoanRepayment(final LoanTransactionType repaymentTransactionType, final Long loanId,
             final JsonCommand command, final boolean isRecoveryRepayment) {
-
+        final AppUser currentUser = getAppUserIfPresent();
         this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType);
         this.loanEventApiJsonValidator.validateNewRepaymentTransaction(command.json());
 
@@ -967,10 +967,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepaymentConfirmation",
                     repaymentConfirmationData.getTransactionId(), this.fromApiJsonHelper.toJson(repaymentConfirmationData), "PENDING",
-                    context.authenticatedUser().getId(), 1L, this.env.getProperty("fineract.activemq.loanRepaymentConfirmationQueue"));
+                    context.authenticatedUser().getId(), currentUser.getOffice().getId(),
+                    this.env.getProperty("fineract.activemq.loanRepaymentConfirmationQueue"));
         } catch (Exception ex) {
             throw ex;
-            // Don't react to this exception because If messaging fails, Payments shouldn't fail
+            // Don't react to this exception because If messaging fails, RpPayment Transaction shouldn't rollback
         }
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
