@@ -70,6 +70,8 @@ dependencyManagement {
         dependency ('org.apache.tika:tika-parser-microsoft-module:2.7.0') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
+            exclude 'org.bouncycastle:bcprov-jdk18on'
+            exclude 'org.bouncycastle:bcmail-jdk18on'
             exclude 'commons-logging:commons-logging'
             exclude 'org.apache.logging.log4j:log4j-api'
             exclude 'org.slf4j:slf4j-api'
@@ -86,6 +88,8 @@ dependencyManagement {
         dependency ('org.apache.tika:tika-parser-miscoffice-module:2.7.0') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
+            exclude 'org.bouncycastle:bcprov-jdk18on'
+            exclude 'org.bouncycastle:bcmail-jdk18on'
             exclude 'commons-logging:commons-logging'
             exclude 'org.apache.logging.log4j:log4j-api'
             exclude 'org.slf4j:slf4j-api'
