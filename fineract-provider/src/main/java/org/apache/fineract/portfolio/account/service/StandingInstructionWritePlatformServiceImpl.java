@@ -333,9 +333,9 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                     + accountTransferDTO.getFromAccountId() + " to " + accountTransferDTO.getToAccountId(), e));
             errorLog.append("Validation exception while trasfering funds " + e.getDefaultUserMessage());
         } catch (final InsufficientAccountBalanceException e) {
-            errors.add(new Exception("InsufficientAccountBalance Exception while trasfering funds for standing Instruction id"
+            errors.add(new Exception(StandingInstructionApiConstants.insufficientBalanceExceptionMessage + " while transferring funds for standing Instruction id"
                     + instructionId + " from " + accountTransferDTO.getFromAccountId() + " to " + accountTransferDTO.getToAccountId(), e));
-            errorLog.append("InsufficientAccountBalance Exception ");
+            errorLog.append(StandingInstructionApiConstants.insufficientBalanceExceptionMessage);
         } catch (final AbstractPlatformServiceUnavailableException e) {
             errors.add(new Exception("Platform exception while trasfering funds for standing Instruction id" + instructionId + " from "
                     + accountTransferDTO.getFromAccountId() + " to " + accountTransferDTO.getToAccountId(), e));
