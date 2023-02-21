@@ -379,7 +379,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                         LoanMessageRepaymentReminderData repaymentReminderData = new LoanMessageRepaymentReminderData(data);
                         activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepaymentReminder", data.getId(),
                                 this.fromApiJsonHelper.toJson(repaymentReminderData), "PENDING", context.authenticatedUser().getId(),
-                                officeId,this.env.getProperty("fineract.activemq.loanRepaymentReminderQueue"));
+                                officeId, this.env.getProperty("fineract.activemq.loanRepaymentReminderQueue"));
                     }
 
                 } else {
@@ -396,7 +396,5 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         }
         return user;
     }
-
-
 
 }

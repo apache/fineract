@@ -153,7 +153,6 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
-import org.apache.fineract.portfolio.loanaccount.data.LoanMessageRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
@@ -198,6 +197,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFou
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentConfirmationData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -961,14 +961,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
         }
-        LoanMessageRepaymentReminderData data = new LoanMessageRepaymentReminderData();
-        data.setLoanId(1L);
-        data.setClientName("Sample Client");
+        try {
+            final LoanRepaymentConfirmationData repaymentConfirmationData = loanReadPlatformService
+                    .generateLoanPaymentReceipt(loanTransaction.getId());
 
-
-        activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepayment", loanTransaction.getId(),
-                this.fromApiJsonHelper.toJson(data), "PENDING", context.authenticatedUser().getId(),
-                1L,this.env.getProperty("fineract.activemq.loanRepaymentConfirmationQueue"));
+            activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepaymentConfirmation",
+                    repaymentConfirmationData.getTransactionId(), this.fromApiJsonHelper.toJson(repaymentConfirmationData), "PENDING",
+                    context.authenticatedUser().getId(), 1L, this.env.getProperty("fineract.activemq.loanRepaymentConfirmationQueue"));
+        } catch (Exception ex) {
+            throw ex;
+            // Don't react to this exception because If messaging fails, Payments shouldn't fail
+        }
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //

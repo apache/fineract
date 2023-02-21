@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.notification.service;
 
+import static java.util.stream.Collectors.toSet;
+
+import java.util.Collection;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -26,10 +30,6 @@ import org.apache.fineract.notification.eventandlistener.NotificationEventPublis
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.springframework.stereotype.Service;
-import java.util.Collection;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
 
 @Service
 @RequiredArgsConstructor
@@ -39,8 +39,8 @@ public class ActiveMqNotificationDomainServiceImpl {
     private final NotificationEventPublisher notificationEventPublisher;
     private final AppUserRepository appUserRepository;
 
-    public void buildNotification(String permission, String objectType, Long objectIdentifier, String notificationContent,
-                                   String eventType, Long appUserId, Long officeId,String queueName) {
+    public void buildNotification(String permission, String objectType, Long objectIdentifier, String notificationContent, String eventType,
+            Long appUserId, Long officeId, String queueName) {
 
         String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
         Set<Long> userIds = getNotifiableUserIds(officeId, permission);
