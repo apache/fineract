@@ -308,7 +308,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     + " where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and c.id = ?";
             final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper, // NOSONAR
                     hierarchySearchString, hierarchySearchString, clientId);
-
             // Get client collaterals
             final Collection<ClientCollateralManagement> clientCollateralManagements = this.clientCollateralManagementRepositoryWrapper
                     .getCollateralsPerClient(clientId);
@@ -326,7 +325,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper, // NOSONAR
                     clientId);
-
             return ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
 
         } catch (final EmptyResultDataAccessException e) {
@@ -550,7 +548,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
                     firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender,
                     activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
-                    clienttype, classification, legalForm, clientNonPerson, isStaff);
+                    clienttype, classification, legalForm, clientNonPerson, isStaff, null, null, null);
 
         }
     }
@@ -577,7 +575,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final StringBuilder builder = new StringBuilder(400);
 
             builder.append(
-                    "c.id as id, c.account_no as accountNo, c.external_id as externalId, c.status_enum as statusEnum,c.sub_status as subStatus, ");
+                    "c.id as id,ctl.client_level_id clientLevelId,clv.code_value clientLevelValue,ctl.daily_withdraw_limit dailyWithDrawLimit,");
+            builder.append(" ctl.single_withdraw_limit singleWithDrawLimit, c.account_no as accountNo,");
+            builder.append(" c.external_id as externalId, c.status_enum as statusEnum,c.sub_status as subStatus,");
             builder.append(
                     "cvSubStatus.code_value as subStatusValue,cvSubStatus.code_description as subStatusDesc,c.office_id as officeId, o.name as officeName, ");
             builder.append("c.transfer_to_office_id as transferToOfficeId, transferToOffice.name as transferToOfficeName, ");
@@ -632,6 +632,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
             builder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
             builder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
+            builder.append("left join m_client_transaction_limit ctl on ctl.client_id = c.id ");
+            builder.append("left join m_code_value clv on clv.id = ctl.client_level_id ");
             builder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
             builder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
             builder.append("left join m_code_value cvSubStatus on cvSubStatus.id = c.sub_status ");
@@ -679,6 +681,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long genderId = JdbcSupport.getLong(rs, "genderId");
             final String genderValue = rs.getString("genderValue");
             final CodeValueData gender = CodeValueData.instance(genderId, genderValue);
+            final Long clientLevelId = JdbcSupport.getLong(rs, "clientLevelId");
+            final String clientLevelValue = rs.getString("clientLevelValue");
+            final CodeValueData clientLevel = CodeValueData.instance(clientLevelId, clientLevelValue);
+            final BigDecimal dailyWithDrawLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "dailyWithDrawLimit");
+            final BigDecimal singleWithDrawLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "singleWithDrawLimit");
 
             final Long clienttypeId = JdbcSupport.getLong(rs, "clienttypeId");
             final String clienttypeValue = rs.getString("clienttypeValue");
@@ -737,7 +744,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
                     firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender,
                     activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
-                    clienttype, classification, legalForm, clientNonPerson, isStaff);
+                    clienttype, classification, legalForm, clientNonPerson, isStaff, clientLevel, dailyWithDrawLimit, singleWithDrawLimit);
 
         }
     }

@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -119,10 +120,14 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     private Long clientClassificationId;
     private Long legalFormId;
     private LocalDate submittedOnDate;
-
     private final Collection<ClientBusinessOwnerData> ownersData;
-
     private Boolean isBusinessOwnerEnabled;
+
+    private final BigDecimal dailyWithdrawLimit;
+
+    private final BigDecimal singleWithdrawLimit;
+
+    private CodeValueData clientLevel;
 
     public static ClientData importClientEntityInstance(Long legalFormId, Integer rowIndex, String fullname, Long officeId,
             Long clientTypeId, Long clientClassificationId, Long staffId, Boolean active, LocalDate activationDate,
@@ -198,6 +203,9 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.id = clientId;
         this.isBusinessOwnerEnabled = false;
         this.ownersData = null;
+        this.clientLevel = null;
+        this.dailyWithdrawLimit = null;
+        this.singleWithdrawLimit = null;
     }
 
     public static ClientData importClientPersonInstance(Long legalFormId, Integer rowIndex, String firstname, String lastname,
@@ -277,6 +285,9 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.emailAddress = null;
         this.clientCollateralManagements = null;
         this.ownersData = null;
+        this.clientLevel = null;
+        this.dailyWithdrawLimit = null;
+        this.singleWithdrawLimit = null;
     }
 
     public Integer getRowIndex() {
@@ -342,7 +353,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType, clientClassification,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
                 clientNonPersonDetails, clientLegalFormOptions, familyMemberOptions, legalForm, address, isAddressEnabled, datatables,
-                isStaff, clientCollateralManagements, ownersData, isBusinessOwnerEnabled);
+                isStaff, clientCollateralManagements, ownersData, isBusinessOwnerEnabled, null, null, null);
 
     }
 
@@ -359,7 +370,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 templateData.clientClassificationOptions, templateData.clientNonPersonConstitutionOptions,
                 templateData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, templateData.clientLegalFormOptions,
                 templateData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled,
+                clientData.getClientLevel(), clientData.getDailyWithdrawLimit(), clientData.singleWithdrawLimit);
 
     }
 
@@ -377,7 +389,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions,
                 clientData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,
                 clientData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled,
+                clientData.getClientLevel(), clientData.getDailyWithdrawLimit(), clientData.singleWithdrawLimit);
 
     }
 
@@ -393,7 +406,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 clientData.clientTypeOptions, clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions,
                 clientData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,
                 clientData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled,
+                clientData.getClientLevel(), clientData.getDailyWithdrawLimit(), clientData.singleWithdrawLimit);
 
     }
 
@@ -442,7 +456,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType,
                 clientClassification, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
                 clientNonPersonMainBusinessLineOptions, clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null,
-                null, isStaff, clientCollateralManagements, null, null);
+                null, isStaff, clientCollateralManagements, null, null, null, null, null);
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
@@ -493,7 +507,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType,
                 clientClassification, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
                 clientNonPersonMainBusinessLineOptions, clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null,
-                null, isStaff, clientCollateralManagements, null, null);
+                null, isStaff, clientCollateralManagements, null, null, null, null, null);
 
     }
 
@@ -510,7 +524,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
             final CodeValueData gender, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
             final ClientTimelineData timeline, final Long savingsProductId, final String savingsProductName, final Long savingsAccountId,
             final CodeValueData clientType, final CodeValueData clientClassification, final EnumOptionData legalForm,
-            final ClientNonPersonData clientNonPerson, final Boolean isStaff) {
+            final ClientNonPersonData clientNonPerson, final Boolean isStaff, final CodeValueData clientLevel,
+            final BigDecimal dailyWithdrawLimit, final BigDecimal singleWithdrawLimit) {
 
         final Collection<OfficeData> allowedOffices = null;
         final Collection<GroupGeneralData> groups = null;
@@ -530,7 +545,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 imageId, staffId, staffName, allowedOffices, groups, staffOptions, closureReasons, genderOptions, timeline,
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, null, clientType, clientClassification,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
-                clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null, null, isStaff, null, null, null);
+                clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null, null, isStaff, null, null, null,
+                clientLevel, dailyWithdrawLimit, singleWithdrawLimit);
 
     }
 
@@ -551,7 +567,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
             final EnumOptionData legalForm, final Collection<AddressData> address, final Boolean isAddressEnabled,
             final List<DatatableData> datatables, final Boolean isStaff,
             final Set<ClientCollateralManagementData> clientCollateralManagements, final Collection<ClientBusinessOwnerData> ownersData,
-            final Boolean isBusinessOwnerEnabled) {
+            final Boolean isBusinessOwnerEnabled, final CodeValueData clientLevel, final BigDecimal dailyWithdrawLimit,
+            final BigDecimal singleWithdrawLimit) {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {
@@ -620,6 +637,9 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.clientCollateralManagements = clientCollateralManagements;
         this.isBusinessOwnerEnabled = isBusinessOwnerEnabled;
         this.ownersData = ownersData;
+        this.clientLevel = clientLevel;
+        this.dailyWithdrawLimit = dailyWithdrawLimit;
+        this.singleWithdrawLimit = singleWithdrawLimit;
     }
 
     public Long id() {
@@ -715,4 +735,15 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         return this.isAddressEnabled;
     }
 
+    public BigDecimal getDailyWithdrawLimit() {
+        return dailyWithdrawLimit;
+    }
+
+    public BigDecimal getSingleWithdrawLimit() {
+        return singleWithdrawLimit;
+    }
+
+    public CodeValueData getClientLevel() {
+        return clientLevel;
+    }
 }

@@ -425,6 +425,7 @@ public class InteropServiceImpl implements InteropService {
         boolean isDebit = request.getTransactionRole().getTransactionType().isDebit();
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
         String transferCode = request.getTransferCode();
+        boolean isTransfer = true;
 
         if (findTransaction(savingsAccount, transferCode, (isDebit ? WITHDRAWAL : DEPOSIT).getValue()) != null) {
             throw new InteropTransferAlreadyCommittedException(savingsAccount.getExternalId(), transferCode);
@@ -465,7 +466,8 @@ public class InteropServiceImpl implements InteropService {
             SavingsTransactionBooleanValues transactionValues = new SavingsTransactionBooleanValues(false, true, true, false, false);
             transaction = savingsAccountService.handleWithdrawal(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
                     instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null),
-                    transactionValues, backdatedTxnsAllowedTill, false);
+                    transactionValues, backdatedTxnsAllowedTill, isTransfer);
+
         } else {
             transaction = savingsAccountService.handleDeposit(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
                     instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null), false, true,

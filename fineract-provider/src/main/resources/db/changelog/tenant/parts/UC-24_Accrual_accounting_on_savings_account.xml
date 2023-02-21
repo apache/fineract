@@ -151,36 +151,6 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="add-loan-repayment-reminder-job">
 
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <sqlCheck expectedResult="1">
-                    SELECT COUNT(1) FROM job WHERE name = 'Loan Repayment Reminder'
-                </sqlCheck>
-            </not>
-        </preConditions>
-
-        <insert tableName="job">
-            <column name="name" value="Loan Repayment Reminder" />
-            <column name="display_name" value="Loan Repayment Reminder" />
-            <column name="cron_expression" value="0 0 22 1/1 * ? *" />
-            <column name="create_time" value="now()" />
-            <column name="task_priority" value="5" />
-            <column name="group_name" value="null" />
-            <column name="previous_run_start_time" value="null" />
-            <column name="next_run_time" value="null" />
-            <column name="job_key" value="Loan Repayment Reminder _ DEFAULT" />
-            <column name="initializing_errorlog" value="null" />
-            <column name="is_active" valueBoolean="true" />
-            <column name="currently_running" valueBoolean="false" />
-            <column name="updates_allowed" valueBoolean="true" />
-            <column name="scheduler_group" value="1" />
-            <column name="is_misfired" valueBoolean="false" />
-            <column name="node_id" value="0" />
-            <column name="is_mismatched_job" valueBoolean="false" />
-
-        </insert>
-    </changeSet>
 
 </databaseChangeLog>
