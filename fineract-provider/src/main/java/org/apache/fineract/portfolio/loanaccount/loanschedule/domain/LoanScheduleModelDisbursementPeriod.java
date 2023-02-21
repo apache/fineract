@@ -148,4 +148,9 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     public void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion) {
         return;
     }
+
+    @Override
+    public void merge(LoanScheduleModelPeriod incoming) {
+        return;
+    }
 }

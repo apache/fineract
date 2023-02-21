@@ -96,6 +96,9 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
     @Column(name = "allow_compounding_on_eod")
     private Boolean allowCompoundingOnEod;
 
+    @Column(name = "advance_payment_interest_for_exact_days_in_period")
+    private boolean advancePaymentInterestForExactDaysInPeriod;
+
     protected LoanProductInterestRecalculationDetails() {
         //
     }
@@ -120,6 +123,8 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                 .integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyIntervalParameterName);
         final boolean isArrearsBasedOnOriginalSchedule = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName);
+
+        final boolean advancePaymentInterestForExactDaysInPeriod = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.advancePaymentInterestForExactDaysInPeriodParamName);
         RecalculationFrequencyType frequencyType = RecalculationFrequencyType.fromInt(recurrenceFrequency);
         if (frequencyType.isSameAsRepayment()) {
             recurrenceInterval = 0;
@@ -166,7 +171,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                 recurrenceFrequency, recurrenceInterval, recurrenceOnNthDay, recurrenceOnDay, recurrenceOnWeekday,
                 compoundingRecurrenceFrequency, compoundingInterval, compoundingRecurrenceOnNthDay, compoundingRecurrenceOnDay,
                 compoundingRecurrenceOnWeekday, isArrearsBasedOnOriginalSchedule, preCloseInterestCalculationStrategy,
-                isCompoundingToBePostedAsTransaction, allowCompoundingOnEod);
+                isCompoundingToBePostedAsTransaction, allowCompoundingOnEod,advancePaymentInterestForExactDaysInPeriod);
     }
 
     private LoanProductInterestRecalculationDetails(final Integer interestRecalculationCompoundingMethod,
@@ -175,7 +180,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             Integer compoundingFrequencyType, Integer compoundingInterval, final Integer compoundingFrequencyNthDay,
             final Integer compoundingFrequencyOnDay, final Integer compoundingFrequencyWeekday,
             final boolean isArrearsBasedOnOriginalSchedule, final Integer preCloseInterestCalculationStrategy,
-            final boolean isCompoundingToBePostedAsTransaction, final boolean allowCompoundingOnEod) {
+            final boolean isCompoundingToBePostedAsTransaction, final boolean allowCompoundingOnEod, final  boolean advancePaymentInterestForExactDaysInPeriod) {
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
         this.restFrequencyType = restFrequencyType;
@@ -192,6 +197,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         this.preClosureInterestCalculationStrategy = preCloseInterestCalculationStrategy;
         this.isCompoundingToBePostedAsTransaction = isCompoundingToBePostedAsTransaction;
         this.allowCompoundingOnEod = allowCompoundingOnEod;
+        this.advancePaymentInterestForExactDaysInPeriod = advancePaymentInterestForExactDaysInPeriod;
     }
 
     public void updateProduct(final LoanProduct loanProduct) {
@@ -406,6 +412,14 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             this.isCompoundingToBePostedAsTransaction = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.advancePaymentInterestForExactDaysInPeriodParamName,
+                this.advancePaymentInterestForExactDaysInPeriod)) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.advancePaymentInterestForExactDaysInPeriodParamName);
+            actualChanges.put(LoanProductConstants.advancePaymentInterestForExactDaysInPeriodParamName, newValue);
+            this.advancePaymentInterestForExactDaysInPeriod = newValue;
+        }
+
     }
 
     public RecalculationFrequencyType getRestFrequencyType() {
@@ -462,5 +476,9 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
 
     public Boolean allowCompoundingOnEod() {
         return this.allowCompoundingOnEod;
+    }
+
+    public boolean isAdvancePaymentInterestForExactDaysInPeriod() {
+        return advancePaymentInterestForExactDaysInPeriod;
     }
 }

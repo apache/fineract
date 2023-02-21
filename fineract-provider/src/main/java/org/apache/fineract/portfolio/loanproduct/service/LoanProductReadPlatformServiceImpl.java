@@ -217,6 +217,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lpr.compounding_frequency_on_day as compoundingFrequencyOnDay, "
                     + "lpr.is_compounding_to_be_posted_as_transaction as isCompoundingToBePostedAsTransaction, "
                     + "lpr.allow_compounding_on_eod as allowCompoundingOnEod, " + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
+                    + "lpr.advance_payment_interest_for_exact_days_in_period as advancePaymentInterestForExactDaysInPeriod,"
                     + "lp.principal_threshold_for_last_installment as principalThresholdForLastInstallment, "
                     + "lp.fixed_principal_percentage_per_installment fixedPrincipalPercentagePerInstallment, "
                     + "lp.sync_expected_with_disbursement_date as syncExpectedWithDisbursementDate, "
@@ -427,11 +428,12 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                         .preCloseInterestCalculationStrategy(preCloseInterestCalculationStrategyEnumValue);
                 final boolean allowCompoundingOnEod = rs.getBoolean("allowCompoundingOnEod");
 
+                boolean advancePaymentInterestForExactDaysInPeriod = rs.getBoolean("advancePaymentInterestForExactDaysInPeriod");
                 interestRecalculationData = new LoanProductInterestRecalculationData(lprId, productId, interestRecalculationCompoundingType,
                         rescheduleStrategyType, restFrequencyType, restFrequencyInterval, restFrequencyNthDayEnum, restFrequencyWeekDayEnum,
                         restFrequencyOnDay, compoundingFrequencyType, compoundingInterval, compoundingFrequencyNthDayEnum,
                         compoundingFrequencyWeekDayEnum, compoundingFrequencyOnDay, isArrearsBasedOnOriginalSchedule,
-                        isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, allowCompoundingOnEod);
+                        isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, allowCompoundingOnEod,advancePaymentInterestForExactDaysInPeriod);
             }
 
             final boolean amortization = rs.getBoolean("amortizationBoolean");

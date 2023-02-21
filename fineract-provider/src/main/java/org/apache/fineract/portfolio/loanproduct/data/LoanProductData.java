@@ -1187,7 +1187,7 @@ public class LoanProductData implements Serializable {
                 getInterestRecalculationRestOnDayType(), compoundingCalendarData, getRecalculationCompoundingFrequencyType(),
                 getRecalculationCompoundingFrequencyInterval(), getInterestRecalculationCompoundingNthDayType(),
                 getInterestRecalculationCompoundingWeekDayType(), getInterestRecalculationCompoundingOnDayType(),
-                isCompoundingToBePostedAsTransaction(), allowCompoundingOnEod());
+                isCompoundingToBePostedAsTransaction(), allowCompoundingOnEod(),isAdvancePaymentInterestForExactDaysInPeriod());
     }
 
     private EnumOptionData getRescheduleStrategyType() {
@@ -1282,6 +1282,11 @@ public class LoanProductData implements Serializable {
     @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
     public Boolean allowCompoundingOnEod() {
         return isInterestRecalculationEnabled() ? this.interestRecalculationData.allowCompoundingOnEod() : null;
+    }
+
+    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
+    public Boolean isAdvancePaymentInterestForExactDaysInPeriod() {
+        return isInterestRecalculationEnabled() ? this.interestRecalculationData.isAdvancePaymentInterestForExactDaysInPeriod() : null;
     }
 
     public boolean canDefineInstallmentAmount() {
