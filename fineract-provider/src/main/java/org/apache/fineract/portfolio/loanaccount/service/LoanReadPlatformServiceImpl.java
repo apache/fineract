@@ -173,6 +173,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanTransactionRelationRepository loanTransactionRelationRepository;
     private final LoanTransactionRelationMapper loanTransactionRelationMapper;
+    private final LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService;
 
     @Override
     public LoanAccountData retrieveOne(final Long loanId) {
@@ -284,6 +285,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             for (LoanTransactionData loanTransaction : loanTransactionData) {
                 loanTransaction
                         .setLoanTransactionRelations(this.retrieveLoanTransactionRelationsByLoanTransactionId(loanTransaction.getId()));
+                loanTransaction.setLoanChargePaidByList(
+                        loanChargePaidByReadPlatformService.getLoanChargesPaidByTransactionId(loanTransaction.getId()));
             }
             return loanTransactionData;
         } catch (final EmptyResultDataAccessException e) {
