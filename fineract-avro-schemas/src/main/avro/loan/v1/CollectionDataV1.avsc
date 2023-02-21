@@ -66,6 +66,22 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "lastRepaymentDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "lastRepaymentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
         }
     ]
 }

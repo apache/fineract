@@ -979,6 +979,11 @@ final class LoansApiResourceSwagger {
             public LocalDate lastPaymentDate;
             @Schema(example = "100.000000")
             public Double lastPaymentAmount;
+
+            @Schema(example = "[2022, 07, 01]")
+            public LocalDate lastRepaymentDate;
+            @Schema(example = "100.000000")
+            public Double lastRepaymentAmount;
         }
 
         @Schema(example = "1")

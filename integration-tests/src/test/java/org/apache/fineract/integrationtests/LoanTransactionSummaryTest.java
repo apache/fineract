@@ -224,7 +224,7 @@ public class LoanTransactionSummaryTest {
                         .transactionAmount(20.0));
 
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
                         .transactionAmount(100.0));
 
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -234,8 +234,11 @@ public class LoanTransactionSummaryTest {
         // Retrieve Loan with loanId
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
 
-        assertEquals(100.0, loanDetails.getDelinquent().getLastPaymentAmount());
+        assertEquals(20.0, loanDetails.getDelinquent().getLastPaymentAmount());
         assertEquals(LocalDate.of(2022, 9, 8), loanDetails.getDelinquent().getLastPaymentDate());
+
+        assertEquals(100.0, loanDetails.getDelinquent().getLastRepaymentAmount());
+        assertEquals(LocalDate.of(2022, 9, 7), loanDetails.getDelinquent().getLastRepaymentDate());
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,

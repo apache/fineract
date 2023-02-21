@@ -115,7 +115,8 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         LocalDate overDueSinceDate = DateUtils.getBusinessLocalDate().minusDays(2);
         LoanScheduleDelinquencyData loanScheduleDelinquencyData = new LoanScheduleDelinquencyData(1L, overDueSinceDate, 1L,
                 loanForProcessing);
-        CollectionData collectionData = new CollectionData(BigDecimal.ZERO, 2L, null, 2L, overDueSinceDate, BigDecimal.ZERO, null, null);
+        CollectionData collectionData = new CollectionData(BigDecimal.ZERO, 2L, null, 2L, overDueSinceDate, BigDecimal.ZERO, null, null,
+                null, null);
 
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getDelinquencyBucket()).thenReturn(delinquencyBucket);

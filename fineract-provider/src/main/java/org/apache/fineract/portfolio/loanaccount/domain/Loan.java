@@ -3217,7 +3217,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             addLoanTransaction(loanTransaction);
         }
 
-        if (loanTransaction.isNotRepaymentType() && loanTransaction.isNotWaiver() && loanTransaction.isNotRecoveryRepayment()) {
+        if (loanTransaction.isNotRepaymentLikeType() && loanTransaction.isNotWaiver() && loanTransaction.isNotRecoveryRepayment()) {
             final String errorMessage = "A transaction of type repayment or recovery repayment or waiver was expected but not received.";
             throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.or.waiver.or.recovery.transaction",
                     errorMessage);
@@ -3604,7 +3604,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         final LocalDate currentTransactionDate = loanTransaction.getTransactionDate();
         for (final LoanTransaction previousTransaction : loanTransactions) {
-            if (previousTransaction.isRepaymentType() && previousTransaction.isNotReversed()
+            if (previousTransaction.isRepaymentLikeType() && previousTransaction.isNotReversed()
                     && currentTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
                 isAfterLatRepayment = false;
                 break;
@@ -3642,7 +3642,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isRepaymentType() && transaction.isNonZero()) {
+            if (transaction.isRepaymentLikeType() && transaction.isNonZero()) {
                 lastTransactionDate = transaction.getTransactionDate();
             }
         }
@@ -3714,7 +3714,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
                 transactionForAdjustment.getTransactionDate());
 
-        if (transactionForAdjustment.isNotRepaymentType() && transactionForAdjustment.isNotWaiver()
+        if (transactionForAdjustment.isNotRepaymentLikeType() && transactionForAdjustment.isNotWaiver()
                 && transactionForAdjustment.isNotCreditBalanceRefund()) {
             final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver or credit balance refund can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
@@ -3734,7 +3734,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_ADJUST_TRANSACTION, this);
         }
 
-        if (newTransactionDetail.isRepaymentType() || newTransactionDetail.isInterestWaiver()) {
+        if (newTransactionDetail.isRepaymentLikeType() || newTransactionDetail.isInterestWaiver()) {
             changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
                     transactionForAdjustment, scheduleGeneratorDTO);
         }
@@ -4227,7 +4227,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         Money cumulativePaid = Money.zero(loanCurrency());
 
         for (final LoanTransaction repayment : this.loanTransactions) {
-            if (repayment.isRepaymentType() && !repayment.isReversed()) {
+            if (repayment.isRepaymentLikeType() && !repayment.isReversed()) {
                 cumulativePaid = cumulativePaid.plus(repayment.getAmount(loanCurrency()));
             }
         }
@@ -4550,7 +4550,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     && !transaction.getTransactionDate().isAfter(tillDate)) {
                 if (transaction.isAccrual()) {
                     receivableInterest = receivableInterest.plus(transaction.getInterestPortion(getCurrency()));
-                } else if (transaction.isRepaymentType() || transaction.isInterestWaiver()) {
+                } else if (transaction.isRepaymentLikeType() || transaction.isInterestWaiver()) {
                     receivableInterest = receivableInterest.minus(transaction.getInterestPortion(getCurrency()));
                 }
             }
@@ -4942,7 +4942,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void validateRepaymentTypeTransactionNotBeforeAChargeRefund(final LoanTransaction repaymentTransaction,
             final String reversedOrCreated) {
-        if (repaymentTransaction.isRepaymentType() && !repaymentTransaction.isChargeRefund()) {
+        if (repaymentTransaction.isRepaymentLikeType() && !repaymentTransaction.isChargeRefund()) {
             for (LoanTransaction txn : this.getLoanTransactions()) {
                 if (txn.isChargeRefund() && repaymentTransaction.getTransactionDate().isBefore(txn.getTransactionDate())) {
                     final String errorMessage = "loan.transaction.cant.be." + reversedOrCreated + ".because.later.charge.refund.exists";
@@ -4968,17 +4968,25 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public LocalDate getLastRepaymentDate() {
         LocalDate currentTransactionDate = getDisbursementDate();
         for (final LoanTransaction previousTransaction : this.loanTransactions) {
-            if (previousTransaction.isRepaymentType() && currentTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
+            if (previousTransaction.isRepaymentLikeType() && currentTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
                 currentTransactionDate = previousTransaction.getTransactionDate();
             }
         }
         return currentTransactionDate;
     }
 
+    public LoanTransaction getLastPaymentTransaction() {
+        return loanTransactions.stream() //
+                .filter(loanTransaction -> !loanTransaction.isReversed()) //
+                .filter(LoanTransaction::isRepaymentLikeType) //
+                .reduce((first, second) -> second) //
+                .orElse(null);
+    }
+
     public LoanTransaction getLastRepaymentTransaction() {
         return loanTransactions.stream() //
                 .filter(loanTransaction -> !loanTransaction.isReversed()) //
-                .filter(LoanTransaction::isRepaymentType) //
+                .filter(LoanTransaction::isRepayment) //
                 .reduce((first, second) -> second) //
                 .orElse(null);
     }
@@ -6300,7 +6308,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if ((transaction.isRepaymentType() || transaction.isRefundForActiveLoan() || transaction.isCreditBalanceRefund())
+            if ((transaction.isRepaymentLikeType() || transaction.isRefundForActiveLoan() || transaction.isCreditBalanceRefund())
                     && transaction.isNonZero() && transaction.isNotReversed()) {
                 lastTransactionDate = transaction.getTransactionDate();
             }
@@ -6349,8 +6357,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         loanTransactions = retrieveListOfTransactionsExcludeAccruals();
         Collections.reverse(loanTransactions);
         for (final LoanTransaction previousTransaction : loanTransactions) {
-            if (lastTransactionDate.isBefore(previousTransaction.getTransactionDate())
-                    && (previousTransaction.isRepaymentType() || previousTransaction.isWaiver() || previousTransaction.isChargePayment())) {
+            if (lastTransactionDate.isBefore(previousTransaction.getTransactionDate()) && (previousTransaction.isRepaymentLikeType()
+                    || previousTransaction.isWaiver() || previousTransaction.isChargePayment())) {
                 throw new UndoLastTrancheDisbursementException(previousTransaction.getId());
             }
             if (previousTransaction.getId().compareTo(lastDisbursalTransaction.getId()) < 0) {
@@ -6673,7 +6681,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     receivableInterest = receivableInterest.plus(transaction.getInterestPortion(currency));
                     receivableFee = receivableFee.plus(transaction.getFeeChargesPortion(currency));
                     receivablePenalty = receivablePenalty.plus(transaction.getPenaltyChargesPortion(currency));
-                } else if (transaction.isRepaymentType() || transaction.isChargePayment()) {
+                } else if (transaction.isRepaymentLikeType() || transaction.isChargePayment()) {
                     receivableInterest = receivableInterest.minus(transaction.getInterestPortion(currency));
                     receivableFee = receivableFee.minus(transaction.getFeeChargesPortion(currency));
                     receivablePenalty = receivablePenalty.minus(transaction.getPenaltyChargesPortion(currency));

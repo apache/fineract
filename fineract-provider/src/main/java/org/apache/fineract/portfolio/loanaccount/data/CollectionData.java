@@ -40,9 +40,12 @@ public final class CollectionData {
     private LocalDate lastPaymentDate;
     private BigDecimal lastPaymentAmount;
 
+    private LocalDate lastRepaymentDate;
+    private BigDecimal lastRepaymentAmount;
+
     public static CollectionData template() {
         final BigDecimal zero = BigDecimal.ZERO;
-        return new CollectionData(zero, 0L, null, 0L, null, zero, null, zero);
+        return new CollectionData(zero, 0L, null, 0L, null, zero, null, zero, null, zero);
     }
 
 }
