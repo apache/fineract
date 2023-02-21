@@ -2418,10 +2418,26 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             sqlBuilder.append(sqlGenerator.charDistinct("l.id", "as loanId, "));
             sqlBuilder.append(
                     " COALESCE(mc.id,null) as clientId,COALESCE(grp.id,null) as groupId,mpl.id as loanProductId,sch.id as loanScheduleId, ");
+            sqlBuilder.append(" sch.duedate as dueDate,sch.installment as installmentNumber, ");
+
             sqlBuilder.append(
-                    " sch.duedate as dueDate,sch.installment as installmentNumber, sch.principal_amount as principalAmountOutStanding,sch.interest_amount as interestAmountOutStanding,sch.fee_charges_amount as feesChargeAmountOutStanding, ");
+                    " (COALESCE(sch.principal_amount, 0.0) - (COALESCE(sch.principal_completed_derived, 0.0) + COALESCE(sch.principal_writtenoff_derived, 0.0)))   as principalAmountOutStanding, ");
             sqlBuilder.append(
-                    " sch.penalty_charges_amount as penaltyChargeAmountOutStanding,(COALESCE(sch.principal_amount,0.0)+ COALESCE(sch.interest_amount,0.0)+ COALESCE(sch.fee_charges_amount,0.0)+ COALESCE(sch.penalty_charges_amount,0.0)) AS totalAmountOutStanding, ");
+                    " (COALESCE(sch.interest_amount, 0.0) - (COALESCE(sch.interest_completed_derived, 0.0) + COALESCE(sch.interest_waived_derived, 0.0) +COALESCE(sch.interest_writtenoff_derived, 0.0)))  as interestAmountOutStanding, ");
+            sqlBuilder.append(
+                    " (COALESCE(sch.fee_charges_amount, 0.0) - (COALESCE(sch.fee_charges_completed_derived, 0.0) + COALESCE(sch.fee_charges_waived_derived, 0.0) +COALESCE(sch.fee_charges_writtenoff_derived, 0.0)))   as feesChargeAmountOutStanding, ");
+            sqlBuilder.append(
+                    " (COALESCE(sch.penalty_charges_amount, 0.0) - (COALESCE(sch.penalty_charges_amount, 0.0) + COALESCE(sch.penalty_charges_waived_derived, 0.0) +COALESCE(sch.penalty_charges_writtenoff_derived, 0.0)))   as penaltyChargeAmountOutStanding, ");
+
+            sqlBuilder.append(
+                    " ((COALESCE(sch.principal_amount, 0.0) - (COALESCE(sch.principal_completed_derived, 0.0) + COALESCE(sch.principal_writtenoff_derived, 0.0))) + ");
+            sqlBuilder.append(
+                    " (COALESCE(sch.interest_amount, 0.0) - (COALESCE(sch.interest_completed_derived, 0.0) + COALESCE(sch.interest_waived_derived, 0.0) +COALESCE(sch.interest_writtenoff_derived, 0.0))) + ");
+            sqlBuilder.append(
+                    " (COALESCE(sch.fee_charges_amount, 0.0) - (COALESCE(sch.fee_charges_completed_derived, 0.0) + COALESCE(sch.fee_charges_waived_derived, 0.0) +COALESCE(sch.fee_charges_writtenoff_derived, 0.0))) + ");
+            sqlBuilder.append(
+                    " (COALESCE(sch.penalty_charges_amount, 0.0) - (COALESCE(sch.penalty_charges_amount, 0.0) + COALESCE(sch.penalty_charges_waived_derived, 0.0) +COALESCE(sch.penalty_charges_writtenoff_derived, 0.0))))  AS totalAmountOutStanding, ");
+
             sqlBuilder.append(
                     " mpl.name productName, mc.display_name as clientName, grp.display_name as groupName,aging.total_overdue_derived    as totalOverdueAmount ");
             sqlBuilder.append(

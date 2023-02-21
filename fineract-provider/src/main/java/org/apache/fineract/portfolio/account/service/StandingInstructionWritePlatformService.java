@@ -32,4 +32,6 @@ public interface StandingInstructionWritePlatformService {
 
     CommandProcessingResult delete(Long id);
 
+    void sendNotificationForFailedStandingInstructions() throws JobExecutionException;
+
 }

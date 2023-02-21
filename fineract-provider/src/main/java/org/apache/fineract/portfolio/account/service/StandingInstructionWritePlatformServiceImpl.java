@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -37,16 +38,22 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformService
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.data.NotificationData;
+import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
+import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDataValidator;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
+import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetailRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
@@ -64,6 +71,7 @@ import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanc
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -81,18 +89,25 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final StandingInstructionRepository standingInstructionRepository;
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
+    private final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final PlatformSecurityContext context;
+    private final NotificationEventPublisher notificationEventPublisher;
+    private final Environment env;
 
     @Autowired
-    public StandingInstructionWritePlatformServiceImpl(final StandingInstructionDataValidator standingInstructionDataValidator,
+    public StandingInstructionWritePlatformServiceImpl(PlatformSecurityContext context,
+            final StandingInstructionDataValidator standingInstructionDataValidator,
             final StandingInstructionAssembler standingInstructionAssembler,
             final AccountTransferDetailRepository accountTransferDetailRepository,
             final StandingInstructionRepository standingInstructionRepository,
             final StandingInstructionReadPlatformService standingInstructionReadPlatformService,
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService, final JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
+            DatabaseSpecificSQLGenerator sqlGenerator,
+            final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService,
+            final NotificationEventPublisher notificationEventPublisher, final Environment env) {
         this.standingInstructionDataValidator = standingInstructionDataValidator;
         this.standingInstructionAssembler = standingInstructionAssembler;
         this.accountTransferDetailRepository = accountTransferDetailRepository;
@@ -101,6 +116,10 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
         this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
+        this.standingInstructionHistoryReadPlatformService = standingInstructionHistoryReadPlatformService;
+        this.context = context;
+        this.notificationEventPublisher = notificationEventPublisher;
+        this.env = env;
     }
 
     @Transactional
@@ -189,6 +208,50 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         final Map<String, Object> actualChanges = new HashMap<>();
         actualChanges.put(statusParamName, StandingInstructionStatus.DELETED.getValue());
         return new CommandProcessingResultBuilder().withEntityId(id).with(actualChanges).build();
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.NOTIFY_FAILED_STANDING_INSTRUCTIONS)
+    public void sendNotificationForFailedStandingInstructions() throws JobExecutionException {
+        LOG.info("Sending notification for failed SI with Insufficient Balance");
+
+        /// get all the standing instruction failed with insufficient balance
+        StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(null, null, null, null, null, null, null, null);
+        Collection<StandingInstructionHistoryData> standingInstructionHistoryDataCollection = this.standingInstructionHistoryReadPlatformService
+                .retrieveAllFailedWithInsufficientBalance(standingInstructionDTO);
+
+        if (CollectionUtils.isNotEmpty(standingInstructionHistoryDataCollection)) {
+            for (StandingInstructionHistoryData standingInstructionHistoryData : standingInstructionHistoryDataCollection) {
+                /// create and send the data for notification message - loan account, saving account id, client name
+                String notificationContent = String.format(
+                        "Standing Instruction to transfer Amount: %s to  ToAccount: %s is failed due to insufficient fund in FromAccount: %s.",
+                        standingInstructionHistoryData.getAmount(), standingInstructionHistoryData.getToAccount().accountId(),
+                        standingInstructionHistoryData.getFromAccount().accountId());
+                buildNotification("Standing Instruction", standingInstructionHistoryData.getStandingInstructionId(), notificationContent,
+                        "standingInstructionFailed", context.authenticatedUser().getId(),
+                        standingInstructionHistoryData.getToClient().getId());
+
+                // update the notification_sent flag in Standing Instruction History to indicate notification has been
+                // sent
+                final String updateQuery = "UPDATE m_account_transfer_standing_instructions_history SET is_notification_sent = ? where standing_instruction_id = ?";
+                this.jdbcTemplate.update(updateQuery, true, standingInstructionHistoryData.getStandingInstructionId());
+            }
+        }
+    }
+
+    private void buildNotification(String objectType, Long objectIdentifier, String notificationContent, String eventType, Long appUserId,
+            Long officeId) {
+
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
+                false, false, tenantIdentifier, officeId, null);
+        try {
+            notificationEventPublisher.broadcastGenericActiveMqNotification(notificationData,
+                    env.getProperty("fineract.activemq.standingInstructionInsufficientBalanceFailureQueue"));
+        } catch (Exception e) {
+            // We want to avoid rethrowing the exception to stop the business transaction from rolling back
+            LOG.error("Error while broadcasting notification event", e);
+        }
     }
 
     @Override

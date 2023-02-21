@@ -22,11 +22,17 @@ import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentReminderSettingsData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LoanRepaymentReminderSettingsRepository
         extends JpaRepository<LoanRepaymentReminderSettingsData, Long>, JpaSpecificationExecutor<LoanRepaymentReminderSettingsData> {
 
-    @Query(value = "SELECT rs.id as id, rs.number_of_days_to_due_date AS days FROM loan_repayment_reminder_settings rs", nativeQuery = true)
+    @Query(value = "SELECT rs.id as id, rs.number_of_days_to_due_date AS days ,rs.batch_id  AS batch FROM loan_repayment_reminder_settings rs", nativeQuery = true)
     List<LoanRepaymentReminderSettingsData> findLoanRepaymentReminderSettings();
+
+    @Modifying
+    @Query(value = "UPDATE loan_repayment_reminder_settings SET batch_id = ?1 WHERE id = ?2", nativeQuery = true)
+    void updateLoanRepaymentReminderSettingsBatchId(@Param("batchId") String batchId, @Param("settingId") Long settingId);
 }
