@@ -361,7 +361,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     public StandingInstructionDuesData retriveLoanDuesData(final Long loanId) {
         final StandingInstructionLoanDuesMapper rm = new StandingInstructionLoanDuesMapper();
         final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= " + sqlGenerator.currentBusinessDate()
-                + " and ls.completed_derived <> 1";
+                + " and ls.completed_derived <> true";
         return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
