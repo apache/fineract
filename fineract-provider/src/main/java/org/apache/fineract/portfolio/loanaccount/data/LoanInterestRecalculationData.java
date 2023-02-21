@@ -46,6 +46,8 @@ public class LoanInterestRecalculationData {
     private final CalendarData compoundingCalendarData;
     private final Boolean allowCompoundingOnEod;
 
+    private final boolean advancePaymentInterestForExactDaysInPeriod;
+
     public LoanInterestRecalculationData(final Long id, final Long loanId, final EnumOptionData interestRecalculationCompoundingType,
             final EnumOptionData rescheduleStrategyType, final CalendarData calendarData,
             final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
@@ -54,7 +56,7 @@ public class LoanInterestRecalculationData {
             final EnumOptionData recalculationCompoundingFrequencyType, final Integer recalculationCompoundingFrequencyInterval,
             final EnumOptionData recalculationCompoundingFrequencyNthDay, final EnumOptionData recalculationCompoundingFrequencyWeekday,
             final Integer recalculationCompoundingFrequencyOnDay, final Boolean isCompoundingToBePostedAsTransaction,
-            final Boolean allowCompoundingOnEod) {
+            final Boolean allowCompoundingOnEod,final boolean advancePaymentInterestForExactDaysInPeriod) {
         this.id = id;
         this.loanId = loanId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;
@@ -73,6 +75,7 @@ public class LoanInterestRecalculationData {
         this.compoundingCalendarData = compoundingCalendarData;
         this.isCompoundingToBePostedAsTransaction = isCompoundingToBePostedAsTransaction;
         this.allowCompoundingOnEod = allowCompoundingOnEod;
+        this.advancePaymentInterestForExactDaysInPeriod = advancePaymentInterestForExactDaysInPeriod;
     }
 
     public static LoanInterestRecalculationData withCalendarData(final LoanInterestRecalculationData recalculationData,
@@ -85,7 +88,7 @@ public class LoanInterestRecalculationData {
                 recalculationData.recalculationCompoundingFrequencyType, recalculationData.recalculationCompoundingFrequencyInterval,
                 recalculationData.recalculationCompoundingFrequencyNthDay, recalculationData.recalculationCompoundingFrequencyWeekday,
                 recalculationData.recalculationCompoundingFrequencyOnDay, recalculationData.isCompoundingToBePostedAsTransaction,
-                recalculationData.allowCompoundingOnEod);
+                recalculationData.allowCompoundingOnEod,recalculationData.advancePaymentInterestForExactDaysInPeriod);
     }
 
     public Long getId() {

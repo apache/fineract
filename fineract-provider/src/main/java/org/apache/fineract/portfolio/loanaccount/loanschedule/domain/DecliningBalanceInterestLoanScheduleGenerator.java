@@ -66,63 +66,68 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
 
         LocalDate interestStartDate = periodStartDate;
         Money interestForThisInstallment = totalCumulativePrincipal.zero();
-        Money compoundedInterest = totalCumulativePrincipal.zero();
         Money balanceForInterestCalculation = outstandingBalance;
         Money cumulatingInterestDueToGrace = cumulatingInterestPaymentDueToGrace;
-        Map<LocalDate, BigDecimal> interestRates = new HashMap<>(termVariations.size());
 
-        for (LoanTermVariationsData loanTermVariation : termVariations) {
-            if (loanTermVariation.getTermVariationType().isInterestRateVariation()
-                    && loanTermVariation.isApplicable(periodStartDate, periodEndDate)) {
-                LocalDate fromDate = loanTermVariation.getTermApplicableFrom();
-                if (fromDate == null) {
-                    fromDate = periodStartDate;
-                }
-                interestRates.put(fromDate, loanTermVariation.getDecimalValue());
-                if (!principalVariation.containsKey(fromDate)) {
-                    principalVariation.put(fromDate, balanceForInterestCalculation.zero());
+
+        if(!loanApplicationTerms.isAdvancePaymentInterestForExactDaysInPeriodEnabled()) {
+            Money compoundedInterest = totalCumulativePrincipal.zero();
+            Map<LocalDate, BigDecimal> interestRates = new HashMap<>(termVariations.size());
+
+            for (LoanTermVariationsData loanTermVariation : termVariations) {
+                if (loanTermVariation.getTermVariationType().isInterestRateVariation()
+                        && loanTermVariation.isApplicable(periodStartDate, periodEndDate)) {
+                    LocalDate fromDate = loanTermVariation.getTermApplicableFrom();
+                    if (fromDate == null) {
+                        fromDate = periodStartDate;
+                    }
+                    interestRates.put(fromDate, loanTermVariation.getDecimalValue());
+                    if (!principalVariation.containsKey(fromDate)) {
+                        principalVariation.put(fromDate, balanceForInterestCalculation.zero());
+                    }
                 }
             }
-        }
 
-        if (principalVariation != null) {
+            if (principalVariation != null) {
 
-            for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
+                for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
 
-                if (!principal.getKey().isAfter(periodEndDate)) {
-                    int interestForDays = Math.toIntExact(ChronoUnit.DAYS.between(interestStartDate, principal.getKey()));
-                    if (interestForDays > 0) {
-                        final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
-                                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,
-                                balanceForInterestCalculation, interestStartDate, principal.getKey());
-                        interestForThisInstallment = interestForThisInstallment.plus(result.interest());
-                        cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
-                        interestStartDate = principal.getKey();
+                    if (!principal.getKey().isAfter(periodEndDate)) {
+                        int interestForDays = Math.toIntExact(ChronoUnit.DAYS.between(interestStartDate, principal.getKey()));
+                        if (interestForDays > 0) {
+                            final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
+                                    interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,
+                                    balanceForInterestCalculation, interestStartDate, principal.getKey());
+                            interestForThisInstallment = interestForThisInstallment.plus(result.interest());
+                            cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
+                            interestStartDate = principal.getKey();
 
-                    }
-                    Money compoundFee = totalCumulativePrincipal.zero();
-                    if (compoundingMap.containsKey(principal.getKey())) {
-                        Money interestToBeCompounded = totalCumulativePrincipal.zero();
-                        // for interest compounding
-                        if (loanApplicationTerms.getInterestRecalculationCompoundingMethod().isInterestCompoundingEnabled()) {
-                            interestToBeCompounded = interestForThisInstallment.minus(compoundedInterest);
-                            balanceForInterestCalculation = balanceForInterestCalculation.plus(interestToBeCompounded);
-                            compoundedInterest = interestForThisInstallment;
                         }
-                        // fee compounding will be done after calculation
-                        compoundFee = compoundingMap.get(principal.getKey());
-                        compoundingMap.put(principal.getKey(), interestToBeCompounded.plus(compoundFee));
-                    }
-                    if (!loanApplicationTerms.isPrincipalCompoundingDisabledForOverdueLoans()) {
-                        balanceForInterestCalculation = balanceForInterestCalculation.plus(principal.getValue());
-                    }
-                    balanceForInterestCalculation = balanceForInterestCalculation.plus(compoundFee);
+                        Money compoundFee = totalCumulativePrincipal.zero();
+                        if (compoundingMap.containsKey(principal.getKey())) {
+                            Money interestToBeCompounded = totalCumulativePrincipal.zero();
+                            // for interest compounding
+                            if (loanApplicationTerms.getInterestRecalculationCompoundingMethod().isInterestCompoundingEnabled()) {
+                                interestToBeCompounded = interestForThisInstallment.minus(compoundedInterest);
+                                balanceForInterestCalculation = balanceForInterestCalculation.plus(interestToBeCompounded);
+                                compoundedInterest = interestForThisInstallment;
+                            }
+                            // fee compounding will be done after calculation
+                            compoundFee = compoundingMap.get(principal.getKey());
+                            compoundingMap.put(principal.getKey(), interestToBeCompounded.plus(compoundFee));
+                        }
+                        if (!loanApplicationTerms.isPrincipalCompoundingDisabledForOverdueLoans()) {
+                            balanceForInterestCalculation = balanceForInterestCalculation.plus(principal.getValue());
+                        }
+                        balanceForInterestCalculation = balanceForInterestCalculation.plus(compoundFee);
 
-                    if (interestRates.containsKey(principal.getKey())) {
-                        loanApplicationTerms.updateAnnualNominalInterestRate(interestRates.get(principal.getKey()));
+                        if (interestRates.containsKey(principal.getKey())) {
+                            loanApplicationTerms.updateAnnualNominalInterestRate(interestRates.get(principal.getKey()));
+                        }
                     }
                 }
             }
+
         }
 
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,

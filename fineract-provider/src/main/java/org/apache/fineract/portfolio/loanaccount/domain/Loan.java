@@ -5664,6 +5664,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
         boolean allowCompoundingOnEod = false;
+        boolean advancePaymentInterestForExactDaysInPeriod = false;
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             restCalendarInstance = scheduleGeneratorDTO.getCalendarInstanceForInterestRecalculation();
             compoundingCalendarInstance = scheduleGeneratorDTO.getCompoundingCalendarInstance();
@@ -5673,6 +5674,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             rescheduleStrategyMethod = this.loanInterestRecalculationDetails.getRescheduleStrategyMethod();
             allowCompoundingOnEod = this.loanInterestRecalculationDetails.allowCompoundingOnEod();
             calendarHistoryDataWrapper = scheduleGeneratorDTO.getCalendarHistoryDataWrapper();
+            advancePaymentInterestForExactDaysInPeriod = this.loanInterestRecalculationDetails.isAdvancePaymentInterestForExactDaysInPeriod();
         }
         calendar = scheduleGeneratorDTO.getCalendar();
         calendarHistoryDataWrapper = scheduleGeneratorDTO.getCalendarHistoryDataWrapper();
@@ -5697,7 +5699,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 calendarHistoryDataWrapper, scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(),
                 holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
                 scheduleGeneratorDTO.isInterestToBeRecoveredFirstWhenGreaterThanEMI(), this.fixedPrincipalPercentagePerInstallment,
-                scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans());
+                scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans(),advancePaymentInterestForExactDaysInPeriod);
         return loanApplicationTerms;
     }
 
@@ -5954,12 +5956,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         RecalculationFrequencyType compoundingFrequencyType = null;
         LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         boolean allowCompoundingOnEod = false;
+        boolean advancePaymentInterestForExactDaysInPeriod = false;
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             recalculationFrequencyType = this.loanInterestRecalculationDetails.getRestFrequencyType();
             compoundingMethod = this.loanInterestRecalculationDetails.getInterestRecalculationCompoundingMethod();
             compoundingFrequencyType = this.loanInterestRecalculationDetails.getCompoundingFrequencyType();
             rescheduleStrategyMethod = this.loanInterestRecalculationDetails.getRescheduleStrategyMethod();
             allowCompoundingOnEod = this.loanInterestRecalculationDetails.allowCompoundingOnEod();
+            advancePaymentInterestForExactDaysInPeriod = this.loanInterestRecalculationDetails.isAdvancePaymentInterestForExactDaysInPeriod();
         }
 
         List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
@@ -5973,7 +5977,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, false,
-                false, this.fixedPrincipalPercentagePerInstallment, false);
+                false, this.fixedPrincipalPercentagePerInstallment, false,advancePaymentInterestForExactDaysInPeriod);
     }
 
     /**
