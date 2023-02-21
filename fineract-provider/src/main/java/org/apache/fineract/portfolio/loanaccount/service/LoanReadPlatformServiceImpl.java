@@ -105,6 +105,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentConfirmationData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -2357,6 +2358,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return repaymentReminderData;
     }
 
+    @Override
+    public LoanRepaymentConfirmationData generateLoanPaymentReceipt(Long transactionId) {
+        final LoanRepaymentConfirmationDataMapper mapper = new LoanRepaymentConfirmationDataMapper(sqlGenerator);
+        String sql = "select " + mapper.schema();
+        LoanRepaymentConfirmationData repaymentConfirmationData = this.jdbcTemplate.queryForObject(sql, mapper, transactionId);
+        return repaymentConfirmationData;
+    }
+
     private static final class CollectionDataMapper implements RowMapper<CollectionData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -2475,6 +2484,64 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return new LoanRepaymentReminderData(loanId, clientId, groupId, loanProductId, loanScheduleId, dueDate, installmentNumber,
                     principalAmountOutStanding, interestAmountOutStanding, feesChargeAmountOutStanding, penaltyChargeAmountOutStanding,
                     totalAmountOutStanding, productName, clientName, groupName, totalOverdueAmount);
+        }
+    }
+
+    private static final class LoanRepaymentConfirmationDataMapper implements RowMapper<LoanRepaymentConfirmationData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanRepaymentConfirmationDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String schema() {
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append(
+                    " tran.id AS transactionId,tran.loan_id AS loanId, tran.transaction_type_enum AS transactionTypeEnum,tran.transaction_date  AS transactionDate,tran.amount AS Amount, ");
+            sqlBuilder.append(
+                    " tran.principal_portion_derived AS principalPortionDerived, tran.interest_portion_derived AS interestPortionDerived, tran.fee_charges_portion_derived AS feeChargesPortionDerived, ");
+
+            sqlBuilder.append(
+                    " tran.penalty_charges_portion_derived AS penaltyChargePortionDerived,tran.outstanding_loan_balance_derived AS outstandingLoanBalanceDerived,tran.transaction_date AS transcactionDate, ");
+            sqlBuilder.append(" COALESCE(mc.id, null)   as clientId,COALESCE(grp.id, null)  as groupId,  mpl.id  as loanProductId, ");
+            sqlBuilder.append(
+                    " mc.display_name as clientName, grp.display_name as groupName, mpl.name productName,aging.total_overdue_derived    as totalOverdueAmount ");
+            sqlBuilder.append(
+                    " FROM m_loan_transaction tran INNER JOIN m_loan ml on tran.loan_id = ml.id INNER JOIN m_product_loan mpl on ml.product_id = mpl.id ");
+
+            sqlBuilder.append(
+                    " LEFT JOIN m_group grp on ml.group_id = grp.id  LEFT JOIN m_client mc on ml.client_id = mc.id LEFT JOIN m_loan_arrears_aging aging on ml.id = aging.loan_id ");
+            sqlBuilder.append(" WHERE tran.id = ? ");
+
+            return sqlBuilder.toString();
+        }
+
+        @Override
+        public LoanRepaymentConfirmationData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final Long transactionId = rs.getLong("transactionId");
+            final Long transactionTypeEnum = rs.getLong("transactionTypeEnum");
+            final String transactionDate = rs.getString("transactionDate");
+            final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amount");
+            final BigDecimal principalPortionDerived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPortionDerived");
+            final BigDecimal interestPortionDerived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestPortionDerived");
+            final BigDecimal feeChargesPortionDerived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesPortionDerived");
+            final BigDecimal penaltyChargePortionDerived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargePortionDerived");
+            final BigDecimal outstandingLoanBalanceDerived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs,
+                    "outstandingLoanBalanceDerived");
+            final Long clientId = rs.getLong("clientId");
+            final Long loanId = rs.getLong("loanId");
+            final Long groupId = rs.getLong("groupId");
+            final Long loanProductId = rs.getLong("loanProductId");
+            final String productName = rs.getString("productName");
+            final String clientName = rs.getString("clientName");
+            final String groupName = rs.getString("groupName");
+            final BigDecimal totalOverdueAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalOverdueAmount");
+
+            return new LoanRepaymentConfirmationData(transactionId, loanId, transactionTypeEnum, transactionDate, amount,
+                    principalPortionDerived, interestPortionDerived, feeChargesPortionDerived, penaltyChargePortionDerived,
+                    outstandingLoanBalanceDerived, clientId, groupId, loanProductId, productName, clientName, groupName,
+                    totalOverdueAmount);
         }
     }
 }

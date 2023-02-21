@@ -60,6 +60,7 @@ import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.service.ActiveMqNotificationDomainServiceImpl;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
@@ -196,6 +197,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFou
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentConfirmationData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -220,6 +222,8 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.Repaym
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -271,6 +275,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanRepository loanRepository;
     private final RepaymentWithPostDatedChecksAssembler repaymentWithPostDatedChecksAssembler;
     private final PostDatedChecksRepository postDatedChecksRepository;
+    @Autowired
+    private ActiveMqNotificationDomainServiceImpl activeMqNotificationDomainService;
+    @Autowired
+    private Environment env;
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
@@ -908,7 +916,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult makeLoanRepayment(final LoanTransactionType repaymentTransactionType, final Long loanId,
             final JsonCommand command, final boolean isRecoveryRepayment) {
-
+        final AppUser currentUser = getAppUserIfPresent();
         this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType);
         this.loanEventApiJsonValidator.validateNewRepaymentTransaction(command.json());
 
@@ -952,6 +960,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
             }
             this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
+        }
+        try {
+            final LoanRepaymentConfirmationData repaymentConfirmationData = loanReadPlatformService
+                    .generateLoanPaymentReceipt(loanTransaction.getId());
+
+            activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepaymentConfirmation",
+                    repaymentConfirmationData.getTransactionId(), this.fromApiJsonHelper.toJson(repaymentConfirmationData), "PENDING",
+                    context.authenticatedUser().getId(), currentUser.getOffice().getId(),
+                    this.env.getProperty("fineract.activemq.loanRepaymentConfirmationQueue"));
+        } catch (Exception ex) {
+            throw ex;
+            // Don't react to this exception because If messaging fails, RpPayment Transaction shouldn't rollback
         }
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //

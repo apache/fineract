@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentReminder;
 
 @Data
+@NoArgsConstructor
 public class LoanMessageRepaymentReminderData {
 
     private Long id;
