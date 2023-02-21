@@ -165,7 +165,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 Collections.sort(installments, byDate);
             }
 
-            if (loanTransaction.isRepaymentType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
+            if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
                     handleTransaction(loanTransaction, currency, installments, charges);
@@ -306,7 +306,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 totalPaidInRepayments = totalPaidInRepayments.minus(transaction.getAmount(currency));
             } else if (transaction.isCreditBalanceRefund() || transaction.isChargeback()) {
                 totalPaidInRepayments = totalPaidInRepayments.minus(transaction.getOverPaymentPortion(currency));
-            } else if (transaction.isRepaymentType()) {
+            } else if (transaction.isRepaymentLikeType()) {
                 totalPaidInRepayments = totalPaidInRepayments.plus(transaction.getAmount(currency));
             }
         }
@@ -428,7 +428,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final Money chargeAmountToProcess,
             final boolean isFeeCharge) {
         // to.
-        if (loanTransaction.isRepaymentType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
+        if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
             loanTransaction.resetDerivedComponents();
         }
         Money transactionAmountUnprocessed = processTransaction(loanTransaction, currency, installments, chargeAmountToProcess);
@@ -686,7 +686,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         Money unProcessed = Money.zero(currency);
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             Money amountToProcess = null;
-            if (loanTransaction.isRepaymentType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
+            if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 loanTransaction.resetDerivedComponents();
             }
             if (loanTransaction.isInterestWaiver()) {

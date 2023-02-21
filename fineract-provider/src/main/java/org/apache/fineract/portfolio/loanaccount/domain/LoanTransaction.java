@@ -562,7 +562,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.manuallyAdjustedOrReversed = true;
     }
 
-    public boolean isRepaymentType() {
+    public boolean isRepaymentLikeType() {
         return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
                 || isChargeAdjustment();
     }
@@ -591,8 +591,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return LoanTransactionType.CHARGE_ADJUSTMENT.equals(getTypeOf()) && isNotReversed();
     }
 
-    public boolean isNotRepaymentType() {
-        return !isRepaymentType();
+    public boolean isNotRepaymentLikeType() {
+        return !isRepaymentLikeType();
     }
 
     public boolean isIncomePosting() {

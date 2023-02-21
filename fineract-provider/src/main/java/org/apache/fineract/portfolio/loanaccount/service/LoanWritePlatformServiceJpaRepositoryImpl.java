@@ -1197,7 +1197,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(transactionToAdjust);
-        if (newTransactionDetail.isRepaymentType() && thereIsNewTransaction) {
+        if (newTransactionDetail.isRepaymentLikeType() && thereIsNewTransaction) {
             eventData.setNewTransactionDetail(newTransactionDetail);
         }
         Long entityId = transactionToAdjust.getId();
