@@ -29,10 +29,10 @@
 
             <createTable tableName="m_product_loan_interest_rate_chart">
                 <column name="loan_product_id" type="BIGINT">
-                    <constraints nullable="false"/>
+                    <constraints nullable="false" foreignKeyName="FK_m_product_loan_interest_rate_chart_m_product_loan" references="m_product_loan(id)"/>
                 </column>
                 <column name="interest_rate_chart_id" type="BIGINT">
-                    <constraints nullable="false"/>
+                    <constraints nullable="false" foreignKeyName="FK_m_product_loan_interest_rate_chart_interest_rate_chart" references="m_interest_rate_chart(id)"/>
                 </column>
             </createTable>
     </changeSet>
