@@ -379,9 +379,12 @@ public class LoanScheduleAssembler {
         CalendarInstance compoundingCalendarInstance = null;
         InterestRecalculationCompoundingMethod compoundingMethod = null;
         boolean allowCompoundingOnEod = false;
+        boolean advancePaymentInterestForExactDaysInPeriod = false;
         if (isInterestRecalculationEnabled) {
             LoanProductInterestRecalculationDetails loanProductInterestRecalculationDetails = loanProduct
                     .getProductInterestRecalculationDetails();
+
+            advancePaymentInterestForExactDaysInPeriod = loanProductInterestRecalculationDetails.isAdvancePaymentInterestForExactDaysInPeriod();
             recalculationFrequencyType = loanProductInterestRecalculationDetails.getRestFrequencyType();
             Integer repeatsOnDay = null;
             Integer recalculationFrequencyNthDay = loanProductInterestRecalculationDetails.getRestFrequencyOnDay();
@@ -486,7 +489,7 @@ public class LoanScheduleAssembler {
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
                 allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
-                fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans);
+                fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans,advancePaymentInterestForExactDaysInPeriod);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

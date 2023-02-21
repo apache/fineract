@@ -53,6 +53,8 @@ public class LoanProductInterestRecalculationData implements Serializable {
     private final EnumOptionData preClosureInterestCalculationStrategy;
     private final boolean allowCompoundingOnEod;
 
+    private final boolean advancePaymentInterestForExactDaysInPeriod;
+
     public LoanProductInterestRecalculationData(final Long id, final Long productId,
             final EnumOptionData interestRecalculationCompoundingType, final EnumOptionData rescheduleStrategyType,
             final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
@@ -61,7 +63,7 @@ public class LoanProductInterestRecalculationData implements Serializable {
             final Integer recalculationCompoundingFrequencyInterval, final EnumOptionData recalculationCompoundingFrequencyNthDay,
             final EnumOptionData recalculationCompoundingFrequencyWeekday, final Integer recalculationCompoundingFrequencyOnDay,
             final boolean isArrearsBasedOnOriginalSchedule, boolean isCompoundingToBePostedAsTransaction,
-            final EnumOptionData preCloseInterestCalculationStrategy, final boolean allowCompoundingOnEod) {
+            final EnumOptionData preCloseInterestCalculationStrategy, final boolean allowCompoundingOnEod,final boolean advancePaymentInterestForExactDaysInPeriod) {
         this.id = id;
         this.productId = productId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;
@@ -80,6 +82,7 @@ public class LoanProductInterestRecalculationData implements Serializable {
         this.preClosureInterestCalculationStrategy = preCloseInterestCalculationStrategy;
         this.isCompoundingToBePostedAsTransaction = isCompoundingToBePostedAsTransaction;
         this.allowCompoundingOnEod = allowCompoundingOnEod;
+        this.advancePaymentInterestForExactDaysInPeriod = advancePaymentInterestForExactDaysInPeriod;
     }
 
     public static LoanProductInterestRecalculationData sensibleDefaultsForNewLoanProductCreation() {
@@ -100,6 +103,7 @@ public class LoanProductInterestRecalculationData implements Serializable {
         final Integer recalculationCompoundingFrequencyOnDay = null;
         final boolean isArrearsBasedOnOriginalSchedule = false;
         final boolean isCompoundingToBePostedAsTransaction = false;
+        final boolean advancePaymentInterestForExactDaysInPeriod = false;
         final EnumOptionData preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy(
                 LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE);
         final boolean allowCompoundingOnEod = false;
@@ -108,7 +112,7 @@ public class LoanProductInterestRecalculationData implements Serializable {
                 recalculationRestFrequencyWeekday, recalculationRestFrequencyOnDay, recalculationCompoundingFrequencyType,
                 recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyNthDay,
                 recalculationCompoundingFrequencyWeekday, recalculationCompoundingFrequencyOnDay, isArrearsBasedOnOriginalSchedule,
-                isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, allowCompoundingOnEod);
+                isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, allowCompoundingOnEod,advancePaymentInterestForExactDaysInPeriod);
     }
 
     public EnumOptionData getInterestRecalculationCompoundingType() {
@@ -166,5 +170,9 @@ public class LoanProductInterestRecalculationData implements Serializable {
 
     public boolean allowCompoundingOnEod() {
         return this.allowCompoundingOnEod;
+    }
+
+    public boolean isAdvancePaymentInterestForExactDaysInPeriod() {
+        return advancePaymentInterestForExactDaysInPeriod;
     }
 }

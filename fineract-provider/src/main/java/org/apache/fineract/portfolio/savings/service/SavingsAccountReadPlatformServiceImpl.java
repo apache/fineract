@@ -1943,7 +1943,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql.append(" FROM m_savings_account msa ");
         sql.append(" JOIN m_savings_product msp ON msp.id = msa.product_id ");
         sql.append(" WHERE msa.status_enum = 300 AND msp.accounting_type = 3 ");
-        sql.append(" and (msa.nominal_annual_interest_rate != 0 or msa.allow_overdraft = 1 or msa.account_balance_derived <= 0) ");
+        sql.append(" and (msa.nominal_annual_interest_rate != 0 or msa.allow_overdraft = true or msa.account_balance_derived <= 0) ");
         sql.append(" AND msa.deposit_type_enum = ? ");
 
         return this.jdbcTemplate.queryForList(sql.toString(), Long.class, accountType);
@@ -1957,7 +1957,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public List<Long> retrieveActiveOverdraftSavingAccounts() {
-        String sql = "select id from m_savings_account where status_enum = 300 and (allow_overdraft = 1 or account_balance_derived <= 0) and deposit_type_enum != 200";
+        String sql = "select id from m_savings_account where status_enum = 300 and (allow_overdraft = true or account_balance_derived <= 0) and deposit_type_enum != 200";
         return this.jdbcTemplate.queryForList(sql, Long.class);
     }
 

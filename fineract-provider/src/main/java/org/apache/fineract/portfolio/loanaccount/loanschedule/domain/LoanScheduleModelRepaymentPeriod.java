@@ -35,12 +35,12 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     private final LocalDate fromDate;
     private final LocalDate dueDate;
     private Money principalDue;
-    private final Money outstandingLoanBalance;
+    private Money outstandingLoanBalance;
     private Money interestDue;
     private Money feeChargesDue;
     private Money penaltyChargesDue;
     private Money totalDue;
-    private final boolean recalculatedInterestComponent;
+    private boolean recalculatedInterestComponent;
     private final Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
     private boolean isEMIFixedSpecificToInstallment = false;
     BigDecimal rescheduleInterestPortion;
@@ -66,6 +66,18 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
         this.penaltyChargesDue = penaltyChargesDue;
         this.totalDue = totalDue;
         this.recalculatedInterestComponent = recalculatedInterestComponent;
+    }
+
+    @Override
+    public  void merge(LoanScheduleModelPeriod installment){
+        LoanScheduleModelRepaymentPeriod incoming = (LoanScheduleModelRepaymentPeriod)installment;
+        this.principalDue = this.principalDue.add(incoming.principalDue);
+        this.outstandingLoanBalance = this.outstandingLoanBalance.add(incoming.outstandingLoanBalance);
+        this.interestDue = this.interestDue.add(incoming.interestDue);
+        this.feeChargesDue = this.feeChargesDue.add(incoming.feeChargesDue);
+        this.penaltyChargesDue = this.penaltyChargesDue.add(incoming.penaltyChargesDue);
+        this.totalDue = this.totalDue.add(incoming.totalDue);
+        this.recalculatedInterestComponent = this.recalculatedInterestComponent || incoming.recalculatedInterestComponent;
     }
 
     @Override

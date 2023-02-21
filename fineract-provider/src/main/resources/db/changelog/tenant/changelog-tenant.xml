@@ -72,4 +72,5 @@
     <include file="parts/OXY-42_enforce_loan_overdue_amount_in_min_balance.xml" relativeToChangelogFile="true"/>
     <include file="parts/OXY-40-Loan-Repayment-Reminder.xml" relativeToChangelogFile="true"/>
     <include file="parts/OXY-95-add_job_for_notifying_failed_standing_instruction.xml" relativeToChangelogFile="true"/>
+    <include file="parts/OXY-35_lp_interest_calculation_detail_interest_exact_days.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

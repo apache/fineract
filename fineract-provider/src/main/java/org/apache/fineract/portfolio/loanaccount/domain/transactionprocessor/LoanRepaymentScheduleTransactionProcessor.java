@@ -47,6 +47,8 @@ public interface LoanRepaymentScheduleTransactionProcessor {
      */
     boolean isInterestFirstRepaymentScheduleTransactionProcessor();
 
+    boolean isPenaltyFirstTransactionProcessor();
+
     void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges);
 

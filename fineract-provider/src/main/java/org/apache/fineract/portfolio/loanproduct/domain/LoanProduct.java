@@ -289,6 +289,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
         final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
 
+        final boolean advancePaymentInterestForExactDaysInPeriod = command.booleanPrimitiveValueOfParameterNamed("advancePaymentInterestForExactDaysInPeriod");
+
         final boolean useBorrowerCycle = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME);
         final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations = new HashSet<>();

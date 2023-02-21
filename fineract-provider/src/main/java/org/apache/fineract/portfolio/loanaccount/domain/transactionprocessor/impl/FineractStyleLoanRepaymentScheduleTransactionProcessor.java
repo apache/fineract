@@ -177,4 +177,9 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
         }
         return transactionAmountRemaining;
     }
+
+    @Override
+    public boolean isPenaltyFirstTransactionProcessor() {
+        return true;
+    }
 }

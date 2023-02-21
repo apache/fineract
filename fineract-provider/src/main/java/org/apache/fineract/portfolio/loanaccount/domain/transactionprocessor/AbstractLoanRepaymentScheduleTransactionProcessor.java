@@ -707,4 +707,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
     }
 
+    @Override
+    public boolean isPenaltyFirstTransactionProcessor() {
+        return false;
+    }
 }
