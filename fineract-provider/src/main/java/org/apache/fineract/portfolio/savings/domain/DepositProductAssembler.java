@@ -599,7 +599,7 @@ public class DepositProductAssembler {
         return charges;
     }
 
-    private Set<InterestRateChart> assembleListOfCharts(JsonCommand command, String currencyCode, DataValidatorBuilder baseDataValidator) {
+    public Set<InterestRateChart> assembleListOfCharts(JsonCommand command, String currencyCode, DataValidatorBuilder baseDataValidator) {
         final Set<InterestRateChart> charts = new HashSet<>();
         if (command.parameterExists(chartsParamName)) {
             final JsonArray chartsArray = command.arrayOfParameterNamed(chartsParamName);
