@@ -3614,4 +3614,12 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions?command=charge-off";
         return this;
     }
+
+    public CommandWrapperBuilder undoChargeOff(final Long loanId) {
+        this.actionName = "UNDOCHARGEOFF";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=undo-charge-off";
+        return this;
+    }
 }

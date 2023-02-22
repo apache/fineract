@@ -69,9 +69,11 @@ import org.apache.fineract.client.models.PostGLAccountsRequest;
 import org.apache.fineract.client.models.PostGLAccountsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -6954,54 +6956,263 @@ public class ClientLoanIntegrationTest {
 
     @Test
     public void chargeOff() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-        String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
-        Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingNoInterest(assetAccount, incomeAccount, expenseAccount,
-                overpaymentAccount);
+        try {
+            GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(this.requestSpec, this.responseSpec, true);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2022.09.30").dateFormat("yyyy.MM.dd").locale("en"));
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+            String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
+                    + Utils.randomStringGenerator("is", 5);
+            Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingNoInterestMultiDisbursement(assetAccount,
+                    incomeAccount, expenseAccount, overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2011");
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2011");
 
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+            final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
-        HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+            HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("02 September 2022", loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+            ResponseSpecification errorResponseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
+            LoanTransactionHelper errorLoanTransactionHelper = new LoanTransactionHelper(this.requestSpec, errorResponseSpec);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanID, "1000");
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.chargeOffLoan((long) loanID,
+                        new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022").locale("en").dateFormat("dd MMMM yyyy")
+                                .externalId(UUID.randomUUID().toString()).chargeOffReasonId((long) chargeOffReasonId));
+            });
 
-        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
-        assertTrue(loanDetails.getStatus().getActive());
-        assertEquals(1000.0, loanDetails.getSummary().getTotalOutstanding());
-        assertFalse(loanDetails.getChargedOff());
-        assertNull(loanDetails.getSummary().getChargeOffReasonId());
-        assertNull(loanDetails.getSummary().getChargeOffReason());
-        assertNull(loanDetails.getTimeline().getChargedOffOnDate());
-        assertNull(loanDetails.getTimeline().getChargedOffByUsername());
-        assertNull(loanDetails.getTimeline().getChargedOffByFirstname());
-        assertNull(loanDetails.getTimeline().getChargedOffByLastname());
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.is.not.active"));
 
-        String transactionExternalId = UUID.randomUUID().toString();
-        this.loanTransactionHelper.chargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022")
-                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                this.loanTransactionHelper.undoChargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest());
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.is.not.active"));
 
-        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
-        assertTrue(loanDetails.getStatus().getActive());
-        assertEquals(1000.0, loanDetails.getSummary().getTotalOutstanding());
-        assertTrue(loanDetails.getChargedOff());
-        assertEquals((long) chargeOffReasonId, loanDetails.getSummary().getChargeOffReasonId());
-        assertEquals(randomText, loanDetails.getSummary().getChargeOffReason());
-        assertEquals(LocalDate.of(2022, 9, 4), loanDetails.getTimeline().getChargedOffOnDate());
-        assertEquals("mifos", loanDetails.getTimeline().getChargedOffByUsername());
-        assertEquals("App", loanDetails.getTimeline().getChargedOffByFirstname());
-        assertEquals("Administrator", loanDetails.getTimeline().getChargedOffByLastname());
+            loanStatusHashMap = this.loanTransactionHelper.approveLoan("02 September 2022", loanID);
+            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount("02 September 2022", loanID, "1000");
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount("03 September 2022", loanID, "1000");
+            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertEquals(2000.0, loanDetails.getSummary().getTotalOutstanding());
+            assertFalse(loanDetails.getChargedOff());
+            assertNull(loanDetails.getSummary().getChargeOffReasonId());
+            assertNull(loanDetails.getSummary().getChargeOffReason());
+            assertNull(loanDetails.getTimeline().getChargedOffOnDate());
+            assertNull(loanDetails.getTimeline().getChargedOffByUsername());
+            assertNull(loanDetails.getTimeline().getChargedOffByFirstname());
+            assertNull(loanDetails.getTimeline().getChargedOffByLastname());
+
+            Integer flatPenaltySpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "3", true));
+            this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatPenaltySpecifiedDueDate), "04 September 2022", "3"));
+            Integer chargeId = this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatPenaltySpecifiedDueDate), "04 September 2022", "5"));
+
+            PostLoansLoanIdChargesChargeIdResponse waiveChargeResponse = this.loanTransactionHelper.waiveLoanCharge((long) loanID,
+                    (long) chargeId, new PostLoansLoanIdChargesChargeIdRequest());
+
+            String transactionExternalId = UUID.randomUUID().toString();
+            this.loanTransactionHelper.chargeOffLoan((long) loanID,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022").locale("en").dateFormat("dd MMMM yyyy")
+                            .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertEquals(2003.0, loanDetails.getSummary().getTotalOutstanding());
+            assertTrue(loanDetails.getChargedOff());
+            assertEquals((long) chargeOffReasonId, loanDetails.getSummary().getChargeOffReasonId());
+            assertEquals(randomText, loanDetails.getSummary().getChargeOffReason());
+            assertEquals(LocalDate.of(2022, 9, 4), loanDetails.getTimeline().getChargedOffOnDate());
+            assertEquals("mifos", loanDetails.getTimeline().getChargedOffByUsername());
+            assertEquals("App", loanDetails.getTimeline().getChargedOffByFirstname());
+            assertEquals("Administrator", loanDetails.getTimeline().getChargedOffByLastname());
+
+            GetLoansLoanIdTransactions chargeOffTransaction = loanDetails.getTransactions().get(loanDetails.getTransactions().size() - 1);
+
+            assertEquals(2003.0, chargeOffTransaction.getAmount());
+            assertEquals(2000.0, chargeOffTransaction.getPrincipalPortion());
+            assertEquals(3.0, chargeOffTransaction.getPenaltyChargesPortion());
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.chargeOffLoan((long) loanID,
+                        new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022").locale("en").dateFormat("dd MMMM yyyy")
+                                .externalId(UUID.randomUUID().toString()).chargeOffReasonId((long) chargeOffReasonId));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.is.already.charged.off"));
+
+            HashMap chargeAddingError = errorLoanTransactionHelper.addChargesForLoanGetFullResponse(loanID, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatPenaltySpecifiedDueDate), "04 September 2022", "3"));
+
+            assertEquals("error.msg.loan.is.charged.off",
+                    ((Map) ((List) chargeAddingError.get("errors")).get(0)).get("userMessageGlobalisationCode"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.undoWaiveLoanCharge((long) loanID, waiveChargeResponse.getSubResourceId(),
+                        new PutChargeTransactionChangesRequest());
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            this.loanTransactionHelper.undoChargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest());
+
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+            assertFalse(loanDetails.getChargedOff());
+            assertNull(loanDetails.getSummary().getChargeOffReasonId());
+            assertNull(loanDetails.getSummary().getChargeOffReason());
+            assertNull(loanDetails.getTimeline().getChargedOffOnDate());
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.undoChargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest());
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.is.not.charged.off"));
+
+            PostLoansLoanIdTransactionsResponse loanRepaymentResponse = this.loanTransactionHelper.makeLoanRepayment((long) loanID,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("05 September 2022").locale("en")
+                            .transactionAmount(5.0));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.chargeOffLoan((long) loanID,
+                        new PostLoansLoanIdTransactionsRequest().transactionDate("04 September 2022").locale("en")
+                                .dateFormat("dd MMMM yyyy").externalId(UUID.randomUUID().toString())
+                                .chargeOffReasonId((long) chargeOffReasonId));
+            });
+
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.charge.off.is.before.than.the.last.user.transaction"));
+
+            this.loanTransactionHelper.chargeOffLoan((long) loanID,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("06 September 2022").locale("en").dateFormat("dd MMMM yyyy")
+                            .externalId(UUID.randomUUID().toString()).chargeOffReasonId((long) chargeOffReasonId));
+
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+            chargeOffTransaction = loanDetails.getTransactions().get(loanDetails.getTransactions().size() - 1);
+
+            assertEquals(1998.0, chargeOffTransaction.getAmount());
+            assertEquals(1998.0, chargeOffTransaction.getPrincipalPortion());
+
+            this.loanTransactionHelper.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("07 September 2022").locale("en").transactionAmount(5.0));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.undoChargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest());
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.charge.off.is.not.the.last.user.transaction"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.adjustLoanTransaction((long) loanID, loanRepaymentResponse.getResourceId(),
+                        new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("06 September 2022").locale("en")
+                                .dateFormat("dd MMMM yyyy").transactionAmount(0.0));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.adjusted.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.makeWriteoff((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                        .transactionDate("05 September 2022").locale("en"));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.closeLoan((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                        .transactionDate("05 September 2022").locale("en"));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.forecloseLoan((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                        .transactionDate("05 September 2022").locale("en"));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.closeRescheduledLoan((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                        .dateFormat("dd MMMM yyyy").transactionDate("05 September 2022").locale("en"));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.is.charged.off"));
+
+            HashMap disbursementDetailREsponse = (HashMap) errorLoanTransactionHelper.addAndDeleteDisbursementDetail(loanID, "1000",
+                    "03 September 2022", List.of(this.loanTransactionHelper.createTrancheDetail(null, "05 September 2022", "200")), "");
+
+            assertEquals("error.msg.loan.is.charged.off",
+                    ((Map) ((List) disbursementDetailREsponse.get("errors")).get(0)).get("userMessageGlobalisationCode"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.undoLastDisbursalLoan((long) loanID, new PostLoansLoanIdRequest());
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.is.charged.off"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.undoDisbursalLoan((long) loanID, new PostLoansLoanIdRequest());
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.is.charged.off"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                        .dateFormat("dd MMMM yyyy").transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                        .dateFormat("dd MMMM yyyy").transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                        .dateFormat("dd MMMM yyyy").transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.disburseLoan((long) loanID,
+                        new PostLoansLoanIdRequest().actualDisbursementDate("4 September 2022").transactionAmount(new BigDecimal("10"))
+                                .locale("en").dateFormat("dd MMMM yyyy"));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            this.loanTransactionHelper.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("07 September 2022").locale("en").transactionAmount(5000.0));
+
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                errorLoanTransactionHelper.makeRefundByCash((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                        .dateFormat("dd MMMM yyyy").transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
+
+            this.loanTransactionHelper.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat("dd MMMM yyyy").transactionDate("08 September 2022").locale("en").transactionAmount(3007.0));
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
     }
 
     @Test
@@ -7477,6 +7688,16 @@ public class ClientLoanIntegrationTest {
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
                 .withAccountingRulePeriodicAccrual(accounts).withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
                 .build(null);
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    private Integer createLoanProductWithPeriodicAccrualAccountingNoInterestMultiDisbursement(final Account... accounts) {
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+                .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
+                .withAccountingRulePeriodicAccrual(accounts).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30")
+                .withDaysInYear("365").withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true).build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 

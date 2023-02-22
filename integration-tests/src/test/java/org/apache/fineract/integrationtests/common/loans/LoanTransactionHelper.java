@@ -710,6 +710,11 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.adjustLoanTransaction1(loanId, transactionExternalId, request, "adjust"));
     }
 
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(final Long loanId, final Long transactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction(loanId, transactionId, request, "adjust"));
+    }
+
     public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(final Integer loanId, final Long transactionId, String date,
             ResponseSpecification responseSpec) {
         return postLoanTransaction(createLoanTransactionURL(null, loanId, transactionId.intValue()),
@@ -755,6 +760,12 @@ public class LoanTransactionHelper extends IntegrationTest {
         final String ADD_CHARGES_URL = LOAN_ACCOUNT_URL + "/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, "");
         return (Integer) response.get("resourceId");
+    }
+
+    public HashMap addChargesForLoanGetFullResponse(final Integer loanId, final String request) {
+        log.info("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
+        final String ADD_CHARGES_URL = LOAN_ACCOUNT_URL + "/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, "");
     }
 
     public Integer addChargesForLoan(final Integer loanId, final String request, final ResponseSpecification responseSpecParam) {
@@ -1738,6 +1749,10 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loans.stateTransitions1(loanExternalId, request, "disburse"));
     }
 
+    public PostLoansLoanIdResponse disburseLoan(Long loanId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions(loanId, request, "disburse"));
+    }
+
     public PostLoansLoanIdResponse disburseToSavingsLoan(String loanExternalId, PostLoansLoanIdRequest request) {
         return ok(fineract().loans.stateTransitions1(loanExternalId, request, "disburseToSavings"));
     }
@@ -1750,8 +1765,16 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loans.stateTransitions1(loanExternalId, request, "undodisbursal"));
     }
 
+    public PostLoansLoanIdResponse undoDisbursalLoan(Long loanId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions(loanId, request, "undodisbursal"));
+    }
+
     public PostLoansLoanIdResponse undoLastDisbursalLoan(String loanExternalId, PostLoansLoanIdRequest request) {
         return ok(fineract().loans.stateTransitions1(loanExternalId, request, "undolastdisbursal"));
+    }
+
+    public PostLoansLoanIdResponse undoLastDisbursalLoan(Long loanId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions(loanId, request, "undolastdisbursal"));
     }
 
     public PostLoansLoanIdResponse assignLoanOfficerLoan(String loanExternalId, PostLoansLoanIdRequest request) {
@@ -1774,12 +1797,24 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "close-rescheduled"));
     }
 
+    public PostLoansLoanIdTransactionsResponse closeRescheduledLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "close-rescheduled"));
+    }
+
     public PostLoansLoanIdTransactionsResponse closeLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "close"));
     }
 
+    public PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "close"));
+    }
+
     public PostLoansLoanIdTransactionsResponse forecloseLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "foreclosure"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse forecloseLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "foreclosure"));
     }
 
     public PostLoansLoanIdTransactionsResponse chargeOffLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
@@ -1788,5 +1823,13 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public PostLoansLoanIdTransactionsResponse chargeOffLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "charge-off"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse undoChargeOffLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "undo-charge-off"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse undoChargeOffLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "undo-charge-off"));
     }
 }

@@ -161,7 +161,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final boolean isRecoveryRepayment, final String chargeRefundChargeType, boolean isAccountTransfer,
             HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone, final boolean isLoanToLoanTransfer) {
         checkClientOrGroupActive(loan);
-
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         LoanBusinessEvent repaymentEvent = getLoanRepaymentTypeBusinessEvent(repaymentTransactionType, isRecoveryRepayment, loan);
         businessEventNotifierService.notifyPreBusinessEvent(repaymentEvent);
 
@@ -357,6 +362,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final Integer transactionType, Integer installmentNumber) {
         boolean isAccountTransfer = true;
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargePaymentPreBusinessEvent(loan));
 
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -436,6 +447,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         boolean isAccountTransfer = true;
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanRefundPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -482,6 +499,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final PaymentDetail paymentDetail, final String noteText, final ExternalId txnExternalId, final boolean isLoanToLoanTransfer) {
         final Loan loan = this.loanAccountAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         boolean isAccountTransfer = true;
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -508,6 +531,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Override
     public void reverseTransfer(final LoanTransaction loanTransaction) {
+        if (loanTransaction.getLoan().isChargedOff()
+                && loanTransaction.getTransactionDate().isBefore(loanTransaction.getLoan().getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date",
+                    "Loan transaction: " + loanTransaction.getId()
+                            + " reversal is not allowed before or on the date when the loan got charged-off",
+                    loanTransaction.getId());
+        }
         loanTransaction.reverse();
         saveLoanTransactionWithDataIntegrityViolationChecks(loanTransaction);
     }
@@ -633,6 +663,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public LoanTransaction creditBalanceRefund(final Loan loan, final LocalDate transactionDate, final BigDecimal transactionAmount,
             final String noteText, final ExternalId externalId, PaymentDetail paymentDetail) {
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
+
         businessEventNotifierService.notifyPreBusinessEvent(new LoanCreditBalanceRefundPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -670,6 +707,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money refundAmount = Money.of(loan.getCurrency(), transactionAmount);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         final LoanTransaction newRefundTransaction = LoanTransaction.refundForActiveLoan(loan.getOffice(), refundAmount, paymentDetail,
                 transactionDate, txnExternalId);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
@@ -702,6 +745,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public LoanTransaction foreCloseLoan(final Loan loan, final LocalDate foreClosureDate, final String noteText,
             final ExternalId externalId, Map<String, Object> changes) {
+        if (loan.isChargedOff() && foreClosureDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanForeClosurePreBusinessEvent(loan));
         MonetaryCurrency currency = loan.getCurrency();
         List<LoanTransaction> newTransactions = new ArrayList<>();
