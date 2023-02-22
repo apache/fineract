@@ -40,6 +40,7 @@ import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLo
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentConfirmationData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentReminderData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -159,4 +160,6 @@ public interface LoanReadPlatformService {
     List<LoanRepaymentReminderData> findLoanRepaymentReminderData(Integer numberOfDaysToDueDate);
 
     LoanRepaymentConfirmationData generateLoanPaymentReceipt(Long transactionId);
+
+    List<LoanRepaymentScheduleData> getLoanRepaymentScheduleData(Long loanId);
 }

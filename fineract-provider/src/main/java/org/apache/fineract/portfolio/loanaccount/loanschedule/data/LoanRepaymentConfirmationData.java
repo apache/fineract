@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -41,6 +43,7 @@ public class LoanRepaymentConfirmationData {
     private final String clientName;
     private final String groupName;
     private final BigDecimal totalOverdueAmount;
+    List<LoanRepaymentScheduleData> scheduleDataList = new ArrayList<>();
 
     public LoanRepaymentConfirmationData(Long transactionId, Long loanId, Long transactionTypeEnum, String transactionDate,
             BigDecimal amount, BigDecimal principalPortionDerived, BigDecimal interestPortionDerived, BigDecimal feeChargesPortionDerived,

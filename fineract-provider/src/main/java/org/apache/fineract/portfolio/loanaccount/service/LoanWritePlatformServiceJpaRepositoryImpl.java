@@ -198,6 +198,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentConfirmationData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanRepaymentScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -964,6 +965,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         try {
             final LoanRepaymentConfirmationData repaymentConfirmationData = loanReadPlatformService
                     .generateLoanPaymentReceipt(loanTransaction.getId());
+            List<LoanRepaymentScheduleData> scheduleDataList = loanReadPlatformService.getLoanRepaymentScheduleData(loanId);
+            repaymentConfirmationData.setScheduleDataList(scheduleDataList);
 
             activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepaymentConfirmation",
                     repaymentConfirmationData.getTransactionId(), this.fromApiJsonHelper.toJson(repaymentConfirmationData), "PENDING",
