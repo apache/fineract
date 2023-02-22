@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -41,6 +42,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -131,6 +133,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatformService {
@@ -173,7 +176,10 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
-
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                    "Adding charge to Loan: " + loanId + " is not allowed. Loan Account is Charged-off", loanId);
+        }
         List<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
         final Long chargeDefinitionId = command.longValueOfParameterNamed("chargeId");
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
@@ -360,7 +366,13 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             throw new LoanChargeWaiveCannotBeReversedException(
                     LoanChargeWaiveCannotBeReversedException.LoanChargeWaiveCannotUndoReason.LOAN_INACTIVE, loanCharge.getId());
         }
-
+        if (loan.isChargedOff() && (loanTransaction.getTransactionDate().isBefore(loan.getChargedOffOnDate())
+                || loanTransaction.getTransactionDate().isEqual(loan.getChargedOffOnDate()))) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date",
+                    "Undo Loan transaction: " + loanTransaction.getId()
+                            + " is not allowed before or on the date when the loan got charged-off",
+                    loanTransaction.getId());
+        }
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
@@ -713,6 +725,10 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     public void applyOverdueChargesForLoan(final Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDataList) {
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        if (loan.isChargedOff()) {
+            log.warn("Adding charge to Loan: {} is not allowed. Loan Account is Charged-off", loanId);
+            return;
+        }
         final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
         boolean runInterestRecalculation = false;

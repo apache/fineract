@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -130,6 +131,11 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             // use the loan id to get a Loan entity object
             final Loan loan = this.loanAssembler.assembleFrom(loanId);
+
+            if (loan.isChargedOff()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                        "Loan: " + loanId + " reschedule installment is not allowed. Loan Account is Charged-off", loanId);
+            }
 
             // validate the request in the JsonCommand object passed as
             // parameter

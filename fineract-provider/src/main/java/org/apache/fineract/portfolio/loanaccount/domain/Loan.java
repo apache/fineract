@@ -7027,10 +7027,29 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return getLoanTransactions().stream().filter(predicate).toList();
     }
 
+    public LoanTransaction findChargedOffTransaction() {
+        return getLoanTransactions().stream() //
+                .filter(LoanTransaction::isNotReversed) //
+                .filter(LoanTransaction::isChargeOff) //
+                .findFirst() //
+                .orElse(null);
+    }
+
     public void handleMaturityDateActivate() {
         if (this.expectedMaturityDate != null && this.actualMaturityDate == null) {
             this.actualMaturityDate = this.expectedMaturityDate;
         }
     }
 
+    public LoanTransaction getLastUserTransaction() {
+        return getLoanTransactions().stream() //
+                .filter(LoanTransaction::isNotReversed) //
+                .filter(t -> !(t.isAccrualTransaction() || t.isIncomePosting())) //
+                .reduce((first, second) -> second) //
+                .orElse(null);
+    }
+
+    public LocalDate getChargedOffOnDate() {
+        return chargedOffOnDate;
+    }
 }

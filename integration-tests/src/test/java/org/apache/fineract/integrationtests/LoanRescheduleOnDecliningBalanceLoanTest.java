@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -244,6 +245,36 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
         this.createRequiredEntities();
         this.createAndApproveLoanRescheduleRequestForRecoverInterestInterestFirst();
 
+    }
+
+    @Test
+    public void testCreateLoanRescheduleRequestFailIfLoanIsChargedOff() {
+        // create all required entities
+        this.createRequiredEntities();
+        this.createLoanRescheduleRequestWhichFailsAsLoanIdChargedOff();
+
+    }
+
+    /**
+     * create new loan reschedule request
+     **/
+    private void createLoanRescheduleRequestWhichFailsAsLoanIdChargedOff() {
+
+        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                .updateExtraTerms(null).updateRescheduleFromDate("04 January 2015").updateAdjustedDueDate("04 October 2015")
+                .updateRecalculateInterest(true).build(this.loanId.toString());
+
+        this.loanTransactionHelper.chargeOffLoan((long) this.loanId,
+                new PostLoansLoanIdTransactionsRequest().transactionDate("04 January 2015").locale("en").dateFormat("dd MMMM yyyy"));
+
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
+        LoanRescheduleRequestHelper errorLoanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, responseSpec);
+        HashMap response = errorLoanRescheduleRequestHelper.createLoanRescheduleRequestWithFullResponse(requestJSON);
+        assertEquals("error.msg.loan.is.charged.off", ((Map) ((List) response.get("errors")).get(0)).get("userMessageGlobalisationCode"));
+
+        this.loanTransactionHelper.undoChargeOffLoan((long) this.loanId, new PostLoansLoanIdTransactionsRequest());
+        this.loanTransactionHelper.closeRescheduledLoan((long) this.loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("04 January 2015").locale("en"));
     }
 
     /**

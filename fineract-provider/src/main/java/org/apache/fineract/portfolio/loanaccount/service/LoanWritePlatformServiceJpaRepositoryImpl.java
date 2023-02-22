@@ -80,6 +80,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanWithdra
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanDisbursalTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoChargeOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoWrittenOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanWaiveInterestBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanWrittenOffPostBusinessEvent;
@@ -286,6 +287,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         // Fail fast if client/group is not active or actual loan status disallows disbursal
         checkClientOrGroupActive(loan);
+
+        final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
+
+        if (loan.isChargedOff() && actualDisbursementDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loanId
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loanId);
+        }
+
         if (loan.loanProduct().isDisallowExpectedDisbursements()) {
             List<LoanDisbursementDetails> filteredList = loan.getDisbursementDetails().stream()
                     .filter(disbursementDetails -> disbursementDetails.actualDisbursementDate() == null).toList();
@@ -325,8 +336,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 throw new LoanCollateralAmountNotSufficientException(disbursedAmount);
             }
         }
-
-        final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
 
         // validate ActualDisbursement Date Against Expected Disbursement Date
         LoanProduct loanProduct = loan.loanProduct();
@@ -805,6 +814,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                    "Undo Loan: " + loanId + " disbursement is not allowed. Loan Account is Charged-off", loanId);
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoDisbursalBusinessEvent(loan));
         removeLoanCycle(loan);
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -1056,6 +1069,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loan.isClosedWrittenOff()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.written.off.update.not.allowed",
                     "Loan transaction:" + transactionId + " update not allowed as loan status is written off", transactionId);
+        }
+        if (loan.isChargedOff() && (transactionToAdjust.getTransactionDate().isBefore(loan.getChargedOffOnDate())
+                || transactionToAdjust.getTransactionDate().isEqual(loan.getChargedOffOnDate()))) {
+            throw new GeneralPlatformDomainRuleException("error.msg.adjusted.transaction.date.cannot.be.earlier.than.charge.off.date",
+                    "Loan transaction: " + transactionId + " adjustment is not allowed before or on the date when the loan got charged-off",
+                    transactionId);
         }
 
         if (transactionToAdjust.hasChargebackLoanTransactionRelations()) {
@@ -1411,6 +1430,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         if (command.hasParameter("writeoffReasonId")) {
             Long writeoffReasonId = command.longValueOfParameterNamed("writeoffReasonId");
@@ -1421,6 +1441,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loanId
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loanId);
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanWrittenOffPreBusinessEvent(loan));
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.WRITE_OFF.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
@@ -1479,6 +1505,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
+        LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loanId
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loanId);
+        }
+
         businessEventNotifierService.notifyPreBusinessEvent(new LoanCloseBusinessEvent(loan));
 
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -1579,6 +1613,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                    "Loan: " + loanId + " Close as rescheduled is not allowed. Loan Account is Charged-off", loanId);
+        }
         removeLoanCycle(loan);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanCloseAsRescheduleBusinessEvent(loan));
 
@@ -1929,6 +1967,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             loan.getExpectedFirstRepaymentOnDate(), presentMeetingDate);
                 }
 
+                if (loan.isChargedOff()) {
+                    throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                            "Loan: " + loan.getId() + " reschedule is not allowed. Loan Account is Charged-off", loan.getId());
+                }
+
                 Boolean isSkipRepaymentOnFirstMonth = false;
                 int numberOfDays = 0;
                 boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
@@ -2219,6 +2262,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                    "Update Loan: " + loanId + " disbursement details is not allowed. Loan Account is Charged-off", loanId);
+        }
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
         LocalDate expectedDisbursementDate = loan.getExpectedDisbursedOnLocalDate();
         if (!loan.loanProduct().isMultiDisburseLoan()) {
@@ -2314,6 +2361,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                    "Update Loan: " + loanId + " disbursement details is not allowed. Loan Account is Charged-off", loanId);
+        }
         LoanDisbursementDetails loanDisbursementDetails = loan.fetchLoanDisbursementsById(disbursementId);
         this.loanEventApiJsonValidator.validateUpdateDisbursementDateAndAmount(command.json(), loanDisbursementDetails);
 
@@ -2565,6 +2616,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LocalDate recalculateFromDate = loan.getLastRepaymentDate();
         validateIsMultiDisbursalLoanAndDisbursedMoreThanOneTranche(loan);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                    "Undo Loan: " + loanId + " last disbursement is not allowed. Loan Account is Charged-off", loanId);
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoLastDisbursalBusinessEvent(loan));
 
         final MonetaryCurrency currency = loan.getCurrency();
@@ -2655,15 +2710,30 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 command.stringValueOfParameterNamed(LoanApiConstants.transactionDateParamName));
         changes.put(LoanApiConstants.localeParameterName, command.locale());
         changes.put(LoanApiConstants.dateFormatParameterName, command.dateFormat());
-
-        // TODO: add business logic validation (transaction date cannot be future, cannot be earlier than latest
-        // transactions, etc)
-        Loan loan = loanAssembler.assembleFrom(command.getLoanId());
-        businessEventNotifierService.notifyPreBusinessEvent(new LoanChargeOffPreBusinessEvent(loan));
-
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(LoanApiConstants.transactionDateParamName);
         final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
         final AppUser currentUser = getAppUserIfPresent();
+
+        Loan loan = loanAssembler.assembleFrom(command.getLoanId());
+        final Long loanId = loan.getId();
+        if (!loan.isOpen()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.active",
+                    "Loan: " + loanId + " Charge-off is not allowed. Loan Account is not Active", loanId);
+        }
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.already.charged.off",
+                    "Loan: " + loanId + " is already charged-off", loanId);
+        }
+        if (transactionDate.isBefore(loan.getLastUserTransactionDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.charge.off.is.before.than.the.last.user.transaction",
+                    "Loan: " + loanId + " charge-off cannot be executed. User transaction was found after the charge-off transaction date!",
+                    loanId);
+        }
+        if (loan.isInterestBearing()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.interest.bearing",
+                    "Loan: " + loanId + " Charge-off is not allowed. Loan Account is interest bearing", loanId);
+        }
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanChargeOffPreBusinessEvent(loan));
 
         if (command.hasParameter(LoanApiConstants.chargeOffReasonIdParamName)) {
             Long chargeOffReasonId = command.longValueOfParameterNamed(LoanApiConstants.chargeOffReasonIdParamName);
@@ -2701,6 +2771,49 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(command.getLoanId()) //
                 .with(changes).build();
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult undoChargeOff(JsonCommand command) {
+        final Long loanId = command.getLoanId();
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
+        checkClientOrGroupActive(loan);
+        if (!loan.isOpen()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.active",
+                    "Loan: " + loanId + " Undo Charge-off is not allowed. Loan Account is not Active", loanId);
+        }
+        if (!loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.charged.off", "Loan: " + loanId + " is not charged-off",
+                    loanId);
+        }
+        LoanTransaction chargedOffTransaction = loan.findChargedOffTransaction();
+        if (chargedOffTransaction == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.charge.off.transaction.not.found",
+                    "Loan: " + loanId + " charge-off transaction was not found", loanId);
+        }
+        if (!chargedOffTransaction.equals(loan.getLastUserTransaction())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.charge.off.is.not.the.last.user.transaction",
+                    "Loan: " + loanId + " charge-off cannot be undone. User transaction was found after charge-off!", loanId);
+        }
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoChargeOffBusinessEvent(chargedOffTransaction));
+
+        chargedOffTransaction.reverse();
+        loan.liftChargeOff();
+        loanTransactionRepository.saveAndFlush(chargedOffTransaction);
+        saveLoanWithDataIntegrityViolationChecks(loan);
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoChargeOffBusinessEvent(chargedOffTransaction));
+        return new CommandProcessingResultBuilder() //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .withEntityId(chargedOffTransaction.getId()) //
+                .withEntityExternalId(chargedOffTransaction.getExternalId()) //
+                .build();
     }
 
     private void validateIsMultiDisbursalLoanAndDisbursedMoreThanOneTranche(Loan loan) {

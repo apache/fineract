@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
 
 public class LoanRescheduleRequestHelper {
 
@@ -38,6 +39,11 @@ public class LoanRescheduleRequestHelper {
     public Integer createLoanRescheduleRequest(final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
+    }
+
+    public HashMap createLoanRescheduleRequestWithFullResponse(final String requestJSON) {
+        final String URL = LOAN_RESCHEDULE_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "");
     }
 
     public Integer rejectLoanRescheduleRequest(final Integer requestId, final String requestJSON) {
