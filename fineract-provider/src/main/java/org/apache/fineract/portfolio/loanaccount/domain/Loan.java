@@ -2166,9 +2166,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_REJECTED, this);
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, this);
-            actualChanges.put(PARAM_STATUS, LoanEnumerations.status(this.loanStatus));
-
             final LocalDate rejectedOn = command.localDateValueOfParameterNamed(REJECTED_ON_DATE);
 
             final Locale locale = new Locale(command.locale());
@@ -2178,6 +2175,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.rejectedBy = currentUser;
             this.closedOnDate = rejectedOn;
             this.closedBy = currentUser;
+
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, this);
+            actualChanges.put(PARAM_STATUS, LoanEnumerations.status(this.loanStatus));
 
             actualChanges.put(LOCALE, command.locale());
             actualChanges.put(DATE_FORMAT, command.dateFormat());
