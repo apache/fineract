@@ -56,7 +56,6 @@ public class MessagingConfiguration {
     @Bean
     public ActiveMQConnectionFactory amqConnectionFactory() {
         ActiveMQConnectionFactory amqConnectionFactory = new ActiveMQConnectionFactory(); // NOSONAR
-        amqConnectionFactory.setTrustAllPackages(true);
         try {
             amqConnectionFactory.setBrokerURL(DEFAULT_BROKER_URL);
         } catch (Exception e) {
