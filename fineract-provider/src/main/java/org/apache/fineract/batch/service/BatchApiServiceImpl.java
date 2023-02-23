@@ -103,8 +103,10 @@ public class BatchApiServiceImpl implements BatchApiService {
             final BatchRequest rootRequest = rootNode.getRequest();
             final CommandStrategy commandStrategy = this.strategyProvider
                     .getCommandStrategy(CommandContext.resource(rootRequest.getRelativeUrl()).method(rootRequest.getMethod()).build());
+            log.debug("Batch request: method [{}], relative url [{}]", rootRequest.getMethod(), rootRequest.getRelativeUrl());
             final BatchResponse rootResponse = safelyExecuteStrategy(commandStrategy, rootRequest, uriInfo);
-
+            log.debug("Batch response: status code [{}], method [{}], relative url [{}]", rootResponse.getStatusCode(),
+                    rootRequest.getMethod(), rootRequest.getRelativeUrl());
             responseList.add(rootResponse);
             responseList.addAll(this.processChildRequests(rootNode, rootResponse, uriInfo));
         }

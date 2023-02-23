@@ -24,6 +24,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.BulkMessageItemV1;
 import org.apache.fineract.avro.BulkMessagePayloadV1;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
@@ -41,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ExternalEventService {
 
     private final ExternalEventRepository repository;
@@ -65,6 +67,8 @@ public class ExternalEventService {
                 externalEvent = handleRegularBusinessEvent(event);
             }
             repository.save(externalEvent);
+            log.debug("Saved message with idempotency key: [{}] of type [{}] and category [{}]", externalEvent.getIdempotencyKey(),
+                    externalEvent.getType(), externalEvent.getCategory());
         } catch (IOException e) {
             throw new RuntimeException("Error while serializing event " + event.getClass().getSimpleName(), e);
         }
