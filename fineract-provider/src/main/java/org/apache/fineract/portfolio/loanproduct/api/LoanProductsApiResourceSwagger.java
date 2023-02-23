@@ -165,6 +165,10 @@ final class LoanProductsApiResourceSwagger {
         public Integer recalculationRestFrequencyType;
         @Schema(example = "1")
         public Integer recalculationRestFrequencyInterval;
+        @Schema(example = "1")
+        public Integer recalculationCompoundingFrequencyInterval;
+        @Schema(example = "1")
+        public Integer recalculationCompoundingFrequencyOnDayType;
 
         // Accounting
         @Schema(example = "3")
@@ -461,6 +465,10 @@ final class LoanProductsApiResourceSwagger {
             public GetLoanProductsPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy;
             @Schema(example = "true")
             public Boolean isArrearsBasedOnOriginalSchedule;
+            @Schema(example = "1")
+            public Integer recalculationCompoundingFrequencyInterval;
+            @Schema(example = "1")
+            public Integer recalculationCompoundingFrequencyOnDayType;
         }
 
         static final class GetLoanProductsAccountingRule {
