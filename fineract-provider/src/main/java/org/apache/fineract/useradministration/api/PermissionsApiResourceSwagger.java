@@ -19,6 +19,7 @@
 package org.apache.fineract.useradministration.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Map;
 
 /**
  * Created by sanyam on 22/8/17.
@@ -56,6 +57,6 @@ final class PermissionsApiResourceSwagger {
         }
 
         @Schema(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
-        public String permissions;
+        public Map<String, Boolean> permissions;
     }
 }

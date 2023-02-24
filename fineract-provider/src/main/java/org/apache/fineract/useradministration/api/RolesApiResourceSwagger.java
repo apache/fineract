@@ -177,8 +177,8 @@ final class RolesApiResourceSwagger {
 
         }
 
+        @Schema(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
         public Map<String, Boolean> permissions;
-
     }
 
     @Schema(description = "PutRolesRoleIdPermissionsResponse")
@@ -188,10 +188,21 @@ final class RolesApiResourceSwagger {
 
         }
 
+        static final class PutRolesRoleIdPermissionsResponsePermissionsChanges {
+
+            private PutRolesRoleIdPermissionsResponsePermissionsChanges() {
+
+            }
+
+            @Schema(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
+            public Map<String, Boolean> permissions;
+        }
+
         @Schema(example = "8")
         public Long resourceId;
-        public Map<String, Boolean> permissions;
 
+        @Schema
+        public PutRolesRoleIdPermissionsResponsePermissionsChanges changes;
     }
 
     @Schema(description = "DeleteRolesRoleIdResponse")
