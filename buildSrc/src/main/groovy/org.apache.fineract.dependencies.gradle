@@ -23,7 +23,7 @@ apply plugin: 'io.spring.dependency-management'
 dependencyManagement {
     imports {
         mavenBom 'org.springframework:spring-framework-bom:5.3.25'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.8'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.9'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.8.10'
         mavenBom 'org.junit:junit-bom:5.9.2'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.2'
@@ -50,7 +50,7 @@ dependencyManagement {
         dependency 'com.google.code.gson:gson:2.10.1'
         dependency 'com.google.truth:truth:1.1.3'
         dependency 'com.google.truth.extensions:truth-java8-extension:1.1.3'
-        dependency 'com.google.googlejavaformat:google-java-format:1.15.0'
+        dependency 'com.google.googlejavaformat:google-java-format:1.16.0'
         dependency ('org.apache.commons:commons-email:1.5') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'javax.activation:activation'
@@ -62,7 +62,7 @@ dependencyManagement {
         }
         dependency 'org.apache.commons:commons-csv:1.10.0'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'software.amazon.awssdk:bom:2.20.8'
+        dependency 'software.amazon.awssdk:bom:2.20.12'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
@@ -118,7 +118,7 @@ dependencyManagement {
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.15.0'
         dependency 'org.webjars:webjars-locator-core:0.52'
-        dependency 'com.icegreen:greenmail-junit5:1.6.13'
+        dependency 'com.icegreen:greenmail-junit5:1.6.14'
         dependency 'com.intuit.karate:karate-junit5:1.3.1'
 
         // fineract client dependencies
@@ -171,7 +171,7 @@ dependencyManagement {
 
         dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.10.0'
 
-        dependency ('org.apache.activemq:activemq-broker:5.17.3') {
+        dependency ('org.apache.activemq:activemq-broker:5.17.4') {
             exclude 'javax.annotation:javax.annotation-api'
         }
 
