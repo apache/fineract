@@ -392,11 +392,11 @@ public class InlineLoanCOBTest {
 
     private void createNewSimpleUserWithoutBypassPermission() {
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-        String username = Utils.randomNameGenerator("NotificationUser", 4);
+        String username = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         String password = Utils.randomStringGenerator("aA1", 10); // prefix is to conform with the password rules
         String simpleRoleId = createSimpleRole();
         PostUsersRequest createUserRequest = new PostUsersRequest().username(username)
-                .firstname(Utils.randomNameGenerator("NotificationFN", 4)).lastname(Utils.randomNameGenerator("NotificationLN", 4))
+                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
                 .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
                 .roles(List.of(simpleRoleId)).officeId(headOffice.getId());
 

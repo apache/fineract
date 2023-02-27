@@ -77,7 +77,7 @@ public final class RatesHelper {
         map.put("percentage", RatesHelper.PERCENTAGE);
         map.put("locale", "en");
         map.put("productApply", RatesHelper.PRODUCT_APPLY_LOAN);
-        map.put("name", Utils.randomNameGenerator("Rate_Loans_", 6));
+        map.put("name", Utils.uniqueRandomStringGenerator("Rate_Loans_", 6));
         return map;
     }
 

@@ -66,7 +66,7 @@ public class StandingInstructionsHelper {
             final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
 
         final HashMap<String, String> map = new HashMap<>();
-        map.put("name", Utils.randomNameGenerator("STANDING_INSTRUCTION_", 5));
+        map.put("name", Utils.uniqueRandomStringGenerator("STANDING_INSTRUCTION_", 5));
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("monthDayFormat", "dd MMMM");
         map.put("locale", LOCALE);

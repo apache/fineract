@@ -54,7 +54,7 @@ public class HolidayHelper {
         map.put("offices", offices);
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
-        map.put("name", Utils.randomNameGenerator("HOLIDAY_", 5));
+        map.put("name", Utils.uniqueRandomStringGenerator("HOLIDAY_", 5));
         map.put("fromDate", "01 April 2013");
         map.put("toDate", "01 April 2013");
         map.put("repaymentsRescheduledTo", "08 April 2013");

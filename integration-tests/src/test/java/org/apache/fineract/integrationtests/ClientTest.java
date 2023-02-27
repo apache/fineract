@@ -208,9 +208,9 @@ public class ClientTest {
         assertThat(isAddressEnabled).isTrue();
 
         Integer addressTypeId = CodeHelper.createAddressTypeCodeValue(requestSpec, responseSpec,
-                Utils.randomNameGenerator("Residential address", 4), 0);
-        Integer countryId = CodeHelper.createCountryCodeValue(requestSpec, responseSpec, Utils.randomNameGenerator("Hungary", 4), 0);
-        Integer stateId = CodeHelper.createStateCodeValue(requestSpec, responseSpec, Utils.randomNameGenerator("Budapest", 4), 0);
+                Utils.randomStringGenerator("Residential address", 4), 0);
+        Integer countryId = CodeHelper.createCountryCodeValue(requestSpec, responseSpec, Utils.randomStringGenerator("Hungary", 4), 0);
+        Integer stateId = CodeHelper.createStateCodeValue(requestSpec, responseSpec, Utils.randomStringGenerator("Budapest", 4), 0);
         String city = "Budapest";
         boolean addressIsActive = true;
         long postalCode = 1000L;
@@ -237,9 +237,9 @@ public class ClientTest {
     public void testClientAddressCreationWorksAfterClientIsCreated() {
         // given
         Integer addressTypeId = CodeHelper.createAddressTypeCodeValue(requestSpec, responseSpec,
-                Utils.randomNameGenerator("Residential address", 4), 0);
-        Integer countryId = CodeHelper.createCountryCodeValue(requestSpec, responseSpec, Utils.randomNameGenerator("Hungary", 4), 0);
-        Integer stateId = CodeHelper.createStateCodeValue(requestSpec, responseSpec, Utils.randomNameGenerator("Budapest", 4), 0);
+                Utils.randomStringGenerator("Residential address", 4), 0);
+        Integer countryId = CodeHelper.createCountryCodeValue(requestSpec, responseSpec, Utils.randomStringGenerator("Hungary", 4), 0);
+        Integer stateId = CodeHelper.createStateCodeValue(requestSpec, responseSpec, Utils.randomStringGenerator("Budapest", 4), 0);
         String city = "Budapest";
         boolean addressIsActive = true;
         long postalCode = 1000L;

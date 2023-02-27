@@ -89,7 +89,7 @@ public class DelinquencyBucketsHelper {
 
     public static String getAsJSON(final ArrayList<Integer> rangeIds) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("name", Utils.randomNameGenerator("Delinquency_Bucket_", 4));
+        map.put("name", Utils.uniqueRandomStringGenerator("Delinquency_Bucket_", 4));
         map.put("ranges", rangeIds.toArray());
         return new Gson().toJson(map);
     }

@@ -120,7 +120,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         // creating datatable for client entity
         final HashMap<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-        columnMap.put("datatableName", Utils.randomNameGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase());
+        columnMap.put("datatableName", Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase());
         columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", false);
@@ -314,7 +314,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         // creating datatable for client entity
         final HashMap<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-        columnMap.put("datatableName", Utils.randomNameGenerator(LOAN_APP_TABLE_NAME + "_", 5));
+        columnMap.put("datatableName", Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5));
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "");
         columnMap.put("multiRow", true);
@@ -437,7 +437,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         final Integer randomNumber = Utils.randomNumberGenerator(3);
 
         // Creating datatable for Client Person
-        final String datatableName = Utils.randomNameGenerator(CLIENT_APP_TABLE_NAME + "_", 5);
+        final String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5);
         final boolean genericResultSet = true;
 
         HashMap<String, Object> columnMap = new HashMap<>();
@@ -545,7 +545,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         // creating datatable for client entity
         final HashMap<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-        columnMap.put("datatableName", Utils.randomNameGenerator(LOAN_APP_TABLE_NAME + "_", 5));
+        columnMap.put("datatableName", Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5));
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "");
         columnMap.put("multiRow", true);

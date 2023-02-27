@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
@@ -280,7 +281,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public static HashMap<String, Object> setInitialClientValues(final String officeId, final Integer legalFormId) {
-        return setInitialClientValues(officeId, legalFormId, randomIDGenerator("ID_", 7));
+        return setInitialClientValues(officeId, legalFormId, UUID.randomUUID().toString());
     }
 
     public static HashMap<String, Object> setInitialClientValues(final String officeId, final Integer legalFormId,
@@ -288,8 +289,8 @@ public class ClientHelper extends IntegrationTest {
         HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
         map.put("legalFormId", legalFormId);
-        map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
-        map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
+        map.put("firstname", Utils.randomStringGenerator("Client_FirstName_", 5));
+        map.put("lastname", Utils.randomStringGenerator("Client_LastName_", 4));
         if (externalId != null) {
             map.put("externalId", externalId);
         }
@@ -338,7 +339,7 @@ public class ClientHelper extends IntegrationTest {
         HashMap<String, Object> datatableMap = new HashMap<>();
         HashMap<String, Object> dataMap = new HashMap<>();
         dataMap.put("locale", "en");
-        dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
+        dataMap.put("Spouse Name", Utils.randomStringGenerator("Spouse_name", 4));
         dataMap.put("Number of Dependents", 5);
         dataMap.put("Time of Visit", "01 December 2016 04:03");
         dataMap.put("dateFormat", Utils.DATE_TIME_FORMAT);
@@ -353,8 +354,8 @@ public class ClientHelper extends IntegrationTest {
     public static String getTestPersonClientAsJSON(final String dateOfJoining, final String officeId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
-        map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
-        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("fullname", Utils.randomStringGenerator("Client_FullName_", 5));
+        map.put("externalId", UUID.randomUUID().toString());
         map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "true");
@@ -369,8 +370,8 @@ public class ClientHelper extends IntegrationTest {
             final HashMap<String, Object> datatables) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
-        map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
-        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("fullname", Utils.randomStringGenerator("Client_FullName_", 5));
+        map.put("externalId", UUID.randomUUID().toString());
         map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "true");
@@ -388,8 +389,8 @@ public class ClientHelper extends IntegrationTest {
             final Integer soleProprietorCodeValueId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
-        map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
-        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("fullname", Utils.randomStringGenerator("Client_FullName_", 5));
+        map.put("externalId", UUID.randomUUID().toString());
         map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "true");
@@ -468,10 +469,6 @@ public class ClientHelper extends IntegrationTest {
     public static HashMap<String, Object> getClientStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId) {
         return (HashMap<String, Object>) getClient(requestSpec, responseSpec, clientId, "status");
-    }
-
-    private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
     public String getCloseClientAsJSON() {
@@ -787,8 +784,8 @@ public class ClientHelper extends IntegrationTest {
 
     public static PostClientsRequest defaultClientCreationRequest() {
         return new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON)
-                .firstname(Utils.randomNameGenerator("Client_FirstName_", 5)).lastname(Utils.randomNameGenerator("Client_LastName_", 5))
-                .externalId(randomIDGenerator("ID_", 7)).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
+                .firstname(Utils.randomStringGenerator("Client_FirstName_", 5)).lastname(Utils.randomStringGenerator("Client_LastName_", 5))
+                .externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
                 .activationDate(DEFAULT_DATE);
     }
 }

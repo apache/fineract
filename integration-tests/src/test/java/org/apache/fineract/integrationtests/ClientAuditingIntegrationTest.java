@@ -62,7 +62,7 @@ public class ClientAuditingIntegrationTest {
     @Test
     public void checkAuditDates() throws InterruptedException {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        String username = Utils.randomNameGenerator("user", 8);
+        String username = Utils.uniqueRandomStringGenerator("user", 8);
         final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "password",
                 "resourceId");
         OffsetDateTime now = OffsetDateTime.now(ZoneId.of("Asia/Kolkata"));

@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.UUID;
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -86,7 +87,7 @@ public class CenterIntegrationTest {
 
         int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
-        String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        String externalId = UUID.randomUUID().toString();
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         int[] groupMembers = generateGroupMembers(3, officeId);
         int resourceId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, requestSpec, responseSpec);
@@ -126,13 +127,13 @@ public class CenterIntegrationTest {
     public void testCenterUpdate() {
         int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
-        String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        String externalId = UUID.randomUUID().toString();
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         int[] groupMembers = generateGroupMembers(3, officeId);
         int resourceId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, requestSpec, responseSpec);
 
         String newName = "TestCenterUpdateNew" + new Timestamp(new java.util.Date().getTime());
-        String newExternalId = Utils.randomStringGenerator("newID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        String newExternalId = UUID.randomUUID().toString();
         int newStaffId = StaffHelper.createStaff(requestSpec, responseSpec);
         int[] associateGroupMembers = generateGroupMembers(2, officeId);
 
@@ -185,8 +186,8 @@ public class CenterIntegrationTest {
         for (int i = 0; i < groupMembers.length; i++) {
             final HashMap<String, String> map = new HashMap<>();
             map.put("officeId", "" + officeId);
-            map.put("name", Utils.randomStringGenerator("Group_Name_", 5));
-            map.put("externalId", Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+            map.put("name", Utils.uniqueRandomStringGenerator("Group_Name_", 5));
+            map.put("externalId", UUID.randomUUID().toString());
             map.put("dateFormat", "dd MMMM yyyy");
             map.put("locale", "en");
             map.put("active", "true");

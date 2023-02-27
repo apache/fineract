@@ -102,7 +102,7 @@ public class GroupTest {
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
         GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
 
-        final String updateGroupName = Utils.randomNameGenerator("Savings Group Help_", 5);
+        final String updateGroupName = Utils.uniqueRandomStringGenerator("Savings Group Help_", 5);
         groupID = GroupHelper.activateGroup(this.requestSpec, this.responseSpec, groupID.toString());
         Integer updateGroupId = GroupHelper.updateGroup(this.requestSpec, this.responseSpec, updateGroupName, groupID.toString());
 

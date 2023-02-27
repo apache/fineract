@@ -1181,7 +1181,7 @@ public final class BatchHelper {
         final BatchRequest br = new BatchRequest();
         final String relativeUrl = String.format("datatables/%s/%s", datatableName, loanId);
         final Map<String, Object> datatableEntryMap = new HashMap<>();
-        datatableEntryMap.putAll(columnNames.stream().collect(Collectors.toMap(v -> v, v -> Utils.randomNameGenerator("VAL_", 3))));
+        datatableEntryMap.putAll(columnNames.stream().collect(Collectors.toMap(v -> v, v -> Utils.randomStringGenerator("VAL_", 3))));
         final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         LOG.info("CreateDataTableEntry map : {}", datatableEntryRequestJsonString);
 
@@ -1211,7 +1211,7 @@ public final class BatchHelper {
         final BatchRequest br = new BatchRequest();
         final String relativeUrl = String.format("datatables/%s/%s/%s", datatableName, loanId, datatableEntryId);
         final Map<String, Object> datatableEntryMap = new HashMap<>();
-        datatableEntryMap.putAll(columnNames.stream().collect(Collectors.toMap(v -> v, v -> Utils.randomNameGenerator("VAL_", 3))));
+        datatableEntryMap.putAll(columnNames.stream().collect(Collectors.toMap(v -> v, v -> Utils.randomStringGenerator("VAL_", 3))));
         final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         LOG.info("UpdateDataTableEntry map : {}", datatableEntryRequestJsonString);
 

@@ -78,7 +78,7 @@ public final class CalendarHelper {
         map.put("interval", interval);
         map.put("repeating", "true");
         map.put("repeatsOnDay", repeatsOnDay);
-        map.put("title", Utils.randomNameGenerator("groups_CollectionMeeting", 4));
+        map.put("title", Utils.randomStringGenerator("groups_CollectionMeeting", 4));
         map.put("typeId", "1");
         map.put("startDate", startDate);
         LOG.info("map : {}", map);
