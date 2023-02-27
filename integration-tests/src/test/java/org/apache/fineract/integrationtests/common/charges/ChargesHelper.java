@@ -167,7 +167,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("currencyCode", currencyCode);
         map.put("locale", CommonConstants.LOCALE);
         map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
-        map.put("name", Utils.randomNameGenerator("Charge_Savings_", 6));
+        map.put("name", Utils.uniqueRandomStringGenerator("Charge_Savings_", 6));
         return map;
     }
 
@@ -207,7 +207,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
         map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
-        map.put("name", Utils.randomNameGenerator("Charge_Savings_", 6));
+        map.put("name", Utils.uniqueRandomStringGenerator("Charge_Savings_", 6));
         map.put("chargeTimeType", CHARGE_WITHDRAWAL_FEE);
         map.put("enablePaymentType", enablePaymentType);
         map.put("paymentTypeId", paymentTypeId);
@@ -329,7 +329,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
         map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
-        map.put("name", Utils.randomNameGenerator("Charge_Loans_", 6));
+        map.put("name", Utils.uniqueRandomStringGenerator("Charge_Loans_", 6));
         return map;
     }
 
@@ -343,7 +343,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
         map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
-        map.put("name", Utils.randomNameGenerator("Charge_client_", 8));
+        map.put("name", Utils.uniqueRandomStringGenerator("Charge_client_", 8));
         return map;
     }
 
@@ -356,7 +356,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("chargeTimeType", ChargesHelper.SHAREACCOUNT_ACTIVATION);
         map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
-        map.put("name", Utils.randomNameGenerator("Charge_Share_Activation_", 8));
+        map.put("name", Utils.uniqueRandomStringGenerator("Charge_Share_Activation_", 8));
         return map;
     }
 
@@ -369,7 +369,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("chargeTimeType", ChargesHelper.SHARE_PURCHASE);
         map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
-        map.put("name", Utils.randomNameGenerator("Charge_Share_Purchase_", 8));
+        map.put("name", Utils.uniqueRandomStringGenerator("Charge_Share_Purchase_", 8));
         return map;
     }
 
@@ -382,7 +382,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("chargeTimeType", ChargesHelper.SHARE_REDEEM);
         map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
-        map.put("name", Utils.randomNameGenerator("Charge_Share_Redeem_", 8));
+        map.put("name", Utils.uniqueRandomStringGenerator("Charge_Share_Redeem_", 8));
         return map;
     }
 

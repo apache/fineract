@@ -1326,9 +1326,9 @@ public class BatchApiTest {
         // creating datatable with m_loan association
         final Map<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-        final String datatableName = Utils.randomNameGenerator(LOAN_APP_TABLE_NAME + "_", 5);
-        final String columnName1 = Utils.randomNameGenerator("COL1_", 5);
-        final String columnName2 = Utils.randomNameGenerator("COL2_", 5);
+        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5);
+        final String columnName1 = Utils.randomStringGenerator("COL1_", 5);
+        final String columnName2 = Utils.randomStringGenerator("COL2_", 5);
         columnMap.put("datatableName", datatableName);
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
@@ -1343,8 +1343,8 @@ public class BatchApiTest {
 
         // Create a datatable entry so that it can be updated using BatchApi
         final Map<String, Object> datatableEntryMap = new HashMap<>();
-        datatableEntryMap.put(columnName1, Utils.randomNameGenerator("VAL1_", 3));
-        datatableEntryMap.put(columnName2, Utils.randomNameGenerator("VAL2_", 3));
+        datatableEntryMap.put(columnName1, Utils.randomStringGenerator("VAL1_", 3));
+        datatableEntryMap.put(columnName2, Utils.randomStringGenerator("VAL2_", 3));
         final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         LOG.info("CreateDataTableEntry map : {}", datatableEntryRequestJsonString);
 
@@ -1923,7 +1923,7 @@ public class BatchApiTest {
      */
     @Test
     public void shouldFindOneToOneDatatableEntryByQueryAPIAndUpdateOneOfItsColumn() {
-        final String datatableName = Utils.randomNameGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
+        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
         final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
@@ -1931,8 +1931,8 @@ public class BatchApiTest {
         final Map<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
 
-        final String columnName1 = Utils.randomNameGenerator("COL1_", 5).toLowerCase();
-        final String columnName2 = Utils.randomNameGenerator("COL2_", 5).toLowerCase();
+        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
+        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
         columnMap.put("datatableName", datatableName);
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
@@ -1947,8 +1947,8 @@ public class BatchApiTest {
 
         // Create a datatable entry so that it can be updated using BatchApi
         final Map<String, Object> datatableEntryMap = new HashMap<>();
-        String columnValue1 = Utils.randomNameGenerator("VAL1_", 3);
-        String columnValue2 = Utils.randomNameGenerator("VAL2_", 3);
+        String columnValue1 = Utils.randomStringGenerator("VAL1_", 3);
+        String columnValue2 = Utils.randomStringGenerator("VAL2_", 3);
         datatableEntryMap.put(columnName1, columnValue1);
         datatableEntryMap.put(columnName2, columnValue2);
         final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
@@ -1990,7 +1990,7 @@ public class BatchApiTest {
      */
     @Test
     public void shouldFindOneToManyDatatableEntryByQueryAPIAndUpdateOneOfItsColumn() {
-        final String datatableName = Utils.randomNameGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
+        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
         final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
@@ -1998,8 +1998,8 @@ public class BatchApiTest {
         final Map<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
 
-        final String columnName1 = Utils.randomNameGenerator("COL1_", 5).toLowerCase();
-        final String columnName2 = Utils.randomNameGenerator("COL2_", 5).toLowerCase();
+        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
+        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
         columnMap.put("datatableName", datatableName);
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
@@ -2014,8 +2014,8 @@ public class BatchApiTest {
 
         // Create a datatable entry so that it can be updated using BatchApi
         final Map<String, Object> datatableEntryMap = new HashMap<>();
-        String columnValue1 = Utils.randomNameGenerator("VAL1_", 3);
-        String columnValue2 = Utils.randomNameGenerator("VAL2_", 3);
+        String columnValue1 = Utils.randomStringGenerator("VAL1_", 3);
+        String columnValue2 = Utils.randomStringGenerator("VAL2_", 3);
         datatableEntryMap.put(columnName1, columnValue1);
         datatableEntryMap.put(columnName2, columnValue2);
         final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);

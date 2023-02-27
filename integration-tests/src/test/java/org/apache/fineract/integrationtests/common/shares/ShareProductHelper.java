@@ -42,9 +42,9 @@ public class ShareProductHelper {
     private static final String IN_MULTIPLES_OF = "0";
     private static final String USD = "USD";
 
-    private String productName = Utils.randomNameGenerator("SHARE_PRODUCT_", 6);
-    private String shortName = Utils.randomNameGenerator("", 4);
-    private String description = Utils.randomNameGenerator("", 20);
+    private String productName = Utils.uniqueRandomStringGenerator("SHARE_PRODUCT_", 6);
+    private String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private String description = Utils.randomStringGenerator("", 20);
     private String totalShares = "10000";
     private final String currencyCode = USD;
     private String sharesIssued = "10000";

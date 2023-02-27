@@ -38,7 +38,7 @@ public class GLAccountBuilder {
 
     private static final String DESCRIPTION = "DEFAULT_DESCRIPTION";
 
-    private String name = Utils.randomStringGenerator("ACCOUNT_NAME_", 5);
+    private String name = Utils.uniqueRandomStringGenerator("ACCOUNT_NAME_", 5);
 
     private String glCode = "";
     private String accountType = "";
@@ -58,37 +58,31 @@ public class GLAccountBuilder {
 
     public GLAccountBuilder withAccountTypeAsAsset() {
         accountType = ASSET_ACCOUNT;
-        glCode = Utils.randomStringGenerator("ASSET_", 2);
-        // Add unique timestamp to avoid random collisions
-        glCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.uniqueRandomStringGenerator("ASSET_" + Calendar.getInstance().getTimeInMillis(), 2);
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsLiability() {
         accountType = LIABILITY_ACCOUNT;
-        glCode = Utils.randomStringGenerator("LIABILITY_", 2);
-        glCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.uniqueRandomStringGenerator("LIABILITY_" + Calendar.getInstance().getTimeInMillis(), 2);
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsAsEquity() {
         accountType = EQUITY_ACCOUNT;
-        glCode = Utils.randomStringGenerator("EQUITY_", 2);
-        glCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.uniqueRandomStringGenerator("EQUITY_" + Calendar.getInstance().getTimeInMillis(), 2);
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsIncome() {
         accountType = INCOME_ACCOUNT;
-        glCode = Utils.randomStringGenerator("INCOME_", 2);
-        glCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.uniqueRandomStringGenerator("INCOME_" + Calendar.getInstance().getTimeInMillis(), 2);
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsExpense() {
         accountType = EXPENSE_ACCOUNT;
-        glCode = Utils.randomStringGenerator("EXPENSE_", 2);
-        glCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.uniqueRandomStringGenerator("EXPENSE_" + Calendar.getInstance().getTimeInMillis(), 2);
         return this;
     }
 

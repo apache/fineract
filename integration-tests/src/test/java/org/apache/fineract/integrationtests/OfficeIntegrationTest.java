@@ -47,7 +47,7 @@ public class OfficeIntegrationTest {
     public void testOfficeModification() {
         OfficeHelper oh = new OfficeHelper(requestSpec, responseSpec);
         int officeId = oh.createOffice("01 July 2007");
-        String name = Utils.randomNameGenerator("New_Office_", 4);
+        String name = Utils.uniqueRandomStringGenerator("New_Office_", 4);
         String date = "02 July 2007";
         String[] dateArr = { "2007", "7", "2" };
 

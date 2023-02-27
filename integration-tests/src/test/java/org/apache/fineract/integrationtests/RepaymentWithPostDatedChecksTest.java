@@ -180,7 +180,7 @@ public class RepaymentWithPostDatedChecksTest {
         map.put("name", "AMANA BANK");
         map.put("amount", amount.toString());
         map.put("accountNo", "900400500621");
-        map.put("checkNo", Utils.randomNumberGenerator(9).toString());
+        map.put("checkNo", Utils.uniqueRandomNumberGenerator(9).toString());
 
         return map;
     }

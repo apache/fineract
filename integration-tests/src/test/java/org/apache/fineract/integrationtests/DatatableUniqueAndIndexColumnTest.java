@@ -62,7 +62,7 @@ public class DatatableUniqueAndIndexColumnTest {
     @Test
     public void testDatableCreationWithUniqueAndIndexedColumns() {
         // create dataTable
-        String datatableName = Utils.randomNameGenerator("dt_" + LOAN_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator("dt_" + LOAN_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
         String column1Name = "itsanumber";
         String column2Name = "itsastring";
 
@@ -120,7 +120,7 @@ public class DatatableUniqueAndIndexColumnTest {
     @Test
     public void testDatableModificationWithUniqueAndIndexedColumns() {
         // create dataTable
-        String datatableName = Utils.randomNameGenerator("dt_" + LOAN_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator("dt_" + LOAN_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
         String column1Name = "itsanumber";
         String column2Name = "itsastring";
 

@@ -83,7 +83,7 @@ public final class UserHelper {
     }
 
     public static String getTestCreateUserAsJSON(int roleId, int staffId) {
-        return "{ \"username\": \"" + Utils.randomNameGenerator("User_Name_", 3)
+        return "{ \"username\": \"" + Utils.uniqueRandomStringGenerator("User_Name_", 3)
                 + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
                 + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
                 + "\"], \"sendPasswordToEmail\": false}";
@@ -108,7 +108,7 @@ public final class UserHelper {
     }
 
     public static String getTestCreateUserAsJSONForSelfService(int roleId, int staffId, int clientId) {
-        return "{ \"username\": \"" + Utils.randomNameGenerator("User_Name_", 3)
+        return "{ \"username\": \"" + Utils.uniqueRandomStringGenerator("User_Name_", 3)
                 + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
                 + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
                 + "\"], \"sendPasswordToEmail\": false," + "\"isSelfServiceUser\" : true," + "\"clients\" : [\"" + clientId + "\"]}";

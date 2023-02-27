@@ -48,11 +48,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
@@ -81,6 +84,10 @@ public final class Utils {
     private static final String HEALTH_URL = "/fineract-provider/actuator/health";
 
     private static final Random r = new Random();
+
+    private static final ConcurrentHashMap<String, Set<String>> uniqueRandomStringContainer = new ConcurrentHashMap<>();
+    public static final String SOURCE_SET_NUMBERS_AND_LETTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final String SOURCE_SET_NUMBERS = "1234567890";
 
     private Utils() {
 
@@ -275,28 +282,43 @@ public final class Utils {
     }
 
     public static String randomStringGenerator(final String prefix, final int len) {
-        return randomStringGenerator(prefix, len, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        return randomStringGenerator(prefix, len, SOURCE_SET_NUMBERS_AND_LETTERS);
     }
 
-    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return randomStringGenerator(prefix, lenOfRandomSuffix);
+    public static String uniqueRandomStringGenerator(final String prefix, final int lenOfRandomSuffix) {
+        return uniqueRandomGenerator(prefix, lenOfRandomSuffix, SOURCE_SET_NUMBERS_AND_LETTERS);
+    }
+
+    public static Integer uniqueRandomNumberGenerator(final int lenOfRandomSuffix) {
+        return Integer.parseInt(uniqueRandomGenerator("", lenOfRandomSuffix, SOURCE_SET_NUMBERS));
+    }
+
+    public static String uniqueRandomGenerator(final String prefix, final int lenOfRandomSuffix, String sourceSet) {
+        String response;
+        String key = prefix + lenOfRandomSuffix;
+        int i = 0;
+        do {
+            response = randomStringGenerator(prefix, lenOfRandomSuffix, sourceSet);
+            uniqueRandomStringContainer.putIfAbsent(key, new HashSet<>());
+            i++;
+
+            if (i == 10000) {
+                throw new IllegalStateException("Possible endless loop for: " + key);
+            }
+        } while (!uniqueRandomStringContainer.get(key).add(response));
+
+        return response;
     }
 
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static Integer randomNumberGenerator(final int expectedLength) {
-        final String source = "1234567890";
-        final int lengthOfSource = source.length();
-
-        StringBuilder stringBuilder = new StringBuilder(expectedLength);
-        for (int i = 0; i < expectedLength; i++) {
-            stringBuilder.append(source.charAt(random.nextInt(lengthOfSource)));
-        }
-        return Integer.parseInt(stringBuilder.toString());
+        String response = randomStringGenerator("", expectedLength, SOURCE_SET_NUMBERS);
+        return Integer.parseInt(response);
     }
 
     public static Float randomDecimalGenerator(final int expectedWholeLength, final int expectedFractionLength) {
-        final String source = "1234567890";
+        final String source = SOURCE_SET_NUMBERS;
         final int lengthOfSource = source.length();
 
         StringBuilder stringBuilder = new StringBuilder(expectedWholeLength + expectedFractionLength + 1);

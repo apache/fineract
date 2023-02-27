@@ -43,8 +43,8 @@ public final class RolesHelper {
 
     public static String getTestCreateRoleAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("name", Utils.randomNameGenerator("Role_Name_", 5));
-        map.put("description", Utils.randomNameGenerator("Role_Description_", 10));
+        map.put("name", Utils.uniqueRandomStringGenerator("Role_Name_", 5));
+        map.put("description", Utils.randomStringGenerator("Role_Description_", 10));
         return new Gson().toJson(map);
     }
 

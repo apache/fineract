@@ -184,7 +184,7 @@ public class ClientLoanIntegrationTest {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         final Integer loanProductID = createLoanProduct(false, NONE);
 
-        final String externalId = Utils.randomStringGenerator("qwerty", 10);
+        final String externalId = UUID.randomUUID().toString();
 
         // When
         final Integer loanID = applyForLoanApplicationWithExternalId(this.requestSpec, this.responseSpec, clientID, loanProductID,
@@ -6290,16 +6290,16 @@ public class ClientLoanIntegrationTest {
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-        final PostGLAccountsResponse uniqueIncomeAccountForFee = this.accountHelper
-                .createGLAccount(new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue())
-                        .glCode(Utils.randomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5))
-                        .manualEntriesAllowed(true)
-                        .name(Utils.randomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5)).usage(1));
-        final PostGLAccountsResponse uniqueIncomeAccountForPenalty = this.accountHelper
-                .createGLAccount(new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue())
-                        .glCode(Utils.randomStringGenerator("UNIQUE_PENALTY_INCOME" + Calendar.getInstance().getTimeInMillis(), 5))
-                        .manualEntriesAllowed(true)
-                        .name(Utils.randomStringGenerator("UNIQUE_PENALTY_INCOME" + Calendar.getInstance().getTimeInMillis(), 5)).usage(1));
+        final PostGLAccountsResponse uniqueIncomeAccountForFee = this.accountHelper.createGLAccount(new PostGLAccountsRequest()
+                .type(GLAccountType.INCOME.getValue())
+                .glCode(Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5))
+                .manualEntriesAllowed(true)
+                .name(Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5)).usage(1));
+        final PostGLAccountsResponse uniqueIncomeAccountForPenalty = this.accountHelper.createGLAccount(new PostGLAccountsRequest()
+                .type(GLAccountType.INCOME.getValue())
+                .glCode(Utils.uniqueRandomStringGenerator("UNIQUE_PENALTY_INCOME" + Calendar.getInstance().getTimeInMillis(), 5))
+                .manualEntriesAllowed(true)
+                .name(Utils.uniqueRandomStringGenerator("UNIQUE_PENALTY_INCOME" + Calendar.getInstance().getTimeInMillis(), 5)).usage(1));
 
         PostChargesResponse penaltyCharge = chargesHelper.createCharges(new PostChargesRequest().penalty(true).amount(10.0)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
@@ -6965,8 +6965,7 @@ public class ClientLoanIntegrationTest {
             final Account incomeAccount = this.accountHelper.createIncomeAccount();
             final Account expenseAccount = this.accountHelper.createExpenseAccount();
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-            String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
-                    + Utils.randomStringGenerator("is", 5);
+            String randomText = UUID.randomUUID().toString();
             Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
             final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingNoInterestMultiDisbursement(assetAccount,
                     incomeAccount, expenseAccount, overpaymentAccount);

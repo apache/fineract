@@ -50,7 +50,7 @@ public class HookHelper {
     public String getTestHookAsJson(final String payloadURL) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", "Web");
-        map.put("displayName", Utils.randomNameGenerator("Hook_DisplayName_", 5));
+        map.put("displayName", Utils.randomStringGenerator("Hook_DisplayName_", 5));
         map.put("isActive", "true");
         final HashMap<String, String> config = new HashMap<>();
         config.put("Content Type", "json");

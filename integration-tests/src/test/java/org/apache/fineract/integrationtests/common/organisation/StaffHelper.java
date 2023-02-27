@@ -105,8 +105,8 @@ public final class StaffHelper {
         final Map<String, Object> map = getMapWithJoiningDate();
 
         map.put("officeId", 1);
-        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
-        map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
+        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
+        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
         map.put("isLoanOfficer", true);
 
         LOG.info("map :  {}", map);
@@ -131,10 +131,10 @@ public final class StaffHelper {
             map.put("officeId", 1);
         }
         if (fieldList.contains("firstname")) {
-            map.put("firstname", Utils.randomNameGenerator("michael_", 5));
+            map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
         }
         if (fieldList.contains("lastname")) {
-            map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
+            map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
         }
         if (fieldList.contains("isLoanOfficer")) {
             map.put("isLoanOfficer", true);

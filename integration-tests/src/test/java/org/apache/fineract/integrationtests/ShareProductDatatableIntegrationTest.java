@@ -62,7 +62,7 @@ public class ShareProductDatatableIntegrationTest {
     @Test
     public void testDatatableCreationForShareProduct() {
         // create dataTable
-        String datatableName = Utils.randomNameGenerator("dt_" + SHARES_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator("dt_" + SHARES_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
         String column1Name = "aNumber";
         String column2Name = "aString";
 
@@ -117,7 +117,7 @@ public class ShareProductDatatableIntegrationTest {
         assertNotNull(shareProductId);
 
         // create dataTable
-        String datatableName = Utils.randomNameGenerator("dt_" + SHARES_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator("dt_" + SHARES_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
         String column1Name = "aNumber";
 
         PostDataTablesRequest request = new PostDataTablesRequest();

@@ -542,7 +542,7 @@ public class EntityDatatableChecksIntegrationTest {
         HashMap<String, Object> datatableMap = new HashMap<>();
         HashMap<String, Object> dataMap = new HashMap<>();
         dataMap.put("locale", "en");
-        dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
+        dataMap.put("Spouse Name", Utils.randomStringGenerator("Spouse_name", 4));
         dataMap.put("Number of Dependents", 5);
         dataMap.put("Time of Visit", "01 December 2016 04:03");
         dataMap.put("dateFormat", DATE_TIME_FORMAT);
@@ -558,8 +558,10 @@ public class EntityDatatableChecksIntegrationTest {
         // creating datatable for client entity person subentity
         HashMap<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-        final String datatableNamePerson = Utils.randomNameGenerator(CLIENT_APP_TABLE_NAME + "_person_", 5).toLowerCase().toLowerCase();
-        final String datatableNameEntity = Utils.randomNameGenerator(CLIENT_APP_TABLE_NAME + "_entity_", 5).toLowerCase().toLowerCase();
+        final String datatableNamePerson = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_person_", 5).toLowerCase()
+                .toLowerCase();
+        final String datatableNameEntity = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_entity_", 5).toLowerCase()
+                .toLowerCase();
 
         String itsAString = "itsastring";
         DatatableHelper.addDatatableColumns(datatableColumnsList, itsAString, "String", true, 10, null);

@@ -71,8 +71,8 @@ public class LoanProductTestBuilder {
     private String digitsAfterDecimal = "2";
     private String inMultiplesOf = "0";
 
-    private String nameOfLoanProduct = Utils.randomNameGenerator("LOAN_PRODUCT_", 6);
-    private final String shortName = Utils.randomNameGenerator("", 4);
+    private String nameOfLoanProduct = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
+    private final String shortName = Utils.uniqueRandomStringGenerator("", 4);
     private String principal = "10000.00";
     private String numberOfRepayments = "5";
     private String repaymentFrequency = MONTHS;
