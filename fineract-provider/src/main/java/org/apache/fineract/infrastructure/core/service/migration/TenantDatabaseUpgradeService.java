@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import javax.sql.DataSource;
+import liquibase.change.custom.CustomTaskChange;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,9 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     private final ExtendedSpringLiquibaseFactory liquibaseFactory;
     private final TenantDataSourceFactory tenantDataSourceFactory;
     private final Environment environment;
+
+    // DO NOT REMOVE! Required for liquibase custom task initialization
+    private final List<CustomTaskChange> customTaskChangesForDependencyInjection;
 
     @Override
     public void afterPropertiesSet() throws Exception {

@@ -25,6 +25,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
+import org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +39,13 @@ public class TenantDataSourceFactory {
 
     private final HikariDataSource tenantDataSource;
 
+    private final DatabasePasswordEncryptor databasePasswordEncryptor;
+
     @Autowired
-    public TenantDataSourceFactory(@Qualifier("hikariTenantDataSource") HikariDataSource tenantDataSource) {
+    public TenantDataSourceFactory(@Qualifier("hikariTenantDataSource") HikariDataSource tenantDataSource,
+            DatabasePasswordEncryptor databasePasswordEncryptor) {
         this.tenantDataSource = tenantDataSource;
+        this.databasePasswordEncryptor = databasePasswordEncryptor;
     }
 
     public DataSource create(FineractPlatformTenant tenant) {
@@ -53,8 +58,11 @@ public class TenantDataSourceFactory {
         dataSource.setConnectionTestQuery(tenantDataSource.getConnectionTestQuery());
 
         FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
+        if (!databasePasswordEncryptor.isMasterPasswordHashValid(tenantConnection.getMasterPasswordHash())) {
+            throw new IllegalArgumentException("Invalid master password");
+        }
         dataSource.setUsername(tenantConnection.getSchemaUsername());
-        dataSource.setPassword(tenantConnection.getSchemaPassword());
+        dataSource.setPassword(databasePasswordEncryptor.decrypt(tenantConnection.getSchemaPassword()));
         String protocol = toProtocol(tenantDataSource);
         String tenantJdbcUrl = toJdbcUrl(protocol, tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
                 tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());

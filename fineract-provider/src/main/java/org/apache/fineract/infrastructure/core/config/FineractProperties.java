@@ -67,6 +67,9 @@ public class FineractProperties {
         private String identifier;
         private String name;
         private String description;
+        private String masterPassword;
+        private String encryption;
+
     }
 
     @Getter
@@ -244,4 +247,5 @@ public class FineractProperties {
         private boolean regexWhitelistEnabled;
         private List<String> regexWhitelist;
     }
+
 }
