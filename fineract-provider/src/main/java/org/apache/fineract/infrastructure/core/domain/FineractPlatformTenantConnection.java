@@ -21,11 +21,13 @@ package org.apache.fineract.infrastructure.core.domain;
 import java.io.Serializable;
 import java.sql.Connection;
 import javax.sql.DataSource;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * Holds Tenant's DB server connection connection details.
  */
+@Getter
 public class FineractPlatformTenantConnection implements Serializable {
 
     private final Long connectionId;
@@ -56,6 +58,8 @@ public class FineractPlatformTenantConnection implements Serializable {
     private final int minEvictableIdleTimeMillis;
     private final boolean testOnBorrow;
 
+    private final String masterPasswordHash;
+
     public FineractPlatformTenantConnection(final Long connectionId, final String schemaName, String schemaServer,
             final String schemaServerPort, final String schemaConnectionParameters, final String schemaUsername,
             final String schemaPassword, final boolean autoUpdateEnabled, final int initialSize, final long validationInterval,
@@ -63,7 +67,8 @@ public class FineractPlatformTenantConnection implements Serializable {
             final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle, final int suspectTimeout,
             final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis, final boolean tesOnBorrow,
             final String readOnlySchemaServer, final String readOnlySchemaServerPort, final String readOnlySchemaName,
-            final String readOnlySchemaUsername, final String readOnlySchemaPassword, final String readOnlySchemaConnectionParameters) {
+            final String readOnlySchemaUsername, final String readOnlySchemaPassword, final String readOnlySchemaConnectionParameters,
+            final String masterPasswordHash) {
 
         this.connectionId = connectionId;
         this.schemaName = schemaName;
@@ -92,114 +97,7 @@ public class FineractPlatformTenantConnection implements Serializable {
         this.readOnlySchemaUsername = readOnlySchemaUsername;
         this.readOnlySchemaPassword = readOnlySchemaPassword;
         this.readOnlySchemaConnectionParameters = readOnlySchemaConnectionParameters;
-    }
-
-    public String getSchemaServer() {
-        return this.schemaServer;
-    }
-
-    public String getSchemaServerPort() {
-        return this.schemaServerPort;
-    }
-
-    public String getSchemaConnectionParameters() {
-        return this.schemaConnectionParameters;
-    }
-
-    public String getSchemaUsername() {
-        return this.schemaUsername;
-    }
-
-    public String getSchemaPassword() {
-        return this.schemaPassword;
-    }
-
-    public boolean isAutoUpdateEnabled() {
-        return this.autoUpdateEnabled;
-    }
-
-    public int getInitialSize() {
-        return this.initialSize;
-    }
-
-    public long getValidationInterval() {
-        return this.validationInterval;
-    }
-
-    public boolean isRemoveAbandoned() {
-        return this.removeAbandoned;
-    }
-
-    public int getRemoveAbandonedTimeout() {
-        return this.removeAbandonedTimeout;
-    }
-
-    public boolean isLogAbandoned() {
-        return this.logAbandoned;
-    }
-
-    public int getAbandonWhenPercentageFull() {
-        return this.abandonWhenPercentageFull;
-    }
-
-    public int getMaxActive() {
-        return this.maxActive;
-    }
-
-    public int getMinIdle() {
-        return this.minIdle;
-    }
-
-    public int getMaxIdle() {
-        return this.maxIdle;
-    }
-
-    public int getSuspectTimeout() {
-        return this.suspectTimeout;
-    }
-
-    public int getTimeBetweenEvictionRunsMillis() {
-        return this.timeBetweenEvictionRunsMillis;
-    }
-
-    public int getMinEvictableIdleTimeMillis() {
-        return this.minEvictableIdleTimeMillis;
-    }
-
-    public boolean isTestOnBorrow() {
-        return testOnBorrow;
-    }
-
-    public Long getConnectionId() {
-        return connectionId;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getReadOnlySchemaServer() {
-        return readOnlySchemaServer;
-    }
-
-    public String getReadOnlySchemaServerPort() {
-        return readOnlySchemaServerPort;
-    }
-
-    public String getReadOnlySchemaName() {
-        return readOnlySchemaName;
-    }
-
-    public String getReadOnlySchemaUsername() {
-        return readOnlySchemaUsername;
-    }
-
-    public String getReadOnlySchemaPassword() {
-        return readOnlySchemaPassword;
-    }
-
-    public String getReadOnlySchemaConnectionParameters() {
-        return readOnlySchemaConnectionParameters;
+        this.masterPasswordHash = masterPasswordHash;
     }
 
     @Override

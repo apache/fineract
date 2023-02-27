@@ -40,8 +40,8 @@ public final class TenantMapper implements RowMapper<FineractPlatformTenant> {
             + " ts.readonly_schema_server as readOnlySchemaServer, " + " ts.readonly_schema_server_port as readOnlySchemaServerPort, "
             + " ts.readonly_schema_name as readOnlySchemaName, " + " ts.readonly_schema_username as readOnlySchemaUsername, "
             + " ts.readonly_schema_password as readOnlySchemaPassword, "
-            + " ts.readonly_schema_connection_parameters as readOnlySchemaConnectionParameters "
-            + " from tenants t left join tenant_server_connections ts ";
+            + " ts.readonly_schema_connection_parameters as readOnlySchemaConnectionParameters, "
+            + " ts.master_password_hash as masterPasswordHash " + " from tenants t left join tenant_server_connections ts ";
     private final StringBuilder sqlBuilder = new StringBuilder(TENANT_SERVER_CONNECTION_BUILDER);
 
     public TenantMapper(boolean isReport) {
@@ -98,11 +98,12 @@ public final class TenantMapper implements RowMapper<FineractPlatformTenant> {
         final int suspectTimeout = rs.getInt("poolSuspectTimeout");
         final int timeBetweenEvictionRunsMillis = rs.getInt("poolTimeBetweenEvictionRunsMillis");
         final int minEvictableIdleTimeMillis = rs.getInt("poolMinEvictableIdleTimeMillis");
+        final String masterPasswordHash = rs.getString("masterPasswordHash");
 
         return new FineractPlatformTenantConnection(connectionId, schemaName, schemaServer, schemaServerPort, schemaConnectionParameters,
                 schemaUsername, schemaPassword, autoUpdateEnabled, initialSize, validationInterval, removeAbandoned, removeAbandonedTimeout,
                 logAbandoned, abandonWhenPercentageFull, maxActive, minIdle, maxIdle, suspectTimeout, timeBetweenEvictionRunsMillis,
                 minEvictableIdleTimeMillis, testOnBorrow, readOnlySchemaServer, readOnlySchemaServerPort, readOnlySchemaName,
-                readOnlySchemaUsername, readOnlySchemaPassword, readOnlySchemaConnectionParameters);
+                readOnlySchemaUsername, readOnlySchemaPassword, readOnlySchemaConnectionParameters, masterPasswordHash);
     }
 }

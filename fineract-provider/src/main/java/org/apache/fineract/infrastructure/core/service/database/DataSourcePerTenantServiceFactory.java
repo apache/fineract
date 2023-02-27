@@ -24,9 +24,9 @@ import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTen
 import com.zaxxer.hikari.HikariConfig;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
-import org.apache.fineract.infrastructure.security.constants.TenantConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -47,16 +47,24 @@ public class DataSourcePerTenantServiceFactory {
     private final DataSource tenantDataSource;
     private final HikariDataSourceFactory hikariDataSourceFactory;
 
+    private final DatabasePasswordEncryptor databasePasswordEncryptor;
+
     public DataSourcePerTenantServiceFactory(@Qualifier("hikariTenantDataSource") DataSource tenantDataSource, HikariConfig hikariConfig,
-            FineractProperties fineractProperties, ApplicationContext context, HikariDataSourceFactory hikariDataSourceFactory) {
+            FineractProperties fineractProperties, ApplicationContext context, HikariDataSourceFactory hikariDataSourceFactory,
+            DatabasePasswordEncryptor databasePasswordEncryptor) {
         this.hikariConfig = hikariConfig;
         this.fineractProperties = fineractProperties;
         this.context = context;
         this.tenantDataSource = tenantDataSource;
         this.hikariDataSourceFactory = hikariDataSourceFactory;
+        this.databasePasswordEncryptor = databasePasswordEncryptor;
     }
 
     public DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnection) {
+        if (!databasePasswordEncryptor.isMasterPasswordHashValid(tenantConnection.getMasterPasswordHash())) {
+            throw new IllegalArgumentException(
+                    "Invalid master password on tenant connection %d.".formatted(tenantConnection.getConnectionId()));
+        }
         String protocol = toProtocol(tenantDataSource);
         // Default properties for Writing
         String schemaServer = tenantConnection.getSchemaServer();
@@ -67,18 +75,13 @@ public class DataSourcePerTenantServiceFactory {
         String schemaConnectionParameters = tenantConnection.getSchemaConnectionParameters();
         // Properties to ReadOnly case
         if (fineractProperties.getMode().isReadOnlyMode()) {
-            schemaServer = getPropertyValue(tenantConnection.getReadOnlySchemaServer(), TenantConstants.PROPERTY_RO_SCHEMA_SERVER_NAME,
-                    schemaServer);
-            schemaPort = getPropertyValue(tenantConnection.getReadOnlySchemaServerPort(), TenantConstants.PROPERTY_RO_SCHEMA_SERVER_PORT,
-                    schemaPort);
-            schemaName = getPropertyValue(tenantConnection.getReadOnlySchemaName(), TenantConstants.PROPERTY_RO_SCHEMA_SCHEMA_NAME,
-                    schemaName);
-            schemaUsername = getPropertyValue(tenantConnection.getReadOnlySchemaUsername(), TenantConstants.PROPERTY_RO_SCHEMA_USERNAME,
-                    schemaUsername);
-            schemaPassword = getPropertyValue(tenantConnection.getReadOnlySchemaPassword(), TenantConstants.PROPERTY_RO_SCHEMA_PASSWORD,
-                    schemaPassword);
-            schemaConnectionParameters = getPropertyValue(tenantConnection.getReadOnlySchemaConnectionParameters(),
-                    TenantConstants.PROPERTY_RO_SCHEMA_CONNECTION_PARAMETERS, schemaConnectionParameters);
+            schemaServer = StringUtils.defaultIfBlank(tenantConnection.getReadOnlySchemaServer(), schemaServer);
+            schemaPort = StringUtils.defaultIfBlank(tenantConnection.getReadOnlySchemaServerPort(), schemaPort);
+            schemaName = StringUtils.defaultIfBlank(tenantConnection.getReadOnlySchemaName(), schemaName);
+            schemaUsername = StringUtils.defaultIfBlank(tenantConnection.getReadOnlySchemaUsername(), schemaUsername);
+            schemaPassword = StringUtils.defaultIfBlank(tenantConnection.getReadOnlySchemaPassword(), schemaPassword);
+            schemaConnectionParameters = StringUtils.defaultIfBlank(tenantConnection.getReadOnlySchemaConnectionParameters(),
+                    schemaConnectionParameters);
         }
         String jdbcUrl = toJdbcUrl(protocol, schemaServer, schemaPort, schemaName, schemaConnectionParameters);
         log.debug("{}", jdbcUrl);
@@ -88,7 +91,7 @@ public class DataSourcePerTenantServiceFactory {
         config.setJdbcUrl(jdbcUrl);
         config.setPoolName(schemaName + "_pool");
         config.setUsername(schemaUsername);
-        config.setPassword(schemaPassword);
+        config.setPassword(databasePasswordEncryptor.decrypt(schemaPassword));
         config.setMinimumIdle(tenantConnection.getInitialSize());
         config.setMaximumPoolSize(tenantConnection.getMaxActive());
         config.setValidationTimeout(tenantConnection.getValidationInterval());
@@ -106,17 +109,6 @@ public class DataSourcePerTenantServiceFactory {
         config.setDataSourceProperties(hikariConfig.getDataSourceProperties());
 
         return hikariDataSourceFactory.create(config);
-    }
-
-    private String getPropertyValue(final String baseValue, final String propertyName, final String defaultValue) {
-        // If the property already has set, return It
-        if (null != baseValue) {
-            return baseValue;
-        }
-        if (context == null) {
-            return defaultValue;
-        }
-        return context.getEnvironment().getProperty(propertyName, defaultValue);
     }
 
 }
