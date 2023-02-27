@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +62,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionRecoveryPaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionRecoveryPaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.interoperation.util.MathUtil;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
@@ -861,6 +863,96 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     accountTransferStandingInstruction.updateStatus(StandingInstructionStatus.DISABLED.getValue());
                     this.standingInstructionRepository.save(accountTransferStandingInstruction);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void applyIncomeAccrualTransaction(Loan loan) {
+        if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()
+                // to avoid collision with processIncomeAccrualTransactionOnLoanClosure()
+                && !(loan.getLoanInterestRecalculationDetails() != null
+                        && loan.getLoanInterestRecalculationDetails().isCompoundingToBePostedAsTransaction())) {
+
+            MonetaryCurrency currency = loan.getCurrency();
+            Money interestPortion = Money.zero(currency);
+            Money feePortion = Money.zero(currency);
+            Money penaltyPortion = Money.zero(currency);
+
+            for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loan.getRepaymentScheduleInstallments()) {
+                interestPortion = interestPortion.add(loanRepaymentScheduleInstallment.getInterestCharged(currency))
+                        .minus(loanRepaymentScheduleInstallment.getInterestAccrued(currency))
+                        .minus(loanRepaymentScheduleInstallment.getInterestWaived(currency));
+                feePortion = feePortion.add(loanRepaymentScheduleInstallment.getFeeChargesCharged(currency))
+                        .minus(loanRepaymentScheduleInstallment.getFeeAccrued(currency))
+                        .minus(loanRepaymentScheduleInstallment.getFeeChargesWaived(currency));
+                penaltyPortion = penaltyPortion.add(loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency))
+                        .minus(loanRepaymentScheduleInstallment.getPenaltyAccrued(currency))
+                        .minus(loanRepaymentScheduleInstallment.getPenaltyChargesWaived(currency));
+            }
+            Money total = interestPortion.plus(feePortion).plus(penaltyPortion);
+
+            if (total.isGreaterThanZero()) {
+                ExternalId externalId = externalIdFactory.create();
+
+                LoanTransaction accrualTransaction = LoanTransaction.accrueTransaction(loan, loan.getOffice(), loan.getClosedOnDate(),
+                        total.getAmount(), interestPortion.getAmount(), feePortion.getAmount(), penaltyPortion.getAmount(), externalId);
+
+                Set<LoanChargePaidBy> accrualCharges = accrualTransaction.getLoanChargesPaid();
+
+                Map<Long, Money> accrualDetails = loan.getActiveCharges().stream()
+                        .collect(Collectors.toMap(LoanCharge::getId, v -> Money.zero(currency)));
+
+                loan.getLoanTransactions(LoanTransaction::isAccrual).forEach(transaction -> {
+                    transaction.getLoanChargesPaid().forEach(loanChargePaid -> {
+                        accrualDetails.computeIfPresent(loanChargePaid.getLoanCharge().getId(),
+                                (mappedKey, mappedValue) -> mappedValue.add(Money.of(currency, loanChargePaid.getAmount())));
+                    });
+                });
+
+                loan.getActiveCharges().forEach(loanCharge -> {
+                    Money amount = loanCharge.getAmount(currency).minus(loanCharge.getAmountWaived(currency));
+                    if (!loanCharge.isInstalmentFee() && loanCharge.isActive()
+                            && accrualDetails.get(loanCharge.getId()).isLessThan(amount)) {
+                        Money amountToBeAccrued = amount.minus(accrualDetails.get(loanCharge.getId()));
+                        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge,
+                                amountToBeAccrued.getAmount(), null);
+                        accrualCharges.add(loanChargePaidBy);
+                    }
+                });
+
+                for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loan.getRepaymentScheduleInstallments()) {
+                    for (LoanInstallmentCharge installmentCharge : loanRepaymentScheduleInstallment.getInstallmentCharges()) {
+                        if (installmentCharge.getLoanCharge().isActive()) {
+                            Money notWaivedAmount = installmentCharge.getAmount(currency)
+                                    .minus(installmentCharge.getAmountWaived(currency));
+                            if (notWaivedAmount.isGreaterThanZero()) {
+                                Money amountToBeAccrued = notWaivedAmount
+                                        .minus(accrualDetails.get(installmentCharge.getLoanCharge().getId()));
+                                if (amountToBeAccrued.isGreaterThanZero()) {
+                                    final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction,
+                                            installmentCharge.getLoanCharge(), amountToBeAccrued.getAmount(),
+                                            installmentCharge.getInstallment().getInstallmentNumber());
+                                    accrualCharges.add(loanChargePaidBy);
+                                    accrualDetails.computeIfPresent(installmentCharge.getLoanCharge().getId(),
+                                            (mappedKey, mappedValue) -> mappedValue.add(amountToBeAccrued));
+                                }
+                                accrualDetails.computeIfPresent(installmentCharge.getLoanCharge().getId(),
+                                        (mappedKey, mappedValue) -> MathUtil
+                                                .negativeToZero(mappedValue.minus(Money.of(currency, installmentCharge.getAmount()))));
+                            }
+                        }
+                    }
+                }
+                saveLoanTransactionWithDataIntegrityViolationChecks(accrualTransaction);
+                loan.addLoanTransaction(accrualTransaction);
+
+                loan.getRepaymentScheduleInstallments().forEach(installment -> {
+                    installment.updateAccrualPortion(
+                            installment.getInterestCharged(currency).minus(installment.getInterestWaived(currency)),
+                            installment.getFeeChargesCharged(currency).minus(installment.getFeeChargesWaived(currency)),
+                            installment.getPenaltyChargesCharged(currency).minus(installment.getPenaltyChargesWaived(currency)));
+                });
             }
         }
     }

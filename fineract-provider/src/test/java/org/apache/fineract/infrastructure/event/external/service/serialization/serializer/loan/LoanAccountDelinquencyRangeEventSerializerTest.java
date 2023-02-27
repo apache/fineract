@@ -133,7 +133,7 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
                 BigDecimal.valueOf(30), BigDecimal.valueOf(50), BigDecimal.valueOf(185), new BigDecimal("100.5"), new BigDecimal("200.3")));
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loanChargeReadPlatformService.retrieveLoanCharges(anyLong())).thenAnswer(a -> repaymentScheduleInstallments.get(0)
-                .getInstallmentCharges().stream().map(c -> c.getLoancharge().toData()).collect(Collectors.toList()));
+                .getInstallmentCharges().stream().map(c -> c.getLoanCharge().toData()).collect(Collectors.toList()));
 
         moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
 

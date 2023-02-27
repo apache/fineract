@@ -7669,6 +7669,94 @@ public class ClientLoanIntegrationTest {
         }
     }
 
+    @Test
+    public void accrualIsCalculatedWhenTheLoanIsClosed() {
+        try {
+            GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(this.requestSpec, this.responseSpec, true);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2022.10.10").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingNoInterest(assetAccount, incomeAccount,
+                    expenseAccount, overpaymentAccount);
+
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2011");
+            List<HashMap> charges = new ArrayList<>();
+            Integer installmentFee = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+            addCharges(charges, installmentFee, "10", null);
+
+            final Integer loanID = applyForLoanApplication(clientID, loanProductID, charges);
+
+            HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+            loanStatusHashMap = this.loanTransactionHelper.approveLoan("02 September 2022", loanID);
+            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanID, "1000");
+            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+            this.loanTransactionHelper.makeRepayment("04 September 2022", Float.parseFloat("5"), loanID);
+
+            this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("04 September 2022");
+
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "11", true));
+            LocalDate targetDate = LocalDate.of(2022, 9, 6);
+            final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "11"));
+
+            this.loanTransactionHelper.waiveLoanCharge((long) loanID, (long) penalty1LoanChargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest());
+
+            this.loanTransactionHelper.makeRepayment("08 September 2022", Float.parseFloat("1010"), loanID);
+
+            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
+
+            GetLoansLoanIdTransactions lastAccrualTransaction = loanDetails.getTransactions().stream()
+                    .filter(t -> Boolean.TRUE.equals(t.getType().getAccrual())).findFirst().get();
+            assertEquals(15, lastAccrualTransaction.getAmount());
+            assertEquals(5, lastAccrualTransaction.getPenaltyChargesPortion());
+            assertEquals(10, lastAccrualTransaction.getFeeChargesPortion());
+
+            GetLoansLoanIdTransactionsTransactionIdResponse accrualTransactionDetails = this.loanTransactionHelper
+                    .getLoanTransactionDetails((long) loanID, lastAccrualTransaction.getId());
+
+            assertEquals(2, accrualTransactionDetails.getLoanChargePaidByList().size());
+            accrualTransactionDetails.getLoanChargePaidByList().forEach(loanCharge -> {
+                if (loanCharge.getChargeId().equals((long) penalty1LoanChargeId)) {
+                    assertEquals(5, loanCharge.getAmount());
+                } else {
+                    assertEquals(10, loanCharge.getAmount());
+                }
+            });
+
+        } finally {
+            GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, false);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(this.requestSpec, this.responseSpec, false);
+        }
+    }
+
+    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final List<HashMap> charges) {
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
+                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
+                .withCharges(charges).withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022")
+                .withLoanType("individual").build(clientID.toString(), loanProductID.toString(), null);
+        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    }
+
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
