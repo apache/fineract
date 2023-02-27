@@ -312,7 +312,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         return amountToDeductOnThisCharge;
     }
 
-    public LoanCharge getLoancharge() {
+    public LoanCharge getLoanCharge() {
         return this.loancharge;
     }
 

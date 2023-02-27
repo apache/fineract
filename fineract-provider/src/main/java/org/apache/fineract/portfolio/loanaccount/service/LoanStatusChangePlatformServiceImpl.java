@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainServiceJpa;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -33,22 +34,22 @@ import org.springframework.stereotype.Service;
 public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlatformService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanAccountDomainServiceJpa loanAccountDomainService;
 
     @PostConstruct
     public void addListeners() {
         businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class, new LoanStatusChangedListener());
     }
 
-    private static class LoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
+    private class LoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {
             final Loan loan = event.get();
             log.debug("Loan Status change for loan {}", loan.getId());
-            // Apply common actions on Loan account closed
-            if (loan.isClosed()) {
+            if (loan.getStatus().isClosedObligationsMet()) {
                 log.debug("Loan Status {} for loan {}", loan.getStatus().getCode(), loan.getId());
-                loan.applyIncomeAccrualTransaction(loan.getClosedOnDate());
+                loanAccountDomainService.applyIncomeAccrualTransaction(loan);
             }
             if (loan.isOpen()) {
                 loan.handleMaturityDateActivate();

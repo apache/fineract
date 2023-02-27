@@ -3506,43 +3506,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         updateLoanOutstandingBalances();
     }
 
-    public void applyIncomeAccrualTransaction(LocalDate closedDate) {
-        ExternalId externalId = ExternalId.empty();
-        boolean isExternalIdAutoGenerationEnabled = TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled();
-        if (isPeriodicAccrualAccountingEnabledOnLoanProduct()
-                // to avoid collision with processIncomeAccrualTransactionOnLoanClosure()
-                // TODO: review after interest calculation implemented
-                && !(this.loanInterestRecalculationDetails != null
-                        && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction())) {
-            List<LoanTransaction> updatedAccrualTransactions = retrieveListOfAccrualTransactions();
-            LocalDate lastAccruedDate = this.getDisbursementDate();
-            if (!updatedAccrualTransactions.isEmpty()) {
-                lastAccruedDate = updatedAccrualTransactions.get(updatedAccrualTransactions.size() - 1).getTransactionDate();
-            }
-            HashMap<String, Object> feeDetails = new HashMap<>();
-            determineFeeDetails(lastAccruedDate, closedDate, feeDetails);
-            if (isExternalIdAutoGenerationEnabled) {
-                externalId = ExternalId.generate();
-            }
-            BigDecimal fee = (BigDecimal) feeDetails.get(FEE);
-            if (fee == null) {
-                fee = BigDecimal.ZERO;
-            }
-            BigDecimal penalty = (BigDecimal) feeDetails.get(PENALTIES);
-            if (penalty == null) {
-                penalty = BigDecimal.ZERO;
-            }
-            BigDecimal total = fee.add(penalty);
-            // TODO: calculate interest?
-            if (total.compareTo(BigDecimal.ZERO) > 0) {
-                LoanTransaction accrualTransaction = LoanTransaction.accrueTransaction(this, this.getOffice(), closedDate, total, null, fee,
-                        penalty, externalId);
-                updateLoanChargesPaidBy(accrualTransaction, feeDetails, null);
-                addLoanTransaction(accrualTransaction);
-            }
-        }
-    }
-
     private void determineCumulativeIncomeFromInstallments(HashMap<String, BigDecimal> cumulativeIncomeFromInstallments) {
         BigDecimal interest = BigDecimal.ZERO;
         BigDecimal fee = BigDecimal.ZERO;
@@ -5484,7 +5447,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             for (LoanInstallmentCharge loanInstallmentCharge : loanInstallmentCharges) {
                 Integer installmentNumber = null == loanInstallmentCharge.getInstallment() ? null
                         : loanInstallmentCharge.getInstallment().getInstallmentNumber();
-                final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrual, loanInstallmentCharge.getLoancharge(),
+                final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrual, loanInstallmentCharge.getLoanCharge(),
                         loanInstallmentCharge.getAmount(getCurrency()).getAmount(), installmentNumber);
                 accrual.getLoanChargesPaid().add(loanChargePaidBy);
             }
@@ -7059,5 +7022,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LocalDate getChargedOffOnDate() {
         return chargedOffOnDate;
+    }
+
+    public LoanInterestRecalculationDetails getLoanInterestRecalculationDetails() {
+        return loanInterestRecalculationDetails;
     }
 }

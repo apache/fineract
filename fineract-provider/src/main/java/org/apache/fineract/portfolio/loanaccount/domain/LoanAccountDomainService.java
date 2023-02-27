@@ -98,4 +98,6 @@ public interface LoanAccountDomainService {
 
     LoanTransaction creditBalanceRefund(Loan loan, LocalDate transactionDate, BigDecimal transactionAmount, String noteText,
             ExternalId externalId, PaymentDetail paymentDetail);
+
+    void applyIncomeAccrualTransaction(Loan loan);
 }
