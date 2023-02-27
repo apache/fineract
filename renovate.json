@@ -95,6 +95,10 @@
     "allowedVersions": "<=9.0.69"
   },
   {
+    "matchPackageNames": ["org.openapi.generator"],
+    "allowedVersions": "<=6.2.1"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"
