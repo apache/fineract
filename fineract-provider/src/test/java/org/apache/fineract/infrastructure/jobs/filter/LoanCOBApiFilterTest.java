@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.UUID;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
@@ -77,15 +79,18 @@ class LoanCOBApiFilterTest {
 
     @Test
     void shouldLoanAndExternalMatchToo() {
+        String externalId = UUID.randomUUID().toString();
         Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12").matches());
         Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/12").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/12?additional=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId).matches());
+        Assertions.assertTrue(
+                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId + "?additional=parameter").matches());
         Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12").replaceAll("$1"));
         Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").replaceAll("$1"));
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/12").replaceAll("$1"));
-        Assertions.assertEquals("12",
-                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/12?additional=parameter").replaceAll("$1"));
+        Assertions.assertEquals(externalId,
+                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId).replaceAll("$1"));
+        Assertions.assertEquals(externalId,
+                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId + "?additional=parameter").replaceAll("$1"));
     }
 
     @Test
@@ -106,6 +111,30 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/jobs/2/inline");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+
+        testObj.doFilterInternal(request, response, filterChain);
+        verify(filterChain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void shouldProceedWhenUrlDoesNotMatchWithInvalidLoanId() throws ServletException, IOException {
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
+
+        given(request.getPathInfo()).willReturn("/loans/invalid2LoanId/charges");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(context.authenticatedUser()).willReturn(appUser);
+        given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
+                eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
+                        .willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
@@ -165,12 +194,13 @@ class LoanCOBApiFilterTest {
         businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
         businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
-
-        given(request.getPathInfo()).willReturn("/loans/external-id/2/charges");
+        String uuid = UUID.randomUUID().toString();
+        given(request.getPathInfo()).willReturn("/loans/external-id/" + uuid + "/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
         given(context.authenticatedUser()).willReturn(appUser);
+        given(loanRepository.findIdByExternalId(any())).willReturn(2L);
         given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
                         .willReturn(Collections.emptyList());
