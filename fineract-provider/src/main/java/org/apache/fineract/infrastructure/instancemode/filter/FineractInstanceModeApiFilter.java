@@ -43,6 +43,7 @@ public class FineractInstanceModeApiFilter extends OncePerRequestFilter {
 
     private static final List<ExceptionListItem> EXCEPTION_LIST = List
             .of(item(FineractProperties.FineractModeProperties::isBatchManagerEnabled, pi -> pi.startsWith("/jobs")),
+                    item(FineractProperties.FineractModeProperties::isBatchManagerEnabled, pi -> pi.startsWith("/scheduler")),
                     item(FineractProperties.FineractModeProperties::isBatchManagerEnabled, pi -> pi.startsWith("/loans/catch-up")),
                     item(FineractProperties.FineractModeProperties::isBatchManagerEnabled,
                             pi -> pi.startsWith("/loans/is-catch-up-running")),

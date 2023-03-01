@@ -368,4 +368,31 @@ class FineractInstanceModeApiFilterTest {
         // then
         verify(filterChain).doFilter(request, response);
     }
+
+    @Test
+    void testDoFilterInternal_ShouldLetSchedulerApiThrough_WhenFineractIsInBatchManagerMode() throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, false, true);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/scheduler?command=start");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void testDoFilterInternal_ShouldNotLetSchedulerApiThrough_WhenFineractIsNotInBatchManagerMode() throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, true, true, false);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/scheduler?command=start");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verifyNoInteractions(filterChain);
+        verify(response).setStatus(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
 }
