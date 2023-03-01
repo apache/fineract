@@ -39,6 +39,7 @@ import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.filters.BatchFilter;
 import org.apache.fineract.infrastructure.core.filters.BatchFilterChain;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -65,7 +66,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
-    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("\\/?loans\\/(?:external-id\\/)?(\\d+).*");
+    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("\\/?loans\\/(?:external-id\\/)?([^\\/\\?]+).*");
 
     public static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("\\/?loans\\/glimAccount\\/(\\d+).*");
     private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find()
@@ -142,13 +143,24 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
 
     private List<Long> calculateRelevantLoanIds(String pathInfo) {
 
-        boolean isGlim = isGlim(pathInfo);
-        Long loanIdFromRequest = getLoanId(isGlim, pathInfo);
-        List<Long> loanIds = isGlim ? getGlimChildLoanIds(loanIdFromRequest) : Collections.singletonList(loanIdFromRequest);
+        List<Long> loanIds = getLoanIdList(pathInfo);
         if (isLoanHardLocked(loanIds)) {
-            throw new LoanIdsHardLockedException(loanIdFromRequest);
+            throw new LoanIdsHardLockedException(loanIds.get(0));
         } else {
             return loanIds;
+        }
+    }
+
+    private List<Long> getLoanIdList(String pathInfo) {
+        boolean isGlim = isGlim(pathInfo);
+        Long loanIdFromRequest = getLoanId(isGlim, pathInfo);
+        if (loanIdFromRequest == null) {
+            return Collections.emptyList();
+        }
+        if (isGlim) {
+            return getGlimChildLoanIds(loanIdFromRequest);
+        } else {
+            return Collections.singletonList(loanIdFromRequest);
         }
     }
 
@@ -190,10 +202,22 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
 
     private Long getLoanId(boolean isGlim, String pathInfo) {
         if (!isGlim) {
-            return Long.valueOf(LOAN_PATH_PATTERN.matcher(pathInfo).replaceAll("$1"));
+            String id = LOAN_PATH_PATTERN.matcher(pathInfo).replaceAll("$1");
+            if (isExternal(pathInfo)) {
+                String externalId = id;
+                return loanRepository.findIdByExternalId(new ExternalId(externalId));
+            } else if (StringUtils.isNumeric(id)) {
+                return Long.valueOf(id);
+            } else {
+                return null;
+            }
         } else {
             return Long.valueOf(LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(pathInfo).replaceAll("$1"));
         }
+    }
+
+    private boolean isExternal(String pathInfo) {
+        return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("external-id");
     }
 
     private boolean isOnApiList(String pathInfo, String method) {
@@ -219,7 +243,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
                 } else {
                     try {
                         List<Long> result = calculateRelevantLoanIds("/" + batchRequest.getRelativeUrl());
-                        if (isLoanSoftLocked(result)) {
+                        if (isLoanSoftLocked(result) || isLoanBehind(result)) {
                             executeInlineCob(result);
                         }
                         return chain.serviceCall(batchRequest, uriInfo);
