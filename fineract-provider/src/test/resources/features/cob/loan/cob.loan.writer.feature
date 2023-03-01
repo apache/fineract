@@ -32,7 +32,7 @@ Feature: COB Writer
   @cob
   Scenario Outline: LoanItemWriter - run test: exception
     Given The LoanItemWriter.write method with action <action>
-    Then throw exception LoanItemWriter.write method
+    Then LoanItemWriter.write should not call repository
 
     Examples:
       |action|

@@ -36,9 +36,11 @@ public abstract class AbstractLoanItemWriter extends RepositoryItemWriter<Loan> 
 
     @Override
     public void write(@NotNull List<? extends Loan> items) throws Exception {
-        super.write(items);
-        List<Long> loanIds = items.stream().map(AbstractPersistableCustom::getId).toList();
-        accountLockRepository.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
+        if (!items.isEmpty()) {
+            super.write(items);
+            List<Long> loanIds = items.stream().map(AbstractPersistableCustom::getId).toList();
+            accountLockRepository.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
+        }
     }
 
     protected abstract LockOwner getLockOwner();

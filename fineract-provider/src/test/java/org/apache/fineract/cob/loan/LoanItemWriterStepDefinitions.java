@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.cob.loan;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,7 +26,6 @@ import io.cucumber.java8.En;
 import java.util.Collections;
 import java.util.List;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.mockito.Mockito;
@@ -48,8 +46,6 @@ public class LoanItemWriterStepDefinitions implements En {
             lenient().when(loan.getId()).thenReturn(1L);
             if (action.equals("error")) {
                 this.items = Collections.emptyList();
-                lenient().doThrow(new RuntimeException("fail")).when(this.accountLockRepository)
-                        .deleteByLoanIdInAndLockOwner(Collections.emptyList(), LockOwner.LOAN_COB_CHUNK_PROCESSING);
             } else {
                 this.items = Collections.singletonList(loan);
                 lenient().doNothing().when(this.accountLockRepository).deleteByLoanIdInAndLockOwner(Mockito.anyList(), Mockito.any());
@@ -65,10 +61,8 @@ public class LoanItemWriterStepDefinitions implements En {
             verify(this.accountLockRepository, Mockito.times(1)).deleteByLoanIdInAndLockOwner(Mockito.any(), Mockito.any());
         });
 
-        Then("throw exception LoanItemWriter.write method", () -> {
-            assertThrows(RuntimeException.class, () -> {
-                this.loanItemWriter.write(items);
-            });
+        Then("LoanItemWriter.write should not call repository", () -> {
+            verify(this.accountLockRepository, Mockito.times(0)).deleteByLoanIdInAndLockOwner(Mockito.any(), Mockito.any());
         });
     }
 }
