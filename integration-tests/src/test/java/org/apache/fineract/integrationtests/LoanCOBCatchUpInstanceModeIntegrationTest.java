@@ -31,6 +31,7 @@ import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanCOBCatchUpHelper;
 import org.apache.fineract.integrationtests.support.instancemode.ConfigureInstanceMode;
@@ -46,6 +47,8 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest {
     private LoanCOBCatchUpHelper loanCOBCatchUpHelper;
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+    private SchedulerJobHelper schedulerJobHelper;
+    private Boolean originalSchedulerStatus;
 
     @BeforeEach
     public void setup() throws InterruptedException {
@@ -54,6 +57,8 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        originalSchedulerStatus = schedulerJobHelper.getSchedulerStatus();
         final LocalDate todaysDate = Utils.getLocalDateOfTenant();
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
         BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
@@ -99,9 +104,24 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest {
         loanCOBCatchUpHelper.executeRetrieveOldestCOBProcessedLoan();
     }
 
+    @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = true)
+    @Test
+    public void testSchedulerWorksWhenInBatchManagerMode() {
+        schedulerJobHelper.updateSchedulerStatus(false);
+    }
+
+    @ConfigureInstanceMode(readEnabled = true, writeEnabled = true, batchWorkerEnabled = true, batchManagerEnabled = false)
+    @Test
+    public void testSchedulerDoesNotWorksWhenNotInBatchManagerMode() {
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> schedulerJobHelper.updateSchedulerStatus(false));
+        assertEquals(405, exception.getResponse().code());
+    }
+
     @AfterEach
     public void tearDown() throws InterruptedException {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        schedulerJobHelper.updateSchedulerStatus(originalSchedulerStatus);
     }
 
 }
