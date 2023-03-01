@@ -61,6 +61,7 @@ public class CacheConfig {
         cacheManager.createCache("codes", defaultTemplate);
         cacheManager.createCache("hooks", defaultTemplate);
         cacheManager.createCache("tfConfig", defaultTemplate);
+        cacheManager.createCache("configByName", defaultTemplate);
 
         javax.cache.configuration.Configuration<Object, Object> accessTokenTemplate = Eh107Configuration.fromEhcacheCacheConfiguration(
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(10000))

@@ -19,22 +19,22 @@
 package org.apache.fineract.infrastructure.configuration.domain;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.cache.domain.PlatformCache;
 import org.apache.fineract.infrastructure.cache.domain.PlatformCacheRepository;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
 import org.apache.fineract.useradministration.exception.PermissionNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class ConfigurationDomainServiceJpa implements ConfigurationDomainService {
 
@@ -55,7 +55,6 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
-    private static Map<String, GlobalConfigurationPropertyData> configurations = new HashMap<>();
 
     @Autowired
     public ConfigurationDomainServiceJpa(final PermissionRepository permissionRepository,
@@ -319,11 +318,10 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.getValue();
     }
 
+    @CacheEvict(value = "configByName", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#propertyName)")
     @Override
     public void removeGlobalConfigurationPropertyDataFromCache(final String propertyName) {
-        String identifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-        String key = identifier + "_" + propertyName;
-        configurations.remove(key);
+        log.debug("Cache entry evicted {}", propertyName);
     }
 
     @Override
@@ -391,13 +389,8 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Cacheable(value = "configByName", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#propertyName)")
     public GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
-        String identifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-        String key = identifier + "_" + propertyName;
-        if (!configurations.containsKey(key)) {
-            GlobalConfigurationProperty configuration = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
-            configurations.put(key, configuration.toData());
-        }
-        return configurations.get(key);
+        GlobalConfigurationProperty configuration = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return configuration.toData();
     }
 
     @Override
