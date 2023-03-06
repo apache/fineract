@@ -69,11 +69,15 @@ public class COBBulkEventConfigurationTest {
     @InjectMocks
     private COBBusinessStepServiceImpl underTest;
 
+    @Mock
+    private ReloaderService reloaderService;
+
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
+        when(reloaderService.reload(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @AfterEach

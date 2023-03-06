@@ -20,6 +20,7 @@ package org.apache.fineract.cob;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,6 +38,7 @@ import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
+import org.apache.fineract.cob.service.ReloaderService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
@@ -55,8 +57,10 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private BatchBusinessStepRepository batchBusinessStepRepository = mock(BatchBusinessStepRepository.class);
     private BusinessEventNotifierService businessEventNotifierService = mock(BusinessEventNotifierService.class);
     private ConfigurationDomainService configurationDomainService = mock(ConfigurationDomainService.class);
+
+    private ReloaderService reloaderService = mock(ReloaderService.class);
     private final COBBusinessStepService businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository,
-            applicationContext, beanFactory, businessEventNotifierService, configurationDomainService);
+            applicationContext, beanFactory, businessEventNotifierService, configurationDomainService, reloaderService);
     private COBBusinessStep cobBusinessStep = mock(COBBusinessStep.class);
     private COBBusinessStep notRegistereCobBusinessStep = mock(COBBusinessStep.class);
     private TreeMap<Long, String> executionMap;
@@ -92,6 +96,7 @@ public class COBBusinessStepServiceStepDefinitions implements En {
             lenient().when(this.applicationContext.getBean("test")).thenReturn(cobBusinessStep);
             lenient().when(this.applicationContext.getBean("notExist")).thenThrow(BeanCreationException.class);
             lenient().when(this.cobBusinessStep.execute(this.item)).thenReturn(outputItem);
+            lenient().when(this.reloaderService.reload(any())).thenAnswer(invocation -> invocation.getArgument(0));
             lenient().when(this.configurationDomainService.isCOBBulkEventEnabled()).thenReturn(true);
 
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
@@ -114,7 +119,7 @@ public class COBBusinessStepServiceStepDefinitions implements En {
                     lenient().when(this.batchBusinessStepRepository.findAllByJobName("exist"))
                             .thenReturn(Collections.singletonList(this.batchBusinessStep));
                     lenient().when(this.batchBusinessStepRepository.findAllByJobName("notExist")).thenReturn(Collections.emptyList());
-
+                    lenient().when(this.reloaderService.reload(any())).thenAnswer(invocation -> invocation.getArgument(0));
                     lenient().when(this.beanFactory.getBeanNamesForType((Class<?>) null)).thenReturn(new String[] { "notExist" });
                     lenient().when(this.beanFactory.getBeanNamesForType(Object.class)).thenReturn(new String[] { "testNotRegistered" });
                     lenient().when(this.beanFactory.getBeanNamesForType(String.class)).thenReturn(new String[] {});
