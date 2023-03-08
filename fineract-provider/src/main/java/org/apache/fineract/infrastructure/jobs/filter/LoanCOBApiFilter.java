@@ -66,6 +66,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
+    public static final Pattern IGNORE_LOAN_PATH_PATTERN = Pattern.compile("\\/loans\\/catch-up");
     public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("\\/?loans\\/(?:external-id\\/)?([^\\/\\?]+).*");
 
     public static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("\\/?loans\\/glimAccount\\/(\\d+).*");
@@ -224,7 +225,8 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
         if (StringUtils.isBlank(pathInfo)) {
             return false;
         }
-        return HTTP_METHODS.contains(HttpMethod.valueOf(method)) && URL_FUNCTION.test(pathInfo);
+        return HTTP_METHODS.contains(HttpMethod.valueOf(method)) && !IGNORE_LOAN_PATH_PATTERN.matcher(pathInfo).find()
+                && URL_FUNCTION.test(pathInfo);
     }
 
     private boolean isGlim(String pathInfo) {
