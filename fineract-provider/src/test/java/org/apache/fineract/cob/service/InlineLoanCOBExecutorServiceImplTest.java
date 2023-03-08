@@ -72,7 +72,7 @@ class InlineLoanCOBExecutorServiceImplTest {
         ThreadLocalContextUtil.setBusinessDates(businessDates);
 
         when(transactionTemplate.execute(any())).thenThrow(new LoanAccountLockCannotBeOverruledException(""));
-        when(loanRepository.findAllNonClosedLoansBehindByLoanIds(any(), anyList())).thenReturn(List.of(loan));
+        when(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(any(), anyList())).thenReturn(List.of(loan));
         assertThrows(LoanAccountLockCannotBeOverruledException.class, () -> testObj.executeInlineJob(command, "INLINE_LOAN_COB"));
     }
 

@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -224,6 +225,102 @@ class LoanCOBApiFilterTest {
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(inlineLoanCOBExecutorService, times(1)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
+        verify(filterChain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void shouldRunInlineCOBAndProceedWhenLoanIsBehind() throws ServletException, IOException {
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
+
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
+
+        LoanIdAndLastClosedBusinessDate result = mock(LoanIdAndLastClosedBusinessDate.class);
+        given(result.getId()).willReturn(2L);
+        given(request.getPathInfo()).willReturn("/loans/2?command=approve");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
+        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
+        given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
+                eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
+                        .willReturn(Collections.singletonList(result));
+
+        given(context.authenticatedUser()).willReturn(appUser);
+
+        testObj.doFilterInternal(request, response, filterChain);
+        verify(inlineLoanCOBExecutorService, times(1)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
+        verify(filterChain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void shouldNotRunInlineCOBAndProceedWhenLoanIsNotBehind() throws ServletException, IOException {
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
+
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
+
+        LoanIdAndLastClosedBusinessDate result = mock(LoanIdAndLastClosedBusinessDate.class);
+        given(result.getId()).willReturn(2L);
+        given(request.getPathInfo()).willReturn("/loans/2?command=approve");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
+        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
+        given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
+                eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
+                        .willReturn(Collections.emptyList());
+
+        given(context.authenticatedUser()).willReturn(appUser);
+
+        testObj.doFilterInternal(request, response, filterChain);
+        verify(inlineLoanCOBExecutorService, times(0)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
+        verify(filterChain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void shouldNotRunInlineCOBAndProceedWhenLoanIsBehindForLoanCreation() throws ServletException, IOException {
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
+
+        given(request.getPathInfo()).willReturn("/loans");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+
+        given(context.authenticatedUser()).willReturn(appUser);
+
+        testObj.doFilterInternal(request, response, filterChain);
+        verify(inlineLoanCOBExecutorService, times(0)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
+        verify(filterChain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void shouldNotRunInlineCOBForCatchUp() throws ServletException, IOException {
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
+
+        given(request.getPathInfo()).willReturn("/loans/catch-up");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+
+        given(context.authenticatedUser()).willReturn(appUser);
+
+        testObj.doFilterInternal(request, response, filterChain);
+        verify(inlineLoanCOBExecutorService, times(0)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
         verify(filterChain, times(1)).doFilter(request, response);
     }
 

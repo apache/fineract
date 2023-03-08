@@ -155,7 +155,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     }
 
     private List<LoanIdAndLastClosedBusinessDate> getLoansToBeProcessed(List<Long> loanIds, LocalDate cobBusinessDate) {
-        return loanRepository.findAllNonClosedLoansBehindByLoanIds(cobBusinessDate, loanIds);
+        return loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(cobBusinessDate, loanIds);
     }
 
     private List<LoanAccountLock> getLoanAccountLocks(List<Long> loanIds) {
