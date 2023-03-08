@@ -23,10 +23,17 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "m_working_days")
 public class WorkingDays extends AbstractPersistableCustom {
@@ -43,43 +50,6 @@ public class WorkingDays extends AbstractPersistableCustom {
     @Column(name = "extend_term_holiday_repayment", nullable = false)
     private Boolean extendTermForRepaymentsOnHolidays;
 
-    protected WorkingDays() {
-
-    }
-
-    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments,
-            final Boolean extendTermForRepaymentsOnHolidays) {
-        this.recurrence = recurrence;
-        this.repaymentReschedulingType = repaymentReschedulingType;
-        this.extendTermForDailyRepayments = extendTermForDailyRepayments;
-        this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
-    }
-
-    /**
-     * @return the recurrence
-     */
-    public String getRecurrence() {
-        return this.recurrence;
-    }
-
-    /**
-     * @return the repaymentReschedulingType
-     */
-    public Integer getRepaymentReschedulingType() {
-        return this.repaymentReschedulingType;
-    }
-
-    public void setRepaymentReschedulingType(Integer repaymentReschedulingType) {
-        this.repaymentReschedulingType = repaymentReschedulingType;
-    }
-
-    public Boolean getExtendTermForDailyRepayments() {
-        return this.extendTermForDailyRepayments;
-    }
-
-    public Boolean getExtendTermForRepaymentsOnHolidays() {
-        return this.extendTermForRepaymentsOnHolidays;
-    }
 
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);

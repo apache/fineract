@@ -18,13 +18,10 @@
  */
 package org.apache.fineract.organisation.workingdays.domain;
 
+import lombok.AllArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
+@AllArgsConstructor
 public final class WorkingDaysEnumerations {
-
-    private WorkingDaysEnumerations() {
-
-    }
 
     public static EnumOptionData workingDaysStatusType(final int id) {
         return repaymentRescheduleType(RepaymentRescheduleType.fromInt(id));

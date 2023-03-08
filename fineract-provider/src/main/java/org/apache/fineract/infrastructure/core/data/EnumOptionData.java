@@ -20,15 +20,15 @@ package org.apache.fineract.infrastructure.core.data;
 
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 
 /**
  * <p>
  * Immutable data object representing generic enumeration value.
  * </p>
  */
-@Getter
+@Data
 @EqualsAndHashCode
 @AllArgsConstructor
 public class EnumOptionData implements Serializable {
