@@ -53,7 +53,9 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -1916,6 +1918,53 @@ public class BatchApiTest {
         Assertions.assertTrue(payoutRefund.get("manuallyReversed").getAsBoolean());
         Assertions.assertEquals(date, merchantIssuedDate);
         Assertions.assertEquals(date, payoutRefundDate);
+    }
+
+    @Test
+    public void shouldReturnOkStatusOnModifyingSavingAccount() {
+        final String startDate = "10 April 2022";
+        final SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
+        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
+        final Integer savingsProductID = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+        Assertions.assertNotNull(savingsProductID);
+        final Integer savingsId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID, "INDIVIDUAL",
+                startDate);
+        Assertions.assertNotNull(savingsId);
+        HashMap savingsStatusHashMap = savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsStatusHashMap = savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, Long.valueOf(savingsId), "chargeStatus=all", null);
+        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L);
+        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L);
+
+        final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
+                holdAmountOnSavingAccountRequest);
+        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests1));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(2).getStatusCode(),
+                "Verify Status Code 200 for hold amount on saving account");
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final Long holdAmountTransactionId = jsonHelper.parse(responses1.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
+
+        final BatchRequest releaseAmountOnSavingAccountRequest = BatchHelper.releaseAmountOnSavingAccount(2L, 1L, holdAmountTransactionId);
+        final BatchRequest withdrawSavingAccountRequest = BatchHelper.withdrawSavingAccount(3L, 1L);
+
+        final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
+                withdrawSavingAccountRequest);
+        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests2));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(1).getStatusCode(),
+                "Verify Status Code 200 for release amount on saving account");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(2).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
     }
 
     /**
