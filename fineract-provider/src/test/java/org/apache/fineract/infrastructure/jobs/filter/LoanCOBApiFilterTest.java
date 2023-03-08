@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -48,6 +49,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
@@ -78,16 +81,25 @@ class LoanCOBApiFilterTest {
     @Mock
     private LoanRepository loanRepository;
 
+    @Mock
+    private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
+
     @Test
     void shouldLoanAndExternalMatchToo() {
         String externalId = UUID.randomUUID().toString();
         Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12").matches());
         Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12?correct=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12?correct=parameter").matches());
         Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId).matches());
         Assertions.assertTrue(
                 LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId + "?additional=parameter").matches());
         Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12").replaceAll("$1"));
         Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").replaceAll("$1"));
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12").replaceAll("$1"));
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12?correct=parameter").replaceAll("$1"));
         Assertions.assertEquals(externalId,
                 LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId).replaceAll("$1"));
         Assertions.assertEquals(externalId,
@@ -202,6 +214,35 @@ class LoanCOBApiFilterTest {
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
         given(context.authenticatedUser()).willReturn(appUser);
         given(loanRepository.findIdByExternalId(any())).willReturn(2L);
+        given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
+                eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
+                        .willReturn(Collections.emptyList());
+
+        testObj.doFilterInternal(request, response, filterChain);
+        verify(filterChain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void shouldProceedWhenRescheduleLoanIsNotLockedAndNotBehind() throws ServletException, IOException {
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
+        Long resourceId = 123L;
+        given(request.getPathInfo()).willReturn("/rescheduleloans/" + resourceId + "/charges");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
+        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
+        LoanRescheduleRequest rescheduleRequest = mock(LoanRescheduleRequest.class);
+        given(loanRescheduleRequestRepository.getLoanIdByRescheduleRequestId(resourceId)).willReturn(Optional.of(2L));
+        given(context.authenticatedUser()).willReturn(appUser);
+
         given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
                         .willReturn(Collections.emptyList());

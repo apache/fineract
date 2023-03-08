@@ -48,6 +48,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.apache.http.HttpStatus;
 import org.springframework.http.HttpMethod;
@@ -64,12 +65,14 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     private final InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
     private final LoanRepository loanRepository;
 
+    private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
+
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
     public static final Pattern IGNORE_LOAN_PATH_PATTERN = Pattern.compile("\\/loans\\/catch-up");
-    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("\\/?loans\\/(?:external-id\\/)?([^\\/\\?]+).*");
+    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("\\/(?:reschedule)?loans\\/(?:external-id\\/)?([^\\/\\?]+).*");
 
-    public static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("\\/?loans\\/glimAccount\\/(\\d+).*");
+    public static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("\\/loans\\/glimAccount\\/(\\d+).*");
     private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find()
             || LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(s).find();
     private static final String JOB_NAME = "INLINE_LOAN_COB";
@@ -123,7 +126,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
                 } else {
                     try {
                         List<Long> loanIds = calculateRelevantLoanIds(request.getPathInfo());
-                        if (isLoanSoftLocked(loanIds) || isLoanBehind(loanIds)) {
+                        if (!loanIds.isEmpty() && (isLoanSoftLocked(loanIds) || isLoanBehind(loanIds))) {
                             executeInlineCob(loanIds);
                         }
                         proceed(filterChain, request, response);
@@ -207,6 +210,8 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
             if (isExternal(pathInfo)) {
                 String externalId = id;
                 return loanRepository.findIdByExternalId(new ExternalId(externalId));
+            } else if (isRescheduleLoans(pathInfo)) {
+                return loanRescheduleRequestRepository.getLoanIdByRescheduleRequestId(Long.valueOf(id)).orElse(null);
             } else if (StringUtils.isNumeric(id)) {
                 return Long.valueOf(id);
             } else {
@@ -219,6 +224,10 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
 
     private boolean isExternal(String pathInfo) {
         return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("external-id");
+    }
+
+    private boolean isRescheduleLoans(String pathInfo) {
+        return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("/rescheduleloans/");
     }
 
     private boolean isOnApiList(String pathInfo, String method) {
@@ -245,7 +254,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
                 } else {
                     try {
                         List<Long> result = calculateRelevantLoanIds("/" + batchRequest.getRelativeUrl());
-                        if (isLoanSoftLocked(result) || isLoanBehind(result)) {
+                        if (!result.isEmpty() && (isLoanSoftLocked(result) || isLoanBehind(result))) {
                             executeInlineCob(result);
                         }
                         return chain.serviceCall(batchRequest, uriInfo);
