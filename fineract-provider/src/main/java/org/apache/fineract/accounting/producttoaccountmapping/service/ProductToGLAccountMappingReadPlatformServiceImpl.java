@@ -148,7 +148,16 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
+                            gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
+                            gLAccountData);
                 }
+
             }
         } else if (AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(accountingType)
                 || AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingType)) {
@@ -198,6 +207,14 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
+                            gLAccountData);
+                } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
+                            gLAccountData);
                 }
             }
 

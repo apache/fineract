@@ -123,7 +123,11 @@ public final class LoanProductDataValidator {
             LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(),
             LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(),
             LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(),
-            LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
+            LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
+            LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, LoanProductConstants.SHORT_NAME,
@@ -657,6 +661,21 @@ public final class LoanProductDataValidator {
                     .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), element);
             baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue())
                     .value(incomeFromChargeOffPenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
+
+            final Long incomeFromGoodwillCreditInterestAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue())
+                    .value(incomeFromGoodwillCreditInterestAccountId).ignoreIfNull().integerGreaterThanZero();
+
+            final Long incomeFromGoodwillCreditFeesAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue())
+                    .value(incomeFromGoodwillCreditFeesAccountId).ignoreIfNull().integerGreaterThanZero();
+
+            final Long incomeFromGoodwillCreditPenaltyAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue())
+                    .value(incomeFromGoodwillCreditPenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
 
             final Long chargeOffExpenseAccountId = this.fromApiJsonHelper
                     .extractLongNamed(LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(), element);
@@ -1527,6 +1546,21 @@ public final class LoanProductDataValidator {
                 .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), element);
         baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue())
                 .value(incomeFromChargeOffPenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
+
+        final Long incomeFromGoodwillCreditInterestAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(), element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue())
+                .value(incomeFromGoodwillCreditInterestAccountId).ignoreIfNull().integerGreaterThanZero();
+
+        final Long incomeFromGoodwillCreditFeesAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue())
+                .value(incomeFromGoodwillCreditFeesAccountId).ignoreIfNull().integerGreaterThanZero();
+
+        final Long incomeFromGoodwillCreditPenaltyAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(), element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue())
+                .value(incomeFromGoodwillCreditPenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
 
         final Long chargeOffExpenseAccountId = this.fromApiJsonHelper
                 .extractLongNamed(LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(), element);

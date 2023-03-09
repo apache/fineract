@@ -429,6 +429,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
         final Float overpaidAmount = 159.00f;
         final Float goodwillAmount = totalOutstanding + overpaidAmount;
+        final Float goodwillAmountInExpense = principalOutstanding + overpaidAmount;
         final String goodwillDate = "09 January 2022";
         HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
                 goodwillAmount, this.disbursedLoanID, "");
@@ -439,7 +440,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, goodwillDate,
                 new JournalEntry(overpaidAmount, JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, goodwillDate,
-                new JournalEntry(goodwillAmount, JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(goodwillAmountInExpense, JournalEntry.TransactionType.DEBIT));
 
     }
 
@@ -455,6 +456,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
         final Float overpaidAmount = 159.00f;
         final Float goodwillAmount = totalOutstanding + overpaidAmount;
+        final Float goodwillAmountInExpense = principalOutstanding + overpaidAmount;
         final String goodwillDate = "09 January 2022";
         HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
                 goodwillAmount, this.disbursedLoanID, "");
@@ -467,7 +469,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, goodwillDate,
                 new JournalEntry(overpaidAmount, JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, goodwillDate,
-                new JournalEntry(goodwillAmount, JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(goodwillAmountInExpense, JournalEntry.TransactionType.DEBIT));
 
     }
 

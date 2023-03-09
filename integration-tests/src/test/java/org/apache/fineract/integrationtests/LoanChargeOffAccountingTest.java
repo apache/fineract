@@ -91,7 +91,7 @@ public class LoanChargeOffAccountingTest {
         // Product to GL account mapping for test
         // ASSET
         // -fundSourceAccountId,loanPortfolioAccountId,transfersInSuspenseAccountId,receivableFeeAccountId,receivablePenaltyAccountId,receivableInterestAccountId
-        // INCOME-interestOnLoanAccountId,incomeFromFeeAccountId,incomeFromPenaltyAccountId,incomeFromRecoveryAccountId,incomeFromChargeOffInterestAccountId,incomeFromChargeOffFeesAccountId,incomeFromChargeOffPenaltyAccountId
+        // INCOME-interestOnLoanAccountId,incomeFromFeeAccountId,incomeFromPenaltyAccountId,incomeFromRecoveryAccountId,incomeFromChargeOffInterestAccountId,incomeFromChargeOffFeesAccountId,incomeFromChargeOffPenaltyAccountId,incomeFromGoodwillCreditInterestAccountId,incomeFromGoodwillCreditFeesAccountId,incomeFromGoodwillCreditPenaltyAccountId
         // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
         // LIABILITY-overpaymentLiabilityAccountId
 
@@ -135,9 +135,7 @@ public class LoanChargeOffAccountingTest {
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "6 September 2022",
                 new JournalEntry(1000, JournalEntry.TransactionType.DEBIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
-                new JournalEntry(10, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
-                new JournalEntry(10, JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(20, JournalEntry.TransactionType.DEBIT));
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -246,7 +244,7 @@ public class LoanChargeOffAccountingTest {
         // Product to GL account mapping for test
         // ASSET
         // -fundSourceAccountId,loanPortfolioAccountId,transfersInSuspenseAccountId
-        // INCOME-interestOnLoanAccountId,incomeFromFeeAccountId,incomeFromPenaltyAccountId,incomeFromRecoveryAccountId,incomeFromChargeOffInterestAccountId,incomeFromChargeOffFeesAccountId,incomeFromChargeOffPenaltyAccountId
+        // INCOME-interestOnLoanAccountId,incomeFromFeeAccountId,incomeFromPenaltyAccountId,incomeFromRecoveryAccountId,incomeFromChargeOffInterestAccountId,incomeFromChargeOffFeesAccountId,incomeFromChargeOffPenaltyAccountId,incomeFromGoodwillCreditInterestAccountId,incomeFromGoodwillCreditFeesAccountId,incomeFromGoodwillCreditPenaltyAccountId
         // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
         // LIABILITY-overpaymentLiabilityAccountId
 
@@ -303,9 +301,7 @@ public class LoanChargeOffAccountingTest {
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "6 September 2022",
                 new JournalEntry(1000, JournalEntry.TransactionType.DEBIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
-                new JournalEntry(10, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
-                new JournalEntry(10, JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(20, JournalEntry.TransactionType.DEBIT));
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -409,6 +405,275 @@ public class LoanChargeOffAccountingTest {
                 new JournalEntry(10, JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, transactionDate,
                 new JournalEntry(10, JournalEntry.TransactionType.DEBIT));
+    }
+
+    // Tests for Goodwill Credit accounting changes
+    @Test
+    public void loanAccountingTreatmentTestForGoodwillCreditPeriodicAccrualAccounting_NoChargeOff() {
+        // Loan ExternalId
+        String loanExternalIdStr = UUID.randomUUID().toString();
+
+        // Product to GL account mapping for test
+        // ASSET
+        // -fundSourceAccountId,loanPortfolioAccountId,transfersInSuspenseAccountId,receivableFeeAccountId,receivablePenaltyAccountId,receivableInterestAccountId
+        // INCOME-interestOnLoanAccountId,incomeFromFeeAccountId,incomeFromPenaltyAccountId,incomeFromRecoveryAccountId,incomeFromChargeOffInterestAccountId,incomeFromChargeOffFeesAccountId,incomeFromChargeOffPenaltyAccountId,incomeFromGoodwillCreditInterestAccountId,incomeFromGoodwillCreditFeesAccountId,incomeFromGoodwillCreditPenaltyAccountId
+        // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
+        // LIABILITY-overpaymentLiabilityAccountId
+
+        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+
+        // apply charges
+        Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+
+        LocalDate targetDate = LocalDate.of(2022, 9, 5);
+        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+
+        // apply penalty
+        Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "110", true));
+
+        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+
+        // Goodwill Credit
+        final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("06 September 2022").locale("en")
+                        .transactionAmount(800.0));
+
+        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+
+        // verify Journal Entries for Goodwill Credit
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "6 September 2022",
+                new JournalEntry(800, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "6 September 2022",
+                new JournalEntry(780, JournalEntry.TransactionType.DEBIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(20, JournalEntry.TransactionType.DEBIT));
+
+    }
+
+    @Test
+    public void loanAccountingTreatmentTestForGoodwillCreditPeriodicAccrualAccounting_ChargeOff() {
+        // Loan ExternalId
+        String loanExternalIdStr = UUID.randomUUID().toString();
+
+        // Product to GL account mapping for test
+        // ASSET
+        // -fundSourceAccountId,loanPortfolioAccountId,transfersInSuspenseAccountId,receivableFeeAccountId,receivablePenaltyAccountId,receivableInterestAccountId
+        // INCOME-interestOnLoanAccountId,incomeFromFeeAccountId,incomeFromPenaltyAccountId,incomeFromRecoveryAccountId,incomeFromChargeOffInterestAccountId,incomeFromChargeOffFeesAccountId,incomeFromChargeOffPenaltyAccountId,incomeFromGoodwillCreditInterestAccountId,incomeFromGoodwillCreditFeesAccountId,incomeFromGoodwillCreditPenaltyAccountId
+        // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
+        // LIABILITY-overpaymentLiabilityAccountId
+
+        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+
+        // apply charges
+        Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+
+        LocalDate targetDate = LocalDate.of(2022, 9, 5);
+        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+
+        // apply penalty
+        Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+
+        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+
+        // set loan as chargeoff
+        String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
+        Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+        String transactionExternalId = UUID.randomUUID().toString();
+        this.loanTransactionHelper.chargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("6 September 2022")
+                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+        assertTrue(loanDetails.getChargedOff());
+
+        // verify Journal Entries For ChargeOff Transaction
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "6 September 2022",
+                new JournalEntry(1020, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "6 September 2022",
+                new JournalEntry(1000, JournalEntry.TransactionType.DEBIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(20, JournalEntry.TransactionType.DEBIT));
+
+        // Goodwill Credit
+        final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("08 September 2022").locale("en")
+                        .transactionAmount(800.0));
+
+        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+        assertTrue(loanDetails.getChargedOff());
+
+        // verify Journal Entries for Goodwill Credit
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "8 September 2022",
+                new JournalEntry(800, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "8 September 2022",
+                new JournalEntry(20, JournalEntry.TransactionType.DEBIT));
+        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "8 September 2022",
+                new JournalEntry(780, JournalEntry.TransactionType.DEBIT));
+
+    }
+
+    @Test
+    public void loanAccountingTreatmentTestForCashBasedAccounting_NoChargeOff() {
+        // Loan ExternalId
+        String loanExternalIdStr = UUID.randomUUID().toString();
+
+        // Product to GL account mapping for test
+        // ASSET
+        // -fundSourceAccountId,loanPortfolioAccountId,transfersInSuspenseAccountId
+        // INCOME-interestOnLoanAccountId,incomeFromFeeAccountId,incomeFromPenaltyAccountId,incomeFromRecoveryAccountId,incomeFromChargeOffInterestAccountId,incomeFromChargeOffFeesAccountId,incomeFromChargeOffPenaltyAccountId,incomeFromGoodwillCreditInterestAccountId,incomeFromGoodwillCreditFeesAccountId,incomeFromGoodwillCreditPenaltyAccountId
+        // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
+        // LIABILITY-overpaymentLiabilityAccountId
+
+        final Integer loanProductID = createLoanProductWithCashBasedAccounting(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+
+        // apply charges
+        Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+
+        LocalDate targetDate = LocalDate.of(2022, 9, 5);
+        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+
+        // apply penalty
+        Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+
+        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+
+        // Goodwill Credit
+        final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("06 September 2022").locale("en")
+                        .transactionAmount(800.0));
+
+        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+
+        // verify Journal Entries for Goodwill Credit
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "6 September 2022",
+                new JournalEntry(780, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(10, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(10, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "6 September 2022",
+                new JournalEntry(780, JournalEntry.TransactionType.DEBIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(20, JournalEntry.TransactionType.DEBIT));
+
+    }
+
+    @Test
+    public void loanAccountingTreatmentTestForCashBasedAccounting_ChargeOff() {
+        // Loan ExternalId
+        String loanExternalIdStr = UUID.randomUUID().toString();
+
+        // Product to GL account mapping for test
+        // ASSET
+        // -fundSourceAccountId,loanPortfolioAccountId,transfersInSuspenseAccountId
+        // INCOME-interestOnLoanAccountId,incomeFromFeeAccountId,incomeFromPenaltyAccountId,incomeFromRecoveryAccountId,incomeFromChargeOffInterestAccountId,incomeFromChargeOffFeesAccountId,incomeFromChargeOffPenaltyAccountId,incomeFromGoodwillCreditInterestAccountId,incomeFromGoodwillCreditFeesAccountId,incomeFromGoodwillCreditPenaltyAccountId
+        // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
+        // LIABILITY-overpaymentLiabilityAccountId
+
+        final Integer loanProductID = createLoanProductWithCashBasedAccounting(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+
+        // apply charges
+        Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+
+        LocalDate targetDate = LocalDate.of(2022, 9, 5);
+        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+
+        // apply penalty
+        Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+
+        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+
+        // set loan as chargeoff
+        String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
+        Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+        String transactionExternalId = UUID.randomUUID().toString();
+        this.loanTransactionHelper.chargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("6 September 2022")
+                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+
+        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+        assertTrue(loanDetails.getChargedOff());
+
+        // verify Journal Entries For ChargeOff Transaction
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "6 September 2022",
+                new JournalEntry(1000, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(20, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "6 September 2022",
+                new JournalEntry(1000, JournalEntry.TransactionType.DEBIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(20, JournalEntry.TransactionType.DEBIT));
+
+        // Goodwill Credit
+        final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
+                        .transactionAmount(800.0));
+
+        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+        assertTrue(loanDetails.getChargedOff());
+
+        // verify Journal Entries for Goodwill Credit
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "6 September 2022",
+                new JournalEntry(1000, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(20, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "6 September 2022",
+                new JournalEntry(1000, JournalEntry.TransactionType.DEBIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "6 September 2022",
+                new JournalEntry(20, JournalEntry.TransactionType.DEBIT));
     }
 
     private Integer createLoanAccount(final Integer clientID, final Integer loanProductID, final String externalId) {
