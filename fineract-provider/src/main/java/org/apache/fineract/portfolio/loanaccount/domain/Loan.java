@@ -3226,7 +3226,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
         if (loanTransactionDate.isBefore(getDisbursementDate())) {
             final String errorMessage = "The transaction date cannot be before the loan disbursement date: "
-                    + getApprovedOnDate().toString();
+                    + getDisbursementDate().toString();
             throw new InvalidLoanStateTransitionException("transaction", "cannot.be.before.disbursement.date", errorMessage,
                     loanTransactionDate, getDisbursementDate());
         }
@@ -6197,7 +6197,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
         if (loanTransactionDate.isBefore(getDisbursementDate())) {
             final String errorMessage = "The transaction date cannot be before the loan disbursement date: "
-                    + getApprovedOnDate().toString();
+                    + getDisbursementDate().toString();
             throw new InvalidLoanStateTransitionException("transaction", "cannot.be.before.disbursement.date", errorMessage,
                     loanTransactionDate, getDisbursementDate());
         }
