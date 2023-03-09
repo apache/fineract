@@ -2729,6 +2729,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     "Loan: " + loanId + " charge-off cannot be executed. User transaction was found after the charge-off transaction date!",
                     loanId);
         }
+        if (transactionDate.isAfter(DateUtils.getBusinessLocalDate())) {
+            final String errorMessage = "The transaction date cannot be in the future.";
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.cannot.be.a.future.date", errorMessage,
+                    transactionDate);
+        }
         if (loan.isInterestBearing()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.interest.bearing",
                     "Loan: " + loanId + " Charge-off is not allowed. Loan Account is interest bearing", loanId);
