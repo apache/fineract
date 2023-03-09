@@ -19,6 +19,7 @@
 package org.apache.fineract.cob.loan;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -28,17 +29,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AddPeriodicAccrualEntriesBusinessStep implements LoanCOBBusinessStep {
 
     private final LoanAccrualPlatformService loanAccrualPlatformService;
 
     @Override
     public Loan execute(Loan loan) {
+        log.debug("start processing period accrual business step for loan with Id [{}]", loan.getId());
         try {
             loanAccrualPlatformService.addPeriodicAccruals(DateUtils.getBusinessLocalDate(), loan);
         } catch (MultiException e) {
             throw new BusinessStepException(String.format("Fail to process period accrual for loan id [%s]", loan.getId()), e);
         }
+        log.debug("end processing period accrual business step for loan Id [{}]", loan.getId());
         return loan;
     }
 

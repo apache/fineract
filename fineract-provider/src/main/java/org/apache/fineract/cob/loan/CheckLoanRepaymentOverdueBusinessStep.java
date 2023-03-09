@@ -21,6 +21,7 @@ package org.apache.fineract.cob.loan;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentOverdueBusinessEvent;
@@ -29,6 +30,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CheckLoanRepaymentOverdueBusinessStep implements LoanCOBBusinessStep {
@@ -38,6 +40,7 @@ public class CheckLoanRepaymentOverdueBusinessStep implements LoanCOBBusinessSte
 
     @Override
     public Loan execute(Loan loan) {
+        log.debug("start processing loan repayment overdue business step for loan with Id [{}]", loan.getId());
         Long numberOfDaysAfterDueDateToRaiseEvent = configurationDomainService.retrieveRepaymentOverdueDays();
         final LocalDate currentDate = DateUtils.getBusinessLocalDate();
         final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
@@ -50,6 +53,7 @@ public class CheckLoanRepaymentOverdueBusinessStep implements LoanCOBBusinessSte
                 }
             }
         }
+        log.debug("end processing loan repayment overdue business step for loan with Id [{}]", loan.getId());
         return loan;
     }
 
