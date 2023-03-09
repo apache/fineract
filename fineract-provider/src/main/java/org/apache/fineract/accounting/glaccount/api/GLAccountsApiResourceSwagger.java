@@ -156,6 +156,30 @@ final class GLAccountsApiResourceSwagger {
 
         @Schema(example = "Cash at Bangalore")
         public String name;
+
+        @Schema(example = "100001")
+        public String glCode;
+
+        @Schema(example = "true")
+        public Boolean manualEntriesAllowed;
+
+        @Schema(example = "1")
+        public Integer type;
+
+        @Schema(example = "10")
+        public Long tagId;
+
+        @Schema(example = "1")
+        public Long parentId;
+
+        @Schema(example = "1")
+        public Integer usage;
+
+        @Schema(example = "Desc")
+        public String description;
+
+        @Schema(example = "false")
+        public Boolean disabled;
     }
 
     @Schema(description = "PutGLAccountsResponse")
