@@ -7003,6 +7003,14 @@ public class ClientLoanIntegrationTest {
             loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount("03 September 2022", loanID, "1000");
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
+            exception = assertThrows(CallFailedRuntimeException.class, () -> {
+                this.loanTransactionHelper.chargeOffLoan((long) loanID,
+                        new PostLoansLoanIdTransactionsRequest().transactionDate("1 October 2022").locale("en").dateFormat("dd MMMM yyyy")
+                                .chargeOffReasonId((long) chargeOffReasonId));
+            });
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.transaction.cannot.be.a.future.date"));
+
             GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanID);
             assertTrue(loanDetails.getStatus().getActive());
             assertEquals(2000.0, loanDetails.getSummary().getTotalOutstanding());
