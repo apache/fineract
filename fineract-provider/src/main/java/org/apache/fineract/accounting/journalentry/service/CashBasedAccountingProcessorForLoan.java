@@ -195,13 +195,23 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         } else {
             accountMapForCredit.put(accountCredit, transactionPartAmount);
         }
-        Integer accountDebit = debitAccountType;
+        Integer accountDebit = returnExistingDebitAccountInMapMatchingGLAccount(loanProductId, paymentTypeId, debitAccountType,
+                accountMapForDebit);
         if (accountMapForDebit.containsKey(accountDebit)) {
             BigDecimal amount = accountMapForDebit.get(accountDebit).add(transactionPartAmount);
             accountMapForDebit.put(accountDebit, amount);
         } else {
             accountMapForDebit.put(accountDebit, transactionPartAmount);
         }
+    }
+
+    private Integer returnExistingDebitAccountInMapMatchingGLAccount(Long loanProductId, Long paymentTypeId, Integer accountType,
+            Map<Integer, BigDecimal> accountMap) {
+        GLAccount glAccount = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accountType, paymentTypeId);
+        Integer accountEntry = accountMap.entrySet().stream().filter(account -> this.helper
+                .getLinkedGLAccountForLoanProduct(loanProductId, account.getKey(), paymentTypeId).getGlCode().equals(glAccount.getGlCode()))
+                .map(Map.Entry::getKey).findFirst().orElse(accountType);
+        return accountEntry;
     }
 
     private void createJournalEntriesForChargeAdjustment(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
@@ -609,7 +619,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
 
             } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
                 populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
-                        CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), accountMapForCredit, accountMapForDebit);
+                        CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(), accountMapForCredit, accountMapForDebit);
             } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
                 populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
                         CashAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
@@ -636,7 +646,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
 
             } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
                 populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
-                        CashAccountsForLoan.GOODWILL_CREDIT.getValue(), accountMapForCredit, accountMapForDebit);
+                        CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), accountMapForCredit, accountMapForDebit);
 
             } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
                 populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
@@ -664,7 +674,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
 
             } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
                 populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId, CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
-                        CashAccountsForLoan.GOODWILL_CREDIT.getValue(), accountMapForCredit, accountMapForDebit);
+                        CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(), accountMapForCredit, accountMapForDebit);
 
             } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
                 populateCreditDebitMaps(loanProductId, penaltiesAmount, paymentTypeId, CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
@@ -755,17 +765,27 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
+        Map<Integer, BigDecimal> debitAccountMapForGoodwillCredit = new LinkedHashMap<>();
 
         if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO, loanProductId,
                     paymentTypeId, loanId, transactionId, transactionDate, principalAmount, isReversal);
+            if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateDebitAccountEntry(loanProductId, principalAmount, CashAccountsForLoan.GOODWILL_CREDIT.getValue(),
+                        debitAccountMapForGoodwillCredit, paymentTypeId);
+            }
         }
 
         if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(interestAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.INTEREST_ON_LOANS,
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, interestAmount, isReversal);
+            if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateDebitAccountEntry(loanProductId, interestAmount,
+                        CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(), debitAccountMapForGoodwillCredit,
+                        paymentTypeId);
+            }
         }
 
         if (feesAmount != null && feesAmount.compareTo(BigDecimal.ZERO) > 0) {
@@ -773,6 +793,10 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                     CashAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate, feesAmount,
                     isReversal, loanTransactionDTO.getFeePayments());
+            if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateDebitAccountEntry(loanProductId, feesAmount, CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(),
+                        debitAccountMapForGoodwillCredit, paymentTypeId);
+            }
         }
 
         if (penaltiesAmount != null && penaltiesAmount.compareTo(BigDecimal.ZERO) > 0) {
@@ -780,12 +804,21 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                     CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue(), loanProductId, loanId, transactionId, transactionDate,
                     penaltiesAmount, isReversal, loanTransactionDTO.getPenaltyPayments());
+            if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateDebitAccountEntry(loanProductId, penaltiesAmount,
+                        CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(), debitAccountMapForGoodwillCredit,
+                        paymentTypeId);
+            }
         }
 
         if (overPaymentAmount != null && overPaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalDebitAmount = totalDebitAmount.add(overPaymentAmount);
             this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.OVERPAYMENT, loanProductId,
                     paymentTypeId, loanId, transactionId, transactionDate, overPaymentAmount, isReversal);
+            if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                populateDebitAccountEntry(loanProductId, overPaymentAmount, CashAccountsForLoan.GOODWILL_CREDIT.getValue(),
+                        debitAccountMapForGoodwillCredit, paymentTypeId);
+            }
         }
 
         /*** create a single debit entry (or reversal) for the entire amount **/
@@ -797,8 +830,12 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
         } else {
             if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
-                this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.GOODWILL_CREDIT.getValue(),
-                        loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+
+                // create debit entries
+                for (Map.Entry<Integer, BigDecimal> debitEntry : debitAccountMapForGoodwillCredit.entrySet()) {
+                    this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, debitEntry.getKey().intValue(),
+                            loanProductId, paymentTypeId, loanId, transactionId, transactionDate, debitEntry.getValue(), isReversal);
+                }
 
             } else {
                 this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(),
@@ -815,6 +852,18 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, incomeAccount,
                     CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
                     totalDebitAmount, isReversal);
+        }
+    }
+
+    private void populateDebitAccountEntry(Long loanProductId, BigDecimal transactionPartAmount, Integer debitAccountType,
+            Map<Integer, BigDecimal> accountMapForDebit, Long paymentTypeId) {
+        Integer accountDebit = returnExistingDebitAccountInMapMatchingGLAccount(loanProductId, paymentTypeId, debitAccountType,
+                accountMapForDebit);
+        if (accountMapForDebit.containsKey(accountDebit)) {
+            BigDecimal amount = accountMapForDebit.get(accountDebit).add(transactionPartAmount);
+            accountMapForDebit.put(accountDebit, amount);
+        } else {
+            accountMapForDebit.put(accountDebit, transactionPartAmount);
         }
     }
 

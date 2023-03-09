@@ -446,6 +446,9 @@ public class LoanProductTestBuilder {
                 map.put("incomeFromChargeOffInterestAccountId", ID);
                 map.put("incomeFromChargeOffFeesAccountId", ID);
                 map.put("incomeFromChargeOffPenaltyAccountId", ID);
+                map.put("incomeFromGoodwillCreditInterestAccountId", ID);
+                map.put("incomeFromGoodwillCreditFeesAccountId", ID);
+                map.put("incomeFromGoodwillCreditPenaltyAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();
@@ -489,6 +492,9 @@ public class LoanProductTestBuilder {
                 map.put("incomeFromChargeOffInterestAccountId", ID);
                 map.put("incomeFromChargeOffFeesAccountId", ID);
                 map.put("incomeFromChargeOffPenaltyAccountId", ID);
+                map.put("incomeFromGoodwillCreditInterestAccountId", ID);
+                map.put("incomeFromGoodwillCreditFeesAccountId", ID);
+                map.put("incomeFromGoodwillCreditPenaltyAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();
