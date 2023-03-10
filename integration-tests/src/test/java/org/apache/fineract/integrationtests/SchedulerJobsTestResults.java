@@ -19,6 +19,8 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.truth.Truth;
 import io.restassured.builder.RequestSpecBuilder;
@@ -48,7 +50,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
@@ -661,11 +665,15 @@ public class SchedulerJobsTestResults {
                 ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
         Assertions.assertNotNull(overdueFeeChargeId);
 
+        Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+        Assertions.assertNotNull(fee);
+
         final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
         Assertions.assertNotNull(loanProductID);
         List<Integer> loanIDs = new ArrayList<>();
         HashMap loanStatusHashMap;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "10 January 2020");
 
             Assertions.assertNotNull(loanID);
@@ -682,6 +690,8 @@ public class SchedulerJobsTestResults {
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
             loanIDs.add(loanID);
 
+            this.loanTransactionHelper.addChargesForLoan(loanID,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 March 2020", "10", null));
         }
 
         String jobName = "Loan COB";
@@ -690,16 +700,80 @@ public class SchedulerJobsTestResults {
             List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
                     loanId);
 
+            Assertions.assertEquals(10.00f, (Float) repaymentScheduleDataAfter.get(1).get("feeChargesDue"),
+                    "Verifying From Fee Charges due for first Repayment after Successful completion of Scheduler Job");
             Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
-                    "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
+                    "Verifying From Penalty Charges due for first Repayment after Successful completion of Scheduler Job");
             Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(2).get("penaltyChargesDue"),
-                    "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
+                    "Verifying From Penalty Charges due for first Repayment after Successful completion of Scheduler Job");
             Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(3).get("penaltyChargesDue"),
-                    "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
+                    "Verifying From Penalty Charges due for first Repayment after Successful completion of Scheduler Job");
             Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(4).get("penaltyChargesDue"),
-                    "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
+                    "Verifying From Penalty Charges due for first Repayment after Successful completion of Scheduler Job");
 
         }
+    }
+
+    @Test
+    public void testLoanCOBJobOutcomeWhileAddingFeeOnDisbursementDate() {
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 3, 2));
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
+
+        Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+        Assertions.assertNotNull(fee);
+
+        final Integer loanProductID = createLoanProductWithPeriodicAccrual(null);
+        Assertions.assertNotNull(loanProductID);
+
+        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "10 January 2020");
+
+        Assertions.assertNotNull(loanID);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 March 2020", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2020", loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        this.loanTransactionHelper.addChargesForLoan(loanID,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 March 2020", "10", null));
+
+        String jobName = "Loan COB";
+        this.schedulerJobHelper.executeAndAwaitJob(jobName);
+
+        List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
+
+        Assertions.assertEquals(10.00f, (Float) repaymentScheduleDataAfter.get(1).get("feeChargesDue"),
+                "Verifying From Fee Charges due for first Repayment after Successful completion of Scheduler Job");
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+        // First accrual transaction
+        assertTrue(getLoansLoanIdResponse.getTransactions().get(1).getType().getAccrual());
+        assertEquals(10.0f, getLoansLoanIdResponse.getTransactions().get(1).getFeeChargesPortion());
+        assertEquals(LocalDate.of(2020, 3, 2), getLoansLoanIdResponse.getTransactions().get(1).getDate());
+        Long transactionId = getLoansLoanIdResponse.getTransactions().get(1).getId();
+
+        final GetJournalEntriesTransactionIdResponse journalEntriesResponse = journalEntryHelper.getJournalEntries("L" + transactionId);
+        assertNotNull(journalEntriesResponse);
+        final List<JournalEntryTransactionItem> journalEntries = journalEntriesResponse.getPageItems();
+        assertEquals(2, journalEntries.size());
+        assertEquals(10, journalEntries.get(0).getAmount());
+        assertEquals(10, journalEntries.get(1).getAmount());
+        assertEquals(LocalDate.of(2020, 3, 2), journalEntries.get(1).getTransactionDate());
+        assertEquals(LocalDate.of(2020, 3, 2), journalEntries.get(0).getTransactionDate());
+
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 
     @Test
@@ -934,7 +1008,7 @@ public class SchedulerJobsTestResults {
         String JobName = "Update Non Performing Assets";
         this.schedulerJobHelper.executeAndAwaitJob(JobName);
         final Boolean isNPAAfter = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
-        Assertions.assertTrue(isNPAAfter);
+        assertTrue(isNPAAfter);
     }
 
     @Test
@@ -1087,6 +1161,21 @@ public class SchedulerJobsTestResults {
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .build(chargeId);
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    private Integer createLoanProductWithPeriodicAccrual(final String chargeId) {
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account assetFeeAndPenaltyAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
+                .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(chargeId);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
