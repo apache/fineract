@@ -84,7 +84,15 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             final Long parentId = JdbcSupport.getLong(rs, "parentId");
             final String parentName = rs.getString("parentName");
 
-            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null);
+            return new OfficeData()
+                    .setId(id)
+                    .setName(name)
+                    .setNameDecorated(nameDecorated)
+                    .setExternalId(externalId)
+                    .setOpeningDate(openingDate)
+                    .setHierarchy(hierarchy)
+                    .setParentId(parentId)
+                    .setParentName(parentName);
         }
     }
 
