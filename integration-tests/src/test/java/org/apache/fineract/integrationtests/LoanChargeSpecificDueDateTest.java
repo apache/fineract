@@ -87,7 +87,8 @@ public class LoanChargeSpecificDueDateTest {
 
         // Client and Loan account creation
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper, null);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithPeriodicAccrual(loanTransactionHelper,
+                null);
         assertNotNull(getLoanProductsProductResponse);
 
         // Older date to have more than one overdue installment
@@ -120,6 +121,25 @@ public class LoanChargeSpecificDueDateTest {
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"), false);
 
+        // Run Accruals
+        log.info("Running Periodic Accrual for date {}", transactionDate);
+        periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(operationDate);
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+
+        final Long transactionId = loanTransactionHelper.evaluateLastLoanTransactionData(getLoansLoanIdResponse,
+                "loanTransactionType.accrual", operationDate, Double.valueOf("10.00"));
+        assertNotNull(transactionId);
+        log.info("transactionId {}", transactionId);
+
+        final GetJournalEntriesTransactionIdResponse journalEntriesResponse = journalEntryHelper.getJournalEntries("L" + transactionId);
+        assertNotNull(journalEntriesResponse);
+        final List<JournalEntryTransactionItem> journalEntries = journalEntriesResponse.getPageItems();
+        assertEquals(2, journalEntries.size());
+        assertEquals(10, journalEntries.get(0).getAmount());
+        assertEquals(10, journalEntries.get(1).getAmount());
+        assertEquals(transactionDate, journalEntries.get(0).getTransactionDate());
+        assertEquals(transactionDate, journalEntries.get(1).getTransactionDate());
+
         // Make a full repayment to close the Loan
         Float amount = Float.valueOf("1010.00");
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
@@ -140,7 +160,8 @@ public class LoanChargeSpecificDueDateTest {
 
         // Client and Loan account creation
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper, null);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithPeriodicAccrual(loanTransactionHelper,
+                null);
         assertNotNull(getLoanProductsProductResponse);
 
         // Older date to have more than one overdue installment
@@ -173,6 +194,25 @@ public class LoanChargeSpecificDueDateTest {
         // Get loan details expecting to have a delinquency classification
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"), true);
+
+        // Run Accruals
+        log.info("Running Periodic Accrual for date {}", transactionDate);
+        periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(operationDate);
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+
+        final Long transactionId = loanTransactionHelper.evaluateLastLoanTransactionData(getLoansLoanIdResponse,
+                "loanTransactionType.accrual", operationDate, Double.valueOf("10.00"));
+        assertNotNull(transactionId);
+        log.info("transactionId {}", transactionId);
+
+        final GetJournalEntriesTransactionIdResponse journalEntriesResponse = journalEntryHelper.getJournalEntries("L" + transactionId);
+        assertNotNull(journalEntriesResponse);
+        final List<JournalEntryTransactionItem> journalEntries = journalEntriesResponse.getPageItems();
+        assertEquals(2, journalEntries.size());
+        assertEquals(10, journalEntries.get(0).getAmount());
+        assertEquals(10, journalEntries.get(1).getAmount());
+        assertEquals(transactionDate, journalEntries.get(0).getTransactionDate());
+        assertEquals(transactionDate, journalEntries.get(1).getTransactionDate());
 
         // Make a full repayment to close the Loan
         Float amount = Float.valueOf("1010.00");
