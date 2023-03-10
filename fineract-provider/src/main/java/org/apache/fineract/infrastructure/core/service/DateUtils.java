@@ -66,6 +66,11 @@ public final class DateUtils {
         return OffsetDateTime.now(zone).truncatedTo(ChronoUnit.SECONDS);
     }
 
+    public static OffsetDateTime getOffsetDateTimeOfTenantWithMilliseconds() {
+        final ZoneId zone = getDateTimeZoneOfTenant();
+        return OffsetDateTime.now(zone).truncatedTo(ChronoUnit.MILLIS);
+    }
+
     public static LocalDateTime getLocalDateTimeOfSystem() {
         return LocalDateTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS);
     }
