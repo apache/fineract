@@ -32,6 +32,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -41,6 +45,10 @@ import org.apache.fineract.organisation.office.exception.RootOfficeParentCannotB
 @Entity
 @Table(name = "m_office", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name_org"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "externalid_org") })
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class Office extends AbstractPersistableCustom implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY)
@@ -64,7 +72,10 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     private String externalId;
 
     public static Office headOffice(final String name, final LocalDate openingDate, final String externalId) {
-        return new Office(null, name, openingDate, externalId);
+        return new Office()
+                .setName(name)
+                .setOpeningDate(openingDate)
+                .setExternalId(externalId);
     }
 
     public static Office fromJson(final Office parentOffice, final JsonCommand command) {
@@ -72,37 +83,11 @@ public class Office extends AbstractPersistableCustom implements Serializable {
         final String name = command.stringValueOfParameterNamed("name");
         final LocalDate openingDate = command.localDateValueOfParameterNamed("openingDate");
         final String externalId = command.stringValueOfParameterNamed("externalId");
-        return new Office(parentOffice, name, openingDate, externalId);
-    }
-
-    protected Office() {
-        this.openingDate = null;
-        this.parent = null;
-        this.name = null;
-        this.externalId = null;
-    }
-
-    private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
-        this.parent = parent;
-        this.openingDate = openingDate;
-        if (parent != null) {
-            this.parent.addChild(this);
-        }
-
-        if (StringUtils.isNotBlank(name)) {
-            this.name = name.trim();
-        } else {
-            this.name = null;
-        }
-        if (StringUtils.isNotBlank(externalId)) {
-            this.externalId = externalId.trim();
-        } else {
-            this.externalId = null;
-        }
-    }
-
-    private void addChild(final Office office) {
-        this.children.add(office);
+        return new Office()
+                .setName(name)
+                .setParent(parentOffice)
+                .setOpeningDate(openingDate)
+                .setExternalId(externalId);
     }
 
     public Map<String, Object> update(final JsonCommand command) {

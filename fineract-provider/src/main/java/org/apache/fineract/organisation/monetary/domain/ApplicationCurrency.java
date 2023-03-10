@@ -104,7 +104,8 @@ public class ApplicationCurrency extends AbstractPersistableCustom {
     }
 
     public OrganisationCurrency toOrganisationCurrency() {
-        return new OrganisationCurrency(this.code, this.name, this.decimalPlaces, this.inMultiplesOf, this.nameCode, this.displaySymbol);
+        return new OrganisationCurrency().setCode(this.code).setName(this.name).setDecimalPlaces(this.decimalPlaces)
+                .setInMultiplesOf(this.inMultiplesOf).setNameCode(this.nameCode).setDisplaySymbol(this.displaySymbol);
     }
 
     public void setCode(final String code) {
