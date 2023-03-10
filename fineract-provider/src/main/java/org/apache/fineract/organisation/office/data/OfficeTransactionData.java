@@ -21,7 +21,6 @@ package org.apache.fineract.organisation.office.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
