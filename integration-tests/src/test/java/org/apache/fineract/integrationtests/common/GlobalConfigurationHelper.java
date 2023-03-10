@@ -119,9 +119,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 49 global configurations.
-        Assertions.assertEquals(49, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(49, actualGlobalConfigurations.size());
+        // There are currently 50 global configurations.
+        Assertions.assertEquals(50, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(50, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -548,6 +548,14 @@ public class GlobalConfigurationHelper {
         reportExportS3FolderName.put("enabled", false);
         reportExportS3FolderName.put("trapDoor", false);
         defaults.add(reportExportS3FolderName);
+
+        HashMap<String, Object> loanArrearsDelinquencyDisplayData = new HashMap<>();
+        loanArrearsDelinquencyDisplayData.put("id", 55);
+        loanArrearsDelinquencyDisplayData.put("name", "loan-arrears-delinquency-display-data");
+        loanArrearsDelinquencyDisplayData.put("value", 0);
+        loanArrearsDelinquencyDisplayData.put("enabled", true);
+        loanArrearsDelinquencyDisplayData.put("trapDoor", false);
+        defaults.add(loanArrearsDelinquencyDisplayData);
         return defaults;
     }
 
