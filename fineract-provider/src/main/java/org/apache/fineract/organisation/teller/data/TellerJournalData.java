@@ -20,6 +20,10 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * {@code TellerJournalData} represents an immutable journal data object.
@@ -30,31 +34,20 @@ import java.time.LocalDate;
  * @see java.io.Serializable
  * @since 2.0.0
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public final class TellerJournalData implements Serializable {
 
-    private final Long officeId;
-    private final Long tellerId;
-    private final LocalDate day;
-    private final Double openingBalance;
-    private final Double settledBalance;
-    private final Double closingBalance;
-    private final Double sumReceipts;
-    private final Double sumPayments;
-
-    /*
-     * Sole private CTOR to create a new instance.
-     */
-    private TellerJournalData(final Long officeId, final Long tellerId, final LocalDate day, final Double openingBalance,
-            final Double settledBalance, final Double closingBalance, final Double sumReceipts, final Double sumPayments) {
-        this.officeId = officeId;
-        this.tellerId = tellerId;
-        this.day = day;
-        this.openingBalance = openingBalance;
-        this.settledBalance = settledBalance;
-        this.closingBalance = closingBalance;
-        this.sumReceipts = sumReceipts;
-        this.sumPayments = sumPayments;
-    }
+    private Long officeId;
+    private Long tellerId;
+    private LocalDate day;
+    private Double openingBalance;
+    private Double settledBalance;
+    private Double closingBalance;
+    private Double sumReceipts;
+    private Double sumPayments;
 
     /**
      * Create a new teller journal data object.
@@ -79,38 +72,8 @@ public final class TellerJournalData implements Serializable {
      */
     public static TellerJournalData instance(final Long officeId, final Long tellerId, final LocalDate day, final Double openingBalance,
             final Double settledBalance, final Double closingBalance, final Double sumReceipts, final Double sumPayments) {
-        return new TellerJournalData(officeId, tellerId, day, openingBalance, settledBalance, closingBalance, sumReceipts, sumPayments);
-    }
-
-    public Long getOfficeId() {
-        return officeId;
-    }
-
-    public Long getTellerId() {
-        return tellerId;
-    }
-
-    public LocalDate getDay() {
-        return day;
-    }
-
-    public Double getOpeningBalance() {
-        return openingBalance;
-    }
-
-    public Double getSettledBalance() {
-        return settledBalance;
-    }
-
-    public Double getClosingBalance() {
-        return closingBalance;
-    }
-
-    public Double getSumReceipts() {
-        return sumReceipts;
-    }
-
-    public Double getSumPayments() {
-        return sumPayments;
+        return new TellerJournalData().setOfficeId(officeId).setTellerId(tellerId).setDay(day).setOpeningBalance(openingBalance)
+                .setSettledBalance(settledBalance).setClosingBalance(closingBalance).setSumReceipts(sumReceipts)
+                .setSumPayments(sumPayments);
     }
 }

@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.teller.service;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
@@ -55,12 +56,12 @@ import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@AllArgsConstructor
 @Service
 public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformService {
 
@@ -76,26 +77,6 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private final JournalEntryRepository glJournalEntryRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
     private final CashierTransactionDataValidator cashierTransactionDataValidator;
-
-    @Autowired
-    public TellerWritePlatformServiceJpaImpl(final PlatformSecurityContext context,
-            final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer, final TellerRepositoryWrapper tellerRepositoryWrapper,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final StaffRepository staffRepository,
-            CashierRepository cashierRepository, CashierTransactionRepository cashierTxnRepository,
-            JournalEntryRepository glJournalEntryRepository,
-            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            final CashierTransactionDataValidator cashierTransactionDataValidator) {
-        this.context = context;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.tellerRepositoryWrapper = tellerRepositoryWrapper;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.staffRepository = staffRepository;
-        this.cashierRepository = cashierRepository;
-        this.cashierTxnRepository = cashierTxnRepository;
-        this.glJournalEntryRepository = glJournalEntryRepository;
-        this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
-        this.cashierTransactionDataValidator = cashierTransactionDataValidator;
-    }
 
     @Override
     @Transactional

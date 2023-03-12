@@ -23,145 +23,55 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public final class CashierTransactionData implements Serializable {
 
-    private final Long id;
-    private final Long cashierId;
-    private final CashierTxnType txnType;
-    private final BigDecimal txnAmount;
-    private final LocalDate txnDate;
-    private final Long entityId;
-    private final String entityType;
-    private final String txnNote;
-    private final OffsetDateTime createdDate;
+    private Long id;
+    private Long cashierId;
+    private CashierTxnType txnType;
+    private BigDecimal txnAmount;
+    private LocalDate txnDate;
+    private Long entityId;
+    private String entityType;
+    private String txnNote;
+    private OffsetDateTime createdDate;
 
     // Template fields
-    private final Long officeId;
-    private final String officeName;
-    private final Long tellerId;
-    private final String tellerName;
-    private final String cashierName;
-
-    private final CashierData cashierData;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
-
-    private final Collection<CurrencyData> currencyOptions;
-
-    /*
-     * Creates a new cashier.
-     */
-    private CashierTransactionData(final Long id, final Long cashierId, CashierTxnType txnType, final BigDecimal txnAmount,
-            final LocalDate txnDate, String txnNote, String entityType, Long entityId, OffsetDateTime createdDate, Long officeId,
-            String officeName, Long tellerId, String tellerName, String cashierName, CashierData cashierData, LocalDate startDate,
-            LocalDate endDate, final Collection<CurrencyData> currencyOptions) {
-        this.id = id;
-        this.cashierId = cashierId;
-        this.txnType = txnType;
-        this.txnAmount = txnAmount;
-        this.txnDate = txnDate;
-        this.txnNote = txnNote;
-        this.entityType = entityType;
-        this.entityId = entityId;
-        this.createdDate = createdDate;
-
-        this.officeId = officeId;
-        this.officeName = officeName;
-        this.tellerId = tellerId;
-        this.tellerName = tellerName;
-        this.cashierName = cashierName;
-        this.cashierData = cashierData;
-
-        this.startDate = startDate;
-        this.endDate = endDate;
-
-        this.currencyOptions = currencyOptions;
-    }
+    private Long officeId;
+    private String officeName;
+    private Long tellerId;
+    private String tellerName;
+    private String cashierName;
+    private CashierData cashierData;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private Collection<CurrencyData> currencyOptions;
 
     public static CashierTransactionData instance(final Long id, final Long cashierId, CashierTxnType txnType, final BigDecimal txnAmount,
             final LocalDate txnDate, final String txnNote, final String entityType, final Long entityId, final OffsetDateTime createdDate,
             final Long officeId, final String officeName, final Long tellerId, final String tellerName, final String cashierName,
             final CashierData cashierData, LocalDate startDate, LocalDate endDate) {
-        return new CashierTransactionData(id, cashierId, txnType, txnAmount, txnDate, txnNote, entityType, entityId, createdDate, officeId,
-                officeName, tellerId, tellerName, cashierName, cashierData, startDate, endDate, null);
+        return new CashierTransactionData().setId(id).setCashierId(cashierId).setTxnType(txnType).setTxnAmount(txnAmount)
+                .setTxnDate(txnDate).setTxnNote(txnNote).setEntityType(entityType).setEntityId(entityId).setCreatedDate(createdDate)
+                .setOfficeId(officeId).setOfficeName(officeName).setTellerId(tellerId).setTellerName(tellerName).setCashierName(cashierName)
+                .setCashierData(cashierData).setStartDate(startDate).setEndDate(endDate);
     }
 
     public static CashierTransactionData template(final Long cashierId, final Long tellerId, final String tellerName, final Long officeId,
             final String officeName, final String cashierName, final CashierData cashierData, LocalDate startDate, LocalDate endDate,
             final Collection<CurrencyData> currencyOptions) {
-        return new CashierTransactionData(null, cashierId, null, null, null, null, null, null, null, officeId, officeName, tellerId,
-                tellerName, cashierName, cashierData, startDate, endDate, currencyOptions);
+        return new CashierTransactionData().setCashierId(cashierId).setOfficeId(officeId).setOfficeName(officeName).setTellerId(tellerId)
+                .setTellerName(tellerName).setCashierName(cashierName).setCashierData(cashierData).setStartDate(startDate)
+                .setEndDate(endDate).setCurrencyOptions(currencyOptions);
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getCashierId() {
-        return cashierId;
-    }
-
-    public CashierTxnType getTxnType() {
-        return txnType;
-    }
-
-    public BigDecimal getTxnAmount() {
-        return txnAmount;
-    }
-
-    public LocalDate getTxnDate() {
-        return txnDate;
-    }
-
-    public String getTxnNote() {
-        return txnNote;
-    }
-
-    public String getEntityType() {
-        return entityType;
-    }
-
-    public Long getEntityId() {
-        return entityId;
-    }
-
-    public OffsetDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public Long getOfficeId() {
-        return officeId;
-    }
-
-    public String getOfficeName() {
-        return officeName;
-    }
-
-    public Long getTellerId() {
-        return tellerId;
-    }
-
-    public String getTellerName() {
-        return tellerName;
-    }
-
-    public String getCashierName() {
-        return cashierName;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public CashierData getCashierData() {
-        return cashierData;
-    }
-
 }
