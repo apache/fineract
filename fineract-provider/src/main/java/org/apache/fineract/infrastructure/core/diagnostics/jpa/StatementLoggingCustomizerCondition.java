@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache;
+package org.apache.fineract.infrastructure.core.diagnostics.jpa;
 
-public final class CacheApiConstants {
+import org.apache.fineract.infrastructure.core.condition.PropertiesCondition;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 
-    private CacheApiConstants() {
+public class StatementLoggingCustomizerCondition extends PropertiesCondition {
 
+    @Override
+    protected boolean matches(FineractProperties properties) {
+        return properties.getJpa().isStatementLoggingEnabled();
     }
-
-    public static final String RESOURCE_NAME = "CACHE";
-    public static final String CACHE_TYPE_PARAMETER = "cacheType";
-
 }

@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache;
+package org.apache.fineract.infrastructure.core.persistence;
 
-public final class CacheApiConstants {
+public interface TransactionLifecycleCallback {
 
-    private CacheApiConstants() {
+    default void afterBegin() {}
 
-    }
+    default void afterCommit() {}
 
-    public static final String RESOURCE_NAME = "CACHE";
-    public static final String CACHE_TYPE_PARAMETER = "cacheType";
-
+    default void afterCompletion() {}
 }

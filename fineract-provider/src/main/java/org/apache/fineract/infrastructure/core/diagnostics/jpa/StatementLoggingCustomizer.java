@@ -16,15 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache;
+package org.apache.fineract.infrastructure.core.diagnostics.jpa;
 
-public final class CacheApiConstants {
+import java.util.Map;
+import org.apache.fineract.infrastructure.core.config.jpa.EntityManagerFactoryCustomizer;
+import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.eclipse.persistence.logging.SessionLog;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Component;
 
-    private CacheApiConstants() {
+@Component
+@Conditional(StatementLoggingCustomizerCondition.class)
+public class StatementLoggingCustomizer implements EntityManagerFactoryCustomizer {
 
+    @Override
+    public Map<String, Object> additionalVendorProperties() {
+        return Map.of("eclipselink.logging.level.sql", SessionLog.FINE_LABEL, PersistenceUnitProperties.LOGGING_PARAMETERS,
+                Boolean.TRUE.toString());
     }
-
-    public static final String RESOURCE_NAME = "CACHE";
-    public static final String CACHE_TYPE_PARAMETER = "cacheType";
-
 }
