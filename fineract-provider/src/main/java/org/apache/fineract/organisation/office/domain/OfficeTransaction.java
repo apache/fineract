@@ -27,6 +27,10 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -34,6 +38,10 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_office_transaction")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class OfficeTransaction extends AbstractPersistableCustom {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,22 +70,7 @@ public class OfficeTransaction extends AbstractPersistableCustom {
         final LocalDate transactionLocalDate = command.localDateValueOfParameterNamed("transactionDate");
         final String description = command.stringValueOfParameterNamed("description");
 
-        return new OfficeTransaction(fromOffice, toOffice, transactionLocalDate, amount, description);
-    }
-
-    protected OfficeTransaction() {
-        this.transactionDate = null;
-    }
-
-    private OfficeTransaction(final Office fromOffice, final Office toOffice, final LocalDate transactionLocalDate, final Money amount,
-            final String description) {
-        this.from = fromOffice;
-        this.to = toOffice;
-        if (transactionLocalDate != null) {
-            this.transactionDate = transactionLocalDate;
-        }
-        this.currency = amount.getCurrency();
-        this.transactionAmount = amount.getAmount();
-        this.description = description;
+        return new OfficeTransaction().setFrom(fromOffice).setTo(toOffice).setTransactionDate(transactionLocalDate)
+                .setCurrency(amount.getCurrency()).setTransactionAmount(amount.getAmount()).setDescription(description);
     }
 }

@@ -22,23 +22,29 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object for office data.
  */
-@Getter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public class OfficeData implements Serializable {
 
-    private final Long id;
-    private final String name;
-    private final String nameDecorated;
-    private final String externalId;
-    private final LocalDate openingDate;
-    private final String hierarchy;
-    private final Long parentId;
-    private final String parentName;
-    private final Collection<OfficeData> allowedParents;
+    private Long id;
+    private String name;
+    private String nameDecorated;
+    private String externalId;
+    private LocalDate openingDate;
+    private String hierarchy;
+    private Long parentId;
+    private String parentName;
+    private Collection<OfficeData> allowedParents;
 
     // import fields
     private transient Integer rowIndex;
@@ -46,7 +52,7 @@ public class OfficeData implements Serializable {
     private String dateFormat;
 
     public static OfficeData importInstance(final String name, final Long parentId, final LocalDate openingDate, final String externalId) {
-        return new OfficeData(null, name, null, externalId, openingDate, null, parentId, null, null);
+        return new OfficeData().setName(name).setParentId(parentId).setOpeningDate(openingDate).setExternalId(externalId);
     }
 
     public void setImportFields(final Integer rowIndex, final String locale, final String dateFormat) {
@@ -56,33 +62,21 @@ public class OfficeData implements Serializable {
     }
 
     public static OfficeData testInstance(final Long id, final String name) {
-        return new OfficeData(id, name, null, null, null, null, null, null, null);
+        return new OfficeData().setId(id).setName(name);
     }
 
     public static OfficeData dropdown(final Long id, final String name, final String nameDecorated) {
-        return new OfficeData(id, name, nameDecorated, null, null, null, null, null, null);
+        return new OfficeData().setId(id).setName(name).setNameDecorated(nameDecorated);
     }
 
     public static OfficeData template(final List<OfficeData> parentLookups, final LocalDate defaultOpeningDate) {
-        return new OfficeData(null, null, null, null, defaultOpeningDate, null, null, null, parentLookups);
+        return new OfficeData().setAllowedParents(parentLookups).setOpeningDate(defaultOpeningDate);
     }
 
     public static OfficeData appendedTemplate(final OfficeData office, final Collection<OfficeData> allowedParents) {
-        return new OfficeData(office.id, office.name, office.nameDecorated, office.externalId, office.openingDate, office.hierarchy,
-                office.parentId, office.parentName, allowedParents);
-    }
-
-    public OfficeData(final Long id, final String name, final String nameDecorated, final String externalId, final LocalDate openingDate,
-            final String hierarchy, final Long parentId, final String parentName, final Collection<OfficeData> allowedParents) {
-        this.id = id;
-        this.name = name;
-        this.nameDecorated = nameDecorated;
-        this.externalId = externalId;
-        this.openingDate = openingDate;
-        this.hierarchy = hierarchy;
-        this.parentName = parentName;
-        this.parentId = parentId;
-        this.allowedParents = allowedParents;
+        return new OfficeData().setId(office.id).setName(office.name).setNameDecorated(office.nameDecorated)
+                .setExternalId(office.externalId).setOpeningDate(office.openingDate).setHierarchy(office.hierarchy)
+                .setParentId(office.parentId).setParentName(office.parentName).setAllowedParents(allowedParents);
     }
 
     public boolean hasIdentifyOf(final Long officeId) {
