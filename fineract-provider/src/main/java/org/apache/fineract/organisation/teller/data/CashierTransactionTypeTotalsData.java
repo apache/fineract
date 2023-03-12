@@ -20,27 +20,21 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public final class CashierTransactionTypeTotalsData implements Serializable {
 
-    private final Integer cashierTxnType;
-    private final BigDecimal cashTotal;
-
-    private CashierTransactionTypeTotalsData(final Integer cashierTxnType, final BigDecimal cashTotal) {
-        this.cashierTxnType = cashierTxnType;
-        this.cashTotal = cashTotal;
-    }
+    private Integer cashierTxnType;
+    private BigDecimal cashTotal;
 
     public static CashierTransactionTypeTotalsData instance(final Integer cashierTxnType, final BigDecimal cashTotal) {
-        return new CashierTransactionTypeTotalsData(cashierTxnType, cashTotal);
+        return new CashierTransactionTypeTotalsData().setCashierTxnType(cashierTxnType).setCashTotal(cashTotal);
     }
-
-    public Integer getCashierTxnType() {
-        return cashierTxnType;
-    }
-
-    public BigDecimal getCashTotal() {
-        return cashTotal;
-    }
-
 }

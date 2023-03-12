@@ -21,6 +21,10 @@ package org.apache.fineract.organisation.teller.data;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.teller.domain.TellerStatus;
@@ -34,47 +38,27 @@ import org.apache.fineract.organisation.teller.domain.TellerStatus;
  * @see java.io.Serializable
  * @since 2.0.0
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public final class TellerData implements Serializable {
 
-    private final Long id;
-    private final Long officeId;
-    private final Long debitAccountId;
-    private final Long creditAccountId;
-    private final String name;
+    private Long id;
+    private Long officeId;
+    private Long debitAccountId;
+    private Long creditAccountId;
+    private String name;
 
-    private final String description;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
-    private final TellerStatus status;
-    private final Boolean hasTransactions;
-    private final Boolean hasMappedCashiers;
-
+    private String description;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private TellerStatus status;
+    private Boolean hasTransactions;
+    private Boolean hasMappedCashiers;
     private String officeName;
-
-    private final Collection<OfficeData> officeOptions;
-    private final Collection<StaffData> staffOptions;
-
-    /*
-     * Sole private CTOR to create a new instance.
-     */
-    private TellerData(final Long id, final Long officeId, final Long debitAccountId, final Long creditAccountId, final String name,
-            final String description, final LocalDate startDate, final LocalDate endDate, final TellerStatus status,
-            final Boolean hasTransactions, final Boolean hasMappedCashiers) {
-
-        this.id = id;
-        this.officeId = officeId;
-        this.debitAccountId = debitAccountId;
-        this.creditAccountId = creditAccountId;
-        this.name = name;
-        this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.status = status;
-        this.hasTransactions = hasTransactions;
-        this.hasMappedCashiers = hasMappedCashiers;
-        this.officeOptions = null;
-        this.staffOptions = null;
-    }
+    private Collection<OfficeData> officeOptions;
+    private Collection<StaffData> staffOptions;
 
     /**
      * Creates a new teller data object.
@@ -106,61 +90,12 @@ public final class TellerData implements Serializable {
     public static TellerData instance(final Long id, final Long officeId, final Long debitAccountId, final Long creditAccountId,
             final String name, final String description, final LocalDate startDate, final LocalDate endDate, final TellerStatus status,
             final String officeName, final Boolean hasTransactions, final Boolean hasMappedCashiers) {
-        TellerData tellerData = new TellerData(id, officeId, debitAccountId, creditAccountId, name, description, startDate, endDate, status,
-                hasTransactions, hasMappedCashiers);
-        tellerData.officeName = officeName;
-        return tellerData;
+        return new TellerData().setId(id).setOfficeId(officeId).setDebitAccountId(debitAccountId).setCreditAccountId(creditAccountId)
+                .setName(name).setDescription(description).setStartDate(startDate).setEndDate(endDate).setStatus(status)
+                .setOfficeName(officeName).setHasTransactions(hasTransactions).setHasMappedCashiers(hasMappedCashiers);
     }
 
     public static TellerData lookup(final Long id, final String name) {
-        return new TellerData(id, null, null, null, name, null, null, null, null, null, null);
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public Long getOfficeId() {
-        return this.officeId;
-    }
-
-    public Long getDebitAccountId() {
-        return this.debitAccountId;
-    }
-
-    public Long getCreditAccountId() {
-        return this.creditAccountId;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getOfficeName() {
-        return this.officeName;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public LocalDate getStartDate() {
-        return this.startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return this.endDate;
-    }
-
-    public TellerStatus getStatus() {
-        return this.status;
-    }
-
-    public Boolean hasTransactions() {
-        return this.hasTransactions;
-    }
-
-    public Boolean hasMappedCashiers() {
-        return this.hasMappedCashiers;
+        return new TellerData().setId(id).setName(name);
     }
 }
