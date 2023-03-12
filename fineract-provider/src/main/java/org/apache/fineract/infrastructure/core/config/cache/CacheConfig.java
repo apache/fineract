@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.core.config.cache;
 
 import java.time.Duration;
 import javax.cache.CacheManager;
@@ -28,20 +28,32 @@ import org.ehcache.config.builders.ExpiryPolicyBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.ehcache.jsr107.Eh107Configuration;
 import org.springframework.cache.jcache.JCacheCacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class CacheConfig {
 
+    public static final String CONFIG_BY_NAME_CACHE_NAME = "configByName";
+
+    @Bean
+    public TransactionBoundCacheManager defaultCacheManager(JCacheCacheManager ehCacheManager) {
+        SpecifiedCacheSupportingCacheManager cacheManager = new SpecifiedCacheSupportingCacheManager();
+        cacheManager.setNoOpCacheManager(new NoOpCacheManager());
+        cacheManager.setDelegateCacheManager(ehCacheManager);
+        cacheManager.setSupportedCaches(CONFIG_BY_NAME_CACHE_NAME);
+        return new TransactionBoundCacheManager(cacheManager);
+    }
+
     @Bean
     public JCacheCacheManager ehCacheManager() {
         JCacheCacheManager jCacheCacheManager = new JCacheCacheManager();
-        jCacheCacheManager.setCacheManager(getCustomCacheManager());
+        jCacheCacheManager.setCacheManager(getInternalEhCacheManager());
         return jCacheCacheManager;
     }
 
-    private CacheManager getCustomCacheManager() {
+    private CacheManager getInternalEhCacheManager() {
         CachingProvider provider = Caching.getCachingProvider();
         CacheManager cacheManager = provider.getCacheManager();
 
@@ -61,6 +73,7 @@ public class CacheConfig {
         cacheManager.createCache("codes", defaultTemplate);
         cacheManager.createCache("hooks", defaultTemplate);
         cacheManager.createCache("tfConfig", defaultTemplate);
+        cacheManager.createCache(CONFIG_BY_NAME_CACHE_NAME, defaultTemplate);
 
         javax.cache.configuration.Configuration<Object, Object> accessTokenTemplate = Eh107Configuration.fromEhcacheCacheConfiguration(
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(10000))

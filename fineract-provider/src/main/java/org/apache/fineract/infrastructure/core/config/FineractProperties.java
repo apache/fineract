@@ -53,6 +53,7 @@ public class FineractProperties {
     private FineractJobProperties job;
 
     private FineractTemplateProperties template;
+    private FineractJpaProperties jpa;
 
     @Getter
     @Setter
@@ -248,4 +249,10 @@ public class FineractProperties {
         private List<String> regexWhitelist;
     }
 
+    @Getter
+    @Setter
+    public static class FineractJpaProperties {
+
+        private boolean statementLoggingEnabled;
+    }
 }

@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.jobs;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
+import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
@@ -39,8 +41,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class ScheduledJobRunnerConfig {
 
     @Bean
-    public PlatformTransactionManager transactionManager(ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+    public PlatformTransactionManager transactionManager(ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers,
+            List<TransactionLifecycleCallback> callbacks) {
         ExtendedJpaTransactionManager transactionManager = new ExtendedJpaTransactionManager();
+        transactionManager.setLifecycleCallbacks(callbacks);
         transactionManager.setValidateExistingTransaction(true);
         transactionManagerCustomizers.ifAvailable(customizers -> customizers.customize(transactionManager));
         return transactionManager;
