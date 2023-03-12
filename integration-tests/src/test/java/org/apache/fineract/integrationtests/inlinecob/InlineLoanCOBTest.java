@@ -207,12 +207,12 @@ public class InlineLoanCOBTest {
         Assertions.assertTrue(loanDelinquencyTags.isEmpty());
         Assertions.assertEquals(LocalDate.of(2020, 3, 2), loan.getLastClosedBusinessDate());
 
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 4, 5));
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 4, 4));
         inlineLoanCOBHelper.executeInlineCOB(List.of(loanID.longValue()));
 
         loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
         loanDelinquencyTags = loanTransactionHelper.getLoanDelinquencyTags(requestSpec, responseSpec, loanID);
-        Assertions.assertEquals(LocalDate.of(2020, 4, 5), loan.getLastClosedBusinessDate());
+        Assertions.assertEquals(LocalDate.of(2020, 4, 4), loan.getLastClosedBusinessDate());
         Assertions.assertEquals(1, loanDelinquencyTags.size());
         Assertions.assertEquals(LocalDate.of(2020, 4, 3), loanDelinquencyTags.get(0).getAddedOnDate());
 

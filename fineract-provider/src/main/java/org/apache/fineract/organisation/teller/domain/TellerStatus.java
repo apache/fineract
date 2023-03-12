@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.organisation.teller.domain;
 
+import lombok.Getter;
+
 /**
  * Enum representation of teller status states.
  */
-
+@Getter
 public enum TellerStatus {
 
     INVALID(0, "tellerStatusType.invalid"), PENDING(100, "tellerStatusType.pending"), ACTIVE(300, "tellerStatusType.active"), INACTIVE(400,
@@ -57,14 +59,6 @@ public enum TellerStatus {
 
     public boolean hasStateOf(final TellerStatus state) {
         return this.value.equals(state.getValue());
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
     }
 
     public boolean isPending() {

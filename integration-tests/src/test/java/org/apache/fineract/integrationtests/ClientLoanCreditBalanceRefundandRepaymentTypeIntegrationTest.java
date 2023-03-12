@@ -374,18 +374,9 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         Integer resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(REPAYMENT, "06 January 2022", 13000.00f,
                 this.disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
-
-        if (repaymentTransactionType.equalsIgnoreCase(REPAYMENT)) {
-            ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.makeRepaymentTypePayment(
-                    repaymentTransactionType, "06 January 2022", 1.00f, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
-
-            assertEquals("error.msg.loan.repayment.or.waiver.account.is.not.active",
-                    errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-        } else {
-            resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022", 1.00f,
-                    this.disbursedLoanID, "resourceId");
-            Assertions.assertNotNull(resourceId);
-        }
+        resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022", 1.00f,
+                this.disbursedLoanID, "resourceId");
+        Assertions.assertNotNull(resourceId);
     }
 
     @Test

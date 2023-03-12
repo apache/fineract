@@ -37,6 +37,11 @@ public final class CashierTxnType implements Serializable {
         this.value = value;
     }
 
+    @Override
+    public String toString() {
+        return value;
+    }
+
     public Integer getId() {
         return id;
     }
