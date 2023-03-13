@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -35,9 +37,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.filters.BatchFilter;
@@ -64,6 +68,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     private final PlatformSecurityContext context;
     private final InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
     private final LoanRepository loanRepository;
+    private final FineractProperties fineractProperties;
 
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
 
@@ -141,8 +146,11 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     }
 
     private boolean isLoanBehind(List<Long> loanIds) {
-        return CollectionUtils.isNotEmpty(loanRepository
-                .findAllNonClosedLoansBehindByLoanIds(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), loanIds));
+        List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
+        List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
+        partitions.forEach(partition -> loanIdAndLastClosedBusinessDates.addAll(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(
+                ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition)));
+        return CollectionUtils.isNotEmpty(loanIdAndLastClosedBusinessDates);
     }
 
     private List<Long> calculateRelevantLoanIds(String pathInfo) {

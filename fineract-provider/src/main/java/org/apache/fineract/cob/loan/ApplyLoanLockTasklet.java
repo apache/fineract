@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.loan;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -40,13 +42,15 @@ import org.springframework.batch.repeat.RepeatStatus;
 public class ApplyLoanLockTasklet implements Tasklet {
 
     private final LoanAccountLockRepository accountLockRepository;
+    private final FineractProperties fineractProperties;
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
         ExecutionContext executionContext = contribution.getStepExecution().getExecutionContext();
         List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
-
-        List<LoanAccountLock> accountLocks = accountLockRepository.findAllByLoanIdIn(loanIds);
+        List<List<Long>> loanIdPartitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
+        List<LoanAccountLock> accountLocks = new ArrayList<>();
+        loanIdPartitions.forEach(loanIdPartition -> accountLocks.addAll(accountLockRepository.findAllByLoanIdIn(loanIdPartition)));
 
         Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap = accountLocks.stream()
                 .filter(e -> LockOwner.LOAN_COB_PARTITIONING.equals(e.getLockOwner()))

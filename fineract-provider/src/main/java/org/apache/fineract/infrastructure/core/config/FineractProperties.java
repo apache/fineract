@@ -55,6 +55,8 @@ public class FineractProperties {
     private FineractTemplateProperties template;
     private FineractJpaProperties jpa;
 
+    private FineractQueryProperties query;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -255,4 +257,12 @@ public class FineractProperties {
 
         private boolean statementLoggingEnabled;
     }
+
+    @Getter
+    @Setter
+    public static class FineractQueryProperties {
+
+        private int inClauseParameterSizeLimit;
+    }
+
 }
