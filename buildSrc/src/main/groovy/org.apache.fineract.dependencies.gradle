@@ -29,7 +29,7 @@ dependencyManagement {
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.2'
         mavenBom 'io.cucumber:cucumber-bom:7.11.1'
         mavenBom 'io.netty:netty-bom:4.1.89.Final'
-        mavenBom 'org.mockito:mockito-bom:5.1.1'
+        mavenBom 'org.mockito:mockito-bom:5.2.0'
     }
 
     dependencies {
@@ -57,12 +57,12 @@ dependencyManagement {
         }
         dependency 'commons-io:commons-io:2.11.0'
         dependency 'com.github.librepdf:openpdf:1.3.30'
-        dependency ('org.mnode.ical4j:ical4j:3.2.9') {
+        dependency ('org.mnode.ical4j:ical4j:3.2.10') {
             exclude 'com.sun.mail:javax.mail'
         }
         dependency 'org.apache.commons:commons-csv:1.10.0'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'software.amazon.awssdk:bom:2.20.12'
+        dependency 'software.amazon.awssdk:bom:2.20.23'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
@@ -112,7 +112,7 @@ dependencyManagement {
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.6'
         dependency 'joda-time:joda-time:2.12.2'
 
-        dependency 'io.github.classgraph:classgraph:4.8.154'
+        dependency 'io.github.classgraph:classgraph:4.8.157'
         dependency 'org.awaitility:awaitility:4.2.0'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.7.3'
         dependency 'javax.cache:cache-api:1.1.1'
@@ -156,20 +156,20 @@ dependencyManagement {
         dependency 'org.bouncycastle:bcprov-jdk15on:1.70'
         dependency 'org.bouncycastle:bcpg-jdk15on:1.70'
 
-        dependency 'org.eclipse.jgit:org.eclipse.jgit:6.4.0.202211300538-r'
-        dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.4.0.202211300538-r'
+        dependency 'org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r'
+        dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.5.0.202303070854-r'
 
-        dependency 'org.tmatesoft.svnkit:svnkit:1.10.10'
+        dependency 'org.tmatesoft.svnkit:svnkit:1.10.11'
         dependency 'com.vdurmont:semver4j:3.1.0'
         dependency 'org.beryx:text-io:3.4.1'
 
-        dependency 'org.springdoc:springdoc-openapi-ui:1.6.14'
-        dependency 'org.springdoc:springdoc-openapi-webmvc-core:1.6.14'
-        dependency 'org.springdoc:springdoc-openapi-common:1.6.14'
-        dependency 'org.springdoc:springdoc-openapi-security:1.6.14'
-        dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.14'
+        dependency 'org.springdoc:springdoc-openapi-ui:1.6.15'
+        dependency 'org.springdoc:springdoc-openapi-webmvc-core:1.6.15'
+        dependency 'org.springdoc:springdoc-openapi-common:1.6.15'
+        dependency 'org.springdoc:springdoc-openapi-security:1.6.15'
+        dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.15'
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.10.0'
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.11.0'
 
         dependency ('org.apache.activemq:activemq-broker:5.17.4') {
             exclude 'javax.annotation:javax.annotation-api'
@@ -194,7 +194,7 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
-        dependency ('org.liquibase:liquibase-core:4.19.0') {
+        dependency ('org.liquibase:liquibase-core:4.20.0') {
             exclude 'javax.xml.bind:jaxb-api'
         }
 
