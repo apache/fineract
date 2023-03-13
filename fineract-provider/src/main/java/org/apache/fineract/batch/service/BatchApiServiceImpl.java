@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -43,7 +45,6 @@ import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.batch.service.ResolutionHelper.BatchRequestNode;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
-import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessFailedException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessSucceedException;
@@ -75,7 +76,8 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     private final List<BatchFilter> batchFilters;
 
-    private final FineractRequestContextHolder fineractRequestContextHolder;
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     /**
      * Returns the response list by getting a proper {@link org.apache.fineract.batch.command.CommandStrategy}.
@@ -85,7 +87,8 @@ public class BatchApiServiceImpl implements BatchApiService {
      * @param uriInfo
      * @return {@code List<BatchResponse>}
      */
-    private List<BatchResponse> handleBatchRequests(final List<BatchRequest> requestList, final UriInfo uriInfo) {
+    private List<BatchResponse> handleBatchRequests(final List<BatchRequest> requestList, final UriInfo uriInfo,
+            boolean isEnclosingTransaction) {
 
         final List<BatchResponse> responseList = new ArrayList<>(requestList.size());
 
@@ -104,11 +107,11 @@ public class BatchApiServiceImpl implements BatchApiService {
             final CommandStrategy commandStrategy = this.strategyProvider
                     .getCommandStrategy(CommandContext.resource(rootRequest.getRelativeUrl()).method(rootRequest.getMethod()).build());
             log.debug("Batch request: method [{}], relative url [{}]", rootRequest.getMethod(), rootRequest.getRelativeUrl());
-            final BatchResponse rootResponse = safelyExecuteStrategy(commandStrategy, rootRequest, uriInfo);
+            final BatchResponse rootResponse = safelyExecuteStrategy(commandStrategy, rootRequest, uriInfo, isEnclosingTransaction);
             log.debug("Batch response: status code [{}], method [{}], relative url [{}]", rootResponse.getStatusCode(),
                     rootRequest.getMethod(), rootRequest.getRelativeUrl());
             responseList.add(rootResponse);
-            responseList.addAll(this.processChildRequests(rootNode, rootResponse, uriInfo));
+            responseList.addAll(this.processChildRequests(rootNode, rootResponse, uriInfo, isEnclosingTransaction));
         }
 
         Collections.sort(responseList, Comparator.comparing(BatchResponse::getRequestId));
@@ -117,8 +120,12 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     }
 
-    private BatchResponse safelyExecuteStrategy(CommandStrategy commandStrategy, BatchRequest request, UriInfo originalUriInfo) {
+    private BatchResponse safelyExecuteStrategy(CommandStrategy commandStrategy, BatchRequest request, UriInfo originalUriInfo,
+            boolean isEnclosingTransaction) {
         try {
+            if (isEnclosingTransaction) {
+                entityManager.flush();
+            }
             BatchRequestContextHolder.setRequestAttributes(new HashMap<>(Optional.ofNullable(request.getHeaders())
                     .map(list -> list.stream().collect(Collectors.toMap(Header::getName, Header::getValue)))
                     .orElse(Collections.emptyMap())));
@@ -160,7 +167,8 @@ public class BatchApiServiceImpl implements BatchApiService {
         return response;
     }
 
-    private List<BatchResponse> processChildRequests(final BatchRequestNode rootRequest, BatchResponse rootResponse, UriInfo uriInfo) {
+    private List<BatchResponse> processChildRequests(final BatchRequestNode rootRequest, BatchResponse rootResponse, UriInfo uriInfo,
+            boolean isEnclosingTransaction) {
 
         final List<BatchResponse> childResponses = new ArrayList<>();
         if (!rootRequest.getChildRequests().isEmpty()) {
@@ -177,8 +185,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                         final CommandStrategy commandStrategy = this.strategyProvider.getCommandStrategy(
                                 CommandContext.resource(childRequest.getRelativeUrl()).method(childRequest.getMethod()).build());
 
-                        childResponse = safelyExecuteStrategy(commandStrategy, childRequest, uriInfo);
-
+                        childResponse = safelyExecuteStrategy(commandStrategy, childRequest, uriInfo, isEnclosingTransaction);
                     } else {
                         // Something went wrong with the parent request, create
                         // a response with status code 409
@@ -191,7 +198,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                                 "Parent request with id " + rootResponse.getRequestId() + " was erroneous!");
                         childResponse.setBody(conflictError.getMessage());
                     }
-                    childResponses.addAll(this.processChildRequests(childNode, childResponse, uriInfo));
+                    childResponses.addAll(this.processChildRequests(childNode, childResponse, uriInfo, isEnclosingTransaction));
 
                 } catch (Throwable ex) {
 
@@ -211,7 +218,7 @@ public class BatchApiServiceImpl implements BatchApiService {
     @Override
     public List<BatchResponse> handleBatchRequestsWithoutEnclosingTransaction(final List<BatchRequest> requestList, UriInfo uriInfo) {
 
-        return handleBatchRequests(requestList, uriInfo);
+        return handleBatchRequests(requestList, uriInfo, false);
     }
 
     @Override
@@ -220,7 +227,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         try {
             return this.transactionTemplate.execute(status -> {
                 try {
-                    responseList.addAll(handleBatchRequests(requestList, uriInfo));
+                    responseList.addAll(handleBatchRequests(requestList, uriInfo, true));
                     return responseList;
                 } catch (RuntimeException ex) {
 
