@@ -35,6 +35,7 @@ import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mockito.Mockito;
@@ -48,6 +49,9 @@ public class FetchAndLockLoanStepDefinitions implements En {
     private final LoanAccountLockRepository loanAccountLockRepository = mock(LoanAccountLockRepository.class);
 
     private final RetrieveLoanIdService retrieveLoanIdService = mock(RetrieveLoanIdService.class);
+    private final FineractProperties fineractProperties = mock(FineractProperties.class);
+    private final FineractProperties.FineractQueryProperties fineractQueryProperties = mock(
+            FineractProperties.FineractQueryProperties.class);
     StepContribution contribution;
     private FetchAndLockLoanTasklet fetchAndLockLoanTasklet;
     private String action;
@@ -65,17 +69,25 @@ public class FetchAndLockLoanStepDefinitions implements En {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(Collections.emptyList());
             } else if ("good".equals(action)) {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
+                lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+                lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
                 lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(Collections.emptyList());
             } else if ("soft lock".equals(action)) {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
+                lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+                lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
                 lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
                         .thenReturn(List.of(new LoanAccountLock(1L, LockOwner.LOAN_COB_PARTITIONING)));
             } else if ("inline cob".equals(action)) {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
+                lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+                lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
                 lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
                         .thenReturn(List.of(new LoanAccountLock(2L, LockOwner.LOAN_INLINE_COB_PROCESSING)));
             } else if ("chunk processing".equals(action)) {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
+                lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+                lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
                 lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
                         .thenReturn(List.of(new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING)));
             }
@@ -85,7 +97,7 @@ public class FetchAndLockLoanStepDefinitions implements En {
             contribution = new StepContribution(stepExecution);
             contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
                     LocalDate.now(ZoneId.systemDefault()).toString());
-            fetchAndLockLoanTasklet = new FetchAndLockLoanTasklet(loanAccountLockRepository, retrieveLoanIdService);
+            fetchAndLockLoanTasklet = new FetchAndLockLoanTasklet(loanAccountLockRepository, retrieveLoanIdService, fineractProperties);
         });
 
         When("FetchAndLockLoanTasklet.execute method executed", () -> {
