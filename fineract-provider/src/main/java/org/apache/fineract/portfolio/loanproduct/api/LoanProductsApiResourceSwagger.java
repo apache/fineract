@@ -1198,10 +1198,247 @@ final class LoanProductsApiResourceSwagger {
 
         private PutLoanProductsProductIdRequest() {}
 
+        @Schema(example = "LP Accrual Accounting")
+        public String name;
+        @Schema(example = "LPAA")
+        public String shortName;
+        @Schema(example = "non-interest bearing product")
+        public String description;
+        @Schema(example = "10 July 2022")
+        public String startDate;
+        @Schema(example = "10 July 2022")
+        public String closeDate;
+        @Schema(example = "3")
+        public Long fundId;
+
+        @Schema(example = "USD")
+        public String currencyCode;
+        @Schema(example = "2")
+        public Integer digitsAfterDecimal;
+        @Schema(example = "1")
+        public Integer installmentAmountInMultiplesOf;
+        @Schema(example = "1")
+        public Integer inMultiplesOf;
+
+        // Terms
+        @Schema(example = "5000.00")
+        public Double minPrincipal;
+        @Schema(example = "10000.00")
+        public Double principal;
+        @Schema(example = "15000.00")
+        public Double maxPrincipal;
+
+        @Schema(example = "1")
+        public Integer minNumberOfRepayments;
+        @Schema(example = "1")
+        public Integer maxNumberOfRepayments;
+        @Schema(example = "12")
+        public Integer numberOfRepayments;
+        @Schema(example = "[]")
+        public List<Integer> principalVariationsForBorrowerCycle;
+        @Schema(example = "[]")
+        public List<Integer> interestRateVariationsForBorrowerCycle;
+        @Schema(example = "[]")
+        public List<Integer> numberOfRepaymentVariationsForBorrowerCycle;
+        @Schema(example = "0")
+        public Double minInterestRatePerPeriod;
+        @Schema(example = "1.75")
+        public Double interestRatePerPeriod;
+        @Schema(example = "23.4")
+        public Double maxInterestRatePerPeriod;
+        @Schema(example = "1")
+        public Integer repaymentEvery;
+        @Schema(example = "5.5")
+        public BigDecimal fixedPrincipalPercentagePerInstallment;
+        @Schema(example = "true")
+        public Boolean canDefineInstallmentAmount;
+
+        // Settings
+        @Schema(example = "false")
+        public Boolean includeInBorrowerCycle;
+        @Schema(example = "false")
+        public Boolean useBorrowerCycle;
+        @Schema(example = "2")
+        public Integer repaymentFrequencyType;
+        @Schema(example = "2")
+        public Integer interestRateFrequencyType;
+        @Schema(example = "1")
+        public Integer amortizationType;
+        @Schema(example = "0")
+        public Integer interestType;
+        @Schema(example = "1")
+        public Integer interestCalculationPeriodType;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
+        @Schema(example = "false")
+        public Boolean isLinkedToFloatingInterestRates;
+        @Schema(example = "false")
+        public Boolean allowVariableInstallments;
+        @Schema(example = "30")
+        public Integer minimumDaysBetweenDisbursalAndFirstRepayment;
+        @Schema(example = "true")
+        public Boolean allowApprovedDisbursedAmountsOverApplied;
+        @Schema(example = "percentage")
+        public String overAppliedCalculationType;
+        @Schema(example = "50")
+        public Integer overAppliedNumber;
+        @Schema(example = "1")
+        public Integer daysInMonthType;
+        @Schema(example = "1")
+        public Integer daysInYearType;
+        @Schema(example = "true")
+        public Boolean allowPartialPeriodInterestCalcualtion;
+        @Schema(example = "179")
+        public Integer overdueDaysForNPA;
+        @Schema(example = "3")
+        public Integer graceOnPrincipalPayment;
+        @Schema(example = "3")
+        public Integer graceOnInterestPayment;
+        @Schema(example = "90")
+        public Integer inArrearsTolerance;
+        @Schema(example = "3")
+        public Integer graceOnArrearsAgeing;
+        @Schema(example = "false")
+        public Boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
+        @Schema(example = "false")
+        public Boolean isEqualAmortization;
+        @Schema(example = "false")
+        public Boolean canUseForTopup;
+        @Schema(example = "false")
+        public Boolean holdGuaranteeFunds;
+        @Schema(example = "1")
+        public Long delinquencyBucketId;
+
+        // Interest Recalculation
+        @Schema(example = "false")
+        public Boolean isInterestRecalculationEnabled;
+        @Schema(example = "1")
+        public Integer interestRecalculationCompoundingMethod;
+        @Schema(example = "2")
+        public Integer rescheduleStrategyMethod;
+        @Schema(example = "1")
+        public Integer preClosureInterestCalculationStrategy;
+        @Schema(example = "1")
+        public Integer recalculationCompoundingFrequencyType;
+        @Schema(example = "50")
+        public Integer recalculationRestFrequencyType;
+        @Schema(example = "1")
+        public Integer recalculationRestFrequencyInterval;
+        @Schema(example = "1")
+        public Integer recalculationCompoundingFrequencyInterval;
+        @Schema(example = "1")
+        public Integer recalculationCompoundingFrequencyOnDayType;
+
+        // Accounting
+        @Schema(example = "3")
+        public Integer accountingRule;
+        @Schema(example = "4")
+        public Long fundSourceAccountId;
+        @Schema(example = "8")
+        public Long loanPortfolioAccountId;
+        @Schema(example = "9")
+        public Long receivableInterestAccountId;
+        @Schema(example = "11")
+        public Long receivableFeeAccountId;
+        @Schema(example = "10")
+        public Long receivablePenaltyAccountId;
+        @Schema(example = "34")
+        public Long interestOnLoanAccountId;
+        @Schema(example = "37")
+        public Long incomeFromFeeAccountId;
+        @Schema(example = "35")
+        public Long incomeFromPenaltyAccountId;
+        @Schema(example = "2")
+        public Long overpaymentLiabilityAccountId;
+        @Schema(example = "41")
+        public Long writeOffAccountId;
+        @Schema(example = "5")
+        public Long transfersInSuspenseAccountId;
+        @Schema(example = "15")
+        public Long incomeFromRecoveryAccountId;
+        @Schema(example = "48")
+        public Long goodwillCreditAccountId;
+        @Schema(example = "20")
+        public Long incomeFromChargeOffInterestAccountId;
+        @Schema(example = "11")
+        public Long incomeFromChargeOffFeesAccountId;
+        @Schema(example = "12")
+        public Long chargeOffExpenseAccountId;
+        @Schema(example = "13")
+        public Long chargeOffFraudExpenseAccountId;
+        @Schema(example = "11")
+        public Long incomeFromChargeOffPenaltyAccountId;
+        public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
+        public List<GetLoanProductsProductIdResponse.GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
+        public List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
+
+        // Multi Disburse
+        @Schema(example = "true")
+        public Boolean multiDisburseLoan;
+        @Schema(example = "50")
+        public Integer principalThresholdForLastInstallment;
+        @Schema(example = "true")
+        public Boolean disallowExpectedDisbursements;
+        @Schema(example = "3")
+        public Integer maxTrancheCount;
+        @Schema(example = "36000.00")
+        public Double outstandingLoanBalance;
+
+        public List<PostLoanProductsRequest.ChargeData> charges;
         @Schema(example = "en_GB")
         public String locale;
-        @Schema(example = "70,000.00")
-        public Double principal;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+
+        public PostLoanProductsRequest.AllowAttributeOverrides allowAttributeOverrides;
+        public List<PostLoanProductsRequest.RateData> rates;
+
+        static final class AllowAttributeOverrides {
+
+            private AllowAttributeOverrides() {}
+
+            @Schema(example = "true")
+            public boolean amortizationType;
+            @Schema(example = "true")
+            public boolean interestType;
+            @Schema(example = "true")
+            public boolean transactionProcessingStrategyCode;
+            @Schema(example = "true")
+            public boolean interestCalculationPeriodType;
+            @Schema(example = "true")
+            public boolean inArrearsTolerance;
+            @Schema(example = "true")
+            public boolean repaymentEvery;
+            @Schema(example = "true")
+            public boolean graceOnPrincipalAndInterestPayment;
+            @Schema(example = "true")
+            public boolean graceOnArrearsAgeing;
+        }
+
+        static final class ChargeData {
+
+            private ChargeData() {}
+
+            @Schema(example = "1")
+            public Long id;
+        }
+
+        static final class RateData {
+
+            private RateData() {}
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "some name")
+            public String name;
+            @Schema(example = "20")
+            public BigDecimal percentage;
+            @Schema(description = "Apply specific product using its id, code, and value.")
+            public EnumOptionData productApply;
+            @Schema(example = "false")
+            public boolean active;
+        }
+
     }
 
     @Schema(description = "PutLoanProductsProductIdResponse")
