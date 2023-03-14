@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,4 +187,31 @@ class ExternalEventServiceTest {
         assertThat(externalEvent.getCategory()).isEqualTo(eventCategory);
 
     }
+
+    @Test
+    public void testEventShouldSaveDatesInMilliSecondFormat() throws IOException {
+        // given
+        ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
+        String eventSchema = "org.apache.fineract.avro.loan.v1.LoanAccountDataV1";
+        String eventType = "TestType";
+        String eventCategory = "TestCategory";
+        String idempotencyKey = "key";
+        BusinessEvent event = mock(BusinessEvent.class);
+        BusinessEventSerializer eventSerializer = mock(BusinessEventSerializer.class);
+        byte[] data = new byte[0];
+
+        given(event.getType()).willReturn(eventType);
+        given(event.getCategory()).willReturn(eventCategory);
+        given(idempotencyKeyGenerator.generate(event)).willReturn(idempotencyKey);
+        given(serializerFactory.create(event)).willReturn(eventSerializer);
+        given(eventSerializer.getSupportedSchema()).will(invocation -> LoanAccountDataV1.class);
+        given(eventSerializer.serialize(event)).willReturn(data);
+        // when
+        underTest.postEvent(event);
+        // then
+        verify(repository).save(externalEventArgumentCaptor.capture());
+        ExternalEvent externalEvent = externalEventArgumentCaptor.getValue();
+        assertThat(externalEvent.getCreatedAt().isSupported(ChronoUnit.MILLIS)).isTrue();
+    }
+
 }

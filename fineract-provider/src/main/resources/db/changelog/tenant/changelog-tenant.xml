@@ -115,4 +115,5 @@
     <include file="parts/0093_update_general_accounting_table_reports.xml" relativeToChangelogFile="true" />
     <include file="parts/0094_add_external_event_default_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0095_add_delinquency_and_arrears_display_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0096_modify_created_and_sent_at_date_external_events.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
