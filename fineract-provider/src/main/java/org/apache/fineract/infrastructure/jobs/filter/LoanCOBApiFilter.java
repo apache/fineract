@@ -148,8 +148,8 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     private boolean isLoanBehind(List<Long> loanIds) {
         List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
-        partitions.forEach(partition -> loanIdAndLastClosedBusinessDates.addAll(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(
-                ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition)));
+        partitions.forEach(partition -> loanIdAndLastClosedBusinessDates.addAll(loanRepository
+                .findAllNonClosedLoansBehindByLoanIds(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition)));
         return CollectionUtils.isNotEmpty(loanIdAndLastClosedBusinessDates);
     }
 
