@@ -192,6 +192,10 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_ALL_NON_CLOSED_LOANS_BY_LAST_CLOSED_BUSINESS_DATE)
     List<Long> findAllNonClosedLoanIdsByLastClosedBusinessDate(@Param("businessDate") LocalDate businessDate);
 
+    @Query(FIND_ALL_NON_CLOSED_LOANS_BEHIND_BY_LOAN_IDS)
+    List<LoanIdAndLastClosedBusinessDate> findAllNonClosedLoansBehindByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate,
+            @Param("loanIds") List<Long> loanIds);
+
     @Query(FIND_ALL_NON_CLOSED_LOANS_BEHIND_OR_NULL_BY_LOAN_IDS)
     List<LoanIdAndLastClosedBusinessDate> findAllNonClosedLoansBehindOrNullByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds);
