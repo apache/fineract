@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
+import org.apache.fineract.infrastructure.core.exception.PlatformRequestBodyItemLimitValidationException;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
@@ -95,6 +96,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public CommandProcessingResult executeInlineJob(JsonCommand command, String jobName) throws LoanAccountLockCannotBeOverruledException {
         List<Long> loanIds = dataParser.parseExecution(command);
+        validateLoanIdsListSize(loanIds);
         execute(loanIds, jobName);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).build();
     }
@@ -230,5 +232,13 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
 
     private boolean isBypassUser() {
         return context.getAuthenticatedUserIfPresent().isBypassUser();
+    }
+
+    private void validateLoanIdsListSize(List<Long> loanIds) {
+        int inlineLoanCobRequestItemLimit = fineractProperties.getApi().getBodyItemSizeLimit().getInlineLoanCob();
+        if (loanIds.size() > inlineLoanCobRequestItemLimit) {
+            String userMessage = "Size of the loan IDs list cannot be over " + inlineLoanCobRequestItemLimit;
+            throw new PlatformRequestBodyItemLimitValidationException(userMessage);
+        }
     }
 }

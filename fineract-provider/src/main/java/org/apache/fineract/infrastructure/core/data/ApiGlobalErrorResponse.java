@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
 
@@ -174,6 +175,10 @@ public class ApiGlobalErrorResponse {
         globalErrorResponse.setErrors(errors);
 
         return globalErrorResponse;
+    }
+
+    public static ApiGlobalErrorResponse badClientRequest(final String globalisationMessageCode, final String defaultUserMessage) {
+        return badClientRequest(globalisationMessageCode, defaultUserMessage, Collections.emptyList());
     }
 
     public static ApiGlobalErrorResponse serverSideError(final String globalisationMessageCode, final String defaultUserMessage,
