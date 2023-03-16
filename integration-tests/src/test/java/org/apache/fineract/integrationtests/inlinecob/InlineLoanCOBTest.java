@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.inlinecob;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -31,6 +32,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.LongStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -388,6 +390,15 @@ public class InlineLoanCOBTest {
 
         loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
         Assertions.assertEquals(LocalDate.of(2020, 3, 9), loan.getLastClosedBusinessDate());
+    }
+
+    @Test
+    public void testInlineCOBRequestBodyItemLimitValidation() {
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
+        inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+        List<Long> loanIds = LongStream.rangeClosed(1, 1001).boxed().toList();
+        String responseUserMessage = inlineLoanCOBHelper.executeInlineCOB(loanIds, "defaultUserMessage");
+        assertEquals("Size of the loan IDs list cannot be over 1000", responseUserMessage);
     }
 
     private void createNewSimpleUserWithoutBypassPermission() {

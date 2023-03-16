@@ -56,6 +56,7 @@ public class FineractProperties {
     private FineractJpaProperties jpa;
 
     private FineractQueryProperties query;
+    private FineractApiProperties api;
 
     @Getter
     @Setter
@@ -263,6 +264,20 @@ public class FineractProperties {
     public static class FineractQueryProperties {
 
         private int inClauseParameterSizeLimit;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractApiProperties {
+
+        private FineractBodyItemSizeLimitProperties bodyItemSizeLimit;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractBodyItemSizeLimitProperties {
+
+        private int inlineLoanCob;
     }
 
 }

@@ -66,6 +66,10 @@ class InlineLoanCOBExecutorServiceImplTest {
     private FineractProperties fineractProperties;
     @Mock
     private FineractProperties.FineractQueryProperties fineractQueryProperties;
+    @Mock
+    private FineractProperties.FineractApiProperties fineractApiProperties;
+    @Mock
+    private FineractProperties.FineractBodyItemSizeLimitProperties fineractBodyItemSizeLimitProperties;
 
     @Test
     void shouldExceptionThrownIfLoanIsAlreadyLocked() {
@@ -80,8 +84,11 @@ class InlineLoanCOBExecutorServiceImplTest {
 
         when(transactionTemplate.execute(any())).thenThrow(new LoanAccountLockCannotBeOverruledException(""));
         when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+        when(fineractProperties.getApi()).thenReturn(fineractApiProperties);
         when(dataParser.parseExecution(any())).thenReturn(List.of(1L));
         when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
+        when(fineractApiProperties.getBodyItemSizeLimit()).thenReturn(fineractBodyItemSizeLimitProperties);
+        when(fineractBodyItemSizeLimitProperties.getInlineLoanCob()).thenReturn(1000);
         when(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(any(), anyList())).thenReturn(List.of(loan));
         assertThrows(LoanAccountLockCannotBeOverruledException.class, () -> testObj.executeInlineJob(command, "INLINE_LOAN_COB"));
     }
@@ -101,8 +108,11 @@ class InlineLoanCOBExecutorServiceImplTest {
 
         when(transactionTemplate.execute(any())).thenThrow(new LoanAccountLockCannotBeOverruledException(""));
         when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+        when(fineractProperties.getApi()).thenReturn(fineractApiProperties);
         when(dataParser.parseExecution(any())).thenReturn(List.of(1L, 2L, 3L));
         when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(2);
+        when(fineractApiProperties.getBodyItemSizeLimit()).thenReturn(fineractBodyItemSizeLimitProperties);
+        when(fineractBodyItemSizeLimitProperties.getInlineLoanCob()).thenReturn(1000);
         when(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(any(), anyList())).thenReturn(List.of(loan1, loan2, loan3));
         assertThrows(LoanAccountLockCannotBeOverruledException.class, () -> testObj.executeInlineJob(command, "INLINE_LOAN_COB"));
         verify(loanRepository, times(2)).findAllNonClosedLoansBehindOrNullByLoanIds(any(), anyList());
