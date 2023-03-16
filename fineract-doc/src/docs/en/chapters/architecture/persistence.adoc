@@ -31,6 +31,25 @@ The currently supported JDBC driver and corresponding mappings can be found belo
 
 The actual code can be found in the `DatabaseTypeResolver` class.
 
+== Tenant database security
+
+The tenant database schema password is stored in the `tenant_server_connections` table in the tenant database.
+The password and the read only schema password are encrypted using the `fineract.tenant.master-password` property.
+By default, the database property will be encrypted in the first start from a plane text.
+
+When you want to generate a new encrypted password, you can use the `org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor` class.
+
+=== Database password encryption usage
+```
+java -cp fineract-provider.jar -Dloader.main=org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor org.springframework.boot.loader.PropertiesLauncher <masterPassword> <plainPassword>
+```
+
+For example:
+```
+java -cp fineract-provider-0.0.0-48f7e315.jar -Dloader.main=org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor org.springframework.boot.loader.PropertiesLauncher fineract-master-password fineract-tenant-password
+The encrypted password: VLwGl7vOP/q275ZTku+PNGWnGwW4mzzNHSNaO9Pr67WT5/NZMpBr9tGYYiYsqwL1eRew2jl7O3/N1EFbLlXhSA==
+```
+
 == Data-access layer
 
 The data-access layer of Fineract is implemented by using JPA (Java Persistence API) with the EclipseLink provider.
