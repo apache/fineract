@@ -49,6 +49,16 @@
 |Default Demo Tenant
 |TBD
 
+|fineract.tenant.master-password
+|FINERACT_DEFAULT_TENANTDB_MASTER_PASSWORD
+|fineract
+|TBD
+
+|fineract.tenant.encrytion
+|FINERACT_DEFAULT_TENANTDB_ENCRYPTION
+|AES/CBC/PKCS5Padding
+|TBD
+
 |spring.liquibase.enabled
 |FINERACT_LIQUIBASE_ENABLED
 |true
