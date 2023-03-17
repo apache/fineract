@@ -19,7 +19,6 @@
 package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -27,7 +26,6 @@ import static org.mockito.Mockito.verify;
 
 import com.google.gson.Gson;
 import io.cucumber.java8.En;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -70,12 +68,12 @@ public class LoanCOBPartitionerStepDefinitions implements En {
                         .thenReturn(Collections.emptySet());
                 lenient().when(jobExplorer.findRunningJobExecutions(JobName.LOAN_COB.name())).thenReturn(Set.of(new JobExecution(3L)));
                 lenient().when(jobOperator.stop(3L)).thenReturn(Boolean.TRUE);
+                loanIds = Collections.emptyList();
             } else if ("empty loanIds".equals(action)) {
                 cobBusinessSteps.add(new BusinessStepNameAndOrder("Business step", 1L));
                 lenient().when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                         .thenReturn(cobBusinessSteps);
-                loanIds = new ArrayList<>();
-                lenient().when(jobExplorer.findRunningJobExecutions(JobName.LOAN_COB.name())).thenThrow(new RuntimeException("fail"));
+                loanIds = Collections.emptyList();
             } else if ("good".equals(action)) {
                 cobBusinessSteps.add(new BusinessStepNameAndOrder("Business step", 1L));
                 lenient().when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
@@ -113,13 +111,18 @@ public class LoanCOBPartitionerStepDefinitions implements En {
                         businessSteps.stream().findFirst().get().getStepName());
                 assertEquals(1, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "2").get(LoanCOBConstant.LOAN_IDS)).size());
                 assertEquals(3L, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "2").get(LoanCOBConstant.LOAN_IDS)).get(0));
+            } else if ("empty loanIds".equals(action)) {
+                verify(jobOperator, Mockito.times(0)).stop(Mockito.anyLong());
+                assertEquals(1, resultItem.size());
+                assertTrue(resultItem.containsKey(LoanCOBPartitioner.PARTITION_PREFIX + "1"));
+                Set<BusinessStepNameAndOrder> businessSteps = (Set<BusinessStepNameAndOrder>) resultItem
+                        .get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.BUSINESS_STEPS);
+                assertEquals(cobBusinessSteps.stream().findFirst().get().getStepOrder(),
+                        businessSteps.stream().findFirst().get().getStepOrder());
+                assertEquals(cobBusinessSteps.stream().findFirst().get().getStepName(),
+                        businessSteps.stream().findFirst().get().getStepName());
+                assertEquals(0, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.LOAN_IDS)).size());
             }
-        });
-
-        Then("throw exception LoanCOBPartitioner.partition method", () -> {
-            assertThrows(RuntimeException.class, () -> {
-                resultItem = this.loanCOBPartitioner.partition(2);
-            });
         });
     }
 }

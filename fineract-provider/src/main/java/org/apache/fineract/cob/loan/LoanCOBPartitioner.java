@@ -37,7 +37,6 @@ import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,17 +57,12 @@ public class LoanCOBPartitioner implements Partitioner {
         int partitionSize = propertyService.getPartitionSize(LoanCOBConstant.JOB_NAME);
         Set<BusinessStepNameAndOrder> cobBusinessSteps = cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class,
                 LoanCOBConstant.LOAN_COB_JOB_NAME);
-        if (cobBusinessSteps.isEmpty()) {
-            stopJobExecution();
-            return Map.of();
-        }
         return getPartitions(partitionSize, cobBusinessSteps);
     }
 
     private Map<String, ExecutionContext> getPartitions(int partitionSize, Set<BusinessStepNameAndOrder> cobBusinessSteps) {
         Map<String, ExecutionContext> partitions = new HashMap<>();
-
-        if (CollectionUtils.isEmpty(loanIds)) {
+        if (cobBusinessSteps.isEmpty()) {
             stopJobExecution();
             return Map.of();
         }

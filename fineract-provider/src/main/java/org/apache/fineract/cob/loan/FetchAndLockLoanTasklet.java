@@ -21,6 +21,7 @@ package org.apache.fineract.cob.loan;
 import com.google.common.collect.Lists;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,7 @@ public class FetchAndLockLoanTasklet implements Tasklet {
         LocalDate businessDate = LocalDate.parse(Objects.requireNonNull(businessDateParameter));
         List<Long> allNonClosedLoanIds = retrieveLoanIdService.retrieveLoanIdsNDaysBehind(NUMBER_OF_DAYS_BEHIND, businessDate);
         if (allNonClosedLoanIds.isEmpty()) {
+            contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.LOAN_IDS, Collections.emptyList());
             return RepeatStatus.FINISHED;
         }
         List<Long> remainingIds = new ArrayList<>(allNonClosedLoanIds);
