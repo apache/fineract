@@ -1366,6 +1366,16 @@ final class LoanProductsApiResourceSwagger {
         public Long chargeOffExpenseAccountId;
         @Schema(example = "13")
         public Long chargeOffFraudExpenseAccountId;
+
+        @Schema(example = "20")
+        public Long incomeFromGoodwillCreditInterestAccountId;
+
+        @Schema(example = "11")
+        public Long incomeFromGoodwillCreditFeesAccountId;
+
+        @Schema(example = "11")
+        public Long incomeFromGoodwillCreditPenaltyAccountId;
+
         @Schema(example = "11")
         public Long incomeFromChargeOffPenaltyAccountId;
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
