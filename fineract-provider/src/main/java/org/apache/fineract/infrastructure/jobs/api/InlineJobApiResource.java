@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Tag(name = "Inline Job", description = "")
 @RequiredArgsConstructor
-public class InlineJobResource {
+public class InlineJobApiResource {
 
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
     private final DefaultToApiJsonSerializer<LoanIdsResponseDTO> serializer;
@@ -57,7 +57,8 @@ public class InlineJobResource {
     @Operation(summary = "Starts an inline Job", description = "Starts an inline Job")
     @RequestBody(content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Request body item size validation error") })
     public String executeInlineJob(@PathParam("jobName") @Parameter(description = "jobName") final String jobName,
             @Parameter(hidden = true) final String jsonRequestBody) {
 

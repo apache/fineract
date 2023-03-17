@@ -45,6 +45,14 @@ public class InlineLoanCOBHelper extends IntegrationTest {
         return Utils.performServerPost(requestSpec, responseSpec, EXECUTE_INLINE_COB_API, buildInlineCOBRequest(loanIds));
     }
 
+    public String executeInlineCOB(List<Long> loanIds, String responseAttribute) {
+        final String EXECUTE_INLINE_COB_API = "/fineract-provider/api/v1/jobs/LOAN_COB/inline";
+        log.info("------------------EXECUTE INLINE COB----------------------");
+        log.info("------------------Loan IDs: {}----------------------", loanIds);
+        return Utils.performServerPost(requestSpec, responseSpec, EXECUTE_INLINE_COB_API, buildInlineCOBRequest(loanIds),
+                responseAttribute);
+    }
+
     private static String buildInlineCOBRequest(List<Long> loanIds) {
         final HashMap<String, List<Long>> map = new HashMap<>();
         map.put("loanIds", loanIds);
