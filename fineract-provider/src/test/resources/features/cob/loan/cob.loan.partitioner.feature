@@ -29,12 +29,4 @@ Feature: COB Loan partitioner Step
       |action|
       |empty steps|
       |good|
-
-  @cob
-  Scenario Outline: LoanCOBPartitioner - run test: exception
-    Given The LoanCOBPartitioner.partition method with action <action>
-    Then throw exception LoanCOBPartitioner.partition method
-
-    Examples:
-      |action|
       |empty loanIds|
