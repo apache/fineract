@@ -27,6 +27,7 @@ jobs:
 
     env:
         TZ: Asia/Kolkata
+        GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # tag=v3
