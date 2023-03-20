@@ -1,13 +1,12 @@
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 
 class S3ContentRepositoryTest {
 
