@@ -25,7 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
@@ -36,7 +36,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -45,19 +44,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class GenericDataServiceImpl implements GenericDataService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
+    private final RoutingDataSource dataSource;
     private final DatabaseIndependentQueryService databaseIndependentQueryService;
-
-    @Autowired
-    public GenericDataServiceImpl(final RoutingDataSource dataSource, final JdbcTemplate jdbcTemplate,
-            DatabaseIndependentQueryService databaseIndependentQueryService) {
-        this.dataSource = dataSource;
-        this.databaseIndependentQueryService = databaseIndependentQueryService;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
-    }
+    private final DatatableKeywordGenerator datatableKeywordGenerator;
 
     @Override
     public GenericResultsetData fillGenericResultSet(final String sql) {
@@ -228,11 +221,13 @@ public class GenericDataServiceImpl implements GenericDataService {
 
             final boolean columnNullable = "YES".equalsIgnoreCase(isNullable) || "TRUE".equalsIgnoreCase(isNullable);
             final boolean columnIsPrimaryKey = "PRI".equalsIgnoreCase(isPrimaryKey) || "TRUE".equalsIgnoreCase(isPrimaryKey);
-            final boolean columnIsUnique = checkUnique(datatable, columnName, indexDefinitions);
-            boolean columnIsIndexed = false;
-            if (!columnIsUnique) {
-                columnIsIndexed = checkIndexed(datatable, columnName, indexDefinitions);
-            }
+
+            // primary keys are automatically unique
+            final boolean columnIsUnique = columnIsPrimaryKey || isExplicitlyUnique(datatable, columnName, indexDefinitions);
+
+            // primary keys and unique constrained columns are automatically indexed
+            final boolean columnIsIndexed = columnIsPrimaryKey || columnIsUnique
+                    || isExplicitlyIndexed(datatable, columnName, indexDefinitions);
 
             List<ResultsetColumnValueData> columnValues = new ArrayList<>();
             String codeName = null;
@@ -240,7 +235,7 @@ public class GenericDataServiceImpl implements GenericDataService {
             if ("varchar".equalsIgnoreCase(columnType) || "int".equalsIgnoreCase(columnType) || "integer".equalsIgnoreCase(columnType)) {
                 if (codePosition > 0) {
                     codeName = columnName.substring(0, codePosition);
-                    columnValues = retreiveColumnValues(codeName);
+                    columnValues = retrieveColumnValues(codeName);
                 }
             }
 
@@ -251,14 +246,24 @@ public class GenericDataServiceImpl implements GenericDataService {
         return columnHeaders;
     }
 
-    private boolean checkUnique(String datatable, String columnName, List<IndexDetail> indexDefinitions) {
-        String keyNameToCheck = "uk_" + datatable + "_" + columnName;
+    private boolean isExplicitlyUnique(String datatable, String columnName, List<IndexDetail> indexDefinitions) {
+        String keyNameToCheck = datatableKeywordGenerator.generateUniqueKeyName(datatable, columnName);
         return checkKeyPresent(keyNameToCheck, indexDefinitions);
     }
 
-    private boolean checkIndexed(String datatable, String columnName, List<IndexDetail> indexDefinitions) {
-        String keyNameToCheck = "idx_" + datatable + "_" + columnName;
+    @Override
+    public boolean isExplicitlyUnique(String datatable, String columnName) {
+        return isExplicitlyUnique(datatable, columnName, getDatatableIndexData(datatable));
+    }
+
+    private boolean isExplicitlyIndexed(String datatable, String columnName, List<IndexDetail> indexDefinitions) {
+        String keyNameToCheck = datatableKeywordGenerator.generateIndexName(datatable, columnName);
         return checkKeyPresent(keyNameToCheck, indexDefinitions);
+    }
+
+    @Override
+    public boolean isExplicitlyIndexed(String datatable, String columnName) {
+        return isExplicitlyIndexed(datatable, columnName, getDatatableIndexData(datatable));
     }
 
     private boolean checkKeyPresent(String keyNameToCheck, List<IndexDetail> indexDefinitions) {
@@ -282,7 +287,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     /*
      * Candidate for using caching there to get allowed 'column values' from code/codevalue tables
      */
-    private List<ResultsetColumnValueData> retreiveColumnValues(final String codeName) {
+    private List<ResultsetColumnValueData> retrieveColumnValues(final String codeName) {
 
         final List<ResultsetColumnValueData> columnValues = new ArrayList<>();
 

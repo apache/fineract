@@ -16,25 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.integrationtests.datatable;
 
-import java.util.List;
-import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import org.apache.fineract.integrationtests.common.Utils;
 
-public interface GenericDataService {
+public abstract class DatatableTestNameGenerator {
 
-    GenericResultsetData fillGenericResultSet(String sql);
+    private DatatableTestNameGenerator() {}
 
-    String generateJsonFromGenericResultsetData(GenericResultsetData grs);
-
-    String replace(String str, String pattern, String replace);
-
-    String wrapSQL(String sql);
-
-    List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(String datatable);
-
-    boolean isExplicitlyUnique(String datatable, String columnName);
-
-    boolean isExplicitlyIndexed(String datatable, String columnName);
+    public static String generateDatatableName(DatatableEntity datatableEntity) {
+        return Utils.uniqueRandomStringGenerator("dt_%s_".formatted(datatableEntity.getReferencedTableName()), 5).toLowerCase();
+    }
 }
