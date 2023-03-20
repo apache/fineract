@@ -28,6 +28,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
@@ -98,6 +100,16 @@ public final class Utils {
         RestAssured.port = 8443;
         RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
         RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    public static RequestSpecification initializeDefaultRequestSpecification() {
+        RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        return requestSpec;
+    }
+
+    public static ResponseSpecification initializeDefaultResponseSpecification() {
+        return new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     private static void awaitSpringBootActuatorHealthyUp() {

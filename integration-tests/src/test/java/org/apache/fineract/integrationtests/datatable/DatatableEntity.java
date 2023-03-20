@@ -16,25 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.integrationtests.datatable;
 
-import java.util.List;
-import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public interface GenericDataService {
+@RequiredArgsConstructor
+@Getter
+public enum DatatableEntity {
 
-    GenericResultsetData fillGenericResultSet(String sql);
+    LOAN("m_loan");
 
-    String generateJsonFromGenericResultsetData(GenericResultsetData grs);
-
-    String replace(String str, String pattern, String replace);
-
-    String wrapSQL(String sql);
-
-    List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(String datatable);
-
-    boolean isExplicitlyUnique(String datatable, String columnName);
-
-    boolean isExplicitlyIndexed(String datatable, String columnName);
+    private final String referencedTableName;
 }

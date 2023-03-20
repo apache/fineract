@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableKeywordGenerator;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataServiceImpl;
@@ -48,9 +49,10 @@ public class DataQueriesAutoConfiguration {
             final DatatableCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final ConfigurationDomainService configurationDomainService, final CodeReadPlatformService codeReadPlatformService,
             final DataTableValidator dataTableValidator, final ColumnValidator columnValidator,
-            final NamedParameterJdbcTemplate namedParameterJdbcTemplate, final SqlInjectionPreventerService preventSqlInjectionService) {
+            final NamedParameterJdbcTemplate namedParameterJdbcTemplate, final SqlInjectionPreventerService preventSqlInjectionService,
+            DatatableKeywordGenerator datatableKeywordGenerator) {
         return new ReadWriteNonCoreDataServiceImpl(jdbcTemplate, databaseTypeResolver, sqlGenerator, context, fromJsonHelper,
                 genericDataService, fromApiJsonDeserializer, configurationDomainService, codeReadPlatformService, dataTableValidator,
-                columnValidator, namedParameterJdbcTemplate, preventSqlInjectionService);
+                columnValidator, namedParameterJdbcTemplate, preventSqlInjectionService, datatableKeywordGenerator);
     }
 }

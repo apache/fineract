@@ -18,23 +18,16 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import java.util.List;
-import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import org.springframework.stereotype.Component;
 
-public interface GenericDataService {
+@Component
+public class DatatableKeywordGenerator {
 
-    GenericResultsetData fillGenericResultSet(String sql);
+    public String generateIndexName(String tableName, String columnName) {
+        return "idx_%s_%s".formatted(tableName, columnName);
+    }
 
-    String generateJsonFromGenericResultsetData(GenericResultsetData grs);
-
-    String replace(String str, String pattern, String replace);
-
-    String wrapSQL(String sql);
-
-    List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(String datatable);
-
-    boolean isExplicitlyUnique(String datatable, String columnName);
-
-    boolean isExplicitlyIndexed(String datatable, String columnName);
+    public String generateUniqueKeyName(String tableName, String columnName) {
+        return "uk_%s_%s".formatted(tableName, columnName);
+    }
 }
