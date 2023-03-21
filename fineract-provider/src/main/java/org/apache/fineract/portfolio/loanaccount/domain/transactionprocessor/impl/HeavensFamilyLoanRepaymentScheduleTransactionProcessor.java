@@ -20,8 +20,10 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
@@ -61,15 +63,16 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+            final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
+            Set<LoanCharge> charges) {
 
         return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed,
-                transactionMappings);
+                transactionMappings, charges);
     }
 
     @Override
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
-            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate, final Money transactionAmount) {
+            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
 
         boolean isInAdvance = false;
 
@@ -92,10 +95,10 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
      */
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final LocalDate transactionDate, final Money paymentInAdvance,
-            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
+            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
+        final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final MonetaryCurrency currency = paymentInAdvance.getCurrency();
         Money transactionAmountRemaining = paymentInAdvance;
         Money principalPortion = Money.zero(currency);
@@ -158,7 +161,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
     @Override
     protected Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();

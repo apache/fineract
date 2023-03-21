@@ -42,6 +42,7 @@ public class LoanProductTestBuilder {
     private static final String FLAT_BALANCE = "1";
     public static final String DEFAULT_STRATEGY = "mifos-standard-strategy";
     public static final String INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY = "interest-principal-penalties-fees-order-strategy";
+    public static final String DUE_DATE_RESPECTIVE_STRATEGY = "due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy";
     // private static final String HEAVENS_FAMILY_STRATEGY ="heavensfamily-strategy";
     // private static final String CREO_CORE_STRATEGY ="creocore-strategy";
     public static final String RBI_INDIA_STRATEGY = "rbi-india-strategy";
