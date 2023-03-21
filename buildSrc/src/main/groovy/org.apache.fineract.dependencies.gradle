@@ -30,6 +30,7 @@ dependencyManagement {
         mavenBom 'io.cucumber:cucumber-bom:7.11.1'
         mavenBom 'io.netty:netty-bom:4.1.89.Final'
         mavenBom 'org.mockito:mockito-bom:5.1.1'
+        mavenBom 'software.amazon.awssdk:bom:2.20.12'
     }
 
     dependencies {
