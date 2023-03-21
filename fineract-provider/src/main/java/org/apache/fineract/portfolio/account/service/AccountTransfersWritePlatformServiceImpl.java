@@ -158,7 +158,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     transactionDate, transactionAmount, paymentDetail, transactionBooleanValues, backdatedTxnsAllowedTill);
 
             final Long toLoanAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
-            final Loan toLoanAccount = this.loanAccountAssembler.assembleFrom(toLoanAccountId);
+            Loan toLoanAccount = this.loanAccountAssembler.assembleFrom(toLoanAccountId);
 
             final Boolean isHolidayValidationDone = false;
             final HolidayDetailDTO holidayDetailDto = null;
@@ -169,7 +169,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final LoanTransaction loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT,
                     toLoanAccount, transactionDate, transactionAmount, paymentDetail, null, externalId, isRecoveryRepayment,
                     chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
-
+            toLoanAccount = loanRepaymentTransaction.getLoan();
             final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(command,
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
@@ -340,6 +340,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                         accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
                         accountTransferDTO.getPaymentDetail(), null, externalId, isRecoveryRepayment, chargeRefundChargeType,
                         isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+                toLoanAccount = loanTransaction.getLoan();
             }
 
             accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(accountTransferDTO, fromSavingsAccount,

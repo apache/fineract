@@ -243,7 +243,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             if (isAppliedOnBackDate && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
 
-                runScheduleRecalculation(loan, recalculateFrom);
+                loan = runScheduleRecalculation(loan, recalculateFrom);
                 reprocessRequired = false;
             }
             this.loanWritePlatformService.updateOriginalSchedule(loan);
@@ -252,14 +252,15 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
                 // Trigger transaction replayed event
                 replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
+            loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         }
-        loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
@@ -760,7 +761,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
             if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                 if (runInterestRecalculation && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
-                    runScheduleRecalculation(loan, recalculateFrom);
+                    loan = runScheduleRecalculation(loan, recalculateFrom);
                     reprocessRequired = false;
                 }
                 this.loanWritePlatformService.updateOriginalSchedule(loan);
@@ -772,11 +773,13 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 if (changedTransactionDetail != null) {
                     for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings()
                             .entrySet()) {
-                        this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                        accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                     }
                     // Trigger transaction replayed event
                     replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
                 }
+                loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             }
 
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -1112,22 +1115,24 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         }
     }
 
-    public void runScheduleRecalculation(final Loan loan, final LocalDate recalculateFrom) {
+    public Loan runScheduleRecalculation(Loan loan, final LocalDate recalculateFrom) {
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
             ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
             ChangedTransactionDetail changedTransactionDetail = loan
                     .handleRegenerateRepaymentScheduleWithInterestRecalculation(generatorDTO);
-            this.loanRepositoryWrapper.save(loan);
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
                 // Trigger transaction replayed event
                 replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
+            loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         }
+        return loan;
     }
 
     private JsonCommand adaptLoanChargeRefundCommandForFurtherRepaymentProcessing(JsonCommand command, BigDecimal fullRefundAbleAmount) {

@@ -16,12 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.handler;
+package org.apache.fineract.batch.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Getter;
+import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.batch.exception.ErrorHandler;
+import org.apache.fineract.batch.exception.ErrorInfo;
 
-public interface NewCommandSourceHandler {
+@Getter
+public class BatchExecutionException extends RuntimeException {
 
-    CommandProcessingResult processCommand(JsonCommand command);
+    private final BatchRequest request;
+    private final ErrorInfo errorInfo;
+
+    public BatchExecutionException(BatchRequest request, RuntimeException ex) {
+        super("Error executing batch request: " + request, ex);
+        this.request = request;
+        this.errorInfo = ErrorHandler.handler(ex);
+    }
 }
