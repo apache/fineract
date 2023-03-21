@@ -120,7 +120,6 @@ dependencies {
     implementation ('org.quartz-scheduler:quartz') {
         exclude group: 'com.zaxxer', module: 'HikariCP-java7'
     }
-    implementation platform('software.amazon.awssdk:bom')
     implementation('org.apache.commons:commons-csv'){}
     implementation ('software.amazon.awssdk:s3') {
     }
