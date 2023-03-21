@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.filter;
 
 import com.google.common.collect.Lists;
+import io.github.resilience4j.core.functions.Either;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,13 +31,11 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.UriInfo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
@@ -44,24 +43,27 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.infrastructure.core.filters.BatchFilter;
-import org.apache.fineract.infrastructure.core.filters.BatchFilterChain;
+import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.apache.http.HttpStatus;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @RequiredArgsConstructor
-public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilter {
+public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchRequestPreprocessor {
 
     private final GLIMAccountInfoRepository glimAccountInfoRepository;
     private final LoanAccountLockService loanAccountLockService;
@@ -81,6 +83,8 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find()
             || LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(s).find();
     private static final String JOB_NAME = "INLINE_LOAN_COB";
+
+    private final PlatformTransactionManager transactionManager;
 
     @RequiredArgsConstructor
     @Getter
@@ -106,15 +110,6 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
         public void toServletResponse(HttpServletResponse response) throws IOException {
             response.setStatus(statusCode);
             response.getWriter().write(message);
-        }
-
-        public BatchResponse toBatchResponse(BatchRequest request) {
-            BatchResponse response = new BatchResponse();
-            response.setStatusCode(statusCode);
-            response.setBody(message);
-            response.setHeaders(request.getHeaders());
-            response.setRequestId(request.getRequestId());
-            return response;
         }
     }
 
@@ -251,28 +246,27 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     }
 
     @Override
-    public BatchResponse doFilter(BatchRequest batchRequest, UriInfo uriInfo, BatchFilterChain chain) {
-        if (!isOnApiList("/" + batchRequest.getRelativeUrl(), batchRequest.getMethod())) {
-            return chain.serviceCall(batchRequest, uriInfo);
-        } else {
+    public Either<RuntimeException, BatchRequest> preprocess(BatchRequest batchRequest) {
+        TransactionTemplate tr = new TransactionTemplate(transactionManager);
+        tr.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+        return tr.execute(status -> {
             try {
-                boolean bypassUser = isBypassUser();
-                if (bypassUser) {
-                    return chain.serviceCall(batchRequest, uriInfo);
-                } else {
-                    try {
+                if (isOnApiList("/" + batchRequest.getRelativeUrl(), batchRequest.getMethod())) {
+                    boolean bypassUser = isBypassUser();
+                    if (!bypassUser) {
                         List<Long> result = calculateRelevantLoanIds("/" + batchRequest.getRelativeUrl());
                         if (!result.isEmpty() && (isLoanSoftLocked(result) || isLoanBehind(result))) {
                             executeInlineCob(result);
                         }
-                        return chain.serviceCall(batchRequest, uriInfo);
-                    } catch (LoanIdsHardLockedException e) {
-                        return Reject.reject(e.getLoanIdFromRequest(), HttpStatus.SC_CONFLICT).toBatchResponse(batchRequest);
                     }
                 }
-            } catch (UnAuthenticatedUserException e) {
-                return Reject.reject(null, HttpStatus.SC_UNAUTHORIZED).toBatchResponse(batchRequest);
+            } catch (LoanNotFoundException e) {
+                return Either.right(batchRequest);
+            } catch (RuntimeException e) {
+                return Either.left(e);
             }
-        }
+            return Either.right(batchRequest);
+        });
     }
+
 }

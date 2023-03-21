@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.handler;
+package org.apache.fineract.infrastructure.core.filters;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import io.github.resilience4j.core.functions.Either;
+import org.apache.fineract.batch.domain.BatchRequest;
 
-public interface NewCommandSourceHandler {
+public interface BatchRequestPreprocessor {
 
-    CommandProcessingResult processCommand(JsonCommand command);
+    Either<RuntimeException, BatchRequest> preprocess(BatchRequest batchRequest);
 }
