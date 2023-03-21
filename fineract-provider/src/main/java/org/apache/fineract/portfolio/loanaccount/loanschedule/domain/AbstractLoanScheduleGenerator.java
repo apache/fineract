@@ -505,7 +505,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     // on scheduled installments to identify the
                     // unprocessed(early payment ) amounts
                     Money unprocessed = loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(currentTransactions, currency,
-                            scheduleParams.getInstallments());
+                            scheduleParams.getInstallments(), loanCharges);
 
                     if (unprocessed.isGreaterThanZero()) {
                         scheduleParams.reduceOutstandingBalance(unprocessed);
@@ -805,7 +805,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         // on scheduled installments to identify the
                         // unprocessed(early payment ) amounts
                         Money unprocessed = scheduleParams.getLoanRepaymentScheduleTransactionProcessor()
-                                .handleRepaymentSchedule(currentTransactions, currency, scheduleParams.getInstallments());
+                                .handleRepaymentSchedule(currentTransactions, currency, scheduleParams.getInstallments(), loanCharges);
                         if (unprocessed.isGreaterThanZero()) {
 
                             if (loanApplicationTerms.getPreClosureInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
@@ -850,7 +850,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         if (applicableDate.isBefore(scheduledDueDate)) {
                             List<LoanTransaction> currentTransactions = createCurrentTransactionList(detail);
                             Money unprocessed = scheduleParams.getLoanRepaymentScheduleTransactionProcessor()
-                                    .handleRepaymentSchedule(currentTransactions, currency, scheduleParams.getInstallments());
+                                    .handleRepaymentSchedule(currentTransactions, currency, scheduleParams.getInstallments(), loanCharges);
                             Money arrears = fetchArrears(loanApplicationTerms, currency, detail.getTransaction());
                             if (unprocessed.isGreaterThanZero()) {
                                 updateMapWithAmount(scheduleParams.getPrincipalPortionMap(), unprocessed, applicableDate);
@@ -1377,7 +1377,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     startDate = transactionDate;
                     additionalPeriodsStartDate = startDate;
                 }
-                loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(currentTransactions, currency, params.getInstallments());
+                loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(currentTransactions, currency, params.getInstallments(),
+                        loanCharges);
                 updateLatePaidAmountsToPrincipalMap(detail.getTransaction(), loanApplicationTerms, currency, holidayDetailDTO, lastRestDate,
                         params);
                 updateLatePaymentsToMap(loanApplicationTerms, holidayDetailDTO, currency, params.getLatePaymentMap(), currentDate,
@@ -2323,7 +2324,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
                     Money unprocessed = updateEarlyPaidAmountsToMap(loanApplicationTerms, holidayDetailDTO,
                             loanRepaymentScheduleTransactionProcessor, newRepaymentScheduleInstallments, currency, principalPortionMap,
-                            installment, applicableTransactions, actualPrincipalPortion);
+                            installment, applicableTransactions, actualPrincipalPortion, loan.getActiveCharges());
 
                     // this block is to adjust the period number based on the
                     // actual
@@ -2413,7 +2414,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         return LoanScheduleDTO.from(retainedInstallments, loanScheduleModelwithPeriodChanges);
     }
 
-    public List<LoanRepaymentScheduleInstallment> fetchRetainedInstallments(
+    private List<LoanRepaymentScheduleInstallment> fetchRetainedInstallments(
             final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LocalDate rescheduleFrom,
             MonetaryCurrency currency) {
         List<LoanRepaymentScheduleInstallment> newRepaymentScheduleInstallments = new ArrayList<>();
@@ -2455,7 +2456,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
             final List<LoanRepaymentScheduleInstallment> newRepaymentScheduleInstallments, MonetaryCurrency currency,
             final Map<LocalDate, Money> principalPortionMap, LoanRepaymentScheduleInstallment installment,
-            Collection<RecalculationDetail> applicableTransactions, Money actualPrincipalPortion) {
+            Collection<RecalculationDetail> applicableTransactions, Money actualPrincipalPortion, Set<LoanCharge> loanCharges) {
         Money unprocessed = Money.zero(currency);
         Money totalUnprocessed = Money.zero(currency);
         for (RecalculationDetail detail : applicableTransactions) {
@@ -2467,7 +2468,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 // on scheduled installments to identify the
                 // unprocessed(early payment ) amounts
                 loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(currentTransactions, currency,
-                        newRepaymentScheduleInstallments);
+                        newRepaymentScheduleInstallments, loanCharges);
 
                 // Identifies totalEarlyPayment and early paid amount with this
                 // transaction

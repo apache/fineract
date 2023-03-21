@@ -60,6 +60,8 @@ public class FineractProperties {
 
     private FineractNotificationProperties notification;
 
+    private FineractLoanProperties loan;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -292,6 +294,35 @@ public class FineractProperties {
     @Getter
     @Setter
     public static class UserNotificationSystemProperties {
+
+        private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractLoanProperties {
+
+        private FineractTransactionProcessorProperties transactionProcessor;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractTransactionProcessorProperties {
+
+        private FineractTransactionProcessorItemProperties creocore;
+        private FineractTransactionProcessorItemProperties earlyRepayment;
+        private FineractTransactionProcessorItemProperties mifosStandard;
+        private FineractTransactionProcessorItemProperties heavensFamily;
+        private FineractTransactionProcessorItemProperties interestPrincipalPenaltiesFees;
+        private FineractTransactionProcessorItemProperties principalInterestPenaltiesFees;
+        private FineractTransactionProcessorItemProperties rbiIndia;
+        private FineractTransactionProcessorItemProperties duePenaltyFeeInterestPrincipalInAdvancePrincipalPenaltyFeeInterest;
+        private boolean errorNotFoundFail;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractTransactionProcessorItemProperties {
 
         private boolean enabled;
     }

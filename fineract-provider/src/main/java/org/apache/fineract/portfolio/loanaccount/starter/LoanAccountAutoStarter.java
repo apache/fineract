@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.DueDateRespectiveLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.EarlyPaymentLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
@@ -29,53 +30,59 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class LoanAccountAutoStarter {
 
     @Bean
-    @ConditionalOnProperty("fineract.loan.transactionprocessor.creocore.enabled")
+    @Conditional(CreocoreLoanRepaymentScheduleTransactionProcessorCondition.class)
     public CreocoreLoanRepaymentScheduleTransactionProcessor creocoreLoanRepaymentScheduleTransactionProcessor() {
         return new CreocoreLoanRepaymentScheduleTransactionProcessor();
     }
 
     @Bean
-    @ConditionalOnProperty("fineract.loan.transactionprocessor.early-repayment.enabled")
+    @Conditional(EarlyRepaymentLoanRepaymentScheduleTransactionProcessorCondition.class)
     public EarlyPaymentLoanRepaymentScheduleTransactionProcessor earlyPaymentLoanRepaymentScheduleTransactionProcessor() {
         return new EarlyPaymentLoanRepaymentScheduleTransactionProcessor();
     }
 
     @Bean
-    @ConditionalOnProperty("fineract.loan.transactionprocessor.mifos-standard.enabled")
+    @Conditional(MifosStandardLoanRepaymentScheduleTransactionProcessorCondition.class)
     public FineractStyleLoanRepaymentScheduleTransactionProcessor fineractStyleLoanRepaymentScheduleTransactionProcessor() {
         return new FineractStyleLoanRepaymentScheduleTransactionProcessor();
     }
 
     @Bean
-    @ConditionalOnProperty("fineract.loan.transactionprocessor.heavensfamily.enabled")
+    @Conditional(HeavensFamilyLoanRepaymentScheduleTransactionProcessorCondition.class)
     public HeavensFamilyLoanRepaymentScheduleTransactionProcessor heavensFamilyLoanRepaymentScheduleTransactionProcessor() {
         return new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
     }
 
     @Bean
-    @ConditionalOnProperty("fineract.loan.transactionprocessor.interest-principal-penalties-fees.enabled")
+    @Conditional(InterestPrincipalPenaltiesFeesLoanRepaymentScheduleTransactionProcessorCondition.class)
     public InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor interestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor() {
         return new InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
     }
 
     @Bean
-    @ConditionalOnProperty("fineract.loan.transactionprocessor.principal-interest-penalties-fees.enabled")
+    @Conditional(PrincipalInterestPenaltiesFeesLoanRepaymentScheduleTransactionProcessorCondition.class)
     public PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor principalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor() {
         return new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
     }
 
     @Bean
-    @ConditionalOnProperty("fineract.loan.transactionprocessor.rbi-india.enabled")
+    @Conditional(RBIIndiaLoanRepaymentScheduleTransactionProcessorCondition.class)
     public RBILoanRepaymentScheduleTransactionProcessor rbiLoanRepaymentScheduleTransactionProcessor() {
         return new RBILoanRepaymentScheduleTransactionProcessor();
+    }
+
+    @Bean
+    @Conditional(DueDateRespectiveLoanRepaymentScheduleTransactionProcessorCondition.class)
+    public DueDateRespectiveLoanRepaymentScheduleTransactionProcessor dueDateRespectiveTransactionProcessor() {
+        return new DueDateRespectiveLoanRepaymentScheduleTransactionProcessor();
     }
 
     @Bean

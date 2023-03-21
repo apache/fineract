@@ -46,7 +46,7 @@ public interface LoanRepaymentScheduleTransactionProcessor {
             List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
 
     Money handleRepaymentSchedule(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments);
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> loanCharges);
 
     /**
      * Used in interest recalculation to introduce new interest only installment.
