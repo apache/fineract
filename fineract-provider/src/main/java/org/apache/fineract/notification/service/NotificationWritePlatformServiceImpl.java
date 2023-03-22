@@ -40,26 +40,6 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
     private final AppUserRepository appUserRepository;
     private final NotificationMapperWritePlatformService notificationMapperWritePlatformService;
 
-    @Override
-    public Long notify(Long userId, String objectType, Long objectIdentifier, String action, Long actorId, String notificationContent,
-            boolean isSystemGenerated) {
-
-        Long generatedNotificationId = insertIntoNotificationGenerator(objectType, objectIdentifier, action, actorId, notificationContent,
-                isSystemGenerated);
-        insertIntoNotificationMapper(userId, generatedNotificationId);
-        return generatedNotificationId;
-    }
-
-    private Long insertIntoNotificationMapper(Long userId, Long generatedNotificationId) {
-        AppUser appUser = this.appUserRepository.findById(userId).orElse(null);
-        NotificationMapper notificationMapper = new NotificationMapper()
-                .setNotification(this.notificationGeneratorReadRepositoryWrapper.findById(generatedNotificationId)).setUserId(appUser)
-                .setRead(false).setCreatedAt(DateUtils.getLocalDateTimeOfSystem());
-
-        this.notificationMapperWritePlatformService.create(notificationMapper);
-        return notificationMapper.getId();
-    }
-
     private Long insertIntoNotificationGenerator(String objectType, Long objectIdentifier, String action, Long actorId,
             String notificationContent, boolean isSystemGenerated) {
 
