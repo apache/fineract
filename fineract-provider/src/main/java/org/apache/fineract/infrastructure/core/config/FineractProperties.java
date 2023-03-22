@@ -58,6 +58,8 @@ public class FineractProperties {
     private FineractQueryProperties query;
     private FineractApiProperties api;
 
+    private FineractNotificationProperties notification;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -280,4 +282,17 @@ public class FineractProperties {
         private int inlineLoanCob;
     }
 
+    @Getter
+    @Setter
+    public static class FineractNotificationProperties {
+
+        private UserNotificationSystemProperties userNotificationSystem;
+    }
+
+    @Getter
+    @Setter
+    public static class UserNotificationSystemProperties {
+
+        private boolean enabled;
+    }
 }

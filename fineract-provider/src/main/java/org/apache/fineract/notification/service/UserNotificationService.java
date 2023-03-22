@@ -18,10 +18,14 @@
  */
 package org.apache.fineract.notification.service;
 
-import java.util.Collection;
+import org.apache.fineract.notification.data.NotificationData;
 
-public interface NotificationWritePlatformService {
+public interface UserNotificationService {
 
-    Long notify(Collection<Long> userIds, String objectType, Long objectId, String action, Long actorId, String notificationContent,
-            boolean isSystemGenerated);
+    void notifyUsers(String permission, String objectType, Long objectIdentifier, String notificationContent, String eventType,
+            Long appUserId, Long officeId);
+
+    boolean hasUnreadUserNotifications(Long appUserId);
+
+    void notifyUsers(NotificationData notificationData);
 }
