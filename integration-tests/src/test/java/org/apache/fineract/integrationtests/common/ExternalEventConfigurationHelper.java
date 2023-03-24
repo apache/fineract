@@ -460,6 +460,11 @@ public class ExternalEventConfigurationHelper {
         loanUndoChargeOffPostBusinessEvent.put("enabled", false);
         defaults.add(loanUndoChargeOffPostBusinessEvent);
 
+        Map<String, Object> loanAccrualTransactionCreatedBusinessEvent = new HashMap<>();
+        loanAccrualTransactionCreatedBusinessEvent.put("type", "LoanAccrualTransactionCreatedBusinessEvent");
+        loanAccrualTransactionCreatedBusinessEvent.put("enabled", false);
+        defaults.add(loanAccrualTransactionCreatedBusinessEvent);
+
         return defaults;
 
     }

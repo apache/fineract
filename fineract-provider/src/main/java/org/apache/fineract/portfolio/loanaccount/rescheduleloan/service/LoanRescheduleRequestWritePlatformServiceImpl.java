@@ -78,6 +78,7 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanResched
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRescheduleRequestNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
@@ -115,6 +116,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final LoanAccountDomainService loanAccountDomainService;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
+    private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
 
     /**
      * create a new instance of the LoanRescheduleRequest object from the JsonCommand object and persist
@@ -459,6 +461,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             // update the loan object
             loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
 
             this.loanAccountDomainService.recalculateAccruals(loan, true);
 

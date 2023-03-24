@@ -28,10 +28,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -42,6 +45,8 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -63,6 +68,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
 
     @Override
     @Transactional
@@ -273,6 +281,14 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         String updateLoan = "UPDATE m_loan  SET accrued_till=?, last_modified_by=?, last_modified_on_utc=?  WHERE  id=?";
         this.jdbcTemplate.update(updateLoan, accruedTill, user.getId(), DateUtils.getOffsetDateTimeOfTenant(),
                 scheduleAccrualData.getLoanId());
+
+        Optional<LoanTransaction> loanAccrualTransaction = loanTransactionRepository.findByIdAndLoanId(transactionId,
+                scheduleAccrualData.getLoanId());
+        if (!loanAccrualTransaction.isEmpty()) {
+            businessEventNotifierService
+                    .notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(loanAccrualTransaction.get()));
+        }
+
         final Map<String, Object> accountingBridgeData = deriveAccountingBridgeData(scheduleAccrualData, transactionMap);
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
@@ -481,6 +497,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             loan.processIncomeTransactions();
             this.loanRepositoryWrapper.saveAndFlush(loan);
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         }
     }
 
