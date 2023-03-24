@@ -163,6 +163,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final NoteRepository noteRepository;
+    private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
 
     private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
         return e.getFromDate().isBefore(loanCharge.getDueDate()) && !loanCharge.getDueDate().isAfter(e.getDueDate());
@@ -512,7 +513,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
-
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveChargeBusinessEvent(loanCharge));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
@@ -816,7 +817,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(loan.getCurrency().getCode(),
                 existingTransactionIds, existingReversedTransactionIds, false);
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
-
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
 
         return loanChargeAdjustmentTransaction;
@@ -1113,6 +1114,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
     public void runScheduleRecalculation(final Loan loan, final LocalDate recalculateFrom) {
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
             ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
             ChangedTransactionDetail changedTransactionDetail = loan
                     .handleRegenerateRepaymentScheduleWithInterestRecalculation(generatorDTO);
@@ -1124,6 +1126,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 // Trigger transaction replayed event
                 replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
+            loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         }
     }
 

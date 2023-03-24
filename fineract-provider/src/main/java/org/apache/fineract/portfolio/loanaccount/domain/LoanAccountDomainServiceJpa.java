@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargePaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargePaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanCreditBalanceRefundPostBusinessEvent;
@@ -90,6 +91,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
@@ -130,6 +132,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
     private final ExternalIdFactory externalIdFactory;
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
+    private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
 
     @Transactional
     @Override
@@ -227,7 +230,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, isLoanToLoanTransfer);
-
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         recalculateAccruals(loan);
 
         setLoanDelinquencyTag(loan, transactionDate);
@@ -405,6 +408,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+
         recalculateAccruals(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargePaymentPostBusinessEvent(newPaymentTransaction));
@@ -480,6 +485,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRefundPostBusinessEvent(newRefundTransaction));
         builderResult.withEntityId(newRefundTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
@@ -734,6 +740,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         recalculateAccruals(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRefundPostBusinessEvent(newRefundTransaction));
@@ -845,6 +852,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanForeClosurePostBusinessEvent(payment));
         return payment;
@@ -946,6 +954,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 }
                 saveLoanTransactionWithDataIntegrityViolationChecks(accrualTransaction);
                 loan.addLoanTransaction(accrualTransaction);
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(accrualTransaction));
 
                 loan.getRepaymentScheduleInstallments().forEach(installment -> {
                     installment.updateAccrualPortion(
