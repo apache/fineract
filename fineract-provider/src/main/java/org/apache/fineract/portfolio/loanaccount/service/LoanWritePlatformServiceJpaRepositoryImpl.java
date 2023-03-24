@@ -2806,6 +2806,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoChargeOffBusinessEvent(chargedOffTransaction));
 
         chargedOffTransaction.reverse();
+        chargedOffTransaction.manuallyAdjustedOrReversed();
         loan.liftChargeOff();
         loanTransactionRepository.saveAndFlush(chargedOffTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);

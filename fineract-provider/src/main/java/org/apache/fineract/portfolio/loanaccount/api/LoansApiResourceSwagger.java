@@ -690,6 +690,8 @@ final class LoansApiResourceSwagger {
                 public boolean creditBalanceRefund;
                 @Schema(example = "false")
                 public boolean chargeAdjustment;
+                @Schema(example = "false")
+                public boolean chargeoff;
             }
 
             static final class GetLoansLoanIdPaymentDetailData {

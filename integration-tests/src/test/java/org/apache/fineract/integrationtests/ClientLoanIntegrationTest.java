@@ -7083,6 +7083,11 @@ public class ClientLoanIntegrationTest {
             assertNull(loanDetails.getSummary().getChargeOffReason());
             assertNull(loanDetails.getTimeline().getChargedOffOnDate());
 
+            GetLoansLoanIdTransactions undoChargeOffTransaction = loanDetails.getTransactions()
+                    .get(loanDetails.getTransactions().size() - 1);
+            assertTrue(undoChargeOffTransaction.getType().getChargeoff());
+            assertTrue(undoChargeOffTransaction.getManuallyReversed());
+
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.undoChargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest());
             });
