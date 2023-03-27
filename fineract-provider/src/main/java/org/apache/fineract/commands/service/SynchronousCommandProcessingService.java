@@ -109,22 +109,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         try {
             result = findCommandHandler(wrapper).processCommand(command);
         } catch (Throwable t) { // NOSONAR
-            CommandSource source;
-            if (BatchRequestContextHolder.getEnclosingTransaction().isPresent()) {
-                source = commandSourceService.findCommandSourceNoTransaction(wrapper, idempotencyKey);
-            } else {
-                source = commandSourceService.findCommandSource(wrapper, idempotencyKey);
-            }
+            CommandSource source = commandSourceService.findCommandSource(wrapper, idempotencyKey);
             commandSourceService.saveFailed(source);
             publishHookErrorEvent(wrapper, command, t);
             throw t;
         }
-        CommandSource initialCommandSource;
-        if (BatchRequestContextHolder.getEnclosingTransaction().isPresent()) {
-            initialCommandSource = commandSourceService.findCommandSourceNoTransaction(wrapper, idempotencyKey);
-        } else {
-            initialCommandSource = commandSourceService.findCommandSource(wrapper, idempotencyKey);
-        }
+        CommandSource initialCommandSource = commandSourceService.findCommandSource(wrapper, idempotencyKey);
 
         initialCommandSource.setResult(toApiJsonSerializer.serializeResult(result));
         initialCommandSource.updateResourceId(result.getResourceId());

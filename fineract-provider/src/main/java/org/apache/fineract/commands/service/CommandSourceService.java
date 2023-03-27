@@ -89,13 +89,7 @@ public class CommandSourceService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public CommandSource findCommandSource(CommandWrapper wrapper, String idempotencyKey) {
-        return commandSourceRepository.findByActionNameAndEntityNameAndIdempotencyKey(wrapper.actionName(), wrapper.entityName(),
-                idempotencyKey);
-    }
-
-    public CommandSource findCommandSourceNoTransaction(CommandWrapper wrapper, String idempotencyKey) {
         return commandSourceRepository.findByActionNameAndEntityNameAndIdempotencyKey(wrapper.actionName(), wrapper.entityName(),
                 idempotencyKey);
     }
