@@ -68,7 +68,14 @@ public class GetDatatableEntryByQueryCommandStrategy implements CommandStrategy 
         // - Call datatablesApiResource.getDatatable(dataTable, appTableId, null, uriInfo)
         String columnFilter = null;
         String valueFilter = null;
+        String dateFilter = null;
+        String likeFilter = null;
         String resultColumns = null;
+        Integer limit = null;
+        Integer offset = null;
+        String orderBy = null;
+        String sortOrder = null;
+
         if (relativeUrl.indexOf('?') > 0) {
             Map<String, String> queryParameters = CommandStrategyUtils.getQueryParameters(relativeUrl);
             // Add the query parameters sent in the relative URL to MutableUriInfo
@@ -78,7 +85,13 @@ public class GetDatatableEntryByQueryCommandStrategy implements CommandStrategy 
                 switch (entry.getKey()) {
                     case "columnFilter" -> columnFilter = entry.getValue();
                     case "valueFilter" -> valueFilter = entry.getValue();
+                    case "dateFilter" -> dateFilter = entry.getValue();
+                    case "likeFilter" -> likeFilter = entry.getValue();
                     case "resultColumns" -> resultColumns = entry.getValue();
+                    case "limit" -> limit = Integer.valueOf(entry.getValue());
+                    case "offset" -> offset = Integer.valueOf(entry.getValue());
+                    case "orderBy" -> orderBy = entry.getValue();
+                    case "sortOrder" -> sortOrder = entry.getValue();
                 }
             }
         }
@@ -87,7 +100,8 @@ public class GetDatatableEntryByQueryCommandStrategy implements CommandStrategy 
 
         // Calls 'queryValues' function from 'DatatablesApiResource' to
         // get the datatable details based on the filters
-        responseBody = dataTablesApiResource.queryValues(dataTableName, columnFilter, valueFilter, resultColumns, parameterizedUriInfo);
+        responseBody = dataTablesApiResource.queryValues(dataTableName, columnFilter, valueFilter, dateFilter, likeFilter, resultColumns,
+                offset, limit, orderBy, sortOrder, parameterizedUriInfo);
 
         response.setStatusCode(HttpStatus.SC_OK);
 

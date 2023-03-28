@@ -63,14 +63,15 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @Test
     public void testSqlInjectionCaughtQueryDataTable() {
         assertThrows(SQLInjectionException.class, () -> {
-            underTest.queryDataTable("table", "cf1", "vf1", "' or 1=1");
+            underTest.queryDataTable("table", "cf1", "vf1", "from_20210201-to_20230228", null, "' or 1=1", 0, 10, "", "");
         });
     }
 
     @Test
     public void testSqlInjectionCaughtQueryDataTable2() {
         assertThrows(SQLInjectionException.class, () -> {
-            underTest.queryDataTable("table", "cf1", "vf1", "1; DROP TABLE m_loan; SELECT");
+            underTest.queryDataTable("table", "cf1", "vf1", "from_20210201-to_20230228", null, "1; DROP TABLE m_loan; SELECT", 0, 10, "",
+                    "");
         });
     }
 
@@ -88,7 +89,8 @@ public class ReadWriteNonCoreDataServiceImplTest {
         ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, null, null, false, false);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
-        List<JsonObject> results = underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2");
+        List<JsonObject> results = underTest.queryDataTable("table", "cf1", "vf1", "from_20210201-to_20230228", null, "rc1,rc2", 0, 10, "",
+                "");
 
         Assertions.assertEquals("value1", results.get(0).get("rc1").getAsString());
         Assertions.assertEquals("value2", results.get(0).get("rc2").getAsString());
@@ -97,7 +99,8 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @Test
     public void testQueryDataTableValidationError() {
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(Collections.emptyList());
-        assertThrows(PlatformApiDataValidationException.class, () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));
+        assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.queryDataTable("table", "cf1", "vf1", "from_20210201-to_20230228", null, "rc1,rc2", 0, 10, "", ""));
     }
 
     @Test
@@ -114,6 +117,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
         ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, null, null, false, false);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
-        assertThrows(IllegalStateException.class, () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));
+        assertThrows(IllegalStateException.class,
+                () -> underTest.queryDataTable("table", "cf1", "vf1", "from_20210201-to_20230228", null, "rc1,rc2", 0, 10, "", ""));
     }
 }

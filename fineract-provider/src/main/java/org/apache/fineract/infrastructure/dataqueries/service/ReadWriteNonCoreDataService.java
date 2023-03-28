@@ -32,7 +32,13 @@ public interface ReadWriteNonCoreDataService {
 
     DatatableData retrieveDatatable(String datatable);
 
-    List<JsonObject> queryDataTable(String datatable, String columnFilter, String valueFilter, String resultColumns);
+    /**
+     * @Description This method will find data from specified table, and return specified column using parameter
+     *              resultColumns There are many filters used in this query which can help to generate sql query from
+     *              api parameters
+     */
+    List<JsonObject> queryDataTable(String datatable, String columnFilter, String valueFilter, String dateFilter, String likeFilter,
+            String resultColumns, Integer offset, Integer limit, String orderBy, String sortOrder);
 
     @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
     void registerDatatable(JsonCommand command);

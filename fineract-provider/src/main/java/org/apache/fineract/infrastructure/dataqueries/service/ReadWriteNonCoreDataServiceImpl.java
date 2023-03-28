@@ -44,7 +44,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
@@ -204,23 +203,75 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     @Override
-    public List<JsonObject> queryDataTable(String datatable, String columnFilter, String valueFilter, String resultColumns) {
-        Arrays.asList(datatable, columnFilter, valueFilter, resultColumns).forEach(SQLInjectionValidator::validateDynamicQuery);
+    public List<JsonObject> queryDataTable(String datatable, String columnFilter, String valueFilter, String dateFilter, String likeFilter,
+            String resultColumns, Integer offset, Integer limit, String orderBy, String sortOrder) {
+
+        Arrays.asList(datatable, columnFilter, valueFilter, resultColumns, orderBy, sortOrder)
+                .forEach(SQLInjectionValidator::validateDynamicQuery);
 
         List<ResultsetColumnHeaderData> resultsetColumnHeaderData = genericDataService.fillResultsetColumnHeaders(datatable);
-        validateRequestParams(columnFilter, valueFilter, resultColumns, resultsetColumnHeaderData);
+        validateRequestParams(columnFilter, valueFilter, likeFilter, resultColumns, resultsetColumnHeaderData, orderBy, sortOrder);
 
-        String sql = "select " + resultColumns + " from " + datatable + " where " + columnFilter + " = ?";
-        SqlRowSet rowSet = null;
-        String filterColumnType = resultsetColumnHeaderData.stream().filter(column -> Objects.equals(columnFilter, column.getColumnName()))
-                .findFirst().map(ResultsetColumnHeaderData::getColumnType).orElse(columnFilter + " does not exist in datatable");
-        if (databaseTypeResolver.isPostgreSQL()) {
-            rowSet = callFilteredPgSql(sql, valueFilter, filterColumnType);
-        } else if (databaseTypeResolver.isMySQL()) {
-            rowSet = callFilteredMysql(sql, valueFilter, filterColumnType);
-        } else {
-            throw new IllegalStateException("Database type is not supported");
+        List<Object> paramList = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("select " + resultColumns + " from " + datatable + " where ");
+
+        // value search must not be null or like filter must not be null
+        if (StringUtils.isNotBlank(columnFilter) && (StringUtils.isNotBlank(valueFilter) || StringUtils.isNotBlank(likeFilter))) {
+            // priority given to like search
+            if (StringUtils.isNotBlank(likeFilter)) {
+                sql.append(columnFilter).append(" LIKE '%").append(likeFilter).append("%' ");
+                paramList.add(likeFilter);
+            } else {
+                sql.append(columnFilter).append(" = ?");
+                paramList.add(valueFilter);
+            }
         }
+
+        if (StringUtils.isNotBlank(dateFilter)) {
+            LocalDate from = null;
+            LocalDate to = null;
+
+            String[] dates = dateFilter.split("-");
+            String fromDate = dates.length > 0 ? dates[0].split("_")[1] : null;
+            String toDate = dates.length > 1 ? dates[1].split("_")[1] : null;
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+            if (fromDate != null) {
+                from = LocalDate.parse(fromDate, formatter);
+            }
+            if (toDate != null) {
+                to = LocalDate.parse(toDate, formatter);
+            }
+
+            if (from != null) {
+                if (to != null) {
+                    sql.append(" and ").append(columnFilter).append("between ? and ? ");
+                    paramList.add(java.sql.Date.valueOf(to));
+                    paramList.add(java.sql.Date.valueOf(from));
+                } else {
+                    sql.append(" and ").append(columnFilter).append(" > ?");
+                    paramList.add(java.sql.Date.valueOf(from));
+                }
+            }
+        }
+
+        if (StringUtils.isNotBlank(orderBy)) {
+            sql.append(" order by ? ");
+            paramList.add(orderBy);
+        }
+        if (StringUtils.isNotBlank(sortOrder)) {
+            sql.append(" ").append(sortOrder).append(" ");
+            paramList.add(sortOrder);
+        }
+        if (limit != null) {
+            if (offset != null) {
+                sql.append(sqlGenerator.limit(limit, offset));
+            } else {
+                sql.append(sqlGenerator.limit(limit));
+            }
+        }
+
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql.toString(), paramList); // NOSONAR
 
         String[] resultColumnNames = resultColumns.split(",");
         List<JsonObject> results = new ArrayList<>();
@@ -332,8 +383,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return jdbcTemplate.queryForRowSet(sql, new Object[] { finalValueFilter }, argType);
     }
 
-    private static void validateRequestParams(String columnFilter, String valueFilter, String resultColumns,
-            List<ResultsetColumnHeaderData> resultsetColumnHeaderData) {
+    private static void validateRequestParams(String columnFilter, String valueFilter, String likeFilter, String resultColumns,
+            List<ResultsetColumnHeaderData> resultsetColumnHeaderData, String orderBy, String sortOrder) {
         List<ApiParameterError> paramErrors = new ArrayList<>();
         List<String> dataTableColumnNames = resultsetColumnHeaderData.stream().map(ResultsetColumnHeaderData::getColumnName).toList();
         if (columnFilter == null || columnFilter.isEmpty()) {
@@ -344,8 +395,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
         }
 
-        if (valueFilter == null || valueFilter.isEmpty()) {
-            paramErrors.add(parameterErrorWithValue("400", "Value filter is empty!", "valueFilter", valueFilter));
+        if ((valueFilter == null || valueFilter.isEmpty() && (likeFilter == null || likeFilter.isEmpty()))) {
+            paramErrors.add(parameterErrorWithValue("400", "Value filter & likw filter is empty!", "valueFilter & likeFilter",
+                    valueFilter + " " + likeFilter));
         }
 
         if (resultColumns == null || resultColumns.isEmpty()) {
@@ -356,6 +408,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     paramErrors.add(parameterErrorWithValue("400", "Result column not exist in datatable!", "resultColumns", rcn));
                 }
             });
+        }
+
+        if (StringUtils.isNotBlank(orderBy)) {
+            if (!dataTableColumnNames.contains(orderBy)) {
+                paramErrors.add(parameterErrorWithValue("400", "Column orderBy not exist in datatable!", "orderBy", orderBy));
+            }
+        }
+        if (StringUtils.isNotBlank(sortOrder)) {
+            if (!dataTableColumnNames.contains(sortOrder)) {
+                paramErrors.add(parameterErrorWithValue("400", "Column sortOrder not exist in datatable!", "sortOrder", sortOrder));
+            }
         }
 
         if (!paramErrors.isEmpty()) {

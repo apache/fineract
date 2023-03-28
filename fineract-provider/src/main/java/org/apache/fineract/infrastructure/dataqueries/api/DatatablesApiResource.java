@@ -228,12 +228,17 @@ public class DatatablesApiResource {
     public String queryValues(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @QueryParam("columnFilter") @Parameter(description = "columnFilter") final String columnFilter,
             @QueryParam("valueFilter") @Parameter(description = "valueFilter") final String valueFilter,
+            @QueryParam("dateFilter") @Parameter(description = "dateFilter") final String dateFilter,
+            @QueryParam("likeFilter") @Parameter(description = "likeFilter") final String likeFilter,
             @QueryParam("resultColumns") @Parameter(description = "resultColumns") final String resultColumns,
-            @Context final UriInfo uriInfo) {
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
-        final List<JsonObject> result = this.readWriteNonCoreDataService.queryDataTable(datatable, columnFilter, valueFilter,
-                resultColumns);
+        final List<JsonObject> result = this.readWriteNonCoreDataService.queryDataTable(datatable, columnFilter, valueFilter, dateFilter,
+                likeFilter, resultColumns, offset, limit, orderBy, sortOrder);
 
         return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
     }
