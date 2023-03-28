@@ -29,12 +29,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,6 +52,8 @@ public class FetchAndLockLoanTasklet implements Tasklet {
 
     private final FineractProperties fineractProperties;
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
         String businessDateParameter = (String) contribution.getStepExecution().getJobExecution().getExecutionContext()
@@ -60,8 +66,7 @@ public class FetchAndLockLoanTasklet implements Tasklet {
         }
         List<Long> remainingIds = new ArrayList<>(allNonClosedLoanIds);
 
-        List<List<Long>> remainingIdPartitions = Lists.partition(remainingIds,
-                fineractProperties.getQuery().getInClauseParameterSizeLimit());
+        List<List<Long>> remainingIdPartitions = Lists.partition(remainingIds, getInClauseParameterSizeLimit());
         List<LoanAccountLock> loanAccountLocks = new ArrayList<>();
         remainingIdPartitions.forEach(
                 remainingIdPartition -> loanAccountLocks.addAll(loanAccountLockRepository.findAllByLoanIdIn(remainingIdPartition)));
@@ -87,10 +92,21 @@ public class FetchAndLockLoanTasklet implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    private void applySoftLock(List<Long> alreadySoftLockedAccounts) {
-        for (Long loanId : alreadySoftLockedAccounts) {
-            LoanAccountLock loanAccountLock = new LoanAccountLock(loanId, LockOwner.LOAN_COB_PARTITIONING);
-            loanAccountLockRepository.save(loanAccountLock);
-        }
+    private void applySoftLock(List<Long> accountsToLock) {
+        LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        jdbcTemplate.batchUpdate("""
+                    INSERT INTO m_loan_account_locks (loan_id, version, lock_owner, lock_placed_on, lock_placed_on_cob_business_date)
+                    VALUES (?, ?, ?, ?, ?)
+                """, accountsToLock, getInClauseParameterSizeLimit(), (ps, id) -> {
+            ps.setLong(1, id);
+            ps.setLong(2, 1);
+            ps.setString(3, LockOwner.LOAN_COB_PARTITIONING.name());
+            ps.setObject(4, DateUtils.getOffsetDateTimeOfTenant());
+            ps.setObject(5, cobBusinessDate);
+        });
+    }
+
+    private int getInClauseParameterSizeLimit() {
+        return fineractProperties.getQuery().getInClauseParameterSizeLimit();
     }
 }
