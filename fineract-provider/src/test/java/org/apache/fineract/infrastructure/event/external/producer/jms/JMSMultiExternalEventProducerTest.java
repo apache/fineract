@@ -37,6 +37,7 @@ import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.messaging.jms.MessageFactory;
 import org.apache.fineract.infrastructure.core.service.HashingService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,6 +108,13 @@ class JMSMultiExternalEventProducerTest {
         given(session1.createProducer(destination)).willReturn(producer1);
         given(session2.createProducer(destination)).willReturn(producer2);
         given(session3.createProducer(destination)).willReturn(producer3);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        verify(session1).close();
+        verify(session2).close();
+        verify(session3).close();
     }
 
     @Test
