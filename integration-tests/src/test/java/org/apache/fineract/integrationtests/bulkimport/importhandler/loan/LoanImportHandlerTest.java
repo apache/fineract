@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
@@ -95,9 +96,9 @@ public class LoanImportHandlerTest {
         OfficeDomain office = officeHelper.retrieveOfficeByID(outcome_office_creation);
         Assertions.assertNotNull(office, "Could not retrieve created office");
 
-        String firstName = Utils.randomNameGenerator("Client_FirstName_", 5);
-        String lastName = Utils.randomNameGenerator("Client_LastName_", 4);
-        String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        String firstName = Utils.randomStringGenerator("Client_FirstName_", 5);
+        String lastName = Utils.randomStringGenerator("Client_LastName_", 4);
+        String externalId = UUID.randomUUID().toString();
 
         final HashMap<String, Object> clientMap = new HashMap<>();
         clientMap.put("officeId", outcome_office_creation.toString());
@@ -154,8 +155,8 @@ public class LoanImportHandlerTest {
         Assertions.assertNotNull("Could not get created Loan Product", loanProductStr);
         JsonPath loanProductJson = JsonPath.from(loanProductStr);
 
-        String fundName = Utils.randomNameGenerator("", 9);
-        FundsHelper fh = FundsHelper.create(fundName).externalId("fund-" + fundName).build();
+        String fundName = Utils.uniqueRandomStringGenerator("", 9);
+        FundsHelper fh = FundsHelper.create(fundName).externalId(UUID.randomUUID().toString()).build();
         Integer outcome_fund_creation = FundsResourceHandler.createFund(new Gson().toJson(fh), requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_fund_creation, "Could not create Fund");
 

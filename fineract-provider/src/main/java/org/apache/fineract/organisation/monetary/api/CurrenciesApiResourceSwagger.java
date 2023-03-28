@@ -25,10 +25,30 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 /**
  * Created by sanyam on 14/8/17.
  */
-final class CurrenciesApiResourceSwagger {
+public final class CurrenciesApiResourceSwagger {
 
     private CurrenciesApiResourceSwagger() {
 
+    }
+
+    public static final class CurrencyItem {
+
+        private CurrencyItem() {}
+
+        @Schema(example = "USD")
+        public String code;
+        @Schema(example = "US Dollar")
+        public String name;
+        @Schema(example = "2")
+        public Integer decimalPlaces;
+        @Schema(example = "100")
+        public Integer inMultiplesOf;
+        @Schema(example = "$")
+        public String displaySymbol;
+        @Schema(example = "currency.USD")
+        public String nameCode;
+        @Schema(example = "US Dollar ($)")
+        public String displayLabel;
     }
 
     @Schema(description = "GetCurrenciesResponse")

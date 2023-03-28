@@ -53,6 +53,7 @@ public class LoanTransactionEnumData {
     private final boolean creditBalanceRefund;
     private final boolean chargeAdjustment;
     private final boolean chargeback;
+    private final boolean chargeoff;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -81,19 +82,7 @@ public class LoanTransactionEnumData {
         this.creditBalanceRefund = Long.valueOf(20).equals(this.id);
         this.chargeback = Long.valueOf(25).equals(this.id);
         this.chargeAdjustment = Long.valueOf(26).equals(this.id);
-    }
-
-    /**
-     * Returns true if the transaction involves either a payment (disbursement) or a receipt (repayments, repayments
-     * during disbursement etc)
-     *
-     * @return
-     */
-    public boolean isPaymentOrReceipt() {
-        if (isDisbursement() || isRepaymentType() || isRepaymentAtDisbursement() || isRecoveryRepayment()) {
-            return true;
-        }
-        return false;
+        this.chargeoff = Long.valueOf(27).equals(this.id);
     }
 
     public boolean isRepaymentType() {

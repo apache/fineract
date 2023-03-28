@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.accounting.provisioning.exception.ProvisioningEntryAlreadyCreatedException;
 import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesWritePlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -31,8 +32,6 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.jpa.JpaSystemException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,14 +47,13 @@ public class GenerateLoanlossProvisioningTasklet implements Tasklet {
         try {
             Collection<ProvisioningCriteriaData> criteriaCollection = provisioningCriteriaReadPlatformService
                     .retrieveAllProvisioningCriterias();
-            if (criteriaCollection == null || criteriaCollection.size() == 0) {
-                throw new NoProvisioningCriteriaDefinitionFoundException();
+            if (CollectionUtils.isNotEmpty(criteriaCollection)) {
+                provisioningEntriesWritePlatformService.createProvisioningEntry(currentDate, addJournalEntries);
             }
-            provisioningEntriesWritePlatformService.createProvisioningEntry(currentDate, addJournalEntries);
-        } catch (ProvisioningEntryAlreadyCreatedException peace) {
-            log.error("Provisioning Entry already created", peace);
-        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            log.error("Problem occurred in generateLoanLossProvisioningAmount function", dve);
+        } catch (ProvisioningEntryAlreadyCreatedException e) {
+            log.error("Provisioning entry already created", e);
+        } catch (Exception e) {
+            log.error("Problem occurred when generating provisioning entries", e);
         }
         return RepeatStatus.FINISHED;
     }

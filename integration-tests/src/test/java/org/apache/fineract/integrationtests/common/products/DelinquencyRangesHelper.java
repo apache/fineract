@@ -85,7 +85,7 @@ public class DelinquencyRangesHelper {
 
     public static String getAsJSON(int minimumAgeDays, int maximumAgeDays) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("classification", Utils.randomNameGenerator("Delinquency__" + minimumAgeDays + "_" + maximumAgeDays + "__", 4));
+        map.put("classification", Utils.uniqueRandomStringGenerator("Delinquency__" + minimumAgeDays + "_" + maximumAgeDays + "__", 4));
         map.put("minimumAgeDays", minimumAgeDays);
         map.put("maximumAgeDays", maximumAgeDays);
         map.put("locale", "en");

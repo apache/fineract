@@ -140,7 +140,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     private LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
 
     @OneToMany(mappedBy = "loanCharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<LoanChargePaidBy> loanChargePaidBySet;
+    private Set<LoanChargePaidBy> loanChargePaidBySet = new HashSet<>();
 
     protected LoanCharge() {
         //

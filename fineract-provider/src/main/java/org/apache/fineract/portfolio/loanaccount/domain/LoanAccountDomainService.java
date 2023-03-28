@@ -97,5 +97,7 @@ public interface LoanAccountDomainService {
     void recalculateAccruals(Loan loan, boolean isInterestCalcualtionHappened);
 
     LoanTransaction creditBalanceRefund(Loan loan, LocalDate transactionDate, BigDecimal transactionAmount, String noteText,
-            ExternalId externalId);
+            ExternalId externalId, PaymentDetail paymentDetail);
+
+    void applyIncomeAccrualTransaction(Loan loan);
 }

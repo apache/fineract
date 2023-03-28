@@ -37,6 +37,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
@@ -87,7 +88,7 @@ public class LoanReschedulingWithinCenterTest {
 
         Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
-        String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        String externalId = UUID.randomUUID().toString();
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         int[] groupMembers = generateGroupMembers(1, officeId);
         final String centerActivationDate = "01 July 2007";
@@ -220,7 +221,7 @@ public class LoanReschedulingWithinCenterTest {
 
         Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
-        String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        String externalId = UUID.randomUUID().toString();
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         int[] groupMembers = generateGroupMembers(1, officeId);
         final String centerActivationDate = "01 July 2007";
@@ -420,8 +421,8 @@ public class LoanReschedulingWithinCenterTest {
         for (int i = 0; i < groupMembers.length; i++) {
             final HashMap<String, String> map = new HashMap<>();
             map.put("officeId", "" + officeId);
-            map.put("name", Utils.randomStringGenerator("Group_Name_", 5));
-            map.put("externalId", Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+            map.put("name", Utils.uniqueRandomStringGenerator("Group_Name_", 5));
+            map.put("externalId", UUID.randomUUID().toString());
             map.put("dateFormat", "dd MMMM yyyy");
             map.put("locale", "en");
             map.put("active", "true");

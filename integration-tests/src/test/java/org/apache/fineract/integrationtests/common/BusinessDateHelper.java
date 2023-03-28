@@ -27,11 +27,14 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.BusinessDateResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 
 @Slf4j
 public final class BusinessDateHelper extends IntegrationTest {
+
+    private static final Gson GSON = new JSON().getGson();
 
     public BusinessDateHelper() {}
 
@@ -47,6 +50,14 @@ public final class BusinessDateHelper extends IntegrationTest {
         log.info("------------------UPDATE BUSINESS DATE----------------------");
         log.info("------------------Type: {}, date: {}----------------------", request.getType(), request.getDate());
         return ok(fineract().businessDateManagement.updateBusinessDate(request));
+    }
+
+    public BusinessDateResponse getBusinessDateByType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final BusinessDateType type) {
+        final String BUSINESS_DATE_API = "/fineract-provider/api/v1/businessdate/" + type.name() + "?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, BUSINESS_DATE_API);
+        log.info("{}", response);
+        return GSON.fromJson(response, BusinessDateResponse.class);
     }
 
     public BusinessDateResponse getBusinessDate(final String type) {

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.springbatch.messagehandler;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.ConnectionFactory;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.springbatch.OutputChannelInterceptor;
 import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.JmsManagerCondition;
@@ -48,7 +48,7 @@ public class JmsManagerConfig {
     private FineractProperties fineractProperties;
 
     @Bean
-    public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectionFactory) {
+    public IntegrationFlow outboundFlow(ConnectionFactory connectionFactory) {
         return IntegrationFlows.from(outboundRequests) //
                 .intercept(outputInterceptor) //
                 .log(LoggingHandler.Level.DEBUG) //

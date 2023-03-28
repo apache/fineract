@@ -83,7 +83,16 @@ public class ProductToGLAccountMappingHelper {
                     portfolioProductType.getValue(), accountTypeId);
             if (accountMapping == null) {
                 ArrayList<String> optionalProductToGLAccountMappingEntries = new ArrayList<String>();
-                optionalProductToGLAccountMappingEntries.add("goodwillCreditAccountId");
+                optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.GOODWILL_CREDIT.getValue());
+                optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue());
+                optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue());
+                optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue());
+                optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue());
+                optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue());
+                optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditInterestAccountId");
+                optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditFeesAccountId");
+                optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditPenaltyAccountId");
+
                 if (optionalProductToGLAccountMappingEntries.contains(paramName)) {
                     saveProductToAccountMapping(element, paramName, productId, accountTypeId, expectedAccountType, portfolioProductType);
                 } else {

@@ -20,6 +20,7 @@ package org.apache.fineract.cob.service;
 
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -40,9 +41,11 @@ import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledExcept
 import org.apache.fineract.cob.loan.LoanCOBConstant;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
+import org.apache.fineract.infrastructure.core.exception.PlatformRequestBodyItemLimitValidationException;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
@@ -85,6 +88,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     private final CustomJobParameterRepository customJobParameterRepository;
     private final PlatformSecurityContext context;
     private final LoanRepository loanRepository;
+    private final FineractProperties fineractProperties;
 
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
@@ -92,6 +96,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public CommandProcessingResult executeInlineJob(JsonCommand command, String jobName) throws LoanAccountLockCannotBeOverruledException {
         List<Long> loanIds = dataParser.parseExecution(command);
+        validateLoanIdsListSize(loanIds);
         execute(loanIds, jobName);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).build();
     }
@@ -155,7 +160,11 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     }
 
     private List<LoanIdAndLastClosedBusinessDate> getLoansToBeProcessed(List<Long> loanIds, LocalDate cobBusinessDate) {
-        return loanRepository.findAllNonClosedLoansBehindByLoanIds(cobBusinessDate, loanIds);
+        List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
+        List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
+        partitions.forEach(partition -> loanIdAndLastClosedBusinessDates
+                .addAll(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(cobBusinessDate, partition)));
+        return loanIdAndLastClosedBusinessDates;
     }
 
     private List<LoanAccountLock> getLoanAccountLocks(List<Long> loanIds) {
@@ -223,5 +232,13 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
 
     private boolean isBypassUser() {
         return context.getAuthenticatedUserIfPresent().isBypassUser();
+    }
+
+    private void validateLoanIdsListSize(List<Long> loanIds) {
+        int inlineLoanCobRequestItemLimit = fineractProperties.getApi().getBodyItemSizeLimit().getInlineLoanCob();
+        if (loanIds.size() > inlineLoanCobRequestItemLimit) {
+            String userMessage = "Size of the loan IDs list cannot be over " + inlineLoanCobRequestItemLimit;
+            throw new PlatformRequestBodyItemLimitValidationException(userMessage);
+        }
     }
 }

@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.springbatch;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.batch.integration.partition.StepExecutionRequest;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -30,7 +31,12 @@ import org.springframework.messaging.support.GenericMessage;
 public class InputChannelInterceptor implements ExecutorChannelInterceptor {
 
     @Override
-    public Message<?> beforeHandle(Message<?> message, @NotNull MessageChannel channel, @NotNull MessageHandler handler) {
+    public Message<StepExecutionRequest> beforeHandle(Message<?> message, @NotNull MessageChannel channel,
+            @NotNull MessageHandler handler) {
+        return beforeHandleMessage(message);
+    }
+
+    public Message<StepExecutionRequest> beforeHandleMessage(Message<?> message) {
         ContextualMessage castedMessage = (ContextualMessage) message.getPayload();
         ThreadLocalContextUtil.init(castedMessage.getContext());
         ThreadLocalContextUtil.setActionContext(ActionContext.COB);

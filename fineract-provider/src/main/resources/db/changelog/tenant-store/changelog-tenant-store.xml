@@ -26,4 +26,6 @@
      <include file="parts/0004_readonly_database_connection.xml" relativeToChangelogFile="true"/>
      <include file="parts/0005_jdbc_connection_string.xml" relativeToChangelogFile="true"/>
      <include file="parts/0006_drop_retry_parameter_columns.xml" relativeToChangelogFile="true"/>
+     <include file="parts/0007_encrypt_existing_tenant_passwords.xml" relativeToChangelogFile="true"/>
+     <include file="parts/0008_encrypt_existing_ro_tenant_passwords.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

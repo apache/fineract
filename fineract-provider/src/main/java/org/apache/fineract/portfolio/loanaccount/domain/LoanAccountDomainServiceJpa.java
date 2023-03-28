@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +62,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionRecoveryPaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionRecoveryPaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.interoperation.util.MathUtil;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
@@ -161,7 +163,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final boolean isRecoveryRepayment, final String chargeRefundChargeType, boolean isAccountTransfer,
             HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone, final boolean isLoanToLoanTransfer) {
         checkClientOrGroupActive(loan);
-
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         LoanBusinessEvent repaymentEvent = getLoanRepaymentTypeBusinessEvent(repaymentTransactionType, isRecoveryRepayment, loan);
         businessEventNotifierService.notifyPreBusinessEvent(repaymentEvent);
 
@@ -357,6 +364,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final Integer transactionType, Integer installmentNumber) {
         boolean isAccountTransfer = true;
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargePaymentPreBusinessEvent(loan));
 
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -436,6 +449,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         boolean isAccountTransfer = true;
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanRefundPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -482,6 +501,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final PaymentDetail paymentDetail, final String noteText, final ExternalId txnExternalId, final boolean isLoanToLoanTransfer) {
         final Loan loan = this.loanAccountAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         boolean isAccountTransfer = true;
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -508,6 +533,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Override
     public void reverseTransfer(final LoanTransaction loanTransaction) {
+        if (loanTransaction.getLoan().isChargedOff()
+                && loanTransaction.getTransactionDate().isBefore(loanTransaction.getLoan().getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date",
+                    "Loan transaction: " + loanTransaction.getId()
+                            + " reversal is not allowed before or on the date when the loan got charged-off",
+                    loanTransaction.getId());
+        }
         loanTransaction.reverse();
         saveLoanTransactionWithDataIntegrityViolationChecks(loanTransaction);
     }
@@ -632,19 +664,26 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Override
     public LoanTransaction creditBalanceRefund(final Loan loan, final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final String noteText, final ExternalId externalId) {
+            final String noteText, final ExternalId externalId, PaymentDetail paymentDetail) {
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
+
         businessEventNotifierService.notifyPreBusinessEvent(new LoanCreditBalanceRefundPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money refundAmount = Money.of(loan.getCurrency(), transactionAmount);
-        final LoanTransaction newCreditBalanceRefundTransaction = LoanTransaction.creditBalanceRefund(loan, loan.getOffice(), refundAmount,
-                transactionDate, externalId);
+        LoanTransaction newCreditBalanceRefundTransaction = LoanTransaction.creditBalanceRefund(loan, loan.getOffice(), refundAmount,
+                transactionDate, externalId, paymentDetail);
 
         loan.creditBalanceRefund(newCreditBalanceRefundTransaction, defaultLoanLifecycleStateMachine, existingTransactionIds,
                 existingReversedTransactionIds);
 
-        this.loanTransactionRepository.saveAndFlush(newCreditBalanceRefundTransaction);
+        newCreditBalanceRefundTransaction = this.loanTransactionRepository.saveAndFlush(newCreditBalanceRefundTransaction);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newCreditBalanceRefundTransaction, noteText);
@@ -670,6 +709,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money refundAmount = Money.of(loan.getCurrency(), transactionAmount);
+        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         final LoanTransaction newRefundTransaction = LoanTransaction.refundForActiveLoan(loan.getOffice(), refundAmount, paymentDetail,
                 transactionDate, txnExternalId);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
@@ -702,6 +747,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public LoanTransaction foreCloseLoan(final Loan loan, final LocalDate foreClosureDate, final String noteText,
             final ExternalId externalId, Map<String, Object> changes) {
+        if (loan.isChargedOff() && foreClosureDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                    + loan.getId()
+                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                    loan.getId());
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanForeClosurePreBusinessEvent(loan));
         MonetaryCurrency currency = loan.getCurrency();
         List<LoanTransaction> newTransactions = new ArrayList<>();
@@ -812,6 +863,96 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     accountTransferStandingInstruction.updateStatus(StandingInstructionStatus.DISABLED.getValue());
                     this.standingInstructionRepository.save(accountTransferStandingInstruction);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void applyIncomeAccrualTransaction(Loan loan) {
+        if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()
+                // to avoid collision with processIncomeAccrualTransactionOnLoanClosure()
+                && !(loan.getLoanInterestRecalculationDetails() != null
+                        && loan.getLoanInterestRecalculationDetails().isCompoundingToBePostedAsTransaction())) {
+
+            MonetaryCurrency currency = loan.getCurrency();
+            Money interestPortion = Money.zero(currency);
+            Money feePortion = Money.zero(currency);
+            Money penaltyPortion = Money.zero(currency);
+
+            for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loan.getRepaymentScheduleInstallments()) {
+                interestPortion = interestPortion.add(loanRepaymentScheduleInstallment.getInterestCharged(currency))
+                        .minus(loanRepaymentScheduleInstallment.getInterestAccrued(currency))
+                        .minus(loanRepaymentScheduleInstallment.getInterestWaived(currency));
+                feePortion = feePortion.add(loanRepaymentScheduleInstallment.getFeeChargesCharged(currency))
+                        .minus(loanRepaymentScheduleInstallment.getFeeAccrued(currency))
+                        .minus(loanRepaymentScheduleInstallment.getFeeChargesWaived(currency));
+                penaltyPortion = penaltyPortion.add(loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency))
+                        .minus(loanRepaymentScheduleInstallment.getPenaltyAccrued(currency))
+                        .minus(loanRepaymentScheduleInstallment.getPenaltyChargesWaived(currency));
+            }
+            Money total = interestPortion.plus(feePortion).plus(penaltyPortion);
+
+            if (total.isGreaterThanZero()) {
+                ExternalId externalId = externalIdFactory.create();
+
+                LoanTransaction accrualTransaction = LoanTransaction.accrueTransaction(loan, loan.getOffice(), loan.getClosedOnDate(),
+                        total.getAmount(), interestPortion.getAmount(), feePortion.getAmount(), penaltyPortion.getAmount(), externalId);
+
+                Set<LoanChargePaidBy> accrualCharges = accrualTransaction.getLoanChargesPaid();
+
+                Map<Long, Money> accrualDetails = loan.getActiveCharges().stream()
+                        .collect(Collectors.toMap(LoanCharge::getId, v -> Money.zero(currency)));
+
+                loan.getLoanTransactions(LoanTransaction::isAccrual).forEach(transaction -> {
+                    transaction.getLoanChargesPaid().forEach(loanChargePaid -> {
+                        accrualDetails.computeIfPresent(loanChargePaid.getLoanCharge().getId(),
+                                (mappedKey, mappedValue) -> mappedValue.add(Money.of(currency, loanChargePaid.getAmount())));
+                    });
+                });
+
+                loan.getActiveCharges().forEach(loanCharge -> {
+                    Money amount = loanCharge.getAmount(currency).minus(loanCharge.getAmountWaived(currency));
+                    if (!loanCharge.isInstalmentFee() && loanCharge.isActive()
+                            && accrualDetails.get(loanCharge.getId()).isLessThan(amount)) {
+                        Money amountToBeAccrued = amount.minus(accrualDetails.get(loanCharge.getId()));
+                        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge,
+                                amountToBeAccrued.getAmount(), null);
+                        accrualCharges.add(loanChargePaidBy);
+                    }
+                });
+
+                for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loan.getRepaymentScheduleInstallments()) {
+                    for (LoanInstallmentCharge installmentCharge : loanRepaymentScheduleInstallment.getInstallmentCharges()) {
+                        if (installmentCharge.getLoanCharge().isActive()) {
+                            Money notWaivedAmount = installmentCharge.getAmount(currency)
+                                    .minus(installmentCharge.getAmountWaived(currency));
+                            if (notWaivedAmount.isGreaterThanZero()) {
+                                Money amountToBeAccrued = notWaivedAmount
+                                        .minus(accrualDetails.get(installmentCharge.getLoanCharge().getId()));
+                                if (amountToBeAccrued.isGreaterThanZero()) {
+                                    final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction,
+                                            installmentCharge.getLoanCharge(), amountToBeAccrued.getAmount(),
+                                            installmentCharge.getInstallment().getInstallmentNumber());
+                                    accrualCharges.add(loanChargePaidBy);
+                                    accrualDetails.computeIfPresent(installmentCharge.getLoanCharge().getId(),
+                                            (mappedKey, mappedValue) -> mappedValue.add(amountToBeAccrued));
+                                }
+                                accrualDetails.computeIfPresent(installmentCharge.getLoanCharge().getId(),
+                                        (mappedKey, mappedValue) -> MathUtil
+                                                .negativeToZero(mappedValue.minus(Money.of(currency, installmentCharge.getAmount()))));
+                            }
+                        }
+                    }
+                }
+                saveLoanTransactionWithDataIntegrityViolationChecks(accrualTransaction);
+                loan.addLoanTransaction(accrualTransaction);
+
+                loan.getRepaymentScheduleInstallments().forEach(installment -> {
+                    installment.updateAccrualPortion(
+                            installment.getInterestCharged(currency).minus(installment.getInterestWaived(currency)),
+                            installment.getFeeChargesCharged(currency).minus(installment.getFeeChargesWaived(currency)),
+                            installment.getPenaltyChargesCharged(currency).minus(installment.getPenaltyChargesWaived(currency)));
+                });
             }
         }
     }

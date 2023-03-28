@@ -27,6 +27,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -373,18 +374,47 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         Integer resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(REPAYMENT, "06 January 2022", 13000.00f,
                 this.disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
+        resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022", 1.00f,
+                this.disbursedLoanID, "resourceId");
+        Assertions.assertNotNull(resourceId);
+    }
 
-        if (repaymentTransactionType.equalsIgnoreCase(REPAYMENT)) {
-            ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.makeRepaymentTypePayment(
-                    repaymentTransactionType, "06 January 2022", 1.00f, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
+    @Test
+    public void goodWillCreditWillCloseTheLoanCorrectly() {
 
-            assertEquals("error.msg.loan.repayment.or.waiver.account.is.not.active",
-                    errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-        } else {
-            resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022", 1.00f,
-                    this.disbursedLoanID, "resourceId");
-            Assertions.assertNotNull(resourceId);
-        }
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
+        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        // pay off all of principal, interest (no fees or penalties)
+        final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
+        final Float goodwillAmount = totalOutstanding;
+        final String goodwillDate = "09 March 2022";
+        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
+                goodwillAmount, this.disbursedLoanID, "");
+
+        GetLoansLoanIdResponse details = this.loanTransactionHelper.getLoan(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        Assertions.assertNull(details.getSummary().getInArrears());
+        Assertions.assertTrue(details.getStatus().getClosedObligationsMet());
+    }
+
+    @Test
+    public void paymentRefundWillCloseTheLoanCorrectly() {
+
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
+        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        // pay off all of principal, interest (no fees or penalties)
+        final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
+        final Float goodwillAmount = totalOutstanding;
+        final String goodwillDate = "09 March 2022";
+        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(PAYOUT_REFUND, goodwillDate,
+                goodwillAmount, this.disbursedLoanID, "");
+
+        GetLoansLoanIdResponse details = this.loanTransactionHelper.getLoan(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        Assertions.assertNull(details.getSummary().getInArrears());
+        Assertions.assertTrue(details.getStatus().getClosedObligationsMet());
     }
 
     @Test
@@ -399,6 +429,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
         final Float overpaidAmount = 159.00f;
         final Float goodwillAmount = totalOutstanding + overpaidAmount;
+        final Float goodwillAmountInExpense = principalOutstanding + overpaidAmount;
         final String goodwillDate = "09 January 2022";
         HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
                 goodwillAmount, this.disbursedLoanID, "");
@@ -409,7 +440,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, goodwillDate,
                 new JournalEntry(overpaidAmount, JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, goodwillDate,
-                new JournalEntry(goodwillAmount, JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(goodwillAmountInExpense, JournalEntry.TransactionType.DEBIT));
 
     }
 
@@ -425,6 +456,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
         final Float overpaidAmount = 159.00f;
         final Float goodwillAmount = totalOutstanding + overpaidAmount;
+        final Float goodwillAmountInExpense = principalOutstanding + overpaidAmount;
         final String goodwillDate = "09 January 2022";
         HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
                 goodwillAmount, this.disbursedLoanID, "");
@@ -437,7 +469,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, goodwillDate,
                 new JournalEntry(overpaidAmount, JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, goodwillDate,
-                new JournalEntry(goodwillAmount, JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(goodwillAmountInExpense, JournalEntry.TransactionType.DEBIT));
 
     }
 

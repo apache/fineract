@@ -63,6 +63,7 @@ public class DatatableCommandFromApiJsonDeserializer {
     public static final String M_OFFICE = "m_office";
     public static final String M_SAVINGS_PRODUCT = "m_savings_product";
     public static final String M_PRODUCT_LOAN = "m_product_loan";
+    public static final String M_SHARE_PRODUCT = "m_share_product";
     public static final String NEW_NAME = "newName";
     public static final String STRING = "string";
     public static final String NUMBER = "number";
@@ -92,7 +93,7 @@ public class DatatableCommandFromApiJsonDeserializer {
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_DROP_COLUMNS = new HashSet<>(List.of(NAME));
     private static final Object[] SUPPORTED_COLUMN_TYPES = { STRING, NUMBER, BOOLEAN, DECIMAL, DATE, DATETIME, TEXT, DROPDOWN };
     private static final Object[] SUPPORTED_APPTABLE_NAMES = { M_LOAN, M_SAVINGS_ACCOUNT, M_CLIENT, M_GROUP, M_CENTER, M_OFFICE,
-            M_SAVINGS_PRODUCT, M_PRODUCT_LOAN };
+            M_SAVINGS_PRODUCT, M_PRODUCT_LOAN, M_SHARE_PRODUCT };
 
     private final FromJsonHelper fromApiJsonHelper;
 

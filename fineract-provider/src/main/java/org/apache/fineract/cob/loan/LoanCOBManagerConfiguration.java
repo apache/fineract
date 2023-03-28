@@ -23,6 +23,7 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
@@ -79,6 +80,8 @@ public class LoanCOBManagerConfiguration {
     private CustomJobParameterResolver customJobParameterResolver;
     @Autowired
     private LoanRepository loanRepository;
+    @Autowired
+    private FineractProperties fineractProperties;
 
     @Bean
     @JobScope
@@ -111,7 +114,7 @@ public class LoanCOBManagerConfiguration {
     @Bean
     @JobScope
     public FetchAndLockLoanTasklet fetchAndLockLoanTasklet() {
-        return new FetchAndLockLoanTasklet(accountLockRepository, retrieveLoanIdService);
+        return new FetchAndLockLoanTasklet(accountLockRepository, retrieveLoanIdService, fineractProperties);
     }
 
     @Bean

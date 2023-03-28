@@ -245,6 +245,8 @@ final class LoansApiResourceSwagger {
             public String disbursedByLastname;
             @Schema(example = "[2012, 4, 10]")
             public LocalDate expectedMaturityDate;
+            @Schema(example = "[2012, 4, 10]")
+            public LocalDate actualMaturityDate;
             @Schema(example = "[2012, 4, 3]")
             public LocalDate closedOnDate;
             @Schema(example = "[2012, 4, 10]")
@@ -977,6 +979,11 @@ final class LoansApiResourceSwagger {
             public LocalDate lastPaymentDate;
             @Schema(example = "100.000000")
             public Double lastPaymentAmount;
+
+            @Schema(example = "[2022, 07, 01]")
+            public LocalDate lastRepaymentDate;
+            @Schema(example = "100.000000")
+            public Double lastRepaymentAmount;
         }
 
         @Schema(example = "1")

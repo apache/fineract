@@ -20,6 +20,10 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
@@ -31,31 +35,20 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  * @see java.io.Serializable
  * @since 2.0.0
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public final class TellerTransactionData implements Serializable {
 
-    private final Long id;
-    private final Long officeId;
-    private final Long tellerId;
-    private final Long cashierId;
-    private final Long clientId;
-    private final EnumOptionData type;
-    private final Double amount;
-    private final LocalDate postingDate;
-
-    /*
-     * Sole private CTOR to create a new instance
-     */
-    private TellerTransactionData(final Long id, final Long officeId, final Long tellerId, final Long cashierId, final Long clientId,
-            final EnumOptionData type, final Double amount, final LocalDate postingDate) {
-        this.id = id;
-        this.officeId = officeId;
-        this.tellerId = tellerId;
-        this.cashierId = cashierId;
-        this.clientId = clientId;
-        this.type = type;
-        this.amount = amount;
-        this.postingDate = postingDate;
-    }
+    private Long id;
+    private Long officeId;
+    private Long tellerId;
+    private Long cashierId;
+    private Long clientId;
+    private EnumOptionData type;
+    private Double amount;
+    private LocalDate postingDate;
 
     /**
      * Creates a new teller transaction data object.
@@ -80,38 +73,7 @@ public final class TellerTransactionData implements Serializable {
      */
     public static TellerTransactionData instance(final Long id, final Long officeId, final Long tellerId, final Long cashierId,
             final Long clientId, final EnumOptionData type, final Double amount, final LocalDate postingDate) {
-        return new TellerTransactionData(id, officeId, tellerId, cashierId, clientId, type, amount, postingDate);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getOfficeId() {
-        return officeId;
-    }
-
-    public Long getTellerId() {
-        return tellerId;
-    }
-
-    public Long getCashierId() {
-        return cashierId;
-    }
-
-    public Long getClientId() {
-        return clientId;
-    }
-
-    public EnumOptionData getType() {
-        return type;
-    }
-
-    public Double getAmount() {
-        return amount;
-    }
-
-    public LocalDate getPostingDate() {
-        return postingDate;
+        return new TellerTransactionData().setId(id).setOfficeId(officeId).setTellerId(tellerId).setCashierId(cashierId)
+                .setClientId(clientId).setType(type).setAmount(amount).setPostingDate(postingDate);
     }
 }

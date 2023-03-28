@@ -85,7 +85,7 @@ public class OfficeHelper {
     public static String getAsJSON(final String openingDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("parentId", "1");
-        map.put("name", Utils.randomNameGenerator("Office_", 4));
+        map.put("name", Utils.uniqueRandomStringGenerator("Office_", 4));
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("openingDate", openingDate);

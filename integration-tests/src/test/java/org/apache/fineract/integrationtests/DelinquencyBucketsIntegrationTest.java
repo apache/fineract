@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
 import org.apache.fineract.client.models.DeleteDelinquencyRangeResponse;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
@@ -64,7 +65,6 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
@@ -72,6 +72,7 @@ public class DelinquencyBucketsIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+    private BusinessDateHelper businessDateHelper;
     private static final String principalAmount = "10000";
 
     @BeforeEach
@@ -81,6 +82,7 @@ public class DelinquencyBucketsIntegrationTest {
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.businessDateHelper = new BusinessDateHelper();
     }
 
     @Test
@@ -239,6 +241,13 @@ public class DelinquencyBucketsIntegrationTest {
     public void testLoanClassificationRealtime() {
         // Given
         final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+
+        final LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 March 2012");
+        log.info("Current date {}", bussinesLocalDate);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
+        final BusinessDateResponse businessDateResponse = this.businessDateHelper.getBusinessDateByType(requestSpec, responseSpec,
+                BusinessDateType.BUSINESS_DATE);
 
         ArrayList<Integer> rangeIds = new ArrayList<>();
         // First Range
@@ -274,9 +283,8 @@ public class DelinquencyBucketsIntegrationTest {
         log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
         assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
 
-        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
         // Older date to have more than one overdue installment
-        final LocalDate transactionDate = todaysDate.minusDays(50);
+        final LocalDate transactionDate = bussinesLocalDate.minusDays(50);
         String operationDate = Utils.dateFormatter.format(transactionDate);
 
         // Create Loan Account
@@ -284,15 +292,16 @@ public class DelinquencyBucketsIntegrationTest {
                 getLoanProductsProductResponse.getId().toString(), operationDate);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        log.info("Loan Delinquency Range after Disbursement {}", getLoansLoanIdResponse.getDelinquencyRange().getClassification());
         assertNotNull(getLoansLoanIdResponse);
+        assertNotNull(getLoansLoanIdResponse.getDelinquencyRange());
+        log.info("Loan Delinquency Range after Disbursement {}", getLoansLoanIdResponse.getDelinquencyRange().getClassification());
         // First Loan Delinquency Classification after Disbursement command
         assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected);
 
         loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
         // Apply a partial repayment
-        operationDate = Utils.dateFormatter.format(todaysDate);
+        operationDate = Utils.dateFormatter.format(bussinesLocalDate);
         loanTransactionHelper.makeLoanRepayment(operationDate, 100.0f, loanId);
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -315,15 +324,20 @@ public class DelinquencyBucketsIntegrationTest {
         log.info("Delinquency Tag History items {}", getDelinquencyTagsHistory.size());
         assertEquals(1, getDelinquencyTagsHistory.size());
         assertNotNull(getDelinquencyTagsHistory.get(0).getLiftedOnDate());
-        assertEquals(getDelinquencyTagsHistory.get(0).getAddedOnDate(), Utils.getLocalDateOfTenant());
-        assertEquals(getDelinquencyTagsHistory.get(0).getLiftedOnDate(), Utils.getLocalDateOfTenant());
+        assertEquals(getDelinquencyTagsHistory.get(0).getAddedOnDate(), businessDateResponse.getDate());
+        assertEquals(getDelinquencyTagsHistory.get(0).getLiftedOnDate(), businessDateResponse.getDate());
         assertEquals(getDelinquencyTagsHistory.get(0).getDelinquencyRange().getClassification(), classificationExpected);
         log.info("Delinquency Tag Item with Lifted On {}", getDelinquencyTagsHistory.get(0).getLiftedOnDate());
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 
     @Test
     public void testLoanClassificationRealtimeWithCharges() {
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+
+        final LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 April 2012");
+        log.info("Current date {}", bussinesLocalDate);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
 
         // Given
         final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -362,9 +376,8 @@ public class DelinquencyBucketsIntegrationTest {
         log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
         assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
 
-        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
         // Older date to have more than one overdue installment
-        LocalDate transactionDate = todaysDate.minusMonths(2).minusDays(5);
+        LocalDate transactionDate = bussinesLocalDate.minusMonths(2).minusDays(5);
         String operationDate = Utils.dateFormatter.format(transactionDate);
 
         // Create Loan Account
@@ -379,7 +392,7 @@ public class DelinquencyBucketsIntegrationTest {
         loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
         // Apply a repayment to get a full paid installment
-        operationDate = Utils.dateFormatter.format(todaysDate);
+        operationDate = Utils.dateFormatter.format(bussinesLocalDate);
         loanTransactionHelper.makeLoanRepayment(operationDate, 2049.99f, loanId);
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -389,7 +402,7 @@ public class DelinquencyBucketsIntegrationTest {
         assertNull(getLoansLoanIdResponse.getDelinquencyRange());
         loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
-        transactionDate = todaysDate.minusDays(18);
+        transactionDate = bussinesLocalDate.minusDays(18);
         operationDate = Utils.dateFormatter.format(transactionDate);
 
         // Create and apply Charge for Specific Due Date
@@ -407,6 +420,7 @@ public class DelinquencyBucketsIntegrationTest {
         assertNotNull(getLoansLoanIdResponse.getDelinquencyRange());
         // Evaluate a Delinquency Tag set after add charge to the Loan
         assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected);
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 
     @Test
@@ -704,15 +718,13 @@ public class DelinquencyBucketsIntegrationTest {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 
-    @Disabled("Failing test.Need rework")
     @Test
     public void testLoanClassificationStepAsPartOfCOB() {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
-        LocalDate businessDate = Utils.getLocalDateOfTenant();
-        businessDate = businessDate.minusDays(4);
-        log.info("Current date {}", businessDate);
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+        LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 April 2012");
+        log.info("Current date {}", bussinesLocalDate);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
 
         // Given
         final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -746,9 +758,8 @@ public class DelinquencyBucketsIntegrationTest {
         log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
         assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
 
-        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
         // Older date to have more than one overdue installment
-        final LocalDate transactionDate = todaysDate.minusDays(33);
+        final LocalDate transactionDate = bussinesLocalDate.minusDays(31);
         String operationDate = Utils.dateFormatter.format(transactionDate);
 
         // Create Loan Account
@@ -782,11 +793,11 @@ public class DelinquencyBucketsIntegrationTest {
         }
 
         // Move the Business date to get older the loan and to have an overdue loan
-        LocalDate lastLoanCOBBusinessDate = businessDate;
-        businessDate = businessDate.plusDays(3);
-        schedulerJobHelper.fastForwardTime(lastLoanCOBBusinessDate, businessDate, jobName, responseSpec);
-        log.info("Current date {}", businessDate);
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+        LocalDate lastLoanCOBBusinessDate = bussinesLocalDate;
+        bussinesLocalDate = bussinesLocalDate.plusDays(3);
+        schedulerJobHelper.fastForwardTime(lastLoanCOBBusinessDate, bussinesLocalDate, jobName, responseSpec);
+        log.info("Current date {}", bussinesLocalDate);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
         // Run Second time the Job
         schedulerJobHelper.executeAndAwaitJob(jobName);
 

@@ -35,7 +35,6 @@ public class LoanItemReader extends AbstractLoanItemReader {
     @BeforeStep
     @SuppressWarnings({ "unchecked" })
     public void beforeStep(@NotNull StepExecution stepExecution) {
-
         ExecutionContext executionContext = stepExecution.getExecutionContext();
         ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
         List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);

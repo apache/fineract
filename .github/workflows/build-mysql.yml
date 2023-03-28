@@ -18,7 +18,7 @@ jobs:
             options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
 
         mock-oauth2-server:
-          image: ghcr.io/navikt/mock-oauth2-server:0.5.6
+          image: ghcr.io/navikt/mock-oauth2-server:0.5.7
           ports:
             - 9000:9000
           env:
@@ -29,9 +29,9 @@ jobs:
         TZ: Asia/Kolkata
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # tag=v3
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # tag=v3
       - name: Set up JDK 17
-        uses: actions/setup-java@1df8dbefe2a8cbc99770194893dd902763bee34b # v3
+        uses: actions/setup-java@3f07048e3d294f56e9b90ac5ea2c6f74e9ad0f98 # v3
         with:
           java-version: '17'
           distribution: 'zulu'
@@ -42,7 +42,7 @@ jobs:
       - name: Congfigure vega-cli
         run: npm i -g vega-cli --unsafe
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@6c561573985cd8bd4d64efcfe270d51682d210e2
+        uses: gradle/wrapper-validation-action@ccb4328a959376b642e027874838f60f8e596de3
       - name: Verify MariaDB connection
         run: |
             while ! mysqladmin ping -h"127.0.0.1" -P3306 ; do
@@ -52,12 +52,39 @@ jobs:
         run: |
             ./gradlew --no-daemon -q createMySQLDB -PdbName=fineract_tenants
             ./gradlew --no-daemon -q createMySQLDB -PdbName=fineract_default
+      - name: Start LocalStack
+        env:
+          AWS_ENDPOINT_URL: http://localhost:4566
+          AWS_ACCESS_KEY_ID: localstack
+          AWS_SECRET_ACCESS_KEY: localstack
+          AWS_REGION: us-east-1
+        run: |
+          echo "Update python pyopenssl"
+          pip install --upgrade pyopenssl
+          echo "Install localstack"
+          pip install localstack awscli-local[ver1] # install LocalStack cli and awslocal
+          docker pull localstack/localstack         # Make sure to pull the latest version of the image
+          localstack start -d                       # Start LocalStack in the background
+
+          echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
+          localstack wait -t 30                     # to become ready before timing out
+          echo "Startup complete"
+          echo "Create fineract S3 bucket"
+          awslocal s3api create-bucket --bucket fineract-reports
+          echo "LocalStack initialization complete"
       - name: Install additional software
         run: |
             sudo apt-get update
             sudo apt-get install ghostscript graphviz -y
 
       - name: Build & Test
+        env:
+          AWS_ENDPOINT_URL: http://localhost:4566
+          AWS_ACCESS_KEY_ID: localstack
+          AWS_SECRET_ACCESS_KEY: localstack
+          AWS_REGION: us-east-1
+          FINERACT_REPORT_EXPORT_S3_ENABLED: true
+          FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
         run: |
             ./gradlew --no-daemon --console=plain build test --fail-fast -x doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=mysql
             ./gradlew --no-daemon --console=plain :twofactor-tests:test --fail-fast -PdbType=mysql

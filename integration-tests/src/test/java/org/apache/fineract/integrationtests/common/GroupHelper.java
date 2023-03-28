@@ -29,6 +29,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +136,7 @@ public class GroupHelper {
         final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Group_Name_", 5));
-        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("externalId", UUID.randomUUID().toString());
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         if (active) {
@@ -291,18 +292,14 @@ public class GroupHelper {
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
-    }
-
-    private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        return Utils.uniqueRandomStringGenerator(prefix, lenOfRandomSuffix);
     }
 
     public static String getTestGroupWithDatatableAsJson(final String registeredTableName) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Group_Name_", 5));
-        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("externalId", UUID.randomUUID().toString());
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("active", "false");
@@ -317,7 +314,7 @@ public class GroupHelper {
         HashMap<String, Object> datatableMap = new HashMap<>();
         HashMap<String, Object> dataMap = new HashMap<>();
         dataMap.put("locale", "en");
-        dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
+        dataMap.put("Spouse Name", Utils.randomStringGenerator("Spouse_name", 4));
         dataMap.put("Number of Dependents", 5);
         dataMap.put("Time of Visit", "01 December 2016 04:03");
         dataMap.put("dateFormat", DATE_TIME_FORMAT);

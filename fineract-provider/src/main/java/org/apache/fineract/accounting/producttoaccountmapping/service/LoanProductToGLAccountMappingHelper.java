@@ -263,12 +263,35 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                         changes);
                 mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(), loanProductId,
                         CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), CashAccountsForLoan.INCOME_FROM_RECOVERY.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(),
+                        loanProductId, CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue(),
+                        CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(),
+                        loanProductId, CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(),
+                        CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(),
+                        loanProductId, CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(),
+                        CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
+                        loanProductId, CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
+                        CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(),
+                        loanProductId, CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(),
+                        CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
+                        loanProductId, CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
+                        CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.toString(), changes);
 
                 // expenses
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
                         CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), CashAccountsForLoan.LOSSES_WRITTEN_OFF.toString(), changes);
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), loanProductId,
                         CashAccountsForLoan.GOODWILL_CREDIT.getValue(), CashAccountsForLoan.GOODWILL_CREDIT.toString(), changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(), loanProductId,
+                        CashAccountsForLoan.CHARGE_OFF_EXPENSE.getValue(), CashAccountsForLoan.CHARGE_OFF_EXPENSE.toString(), changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(),
+                        loanProductId, CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(),
+                        CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.toString(), changes);
 
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,
@@ -307,6 +330,24 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(), loanProductId,
                         AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), AccrualAccountsForLoan.INCOME_FROM_RECOVERY.toString(),
                         changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(),
+                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue(),
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(),
+                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(),
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(),
+                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(),
+                        AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
+                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
+                        AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(),
+                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(),
+                        AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
+                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
+                        AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.toString(), changes);
 
                 // expenses
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
@@ -314,6 +355,12 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                         changes);
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), loanProductId,
                         AccrualAccountsForLoan.GOODWILL_CREDIT.getValue(), AccrualAccountsForLoan.GOODWILL_CREDIT.toString(), changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.CHARGE_OFF_EXPENSE.getValue(), loanProductId,
+                        AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue(), AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.toString(),
+                        changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(),
+                        loanProductId, AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(),
+                        AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.toString(), changes);
 
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,

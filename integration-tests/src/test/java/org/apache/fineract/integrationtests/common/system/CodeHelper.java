@@ -100,7 +100,7 @@ public final class CodeHelper {
         /* If Code Values doesn't exist,then create Code value */
         if (codeValuesList.size() == 0) {
             final Integer codeValuePosition = 0;
-            final String codeValue = Utils.randomNameGenerator("", 3);
+            final String codeValue = Utils.randomStringGenerator("", 3);
             codeValueId = (Integer) CodeHelper.createCodeValue(requestSpec, responseSpec, codeId, codeValue, codeValuePosition,
                     "subResourceId");
 

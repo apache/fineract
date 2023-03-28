@@ -18,9 +18,15 @@
  */
 package org.apache.fineract.cob.loan;
 
+import static org.apache.fineract.infrastructure.core.service.MeasuringUtil.measure;
+
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.springframework.stereotype.Component;
@@ -34,8 +40,37 @@ public class SetLoanDelinquencyTagsBusinessStep implements LoanCOBBusinessStep {
 
     @Override
     public Loan execute(Loan loan) {
-        log.debug("Set Loan Delinquency Tags Business Step {}", loan.getId());
-        loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
+        if (loan == null) {
+            log.debug("Ignoring delinquency tag processing for null loan.");
+            return null;
+        }
+
+        String externalId = Optional.ofNullable(loan.getExternalId()).map(ExternalId::getValue).orElse(null);
+        measure(() -> {
+            try {
+                log.debug("Starting delinquency tag processing for loan with Id [{}], account number [{}], external Id [{}]", loan.getId(),
+                        loan.getAccountNumber(), externalId);
+
+                // Change the Action Context to DEFAULT for Business Date so that we can compare the loan due date to
+                // the
+                // current date and not the previous (COB) date.
+                ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+                loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
+            } catch (RuntimeException re) {
+                log.error(
+                        "Received [{}] exception while processing delinquency tag for loan with Id [{}], account number [{}], external Id [{}]",
+                        re.getMessage(), loan.getId(), loan.getAccountNumber(), externalId, re);
+
+                throw re;
+            } finally {
+                // Change the Action Context back to COB to resume COB steps.
+                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+            }
+        }, duration -> {
+            log.debug("Ending delinquency tag processing for loan with Id [{}], account number [{}], external Id [{}], finished in [{}]ms",
+                    loan.getId(), loan.getAccountNumber(), externalId, duration.toMillis());
+        });
+
         return loan;
     }
 

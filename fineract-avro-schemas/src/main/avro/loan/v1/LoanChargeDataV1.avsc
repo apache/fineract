@@ -232,6 +232,22 @@
                 "null",
                 "string"
             ]
+        },
+        {
+            "default": null,
+            "name": "externalLoanId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "submittedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
         }
     ]
 }

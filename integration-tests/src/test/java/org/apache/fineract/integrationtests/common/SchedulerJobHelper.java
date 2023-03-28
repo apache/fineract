@@ -97,9 +97,7 @@ public class SchedulerJobHelper extends IntegrationTest {
 
     public void updateSchedulerStatus(final boolean on) {
         String command = on ? "start" : "stop";
-        final String UPDATE_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/scheduler?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
-        LOG.info("------------------------ UPDATING SCHEDULER STATUS -------------------------");
-        Utils.performServerPost(requestSpec, response202Spec, UPDATE_SCHEDULER_STATUS_URL, runSchedulerJobAsJSON(), null);
+        ok(fineract().jobsScheduler.changeSchedulerStatus(command));
     }
 
     public Map<String, Object> updateSchedulerJob(int jobId, final boolean active) {

@@ -19,7 +19,13 @@
 package org.apache.fineract.organisation.teller.domain;
 
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public final class CashierTxnType implements Serializable {
 
     private Integer id;
@@ -30,18 +36,8 @@ public final class CashierTxnType implements Serializable {
     public static final CashierTxnType INWARD_CASH_TXN = new CashierTxnType(103, "Cash In");
     public static final CashierTxnType OUTWARD_CASH_TXN = new CashierTxnType(104, "Cash Out");
 
-    private CashierTxnType() {}
-
-    private CashierTxnType(Integer id, String value) {
-        this.id = id;
-        this.value = value;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getValue() {
+    @Override
+    public String toString() {
         return value;
     }
 

@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +37,6 @@ import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -56,29 +55,24 @@ public class LoanCOBPartitioner implements Partitioner {
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         int partitionSize = propertyService.getPartitionSize(LoanCOBConstant.JOB_NAME);
-        TreeMap<Long, String> cobBusinessStepMap = cobBusinessStepService.getCOBBusinessStepMap(LoanCOBBusinessStep.class,
+        Set<BusinessStepNameAndOrder> cobBusinessSteps = cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class,
                 LoanCOBConstant.LOAN_COB_JOB_NAME);
-        if (cobBusinessStepMap.isEmpty()) {
-            stopJobExecution();
-            return Map.of();
-        }
-        return getPartitions(partitionSize, cobBusinessStepMap);
+        return getPartitions(partitionSize, cobBusinessSteps);
     }
 
-    private Map<String, ExecutionContext> getPartitions(int partitionSize, TreeMap<Long, String> cobBusinessStepMap) {
+    private Map<String, ExecutionContext> getPartitions(int partitionSize, Set<BusinessStepNameAndOrder> cobBusinessSteps) {
         Map<String, ExecutionContext> partitions = new HashMap<>();
-
-        if (CollectionUtils.isEmpty(loanIds)) {
+        if (cobBusinessSteps.isEmpty()) {
             stopJobExecution();
             return Map.of();
         }
         int partitionIndex = 1;
         int remainingSpace = 0;
-        createNewPartition(partitions, partitionIndex, cobBusinessStepMap);
+        createNewPartition(partitions, partitionIndex, cobBusinessSteps);
         for (Long loanId : loanIds) {
             if (remainingSpace == partitionSize) {
                 partitionIndex++;
-                createNewPartition(partitions, partitionIndex, cobBusinessStepMap);
+                createNewPartition(partitions, partitionIndex, cobBusinessSteps);
                 remainingSpace = 0;
             }
             String key = PARTITION_PREFIX + partitionIndex;
@@ -91,10 +85,10 @@ public class LoanCOBPartitioner implements Partitioner {
     }
 
     private void createNewPartition(Map<String, ExecutionContext> partitions, int partitionIndex,
-            TreeMap<Long, String> cobBusinessStepMap) {
+            Set<BusinessStepNameAndOrder> cobBusinessSteps) {
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(LoanCOBConstant.LOAN_IDS, new ArrayList<Long>());
-        executionContext.put(LoanCOBConstant.BUSINESS_STEP_MAP, cobBusinessStepMap);
+        executionContext.put(LoanCOBConstant.BUSINESS_STEPS, cobBusinessSteps);
         executionContext.put("partition", PARTITION_PREFIX + partitionIndex);
         partitions.put(PARTITION_PREFIX + partitionIndex, executionContext);
     }

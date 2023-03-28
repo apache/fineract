@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +141,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         }
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Center_Name_", 5));
-        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("externalId", UUID.randomUUID().toString());
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         if (staffId != null) {
@@ -170,11 +171,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
-    }
-
-    private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        return Utils.uniqueRandomStringGenerator(prefix, lenOfRandomSuffix);
     }
 
     public String getExternalId() {

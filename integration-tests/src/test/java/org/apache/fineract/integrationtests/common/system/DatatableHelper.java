@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common.system;
 
+import static org.apache.fineract.integrationtests.common.Utils.initializeDefaultRequestSpecification;
+import static org.apache.fineract.integrationtests.common.Utils.initializeDefaultResponseSpecification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
@@ -52,6 +54,10 @@ public class DatatableHelper extends IntegrationTest {
     private final ResponseSpecification responseSpec;
 
     private static final String DATATABLE_URL = "/fineract-provider/api/v1/datatables";
+
+    public DatatableHelper() {
+        this(initializeDefaultRequestSpecification(), initializeDefaultResponseSpecification());
+    }
 
     public DatatableHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -164,7 +170,8 @@ public class DatatableHelper extends IntegrationTest {
             final boolean multiRow) {
         final HashMap<String, Object> map = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-        map.put("datatableName", Objects.requireNonNullElseGet(datatableName, () -> Utils.randomNameGenerator(apptableName + "_", 5)));
+        map.put("datatableName",
+                Objects.requireNonNullElseGet(datatableName, () -> Utils.uniqueRandomStringGenerator(apptableName + "_", 5)));
         map.put("apptableName", apptableName);
         if ("m_client".equalsIgnoreCase(apptableName)) {
             map.put("entitySubType", "PERSON");
@@ -189,7 +196,7 @@ public class DatatableHelper extends IntegrationTest {
     public static String getTestDatatableAsJSON(final String apptableName, final boolean multiRow) {
         final HashMap<String, Object> map = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-        map.put("datatableName", Utils.randomNameGenerator(apptableName + "_", 5));
+        map.put("datatableName", Utils.uniqueRandomStringGenerator(apptableName + "_", 5));
         map.put("apptableName", apptableName);
         map.put("entitySubType", "PERSON");
         map.put("multiRow", multiRow);
@@ -205,7 +212,7 @@ public class DatatableHelper extends IntegrationTest {
 
     public static String getTestDatatableEntryAsJSON(final String dateFormat) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("Spouse Name", Utils.randomNameGenerator("Spouse_Name_", 5));
+        map.put("Spouse Name", Utils.randomStringGenerator("Spouse_Name_", 5));
         map.put("Number of Dependents", Utils.randomNumberGenerator(1));
         map.put("Date of Approval", Utils.convertDateToURLFormat(Calendar.getInstance(), dateFormat));
         map.put("locale", "en");

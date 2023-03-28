@@ -71,8 +71,8 @@ public class LoanProductTestBuilder {
     private String digitsAfterDecimal = "2";
     private String inMultiplesOf = "0";
 
-    private String nameOfLoanProduct = Utils.randomNameGenerator("LOAN_PRODUCT_", 6);
-    private final String shortName = Utils.randomNameGenerator("", 4);
+    private String nameOfLoanProduct = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
+    private final String shortName = Utils.uniqueRandomStringGenerator("", 4);
     private String principal = "10000.00";
     private String numberOfRepayments = "5";
     private String repaymentFrequency = MONTHS;
@@ -443,11 +443,19 @@ public class LoanProductTestBuilder {
                 map.put("incomeFromFeeAccountId", ID);
                 map.put("incomeFromPenaltyAccountId", ID);
                 map.put("incomeFromRecoveryAccountId", ID);
+                map.put("incomeFromChargeOffInterestAccountId", ID);
+                map.put("incomeFromChargeOffFeesAccountId", ID);
+                map.put("incomeFromChargeOffPenaltyAccountId", ID);
+                map.put("incomeFromGoodwillCreditInterestAccountId", ID);
+                map.put("incomeFromGoodwillCreditFeesAccountId", ID);
+                map.put("incomeFromGoodwillCreditPenaltyAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();
                 map.put("writeOffAccountId", ID);
                 map.put("goodwillCreditAccountId", ID);
+                map.put("chargeOffExpenseAccountId", ID);
+                map.put("chargeOffFraudExpenseAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
                 final String ID = this.accountList[i].getAccountID().toString();
@@ -481,11 +489,19 @@ public class LoanProductTestBuilder {
                 map.put("incomeFromFeeAccountId", ID);
                 map.put("incomeFromPenaltyAccountId", ID);
                 map.put("incomeFromRecoveryAccountId", ID);
+                map.put("incomeFromChargeOffInterestAccountId", ID);
+                map.put("incomeFromChargeOffFeesAccountId", ID);
+                map.put("incomeFromChargeOffPenaltyAccountId", ID);
+                map.put("incomeFromGoodwillCreditInterestAccountId", ID);
+                map.put("incomeFromGoodwillCreditFeesAccountId", ID);
+                map.put("incomeFromGoodwillCreditPenaltyAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();
                 map.put("writeOffAccountId", ID);
                 map.put("goodwillCreditAccountId", ID);
+                map.put("chargeOffExpenseAccountId", ID);
+                map.put("chargeOffFraudExpenseAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
                 final String ID = this.accountList[i].getAccountID().toString();

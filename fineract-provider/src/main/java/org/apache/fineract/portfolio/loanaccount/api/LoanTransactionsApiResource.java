@@ -77,6 +77,7 @@ import org.springframework.stereotype.Component;
 public class LoanTransactionsApiResource {
 
     public static final String CHARGE_OFF_COMMAND_VALUE = "charge-off";
+    public static final String UNDO_CHARGE_OFF_COMMAND_VALUE = "undo-charge-off";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
@@ -463,6 +464,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.creditBalanceRefund(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, CHARGE_OFF_COMMAND_VALUE)) {
             commandRequest = builder.chargeOff(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, UNDO_CHARGE_OFF_COMMAND_VALUE)) {
+            commandRequest = builder.undoChargeOff(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {

@@ -143,6 +143,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final ColumnValidator columnValidator;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final SqlInjectionPreventerService preventSqlInjectionService;
+    private final DatatableKeywordGenerator datatableKeywordGenerator;
 
     @Override
     public List<DatatableData> retrieveDatatableNames(final String appTable) {
@@ -753,7 +754,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
         }
         if (unique) {
-            String uniqueKeyName = "uk_" + dataTableNameAlias + "_" + name;
+            String uniqueKeyName = datatableKeywordGenerator.generateUniqueKeyName(dataTableNameAlias, name);
             constrainBuilder.append(", CONSTRAINT ").append(sqlGenerator.escape(uniqueKeyName)).append(" ")
                     .append("UNIQUE (" + sqlGenerator.escape(name) + ")");
         }
@@ -854,11 +855,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (databaseTypeResolver.isMySQL()) {
                 sqlBuilder.append(" ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;");
             }
-            log.debug("SQL:: {}", sqlBuilder.toString());
+            log.debug("SQL:: {}", sqlBuilder);
 
-            this.jdbcTemplate.execute(sqlBuilder.toString());
+            jdbcTemplate.execute(sqlBuilder.toString());
 
             // create indexes
+            if (multiRow) {
+                createFkIndex(datatableName, fkColumnName);
+            } else {
+                /*
+                 * in case of non-multirow, the primary key of the table is the FK and MySQL and PostgreSQL
+                 * automatically puts an index onto it so no need to create it explicitly
+                 */
+            }
             createIndexesForTable(datatableName, columns);
             registerDatatable(datatableName, apptableName, entitySubType);
             registerColumnCodeMapping(codeMappings);
@@ -884,6 +893,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withResourceIdAsString(datatableName).build();
     }
 
+    private void createFkIndex(String datatableName, String fkColumnName) {
+        String indexName = datatableKeywordGenerator.generateIndexName(datatableName, fkColumnName);
+        createIndex(indexName, datatableName, fkColumnName);
+    }
+
     private void createIndexesForTable(String datatableName, JsonArray columns) {
         for (final JsonElement column : columns) {
             createIndexForColumn(datatableName, column.getAsJsonObject());
@@ -896,8 +910,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final Boolean indexed = column.has("indexed") ? column.get("indexed").getAsBoolean() : false;
         if (indexed) {
             if (!unique) {
-                String indexName = "idx_" + datatableName + "_" + name;
-                createIndexForColumnOnTable(indexName, datatableName, name);
+                String indexName = datatableKeywordGenerator.generateIndexName(datatableName, name);
+                createIndex(indexName, datatableName, name);
             }
         }
     }
@@ -1072,7 +1086,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         if (unique) {
-            String uniqueKeyName = "uk_" + dataTableNameAlias + "_" + name;
+            String uniqueKeyName = datatableKeywordGenerator.generateUniqueKeyName(dataTableNameAlias, name);
             constrainBuilder.append(",ADD CONSTRAINT  ").append(sqlGenerator.escape(uniqueKeyName)).append(" ")
                     .append("UNIQUE (" + sqlGenerator.escape(name) + ")");
         }
@@ -1277,7 +1291,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     sqlBuilder = sqlBuilder.deleteCharAt(indexOfFirstComma);
                 }
                 sqlBuilder.append(constrainBuilder);
-                this.jdbcTemplate.execute(sqlBuilder.toString());
+                jdbcTemplate.execute(sqlBuilder.toString());
                 createIndexesForTable(datatableName, addColumns);
                 registerColumnCodeMapping(codeMappings);
             }
@@ -1302,7 +1316,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 }
                 sqlBuilder.append(constrainBuilder);
                 try {
-                    this.jdbcTemplate.execute(sqlBuilder.toString());
+                    jdbcTemplate.execute(sqlBuilder.toString());
                     deleteColumnCodeMapping(removeMappings);
                     registerColumnCodeMapping(codeMappings);
                     // update unique constraint
@@ -1310,6 +1324,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     // update indexes
                     updateIndexesForTable(datatableName, changeColumns, mapColumnNameDefinition);
                 } catch (final Exception e) {
+                    log.error("Exception while modifying a datatable", e);
                     if (e.getMessage().contains("Error on rename")) {
                         throw new PlatformServiceUnavailableException("error.msg.datatable.column.update.not.allowed",
                                 "One of the column name modification not allowed", e);
@@ -1380,8 +1395,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String name = column.has("name") ? column.get("name").getAsString() : null;
         String columnNewName = column.has("newName") ? column.get("newName").getAsString() : null;
         final Boolean setUnique = column.has("unique") ? column.get("unique").getAsBoolean() : false;
-        final Boolean isAlreadyUnique = columnMetaData.getIsColumnUnique();
-        String uniqueKeyName = "uk_" + datatableName + "_" + name;
+        final Boolean isAlreadyUnique = genericDataService.isExplicitlyUnique(datatableName, name);
+        String uniqueKeyName = datatableKeywordGenerator.generateUniqueKeyName(datatableName, name);
 
         if (isAlreadyUnique) {
             if (!setUnique) {
@@ -1401,7 +1416,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private void checkColumnRenameAndCreateUniqueConstraint(String datatableName, String name, String columnNewName, String constraintKey) {
         if (columnNewName != null) {
             // create constraint with new column name
-            String uniqueKeyName = "uk_" + datatableName + "_" + columnNewName;
+            String uniqueKeyName = datatableKeywordGenerator.generateUniqueKeyName(datatableName, columnNewName);
             createUniqueConstraint(datatableName, columnNewName, uniqueKeyName);
         } else {
             // create constraint for column
@@ -1414,7 +1429,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             // drop existing constraint
             dropUniqueConstraint(datatableName, existingConstraint);
             // create constraint with new column name
-            String uniqueKeyName = "uk_" + datatableName + "_" + columnNewName;
+            String uniqueKeyName = datatableKeywordGenerator.generateUniqueKeyName(datatableName, columnNewName);
             createUniqueConstraint(datatableName, columnNewName, uniqueKeyName);
         }
     }
@@ -1452,19 +1467,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final Boolean setForUnique = column.has("unique") ? column.get("unique").getAsBoolean() : false;
         final Boolean setForIndexed = column.has("indexed") ? column.get("indexed").getAsBoolean() : false;
         if (!setForUnique) {
-            final Boolean isAlreadyIndexed = columnMetaData.getIsColumnIndexed();
-            String uniqueIndexName = "idx_" + datatableName + "_" + name;
+            final Boolean isAlreadyIndexed = genericDataService.isExplicitlyIndexed(datatableName, name);
+            String indexName = datatableKeywordGenerator.generateIndexName(datatableName, name);
             if (isAlreadyIndexed) {
                 if (!setForIndexed) {
                     // drop index
-                    dropIndex(datatableName, uniqueIndexName);
+                    dropIndex(datatableName, indexName);
                 } else { // if column name changed
-                    checkColumnRenameAndModifyIndex(datatableName, columnNewName, uniqueIndexName);
+                    checkColumnRenameAndModifyIndex(datatableName, columnNewName, indexName);
                 }
 
             } else {
                 if (setForIndexed) {
-                    checkColumnRenameAndCreateIndex(datatableName, name, columnNewName, uniqueIndexName);
+                    checkColumnRenameAndCreateIndex(datatableName, name, columnNewName, indexName);
                 }
             }
 
@@ -1474,12 +1489,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private void checkColumnRenameAndCreateIndex(String datatableName, String columnExistingName, String columnNewName, String indexName) {
         if (columnNewName != null) {
-            String uniqueIndexName = "idx_" + datatableName + "_" + columnNewName;
+            String newIndexName = datatableKeywordGenerator.generateIndexName(datatableName, columnNewName);
             // create index with new column name
-            createIndexForColumnOnTable(uniqueIndexName, datatableName, columnNewName);
+            createIndex(newIndexName, datatableName, columnNewName);
         } else {
             // create index with previous name
-            createIndexForColumnOnTable(indexName, datatableName, columnExistingName);
+            createIndex(indexName, datatableName, columnExistingName);
         }
     }
 
@@ -1488,16 +1503,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             // drop index with previous name
             dropIndex(datatableName, existingIndex);
             // create index with new name
-            String uniqueIndexName = "idx_" + datatableName + "_" + columnNewName;
-            createIndexForColumnOnTable(uniqueIndexName, datatableName, columnNewName);
+            String newIndexName = datatableKeywordGenerator.generateIndexName(datatableName, columnNewName);
+            createIndex(newIndexName, datatableName, columnNewName);
         }
     }
 
-    private void createIndexForColumnOnTable(String uniqueIndexName, String datatableName, String columnName) {
-        StringBuilder sqlIndexUpdateBuilder = new StringBuilder();
-        sqlIndexUpdateBuilder.append("CREATE INDEX ").append(sqlGenerator.escape(uniqueIndexName)).append(" ON ")
-                .append(sqlGenerator.escape(datatableName)).append(" (").append(sqlGenerator.escape(columnName)).append(");");
-        this.jdbcTemplate.execute(sqlIndexUpdateBuilder.toString());
+    private void createIndex(String indexName, String tableName, String columnName) {
+        String safeIndexName = sqlGenerator.escape(indexName);
+        String safeTableName = sqlGenerator.escape(tableName);
+        String safeColumnName = sqlGenerator.escape(columnName);
+        String sqlIndexUpdateBuilder = "CREATE INDEX %s ON %s (%s);".formatted(safeIndexName, safeTableName, safeColumnName);
+        jdbcTemplate.execute(sqlIndexUpdateBuilder);
     }
 
     private void dropIndex(String datatableName, String uniqueIndexName) {
@@ -1506,7 +1522,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             sqlIndexUpdateBuilder.append("ALTER TABLE ").append(sqlGenerator.escape(datatableName)).append(" ");
         }
         sqlIndexUpdateBuilder.append("DROP INDEX ").append(sqlGenerator.escape(uniqueIndexName)).append(";");
-        this.jdbcTemplate.execute(sqlIndexUpdateBuilder.toString());
+        jdbcTemplate.execute(sqlIndexUpdateBuilder.toString());
     }
 
     @Transactional
@@ -1662,6 +1678,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     @Override
+    @Transactional(readOnly = true)
     public GenericResultsetData retrieveDataTableGenericResultSet(final String dataTableName, final Long appTableId, final String order,
             final Long id) {
 
@@ -1798,7 +1815,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     + " where o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'" + " and o.id = " + appTableId;
         }
 
-        if (appTable.equalsIgnoreCase("m_product_loan") || appTable.equalsIgnoreCase("m_savings_product")) {
+        if (appTable.equalsIgnoreCase("m_product_loan") || appTable.equalsIgnoreCase("m_savings_product")
+                || appTable.equalsIgnoreCase("m_share_product")) {
             scopedSQL = "select null as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, p.id as entityId from "
                     + appTable + " as p WHERE p.id = " + appTableId;
         }
@@ -1836,6 +1854,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             return;
         }
         if (appTable.equalsIgnoreCase("m_savings_product")) {
+            return;
+        }
+        if (appTable.equalsIgnoreCase("m_share_product")) {
             return;
         }
 

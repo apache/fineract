@@ -68,7 +68,7 @@ public class OfficeImportHandlerTest {
         // insert dummy data into excel
         Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row firstOfficeRow = sheet.getRow(1);
-        firstOfficeRow.createCell(OfficeConstants.OFFICE_NAME_COL).setCellValue(Utils.randomNameGenerator("Test_Off_", 6));
+        firstOfficeRow.createCell(OfficeConstants.OFFICE_NAME_COL).setCellValue(Utils.uniqueRandomStringGenerator("Test_Off_", 6));
         firstOfficeRow.createCell(OfficeConstants.PARENT_OFFICE_NAME_COL)
                 .setCellValue(firstOfficeRow.getCell(OfficeConstants.LOOKUP_OFFICE_COL).getStringCellValue());
         firstOfficeRow.createCell(OfficeConstants.PARENT_OFFICE_ID_COL)

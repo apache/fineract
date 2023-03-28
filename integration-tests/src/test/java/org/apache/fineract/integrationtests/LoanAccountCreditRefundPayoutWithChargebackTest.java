@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -91,8 +92,13 @@ public class LoanAccountCreditRefundPayoutWithChargebackTest {
                         .transactionAmount(1000.0));
 
         // Chargeback full repayment amount to add to principal balance
-        loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, repaymentTransaction_1.getResourceId(),
+        PostLoansLoanIdTransactionsResponse chargebackResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr,
+                repaymentTransaction_1.getResourceId(),
                 new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(1000.0).paymentTypeId(1L));
+
+        GetLoansLoanIdTransactionsTransactionIdResponse chargebackTransactionResponse = loanTransactionHelper
+                .getLoanTransactionDetails(chargebackResponse.getLoanId(), chargebackResponse.getResourceId());
+        assertEquals(1L, chargebackTransactionResponse.getPaymentDetailData().getPaymentType().getId());
 
         // Verify Goodwill Credit can be created with full amount
         final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,

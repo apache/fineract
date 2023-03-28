@@ -108,11 +108,11 @@ public class CampaignsHelper {
         map.put("triggerType", triggerType);
         if (2 == triggerType) {
             map.put("recurrenceStartDate",
-                    LocalDateTime.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+                    LocalDateTime.now(Utils.getZoneIdOfTenant()).plusMinutes(1).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
             map.put("frequency", 1);
             map.put("interval", "1");
         }
-        map.put("campaignName", Utils.randomNameGenerator("Campaign_Name_", 5));
+        map.put("campaignName", Utils.randomStringGenerator("Campaign_Name_", 5));
         map.put("campaignType", 1);
         map.put("message", "Hi, this is from integtration tests runner");
         map.put("locale", "en");
@@ -136,9 +136,9 @@ public class CampaignsHelper {
         map.put("triggerType", triggerType);
         if (2 == triggerType) {
             map.put("recurrenceStartDate",
-                    LocalDateTime.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+                    LocalDateTime.now(Utils.getZoneIdOfTenant()).plusMinutes(1).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
         }
-        map.put("campaignName", Utils.randomNameGenerator("Campaign_Name_", 5));
+        map.put("campaignName", Utils.randomStringGenerator("Campaign_Name_", 5));
         map.put("campaignType", 1);
         map.put("message", "Hi, this is from integtration tests runner");
         map.put("locale", "en");

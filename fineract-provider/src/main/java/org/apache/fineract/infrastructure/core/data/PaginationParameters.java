@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.data;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 
 /**
  * <p>
@@ -44,6 +45,9 @@ public final class PaginationParameters {
     }
 
     private PaginationParameters(boolean paged, Integer offset, Integer limit, String orderBy, String sortOrder) {
+        SQLInjectionValidator.validateSQLInput(orderBy);
+        SQLInjectionValidator.validateSQLInput(sortOrder);
+
         this.paged = paged;
         this.offset = offset;
         this.limit = limit;

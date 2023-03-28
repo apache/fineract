@@ -20,6 +20,7 @@ package org.apache.fineract.useradministration.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created by sanyam on 23/8/17.
@@ -176,18 +177,8 @@ final class RolesApiResourceSwagger {
 
         }
 
-        static final class PostRolesRoleIdPermissionsResponsePermissions {
-
-            private PostRolesRoleIdPermissionsResponsePermissions() {
-
-            }
-
-            @Schema(example = "true")
-            public String ALL_FUNCTIONS_READ;
-        }
-
-        public PutRolesRoleIdPermissionsRequest.PostRolesRoleIdPermissionsResponsePermissions permissions;
-
+        @Schema(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
+        public Map<String, Boolean> permissions;
     }
 
     @Schema(description = "PutRolesRoleIdPermissionsResponse")
@@ -197,20 +188,21 @@ final class RolesApiResourceSwagger {
 
         }
 
-        static final class PostRolesRoleIdPermissionsResponsePermissions {
+        static final class PutRolesRoleIdPermissionsResponsePermissionsChanges {
 
-            private PostRolesRoleIdPermissionsResponsePermissions() {
+            private PutRolesRoleIdPermissionsResponsePermissionsChanges() {
 
             }
 
-            @Schema(example = "true")
-            public String ALL_FUNCTIONS_READ;
+            @Schema(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
+            public Map<String, Boolean> permissions;
         }
 
         @Schema(example = "8")
         public Long resourceId;
-        public PutRolesRoleIdPermissionsRequest.PostRolesRoleIdPermissionsResponsePermissions permissions;
 
+        @Schema
+        public PutRolesRoleIdPermissionsResponsePermissionsChanges changes;
     }
 
     @Schema(description = "DeleteRolesRoleIdResponse")

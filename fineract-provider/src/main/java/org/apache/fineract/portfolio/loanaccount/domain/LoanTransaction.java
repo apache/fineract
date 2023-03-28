@@ -159,9 +159,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
-    public static LoanTransaction chargeback(final Office office, final Money amount, final PaymentDetail paymentDetail,
+    public static LoanTransaction chargeback(final Loan loan, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final ExternalId externalId) {
-        LoanTransaction loanTransaction = new LoanTransaction(null, office, LoanTransactionType.CHARGEBACK, paymentDetail,
+        LoanTransaction loanTransaction = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGEBACK, paymentDetail,
                 amount.getAmount(), paymentDate, externalId);
         loanTransaction.principalPortion = amount.getAmount();
         return loanTransaction;
@@ -175,8 +175,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
-            final ExternalId externalId) {
-        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, amount, transactionDate, externalId);
+            final ExternalId externalId, PaymentDetail paymentDetail) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, paymentDetail, amount, transactionDate,
+                externalId);
     }
 
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
@@ -290,10 +291,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction creditBalanceRefund(final Loan loan, final Office office, final Money amount, final LocalDate paymentDate,
-            final ExternalId externalId) {
-        final PaymentDetail paymentDetail = null;
-        return new LoanTransaction(loan, office, LoanTransactionType.CREDIT_BALANCE_REFUND, paymentDetail, amount.getAmount(), paymentDate,
-                externalId);
+            final ExternalId externalId, PaymentDetail paymentDetail) {
+        return new LoanTransaction(loan, office, LoanTransactionType.CREDIT_BALANCE_REFUND.getValue(), paymentDate, amount.getAmount(),
+                null, null, null, null, amount.getAmount(), false, paymentDetail, externalId);
     }
 
     public static LoanTransaction refundForActiveLoan(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -562,7 +562,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.manuallyAdjustedOrReversed = true;
     }
 
-    public boolean isRepaymentType() {
+    public boolean isRepaymentLikeType() {
         return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
                 || isChargeAdjustment();
     }
@@ -591,8 +591,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return LoanTransactionType.CHARGE_ADJUSTMENT.equals(getTypeOf()) && isNotReversed();
     }
 
-    public boolean isNotRepaymentType() {
-        return !isRepaymentType();
+    public boolean isNotRepaymentLikeType() {
+        return !isRepaymentLikeType();
     }
 
     public boolean isIncomePosting() {

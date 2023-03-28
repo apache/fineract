@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.cob.loan;
 
+import com.google.common.collect.Lists;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -43,6 +46,8 @@ public class FetchAndLockLoanTasklet implements Tasklet {
 
     private final RetrieveLoanIdService retrieveLoanIdService;
 
+    private final FineractProperties fineractProperties;
+
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
         String businessDateParameter = (String) contribution.getStepExecution().getJobExecution().getExecutionContext()
@@ -50,11 +55,16 @@ public class FetchAndLockLoanTasklet implements Tasklet {
         LocalDate businessDate = LocalDate.parse(Objects.requireNonNull(businessDateParameter));
         List<Long> allNonClosedLoanIds = retrieveLoanIdService.retrieveLoanIdsNDaysBehind(NUMBER_OF_DAYS_BEHIND, businessDate);
         if (allNonClosedLoanIds.isEmpty()) {
+            contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.LOAN_IDS, Collections.emptyList());
             return RepeatStatus.FINISHED;
         }
         List<Long> remainingIds = new ArrayList<>(allNonClosedLoanIds);
 
-        List<LoanAccountLock> loanAccountLocks = loanAccountLockRepository.findAllByLoanIdIn(remainingIds);
+        List<List<Long>> remainingIdPartitions = Lists.partition(remainingIds,
+                fineractProperties.getQuery().getInClauseParameterSizeLimit());
+        List<LoanAccountLock> loanAccountLocks = new ArrayList<>();
+        remainingIdPartitions.forEach(
+                remainingIdPartition -> loanAccountLocks.addAll(loanAccountLockRepository.findAllByLoanIdIn(remainingIdPartition)));
 
         List<Long> alreadySoftLockedAccounts = loanAccountLocks.stream()
                 .filter(e -> LockOwner.LOAN_COB_PARTITIONING.equals(e.getLockOwner())).map(LoanAccountLock::getLoanId).toList();

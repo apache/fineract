@@ -69,9 +69,9 @@ public class RecurringDepositProductHelper {
     private static final String WHOLE_TERM = "1";
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
 
-    private final String name = Utils.randomNameGenerator("RECURRING_DEPOSIT_PRODUCT_", 6);
-    private final String shortName = Utils.randomNameGenerator("", 4);
-    private final String description = Utils.randomNameGenerator("", 20);
+    private final String name = Utils.uniqueRandomStringGenerator("RECURRING_DEPOSIT_PRODUCT_", 6);
+    private final String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private final String description = Utils.randomStringGenerator("", 20);
     private final String interestCompoundingPeriodType = MONTHLY;
     private final String interestPostingPeriodType = MONTHLY;
     private final String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;

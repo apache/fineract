@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Created by Chirag Gupta on 01/01/18.
  */
-final class PaymentTypeApiResourceSwagger {
+public final class PaymentTypeApiResourceSwagger {
 
     private PaymentTypeApiResourceSwagger() {}
 

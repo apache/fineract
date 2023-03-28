@@ -108,6 +108,8 @@ public class AccountingProcessorHelper {
         final String currencyCode = (String) accountingBridgeData.get("currencyCode");
         final List<LoanTransactionDTO> newLoanTransactions = new ArrayList<>();
         boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
+        boolean isLoanMarkedAsChargeOff = (Boolean) accountingBridgeData.get("isChargeOff");
+        boolean isLoanMarkedAsFraud = (Boolean) accountingBridgeData.get("isFraud");
 
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newLoanTransactions");
@@ -162,7 +164,7 @@ public class AccountingProcessorHelper {
         }
 
         return new LoanDTO(loanId, loanProductId, officeId, currencyCode, cashBasedAccountingEnabled, upfrontAccrualBasedAccountingEnabled,
-                periodicAccrualBasedAccountingEnabled, newLoanTransactions);
+                periodicAccrualBasedAccountingEnabled, newLoanTransactions, isLoanMarkedAsChargeOff, isLoanMarkedAsFraud);
     }
 
     public SavingsDTO populateSavingsDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -451,6 +453,30 @@ public class AccountingProcessorHelper {
         }
         createJournalEntriesForLoan(office, currencyCode, accountTypeToDebitId, accountTypeToCreditId, loanProductId, paymentTypeId, loanId,
                 transactionId, transactionDate, amount);
+    }
+
+    public void createSplitJournalEntriesAndReversalsForLoan(Office office, String currencyCode,
+            List<JournalAmountHolder> splitAccountsHolder, JournalAmountHolder totalAccountHolder, Long loanProductId, Long paymentTypeId,
+            Long loanId, String transactionId, LocalDate transactionDate, Boolean isReversal) {
+        splitAccountsHolder.forEach(journalItemHolder -> {
+            final GLAccount account = getLinkedGLAccountForLoanProduct(loanProductId, journalItemHolder.getAccountType(), paymentTypeId);
+            if (isReversal) {
+                createCreditJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate,
+                        journalItemHolder.getAmount());
+            } else {
+                createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate,
+                        journalItemHolder.getAmount());
+            }
+
+        });
+        final GLAccount totalAccount = getLinkedGLAccountForLoanProduct(loanProductId, totalAccountHolder.getAccountType(), paymentTypeId);
+        if (isReversal) {
+            createDebitJournalEntryForLoan(office, currencyCode, totalAccount, loanId, transactionId, transactionDate,
+                    totalAccountHolder.getAmount());
+        } else {
+            createCreditJournalEntryForLoan(office, currencyCode, totalAccount, loanId, transactionId, transactionDate,
+                    totalAccountHolder.getAmount());
+        }
     }
 
     public void createCreditJournalEntryOrReversalForLoan(final Office office, final String currencyCode,

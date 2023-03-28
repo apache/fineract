@@ -134,4 +134,6 @@ public interface ConfigurationDomainService {
     boolean isCOBBulkEventEnabled();
 
     Long retrieveExternalEventBatchSize();
+
+    String retrieveReportExportS3FolderName();
 }

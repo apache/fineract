@@ -48,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
 
     private final CacheWritePlatformService cacheService;
-    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CacheApiConstants.cacheTypeParameter));
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CacheApiConstants.CACHE_TYPE_PARAMETER));
 
     @Autowired
     public UpdateCacheCommandHandler(final CacheWritePlatformService cacheService) {
@@ -72,8 +72,8 @@ public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(CacheApiConstants.RESOURCE_NAME.toLowerCase());
 
-        final int cacheTypeEnum = command.integerValueSansLocaleOfParameterNamed(CacheApiConstants.cacheTypeParameter);
-        baseDataValidator.reset().parameter(CacheApiConstants.cacheTypeParameter).value(Integer.valueOf(cacheTypeEnum)).notNull()
+        final int cacheTypeEnum = command.integerValueSansLocaleOfParameterNamed(CacheApiConstants.CACHE_TYPE_PARAMETER);
+        baseDataValidator.reset().parameter(CacheApiConstants.CACHE_TYPE_PARAMETER).value(Integer.valueOf(cacheTypeEnum)).notNull()
                 .isOneOfTheseValues(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3));
 
         if (!dataValidationErrors.isEmpty()) {

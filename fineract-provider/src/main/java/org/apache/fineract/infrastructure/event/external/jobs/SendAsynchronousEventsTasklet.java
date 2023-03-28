@@ -98,7 +98,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     }
 
     private void markEventsAsSent(List<Long> eventIds) {
-        OffsetDateTime sentAt = DateUtils.getOffsetDateTimeOfTenant();
+        OffsetDateTime sentAt = DateUtils.getOffsetDateTimeOfTenantWithMilliseconds();
 
         // Partitioning dataset to avoid exception: PreparedStatement can have at most 65,535 parameters
         List<List<Long>> partitions = Lists.partition(eventIds, 5_000);
@@ -135,6 +135,8 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
                 ByteBuffer toByteBuffer = message.toByteBuffer();
                 byte[] convert = byteBufferConverter.convert(toByteBuffer);
                 messages.add(convert);
+                log.debug("Created message to send with id: [{}], type: [{}], idempotency key: [{}]", message.getId(), message.getType(),
+                        message.getIdempotencyKey());
             }
             return messages;
         } catch (IOException e) {

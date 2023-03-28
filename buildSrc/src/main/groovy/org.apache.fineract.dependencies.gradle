@@ -23,13 +23,13 @@ apply plugin: 'io.spring.dependency-management'
 dependencyManagement {
     imports {
         mavenBom 'org.springframework:spring-framework-bom:5.3.25'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.8'
-        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.8.0'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.9'
+        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.8.10'
         mavenBom 'org.junit:junit-bom:5.9.2'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.2'
-        mavenBom 'io.cucumber:cucumber-bom:7.11.0'
-        mavenBom 'io.netty:netty-bom:4.1.87.Final'
-        mavenBom 'org.mockito:mockito-bom:5.1.0'
+        mavenBom 'io.cucumber:cucumber-bom:7.11.1'
+        mavenBom 'io.netty:netty-bom:4.1.89.Final'
+        mavenBom 'org.mockito:mockito-bom:5.1.1'
     }
 
     dependencies {
@@ -50,26 +50,28 @@ dependencyManagement {
         dependency 'com.google.code.gson:gson:2.10.1'
         dependency 'com.google.truth:truth:1.1.3'
         dependency 'com.google.truth.extensions:truth-java8-extension:1.1.3'
-        dependency 'com.google.googlejavaformat:google-java-format:1.15.0'
+        dependency 'com.google.googlejavaformat:google-java-format:1.16.0'
         dependency ('org.apache.commons:commons-email:1.5') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'javax.activation:activation'
         }
         dependency 'commons-io:commons-io:2.11.0'
         dependency 'com.github.librepdf:openpdf:1.3.30'
-        dependency ('org.mnode.ical4j:ical4j:3.2.8') {
+        dependency ('org.mnode.ical4j:ical4j:3.2.9') {
             exclude 'com.sun.mail:javax.mail'
         }
-        dependency 'org.apache.commons:commons-csv:1.9.0'
+        dependency 'org.apache.commons:commons-csv:1.10.0'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'software.amazon.awssdk:bom:2.19.26'
+        dependency 'software.amazon.awssdk:bom:2.20.12'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
-        dependency 'org.apache.tika:tika-core:2.6.0'
-        dependency ('org.apache.tika:tika-parser-microsoft-module:2.6.0') {
+        dependency 'org.apache.tika:tika-core:2.7.0'
+        dependency ('org.apache.tika:tika-parser-microsoft-module:2.7.0') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
+            exclude 'org.bouncycastle:bcprov-jdk18on'
+            exclude 'org.bouncycastle:bcmail-jdk18on'
             exclude 'commons-logging:commons-logging'
             exclude 'org.apache.logging.log4j:log4j-api'
             exclude 'org.slf4j:slf4j-api'
@@ -83,9 +85,11 @@ dependencyManagement {
             exclude 'org.apache.commons:commons-compress'
             exclude 'xml-apis:xml-apis'
         }
-        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.6.0') {
+        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.7.0') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
+            exclude 'org.bouncycastle:bcprov-jdk18on'
+            exclude 'org.bouncycastle:bcmail-jdk18on'
             exclude 'commons-logging:commons-logging'
             exclude 'org.apache.logging.log4j:log4j-api'
             exclude 'org.slf4j:slf4j-api'
@@ -114,7 +118,7 @@ dependencyManagement {
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.15.0'
         dependency 'org.webjars:webjars-locator-core:0.52'
-        dependency 'com.icegreen:greenmail-junit5:1.6.12'
+        dependency 'com.icegreen:greenmail-junit5:1.6.14'
         dependency 'com.intuit.karate:karate-junit5:1.3.1'
 
         // fineract client dependencies
@@ -145,7 +149,7 @@ dependencyManagement {
         dependency "io.gsonfire:gson-fire:1.8.5"
         dependency "com.google.code.findbugs:jsr305:3.0.2"
         dependency "commons-codec:commons-codec:1.15"
-        dependency "org.projectlombok:lombok:1.18.24"
+        dependency "org.projectlombok:lombok:1.18.26"
 
         dependency 'org.bouncycastle:bcpkix-jdk15to18:1.72'
         dependency 'org.bouncycastle:bcprov-jdk15to18:1.72'
@@ -155,7 +159,7 @@ dependencyManagement {
         dependency 'org.eclipse.jgit:org.eclipse.jgit:6.4.0.202211300538-r'
         dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.4.0.202211300538-r'
 
-        dependency 'org.tmatesoft.svnkit:svnkit:1.10.9'
+        dependency 'org.tmatesoft.svnkit:svnkit:1.10.10'
         dependency 'com.vdurmont:semver4j:3.1.0'
         dependency 'org.beryx:text-io:3.4.1'
 
@@ -165,9 +169,9 @@ dependencyManagement {
         dependency 'org.springdoc:springdoc-openapi-security:1.6.14'
         dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.14'
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.9.0'
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.10.0'
 
-        dependency ('org.apache.activemq:activemq-broker:5.17.3') {
+        dependency ('org.apache.activemq:activemq-broker:5.17.4') {
             exclude 'javax.annotation:javax.annotation-api'
         }
 
@@ -228,6 +232,8 @@ dependencyManagement {
             exclude 'org.slf4j:slf4j-api'
         }
 
-        dependency 'org.postgresql:postgresql:42.5.1'
+        dependency 'org.postgresql:postgresql:42.5.4'
+
+        dependency 'org.assertj:assertj-core:3.24.2'
     }
 }

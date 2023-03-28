@@ -18,14 +18,16 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import com.google.common.collect.Lists;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,14 +38,11 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  */
 @Service
+@RequiredArgsConstructor
 public class LoanRepositoryWrapper {
 
     private final LoanRepository repository;
-
-    @Autowired
-    public LoanRepositoryWrapper(final LoanRepository repository) {
-        this.repository = repository;
-    }
+    private final FineractProperties fineractProperties;
 
     @Transactional(readOnly = true)
     public Loan findOneWithNotFoundDetection(final Long id) {
@@ -181,8 +180,11 @@ public class LoanRepositoryWrapper {
     // Looks like we need complete Data
     public List<Loan> findByIdsAndLoanStatusAndLoanType(@Param("ids") Collection<Long> ids,
             @Param("loanStatuses") Collection<Integer> loanStatuses, @Param("loanTypes") Collection<Integer> loanTypes) {
-        List<Loan> loans = this.repository.findByIdsAndLoanStatusAndLoanType(ids, loanStatuses, loanTypes);
-        if (loans != null && loans.size() > 0) {
+        List<Loan> loans = new ArrayList<>();
+        List<List<Long>> partitions = Lists.partition(ids.stream().toList(), fineractProperties.getQuery().getInClauseParameterSizeLimit());
+        partitions
+                .forEach(partition -> loans.addAll(this.repository.findByIdsAndLoanStatusAndLoanType(partition, loanStatuses, loanTypes)));
+        if (loans.size() > 0) {
             for (Loan loan : loans) {
                 loan.initializeLazyCollections();
             }

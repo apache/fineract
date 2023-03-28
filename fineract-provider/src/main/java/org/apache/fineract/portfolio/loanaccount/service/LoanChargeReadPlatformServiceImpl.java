@@ -76,9 +76,10 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.loan_id as loanId, c.currency_code as currencyCode, oc.name as currencyName, " //
                     + "date(coalesce(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, " //
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, " //
-                    + "oc.internationalized_name_code as currencyNameCode from m_charge c " //
+                    + "oc.internationalized_name_code as currencyNameCode, l.external_id as externalLoanId from m_charge c " //
                     + "join m_organisation_currency oc on c.currency_code = oc.code join m_loan_charge lc on lc.charge_id = c.id " //
-                    + "left join m_loan_tranche_disbursement_charge dc on dc.loan_charge_id=lc.id left join m_loan_disbursement_detail dd on dd.id=dc.disbursement_detail_id ";
+                    + "left join m_loan_tranche_disbursement_charge dc on dc.loan_charge_id=lc.id left join m_loan_disbursement_detail dd on dd.id=dc.disbursement_detail_id " //
+                    + " join m_loan l on lc.loan_id = l.id";
         }
 
         @Override
@@ -130,10 +131,12 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             }
             final String externalIdStr = rs.getString("externalId");
             final ExternalId externalId = ExternalIdFactory.produce(externalIdStr);
+            final String externalLoanIdStr = rs.getString("externalLoanId");
+            final ExternalId externalLoanId = ExternalIdFactory.produce(externalLoanIdStr);
 
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
                     chargeTimeType, submittedOnDate, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty,
-                    paymentMode, paid, waived, loanId, minCap, maxCap, amountOrPercentage, null, externalId);
+                    paymentMode, paid, waived, loanId, externalLoanId, minCap, maxCap, amountOrPercentage, null, externalId);
         }
     }
 
@@ -199,8 +202,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     private static final class LoanChargeMapperWithLoanId implements RowMapper<LoanChargeData> {
 
         public String schema() {
-            return " lc.id as id, lc.due_for_collection_as_of_date as dueAsOfDate, lc.amount_outstanding_derived as amountOutstanding, "
-                    + " lc.charge_time_enum as chargeTime, loan.id as loanId, lc.external_id as externalId from  m_loan_charge lc "
+            return " lc.id as id, lc.due_for_collection_as_of_date as dueAsOfDate, lc.amount_outstanding_derived as amountOutstanding, lc.submitted_on_date as submittedOnDate, "
+                    + " lc.charge_time_enum as chargeTime, loan.id as loanId, loan.external_id as externalLoanId, lc.external_id as externalId from  m_loan_charge lc "
                     + " join m_loan loan on loan.id = lc.loan_id ";
         }
 
@@ -209,14 +212,18 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
             final Long id = rs.getLong("id");
             final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final Long loanId = rs.getLong("loanId");
             final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
             final int chargeTime = rs.getInt("chargeTime");
             final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
             final String externalIdStr = rs.getString("externalId");
             final ExternalId externalId = ExternalIdFactory.produce(externalIdStr);
+            final String externalLoanIdStr = rs.getString("externalLoanId");
+            final ExternalId externalLoanId = ExternalIdFactory.produce(externalLoanIdStr);
 
-            return new LoanChargeData(id, dueAsOfDate, amountOutstanding, chargeTimeType, loanId, null, externalId);
+            return new LoanChargeData(id, dueAsOfDate, submittedOnDate, amountOutstanding, chargeTimeType, loanId, externalLoanId, null,
+                    externalId);
         }
     }
 
@@ -313,7 +320,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append(" lc.charge_time_enum as chargeTime, ");
             sb.append(" sum(cp.amount) as amountAccrued, ");
             sb.append(" lc.is_penalty as penalty, ");
-            sb.append(" lc.due_for_collection_as_of_date as dueAsOfDate ");
+            sb.append(" lc.due_for_collection_as_of_date as dueAsOfDate, ");
+            sb.append(" lc.submitted_on_date as submittedOnDate ");
             sb.append(" from m_loan_charge lc ");
             sb.append(" left join ( ");
             sb.append(" select lcp.loan_charge_id, lcp.amount ");
@@ -342,12 +350,14 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
 
             final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final boolean penalty = rs.getBoolean("penalty");
 
             final String externalIdStr = rs.getString("externalId");
             final ExternalId externalId = ExternalIdFactory.produce(externalIdStr);
 
-            return new LoanChargeData(id, chargeId, dueAsOfDate, chargeTimeType, amount, amountAccrued, amountWaived, penalty, externalId);
+            return new LoanChargeData(id, chargeId, dueAsOfDate, submittedOnDate, chargeTimeType, amount, amountAccrued, amountWaived,
+                    penalty, externalId);
         }
     }
 

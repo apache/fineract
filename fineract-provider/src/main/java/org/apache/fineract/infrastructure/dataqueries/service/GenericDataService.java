@@ -33,4 +33,8 @@ public interface GenericDataService {
     String wrapSQL(String sql);
 
     List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(String datatable);
+
+    boolean isExplicitlyUnique(String datatable, String columnName);
+
+    boolean isExplicitlyIndexed(String datatable, String columnName);
 }

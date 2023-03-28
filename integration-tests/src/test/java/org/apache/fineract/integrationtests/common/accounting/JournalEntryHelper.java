@@ -20,18 +20,24 @@ package org.apache.fineract.integrationtests.common.accounting;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 
+@Slf4j
 @SuppressWarnings("rawtypes")
 public class JournalEntryHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
+    private static final Gson GSON = new JSON().getGson();
 
     public JournalEntryHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -102,6 +108,14 @@ public class JournalEntryHelper {
     private String createURLForGettingAccountEntriesByTransactionId(final String transactionId) {
         return new String("/fineract-provider/api/v1/journalentries?transactionId=" + transactionId + "&tenantIdentifier=default"
                 + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy");
+    }
+
+    public GetJournalEntriesTransactionIdResponse getJournalEntries(final String transactionId) {
+        log.info("Getting GL Journal entries for transaction id {}", transactionId);
+        final String url = createURLForGettingAccountEntriesByTransactionId(transactionId);
+        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, null);
+        log.info("response {}", response);
+        return GSON.fromJson(response, GetJournalEntriesTransactionIdResponse.class);
     }
 
 }

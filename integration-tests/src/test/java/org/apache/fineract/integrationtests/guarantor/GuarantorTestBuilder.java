@@ -47,8 +47,8 @@ public class GuarantorTestBuilder {
         map.put("guarantorTypeId", guarantorTypeId);
         map.put("locale", "en");
         if (GUARANTOR_TYPE_EXTERNAL.equals(guarantorTypeId)) {
-            map.put("firstname", Utils.randomNameGenerator("guarantor_FirstName_", 5));
-            map.put("lastname", Utils.randomNameGenerator("guarantor_LastName_", 4));
+            map.put("firstname", Utils.randomStringGenerator("guarantor_FirstName_", 5));
+            map.put("lastname", Utils.randomStringGenerator("guarantor_LastName_", 4));
             map.put("addressLine1", addressLine1);
             map.put("addressLine2", addressLine2);
             map.put("city", city);

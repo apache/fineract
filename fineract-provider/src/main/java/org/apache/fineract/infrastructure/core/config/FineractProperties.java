@@ -48,6 +48,18 @@ public class FineractProperties {
 
     private FineractContentProperties content;
 
+    private FineractReportProperties report;
+
+    private FineractJobProperties job;
+
+    private FineractTemplateProperties template;
+    private FineractJpaProperties jpa;
+
+    private FineractQueryProperties query;
+    private FineractApiProperties api;
+
+    private FineractNotificationProperties notification;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -61,6 +73,9 @@ public class FineractProperties {
         private String identifier;
         private String name;
         private String description;
+        private String masterPassword;
+        private String encryption;
+
     }
 
     @Getter
@@ -200,5 +215,84 @@ public class FineractProperties {
         private String bucketName;
         private String accessKey;
         private String secretKey;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractReportProperties {
+
+        private FineractExportProperties export;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExportProperties {
+
+        private FineractExportS3Properties s3;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExportS3Properties {
+
+        private String bucketName;
+        private Boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractJobProperties {
+
+        private int stuckRetryThreshold;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractTemplateProperties {
+
+        private boolean regexWhitelistEnabled;
+        private List<String> regexWhitelist;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractJpaProperties {
+
+        private boolean statementLoggingEnabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractQueryProperties {
+
+        private int inClauseParameterSizeLimit;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractApiProperties {
+
+        private FineractBodyItemSizeLimitProperties bodyItemSizeLimit;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractBodyItemSizeLimitProperties {
+
+        private int inlineLoanCob;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractNotificationProperties {
+
+        private UserNotificationSystemProperties userNotificationSystem;
+    }
+
+    @Getter
+    @Setter
+    public static class UserNotificationSystemProperties {
+
+        private boolean enabled;
     }
 }

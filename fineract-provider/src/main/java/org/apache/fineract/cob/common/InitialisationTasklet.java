@@ -59,6 +59,8 @@ public class InitialisationTasklet implements Tasklet {
         businessDates.put(BusinessDateType.COB_DATE, businessDate);
         businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate.plusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
+        log.debug("Initialisation with Business Date [{}], COB Date [{}] and Action Context [{}]", businessDate.plusDays(1), businessDate,
+                ThreadLocalContextUtil.getActionContext());
         return RepeatStatus.FINISHED;
     }
 }

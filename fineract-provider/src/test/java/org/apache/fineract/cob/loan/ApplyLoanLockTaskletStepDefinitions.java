@@ -29,6 +29,7 @@ import java.util.List;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mockito.ArgumentCaptor;
@@ -42,7 +43,9 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
 
     ArgumentCaptor<LoanAccountLock> valueCaptor = ArgumentCaptor.forClass(LoanAccountLock.class);
     private LoanAccountLockRepository accountLockRepository = mock(LoanAccountLockRepository.class);
-    private ApplyLoanLockTasklet applyLoanLockTasklet = new ApplyLoanLockTasklet(accountLockRepository);
+    private FineractProperties fineractProperties = mock(FineractProperties.class);
+    private FineractProperties.FineractQueryProperties fineractQueryProperties = mock(FineractProperties.FineractQueryProperties.class);
+    private ApplyLoanLockTasklet applyLoanLockTasklet = new ApplyLoanLockTasklet(accountLockRepository, fineractProperties);
     private RepeatStatus resultItem;
     private StepContribution stepContribution;
 
@@ -56,12 +59,16 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
             this.stepContribution = new StepContribution(stepExecution);
 
             if ("error".equals(action)) {
+                lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+                lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
                 lenient().when(this.accountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenThrow(new RuntimeException("fail"));
             } else {
                 LoanAccountLock lock1 = new LoanAccountLock(1L, LockOwner.LOAN_COB_CHUNK_PROCESSING);
                 LoanAccountLock lock2 = new LoanAccountLock(2L, LockOwner.LOAN_COB_PARTITIONING);
                 LoanAccountLock lock3 = new LoanAccountLock(3L, LockOwner.LOAN_INLINE_COB_PROCESSING);
                 List<LoanAccountLock> accountLocks = List.of(lock1, lock2, lock3);
+                lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+                lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
                 lenient().when(this.accountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(accountLocks);
             }
 

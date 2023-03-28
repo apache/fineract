@@ -128,7 +128,15 @@ public class CommandStrategyProvider {
         commandStrategies.put(
                 CommandContext.resource("loans\\/external-id\\/" + UUID_PARAM_REGEX + OPTIONAL_QUERY_PARAM_REGEX).method(GET).build(),
                 "getLoanByExternalIdCommandStrategy");
+        commandStrategies.put(CommandContext.resource("savingsaccounts\\/" + NUMBER_REGEX + OPTIONAL_QUERY_PARAM_REGEX).method(GET).build(),
+                "getSavingsAccountByIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("savingsaccounts").method(POST).build(), "applySavingsCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("savingsaccounts\\/" + NUMBER_REGEX + "\\/transactions" + OPTIONAL_COMMAND_PARAM_REGEX).method(POST).build(),
+                "savingsAccountTransactionCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("savingsaccounts\\/" + NUMBER_REGEX + "\\/transactions\\/" + NUMBER_REGEX + OPTIONAL_COMMAND_PARAM_REGEX)
+                .method(POST).build(), "savingsAccountAdjustTransactionCommandStrategy");
         commandStrategies.put(CommandContext.resource("loans\\/" + NUMBER_REGEX + "\\/charges").method(POST).build(),
                 "createChargeCommandStrategy");
         commandStrategies

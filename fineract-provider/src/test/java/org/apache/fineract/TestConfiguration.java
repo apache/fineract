@@ -22,17 +22,20 @@ import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.mock;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.List;
 import javax.sql.DataSource;
+import liquibase.change.custom.CustomTaskChange;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
+import org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor;
 import org.apache.fineract.infrastructure.core.service.migration.ExtendedSpringLiquibaseFactory;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseStateVerifier;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseUpgradeService;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.apache.fineract.infrastructure.jobs.ScheduledJobRunnerConfig;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
-import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,6 +62,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -82,8 +86,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class TestConfiguration {
 
     @Bean
-    public TenantDataSourceFactory tenantDataSourceFactory() {
-        return new TenantDataSourceFactory(null) {
+    public TenantDataSourceFactory tenantDataSourceFactory(DatabasePasswordEncryptor databasePasswordEncryptor) {
+        return new TenantDataSourceFactory(null, databasePasswordEncryptor) {
 
             @Override
             public DataSource create(FineractPlatformTenant tenant) {
@@ -138,8 +142,8 @@ public class TestConfiguration {
 
     @Bean
     public TenantDatabaseStateVerifier tenantDatabaseStateVerifier(DatabaseIndependentQueryService databaseIndependentQueryService,
-            LiquibaseProperties liquibaseProperties, FineractProperties fineractProperties) {
-        return new TenantDatabaseStateVerifier(liquibaseProperties, databaseIndependentQueryService, fineractProperties);
+            LiquibaseProperties liquibaseProperties) {
+        return new TenantDatabaseStateVerifier(liquibaseProperties, databaseIndependentQueryService);
     }
 
     /**
@@ -150,9 +154,10 @@ public class TestConfiguration {
     public TenantDatabaseUpgradeService tenantDatabaseUpgradeService(TenantDetailsService tenantDetailsService,
             HikariDataSource tenantDataSource, TenantDatabaseStateVerifier tenantDatabaseStateVerifier,
             ExtendedSpringLiquibaseFactory liquibaseFactory, TenantDataSourceFactory tenantDataSourceFactory,
-            FineractProperties fineractProperties) {
+            FineractProperties fineractProperties, Environment environment,
+            List<CustomTaskChange> customTaskChangesForDependencyInjection) {
         return new TenantDatabaseUpgradeService(tenantDetailsService, tenantDataSource, fineractProperties, tenantDatabaseStateVerifier,
-                liquibaseFactory, tenantDataSourceFactory);
+                liquibaseFactory, tenantDataSourceFactory, environment, customTaskChangesForDependencyInjection);
     }
 
     /**

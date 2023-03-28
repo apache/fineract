@@ -27,6 +27,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.jupiter.api.Assertions;
@@ -73,21 +74,21 @@ public class StaffTest {
         final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
-        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
-        map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
+        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
+        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
 
         /** Long firstname test */
-        map.put("firstname", Utils.randomNameGenerator("michael_", 43));
+        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 43));
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
-        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
+        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
 
         /** Long lastname test */
-        map.put("lastname", Utils.randomNameGenerator("Doe_", 47));
+        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 47));
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
-        map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
+        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
 
         /** Long mobileNo test */
-        map.put("mobileNo", Utils.randomNameGenerator("num_", 47));
+        map.put("mobileNo", Utils.uniqueRandomStringGenerator("num_", 47));
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
     }
 
@@ -97,8 +98,8 @@ public class StaffTest {
         final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
-        map.put("firstname", Utils.randomNameGenerator("michael_", 42));
-        map.put("lastname", Utils.randomNameGenerator("Doe_", 46));
+        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 42));
+        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 46));
 
         StaffHelper.createStaffWithJson(requestSpec, responseSpec, new Gson().toJson(map));
     }
@@ -108,8 +109,8 @@ public class StaffTest {
         final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
-        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
-        map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
+        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
+        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
 
         map.put("externalId", Utils.randomStringGenerator("EXT", 98));
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
@@ -166,10 +167,10 @@ public class StaffTest {
     @Test
     public void testStaffUpdate() {
         final Map<String, Object> map = new HashMap<>();
-        final String firstname = Utils.randomNameGenerator("michael_", 10);
-        final String lastname = Utils.randomNameGenerator("Doe_", 10);
-        final String externalId = Utils.randomStringGenerator("EXT", 97);
-        final String mobileNo = Utils.randomStringGenerator("num_", 10);
+        final String firstname = Utils.uniqueRandomStringGenerator("michael_", 10);
+        final String lastname = Utils.uniqueRandomStringGenerator("Doe_", 10);
+        final String externalId = UUID.randomUUID().toString();
+        final String mobileNo = Utils.uniqueRandomStringGenerator("num_", 10);
 
         map.put("firstname", firstname);
         map.put("lastname", lastname);
@@ -206,7 +207,7 @@ public class StaffTest {
     @Test
     public void testStaffUpdateNotFoundError() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
+        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
 
         StaffHelper.updateStaff(requestSpec, responseSpecForNotFoundError, Integer.MAX_VALUE, map);
     }
@@ -214,10 +215,10 @@ public class StaffTest {
     @Test
     public void testStaffUpdateValidationError() {
         final HashMap<String, Object> map = new HashMap<>();
-        final String firstname = Utils.randomNameGenerator("michael_", 5);
-        final String lastname = Utils.randomNameGenerator("Doe_", 4);
-        final String firstnameLong = Utils.randomNameGenerator("michael_", 43);
-        final String lastnameLong = Utils.randomNameGenerator("Doe_", 47);
+        final String firstname = Utils.uniqueRandomStringGenerator("michael_", 5);
+        final String lastname = Utils.uniqueRandomStringGenerator("Doe_", 4);
+        final String firstnameLong = Utils.uniqueRandomStringGenerator("michael_", 43);
+        final String lastnameLong = Utils.uniqueRandomStringGenerator("Doe_", 47);
 
         map.put("firstname", firstname);
         map.put("lastname", lastname);
@@ -233,7 +234,7 @@ public class StaffTest {
         map.put("lastname", lastname);
 
         /** Long mobileNo test */
-        map.put("mobileNo", Utils.randomNameGenerator("num_", 47));
+        map.put("mobileNo", Utils.uniqueRandomStringGenerator("num_", 47));
         StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
         map.remove("mobileNo");
 
@@ -247,8 +248,8 @@ public class StaffTest {
         final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
-        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
-        map.put("lastname", Utils.randomNameGenerator("Doe_", 5));
+        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
+        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 5));
         map.put("isLoanOfficer", true);
 
         StaffHelper.createStaffWithJson(requestSpec, responseSpec, new Gson().toJson(map));

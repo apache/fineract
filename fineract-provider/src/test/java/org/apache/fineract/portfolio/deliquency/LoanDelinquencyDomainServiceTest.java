@@ -26,10 +26,12 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -136,6 +138,8 @@ public class LoanDelinquencyDomainServiceTest {
         when(loanProduct.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getLoanProduct()).thenReturn(loanProduct);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
+        when(loan.getLoanTransactions(Mockito.any(Predicate.class))).thenReturn(Collections.emptyList());
+        when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
 
         CollectionData collectionData = underTest.getOverdueCollectionData(loan);
@@ -159,7 +163,7 @@ public class LoanDelinquencyDomainServiceTest {
         final Money zeroMoney = Money.zero(currency);
         LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, 1, fromDate, dueDate, principal,
                 zeroAmount, zeroAmount, zeroAmount, false, new HashSet<>(), zeroAmount);
-        LoanTransaction loanTransaction = LoanTransaction.chargeback(null, Money.of(currency, principal), paymentDetail, transactionDate,
+        LoanTransaction loanTransaction = LoanTransaction.chargeback(loan, Money.of(currency, principal), paymentDetail, transactionDate,
                 null);
         installment.getLoanTransactionToRepaymentScheduleMappings().add(LoanTransactionToRepaymentScheduleMapping
                 .createFrom(loanTransaction, installment, zeroMoney, zeroMoney, zeroMoney, zeroMoney));
