@@ -80,6 +80,12 @@ public class FineractProperties {
         private String masterPassword;
         private String encryption;
 
+        private String readOnlyHost;
+        private Integer readOnlyPort;
+        private String readOnlyUsername;
+        private String readOnlyPassword;
+        private String readOnlyParameters;
+        private String readOnlyName;
     }
 
     @Getter
