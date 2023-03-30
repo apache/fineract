@@ -41,6 +41,8 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.performance.sampling.NoopSamplingService;
+import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingServiceFactory;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.junit.jupiter.api.AfterEach;
@@ -66,6 +68,8 @@ public class COBBulkEventConfigurationTest {
     private BusinessEventNotifierService businessEventNotifierService;
     @Mock
     private ConfigurationDomainService configurationDomainService;
+    @Mock
+    private SamplingServiceFactory samplingServiceFactory;
     @InjectMocks
     private COBBusinessStepServiceImpl underTest;
 
@@ -73,11 +77,13 @@ public class COBBulkEventConfigurationTest {
     private ReloaderService reloaderService;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
         when(reloaderService.reload(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(samplingServiceFactory.forClass(any())).thenReturn(new NoopSamplingService());
+        underTest.afterPropertiesSet();
     }
 
     @AfterEach

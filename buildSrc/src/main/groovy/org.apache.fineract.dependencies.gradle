@@ -239,5 +239,7 @@ dependencyManagement {
         dependency 'org.postgresql:postgresql:42.5.4'
 
         dependency 'org.assertj:assertj-core:3.24.2'
+
+        dependency 'org.apache.commons:commons-math3:3.6.1'
     }
 }

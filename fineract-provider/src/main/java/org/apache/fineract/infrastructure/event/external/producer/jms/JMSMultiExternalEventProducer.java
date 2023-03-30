@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.producer.jms;
 
-import static org.apache.fineract.infrastructure.core.service.MeasuringUtil.measure;
+import static org.apache.fineract.infrastructure.core.service.performance.MeasuringUtil.measure;
 
 import java.util.ArrayList;
 import java.util.Collection;

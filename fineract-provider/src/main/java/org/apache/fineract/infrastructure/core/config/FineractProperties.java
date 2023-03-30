@@ -62,6 +62,8 @@ public class FineractProperties {
 
     private FineractLoanProperties loan;
 
+    private FineractSamplingProperties sampling;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -325,5 +327,14 @@ public class FineractProperties {
     public static class FineractTransactionProcessorItemProperties {
 
         private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSamplingProperties {
+
+        private boolean enabled;
+        private int samplingRate;
+        private String sampledClasses;
     }
 }

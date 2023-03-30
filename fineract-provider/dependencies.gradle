@@ -168,6 +168,9 @@ dependencies {
     implementation 'ch.qos.logback.contrib:logback-jackson'
     implementation 'org.codehaus.janino:janino'
 
+    implementation 'org.apache.commons:commons-math3'
+
+
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
