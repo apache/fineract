@@ -79,6 +79,7 @@ public class COBBulkEventConfigurationTest {
     @BeforeEach
     public void setUp() throws Exception {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
         when(reloaderService.reload(any())).thenAnswer(invocation -> invocation.getArgument(0));

@@ -80,20 +80,20 @@ public class FetchAndLockLoanStepDefinitions implements En {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
                 lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
-                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
-                        .thenReturn(List.of(new LoanAccountLock(1L, LockOwner.LOAN_COB_PARTITIONING)));
+                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(
+                        List.of(new LoanAccountLock(1L, LockOwner.LOAN_COB_PARTITIONING, LocalDate.now(ZoneId.systemDefault()))));
             } else if ("inline cob".equals(action)) {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
                 lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
-                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
-                        .thenReturn(List.of(new LoanAccountLock(2L, LockOwner.LOAN_INLINE_COB_PROCESSING)));
+                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(
+                        List.of(new LoanAccountLock(2L, LockOwner.LOAN_INLINE_COB_PROCESSING, LocalDate.now(ZoneId.systemDefault()))));
             } else if ("chunk processing".equals(action)) {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
                 lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
-                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
-                        .thenReturn(List.of(new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING)));
+                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(
+                        List.of(new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()))));
             }
 
             JobExecution jobExecution = new JobExecution(1L);

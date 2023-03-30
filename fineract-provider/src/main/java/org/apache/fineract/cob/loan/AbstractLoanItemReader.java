@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.exceptions.LoanAccountWasAlreadyLockedOrProcessed;
 import org.apache.fineract.cob.exceptions.LoanReadException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -51,9 +50,6 @@ public abstract class AbstractLoanItemReader implements ItemReader<Loan> {
         try {
             if (remainingData.size() > 0) {
                 loanId = remainingData.remove(0);
-                if (alreadyLockedOrProcessedAccounts != null && alreadyLockedOrProcessedAccounts.remove(loanId)) {
-                    throw new LoanAccountWasAlreadyLockedOrProcessed(loanId);
-                }
                 return loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
             }
         } catch (Exception e) {

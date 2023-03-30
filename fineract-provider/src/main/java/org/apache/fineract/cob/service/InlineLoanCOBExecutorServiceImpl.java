@@ -129,7 +129,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     }
 
     private void execute(List<Long> loanIds, String jobName, LocalDate businessDate) {
-        lockLoanAccounts(loanIds);
+        lockLoanAccounts(loanIds, businessDate);
         Job inlineLoanCOBJob;
         try {
             inlineLoanCOBJob = jobLocator.getJob(jobName);
@@ -167,7 +167,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         return loanIdAndLastClosedBusinessDates;
     }
 
-    private List<LoanAccountLock> getLoanAccountLocks(List<Long> loanIds) {
+    private List<LoanAccountLock> getLoanAccountLocks(List<Long> loanIds, LocalDate businessDate) {
         List<LoanAccountLock> loanAccountLocks = new ArrayList<>();
         List<Long> alreadyLockedLoanIds = new ArrayList<>();
         loanIds.forEach(loanId -> {
@@ -180,7 +180,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
                     alreadyLockedLoanIds.add(loanId);
                 }
             } else {
-                loanAccountLocks.add(new LoanAccountLock(loanId, LockOwner.LOAN_INLINE_COB_PROCESSING));
+                loanAccountLocks.add(new LoanAccountLock(loanId, LockOwner.LOAN_INLINE_COB_PROCESSING, businessDate));
             }
         });
         if (!alreadyLockedLoanIds.isEmpty()) {
@@ -207,13 +207,13 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         return jobParameterMap;
     }
 
-    private void lockLoanAccounts(List<Long> loanIds) {
+    private void lockLoanAccounts(List<Long> loanIds, LocalDate businessDate) {
         transactionTemplate.setPropagationBehavior(PROPAGATION_REQUIRES_NEW);
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
             @Override
             protected void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
-                List<LoanAccountLock> loanAccountLocks = getLoanAccountLocks(loanIds);
+                List<LoanAccountLock> loanAccountLocks = getLoanAccountLocks(loanIds, businessDate);
                 loanAccountLocks.forEach(loanAccountLock -> {
                     loanAccountLock.setNewLockOwner(LockOwner.LOAN_INLINE_COB_PROCESSING);
                     loanAccountLockRepository.save(loanAccountLock);
