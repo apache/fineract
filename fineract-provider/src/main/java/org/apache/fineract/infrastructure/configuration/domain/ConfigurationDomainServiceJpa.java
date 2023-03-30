@@ -60,16 +60,17 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         if (StringUtils.isBlank(taskPermissionCode)) {
             throw new PermissionNotFoundException(taskPermissionCode);
         }
-
-        final Permission thisTask = this.permissionRepository.findOneByCode(taskPermissionCode);
-        if (thisTask == null) {
-            throw new PermissionNotFoundException(taskPermissionCode);
-        }
-
         final String makerCheckerConfigurationProperty = "maker-checker";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(makerCheckerConfigurationProperty);
+        if (property.isEnabled()) {
+            final Permission thisTask = this.permissionRepository.findOneByCode(taskPermissionCode);
+            if (thisTask == null) {
+                throw new PermissionNotFoundException(taskPermissionCode);
+            }
 
-        return thisTask.hasMakerCheckerEnabled() && property.isEnabled();
+            return thisTask.hasMakerCheckerEnabled();
+        }
+        return false;
     }
 
     @Override
