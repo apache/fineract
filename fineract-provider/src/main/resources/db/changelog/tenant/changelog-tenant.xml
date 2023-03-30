@@ -120,4 +120,5 @@
     <include file="parts/0098_update_transaction_summary_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/0099_add_accrual_transaction_external_event_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0100_new_repayment_strategy.xml" relativeToChangelogFile="true" />
+    <include file="parts/0101_update_transaction_summary_table_report.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
