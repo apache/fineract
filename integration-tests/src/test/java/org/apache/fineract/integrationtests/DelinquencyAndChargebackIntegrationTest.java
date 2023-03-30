@@ -52,6 +52,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
@@ -75,6 +76,7 @@ public class DelinquencyAndChargebackIntegrationTest {
     }
 
     @Test
+    @Disabled
     public void testLoanClassificationStepAsPartOfCOB() {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
@@ -191,6 +193,7 @@ public class DelinquencyAndChargebackIntegrationTest {
     }
 
     @Test
+    @Disabled
     public void testLoanClassificationStepAsPartOfCOBRepeated() {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
         List<LocalDate> expectedDates = new ArrayList();

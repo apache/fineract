@@ -19,11 +19,15 @@
 package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.COBBusinessStepServiceImpl;
 import org.apache.fineract.cob.common.InitialisationTasklet;
 import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingDataPrinter;
+import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingServiceFactory;
+import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingStepExecutionListener;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -67,6 +71,10 @@ public class LoanCOBWorkerConfiguration {
     private AppUserRepositoryWrapper userRepository;
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private SamplingServiceFactory samplingServiceFactory;
+    @Autowired
+    private SamplingDataPrinter samplingDataPrinter;
 
     @Autowired
     private FineractProperties fineractProperties;
@@ -95,7 +103,7 @@ public class LoanCOBWorkerConfiguration {
                 .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).reader(cobWorkerItemReader())
                 .processor(cobWorkerItemProcessor()).writer(cobWorkerItemWriter()).faultTolerant().skip(Exception.class)
                 .skipLimit(propertyService.getChunkSize(JobName.LOAN_COB.name()) + 1).listener(loanItemListener())
-                .listener(promotionListener()).build();
+                .listener(promotionListener()).listener(samplingStepExecutionListener()).build();
     }
 
     @Bean
@@ -154,6 +162,13 @@ public class LoanCOBWorkerConfiguration {
     public ExecutionContextPromotionListener promotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
         listener.setKeys(new String[] { LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS });
+        return listener;
+    }
+
+    @Bean
+    public SamplingStepExecutionListener samplingStepExecutionListener() {
+        SamplingStepExecutionListener listener = new SamplingStepExecutionListener(samplingServiceFactory, samplingDataPrinter);
+        listener.setSampledClasses(COBBusinessStepServiceImpl.class);
         return listener;
     }
 }

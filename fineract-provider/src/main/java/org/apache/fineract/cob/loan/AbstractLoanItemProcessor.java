@@ -49,9 +49,13 @@ public abstract class AbstractLoanItemProcessor implements ItemProcessor<Loan, L
     private ExecutionContext executionContext;
     private LocalDate businessDate;
 
+    @SuppressWarnings({ "unchecked" })
     @Override
     public Loan process(@NotNull Loan item) throws Exception {
         Set<BusinessStepNameAndOrder> businessSteps = (Set<BusinessStepNameAndOrder>) executionContext.get(LoanCOBConstant.BUSINESS_STEPS);
+        if (businessSteps == null) {
+            throw new IllegalStateException("No business steps found in the execution context");
+        }
         TreeMap<Long, String> businessStepMap = getBusinessStepMap(businessSteps);
 
         Loan alreadyProcessedLoan = cobBusinessStepService.run(businessStepMap, item);

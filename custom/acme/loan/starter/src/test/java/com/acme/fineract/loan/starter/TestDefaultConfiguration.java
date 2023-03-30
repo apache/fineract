@@ -26,6 +26,7 @@ import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.cob.service.ReloaderService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingServiceFactory;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -49,9 +50,15 @@ public class TestDefaultConfiguration {
     @Bean
     public COBBusinessStepService cobBusinessStepService(BatchBusinessStepRepository batchBusinessStepRepository,
             ApplicationContext context, ListableBeanFactory beanFactory, BusinessEventNotifierService businessEventNotifierService,
-            ConfigurationDomainService configurationDomainService, ReloaderService reloaderService) {
+            ConfigurationDomainService configurationDomainService, ReloaderService reloaderService,
+            SamplingServiceFactory samplingServiceFactory) {
         return new COBBusinessStepServiceImpl(batchBusinessStepRepository, context, beanFactory, businessEventNotifierService,
-                configurationDomainService, reloaderService);
+                configurationDomainService, reloaderService, samplingServiceFactory);
+    }
+
+    @Bean
+    public SamplingServiceFactory samplingServiceFactory(FineractProperties fineractProperties) {
+        return new SamplingServiceFactory(fineractProperties);
     }
 
     @Bean

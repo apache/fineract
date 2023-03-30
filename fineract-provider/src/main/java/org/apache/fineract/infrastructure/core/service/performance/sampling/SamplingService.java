@@ -16,26 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.service;
+package org.apache.fineract.infrastructure.core.service.performance.sampling;
 
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.springframework.stereotype.Component;
+import java.util.function.Supplier;
 
-@Component
-@RequiredArgsConstructor
-@SuppressWarnings({ "unchecked", "rawtypes" })
-public class ReloaderService {
+public interface SamplingService {
 
-    private final List<ReloadService> reloadServices;
+    void sample(String key, Runnable r);
 
-    public <S extends AbstractPersistableCustom> S reload(S input) {
-        for (ReloadService reloadService : reloadServices) {
-            if (reloadService.canReload(input)) {
-                return (S) reloadService.reload(input);
-            }
-        }
-        return input;
-    }
+    <T> T sample(String key, Supplier<T> s);
+
+    void reset();
+
+    SamplingData getSamplingData();
 }
