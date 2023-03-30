@@ -38,7 +38,6 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
-import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +45,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
@@ -78,6 +78,8 @@ public class LoanCOBWorkerConfiguration {
 
     @Autowired
     private FineractProperties fineractProperties;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Bean(name = LoanCOBConstant.LOAN_COB_WORKER_STEP)
     public Step loanCOBWorkerStep() {
@@ -103,13 +105,13 @@ public class LoanCOBWorkerConfiguration {
                 .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).reader(cobWorkerItemReader())
                 .processor(cobWorkerItemProcessor()).writer(cobWorkerItemWriter()).faultTolerant().skip(Exception.class)
                 .skipLimit(propertyService.getChunkSize(JobName.LOAN_COB.name()) + 1).listener(loanItemListener())
-                .listener(promotionListener()).listener(samplingStepExecutionListener()).build();
+                .listener(samplingStepExecutionListener()).build();
     }
 
     @Bean
     @StepScope
     public Step applyLockStep(@Value("#{stepExecutionContext['partition']}") String partitionName) {
-        return localStepBuilderFactory.get("Apply lock - Step:" + partitionName).tasklet(applyLock()).listener(promotionListener()).build();
+        return localStepBuilderFactory.get("Apply lock - Step:" + partitionName).tasklet(applyLock()).build();
     }
 
     @Bean
@@ -130,7 +132,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ApplyLoanLockTasklet applyLock() {
-        return new ApplyLoanLockTasklet(accountLockRepository, fineractProperties);
+        return new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate);
     }
 
     @Bean
@@ -156,13 +158,6 @@ public class LoanCOBWorkerConfiguration {
         LoanItemWriter repositoryItemWriter = new LoanItemWriter(accountLockRepository);
         repositoryItemWriter.setRepository(loanRepository);
         return repositoryItemWriter;
-    }
-
-    @Bean
-    public ExecutionContextPromotionListener promotionListener() {
-        ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[] { LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS });
-        return listener;
     }
 
     @Bean

@@ -29,9 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 
 @Entity
 @Table(name = "m_loan_account_locks")
@@ -63,11 +61,11 @@ public class LoanAccountLock {
     @Column(name = "lock_placed_on_cob_business_date")
     private LocalDate lockPlacedOnCobBusinessDate;
 
-    public LoanAccountLock(Long loanId, LockOwner lockOwner) {
+    public LoanAccountLock(Long loanId, LockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {
         this.loanId = loanId;
         this.lockOwner = lockOwner;
         this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenant();
-        this.lockPlacedOnCobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        this.lockPlacedOnCobBusinessDate = lockPlacedOnCobBusinessDate;
     }
 
     public void setError(String errorMessage, String stacktrace) {
@@ -78,6 +76,5 @@ public class LoanAccountLock {
     public void setNewLockOwner(LockOwner newLockOwner) {
         this.lockOwner = newLockOwner;
         this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenant();
-        this.lockPlacedOnCobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
     }
 }

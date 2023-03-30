@@ -27,6 +27,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.cucumber.java8.En;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.cob.domain.LoanAccountLock;
@@ -58,7 +60,7 @@ public class LoanItemListenerStepDefinitions implements En {
         Given("/^The LoanItemListener.onReadError method (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
             exception = new LoanReadException(1L, new RuntimeException("fail"));
-            loanAccountLock = new LoanAccountLock(1L, LockOwner.LOAN_COB_CHUNK_PROCESSING);
+            loanAccountLock = new LoanAccountLock(1L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()));
             when(accountLockRepository.findByLoanIdAndLockOwner(1L, LockOwner.LOAN_COB_CHUNK_PROCESSING))
                     .thenReturn(Optional.of(loanAccountLock));
             transactionTemplate.setTransactionManager(mock(PlatformTransactionManager.class));
@@ -80,7 +82,7 @@ public class LoanItemListenerStepDefinitions implements En {
         Given("/^The LoanItemListener.onProcessError method (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
             exception = new LoanReadException(1L, new RuntimeException("fail"));
-            loanAccountLock = new LoanAccountLock(2L, LockOwner.LOAN_COB_CHUNK_PROCESSING);
+            loanAccountLock = new LoanAccountLock(2L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()));
             when(accountLockRepository.findByLoanIdAndLockOwner(2L, LockOwner.LOAN_COB_CHUNK_PROCESSING))
                     .thenReturn(Optional.of(loanAccountLock));
             when(loan.getId()).thenReturn(2L);
@@ -102,7 +104,7 @@ public class LoanItemListenerStepDefinitions implements En {
         Given("/^The LoanItemListener.onWriteError method (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
             exception = new LoanReadException(3L, new RuntimeException("fail"));
-            loanAccountLock = new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING);
+            loanAccountLock = new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()));
             when(accountLockRepository.findByLoanIdAndLockOwner(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING))
                     .thenReturn(Optional.of(loanAccountLock));
             when(loan.getId()).thenReturn(3L);
