@@ -843,10 +843,8 @@ public class LoansApiResource {
         Collection<LoanTermVariationsData> emiAmountVariations = null;
         Collection<LoanCollateralResponseData> loanCollateralManagements;
         Collection<LoanCollateralManagementData> loanCollateralManagementData = new ArrayList<>();
-        CollectionData collectionData = CollectionData.template();
-        if (loanBasicDetails.isActive()) {
-            collectionData = this.delinquencyReadPlatformService.calculateLoanCollectionData(resolvedLoanId);
-        }
+        CollectionData collectionData = this.delinquencyReadPlatformService.calculateLoanCollectionData(resolvedLoanId);
+
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(resolvedLoanId);
