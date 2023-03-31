@@ -162,7 +162,6 @@ public class DueDateRespectiveLoanRepaymentScheduleTransactionProcessor extends 
                 penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
 
                 Money subFeePortion;
-
                 if (!ignoreDueDateCheck) {
                     if (calculatedFeeCharge.isGreaterThan(transactionAmountRemaining)) {
                         calculatedFeeCharge = transactionAmountRemaining;
@@ -174,14 +173,16 @@ public class DueDateRespectiveLoanRepaymentScheduleTransactionProcessor extends 
                 transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
                 feeChargesPortion = feeChargesPortion.add(subFeePortion);
 
+                Money subInterestPortion;
                 if (ignoreDueDateCheck || !transactionDate.isBefore(currentInstallment.getDueDate())) {
-                    interestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
-                    transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+                    subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
+                    transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
+                    interestPortion = interestPortion.add(subInterestPortion);
                 }
 
-                principalPortion = principalPortion
-                        .add(currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining));
-                transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+                Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
+                principalPortion = principalPortion.add(subPrincipalPortion);
                 // If the transactionAmountRemaining is greater than zero, rerun the allocation without due date check
                 // to distribute the in advance portions
                 if (transactionAmountRemaining.isGreaterThanZero()) {
