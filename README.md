@@ -44,7 +44,7 @@ Recently (after release 1.7.0) we introduced improved date time handling in Fine
 serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=‘-00:00’
 ```
 
-__DO__: If you do use MySQL as your Fineract databsae then the following configuration is highly recommended:
+__DO__: If you do use MySQL as your Fineract database then the following configuration is highly recommended:
 
 * Run the application in UTC (the default command line in our Docker image has the necessary parameters already set)
 * Run the MySQL database server in UTC (if you use managed services like AWS RDS then this should be the default anyway, but it would be good to double-check)
@@ -439,7 +439,7 @@ Logging Guidelines
 Pull Requests
 -------------
 
-We request that your commit message include a FINERACT JIRA issue, recommended to be put in parenthesis add the end of the first line.  Start with an upper case imperative verb (not past form), and a short but concise clear description. (E.g. _Add enforced HideUtilityClassConstructor checkstyle (FINERACT-821)_ or _Fix inability to reschedule when interest accrued larger than EMI (FINERACT-1109)_ etc.).
+We request that your commit message include a FINERACT JIRA issue, recommended to be put in parenthesis at the end of the first line.  Start with an upper case imperative verb (not past form), and a short but concise clear description. (E.g. _Add enforced HideUtilityClassConstructor checkstyle (FINERACT-821)_ or _Fix inability to reschedule when interest accrued larger than EMI (FINERACT-1109)_ etc.).
 
 If your PR is failing to pass our CI build due to a test failure, then:
 
