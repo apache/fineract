@@ -65,10 +65,8 @@ public class LoanBusinessEventSerializer extends AbstractBusinessEventSerializer
             data.setCharges(loanCharges);
         }
 
-        if (data.isActive()) {
-            CollectionData delinquentData = delinquencyReadPlatformService.calculateLoanCollectionData(loanId);
-            data.setDelinquent(delinquentData);
-        }
+        CollectionData delinquentData = delinquencyReadPlatformService.calculateLoanCollectionData(loanId);
+        data.setDelinquent(delinquentData);
 
         if (data.getSummary() != null) {
             final Collection<LoanTransactionData> currentLoanTransactions = service.retrieveLoanTransactions(loanId);
