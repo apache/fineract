@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.infrastructure.accountnumberformat.domain;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public enum EntityAccountType {
 
     CLIENT(1, "accountType.client"), LOAN(2, "accountType.loan"), SAVINGS(3, "accountType.savings"), CENTER(4,
@@ -34,16 +37,10 @@ public enum EntityAccountType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     private static final Map<Integer, EntityAccountType> intToEnumMap = new HashMap<>();
+    @Getter
     private static int minValue;
+    @Getter
     private static int maxValue;
 
     static {
@@ -64,21 +61,12 @@ public enum EntityAccountType {
     }
 
     public static EntityAccountType fromInt(final int i) {
-        final EntityAccountType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
-    }
-
-    public static int getMinValue() {
-        return minValue;
-    }
-
-    public static int getMaxValue() {
-        return maxValue;
+        return intToEnumMap.get(i);
     }
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public boolean isClientAccount() {

@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.infrastructure.accountnumberformat.service;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.data.AccountNumberFormatDataValidator;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -38,6 +35,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.PersistenceException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements AccountNumberFormatWritePlatformService {
@@ -94,7 +95,7 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
 
             final AccountNumberFormat accountNumberFormatForUpdate = this.accountNumberFormatRepository
                     .findOneWithNotFoundDetection(accountNumberFormatId);
-            EntityAccountType accountType = accountNumberFormatForUpdate.getAccountType();
+            EntityAccountType accountType = EntityAccountType.fromInt(accountNumberFormatForUpdate.getAccountTypeEnum());
 
             this.accountNumberFormatDataValidator.validateForUpdate(command.json(), accountType);
 
@@ -105,7 +106,7 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
                 final Integer newValue = command.integerValueSansLocaleOfParameterNamed(AccountNumberFormatConstants.prefixTypeParamName);
                 final AccountNumberPrefixType accountNumberPrefixType = AccountNumberPrefixType.fromInt(newValue);
                 actualChanges.put(AccountNumberFormatConstants.prefixTypeParamName, accountNumberPrefixType);
-                accountNumberFormatForUpdate.setPrefix(accountNumberPrefixType);
+                accountNumberFormatForUpdate.setPrefixEnum(accountNumberPrefixType.getValue());
             }
 
             if (command.isChangeInStringParameterNamed(AccountNumberFormatConstants.prefixCharacterParamName,

@@ -18,14 +18,6 @@
  */
 package org.apache.fineract.infrastructure.accountnumberformat.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.accountnumberformat.data.AccountNumberFormatData;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations;
@@ -40,6 +32,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -83,7 +79,10 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             if (prefixTypeEnum != null) {
                 prefixType = AccountNumberFormatEnumerations.accountNumberPrefixType(prefixTypeEnum);
             }
-            return new AccountNumberFormatData(id, accountNumberType, prefixType, prefixCharacter);
+            return new AccountNumberFormatData().setId(id)
+                    .setAccountType(accountNumberType)
+                    .setPrefixType(prefixType)
+                    .setPrefixCharacter(prefixCharacter);
         }
     }
 
@@ -123,7 +122,9 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
 
             }
         }
-        return new AccountNumberFormatData(entityAccountTypeOptions, accountNumberPrefixTypeOptions);
+        return new AccountNumberFormatData()
+                .setAccountTypeOptions(entityAccountTypeOptions)
+                .setPrefixTypeOptions(accountNumberPrefixTypeOptions);
     }
 
     public void determinePrefixTypesForAccounts(Map<String, List<EnumOptionData>> accountNumberPrefixTypeOptions,
