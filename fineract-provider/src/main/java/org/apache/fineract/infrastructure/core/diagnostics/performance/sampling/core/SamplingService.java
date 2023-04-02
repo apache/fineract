@@ -16,31 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service.performance.sampling;
-
-import static java.util.Collections.emptyMap;
+package org.apache.fineract.infrastructure.core.diagnostics.performance.sampling.core;
 
 import java.util.function.Supplier;
 
-public class NoopSamplingService implements SamplingService {
+public interface SamplingService {
 
-    public NoopSamplingService() {}
+    void sample(String key, Runnable r);
 
-    @Override
-    public void sample(String key, Runnable r) {
-        r.run();
-    }
+    <T> T sample(String key, Supplier<T> s);
 
-    @Override
-    public <T> T sample(String key, Supplier<T> s) {
-        return s.get();
-    }
+    void reset();
 
-    @Override
-    public void reset() {}
-
-    @Override
-    public SamplingData getSamplingData() {
-        return new SamplingData(emptyMap());
-    }
+    SamplingData getSamplingData();
 }

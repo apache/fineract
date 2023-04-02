@@ -19,15 +19,11 @@
 package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
-import org.apache.fineract.cob.COBBusinessStepServiceImpl;
 import org.apache.fineract.cob.common.InitialisationTasklet;
 import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingDataPrinter;
-import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingServiceFactory;
-import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingStepExecutionListener;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -71,10 +67,6 @@ public class LoanCOBWorkerConfiguration {
     private AppUserRepositoryWrapper userRepository;
     @Autowired
     private TransactionTemplate transactionTemplate;
-    @Autowired
-    private SamplingServiceFactory samplingServiceFactory;
-    @Autowired
-    private SamplingDataPrinter samplingDataPrinter;
 
     @Autowired
     private FineractProperties fineractProperties;
@@ -104,8 +96,7 @@ public class LoanCOBWorkerConfiguration {
         return localStepBuilderFactory.get("Loan Business - Step:" + partitionName)
                 .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).reader(cobWorkerItemReader())
                 .processor(cobWorkerItemProcessor()).writer(cobWorkerItemWriter()).faultTolerant().skip(Exception.class)
-                .skipLimit(propertyService.getChunkSize(JobName.LOAN_COB.name()) + 1).listener(loanItemListener())
-                .listener(samplingStepExecutionListener()).build();
+                .skipLimit(propertyService.getChunkSize(JobName.LOAN_COB.name()) + 1).listener(loanItemListener()).build();
     }
 
     @Bean
@@ -158,12 +149,5 @@ public class LoanCOBWorkerConfiguration {
         LoanItemWriter repositoryItemWriter = new LoanItemWriter(accountLockRepository);
         repositoryItemWriter.setRepository(loanRepository);
         return repositoryItemWriter;
-    }
-
-    @Bean
-    public SamplingStepExecutionListener samplingStepExecutionListener() {
-        SamplingStepExecutionListener listener = new SamplingStepExecutionListener(samplingServiceFactory, samplingDataPrinter);
-        listener.setSampledClasses(COBBusinessStepServiceImpl.class);
-        return listener;
     }
 }

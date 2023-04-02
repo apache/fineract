@@ -16,19 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service.performance.sampling;
+package org.apache.fineract.infrastructure.core.diagnostics.performance.sampling.support;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import lombok.Getter;
+import org.apache.fineract.infrastructure.core.condition.PropertiesCondition;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 
-@Getter
-public class SamplingData {
+public class SamplingEnabledCondition extends PropertiesCondition {
 
-    private final Map<String, List<Duration>> timings;
-
-    public SamplingData(Map<String, List<Duration>> timings) {
-        this.timings = Map.copyOf(timings);
+    @Override
+    protected boolean matches(FineractProperties properties) {
+        return properties.getSampling().isEnabled();
     }
 }

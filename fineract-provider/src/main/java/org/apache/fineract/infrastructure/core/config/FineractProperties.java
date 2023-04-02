@@ -336,5 +336,6 @@ public class FineractProperties {
         private boolean enabled;
         private int samplingRate;
         private String sampledClasses;
+        private int resetPeriodSec;
     }
 }

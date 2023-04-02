@@ -16,48 +16,71 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service.performance.sampling;
+package org.apache.fineract.infrastructure.core.diagnostics.performance.sampling.output;
 
+import static java.lang.System.lineSeparator;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.fineract.infrastructure.core.diagnostics.performance.sampling.core.SamplingData;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class SamplingDataPrinter {
 
-    public void printForClass(Class<?> clazz, SamplingData samplingData) {
+    @SuppressFBWarnings({ "SLF4J_FORMAT_SHOULD_BE_CONST" })
+    public void print(Map<Class<?>, SamplingData> data) {
+        if (log.isInfoEnabled()) {
+            if (MapUtils.isNotEmpty(data)) {
+                String logMsg = data.entrySet() //
+                        .stream() //
+                        .map(e -> getFormattedSamplingData(e.getKey(), e.getValue())) //
+                        .filter(Objects::nonNull).collect(Collectors.joining(lineSeparator())); //
+                if (StringUtils.isNotBlank(logMsg)) {
+                    log.info(logMsg);
+                }
+            }
+        }
+    }
+
+    private String getFormattedSamplingData(Class<?> clazz, SamplingData samplingData) {
         if (clazz != null && samplingData != null) {
             Map<String, List<Duration>> timings = samplingData.getTimings();
             if (!timings.isEmpty()) {
-                log.info("""
+                return """
 
-                        Sampling data for {}
+                        Sampling data for %s
                         -------------
-                        {}
-                        """, clazz.getName(), getTimingsLog(timings));
+                        %s
+                        """.formatted(clazz.getName(), getTimingsLog(timings));
             }
         }
+        return null;
     }
 
     private String getTimingsLog(Map<String, List<Duration>> timings) {
         return timings.entrySet().stream() //
                 .map(e -> getSingleTimingLog(e.getKey(), e.getValue())) //
-                .collect(Collectors.joining(System.lineSeparator())); //
+                .collect(Collectors.joining(lineSeparator())); //
     }
 
     private String getSingleTimingLog(String key, List<Duration> durations) {
         double[] millis = durations.stream().mapToLong(Duration::toMillis).asDoubleStream().toArray();
-        double highest = StatUtils.max(millis);
+        double percentile99 = StatUtils.percentile(millis, 99);
         double average = Arrays.stream(millis).average().orElse(Double.NaN);
         double median = StatUtils.percentile(millis, 50);
         double lowest = StatUtils.min(millis);
-        return "%s with %d data points -> highest: %.0fms, average: %.0fms, median: %.0fms, lowest: %.0fms".formatted(key, millis.length,
-                highest, average, median, lowest);
+        return "%s with %d data points -> 99th percentile: %.0fms, average: %.0fms, median: %.0fms, lowest: %.0fms".formatted(key,
+                millis.length, percentile99, average, median, lowest);
     }
 }

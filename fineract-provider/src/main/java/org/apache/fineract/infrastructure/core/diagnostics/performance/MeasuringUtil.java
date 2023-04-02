@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service.performance;
+package org.apache.fineract.infrastructure.core.diagnostics.performance;
 
 import java.time.Duration;
 import java.util.function.BiConsumer;

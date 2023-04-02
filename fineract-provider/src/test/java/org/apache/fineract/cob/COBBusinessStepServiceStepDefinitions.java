@@ -40,11 +40,9 @@ import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
 import org.apache.fineract.cob.service.ReloaderService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingServiceFactory;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.mockito.Mockito;
@@ -53,8 +51,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
 public class COBBusinessStepServiceStepDefinitions implements En {
-
-    private SamplingServiceFactory samplingServiceFactory;
 
     private ApplicationContext applicationContext = mock(ApplicationContext.class);
     private ListableBeanFactory beanFactory = mock(ListableBeanFactory.class);
@@ -82,17 +78,8 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private Set<BusinessStepNameAndOrder> resultSet;
 
     public COBBusinessStepServiceStepDefinitions() throws Exception {
-        FineractProperties.FineractSamplingProperties sampling = new FineractProperties.FineractSamplingProperties();
-        sampling.setEnabled(false);
-        sampling.setSampledClasses("");
-        FineractProperties fineractProperties = new FineractProperties();
-        fineractProperties.setSampling(sampling);
-        samplingServiceFactory = new SamplingServiceFactory(fineractProperties);
-        samplingServiceFactory.afterPropertiesSet();
-
         businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository, applicationContext, beanFactory,
-                businessEventNotifierService, configurationDomainService, reloaderService, samplingServiceFactory);
-        businessStepService.afterPropertiesSet();
+                businessEventNotifierService, configurationDomainService, reloaderService);
 
         Given("/^The COBBusinessStepService.run method with executeMap (.*)$/", (String executionMap) -> {
             if ("null".equals(executionMap)) {
