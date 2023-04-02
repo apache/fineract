@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service.performance.sampling;
+package org.apache.fineract.infrastructure.core.diagnostics.performance.sampling.core;
 
 import java.time.Duration;
 import java.util.List;

@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.event.external.jobs;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.fineract.infrastructure.core.service.performance.MeasuringUtil.measure;
+import static org.apache.fineract.infrastructure.core.diagnostics.performance.MeasuringUtil.measure;
 
 import com.google.common.collect.Lists;
 import java.io.IOException;

@@ -35,11 +35,8 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingService;
-import org.apache.fineract.infrastructure.core.service.performance.sampling.SamplingServiceFactory;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -47,7 +44,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class COBBusinessStepServiceImpl implements COBBusinessStepService, InitializingBean {
+public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     private final BatchBusinessStepRepository batchBusinessStepRepository;
     private final ApplicationContext applicationContext;
@@ -56,15 +53,6 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService, Initi
     private final ConfigurationDomainService configurationDomainService;
 
     private final ReloaderService reloaderService;
-
-    private final SamplingServiceFactory samplingServiceFactory;
-
-    private SamplingService samplingService;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.samplingService = samplingServiceFactory.forClass(COBBusinessStepServiceImpl.class);
-    }
 
     @SuppressWarnings({ "unchecked" })
     @Override
@@ -83,8 +71,8 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService, Initi
                 try {
                     ThreadLocalContextUtil.setActionContext(ActionContext.COB);
                     COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
-                    item = reloadAndSample(item);
-                    item = executeAndSample(item, businessStepBean);
+                    item = reloaderService.reload(item);
+                    item = businessStepBean.execute(item);
                 } catch (Exception e) {
                     throw new BusinessStepException("Error happened during business step execution", e);
                 } finally {
@@ -102,16 +90,6 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService, Initi
             throw e;
         }
         return item;
-    }
-
-    private <S extends AbstractPersistableCustom> S reloadAndSample(S item) {
-        String key = reloaderService.getClass().getSimpleName();
-        return samplingService.sample(key, () -> reloaderService.reload(item));
-    }
-
-    private <S extends AbstractPersistableCustom> S executeAndSample(S item, COBBusinessStep<S> businessStepBean) {
-        String key = businessStepBean.getClass().getSimpleName();
-        return samplingService.sample(key, () -> businessStepBean.execute(item));
     }
 
     @NotNull

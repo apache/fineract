@@ -16,52 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service.performance.sampling;
+package org.apache.fineract.infrastructure.core.diagnostics.performance.sampling.core;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SamplingServiceFactory implements InitializingBean {
+public class SamplingServiceFactory {
 
     private final Map<Class<?>, SamplingService> services = new ConcurrentHashMap<>();
-    private final Set<String> classesToSample = ConcurrentHashMap.newKeySet();
-
-    private final FineractProperties properties;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        String sampledClasses = properties.getSampling().getSampledClasses();
-        String[] fqdns = sampledClasses.split(",");
-        Arrays.stream(fqdns).map(String::trim).forEach(classesToSample::add);
-    }
+    private final SamplingConfiguration samplingConfiguration;
 
     public SamplingService forClass(Class<?> contextClass) {
         return services.computeIfAbsent(contextClass, (cc) -> {
-            if (isSamplingEnabled() && isSamplingConfiguredForClass(contextClass)) {
-                return new InMemorySamplingService(getSamplingRate());
+            if (samplingConfiguration.isSamplingEnabled() && samplingConfiguration.isSamplingConfiguredForClass(contextClass)) {
+                return new InMemorySamplingService(samplingConfiguration.getSamplingRate());
             } else {
                 return new NoopSamplingService();
             }
         });
     }
 
-    private boolean isSamplingConfiguredForClass(Class<?> contextClass) {
-        return classesToSample.contains(contextClass.getName());
-    }
-
-    private boolean isSamplingEnabled() {
-        return properties.getSampling().isEnabled();
-    }
-
-    private int getSamplingRate() {
-        return properties.getSampling().getSamplingRate();
+    public void doWithAll(Consumer<Map<Class<?>, SamplingService>> c) {
+        c.accept(Map.copyOf(services));
     }
 }

@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service.performance.sampling;
+package org.apache.fineract.infrastructure.core.diagnostics.performance.sampling.core;
 
-import static org.apache.fineract.infrastructure.core.service.performance.MeasuringUtil.measure;
+import static org.apache.fineract.infrastructure.core.diagnostics.performance.MeasuringUtil.measure;
 
 import java.time.Duration;
 import java.util.Map;
