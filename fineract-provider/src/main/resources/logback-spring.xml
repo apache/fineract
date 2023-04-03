@@ -20,9 +20,11 @@
 
 -->
 <configuration>
+    <springProperty name="jsonLoggingEnabled" source="fineract.logging.json.enabled" defaultValue="false"/>
+
     <!-- see https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-custom-log-configuration
          and https://github.com/spring-projects/spring-boot/tree/master/spring-boot-project/spring-boot/src/main/resources/org/springframework/boot/logging/logback -->
-    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <appender name="CONSOLE" target="System.out" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -30,15 +32,33 @@
         </encoder>
     </appender>
 
-    <!-- See https://github.com/apache/fineract/#logging-guidelines for why by default we log only to INFO, only (WARN and) ERROR
-         but it's still possible to override this using java -Dlogging.level.root=info -jar fineract-provider.jar, as per https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-custom-log-levels -->
-    <root level="info">
-        <appender-ref ref="CONSOLE" />
-    </root>
-
     <!-- But these three INFO are still handy ;-) just to see when it's up and running -->
-    <logger name="org.springframework.boot.web.embedded.tomcat.TomcatWebServer" level="info" />
-    <logger name="org.apache.fineract.ServerApplication" level="info" />
-    <logger name="org.apache.fineract" level="${FINERACT_LOGGING_LEVEL:-INFO}" />
-    <logger name="liquibase" level="info" />
+    <logger name="org.springframework.boot.web.embedded.tomcat.TomcatWebServer" level="info"/>
+    <logger name="org.apache.fineract.ServerApplication" level="info"/>
+    <logger name="org.apache.fineract" level="${FINERACT_LOGGING_LEVEL:-INFO}"/>
+    <logger name="liquibase" level="info"/>
+
+    <if condition="${jsonLoggingEnabled} == true">
+        <then>
+            <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+                <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+                    <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
+                        <prettyPrint>false</prettyPrint>
+                    </jsonFormatter>
+                    <appendLineSeparator>true</appendLineSeparator>
+                </layout>
+            </appender>
+
+            <root level="info">
+                <appender-ref ref="JSON"/>
+            </root>
+        </then>
+        <else>
+            <!-- See https://github.com/apache/fineract/#logging-guidelines for why by default we log only to INFO, only (WARN and) ERROR
+                 but it's still possible to override this using java -Dlogging.level.root=info -jar fineract-provider.jar, as per https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-custom-log-levels -->
+            <root level="info">
+                <appender-ref ref="CONSOLE"/>
+            </root>
+        </else>
+    </if>
 </configuration>

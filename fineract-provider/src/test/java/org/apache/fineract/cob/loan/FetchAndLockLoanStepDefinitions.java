@@ -20,7 +20,9 @@ package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -43,6 +45,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 public class FetchAndLockLoanStepDefinitions implements En {
 
@@ -56,6 +59,7 @@ public class FetchAndLockLoanStepDefinitions implements En {
     private FetchAndLockLoanTasklet fetchAndLockLoanTasklet;
     private String action;
     private RepeatStatus result;
+    private JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 
     public FetchAndLockLoanStepDefinitions() {
         Given("/^The FetchAndLockLoanTasklet.execute method with action (.*)$/", (String action) -> {
@@ -76,20 +80,20 @@ public class FetchAndLockLoanStepDefinitions implements En {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
                 lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
-                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
-                        .thenReturn(List.of(new LoanAccountLock(1L, LockOwner.LOAN_COB_PARTITIONING)));
+                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(
+                        List.of(new LoanAccountLock(1L, LockOwner.LOAN_COB_PARTITIONING, LocalDate.now(ZoneId.systemDefault()))));
             } else if ("inline cob".equals(action)) {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
                 lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
-                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
-                        .thenReturn(List.of(new LoanAccountLock(2L, LockOwner.LOAN_INLINE_COB_PROCESSING)));
+                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(
+                        List.of(new LoanAccountLock(2L, LockOwner.LOAN_INLINE_COB_PROCESSING, LocalDate.now(ZoneId.systemDefault()))));
             } else if ("chunk processing".equals(action)) {
                 lenient().when(retrieveLoanIdService.retrieveLoanIdsNDaysBehind(anyLong(), any())).thenReturn(List.of(1L, 2L, 3L));
                 lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
                 lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
-                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList()))
-                        .thenReturn(List.of(new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING)));
+                lenient().when(loanAccountLockRepository.findAllByLoanIdIn(Mockito.anyList())).thenReturn(
+                        List.of(new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()))));
             }
 
             JobExecution jobExecution = new JobExecution(1L);
@@ -97,7 +101,8 @@ public class FetchAndLockLoanStepDefinitions implements En {
             contribution = new StepContribution(stepExecution);
             contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
                     LocalDate.now(ZoneId.systemDefault()).toString());
-            fetchAndLockLoanTasklet = new FetchAndLockLoanTasklet(loanAccountLockRepository, retrieveLoanIdService, fineractProperties);
+            fetchAndLockLoanTasklet = new FetchAndLockLoanTasklet(loanAccountLockRepository, retrieveLoanIdService, fineractProperties,
+                    jdbcTemplate);
         });
 
         When("FetchAndLockLoanTasklet.execute method executed", () -> {
@@ -108,7 +113,7 @@ public class FetchAndLockLoanStepDefinitions implements En {
             if ("empty steps".equals(action)) {
                 assertEquals(RepeatStatus.FINISHED, result);
             } else if ("good".equals(action)) {
-                verify(loanAccountLockRepository, Mockito.times(3)).save(Mockito.any());
+                verify(jdbcTemplate).batchUpdate(anyString(), any(), anyInt(), any());
                 assertEquals(RepeatStatus.FINISHED, result);
                 assertEquals(3,
                         ((List) contribution.getStepExecution().getJobExecution().getExecutionContext().get(LoanCOBConstant.LOAN_IDS))
@@ -123,7 +128,7 @@ public class FetchAndLockLoanStepDefinitions implements En {
                         ((List) contribution.getStepExecution().getJobExecution().getExecutionContext().get(LoanCOBConstant.LOAN_IDS))
                                 .get(2));
             } else if ("soft lock".equals(action)) {
-                verify(loanAccountLockRepository, Mockito.times(2)).save(Mockito.any());
+                verify(jdbcTemplate).batchUpdate(anyString(), any(), anyInt(), any());
                 assertEquals(RepeatStatus.FINISHED, result);
                 assertEquals(3,
                         ((List) contribution.getStepExecution().getJobExecution().getExecutionContext().get(LoanCOBConstant.LOAN_IDS))
@@ -138,7 +143,7 @@ public class FetchAndLockLoanStepDefinitions implements En {
                         ((List) contribution.getStepExecution().getJobExecution().getExecutionContext().get(LoanCOBConstant.LOAN_IDS))
                                 .get(2));
             } else if ("inline cob".equals(action)) {
-                verify(loanAccountLockRepository, Mockito.times(2)).save(Mockito.any());
+                verify(jdbcTemplate).batchUpdate(anyString(), any(), anyInt(), any());
                 assertEquals(RepeatStatus.FINISHED, result);
                 assertEquals(2,
                         ((List) contribution.getStepExecution().getJobExecution().getExecutionContext().get(LoanCOBConstant.LOAN_IDS))
@@ -150,7 +155,7 @@ public class FetchAndLockLoanStepDefinitions implements En {
                         ((List) contribution.getStepExecution().getJobExecution().getExecutionContext().get(LoanCOBConstant.LOAN_IDS))
                                 .get(1));
             } else if ("chunk processing".equals(action)) {
-                verify(loanAccountLockRepository, Mockito.times(2)).save(Mockito.any());
+                verify(jdbcTemplate).batchUpdate(anyString(), any(), anyInt(), any());
                 assertEquals(RepeatStatus.FINISHED, result);
                 assertEquals(2,
                         ((List) contribution.getStepExecution().getJobExecution().getExecutionContext().get(LoanCOBConstant.LOAN_IDS))

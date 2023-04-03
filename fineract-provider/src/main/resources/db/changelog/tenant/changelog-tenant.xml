@@ -116,4 +116,9 @@
     <include file="parts/0094_add_external_event_default_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0095_add_delinquency_and_arrears_display_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0096_modify_created_and_sent_at_date_external_events.xml" relativeToChangelogFile="true" />
+    <include file="parts/0097_update_accounting_summary_table_reports.xml" relativeToChangelogFile="true" />
+    <include file="parts/0098_update_transaction_summary_table_report.xml" relativeToChangelogFile="true" />
+    <include file="parts/0099_add_accrual_transaction_external_event_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0100_new_repayment_strategy.xml" relativeToChangelogFile="true" />
+    <include file="parts/0101_update_transaction_summary_table_report.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

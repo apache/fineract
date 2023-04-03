@@ -27,11 +27,11 @@ import org.apache.fineract.cob.data.IsCatchUpRunningDTO;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.data.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.stereotype.Service;
@@ -40,15 +40,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LoanCOBCatchUpServiceImpl implements LoanCOBCatchUpService {
 
-    private final LoanRepository loanRepository;
     private final AsyncLoanCOBExecutorService asyncLoanCOBExecutorService;
     private final JobExecutionRepository jobExecutionRepository;
     private final JobExplorer jobExplorer;
+    private final RetrieveLoanIdService retrieveLoanIdService;
 
     @Override
     public OldestCOBProcessedLoanDTO getOldestCOBProcessedLoan() {
-        List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = loanRepository
-                .findOldestCOBProcessedLoan(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
+        List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveLoanIdService
+                .retrieveLoanIdsOldestCobProcessed(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
         OldestCOBProcessedLoanDTO oldestCOBProcessedLoanDTO = new OldestCOBProcessedLoanDTO();
         oldestCOBProcessedLoanDTO.setLoanIds(loanIdAndLastClosedBusinessDate.stream().map(LoanIdAndLastClosedBusinessDate::getId).toList());
         oldestCOBProcessedLoanDTO.setCobProcessedDate(

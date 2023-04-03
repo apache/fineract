@@ -176,8 +176,9 @@ public final class ResultsetColumnHeaderData implements Serializable {
     }
 
     private boolean isDateTime() {
-        return "datetime".equalsIgnoreCase(this.columnType) || "timestamp without time zone".equalsIgnoreCase(this.columnType)
-                || "timestamptz".equalsIgnoreCase(this.columnType) || "timestamp with time zone".equalsIgnoreCase(this.columnType);
+        return "datetime".equalsIgnoreCase(this.columnType) || "timestamp".equalsIgnoreCase(this.columnType)
+                || "timestamp without time zone".equalsIgnoreCase(this.columnType) || "timestamptz".equalsIgnoreCase(this.columnType)
+                || "timestamp with time zone".equalsIgnoreCase(this.columnType);
     }
 
     public boolean isString() {

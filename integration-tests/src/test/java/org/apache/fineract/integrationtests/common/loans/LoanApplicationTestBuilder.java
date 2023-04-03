@@ -42,6 +42,7 @@ public class LoanApplicationTestBuilder {
     public static final String DEFAULT_STRATEGY = "mifos-standard-strategy";
     public static final String RBI_INDIA_STRATEGY = "rbi-india-strategy";
     public static final String INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY = "interest-principal-penalties-fees-order-strategy";
+    public static final String DUE_DATE_RESPECTIVE_STRATEGY = "due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy";
 
     private String externalId = null;
     private String principal = "10,000";

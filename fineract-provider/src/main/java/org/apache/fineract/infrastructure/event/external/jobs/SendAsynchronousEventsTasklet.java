@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.event.external.jobs;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.fineract.infrastructure.core.service.MeasuringUtil.measure;
+import static org.apache.fineract.infrastructure.core.diagnostics.performance.MeasuringUtil.measure;
 
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -135,7 +135,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
                 ByteBuffer toByteBuffer = message.toByteBuffer();
                 byte[] convert = byteBufferConverter.convert(toByteBuffer);
                 messages.add(convert);
-                log.debug("Created message to send with id: [{}], type: [{}], idempotency key: [{}]", message.getId(), message.getType(),
+                log.trace("Created message to send with id: [{}], type: [{}], idempotency key: [{}]", message.getId(), message.getType(),
                         message.getIdempotencyKey());
             }
             return messages;

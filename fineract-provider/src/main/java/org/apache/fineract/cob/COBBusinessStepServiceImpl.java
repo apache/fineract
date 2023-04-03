@@ -54,6 +54,7 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     private final ReloaderService reloaderService;
 
+    @SuppressWarnings({ "unchecked" })
     @Override
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {

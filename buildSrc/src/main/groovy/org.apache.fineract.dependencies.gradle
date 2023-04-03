@@ -30,6 +30,7 @@ dependencyManagement {
         mavenBom 'io.cucumber:cucumber-bom:7.11.1'
         mavenBom 'io.netty:netty-bom:4.1.89.Final'
         mavenBom 'org.mockito:mockito-bom:5.1.1'
+        mavenBom 'software.amazon.awssdk:bom:2.20.12'
     }
 
     dependencies {
@@ -44,6 +45,10 @@ dependencyManagement {
         dependency 'org.slf4j:log4j-over-slf4j:1.7.36'
         dependency 'ch.qos.logback:logback-core:1.2.11'
         dependency 'ch.qos.logback:logback-classic:1.2.11'
+        dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
+        dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
+        dependency 'org.codehaus.janino:janino:3.1.9'
+
 
         dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10'
         dependency 'com.google.guava:guava:31.1-jre'
@@ -233,5 +238,9 @@ dependencyManagement {
         }
 
         dependency 'org.postgresql:postgresql:42.5.4'
+
+        dependency 'org.assertj:assertj-core:3.24.2'
+
+        dependency 'org.apache.commons:commons-math3:3.6.1'
     }
 }

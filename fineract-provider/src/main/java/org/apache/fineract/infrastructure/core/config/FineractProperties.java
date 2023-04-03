@@ -58,6 +58,12 @@ public class FineractProperties {
     private FineractQueryProperties query;
     private FineractApiProperties api;
 
+    private FineractNotificationProperties notification;
+
+    private FineractLoanProperties loan;
+
+    private FineractSamplingProperties sampling;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -74,6 +80,12 @@ public class FineractProperties {
         private String masterPassword;
         private String encryption;
 
+        private String readOnlyHost;
+        private Integer readOnlyPort;
+        private String readOnlyUsername;
+        private String readOnlyPassword;
+        private String readOnlyParameters;
+        private String readOnlyName;
     }
 
     @Getter
@@ -280,4 +292,56 @@ public class FineractProperties {
         private int inlineLoanCob;
     }
 
+    @Getter
+    @Setter
+    public static class FineractNotificationProperties {
+
+        private UserNotificationSystemProperties userNotificationSystem;
+    }
+
+    @Getter
+    @Setter
+    public static class UserNotificationSystemProperties {
+
+        private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractLoanProperties {
+
+        private FineractTransactionProcessorProperties transactionProcessor;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractTransactionProcessorProperties {
+
+        private FineractTransactionProcessorItemProperties creocore;
+        private FineractTransactionProcessorItemProperties earlyRepayment;
+        private FineractTransactionProcessorItemProperties mifosStandard;
+        private FineractTransactionProcessorItemProperties heavensFamily;
+        private FineractTransactionProcessorItemProperties interestPrincipalPenaltiesFees;
+        private FineractTransactionProcessorItemProperties principalInterestPenaltiesFees;
+        private FineractTransactionProcessorItemProperties rbiIndia;
+        private FineractTransactionProcessorItemProperties duePenaltyFeeInterestPrincipalInAdvancePrincipalPenaltyFeeInterest;
+        private boolean errorNotFoundFail;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractTransactionProcessorItemProperties {
+
+        private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSamplingProperties {
+
+        private boolean enabled;
+        private int samplingRate;
+        private String sampledClasses;
+        private int resetPeriodSec;
+    }
 }

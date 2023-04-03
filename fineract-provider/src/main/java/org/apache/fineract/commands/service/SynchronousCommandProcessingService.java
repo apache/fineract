@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessFailedException;
@@ -94,9 +95,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey);
 
         // Store idempotency key to the request attribute
-
-        CommandSource savedCommandSource = commandSourceService.saveInitial(wrapper, command, context.authenticatedUser(wrapper),
-                idempotencyKey);
+        CommandSource savedCommandSource;
+        if (BatchRequestContextHolder.getEnclosingTransaction().isPresent()) {
+            savedCommandSource = commandSourceService.saveInitialNoTransaction(wrapper, command, context.authenticatedUser(wrapper),
+                    idempotencyKey);
+        } else {
+            savedCommandSource = commandSourceService.saveInitial(wrapper, command, context.authenticatedUser(wrapper), idempotencyKey);
+        }
         storeCommandToIdempotentFilter(savedCommandSource);
         setIdempotencyKeyStoreFlag(true);
 
@@ -104,12 +109,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         try {
             result = findCommandHandler(wrapper).processCommand(command);
         } catch (Throwable t) { // NOSONAR
-            commandSourceService.saveFailed(commandSourceService.findCommandSource(wrapper, idempotencyKey));
+            CommandSource source = commandSourceService.findCommandSource(wrapper, idempotencyKey);
+            commandSourceService.saveFailed(source);
             publishHookErrorEvent(wrapper, command, t);
             throw t;
         }
-
         CommandSource initialCommandSource = commandSourceService.findCommandSource(wrapper, idempotencyKey);
+
         initialCommandSource.setResult(toApiJsonSerializer.serializeResult(result));
         initialCommandSource.updateResourceId(result.getResourceId());
         initialCommandSource.updateForAudit(result);
@@ -120,7 +126,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
 
         initialCommandSource.setStatus(CommandProcessingResultType.PROCESSED.getValue());
-        commandSourceService.saveResult(initialCommandSource);
+        if (BatchRequestContextHolder.getEnclosingTransaction().isPresent()) {
+            commandSourceService.saveResultNoTransaction(initialCommandSource);
+        } else {
+            commandSourceService.saveResult(initialCommandSource);
+        }
 
         if ((rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker) {
             /*
@@ -187,7 +197,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         if (commandSourceResult.getIdempotencyKey() == null) {
             commandSourceResult.setIdempotencyKey(idempotencyKeyGenerator.create());
         }
-        commandSourceResult = commandSourceService.saveResult(commandSourceResult);
+        commandSourceResult = commandSourceService.saveResultNoTransaction(commandSourceResult);
 
         return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId())
                 .withEntityId(commandSourceResult.getResourceId()).build();

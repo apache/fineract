@@ -30,6 +30,7 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,6 +49,15 @@ public class CommandSourceService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
     public CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
+        return saveInitialInternal(wrapper, jsonCommand, maker, idempotencyKey);
+    }
+
+    public CommandSource saveInitialNoTransaction(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
+        return saveInitialInternal(wrapper, jsonCommand, maker, idempotencyKey);
+    }
+
+    @NotNull
+    private CommandSource saveInitialInternal(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
 
         if (initialCommandSource.getCommandJson() == null) {
@@ -57,7 +67,6 @@ public class CommandSourceService {
         return commandSourceRepository.saveAndFlush(initialCommandSource);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
     public void saveFailed(CommandSource commandSource) {
         commandSource.setStatus(ERROR.getValue());
         commandSourceRepository.saveAndFlush(commandSource);
@@ -65,6 +74,10 @@ public class CommandSourceService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
     public CommandSource saveResult(CommandSource commandSource) {
+        return commandSourceRepository.saveAndFlush(commandSource);
+    }
+
+    public CommandSource saveResultNoTransaction(CommandSource commandSource) {
         return commandSourceRepository.saveAndFlush(commandSource);
     }
 
@@ -76,7 +89,6 @@ public class CommandSourceService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public CommandSource findCommandSource(CommandWrapper wrapper, String idempotencyKey) {
         return commandSourceRepository.findByActionNameAndEntityNameAndIdempotencyKey(wrapper.actionName(), wrapper.entityName(),
                 idempotencyKey);

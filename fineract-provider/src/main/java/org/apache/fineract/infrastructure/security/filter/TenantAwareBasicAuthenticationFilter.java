@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentifierException;
 import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
-import org.apache.fineract.notification.service.NotificationReadPlatformService;
+import org.apache.fineract.notification.service.UserNotificationService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     private CacheWritePlatformService cacheWritePlatformService;
 
     @Autowired
-    private NotificationReadPlatformService notificationReadPlatformService;
+    private UserNotificationService userNotificationService;
 
     @Autowired
     private BasicAuthTenantDetailsService basicAuthTenantDetailsService;
@@ -170,7 +170,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         super.onSuccessfulAuthentication(request, response, authResult);
         AppUser user = (AppUser) authResult.getPrincipal();
 
-        if (notificationReadPlatformService.hasUnreadNotifications(user.getId())) {
+        if (userNotificationService.hasUnreadUserNotifications(user.getId())) {
             response.addHeader("X-Notification-Refresh", "true");
         } else {
             response.addHeader("X-Notification-Refresh", "false");

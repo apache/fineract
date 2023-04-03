@@ -18,15 +18,10 @@
  */
 package org.apache.fineract.notification.service;
 
-import static java.util.stream.Collectors.toSet;
-
-import java.util.Collection;
-import java.util.Set;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.FixedDepositAccountCreateBusinessEvent;
@@ -50,8 +45,6 @@ import org.apache.fineract.infrastructure.event.business.domain.share.ShareAccou
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareProductDividentsCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.notification.data.NotificationData;
-import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -62,8 +55,6 @@ import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -73,8 +64,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
     private final BusinessEventNotifierService businessEventNotifierService;
     private final PlatformSecurityContext context;
-    private final NotificationEventPublisher notificationEventPublisher;
-    private final AppUserRepository appUserRepository;
+    private final UserNotificationService userNotificationService;
 
     @PostConstruct
     public void addListeners() {
@@ -327,22 +317,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private void buildNotification(String permission, String objectType, Long objectIdentifier, String notificationContent,
             String eventType, Long appUserId, Long officeId) {
 
-        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-        Set<Long> userIds = getNotifiableUserIds(officeId, permission);
-        NotificationData notificationData = new NotificationData().setObjectType(objectType).setObjectId(objectIdentifier)
-                .setAction(eventType).setActorId(appUserId).setContent(notificationContent).setRead(false).setSystemGenerated(false)
-                .setTenantIdentifier(tenantIdentifier).setOfficeId(officeId).setUserIds(userIds);
-        try {
-            notificationEventPublisher.broadcastNotification(notificationData);
-        } catch (Exception e) {
-            // We want to avoid rethrowing the exception to stop the business transaction from rolling back
-            log.error("Error while broadcasting notification event", e);
-        }
+        userNotificationService.notifyUsers(permission, objectType, objectIdentifier, notificationContent, eventType, appUserId, officeId);
     }
 
-    private Set<Long> getNotifiableUserIds(Long officeId, String permission) {
-        Collection<AppUser> users = appUserRepository.findByOfficeId(officeId);
-        Collection<AppUser> usersWithPermission = users.stream().filter(aU -> aU.hasAnyPermission(permission, "ALL_FUNCTIONS")).toList();
-        return usersWithPermission.stream().map(AppUser::getId).collect(toSet());
-    }
 }

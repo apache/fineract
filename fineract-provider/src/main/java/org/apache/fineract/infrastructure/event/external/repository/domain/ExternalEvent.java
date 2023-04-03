@@ -79,6 +79,7 @@ public class ExternalEvent extends AbstractPersistableCustom {
         this.schema = schema;
         this.data = data;
         this.idempotencyKey = idempotencyKey;
+        this.aggregateRootId = aggregateRootId;
         this.createdAt = DateUtils.getOffsetDateTimeOfTenantWithMilliseconds();
         this.status = ExternalEventStatus.TO_BE_SENT;
         this.businessDate = DateUtils.getBusinessLocalDate();

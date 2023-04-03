@@ -46,6 +46,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 @EnableBatchIntegration
@@ -83,6 +84,9 @@ public class LoanCOBManagerConfiguration {
     @Autowired
     private FineractProperties fineractProperties;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Bean
     @JobScope
     public LoanCOBPartitioner partitioner(@Value("#{jobExecutionContext['loanIds']}") List<Long> loanIds) {
@@ -114,7 +118,7 @@ public class LoanCOBManagerConfiguration {
     @Bean
     @JobScope
     public FetchAndLockLoanTasklet fetchAndLockLoanTasklet() {
-        return new FetchAndLockLoanTasklet(accountLockRepository, retrieveLoanIdService, fineractProperties);
+        return new FetchAndLockLoanTasklet(accountLockRepository, retrieveLoanIdService, fineractProperties, jdbcTemplate);
     }
 
     @Bean

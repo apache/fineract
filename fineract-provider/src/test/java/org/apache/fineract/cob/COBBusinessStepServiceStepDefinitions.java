@@ -59,8 +59,8 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private ConfigurationDomainService configurationDomainService = mock(ConfigurationDomainService.class);
 
     private ReloaderService reloaderService = mock(ReloaderService.class);
-    private final COBBusinessStepService businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository,
-            applicationContext, beanFactory, businessEventNotifierService, configurationDomainService, reloaderService);
+    private final COBBusinessStepServiceImpl businessStepService;
+
     private COBBusinessStep cobBusinessStep = mock(COBBusinessStep.class);
     private COBBusinessStep notRegistereCobBusinessStep = mock(COBBusinessStep.class);
     private TreeMap<Long, String> executionMap;
@@ -77,7 +77,10 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private BatchBusinessStep batchBusinessStep = mock(BatchBusinessStep.class);
     private Set<BusinessStepNameAndOrder> resultSet;
 
-    public COBBusinessStepServiceStepDefinitions() {
+    public COBBusinessStepServiceStepDefinitions() throws Exception {
+        businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository, applicationContext, beanFactory,
+                businessEventNotifierService, configurationDomainService, reloaderService);
+
         Given("/^The COBBusinessStepService.run method with executeMap (.*)$/", (String executionMap) -> {
             if ("null".equals(executionMap)) {
                 this.executionMap = null;

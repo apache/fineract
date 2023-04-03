@@ -844,7 +844,9 @@ public class LoansApiResource {
         Collection<LoanCollateralResponseData> loanCollateralManagements;
         Collection<LoanCollateralManagementData> loanCollateralManagementData = new ArrayList<>();
         CollectionData collectionData = CollectionData.template();
-
+        if (loanBasicDetails.isActive()) {
+            collectionData = this.delinquencyReadPlatformService.calculateLoanCollectionData(resolvedLoanId);
+        }
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(resolvedLoanId);
@@ -947,13 +949,6 @@ public class LoansApiResource {
             if (associationParameters.contains(DataTableApiConstant.linkedAccountAssociateParamName)) {
                 mandatoryResponseParameters.add(DataTableApiConstant.linkedAccountAssociateParamName);
                 linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(resolvedLoanId);
-            }
-
-            if (associationParameters.contains(DataTableApiConstant.collectionAssociateParamName)) {
-                mandatoryResponseParameters.add(DataTableApiConstant.collectionAssociateParamName);
-                if (loanBasicDetails.isActive()) {
-                    collectionData = this.delinquencyReadPlatformService.calculateLoanCollectionData(resolvedLoanId);
-                }
             }
         }
 

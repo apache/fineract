@@ -78,7 +78,7 @@ public class DelinquencyAndChargebackIntegrationTest {
     public void testLoanClassificationStepAsPartOfCOB() {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
-        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        final LocalDate todaysDate = Utils.getDateAsLocalDate("01 April 2012");
         LocalDate businessDate = todaysDate.minusMonths(3);
         log.info("Current Business date {}", businessDate);
         BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);

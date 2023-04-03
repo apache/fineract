@@ -32,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -69,7 +71,8 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
         log.warn("                                                            ");
         log.warn("------------------------------------------------------------");
 
-        LoanAccountLock loanAccountLock = new LoanAccountLock(loanId, LockOwner.valueOf(lockOwner));
+        LoanAccountLock loanAccountLock = new LoanAccountLock(loanId, LockOwner.valueOf(lockOwner),
+                ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
         loanAccountLockRepository.save(loanAccountLock);
         return Response.status(Response.Status.ACCEPTED).build();
     }

@@ -19,13 +19,23 @@
 package org.apache.fineract.infrastructure.core.domain;
 
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.transaction.TransactionStatus;
 
 public final class BatchRequestContextHolder {
 
     private BatchRequestContextHolder() {}
 
     private static final ThreadLocal<Map<String, Object>> batchAttributes = new NamedThreadLocal<>("BatchAttributesForProcessing");
+
+    private static final ThreadLocal<Optional<TransactionStatus>> enclosingTransaction = new NamedThreadLocal<>("EnclosingTransaction") {
+
+        @Override
+        protected Optional<TransactionStatus> initialValue() {
+            return Optional.empty();
+        }
+    };
 
     /**
      * True if the batch attributes are set
@@ -34,6 +44,15 @@ public final class BatchRequestContextHolder {
      */
     public static boolean isBatchRequest() {
         return batchAttributes.get() != null;
+    }
+
+    /**
+     * True if the batch attributes are set and the enclosing transaction is set to true
+     *
+     * @return
+     */
+    public static Optional<TransactionStatus> getEnclosingTransaction() {
+        return enclosingTransaction.get();
     }
 
     /**
@@ -60,5 +79,14 @@ public final class BatchRequestContextHolder {
      */
     public static void resetRequestAttributes() {
         batchAttributes.remove();
+    }
+
+    /**
+     * Set the enclosing transaction flag for the current thread.
+     *
+     * @param isEnclosingTransaction
+     */
+    public static void setEnclosingTransaction(Optional<TransactionStatus> enclosingTransaction) {
+        BatchRequestContextHolder.enclosingTransaction.set(enclosingTransaction);
     }
 }

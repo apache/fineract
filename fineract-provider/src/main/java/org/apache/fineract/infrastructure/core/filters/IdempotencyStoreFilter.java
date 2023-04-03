@@ -70,7 +70,7 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter implements Batc
         boolean isSuccessWithoutStored = isStoreIdempotencyKey(request) && commandId.isPresent() && isAllowedContentTypeResponse(response)
                 && wrapper.getValue() != null;
         if (isSuccessWithoutStored) {
-            storeCommandResult(response.getStatus(), Optional.ofNullable(wrapper.getValue())
+            storeCommandResult(false, response.getStatus(), Optional.ofNullable(wrapper.getValue())
                     .map(ContentCachingResponseWrapper::getContentAsByteArray).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null),
                     commandId);
         }
@@ -79,11 +79,15 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter implements Batc
         }
     }
 
-    private void storeCommandResult(int response, String body, Optional<Long> commandId) {
+    private void storeCommandResult(boolean batch, int response, String body, Optional<Long> commandId) {
         commandSourceRepository.findById(commandId.get()).ifPresent(commandSource -> {
             commandSource.setResultStatusCode(response);
             commandSource.setResult(body);
-            commandSourceService.saveResult(commandSource);
+            if (batch) {
+                commandSourceService.saveResultNoTransaction(commandSource);
+            } else {
+                commandSourceService.saveResult(commandSource);
+            }
         });
     }
 
@@ -133,7 +137,7 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter implements Batc
         Optional<Long> commandId = getCommandId(null);
         boolean isSuccessWithoutStored = isStoreIdempotencyKey(null) && commandId.isPresent();
         if (isSuccessWithoutStored) {
-            storeCommandResult(result.getStatusCode(), result.getBody(), commandId);
+            storeCommandResult(true, result.getStatusCode(), result.getBody(), commandId);
         }
         return result;
     }

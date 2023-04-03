@@ -163,6 +163,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final NoteRepository noteRepository;
+    private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
 
     private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
         return e.getFromDate().isBefore(loanCharge.getDueDate()) && !loanCharge.getDueDate().isAfter(e.getDueDate());
@@ -242,7 +243,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             if (isAppliedOnBackDate && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
 
-                runScheduleRecalculation(loan, recalculateFrom);
+                loan = runScheduleRecalculation(loan, recalculateFrom);
                 reprocessRequired = false;
             }
             this.loanWritePlatformService.updateOriginalSchedule(loan);
@@ -251,14 +252,15 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
                 // Trigger transaction replayed event
                 replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
+            loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         }
-        loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
@@ -512,7 +514,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
-
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveChargeBusinessEvent(loanCharge));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
@@ -759,7 +761,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
             if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                 if (runInterestRecalculation && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
-                    runScheduleRecalculation(loan, recalculateFrom);
+                    loan = runScheduleRecalculation(loan, recalculateFrom);
                     reprocessRequired = false;
                 }
                 this.loanWritePlatformService.updateOriginalSchedule(loan);
@@ -771,11 +773,13 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 if (changedTransactionDetail != null) {
                     for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings()
                             .entrySet()) {
-                        this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                        accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                     }
                     // Trigger transaction replayed event
                     replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
                 }
+                loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             }
 
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -816,7 +820,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(loan.getCurrency().getCode(),
                 existingTransactionIds, existingReversedTransactionIds, false);
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
-
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
 
         return loanChargeAdjustmentTransaction;
@@ -981,7 +985,13 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             }
         }
 
-        if (!loan.isInterestBearing() && loanCharge.isSpecifiedDueDate() && loanCharge.getDueDate().isAfter(loan.getMaturityDate())) {
+        LocalDate loanMaturityDate = loan.getExpectedMaturityDate();
+
+        if (loan.getMaturityDate() != null) {
+            loanMaturityDate = loan.getMaturityDate();
+        }
+
+        if (!loan.isInterestBearing() && loanCharge.isSpecifiedDueDate() && loanCharge.getDueDate().isAfter(loanMaturityDate)) {
             LoanRepaymentScheduleInstallment latestRepaymentScheduleInstalment = loan.getRepaymentScheduleInstallments()
                     .get(loan.getLoanRepaymentScheduleInstallmentsSize() - 1);
             if (loanCharge.getDueDate().isAfter(latestRepaymentScheduleInstalment.getDueDate())) {
@@ -1105,20 +1115,24 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         }
     }
 
-    public void runScheduleRecalculation(final Loan loan, final LocalDate recalculateFrom) {
+    public Loan runScheduleRecalculation(Loan loan, final LocalDate recalculateFrom) {
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
             ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
             ChangedTransactionDetail changedTransactionDetail = loan
                     .handleRegenerateRepaymentScheduleWithInterestRecalculation(generatorDTO);
-            this.loanRepositoryWrapper.save(loan);
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
                 // Trigger transaction replayed event
                 replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
+            loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         }
+        return loan;
     }
 
     private JsonCommand adaptLoanChargeRefundCommandForFurtherRepaymentProcessing(JsonCommand command, BigDecimal fullRefundAbleAmount) {

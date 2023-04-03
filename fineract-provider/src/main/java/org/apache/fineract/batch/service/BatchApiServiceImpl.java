@@ -19,17 +19,21 @@
 package org.apache.fineract.batch.service;
 
 import com.google.gson.Gson;
+import io.github.resilience4j.core.functions.Either;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
@@ -51,9 +55,14 @@ import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProces
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
 import org.apache.fineract.infrastructure.core.filters.BatchCallHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchFilter;
+import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -72,9 +81,11 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     private final CommandStrategyProvider strategyProvider;
     private final ResolutionHelper resolutionHelper;
-    private final TransactionTemplate transactionTemplate;
+    private final PlatformTransactionManager transactionManager;
 
     private final List<BatchFilter> batchFilters;
+
+    private final List<BatchRequestPreprocessor> batchPreprocessors;
 
     @PersistenceContext
     private final EntityManager entityManager;
@@ -87,8 +98,8 @@ public class BatchApiServiceImpl implements BatchApiService {
      * @param uriInfo
      * @return {@code List<BatchResponse>}
      */
-    private List<BatchResponse> handleBatchRequests(final List<BatchRequest> requestList, final UriInfo uriInfo,
-            boolean isEnclosingTransaction) {
+    private List<BatchResponse> handleBatchRequests(boolean enclosingTransaction, final List<BatchRequest> requestList,
+            final UriInfo uriInfo) {
 
         final List<BatchResponse> responseList = new ArrayList<>(requestList.size());
 
@@ -103,52 +114,150 @@ public class BatchApiServiceImpl implements BatchApiService {
         }
 
         for (BatchRequestNode rootNode : batchRequestNodes) {
-            final BatchRequest rootRequest = rootNode.getRequest();
-            final CommandStrategy commandStrategy = this.strategyProvider
-                    .getCommandStrategy(CommandContext.resource(rootRequest.getRelativeUrl()).method(rootRequest.getMethod()).build());
-            log.debug("Batch request: method [{}], relative url [{}]", rootRequest.getMethod(), rootRequest.getRelativeUrl());
-            final BatchResponse rootResponse = safelyExecuteStrategy(commandStrategy, rootRequest, uriInfo, isEnclosingTransaction);
-            log.debug("Batch response: status code [{}], method [{}], relative url [{}]", rootResponse.getStatusCode(),
-                    rootRequest.getMethod(), rootRequest.getRelativeUrl());
-            responseList.add(rootResponse);
-            responseList.addAll(this.processChildRequests(rootNode, rootResponse, uriInfo, isEnclosingTransaction));
+            if (enclosingTransaction) {
+                this.callRequestRecursive(rootNode.getRequest(), rootNode, responseList, uriInfo);
+            } else {
+                responseList.addAll(callInTransaction(
+                        transactionTemplate -> transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
+                        () -> {
+                            List<BatchResponse> localResponseList = new ArrayList<>();
+                            this.callRequestRecursive(rootNode.getRequest(), rootNode, localResponseList, uriInfo);
+                            return localResponseList;
+                        }));
+            }
         }
-
         Collections.sort(responseList, Comparator.comparing(BatchResponse::getRequestId));
-
         return responseList;
-
     }
 
-    private BatchResponse safelyExecuteStrategy(CommandStrategy commandStrategy, BatchRequest request, UriInfo originalUriInfo,
-            boolean isEnclosingTransaction) {
+    /**
+     * Executes the request and call child requests recursively.
+     *
+     * @param request
+     *            the current batch request
+     * @param requestNode
+     *            the batch request holder node
+     * @param responseList
+     *            the collected responses
+     * @return {@code BatchResponse}
+     */
+    private void callRequestRecursive(BatchRequest request, BatchRequestNode requestNode, List<BatchResponse> responseList,
+            UriInfo uriInfo) {
+        // 1. run current node
+        BatchResponse response = executeRequest(request, uriInfo);
+        responseList.add(response);
+        if (response.getStatusCode() == 200) {
+            requestNode.getChildRequests().forEach(childNode -> {
+                BatchRequest resolvedChildRequest;
+                try {
+                    resolvedChildRequest = this.resolutionHelper.resoluteRequest(childNode.getRequest(), response);
+                } catch (RuntimeException ex) {
+                    throw new BatchExecutionException(childNode.getRequest(), ex);
+                }
+                callRequestRecursive(resolvedChildRequest, childNode, responseList, uriInfo);
+
+            });
+        } else {
+            responseList.addAll(parentRequestFailedRecursive(request, requestNode));
+        }
+        // If the current request fails, then all the child requests are not executed. If we want to write out all the
+        // child requests, here is the place.
+    }
+
+    /**
+     * All requests recursively are set to status 409 if the parent request fails.
+     *
+     * @param request
+     *            the current request
+     * @param requestNode
+     *            the current request node
+     * @return {@code BatchResponse} list of the generated batch responses
+     */
+    private List<BatchResponse> parentRequestFailedRecursive(BatchRequest request, BatchRequestNode requestNode) {
+        List<BatchResponse> responseList = new ArrayList<>();
+        BatchRequestContextHolder.getEnclosingTransaction().ifPresent(TransactionExecution::setRollbackOnly);
+        BatchResponse errorResponse = new BatchResponse();
+        errorResponse.setRequestId(request.getRequestId());
+        errorResponse.setStatusCode(Status.CONFLICT.getStatusCode());
+
+        // Some detail information about the error
+        final ErrorInfo conflictError = new ErrorInfo(Status.CONFLICT.getStatusCode(), 8001,
+                "Parent request with id " + request.getRequestId() + " was erroneous!");
+        errorResponse.setBody(conflictError.getMessage());
+        requestNode.getChildRequests().stream()
+                .flatMap(childNode -> parentRequestFailedRecursive(childNode.getRequest(), childNode).stream()).forEach(responseList::add);
+        return responseList;
+    }
+
+    /**
+     * Execute the request
+     *
+     * @param request
+     * @param uriInfo
+     * @return
+     */
+    private BatchResponse executeRequest(BatchRequest request, UriInfo uriInfo) {
+        final CommandStrategy commandStrategy = this.strategyProvider
+                .getCommandStrategy(CommandContext.resource(request.getRelativeUrl()).method(request.getMethod()).build());
+        log.debug("Batch request: method [{}], relative url [{}]", request.getMethod(), request.getRelativeUrl());
+        Either<RuntimeException, BatchRequest> preprocessorResult = runPreprocessors(request);
+        if (preprocessorResult.isLeft()) {
+            throw new BatchExecutionException(request, preprocessorResult.getLeft());
+        } else {
+            request = preprocessorResult.get();
+        }
         try {
-            if (isEnclosingTransaction) {
-                entityManager.flush();
-            }
             BatchRequestContextHolder.setRequestAttributes(new HashMap<>(Optional.ofNullable(request.getHeaders())
                     .map(list -> list.stream().collect(Collectors.toMap(Header::getName, Header::getValue)))
                     .orElse(Collections.emptyMap())));
-
-            return new BatchCallHandler(this.batchFilters, commandStrategy::execute).serviceCall(request, originalUriInfo);
+            BatchCallHandler callHandler = new BatchCallHandler(this.batchFilters, commandStrategy::execute);
+            if (BatchRequestContextHolder.getEnclosingTransaction().isPresent()) {
+                if (BatchRequestContextHolder.getEnclosingTransaction().get().isRollbackOnly()) {
+                    return new BatchResponse();
+                }
+                entityManager.flush();
+            }
+            final BatchResponse rootResponse = callHandler.serviceCall(request, uriInfo);
+            log.debug("Batch response: status code [{}], method [{}], relative url [{}]", rootResponse.getStatusCode(), request.getMethod(),
+                    request.getRelativeUrl());
+            return rootResponse;
         } catch (AbstractIdempotentCommandException idempotentException) {
             return handleIdempotentRequests(idempotentException, request);
-        } catch (RuntimeException e) {
-            log.warn("Exception while executing batch strategy {}", commandStrategy.getClass().getSimpleName(), e);
-
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            final BatchResponse response = new BatchResponse();
-            response.setRequestId(request.getRequestId());
-            response.setHeaders(request.getHeaders());
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-            return response;
+        } catch (RuntimeException ex) {
+            throw new BatchExecutionException(request, ex);
         } finally {
             BatchRequestContextHolder.resetRequestAttributes();
         }
     }
 
+    private Either<RuntimeException, BatchRequest> runPreprocessors(BatchRequest request) {
+        return runPreprocessor(batchPreprocessors, request);
+    }
+
+    private Either<RuntimeException, BatchRequest> runPreprocessor(List<BatchRequestPreprocessor> remainingPreprocessor,
+            BatchRequest request) {
+        if (remainingPreprocessor.isEmpty()) {
+            return Either.right(request);
+        } else {
+            BatchRequestPreprocessor preprocessor = remainingPreprocessor.get(0);
+            Either<RuntimeException, BatchRequest> processingResult = preprocessor.preprocess(request);
+            if (processingResult.isLeft()) {
+                return processingResult;
+            } else {
+                return runPreprocessor(remainingPreprocessor.subList(1, remainingPreprocessor.size()), processingResult.get());
+            }
+        }
+    }
+
+    /**
+     * Return the idempotent response when idempotent exception raised
+     *
+     * @param idempotentException
+     *            the idempotent exception
+     * @param request
+     *            the called request
+     * @return
+     */
     private BatchResponse handleIdempotentRequests(AbstractIdempotentCommandException idempotentException, BatchRequest request) {
         BatchResponse response = new BatchResponse();
         response.setRequestId(request.getRequestId());
@@ -167,98 +276,96 @@ public class BatchApiServiceImpl implements BatchApiService {
         return response;
     }
 
-    private List<BatchResponse> processChildRequests(final BatchRequestNode rootRequest, BatchResponse rootResponse, UriInfo uriInfo,
-            boolean isEnclosingTransaction) {
-
-        final List<BatchResponse> childResponses = new ArrayList<>();
-        if (!rootRequest.getChildRequests().isEmpty()) {
-
-            for (BatchRequestNode childNode : rootRequest.getChildRequests()) {
-
-                BatchRequest childRequest = childNode.getRequest();
-                BatchResponse childResponse;
-
-                try {
-
-                    if (rootResponse.getStatusCode().equals(200)) {
-                        childRequest = this.resolutionHelper.resoluteRequest(childRequest, rootResponse);
-                        final CommandStrategy commandStrategy = this.strategyProvider.getCommandStrategy(
-                                CommandContext.resource(childRequest.getRelativeUrl()).method(childRequest.getMethod()).build());
-
-                        childResponse = safelyExecuteStrategy(commandStrategy, childRequest, uriInfo, isEnclosingTransaction);
-                    } else {
-                        // Something went wrong with the parent request, create
-                        // a response with status code 409
-                        childResponse = new BatchResponse();
-                        childResponse.setRequestId(childRequest.getRequestId());
-                        childResponse.setStatusCode(Status.CONFLICT.getStatusCode());
-
-                        // Some detail information about the error
-                        final ErrorInfo conflictError = new ErrorInfo(Status.CONFLICT.getStatusCode(), 8001,
-                                "Parent request with id " + rootResponse.getRequestId() + " was erroneous!");
-                        childResponse.setBody(conflictError.getMessage());
-                    }
-                    childResponses.addAll(this.processChildRequests(childNode, childResponse, uriInfo, isEnclosingTransaction));
-
-                } catch (Throwable ex) {
-
-                    childResponse = new BatchResponse();
-                    childResponse.setRequestId(childRequest.getRequestId());
-                    childResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-                    childResponse.setBody(ex.getMessage());
-                }
-
-                childResponses.add(childResponse);
-            }
-        }
-
-        return childResponses;
-    }
-
+    /**
+     * Run each request root step in a separated transaction
+     *
+     * @param requestList
+     * @param uriInfo
+     * @return
+     */
     @Override
     public List<BatchResponse> handleBatchRequestsWithoutEnclosingTransaction(final List<BatchRequest> requestList, UriInfo uriInfo) {
-
-        return handleBatchRequests(requestList, uriInfo, false);
+        BatchRequestContextHolder.setEnclosingTransaction(Optional.empty());
+        return handleBatchRequests(false, requestList, uriInfo);
     }
 
+    /**
+     * Run the batch request in transaction
+     *
+     * @param requestList
+     * @param uriInfo
+     * @return
+     */
     @Override
     public List<BatchResponse> handleBatchRequestsWithEnclosingTransaction(final List<BatchRequest> requestList, final UriInfo uriInfo) {
+        return callInTransaction(() -> handleBatchRequests(true, requestList, uriInfo));
+    }
+
+    @NotNull
+    private List<BatchResponse> createErrorResponse(List<BatchResponse> responseList, int statusCode) {
+        BatchResponse errResponse = new BatchResponse();
+
+        for (BatchResponse res : responseList) {
+            if (!res.getStatusCode().equals(200)) {
+                errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
+                errResponse.setRequestId(res.getRequestId());
+                if (statusCode == -1) {
+                    statusCode = res.getStatusCode();
+                }
+                break;
+            }
+        }
+        errResponse.setStatusCode(statusCode);
+        return Arrays.asList(errResponse);
+    }
+
+    private List<BatchResponse> callInTransaction(Supplier<List<BatchResponse>> request) {
+        return callInTransaction(Function.identity()::apply, request);
+    }
+
+    /**
+     * Helper method to run the command in transaction
+     *
+     * @param request
+     *            the enclosing supplier of the command
+     * @param transactionConfigurator
+     *            consumer to configure the transaction behavior and isolation
+     * @return
+     */
+    private List<BatchResponse> callInTransaction(Consumer<TransactionTemplate> transactionConfigurator,
+            Supplier<List<BatchResponse>> request) {
         List<BatchResponse> responseList = new ArrayList<>();
         try {
-            return this.transactionTemplate.execute(status -> {
+            TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+            transactionConfigurator.accept(transactionTemplate);
+            return transactionTemplate.execute(status -> {
+                BatchRequestContextHolder.setEnclosingTransaction(Optional.of(status));
                 try {
-                    responseList.addAll(handleBatchRequests(requestList, uriInfo, true));
+                    responseList.addAll(request.get());
+                    if (status.isRollbackOnly()) {
+                        return createErrorResponse(responseList, -1);
+                    }
                     return responseList;
+                } catch (BatchExecutionException ex) {
+                    status.setRollbackOnly();
+                    BatchResponse errResponse = new BatchResponse();
+                    errResponse.setStatusCode(ex.getErrorInfo().getStatusCode());
+                    errResponse.setRequestId(ex.getRequest().getRequestId());
+                    errResponse.setBody(ex.getErrorInfo().getMessage());
+                    return Arrays.asList(errResponse);
                 } catch (RuntimeException ex) {
-
+                    status.setRollbackOnly();
                     ErrorInfo e = ErrorHandler.handler(ex);
                     BatchResponse errResponse = new BatchResponse();
                     errResponse.setStatusCode(e.getStatusCode());
                     errResponse.setBody(e.getMessage());
-
-                    List<BatchResponse> errResponseList = new ArrayList<>();
-                    errResponseList.add(errResponse);
-
-                    status.setRollbackOnly();
-                    return errResponseList;
+                    return Arrays.asList(errResponse);
                 }
             });
         } catch (TransactionException | NonTransientDataAccessException ex) {
             ErrorInfo e = ErrorHandler.handler(ex);
-            BatchResponse errResponse = new BatchResponse();
-            errResponse.setStatusCode(e.getStatusCode());
-
-            for (BatchResponse res : responseList) {
-                if (!res.getStatusCode().equals(200)) {
-                    errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
-                    break;
-                }
-            }
-
-            List<BatchResponse> errResponseList = new ArrayList<>();
-            errResponseList.add(errResponse);
-
-            return errResponseList;
+            return createErrorResponse(responseList, e.getStatusCode());
         }
     }
+
 }

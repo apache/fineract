@@ -52,6 +52,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.Guarantor;
@@ -85,6 +86,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private final SavingsAccountAssembler savingsAccountAssembler;
     private final ConfigurationDomainService configurationDomainService;
     private final ExternalIdFactory externalIdFactory;
+    private final LoanRepository loanRepository;
 
     @PostConstruct
     public void addListeners() {
@@ -232,28 +234,27 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         final AccountTransferDetails accountTransferDetails = null;
         final String noteText = null;
 
-        final SavingsAccount toSavingsAccount = null;
-
         Long loanId = loan.getId();
 
         for (Guarantor guarantor : existGuarantorList) {
             final List<GuarantorFundingDetails> fundingDetails = guarantor.getGuarantorFundDetails();
             for (GuarantorFundingDetails guarantorFundingDetails : fundingDetails) {
+                Loan freshLoan = loanRepository.findById(loanId).orElseThrow();
                 if (guarantorFundingDetails.getStatus().isActive()) {
                     final SavingsAccount fromSavingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
                     final Long fromAccountId = fromSavingsAccount.getId();
                     releaseLoanIds.put(loanId, guarantorFundingDetails.getId());
                     try {
                         BigDecimal remainingAmount = guarantorFundingDetails.getAmountRemaining();
-                        if (loan.getGuaranteeAmount().compareTo(loan.getPrincipal().getAmount()) > 0) {
-                            remainingAmount = remainingAmount.multiply(loan.getPrincipal().getAmount()).divide(loan.getGuaranteeAmount(),
-                                    MoneyHelper.getRoundingMode());
+                        if (freshLoan.getGuaranteeAmount().compareTo(freshLoan.getPrincipal().getAmount()) > 0) {
+                            remainingAmount = remainingAmount.multiply(freshLoan.getPrincipal().getAmount())
+                                    .divide(freshLoan.getGuaranteeAmount(), MoneyHelper.getRoundingMode());
                         }
                         ExternalId externalId = externalIdFactory.create();
                         AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, remainingAmount, fromAccountType,
                                 toAccountType, fromAccountId, toAccountId, description, locale, fmt, paymentDetail, fromTransferType,
                                 toTransferType, chargeId, loanInstallmentNumber, transferType, accountTransferDetails, noteText, externalId,
-                                loan, toSavingsAccount, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
+                                null, null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                         transferAmount(accountTransferDTO);
                     } finally {
                         releaseLoanIds.remove(loanId);

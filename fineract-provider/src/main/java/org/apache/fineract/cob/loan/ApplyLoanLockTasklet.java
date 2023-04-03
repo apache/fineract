@@ -30,12 +30,14 @@ import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,6 +45,7 @@ public class ApplyLoanLockTasklet implements Tasklet {
 
     private final LoanAccountLockRepository accountLockRepository;
     private final FineractProperties fineractProperties;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
@@ -61,23 +64,28 @@ public class ApplyLoanLockTasklet implements Tasklet {
 
         List<Long> toBeProcessedLoanIds = new ArrayList<>(alreadySoftLockedAccountsMap.keySet());
 
-        for (Long loanId : toBeProcessedLoanIds) {
-            upgradeToHardLock(loanId, alreadySoftLockedAccountsMap);
-        }
+        upgradeToHardLock(toBeProcessedLoanIds);
 
         toBeProcessedLoanIds.addAll(alreadyLockedByChunkProcessingAccountIds);
         List<Long> alreadyLockedByInlineCOBOrProcessedLoanIds = new ArrayList<>(loanIds);
         alreadyLockedByInlineCOBOrProcessedLoanIds.removeAll(toBeProcessedLoanIds);
 
-        executionContext.put(LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS,
-                new ArrayList<>(alreadyLockedByInlineCOBOrProcessedLoanIds));
+        loanIds.removeAll(alreadyLockedByInlineCOBOrProcessedLoanIds);
+
         return RepeatStatus.FINISHED;
     }
 
-    private void upgradeToHardLock(Long loanId, Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap) {
-        LoanAccountLock loanAccountLock = alreadySoftLockedAccountsMap.get(loanId);
-        // Upgrade lock
-        loanAccountLock.setNewLockOwner(LockOwner.LOAN_COB_CHUNK_PROCESSING);
-        accountLockRepository.save(loanAccountLock);
+    private void upgradeToHardLock(List<Long> accountsToLock) {
+        jdbcTemplate.batchUpdate("""
+                    UPDATE m_loan_account_locks SET version= version + 1, lock_owner = ?, lock_placed_on = ? WHERE loan_id = ?
+                """, accountsToLock, getInClauseParameterSizeLimit(), (ps, id) -> {
+            ps.setString(1, LockOwner.LOAN_COB_CHUNK_PROCESSING.name());
+            ps.setObject(2, DateUtils.getOffsetDateTimeOfTenant());
+            ps.setLong(3, id);
+        });
+    }
+
+    private int getInClauseParameterSizeLimit() {
+        return fineractProperties.getQuery().getInClauseParameterSizeLimit();
     }
 }

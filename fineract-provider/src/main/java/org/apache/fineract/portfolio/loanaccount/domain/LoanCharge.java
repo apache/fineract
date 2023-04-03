@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
@@ -1004,6 +1005,23 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public ChargeTimeType getChargeTimeType() {
         return ChargeTimeType.fromInt(this.chargeTime);
+    }
+
+    /**
+     * Return the effective due date of the loan charge. For installment fee we are using the earliest not fully paid
+     * installment due date
+     *
+     * @return LocalDate
+     */
+    public LocalDate getEffectiveDueDate() {
+        LocalDate dueDate;
+        if (Objects.requireNonNull(getChargeTimeType()) == ChargeTimeType.INSTALMENT_FEE) {
+            LoanInstallmentCharge firstUnpaidInstallment = getUnpaidInstallmentLoanCharge();
+            dueDate = firstUnpaidInstallment != null ? firstUnpaidInstallment.getInstallment().getDueDate() : null;
+        } else {
+            dueDate = getDueLocalDate();
+        }
+        return dueDate;
     }
 
     public LoanChargeData toData() {

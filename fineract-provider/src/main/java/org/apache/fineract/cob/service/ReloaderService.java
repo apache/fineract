@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ReloaderService {
 
     private final List<ReloadService> reloadServices;

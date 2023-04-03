@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.cob.loan;
 
-import static org.apache.fineract.infrastructure.core.service.MeasuringUtil.measure;
+import static org.apache.fineract.infrastructure.core.diagnostics.performance.MeasuringUtil.measure;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

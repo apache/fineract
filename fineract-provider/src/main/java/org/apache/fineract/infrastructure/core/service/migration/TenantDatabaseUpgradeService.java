@@ -29,6 +29,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -108,6 +109,13 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
         log.info("- fineract.tenant.description: {}", fineractProperties.getTenant().getDescription());
         log.info("- fineract.tenant.identifier: {}", fineractProperties.getTenant().getIdentifier());
         log.info("- fineract.tenant.name: {}", fineractProperties.getTenant().getName());
+
+        log.info("- fineract.tenant.username: {}", fineractProperties.getTenant().getReadOnlyUsername());
+        log.info("- fineract.tenant.password: {}",
+                StringUtils.isNotBlank(fineractProperties.getTenant().getReadOnlyPassword()) ? "****" : "");
+        log.info("- fineract.tenant.parameters: {}", fineractProperties.getTenant().getReadOnlyParameters());
+        log.info("- fineract.tenant.name: {}", fineractProperties.getTenant().getReadOnlyName());
+
     }
 
     private void upgradeIndividualTenants() throws LiquibaseException {

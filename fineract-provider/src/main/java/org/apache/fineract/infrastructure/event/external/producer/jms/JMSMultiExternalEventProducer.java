@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.producer.jms;
 
-import static org.apache.fineract.infrastructure.core.service.MeasuringUtil.measure;
+import static org.apache.fineract.infrastructure.core.diagnostics.performance.MeasuringUtil.measure;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -34,6 +35,8 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.messaging.jms.MessageFactory;
 import org.apache.fineract.infrastructure.core.service.HashingService;
@@ -73,8 +76,12 @@ public class JMSMultiExternalEventProducer implements ExternalEventProducer {
     public void sendEvents(Map<Long, List<byte[]>> partitions) throws AcknowledgementTimeoutException {
         Map<Integer, List<byte[]>> indexedPartitions = mapPartitionsToProducers(partitions);
         measure(() -> {
-            List<Future<?>> tasks = sendPartitions(indexedPartitions);
+            List<Pair<Session, MessageProducer>> producersWithSessions = obtainProducers();
+            List<MessageProducer> producers = producersWithSessions.stream().map(Pair::getRight).collect(Collectors.toList());
+            List<Session> sessions = producersWithSessions.stream().map(Pair::getLeft).collect(Collectors.toList());
+            List<Future<?>> tasks = sendPartitions(indexedPartitions, producers);
             waitForSendingCompletion(tasks);
+            closeSessions(sessions);
         }, timeTaken -> {
             if (log.isDebugEnabled()) {
                 int eventCount = partitions.values().stream().map(Collection::size).reduce(0, Integer::sum);
@@ -84,8 +91,20 @@ public class JMSMultiExternalEventProducer implements ExternalEventProducer {
         });
     }
 
-    private List<MessageProducer> obtainProducers() {
-        List<MessageProducer> result = new ArrayList<>();
+    private void closeSessions(List<Session> sessions) {
+        // The sessions retrieved from a CachingConnectionFactory needs to be explicitly closed, otherwise we're making
+        // orphan sessions, leaking memory
+        for (Session session : sessions) {
+            try {
+                session.close();
+            } catch (JMSException e) {
+                log.error("Exception while trying to close sessions", e);
+            }
+        }
+    }
+
+    private List<Pair<Session, MessageProducer>> obtainProducers() {
+        List<Pair<Session, MessageProducer>> result = new ArrayList<>();
         int producerCount = getProducerCount();
         try {
             // No need to close the connection since it's a pooled one
@@ -96,7 +115,7 @@ public class JMSMultiExternalEventProducer implements ExternalEventProducer {
                 // producers
                 Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
                 MessageProducer producer = session.createProducer(destination);
-                result.add(producer);
+                result.add(new ImmutablePair<>(session, producer));
             }
         } catch (JMSException e) {
             throw new RuntimeException("Error while obtaining message producers", e);
@@ -104,8 +123,7 @@ public class JMSMultiExternalEventProducer implements ExternalEventProducer {
         return result;
     }
 
-    private List<Future<?>> sendPartitions(Map<Integer, List<byte[]>> indexedPartitions) {
-        List<MessageProducer> producers = obtainProducers();
+    private List<Future<?>> sendPartitions(Map<Integer, List<byte[]>> indexedPartitions, List<MessageProducer> producers) {
         List<Future<?>> tasks = new ArrayList<>();
         for (Map.Entry<Integer, List<byte[]>> entry : indexedPartitions.entrySet()) {
             Integer producerIndex = entry.getKey();

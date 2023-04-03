@@ -39,6 +39,7 @@ import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -54,7 +55,6 @@ import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.service.InlineExecutorService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -87,7 +87,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     private final TransactionTemplate transactionTemplate;
     private final CustomJobParameterRepository customJobParameterRepository;
     private final PlatformSecurityContext context;
-    private final LoanRepository loanRepository;
+    private final RetrieveLoanIdService retrieveLoanIdService;
     private final FineractProperties fineractProperties;
 
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
@@ -129,7 +129,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     }
 
     private void execute(List<Long> loanIds, String jobName, LocalDate businessDate) {
-        lockLoanAccounts(loanIds);
+        lockLoanAccounts(loanIds, businessDate);
         Job inlineLoanCOBJob;
         try {
             inlineLoanCOBJob = jobLocator.getJob(jobName);
@@ -163,11 +163,11 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
         partitions.forEach(partition -> loanIdAndLastClosedBusinessDates
-                .addAll(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(cobBusinessDate, partition)));
+                .addAll(retrieveLoanIdService.retrieveLoanIdsBehindDateOrNull(cobBusinessDate, partition)));
         return loanIdAndLastClosedBusinessDates;
     }
 
-    private List<LoanAccountLock> getLoanAccountLocks(List<Long> loanIds) {
+    private List<LoanAccountLock> getLoanAccountLocks(List<Long> loanIds, LocalDate businessDate) {
         List<LoanAccountLock> loanAccountLocks = new ArrayList<>();
         List<Long> alreadyLockedLoanIds = new ArrayList<>();
         loanIds.forEach(loanId -> {
@@ -180,7 +180,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
                     alreadyLockedLoanIds.add(loanId);
                 }
             } else {
-                loanAccountLocks.add(new LoanAccountLock(loanId, LockOwner.LOAN_INLINE_COB_PROCESSING));
+                loanAccountLocks.add(new LoanAccountLock(loanId, LockOwner.LOAN_INLINE_COB_PROCESSING, businessDate));
             }
         });
         if (!alreadyLockedLoanIds.isEmpty()) {
@@ -207,13 +207,13 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         return jobParameterMap;
     }
 
-    private void lockLoanAccounts(List<Long> loanIds) {
+    private void lockLoanAccounts(List<Long> loanIds, LocalDate businessDate) {
         transactionTemplate.setPropagationBehavior(PROPAGATION_REQUIRES_NEW);
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
             @Override
             protected void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
-                List<LoanAccountLock> loanAccountLocks = getLoanAccountLocks(loanIds);
+                List<LoanAccountLock> loanAccountLocks = getLoanAccountLocks(loanIds, businessDate);
                 loanAccountLocks.forEach(loanAccountLock -> {
                     loanAccountLock.setNewLockOwner(LockOwner.LOAN_INLINE_COB_PROCESSING);
                     loanAccountLockRepository.save(loanAccountLock);
