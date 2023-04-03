@@ -83,7 +83,8 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             if (prefixTypeEnum != null) {
                 prefixType = AccountNumberFormatEnumerations.accountNumberPrefixType(prefixTypeEnum);
             }
-            return new AccountNumberFormatData(id, accountNumberType, prefixType, prefixCharacter);
+            return new AccountNumberFormatData().setId(id).setAccountType(accountNumberType).setPrefixType(prefixType)
+                    .setPrefixCharacter(prefixCharacter);
         }
     }
 
@@ -123,7 +124,8 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
 
             }
         }
-        return new AccountNumberFormatData(entityAccountTypeOptions, accountNumberPrefixTypeOptions);
+        return new AccountNumberFormatData().setAccountTypeOptions(entityAccountTypeOptions)
+                .setPrefixTypeOptions(accountNumberPrefixTypeOptions);
     }
 
     public void determinePrefixTypesForAccounts(Map<String, List<EnumOptionData>> accountNumberPrefixTypeOptions,

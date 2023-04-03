@@ -26,13 +26,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AccountNumberFormatEnumerations {
-
-    private AccountNumberFormatEnumerations() {
-
-    }
 
     public static final Set<AccountNumberPrefixType> accountNumberPrefixesForClientAccounts = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.CLIENT_TYPE,
@@ -52,6 +55,7 @@ public final class AccountNumberFormatEnumerations {
     public static final Set<AccountNumberPrefixType> accountNumberPrefixesForGroups = Collections
             .unmodifiableSet(new HashSet<>(Collections.singletonList(AccountNumberPrefixType.OFFICE_NAME)));
 
+    @Getter
     public enum AccountNumberPrefixType {
 
         OFFICE_NAME(1, "accountNumberPrefixType.officeName"), CLIENT_TYPE(101,
@@ -66,14 +70,6 @@ public final class AccountNumberFormatEnumerations {
         AccountNumberPrefixType(final Integer value, final String code) {
             this.value = value;
             this.code = code;
-        }
-
-        public Integer getValue() {
-            return this.value;
-        }
-
-        public String getCode() {
-            return this.code;
         }
 
         private static final Map<Integer, AccountNumberPrefixType> intToEnumMap = new HashMap<>();
@@ -98,8 +94,7 @@ public final class AccountNumberFormatEnumerations {
         }
 
         public static AccountNumberPrefixType fromInt(final int i) {
-            final AccountNumberPrefixType type = intToEnumMap.get(Integer.valueOf(i));
-            return type;
+            return intToEnumMap.get(i);
         }
 
         public static int getMinValue() {
@@ -125,9 +120,7 @@ public final class AccountNumberFormatEnumerations {
     }
 
     public static EnumOptionData entityAccountType(final EntityAccountType accountType) {
-        final EnumOptionData optionData = new EnumOptionData(accountType.getValue().longValue(), accountType.getCode(),
-                accountType.toString());
-        return optionData;
+        return new EnumOptionData(accountType.getValue().longValue(), accountType.getCode(), accountType.toString());
     }
 
     public static EnumOptionData accountNumberPrefixType(final Integer accountNumberPrefixTypeId) {
@@ -135,17 +128,16 @@ public final class AccountNumberFormatEnumerations {
     }
 
     public static List<EnumOptionData> accountNumberPrefixType(final AccountNumberPrefixType[] accountNumberPrefixTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<>();
+        final List<EnumOptionData> optionData = new ArrayList<>();
         for (final AccountNumberPrefixType accountNumberPrefixType : accountNumberPrefixTypes) {
-            optionDatas.add(entityAccountType(accountNumberPrefixType));
+            optionData.add(entityAccountType(accountNumberPrefixType));
         }
-        return optionDatas;
+        return optionData;
     }
 
     public static EnumOptionData entityAccountType(final AccountNumberPrefixType accountNumberPrefixType) {
-        final EnumOptionData optionData = new EnumOptionData(accountNumberPrefixType.getValue().longValue(),
-                accountNumberPrefixType.getCode(), accountNumberPrefixType.toString());
-        return optionData;
+        return new EnumOptionData(accountNumberPrefixType.getValue().longValue(), accountNumberPrefixType.getCode(),
+                accountNumberPrefixType.toString());
     }
 
     public static List<EnumOptionData> accountNumberPrefixType(Object[] array) {

@@ -94,7 +94,7 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
 
             final AccountNumberFormat accountNumberFormatForUpdate = this.accountNumberFormatRepository
                     .findOneWithNotFoundDetection(accountNumberFormatId);
-            EntityAccountType accountType = accountNumberFormatForUpdate.getAccountType();
+            EntityAccountType accountType = EntityAccountType.fromInt(accountNumberFormatForUpdate.getAccountTypeEnum());
 
             this.accountNumberFormatDataValidator.validateForUpdate(command.json(), accountType);
 
@@ -105,7 +105,7 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
                 final Integer newValue = command.integerValueSansLocaleOfParameterNamed(AccountNumberFormatConstants.prefixTypeParamName);
                 final AccountNumberPrefixType accountNumberPrefixType = AccountNumberPrefixType.fromInt(newValue);
                 actualChanges.put(AccountNumberFormatConstants.prefixTypeParamName, accountNumberPrefixType);
-                accountNumberFormatForUpdate.setPrefix(accountNumberPrefixType);
+                accountNumberFormatForUpdate.setPrefixEnum(accountNumberPrefixType.getValue());
             }
 
             if (command.isChangeInStringParameterNamed(AccountNumberFormatConstants.prefixCharacterParamName,
