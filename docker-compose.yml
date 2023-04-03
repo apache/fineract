@@ -35,7 +35,7 @@ services:
     ports:
       - "3306:3306"
   fineract-server:
-    image: fineract:latest
+    image: apache/fineract:latest
     volumes:
       - ./fineract-provider/build/data:/data
     healthcheck:
