@@ -1832,4 +1832,20 @@ public class LoanTransactionHelper extends IntegrationTest {
     public PostLoansLoanIdTransactionsResponse undoChargeOffLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "undo-charge-off"));
     }
+
+    public static List<Integer> getLoansByStatusId(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer statusId) {
+        final String GET_LOAN_URL = "/fineract-provider/api/v1/internal/loan/status/" + statusId + "?" + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------GET LOANS BY STATUS---------------------------------------------");
+        final String get = Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_URL, null);
+        return new Gson().fromJson(get, new TypeToken<ArrayList<Integer>>() {}.getType());
+    }
+
+    public static Object setLoanStatusDirectly(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanId, final Integer statusId) {
+        final String POST_LOAN_URL = "/fineract-provider/api/v1/internal/loan/" + loanId + "/status/" + statusId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------POST CHANGE LOAN STATUS DIRECTLY---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, POST_LOAN_URL, "{}", null);
+    }
+
 }

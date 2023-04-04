@@ -86,6 +86,10 @@ public class ClientSavingsIntegrationTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> savingsIds = SavingsAccountHelper.getSavingsByStatusId(requestSpec, responseSpec, 300);
+        savingsIds.forEach(savingsId -> SavingsAccountHelper.setSavingsStatusDirectly(requestSpec, responseSpec, savingsId, 600));
     }
 
     @Test

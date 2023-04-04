@@ -152,6 +152,10 @@ public class ClientLoanIntegrationTest {
         this.businessDateHelper = new BusinessDateHelper();
         this.chargesHelper = new ChargesHelper();
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> loanIds = LoanTransactionHelper.getLoansByStatusId(requestSpec, responseSpec, 300);
+        loanIds.forEach(loanId -> LoanTransactionHelper.setLoanStatusDirectly(requestSpec, responseSpec, loanId, 600));
     }
 
     @Test

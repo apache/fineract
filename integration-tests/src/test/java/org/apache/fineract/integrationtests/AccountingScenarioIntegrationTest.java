@@ -133,6 +133,10 @@ public class AccountingScenarioIntegrationTest {
         this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec, responseSpec);
 
         this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> loanIds = LoanTransactionHelper.getLoansByStatusId(requestSpec, responseSpec, 300);
+        loanIds.forEach(loanId -> LoanTransactionHelper.setLoanStatusDirectly(requestSpec, responseSpec, loanId, 600));
     }
 
     @Test

@@ -915,4 +915,19 @@ public class SavingsAccountHelper {
                 updateGsimJSON(clientID.toString(), groupID.toString(), productID.toString()), "");
     }
 
+    public static List<Integer> getSavingsByStatusId(RequestSpecification requestSpec, ResponseSpecification responseSpec, int statusId) {
+        final String GET_SAVINGS_URL = "/fineract-provider/api/v1/internal/savings/status/" + statusId + "?" + Utils.TENANT_IDENTIFIER;
+        LOG.info("---------------------------------GET SAVINGS BY STATUS---------------------------------------------");
+        final String get = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_URL, null);
+        return new Gson().fromJson(get, new TypeToken<ArrayList<Integer>>() {}.getType());
+    }
+
+    public static Object setSavingsStatusDirectly(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer savingsId, final Integer statusId) {
+        final String POST_SAVINGS_URL = "/fineract-provider/api/v1/internal/savings/" + savingsId + "/status/" + statusId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        LOG.info("---------------------------------POST CHANGE SAVINGS STATUS DIRECTLY---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, POST_SAVINGS_URL, "{}", null);
+    }
+
 }

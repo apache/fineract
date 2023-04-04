@@ -27,6 +27,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -68,6 +69,10 @@ public class SavingsInterestPostingJobIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
         this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> savingsIds = SavingsAccountHelper.getSavingsByStatusId(requestSpec, responseSpec, 300);
+        savingsIds.forEach(savingsId -> SavingsAccountHelper.setSavingsStatusDirectly(requestSpec, responseSpec, savingsId, 600));
     }
 
     @Test

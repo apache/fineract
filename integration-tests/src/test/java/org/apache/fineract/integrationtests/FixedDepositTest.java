@@ -127,6 +127,10 @@ public class FixedDepositTest {
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
 
         this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> savingsIds = SavingsAccountHelper.getSavingsByStatusId(requestSpec, responseSpec, 300);
+        savingsIds.forEach(savingsId -> SavingsAccountHelper.setSavingsStatusDirectly(requestSpec, responseSpec, savingsId, 600));
     }
 
     /***

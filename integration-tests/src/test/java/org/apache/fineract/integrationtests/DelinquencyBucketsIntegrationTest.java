@@ -33,6 +33,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
@@ -83,6 +84,10 @@ public class DelinquencyBucketsIntegrationTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.businessDateHelper = new BusinessDateHelper();
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> loanIds = LoanTransactionHelper.getLoansByStatusId(requestSpec, responseSpec, 300);
+        loanIds.forEach(loanId -> LoanTransactionHelper.setLoanStatusDirectly(requestSpec, responseSpec, loanId, 600));
     }
 
     @Test

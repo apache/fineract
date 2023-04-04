@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
@@ -72,6 +73,10 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest {
         this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> loanIds = LoanTransactionHelper.getLoansByStatusId(requestSpec, responseSpec, 300);
+        loanIds.forEach(loanId -> LoanTransactionHelper.setLoanStatusDirectly(requestSpec, responseSpec, loanId, 600));
     }
 
     @Test

@@ -26,6 +26,7 @@ import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -92,6 +93,10 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     String FIND_ALL_NON_CLOSED_LOANS_BEHIND_BY_LOAN_IDS = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in (100,200,300,303,304) and loan.lastClosedBusinessDate < :cobBusinessDate";
 
     String FIND_ALL_STAYED_LOCKED_BY_LOAN_IDS = "select loan.id, loan.externalId, loan.accountNumber from LoanAccountLock lock left join Loan loan on lock.loanId = loan.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate";
+
+    String FIND_ALL_LOAN_IDS_BY_STATUS_ID = "SELECT loan.id FROM Loan loan WHERE loan.loanStatus = :statusId";
+
+    String UPDATE_STATUS = "UPDATE Loan loan SET loan.loanStatus = :statusId WHERE loan.id = :loanId";
 
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
@@ -206,4 +211,10 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_ALL_STAYED_LOCKED_BY_LOAN_IDS)
     List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
+    @Query(FIND_ALL_LOAN_IDS_BY_STATUS_ID)
+    List<Long> findLoanIdByStatusId(@Param("statusId") Integer statusId);
+
+    @Query(UPDATE_STATUS)
+    @Modifying
+    void updateStatus(@Param("loanId") Long loanId, @Param("statusId") Integer statusId);
 }

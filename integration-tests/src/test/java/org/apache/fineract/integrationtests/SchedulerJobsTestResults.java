@@ -128,6 +128,10 @@ public class SchedulerJobsTestResults {
         clientHelper = new ClientHelper(requestSpec, responseSpec);
         this.businessDateHelper = new BusinessDateHelper();
         this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> loanIds = LoanTransactionHelper.getLoansByStatusId(requestSpec, responseSpec, 300);
+        loanIds.forEach(loanId -> LoanTransactionHelper.setLoanStatusDirectly(requestSpec, responseSpec, loanId, 600));
     }
 
     @AfterEach
@@ -648,9 +652,6 @@ public class SchedulerJobsTestResults {
         Assertions.assertEquals(0, (Integer) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
                 "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
-        this.loanTransactionHelper.undoChargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest());
-        this.loanTransactionHelper.closeRescheduledLoan((long) loanID,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("03 March 2020").locale("en"));
     }
 
     @Test

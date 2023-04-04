@@ -72,6 +72,10 @@ public class DelinquencyAndChargebackIntegrationTest {
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
         loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        // Mark them as closed, to not be picked up by any jobs
+        List<Integer> loanIds = LoanTransactionHelper.getLoansByStatusId(requestSpec, responseSpec, 300);
+        loanIds.forEach(loanId -> LoanTransactionHelper.setLoanStatusDirectly(requestSpec, responseSpec, loanId, 600));
     }
 
     @Test

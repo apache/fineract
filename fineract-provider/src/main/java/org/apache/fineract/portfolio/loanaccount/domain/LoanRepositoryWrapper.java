@@ -258,4 +258,13 @@ public class LoanRepositoryWrapper {
     public Long findIdByExternalId(ExternalId externalId) {
         return this.repository.findIdByExternalId(externalId);
     }
+
+    public List<Long> findLoanIdByStatusId(Integer statusId) {
+        return repository.findLoanIdByStatusId(statusId);
+    }
+
+    @Transactional
+    public void updateStatus(Long loanId, Integer statusId) {
+        repository.updateStatus(loanId, statusId);
+    }
 }

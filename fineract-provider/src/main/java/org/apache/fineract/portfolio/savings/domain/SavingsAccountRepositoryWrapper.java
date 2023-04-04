@@ -175,4 +175,7 @@ public class SavingsAccountRepositoryWrapper {
         }
     }
 
+    public List<Long> findSavingAccountIdByStatus(Integer statusId) {
+        return repository.findSavingAccountIdByStatus(statusId);
+    }
 }
