@@ -418,6 +418,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
         final String currencyCode = loanDTO.getCurrencyCode();
+        final BigDecimal overpaidAmount = loanDTO.getOverpaidAmount();
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
@@ -426,9 +427,24 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final boolean isReversal = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
-        this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate, amount,
-                isReversal);
+        if (BigDecimal.ZERO.compareTo(overpaidAmount) == 0) {
+            helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                    AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                    amount, isReversal);
+        } else if (overpaidAmount.compareTo(amount) > 0) {
+            helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
+                    AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                    amount, isReversal);
+        } else {
+            BigDecimal diff = amount.subtract(overpaidAmount);
+            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, diff, isReversal);
+            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.FUND_SOURCE.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, amount, isReversal);
+            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, overpaidAmount, isReversal);
+        }
+
     }
 
     /**

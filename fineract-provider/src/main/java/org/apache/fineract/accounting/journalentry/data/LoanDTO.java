@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.journalentry.data;
 
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,4 +46,6 @@ public class LoanDTO {
     private boolean markedAsChargeOff;
     @Setter
     private boolean markedAsFraud;
+    @Setter
+    private BigDecimal overpaidAmount;
 }

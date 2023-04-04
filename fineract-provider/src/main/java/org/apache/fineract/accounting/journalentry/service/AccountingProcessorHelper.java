@@ -110,6 +110,7 @@ public class AccountingProcessorHelper {
         boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
         boolean isLoanMarkedAsChargeOff = (Boolean) accountingBridgeData.get("isChargeOff");
         boolean isLoanMarkedAsFraud = (Boolean) accountingBridgeData.get("isFraud");
+        BigDecimal overpaidAmount = (BigDecimal) accountingBridgeData.get("overpaidAmount");
 
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newLoanTransactions");
@@ -164,7 +165,7 @@ public class AccountingProcessorHelper {
         }
 
         return new LoanDTO(loanId, loanProductId, officeId, currencyCode, cashBasedAccountingEnabled, upfrontAccrualBasedAccountingEnabled,
-                periodicAccrualBasedAccountingEnabled, newLoanTransactions, isLoanMarkedAsChargeOff, isLoanMarkedAsFraud);
+                periodicAccrualBasedAccountingEnabled, newLoanTransactions, isLoanMarkedAsChargeOff, isLoanMarkedAsFraud, overpaidAmount);
     }
 
     public SavingsDTO populateSavingsDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -786,7 +787,7 @@ public class AccountingProcessorHelper {
         return this.officeRepository.getReferenceById(officeId);
     }
 
-    private void createCreditJournalEntryOrReversalForLoan(final Office office, final String currencyCode, final int accountMappingTypeId,
+    public void createCreditJournalEntryOrReversalForLoan(final Office office, final String currencyCode, final int accountMappingTypeId,
             final Long loanProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal) {
         final GLAccount account = getLinkedGLAccountForLoanProduct(loanProductId, accountMappingTypeId, paymentTypeId);

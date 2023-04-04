@@ -4492,6 +4492,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         accountingBridgeData.put("isAccountTransfer", isAccountTransfer);
         accountingBridgeData.put("isChargeOff", isChargedOff());
         accountingBridgeData.put("isFraud", isFraud());
+        accountingBridgeData.put("overpaidAmount", calculateTotalOverpayment().getAmount().abs());
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
