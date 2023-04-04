@@ -39,7 +39,7 @@ services:
     ports:
       - "5432:5432"
   fineract-server:
-    image: fineract:latest
+    image: apache/fineract:latest
     volumes:
       - ./fineract-provider/build/data:/data
     healthcheck:
