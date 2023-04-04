@@ -191,6 +191,7 @@ public class FineractProperties {
         private String brokerUsername;
         private String brokerPassword;
         private int producerCount;
+        private boolean asyncSendEnabled;
 
         public boolean isBrokerPasswordProtected() {
             return StringUtils.isNotBlank(brokerUsername) || StringUtils.isNotBlank(brokerPassword);

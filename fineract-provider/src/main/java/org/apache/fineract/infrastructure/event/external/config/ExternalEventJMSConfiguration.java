@@ -43,6 +43,7 @@ public class ExternalEventJMSConfiguration {
         FineractExternalEventsProducerJmsProperties jmsProps = fineractProperties.getEvents().getExternal().getProducer().getJms();
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
         connectionFactory.setBrokerURL(jmsProps.getBrokerUrl());
+        connectionFactory.setUseAsyncSend(jmsProps.isAsyncSendEnabled());
         connectionFactory.setTrustAllPackages(true);
         if (jmsProps.isBrokerPasswordProtected()) {
             connectionFactory.setUserName(jmsProps.getBrokerUsername());
