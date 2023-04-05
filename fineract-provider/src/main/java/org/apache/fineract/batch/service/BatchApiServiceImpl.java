@@ -146,7 +146,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         // 1. run current node
         BatchResponse response = executeRequest(request, uriInfo);
         responseList.add(response);
-        if (response.getStatusCode() == 200) {
+        if (response.getStatusCode() != null && response.getStatusCode() == 200) {
             requestNode.getChildRequests().forEach(childNode -> {
                 BatchRequest resolvedChildRequest;
                 try {
@@ -306,7 +306,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         BatchResponse errResponse = new BatchResponse();
 
         for (BatchResponse res : responseList) {
-            if (!res.getStatusCode().equals(200)) {
+            if (res.getStatusCode() == null || !res.getStatusCode().equals(200)) {
                 errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
                 errResponse.setRequestId(res.getRequestId());
                 if (statusCode == -1) {
