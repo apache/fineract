@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
@@ -47,6 +48,8 @@ public class SetLoanDelinquencyTagsTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        // Set DEFAULT action context to use the business step instead of COB date
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         log.debug("Run job for date {}", businessDate);
