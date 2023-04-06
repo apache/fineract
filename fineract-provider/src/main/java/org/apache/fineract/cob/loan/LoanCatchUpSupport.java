@@ -16,18 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.service;
+package org.apache.fineract.cob.loan;
 
-import java.util.List;
-import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.StepExecution;
 
-public interface LoanAccountLockService {
+public interface LoanCatchUpSupport {
 
-    List<LoanAccountLock> getLockedLoanAccountByPage(int page, int limit);
+    default boolean isCatchUp(StepContribution contribution) {
+        return isCatchUp(contribution.getStepExecution());
+    }
 
-    boolean isLoanHardLocked(Long loanId);
-
-    boolean isLoanSoftLocked(Long loanId);
-
-    void updateCobAndRemoveLocks();
+    default boolean isCatchUp(StepExecution execution) {
+        return "true".equalsIgnoreCase(execution.getExecutionContext().getString(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME, "false"));
+    }
 }

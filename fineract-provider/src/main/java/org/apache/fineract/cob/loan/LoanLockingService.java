@@ -26,7 +26,7 @@ import org.apache.fineract.cob.domain.LockOwner;
 
 public interface LoanLockingService {
 
-    void applySoftLock(LocalDate lastClosedBusinessDate, LoanCOBParameter loanCOBParameter);
+    void applySoftLock(LocalDate lastClosedBusinessDate, LoanCOBParameter loanCOBParameter, boolean isCatchUp);
 
     void upgradeLock(List<Long> accountsToLock, LockOwner lockOwner);
 

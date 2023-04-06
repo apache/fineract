@@ -37,7 +37,6 @@ import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.service.JobStarter;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobLocator;
@@ -52,7 +51,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorService {
 
-    private final LoanRepository loanRepository;
     private final JobLocator jobLocator;
     private final ScheduledJobDetailRepository scheduledJobDetailRepository;
     private final JobStarter jobStarter;
@@ -67,6 +65,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
             LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
             List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveLoanIdService
                     .retrieveLoanIdsOldestCobProcessed(cobBusinessDate);
+
             LocalDate oldestCOBProcessedDate = !loanIdAndLastClosedBusinessDate.isEmpty()
                     ? loanIdAndLastClosedBusinessDate.get(0).getLastClosedBusinessDate()
                     : cobBusinessDate;

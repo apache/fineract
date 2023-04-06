@@ -41,7 +41,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ApplyLoanLockTasklet implements Tasklet {
+public class ApplyLoanLockTasklet implements Tasklet, LoanCatchUpSupport {
 
     private final FineractProperties fineractProperties;
     private final LoanLockingService loanLockingService;
@@ -57,8 +57,8 @@ public class ApplyLoanLockTasklet implements Tasklet {
                 || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
-            loanIds = new ArrayList<>(
-                    retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter));
+            loanIds = new ArrayList<>(retrieveLoanIdService
+                    .retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter, isCatchUp(contribution)));
         }
         List<List<Long>> loanIdPartitions = Lists.partition(loanIds, getInClauseParameterSizeLimit());
         List<LoanAccountLock> accountLocks = new ArrayList<>();

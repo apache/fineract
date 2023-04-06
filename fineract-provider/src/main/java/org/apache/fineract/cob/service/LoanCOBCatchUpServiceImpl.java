@@ -45,6 +45,13 @@ public class LoanCOBCatchUpServiceImpl implements LoanCOBCatchUpService {
     private final JobExplorer jobExplorer;
     private final RetrieveLoanIdService retrieveLoanIdService;
 
+    private final LoanAccountLockService accountLockService;
+
+    @Override
+    public void unlockHardLockedLoans() {
+        accountLockService.updateCobAndRemoveLocks();
+    }
+
     @Override
     public OldestCOBProcessedLoanDTO getOldestCOBProcessedLoan() {
         List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveLoanIdService

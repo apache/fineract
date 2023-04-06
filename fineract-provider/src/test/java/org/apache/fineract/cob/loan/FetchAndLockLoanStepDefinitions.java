@@ -53,6 +53,8 @@ public class FetchAndLockLoanStepDefinitions implements En {
     StepContribution contribution;
     ArgumentCaptor<LocalDate> dateValueCaptor = ArgumentCaptor.forClass(LocalDate.class);
     ArgumentCaptor<LoanCOBParameter> loanCOBParameterValueCaptor = ArgumentCaptor.forClass(LoanCOBParameter.class);
+
+    ArgumentCaptor<Boolean> isCatchUpParameterCaptor = ArgumentCaptor.forClass(Boolean.class);
     private LockLoanTasklet lockLoanTasklet;
     private String action;
     private RepeatStatus result;
@@ -115,44 +117,52 @@ public class FetchAndLockLoanStepDefinitions implements En {
             if ("empty steps".equals(action)) {
                 assertEquals(RepeatStatus.FINISHED, result);
             } else if ("good".equals(action)) {
-                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture());
+                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture(),
+                        isCatchUpParameterCaptor.capture());
                 assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), dateValueCaptor.getValue());
                 assertEquals(1L, loanCOBParameterValueCaptor.getValue().getMinLoanId());
                 assertEquals(3L, loanCOBParameterValueCaptor.getValue().getMaxLoanId());
                 assertEquals(RepeatStatus.FINISHED, result);
+                assertEquals(false, isCatchUpParameterCaptor.getValue());
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution()
                         .getExecutionContext().get(LoanCOBConstant.LOAN_COB_PARAMETER);
                 assertEquals(2, loanCOBParameter.getMaxLoanId() - loanCOBParameter.getMinLoanId());
                 assertEquals(1L, loanCOBParameter.getMinLoanId());
                 assertEquals(3L, loanCOBParameter.getMaxLoanId());
             } else if ("soft lock".equals(action)) {
-                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture());
+                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture(),
+                        isCatchUpParameterCaptor.capture());
                 assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), dateValueCaptor.getValue());
                 assertEquals(1L, loanCOBParameterValueCaptor.getValue().getMinLoanId());
                 assertEquals(3L, loanCOBParameterValueCaptor.getValue().getMaxLoanId());
                 assertEquals(RepeatStatus.FINISHED, result);
+                assertEquals(false, isCatchUpParameterCaptor.getValue());
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution()
                         .getExecutionContext().get(LoanCOBConstant.LOAN_COB_PARAMETER);
                 assertEquals(2, loanCOBParameter.getMaxLoanId() - loanCOBParameter.getMinLoanId());
                 assertEquals(1L, loanCOBParameter.getMinLoanId());
                 assertEquals(3L, loanCOBParameter.getMaxLoanId());
             } else if ("inline cob".equals(action)) {
-                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture());
+                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture(),
+                        isCatchUpParameterCaptor.capture());
                 assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), dateValueCaptor.getValue());
                 assertEquals(1L, loanCOBParameterValueCaptor.getValue().getMinLoanId());
                 assertEquals(3L, loanCOBParameterValueCaptor.getValue().getMaxLoanId());
                 assertEquals(RepeatStatus.FINISHED, result);
+                assertEquals(false, isCatchUpParameterCaptor.getValue());
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution()
                         .getExecutionContext().get(LoanCOBConstant.LOAN_COB_PARAMETER);
                 assertEquals(2, loanCOBParameter.getMaxLoanId() - loanCOBParameter.getMinLoanId());
                 assertEquals(1L, loanCOBParameter.getMinLoanId());
                 assertEquals(3L, loanCOBParameter.getMaxLoanId());
             } else if ("chunk processing".equals(action)) {
-                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture());
+                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture(),
+                        isCatchUpParameterCaptor.capture());
                 assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), dateValueCaptor.getValue());
                 assertEquals(1L, loanCOBParameterValueCaptor.getValue().getMinLoanId());
                 assertEquals(3L, loanCOBParameterValueCaptor.getValue().getMaxLoanId());
                 assertEquals(RepeatStatus.FINISHED, result);
+                assertEquals(false, isCatchUpParameterCaptor.getValue());
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution()
                         .getExecutionContext().get(LoanCOBConstant.LOAN_COB_PARAMETER);
                 assertEquals(2, loanCOBParameter.getMaxLoanId() - loanCOBParameter.getMinLoanId());

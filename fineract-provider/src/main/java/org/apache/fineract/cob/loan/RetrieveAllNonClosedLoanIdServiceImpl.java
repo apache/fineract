@@ -34,8 +34,12 @@ public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdServ
     private final LoanRepository loanRepository;
 
     @Override
-    public LoanCOBParameter retrieveMinAndMaxLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate) {
-        return loanRepository.findMinAndMaxNonClosedLoanIdsByLastClosedBusinessDate(businessDate.minusDays(numberOfDays));
+    public LoanCOBParameter retrieveMinAndMaxLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate, boolean isCatchUp) {
+        if (isCatchUp) {
+            return loanRepository.findMinAndMaxNonClosedLoanIdsByLastClosedBusinessDateNotNull(businessDate.minusDays(numberOfDays));
+        } else {
+            return loanRepository.findMinAndMaxNonClosedLoanIdsByLastClosedBusinessDate(businessDate.minusDays(numberOfDays));
+        }
     }
 
     @Override
@@ -49,10 +53,17 @@ public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdServ
     }
 
     @Override
-    public List<Long> retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(LoanCOBParameter loanCOBParameter) {
-        return loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
-                loanCOBParameter.getMaxLoanId(),
-                ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE).minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND));
+    public List<Long> retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(LoanCOBParameter loanCOBParameter,
+            boolean isCatchUp) {
+        if (isCatchUp) {
+            return loanRepository.findAllNonClosedLoansByLastClosedBusinessDateNotNullAndMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
+                    loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)
+                            .minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND));
+        } else {
+            return loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
+                    loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)
+                            .minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND));
+        }
     }
 
     @Override

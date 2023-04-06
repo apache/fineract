@@ -23,6 +23,8 @@ import org.apache.fineract.cob.data.OldestCOBProcessedLoanDTO;
 
 public interface LoanCOBCatchUpService {
 
+    void unlockHardLockedLoans();
+
     OldestCOBProcessedLoanDTO getOldestCOBProcessedLoan();
 
     void executeLoanCOBCatchUp();
