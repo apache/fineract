@@ -38,9 +38,11 @@ import org.apache.fineract.integrationtests.support.instancemode.ConfigureInstan
 import org.apache.fineract.integrationtests.support.instancemode.InstanceModeSupportExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+@Order(1)
 @ExtendWith(InstanceModeSupportExtension.class)
 public class LoanCOBCatchUpInstanceModeIntegrationTest {
 
