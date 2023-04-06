@@ -59,6 +59,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
@@ -142,6 +143,23 @@ public final class Utils {
             LOG.error("{} still has not returned HTTP 200, giving up (last) body: {}", HEALTH_URL, response.prettyPrint());
             fail(HEALTH_URL + " returned " + response.prettyPrint());
         }
+    }
+
+    /**
+     * Wait until the given condition is true or the maxRun is reached.
+     *
+     * @param maxRun
+     *            max number of times to run the condition
+     * @param waitInMs
+     *            wait time between evaluation in milliseconds
+     * @param waitCondition
+     *            condition to evaluate
+     */
+    public static void conditionalSleepWithMaxWait(int maxRun, int waitInMs, Supplier<Boolean> waitCondition) {
+        do {
+            sleep(waitInMs);
+            maxRun--;
+        } while (maxRun > 0 && waitCondition.get());
     }
 
     private static void sleep(int seconds) {

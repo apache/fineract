@@ -31,7 +31,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LockLoanTasklet implements Tasklet {
+public class LockLoanTasklet implements Tasklet, LoanCatchUpSupport {
 
     private final LoanLockingService loanLockingService;
 
@@ -47,7 +47,7 @@ public class LockLoanTasklet implements Tasklet {
                 || (Objects.isNull(loanCOBParameter.getMinLoanId()) && Objects.isNull(loanCOBParameter.getMaxLoanId()))) {
             loanCOBParameter = new LoanCOBParameter(0L, 0L);
         }
-        loanLockingService.applySoftLock(lastClosedBusinessDate, loanCOBParameter);
+        loanLockingService.applySoftLock(lastClosedBusinessDate, loanCOBParameter, isCatchUp(contribution));
 
         return RepeatStatus.FINISHED;
     }

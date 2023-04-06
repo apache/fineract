@@ -30,7 +30,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LoanIdParameterTasklet implements Tasklet {
+public class LoanIdParameterTasklet implements Tasklet, LoanCatchUpSupport {
 
     private final RetrieveLoanIdService retrieveLoanIdService;
 
@@ -40,7 +40,7 @@ public class LoanIdParameterTasklet implements Tasklet {
                 .get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);
         LocalDate businessDate = LocalDate.parse(Objects.requireNonNull(businessDateParameter));
         LoanCOBParameter minAndMaxLoanId = retrieveLoanIdService.retrieveMinAndMaxLoanIdsNDaysBehind(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND,
-                businessDate);
+                businessDate, isCatchUp(contribution));
         if (Objects.isNull(minAndMaxLoanId)
                 || (Objects.isNull(minAndMaxLoanId.getMinLoanId()) && Objects.isNull(minAndMaxLoanId.getMaxLoanId()))) {
             contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.LOAN_COB_PARAMETER,

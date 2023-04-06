@@ -29,7 +29,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 
-public class LoanItemReader extends AbstractLoanItemReader {
+public class LoanItemReader extends AbstractLoanItemReader implements LoanCatchUpSupport {
 
     private final RetrieveLoanIdService retrieveLoanIdService;
 
@@ -49,7 +49,8 @@ public class LoanItemReader extends AbstractLoanItemReader {
                 || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
-            loanIds = retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter);
+            loanIds = retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter,
+                    isCatchUp(stepExecution));
         }
         setRemainingData(new ArrayList<>(loanIds));
     }

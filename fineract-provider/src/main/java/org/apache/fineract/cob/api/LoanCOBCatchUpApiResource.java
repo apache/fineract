@@ -57,7 +57,6 @@ public class LoanCOBCatchUpApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanCOBCatchUpApiResourceSwagger.GetOldestCOBProcessedLoanResponse.class))) })
     public String getOldestCOBProcessedLoan() {
         OldestCOBProcessedLoanDTO response = loanCOBCatchUpService.getOldestCOBProcessedLoan();
-
         return oldestCOBProcessedLoanSerializeService.serialize(response);
     }
 
@@ -73,6 +72,7 @@ public class LoanCOBCatchUpApiResource {
         if (loanCOBCatchUpService.isCatchUpRunning().isCatchUpRunning()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
+        loanCOBCatchUpService.unlockHardLockedLoans();
         OldestCOBProcessedLoanDTO oldestCOBProcessedLoan = loanCOBCatchUpService.getOldestCOBProcessedLoan();
         if (oldestCOBProcessedLoan.getCobProcessedDate().equals(oldestCOBProcessedLoan.getCobBusinessDate())) {
             return Response.status(Response.Status.OK).build();

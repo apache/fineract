@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -37,6 +38,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Profile("test")
 @Component
@@ -64,7 +66,7 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response placeLockOnLoanAccount(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
-            @PathParam("lockOwner") String lockOwner) {
+            @PathParam("lockOwner") String lockOwner, @RequestBody(required = false) String error) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
         log.warn("Placing lock on loan: {}", loanId);
@@ -73,7 +75,12 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
 
         LoanAccountLock loanAccountLock = new LoanAccountLock(loanId, LockOwner.valueOf(lockOwner),
                 ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
+
+        if (StringUtils.isNotBlank(error)) {
+            loanAccountLock.setError(error, error);
+        }
         loanAccountLockRepository.save(loanAccountLock);
         return Response.status(Response.Status.ACCEPTED).build();
     }
+
 }

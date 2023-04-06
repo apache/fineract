@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.loans;
 
+import java.util.Objects;
 import org.apache.fineract.client.models.GetOldestCOBProcessedLoanResponse;
 import org.apache.fineract.client.models.IsCatchUpRunningResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -26,6 +27,11 @@ import retrofit2.Response;
 public class LoanCOBCatchUpHelper extends IntegrationTest {
 
     public LoanCOBCatchUpHelper() {}
+
+    public boolean isLoanCOBCatchUpRunning() {
+        Response<IsCatchUpRunningResponse> response = executeGetLoanCatchUpStatus();
+        return Boolean.TRUE.equals(Objects.requireNonNull(response.body()).getIsCatchUpRunning());
+    }
 
     public Response<Void> executeLoanCOBCatchUp() {
         return okR(fineract().loanCobCatchUpApi.executeLoanCOBCatchUp());
@@ -38,4 +44,5 @@ public class LoanCOBCatchUpHelper extends IntegrationTest {
     public Response<IsCatchUpRunningResponse> executeGetLoanCatchUpStatus() {
         return okR(fineract().loanCobCatchUpApi.isCatchUpRunning());
     }
+
 }
