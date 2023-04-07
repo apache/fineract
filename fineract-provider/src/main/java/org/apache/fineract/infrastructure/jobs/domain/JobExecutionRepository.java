@@ -24,19 +24,32 @@ import static org.springframework.batch.core.BatchStatus.STARTED;
 import static org.springframework.batch.core.BatchStatus.STARTING;
 import static org.springframework.batch.core.BatchStatus.UNKNOWN;
 
+import com.google.gson.Gson;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class JobExecutionRepository {
+public class JobExecutionRepository implements InitializingBean {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final FineractProperties fineractProperties;
+    private final DatabaseTypeResolver databaseTypeResolver;
+    private final GoogleGsonSerializerHelper gsonFactory;
+    private Gson gson;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.gson = gsonFactory.createSimpleGson();
+    }
 
     public List<String> getStuckJobNames(NamedParameterJdbcTemplate jdbcTemplate) {
         int threshold = fineractProperties.getJob().getStuckRetryThreshold();
@@ -180,4 +193,32 @@ public class JobExecutionRepository {
                 """, Map.of("statuses", List.of(STARTED.name(), STARTING.name()), "jobName", jobName, "completedStatus", COMPLETED.name(),
                 "parameterKeyName", parameterKeyName, "parameterValue", parameterValue), Long.class);
     }
+
+    public List<Long> getRunningJobsIdsByExecutionParameter(String jobName, String jobCustomParamKeyName, String parameterKeyName,
+            String parameterValue) {
+        final StringBuilder sqlStatementBuilder = new StringBuilder();
+        String jsonString = gson.toJson(new JobParameterDTO(parameterKeyName, parameterValue));
+        sqlStatementBuilder.append(
+                "SELECT bje.JOB_EXECUTION_ID FROM BATCH_JOB_INSTANCE bji INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID INNER JOIN BATCH_JOB_EXECUTION_PARAMS bjep ON bje.JOB_EXECUTION_ID = bjep.JOB_EXECUTION_ID"
+                        + " WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bjep.KEY_NAME = :jobCustomParamKeyName AND bjep.LONG_VAL IN ("
+                        + getSubQueryForCustomJobParameters()
+                        + ") AND bje.JOB_INSTANCE_ID NOT IN (SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID"
+                        + " WHERE bje.STATUS = :completedStatus AND bji.JOB_NAME = :jobName)");
+        return namedParameterJdbcTemplate.queryForList(
+                sqlStatementBuilder.toString(), Map.of("statuses", List.of(STARTED.name(), STARTING.name()), "jobName", jobName,
+                        "completedStatus", COMPLETED.name(), "jobCustomParamKeyName", jobCustomParamKeyName, "jsonString", jsonString),
+                Long.class);
+    }
+
+    private String getSubQueryForCustomJobParameters() {
+        if (databaseTypeResolver.isMySQL()) {
+            return "SELECT cjp.id FROM batch_custom_job_parameters cjp WHERE JSON_CONTAINS(cjp.parameter_json,:jsonString)";
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return "SELECT cjp.id FROM (SELECT id,json_array_elements(parameter_json) AS json_data FROM batch_custom_job_parameters) AS cjp WHERE (cjp.json_data ::jsonb @> :jsonString ::jsonb)";
+        } else {
+            throw new IllegalStateException("Database type is not supported for json query " + databaseTypeResolver.databaseType());
+        }
+
+    }
+
 }

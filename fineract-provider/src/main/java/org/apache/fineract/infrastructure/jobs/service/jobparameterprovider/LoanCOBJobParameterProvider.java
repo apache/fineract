@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
-import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
@@ -58,10 +57,9 @@ public class LoanCOBJobParameterProvider extends AbstractJobParameterProvider im
     @Transactional
     public Map<String, JobParameter> provide(Set<JobParameterDTO> jobParameterDTOSet) {
         Map<String, JobParameter> jobParameterMap = new HashMap<>();
-        CustomJobParameter customJobParameter = new CustomJobParameter();
-        customJobParameter.setParameterJson(gson.toJson(getJobParameterDTOListWithCorrectBusinessDate(jobParameterDTOSet)));
-        CustomJobParameter savedCustomJobParameter = customJobParameterRepository.saveAndFlush(customJobParameter);
-        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(savedCustomJobParameter.getId()));
+        Long customJobParameterId = customJobParameterRepository
+                .save(gson.toJson(getJobParameterDTOListWithCorrectBusinessDate(jobParameterDTOSet)));
+        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(customJobParameterId));
         return jobParameterMap;
     }
 
