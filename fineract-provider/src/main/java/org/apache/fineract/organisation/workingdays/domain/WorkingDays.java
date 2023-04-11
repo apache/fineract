@@ -23,10 +23,13 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
 
+@Getter
 @Entity
 @Table(name = "m_working_days")
 public class WorkingDays extends AbstractPersistableCustom {
@@ -34,6 +37,7 @@ public class WorkingDays extends AbstractPersistableCustom {
     @Column(name = "recurrence", length = 100, nullable = true)
     private String recurrence;
 
+    @Setter
     @Column(name = "repayment_rescheduling_enum", nullable = false)
     private Integer repaymentReschedulingType;
 
@@ -53,32 +57,6 @@ public class WorkingDays extends AbstractPersistableCustom {
         this.repaymentReschedulingType = repaymentReschedulingType;
         this.extendTermForDailyRepayments = extendTermForDailyRepayments;
         this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
-    }
-
-    /**
-     * @return the recurrence
-     */
-    public String getRecurrence() {
-        return this.recurrence;
-    }
-
-    /**
-     * @return the repaymentReschedulingType
-     */
-    public Integer getRepaymentReschedulingType() {
-        return this.repaymentReschedulingType;
-    }
-
-    public void setRepaymentReschedulingType(Integer repaymentReschedulingType) {
-        this.repaymentReschedulingType = repaymentReschedulingType;
-    }
-
-    public Boolean getExtendTermForDailyRepayments() {
-        return this.extendTermForDailyRepayments;
-    }
-
-    public Boolean getExtendTermForRepaymentsOnHolidays() {
-        return this.extendTermForRepaymentsOnHolidays;
     }
 
     public Map<String, Object> update(final JsonCommand command) {

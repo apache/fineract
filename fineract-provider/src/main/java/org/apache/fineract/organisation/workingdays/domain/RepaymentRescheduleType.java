@@ -20,7 +20,9 @@ package org.apache.fineract.organisation.workingdays.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 
+@Getter
 public enum RepaymentRescheduleType {
 
     INVALID(0, "RepaymentRescheduleType.invalid"), SAME_DAY(1, "RepaymentRescheduleType.same.day"), MOVE_TO_NEXT_WORKING_DAY(2,
@@ -35,14 +37,6 @@ public enum RepaymentRescheduleType {
     RepaymentRescheduleType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
     }
 
     public boolean isMoveToNextRepaymentDay() {
