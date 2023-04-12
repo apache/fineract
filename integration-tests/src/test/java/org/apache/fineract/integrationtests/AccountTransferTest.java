@@ -44,6 +44,7 @@ import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
@@ -53,6 +54,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +62,7 @@ import org.slf4j.LoggerFactory;
  * JUnit Test Cases for Account Transfer for.
  */
 @SuppressWarnings({ "rawtypes", "unused" })
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class AccountTransferTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountTransferTest.class);

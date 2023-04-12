@@ -349,9 +349,9 @@ public class LoanTransactionHelper extends IntegrationTest {
                 getDisburseLoanAsJSON(date, null, netDisbursalAmount));
     }
 
-    public HashMap disburseLoan(final String date, final Integer loanID, final String netDisbursalAmount, final String externalId) {
+    public HashMap disburseLoan(final String date, final Integer loanID, final String transactionAmount, final String externalId) {
         return (HashMap) performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
-                getDisburseLoanAsJSON(date, null, netDisbursalAmount, externalId), "");
+                getDisburseLoanAsJSON(date, transactionAmount, null, externalId), "");
     }
 
     public HashMap disburseLoanWithTransactionAmount(final String date, final Integer loanID, final String transactionAmount) {
@@ -1741,6 +1741,10 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loans.stateTransitions1(loanExternalId, request, "reject"));
     }
 
+    public PostLoansLoanIdResponse rejectLoan(Long loanId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions(loanId, request, "reject"));
+    }
+
     public PostLoansLoanIdResponse withdrawnByApplicantLoan(String loanExternalId, PostLoansLoanIdRequest request) {
         return ok(fineract().loans.stateTransitions1(loanExternalId, request, "withdrawnByApplicant"));
     }
@@ -1831,5 +1835,13 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public PostLoansLoanIdTransactionsResponse undoChargeOffLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "undo-charge-off"));
+    }
+
+    public static List<Integer> getLoanIdsByStatusId(RequestSpecification requestSpec, ResponseSpecification responseSpec,
+            Integer statusId) {
+        final String GET_LOAN_URL = "/fineract-provider/api/v1/internal/loan/status/" + statusId + "?" + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------GET LOANS BY STATUS---------------------------------------------");
+        final String get = Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_URL, null);
+        return new Gson().fromJson(get, new TypeToken<ArrayList<Integer>>() {}.getType());
     }
 }

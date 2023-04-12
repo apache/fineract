@@ -60,6 +60,7 @@ import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProd
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDepositAccountHelper;
 import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDepositAccountStatusChecker;
@@ -70,10 +71,12 @@ import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unchecked" })
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class AccountingScenarioIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountingScenarioIntegrationTest.class);

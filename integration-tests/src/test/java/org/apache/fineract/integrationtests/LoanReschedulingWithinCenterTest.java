@@ -51,14 +51,17 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanReschedulingWithinCenterTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
@@ -259,9 +262,9 @@ public class LoanReschedulingWithinCenterTest {
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan, null, null);
 
-        Calendar seondTrancheDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        seondTrancheDate.add(Calendar.MONTH, 1);
-        String secondDisbursement = dateFormat.format(seondTrancheDate.getTime());
+        Calendar secondTrancheDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        secondTrancheDate.add(Calendar.DAY_OF_MONTH, -7);
+        String secondDisbursement = dateFormat.format(secondTrancheDate.getTime());
 
         // CREATE TRANCHES
         List<HashMap> createTranches = new ArrayList<>();
@@ -299,11 +302,8 @@ public class LoanReschedulingWithinCenterTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
-        // DISBURSE A FIRST TRANCHE
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursementDate, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        // DISBURSE THE FIRST TRANCHE
+        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursementDate, loanID, "5000");
 
         LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
         Calendar todaysdate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -322,6 +322,9 @@ public class LoanReschedulingWithinCenterTest {
         // VERIFY THE INTEREST
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
         assertEquals("41.05", String.valueOf(interestDue));
+
+        // DISBURSE THE SECOND TRANCHE (for let the loan test lifecycle callback to close the loan
+        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(secondDisbursement, loanID, "5000");
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,

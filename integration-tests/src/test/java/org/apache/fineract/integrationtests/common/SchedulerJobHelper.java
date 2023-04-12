@@ -172,26 +172,21 @@ public class SchedulerJobHelper extends IntegrationTest {
 
         // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
         // jobRunStartTime >= beforeExecuteTime (or timeout)
-        await().atMost(timeout).pollInterval(pause).until(jobLastRunHistorySupplier(jobId), lastRunHistory -> {
-            String jobRunStartText = lastRunHistory.get("jobRunStartTime");
-            if (jobRunStartText == null) {
-                return false;
-            }
-            Instant jobRunStartTime = df.parse(jobRunStartText, Instant::from);
-            return jobRunStartTime.equals(beforeExecuteTime) || jobRunStartTime.isAfter(beforeExecuteTime);
-        });
-
-        // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
         // jobRunEndTime to be both set and >= jobRunStartTime (or timeout)
         Map<String, String> finalLastRunHistory = await().atMost(timeout).pollInterval(pause).until(jobLastRunHistorySupplier(jobId),
                 lastRunHistory -> {
+                    String jobRunStartText = lastRunHistory.get("jobRunStartTime");
+                    if (jobRunStartText == null) {
+                        return false;
+                    }
                     String jobRunEndText = lastRunHistory.get("jobRunEndTime");
                     if (jobRunEndText == null) {
                         return false;
                     }
+                    Instant jobRunStartTime = df.parse(jobRunStartText, Instant::from);
                     Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
-                    Instant jobRunStartTime = df.parse(lastRunHistory.get("jobRunStartTime"), Instant::from);
-                    return jobRunEndTime.equals(jobRunStartTime) || jobRunEndTime.isAfter(jobRunStartTime);
+                    return (jobRunStartTime.equals(beforeExecuteTime) || jobRunStartTime.isAfter(beforeExecuteTime))
+                            && (jobRunEndTime.equals(jobRunStartTime) || jobRunEndTime.isAfter(jobRunStartTime));
                 });
 
         // Verify triggerType

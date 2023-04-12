@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,7 @@ import org.slf4j.LoggerFactory;
  * Client Savings Integration Test for checking Savings Application.
  */
 @SuppressWarnings({ "rawtypes" })
+@Order(2)
 public class ClientSavingsIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientSavingsIntegrationTest.class);
