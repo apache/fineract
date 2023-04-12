@@ -421,7 +421,7 @@ final class LoansApiResourceSwagger {
                 @Schema(example = "1")
                 public Integer id;
                 @Schema(example = "000000001")
-                public Long accountNo;
+                public String accountNo;
             }
 
             static final class GetLoansLoanIdOverdueCharges {
@@ -993,7 +993,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String externalId;
         @Schema(example = "000000001")
-        public Long accountNo;
+        public String accountNo;
         public GetLoansLoanIdStatus status;
         @Schema(example = "false")
         public boolean disallowExpectedDisbursements;

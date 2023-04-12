@@ -520,7 +520,7 @@ public class GlobalConfigurationHelper {
         HashMap<String, Object> purgeProcessCommandDaysDefault = new HashMap<>();
         purgeProcessCommandDaysDefault.put("id", 51);
         purgeProcessCommandDaysDefault.put("name", "purge-processed-commands-older-than-days");
-        purgeProcessCommandDaysDefault.put("value", 0);
+        purgeProcessCommandDaysDefault.put("value", 30);
         purgeProcessCommandDaysDefault.put("enabled", false);
         purgeProcessCommandDaysDefault.put("trapDoor", false);
         defaults.add(purgeProcessCommandDaysDefault);
@@ -545,7 +545,7 @@ public class GlobalConfigurationHelper {
         reportExportS3FolderName.put("id", 54);
         reportExportS3FolderName.put("name", "report-export-s3-folder-name");
         reportExportS3FolderName.put("value", 0);
-        reportExportS3FolderName.put("enabled", false);
+        reportExportS3FolderName.put("enabled", true);
         reportExportS3FolderName.put("trapDoor", false);
         defaults.add(reportExportS3FolderName);
 

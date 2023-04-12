@@ -76,6 +76,7 @@ import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
@@ -83,7 +84,9 @@ import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHel
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class ExternalIdSupportIntegrationTest extends IntegrationTest {
 
     private ResponseSpecification responseSpec;
@@ -849,6 +852,7 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
 
     @Test
     public void loan() {
+
         GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 50, true);
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
         new BusinessDateHelper().updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())

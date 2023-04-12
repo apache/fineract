@@ -93,6 +93,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_ALL_STAYED_LOCKED_BY_LOAN_IDS = "select loan.id, loan.externalId, loan.accountNumber from LoanAccountLock lock left join Loan loan on lock.loanId = loan.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate";
 
+    String FIND_ALL_LOAN_IDS_BY_STATUS_ID = "SELECT loan.id FROM Loan loan WHERE loan.loanStatus = :statusId";
+
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") Integer loanType);
@@ -206,4 +208,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_ALL_STAYED_LOCKED_BY_LOAN_IDS)
     List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
+    @Query(FIND_ALL_LOAN_IDS_BY_STATUS_ID)
+    List<Long> findLoanIdByStatusId(@Param("statusId") Integer statusId);
 }

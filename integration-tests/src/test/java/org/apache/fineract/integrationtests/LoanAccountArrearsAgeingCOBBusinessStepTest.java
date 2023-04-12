@@ -46,11 +46,14 @@ import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanAccountArrearsAgeingCOBBusinessStepTest {
 
     private ResponseSpecification responseSpec;
@@ -77,72 +80,76 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest {
     @Test
     public void loanArrearsAgeingCOBBusinessStepTest() {
         // Set Business Date
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
-        LocalDate businessDate = Utils.getLocalDateOfTenant();
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
-        LocalDate operationDate = businessDate.minusDays(40);
-        String loanOperationDate = Utils.dateFormatter.format(operationDate);
+            LocalDate businessDate = Utils.getLocalDateOfTenant();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
 
-        // create Client
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            LocalDate operationDate = businessDate.minusDays(40);
+            String loanOperationDate = Utils.dateFormatter.format(operationDate);
 
-        // create Loan Product
+            // create Client
+            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                delinquencyBucketId);
+            // create Loan Product
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucketId);
-        assertNotNull(getLoanProductsProductResponse);
+            // Delinquency Bucket
+            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+                    delinquencyBucketId);
 
-        // Loan1 ExternalId
-        String loan1ExternalIdStr = UUID.randomUUID().toString();
+            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
+                    delinquencyBucketId);
+            assertNotNull(getLoanProductsProductResponse);
 
-        // create Loan Account for Client with Loan Product type 1
-        Long loanProductId = getLoanProductsProductResponse.getId();
-        final Integer loanId_1 = createLoanAccount(loanOperationDate, clientId, loanProductId, loan1ExternalIdStr);
+            // Loan1 ExternalId
+            String loan1ExternalIdStr = UUID.randomUUID().toString();
 
-        String loan2ExternalIdStr = UUID.randomUUID().toString();
-        final Integer loanId_2 = createLoanAccount(loanOperationDate, clientId, loanProductId, loan2ExternalIdStr);
+            // create Loan Account for Client with Loan Product type 1
+            Long loanProductId = getLoanProductsProductResponse.getId();
+            final Integer loanId_1 = createLoanAccount(loanOperationDate, clientId, loanProductId, loan1ExternalIdStr);
 
-        // Run Loan cob with verfying business step for Update Arrears ageing details
-        final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+            String loan2ExternalIdStr = UUID.randomUUID().toString();
+            final Integer loanId_2 = createLoanAccount(loanOperationDate, clientId, loanProductId, loan2ExternalIdStr);
 
-        // COB Step Validation
-        final JobBusinessStepConfigData jobBusinessStepConfigData = BusinessStepConfigurationHelper
-                .getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, BusinessConfigurationApiTest.LOAN_JOB_NAME);
-        assertNotNull(jobBusinessStepConfigData);
-        assertEquals(BusinessConfigurationApiTest.LOAN_JOB_NAME, jobBusinessStepConfigData.getJobName());
-        assertTrue(jobBusinessStepConfigData.getBusinessSteps().size() > 0);
-        assertTrue(jobBusinessStepConfigData.getBusinessSteps().stream()
-                .anyMatch(businessStep -> UPDATE_LOAN_ARREARS_AGING.equals(businessStep.getStepName())));
+            // Run Loan cob with verfying business step for Update Arrears ageing details
+            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
-        // Run the Loan COB Job
-        final String jobName = "Loan COB";
-        schedulerJobHelper.executeAndAwaitJob(jobName);
+            // COB Step Validation
+            final JobBusinessStepConfigData jobBusinessStepConfigData = BusinessStepConfigurationHelper
+                    .getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, BusinessConfigurationApiTest.LOAN_JOB_NAME);
+            assertNotNull(jobBusinessStepConfigData);
+            assertEquals(BusinessConfigurationApiTest.LOAN_JOB_NAME, jobBusinessStepConfigData.getJobName());
+            assertTrue(jobBusinessStepConfigData.getBusinessSteps().size() > 0);
+            assertTrue(jobBusinessStepConfigData.getBusinessSteps().stream()
+                    .anyMatch(businessStep -> UPDATE_LOAN_ARREARS_AGING.equals(businessStep.getStepName())));
 
-        // verify Arrears details are updated for both the loans, by verifying loan summary fields for
-        // principalOverdue,totalOverdue,overdueSinceddate
+            // Run the Loan COB Job
+            final String jobName = "Loan COB";
+            schedulerJobHelper.executeAndAwaitJob(jobName);
 
-        // Retrieve Loan 1 with loanId
-        GetLoansLoanIdResponse loan1Details = loanTransactionHelper.getLoanDetails((long) loanId_1);
-        GetLoansLoanIdSummary loan1Summary = loan1Details.getSummary();
-        assertNotNull(loan1Summary);
-        assertNotNull(loan1Summary.getOverdueSinceDate());
-        assertEquals(loan1Summary.getPrincipalOverdue(), 1000.00);
-        assertEquals(loan1Summary.getTotalOverdue(), 1000.00);
+            // verify Arrears details are updated for both the loans, by verifying loan summary fields for
+            // principalOverdue,totalOverdue,overdueSinceddate
 
-        // Retrieve Loan 2 with loanId
-        GetLoansLoanIdResponse loan2Details = loanTransactionHelper.getLoanDetails((long) loanId_2);
-        GetLoansLoanIdSummary loan2Summary = loan2Details.getSummary();
-        assertNotNull(loan2Summary);
-        assertNotNull(loan2Summary.getOverdueSinceDate());
-        assertEquals(loan2Summary.getPrincipalOverdue(), 1000.00);
-        assertEquals(loan2Summary.getTotalOverdue(), 1000.00);
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            // Retrieve Loan 1 with loanId
+            GetLoansLoanIdResponse loan1Details = loanTransactionHelper.getLoanDetails((long) loanId_1);
+            GetLoansLoanIdSummary loan1Summary = loan1Details.getSummary();
+            assertNotNull(loan1Summary);
+            assertNotNull(loan1Summary.getOverdueSinceDate());
+            assertEquals(loan1Summary.getPrincipalOverdue(), 1000.00);
+            assertEquals(loan1Summary.getTotalOverdue(), 1000.00);
+
+            // Retrieve Loan 2 with loanId
+            GetLoansLoanIdResponse loan2Details = loanTransactionHelper.getLoanDetails((long) loanId_2);
+            GetLoansLoanIdSummary loan2Summary = loan2Details.getSummary();
+            assertNotNull(loan2Summary);
+            assertNotNull(loan2Summary.getOverdueSinceDate());
+            assertEquals(loan2Summary.getPrincipalOverdue(), 1000.00);
+            assertEquals(loan2Summary.getTotalOverdue(), 1000.00);
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
