@@ -40,7 +40,7 @@ public class LoanItemReader extends AbstractLoanItemReader {
     @BeforeStep
     @SuppressWarnings({ "unchecked" })
     public void beforeStep(@NotNull StepExecution stepExecution) {
-        ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
+        ExecutionContext executionContext = stepExecution.getExecutionContext();
         LoanCOBParameter loanCOBParameter = (LoanCOBParameter) executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER);
         List<Long> loanIds;
         if (Objects.isNull(loanCOBParameter)
@@ -48,8 +48,9 @@ public class LoanItemReader extends AbstractLoanItemReader {
                 || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
-            loanIds = loanRepository.findAllNonClosedLoansBehindOrNullByMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
-                    loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
+            loanIds = loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
+                    loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)
+                            .minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND));
         }
         setRemainingData(new ArrayList<>(loanIds));
     }

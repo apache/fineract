@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.cob.loan;
 
+import com.google.common.collect.Lists;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
@@ -66,34 +69,24 @@ public class LoanCOBPartitioner implements Partitioner {
             stopJobExecution();
             return Map.of();
         }
-        int partitionIndex = 1;
-        createNewPartition(partitions, partitionIndex, cobBusinessSteps);
         if (!Objects.isNull(minAndMaxLoanId)) {
-            long remainingLoanIdCount = minAndMaxLoanId.getMaxLoanId() - minAndMaxLoanId.getMinLoanId() + 1;
-            long startLoanId = minAndMaxLoanId.getMinLoanId();
-            long endLoanId;
-            do {
-                String key = PARTITION_PREFIX + partitionIndex;
-                ExecutionContext executionContext = partitions.get(key);
-                if (remainingLoanIdCount > partitionSize) {
-                    endLoanId = startLoanId + partitionSize - 1;
-                    partitionIndex++;
-                    createNewPartition(partitions, partitionIndex, cobBusinessSteps);
-                } else {
-                    endLoanId = minAndMaxLoanId.getMaxLoanId();
-                }
-                executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, new LoanCOBParameter(startLoanId, endLoanId));
-                startLoanId = startLoanId + partitionSize;
-                remainingLoanIdCount = minAndMaxLoanId.getMaxLoanId() - endLoanId;
-            } while (remainingLoanIdCount > 0);
+            List<Long> loanIdsInRange = LongStream.rangeClosed(minAndMaxLoanId.getMinLoanId(), minAndMaxLoanId.getMaxLoanId()).boxed()
+                    .toList();
+            List<List<Long>> loanIdPartitions = Lists.partition(loanIdsInRange, partitionSize);
+            for (int i = 0; i < loanIdPartitions.size(); i++) {
+                createNewPartition(partitions, i + 1, cobBusinessSteps, loanIdPartitions.get(i));
+            }
+        } else {
+            createNewPartition(partitions, 1, cobBusinessSteps, List.of(0L));
         }
         return partitions;
     }
 
     private void createNewPartition(Map<String, ExecutionContext> partitions, int partitionIndex,
-            Set<BusinessStepNameAndOrder> cobBusinessSteps) {
+            Set<BusinessStepNameAndOrder> cobBusinessSteps, List<Long> loanIds) {
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(LoanCOBConstant.BUSINESS_STEPS, cobBusinessSteps);
+        executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, new LoanCOBParameter(loanIds.get(0), loanIds.get(loanIds.size() - 1)));
         executionContext.put("partition", PARTITION_PREFIX + partitionIndex);
         partitions.put(PARTITION_PREFIX + partitionIndex, executionContext);
     }

@@ -71,7 +71,7 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
             StepExecution stepExecution = new StepExecution("test", null);
             ExecutionContext executionContext = new ExecutionContext();
             executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, new LoanCOBParameter(1L, 4L));
-            lenient().when(this.loanRepository.findAllNonClosedLoansBehindOrNullByMinAndMaxLoanId(anyLong(), anyLong(), any()))
+            lenient().when(this.loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(anyLong(), anyLong(), any()))
                     .thenReturn(List.of(1L, 2L, 3L, 4L));
             stepExecution.setExecutionContext(executionContext);
             this.stepContribution = new StepContribution(stepExecution);
