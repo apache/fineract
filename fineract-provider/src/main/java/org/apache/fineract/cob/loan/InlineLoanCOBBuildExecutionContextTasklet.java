@@ -58,7 +58,8 @@ public class InlineLoanCOBBuildExecutionContextTasklet implements Tasklet {
         ThreadLocalContextUtil.setActionContext(ActionContext.COB);
         Set<BusinessStepNameAndOrder> cobBusinessSteps = cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class,
                 LoanCOBConstant.LOAN_COB_JOB_NAME);
-        contribution.getStepExecution().getExecutionContext().put(LoanCOBConstant.LOAN_IDS, getLoanIdsFromJobParameters(chunkContext));
+        contribution.getStepExecution().getExecutionContext().put(LoanCOBConstant.LOAN_COB_PARAMETER,
+                getLoanIdsFromJobParameters(chunkContext));
         contribution.getStepExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_STEPS, cobBusinessSteps);
         String businessDateString = getBusinessDateFromJobParameters(chunkContext);
         contribution.getStepExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, businessDateString);

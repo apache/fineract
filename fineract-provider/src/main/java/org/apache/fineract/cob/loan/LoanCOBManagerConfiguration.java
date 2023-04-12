@@ -18,12 +18,10 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.List;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
@@ -74,23 +72,19 @@ public class LoanCOBManagerConfiguration {
     @Autowired
     private RetrieveLoanIdService retrieveLoanIdService;
     @Autowired
-    private LoanAccountLockRepository accountLockRepository;
-    @Autowired
     private BusinessEventNotifierService businessEventNotifierService;
     @Autowired
     private CustomJobParameterResolver customJobParameterResolver;
     @Autowired
     private LoanRepository loanRepository;
-    @Autowired
-    private FineractProperties fineractProperties;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Bean
     @JobScope
-    public LoanCOBPartitioner partitioner(@Value("#{jobExecutionContext['loanIds']}") List<Long> loanIds) {
-        return new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, loanIds);
+    public LoanCOBPartitioner partitioner(@Value("#{jobExecutionContext['loanIds']}") LoanCOBParameter minAndMaxLoanId) {
+        return new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, minAndMaxLoanId);
     }
 
     @Bean
@@ -100,8 +94,13 @@ public class LoanCOBManagerConfiguration {
     }
 
     @Bean
-    public Step fetchAndLockStep() {
-        return localStepBuilderFactory.get("Fetch and Lock loan accounts - Step").tasklet(fetchAndLockLoanTasklet()).build();
+    public Step loanIdParameterStep() {
+        return localStepBuilderFactory.get("Set loan ID parameter - Step").tasklet(loanIdParameterTasklet()).build();
+    }
+
+    @Bean
+    public Step lockStep() {
+        return localStepBuilderFactory.get("Lock loan accounts - Step").tasklet(lockLoanTasklet()).build();
     }
 
     @Bean
@@ -117,8 +116,14 @@ public class LoanCOBManagerConfiguration {
 
     @Bean
     @JobScope
-    public FetchAndLockLoanTasklet fetchAndLockLoanTasklet() {
-        return new FetchAndLockLoanTasklet(accountLockRepository, retrieveLoanIdService, fineractProperties, jdbcTemplate);
+    public LoanIdParameterTasklet loanIdParameterTasklet() {
+        return new LoanIdParameterTasklet(retrieveLoanIdService);
+    }
+
+    @Bean
+    @JobScope
+    public LockLoanTasklet lockLoanTasklet() {
+        return new LockLoanTasklet(jdbcTemplate);
     }
 
     @Bean
@@ -138,7 +143,7 @@ public class LoanCOBManagerConfiguration {
         return jobBuilderFactory.get(JobName.LOAN_COB.name()) //
                 .listener(new COBExecutionListenerRunner(applicationContext, JobName.LOAN_COB.name())) //
                 .start(resolveCustomJobParametersStep()) //
-                .next(fetchAndLockStep()).next(loanCOBStep()).next(stayedLockedStep()) //
+                .next(loanIdParameterStep()).next(lockStep()).next(loanCOBStep()).next(stayedLockedStep()) //
                 .incrementer(new RunIdIncrementer()) //
                 .build();
     }

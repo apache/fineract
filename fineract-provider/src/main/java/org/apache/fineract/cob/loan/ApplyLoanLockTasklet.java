@@ -20,17 +20,23 @@ package org.apache.fineract.cob.loan;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -46,11 +52,21 @@ public class ApplyLoanLockTasklet implements Tasklet {
     private final LoanAccountLockRepository accountLockRepository;
     private final FineractProperties fineractProperties;
     private final JdbcTemplate jdbcTemplate;
+    private final LoanRepository loanRepository;
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
         ExecutionContext executionContext = contribution.getStepExecution().getExecutionContext();
-        List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
+        LoanCOBParameter loanCOBParameter = (LoanCOBParameter) executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER);
+        List<Long> loanIds;
+        if (Objects.isNull(loanCOBParameter)
+                || (Objects.isNull(loanCOBParameter.getMinLoanId()) && Objects.isNull(loanCOBParameter.getMaxLoanId()))
+                || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
+            loanIds = Collections.emptyList();
+        } else {
+            loanIds = new ArrayList<>(loanRepository.findAllNonClosedLoansBehindOrNullByMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
+                    loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)));
+        }
         List<List<Long>> loanIdPartitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
         List<LoanAccountLock> accountLocks = new ArrayList<>();
         loanIdPartitions.forEach(loanIdPartition -> accountLocks.addAll(accountLockRepository.findAllByLoanIdIn(loanIdPartition)));

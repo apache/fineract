@@ -20,6 +20,8 @@ package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,9 +29,9 @@ import static org.mockito.Mockito.verify;
 import io.cucumber.java8.En;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -37,6 +39,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.batch.core.StepContribution;
@@ -53,7 +56,9 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
     private FineractProperties fineractProperties = mock(FineractProperties.class);
     private JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
     private FineractProperties.FineractQueryProperties fineractQueryProperties = mock(FineractProperties.FineractQueryProperties.class);
-    private ApplyLoanLockTasklet applyLoanLockTasklet = new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate);
+    private LoanRepository loanRepository = mock(LoanRepository.class);
+    private ApplyLoanLockTasklet applyLoanLockTasklet = new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate,
+            loanRepository);
     private RepeatStatus resultItem;
     private StepContribution stepContribution;
 
@@ -65,7 +70,9 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
             ThreadLocalContextUtil.setBusinessDates(businessDateMap);
             StepExecution stepExecution = new StepExecution("test", null);
             ExecutionContext executionContext = new ExecutionContext();
-            executionContext.put(LoanCOBConstant.LOAN_IDS, new ArrayList<>(List.of(1L, 2L, 3L, 4L)));
+            executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, new LoanCOBParameter(1L, 4L));
+            lenient().when(this.loanRepository.findAllNonClosedLoansBehindOrNullByMinAndMaxLoanId(anyLong(), anyLong(), any()))
+                    .thenReturn(List.of(1L, 2L, 3L, 4L));
             stepExecution.setExecutionContext(executionContext);
             this.stepContribution = new StepContribution(stepExecution);
 

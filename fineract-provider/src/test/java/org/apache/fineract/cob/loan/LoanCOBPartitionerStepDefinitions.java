@@ -28,11 +28,11 @@ import com.google.gson.Gson;
 import io.cucumber.java8.En;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
+import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
@@ -50,7 +50,7 @@ public class LoanCOBPartitionerStepDefinitions implements En {
     JobExplorer jobExplorer = mock(JobExplorer.class);
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
-    List<Long> loanIds;
+    LoanCOBParameter loanIds;
     private LoanCOBPartitioner loanCOBPartitioner;
 
     private Set<BusinessStepNameAndOrder> cobBusinessSteps = new HashSet<>();
@@ -68,17 +68,17 @@ public class LoanCOBPartitionerStepDefinitions implements En {
                         .thenReturn(Collections.emptySet());
                 lenient().when(jobExplorer.findRunningJobExecutions(JobName.LOAN_COB.name())).thenReturn(Set.of(new JobExecution(3L)));
                 lenient().when(jobOperator.stop(3L)).thenReturn(Boolean.TRUE);
-                loanIds = Collections.emptyList();
+                loanIds = null;
             } else if ("empty loanIds".equals(action)) {
                 cobBusinessSteps.add(new BusinessStepNameAndOrder("Business step", 1L));
                 lenient().when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                         .thenReturn(cobBusinessSteps);
-                loanIds = Collections.emptyList();
+                loanIds = null;
             } else if ("good".equals(action)) {
                 cobBusinessSteps.add(new BusinessStepNameAndOrder("Business step", 1L));
                 lenient().when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                         .thenReturn(cobBusinessSteps);
-                loanIds = List.of(1L, 2L, 3L);
+                loanIds = new LoanCOBParameter(1L, 3L);
             }
             loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, loanIds);
         });
@@ -101,16 +101,21 @@ public class LoanCOBPartitionerStepDefinitions implements En {
                         businessSteps.stream().findFirst().get().getStepOrder());
                 assertEquals(cobBusinessSteps.stream().findFirst().get().getStepName(),
                         businessSteps.stream().findFirst().get().getStepName());
-                assertEquals(2, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.LOAN_IDS)).size());
-                assertEquals(1L, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.LOAN_IDS)).get(0));
-                assertEquals(2L, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.LOAN_IDS)).get(1));
+                LoanCOBParameter loanCOBParameter = (LoanCOBParameter) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1")
+                        .get(LoanCOBConstant.LOAN_COB_PARAMETER);
+                assertEquals(1, loanCOBParameter.getMaxLoanId() - loanCOBParameter.getMinLoanId());
+                assertEquals(1L, loanCOBParameter.getMinLoanId());
+                assertEquals(2L, loanCOBParameter.getMaxLoanId());
                 assertTrue(resultItem.containsKey(LoanCOBPartitioner.PARTITION_PREFIX + "2"));
                 assertEquals(cobBusinessSteps.stream().findFirst().get().getStepOrder(),
                         businessSteps.stream().findFirst().get().getStepOrder());
                 assertEquals(cobBusinessSteps.stream().findFirst().get().getStepName(),
                         businessSteps.stream().findFirst().get().getStepName());
-                assertEquals(1, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "2").get(LoanCOBConstant.LOAN_IDS)).size());
-                assertEquals(3L, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "2").get(LoanCOBConstant.LOAN_IDS)).get(0));
+                loanCOBParameter = (LoanCOBParameter) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "2")
+                        .get(LoanCOBConstant.LOAN_COB_PARAMETER);
+                assertEquals(0, loanCOBParameter.getMaxLoanId() - loanCOBParameter.getMinLoanId());
+                assertEquals(3L, loanCOBParameter.getMinLoanId());
+                assertEquals(3L, loanCOBParameter.getMaxLoanId());
             } else if ("empty loanIds".equals(action)) {
                 verify(jobOperator, Mockito.times(0)).stop(Mockito.anyLong());
                 assertEquals(1, resultItem.size());
@@ -121,7 +126,9 @@ public class LoanCOBPartitionerStepDefinitions implements En {
                         businessSteps.stream().findFirst().get().getStepOrder());
                 assertEquals(cobBusinessSteps.stream().findFirst().get().getStepName(),
                         businessSteps.stream().findFirst().get().getStepName());
-                assertEquals(0, ((List) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1").get(LoanCOBConstant.LOAN_IDS)).size());
+                LoanCOBParameter loanCOBParameter = (LoanCOBParameter) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1")
+                        .get(LoanCOBConstant.LOAN_COB_PARAMETER);
+                assertEquals(null, loanCOBParameter);
             }
         });
     }
