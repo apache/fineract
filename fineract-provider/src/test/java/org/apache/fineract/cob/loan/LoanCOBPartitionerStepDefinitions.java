@@ -128,7 +128,8 @@ public class LoanCOBPartitionerStepDefinitions implements En {
                         businessSteps.stream().findFirst().get().getStepName());
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) resultItem.get(LoanCOBPartitioner.PARTITION_PREFIX + "1")
                         .get(LoanCOBConstant.LOAN_COB_PARAMETER);
-                assertEquals(null, loanCOBParameter);
+                assertEquals(0L, loanCOBParameter.getMinLoanId());
+                assertEquals(0L, loanCOBParameter.getMaxLoanId());
             }
         });
     }

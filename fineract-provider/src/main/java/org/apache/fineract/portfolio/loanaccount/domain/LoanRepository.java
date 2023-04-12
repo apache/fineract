@@ -91,8 +91,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     String FIND_ALL_NON_CLOSED_LOANS_BEHIND_OR_NULL_BY_LOAN_IDS = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in (100,200,300,303,304) and (loan.lastClosedBusinessDate < :cobBusinessDate or "
             + "loan.lastClosedBusinessDate is null)";
 
-    String FIND_ALL_NON_CLOSED_LOANS_BEHIND_OR_NULL_BY_MIN_AND_MAX_LOAN_ID = "select loan.id from Loan loan where loan.id BETWEEN :minLoanId and :maxLoanId and loan.loanStatus in (100,200,300,303,304) and (loan.lastClosedBusinessDate < "
-            + ":cobBusinessDate or loan.lastClosedBusinessDate is null)";
+    String FIND_ALL_NON_CLOSED_LOANS_BY_LAST_CLOSED_BUSINESS_DATE_AND_MIN_AND_MAX_LOAN_ID = "select loan.id from Loan loan where loan.id BETWEEN :minLoanId and :maxLoanId and loan.loanStatus in (100,200,300,303,304) and (:cobBusinessDate = loan.lastClosedBusinessDate or loan.lastClosedBusinessDate is NULL)";
 
     String FIND_ALL_NON_CLOSED_LOANS_BEHIND_BY_LOAN_IDS = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in (100,200,300,303,304) and loan.lastClosedBusinessDate < :cobBusinessDate";
 
@@ -207,9 +206,9 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<LoanIdAndLastClosedBusinessDate> findAllNonClosedLoansBehindOrNullByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds);
 
-    @Query(FIND_ALL_NON_CLOSED_LOANS_BEHIND_OR_NULL_BY_MIN_AND_MAX_LOAN_ID)
-    List<Long> findAllNonClosedLoansBehindOrNullByMinAndMaxLoanId(@Param("minLoanId") Long minLoanId, @Param("maxLoanId") Long maxLoanId,
-            @Param("cobBusinessDate") LocalDate cobBusinessDate);
+    @Query(FIND_ALL_NON_CLOSED_LOANS_BY_LAST_CLOSED_BUSINESS_DATE_AND_MIN_AND_MAX_LOAN_ID)
+    List<Long> findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(@Param("minLoanId") Long minLoanId,
+            @Param("maxLoanId") Long maxLoanId, @Param("cobBusinessDate") LocalDate cobBusinessDate);
 
     @Query(FIND_OLDEST_COB_PROCESSED_LOAN)
     List<LoanIdAndLastClosedBusinessDate> findOldestCOBProcessedLoan(@Param("cobBusinessDate") LocalDate cobBusinessDate);

@@ -71,9 +71,9 @@ public class LoanItemReaderStepDefinitions implements En {
                 maxLoanId = splitAccounts.get(splitAccounts.size() - 1);
             }
             stepExecutionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, new LoanCOBParameter(minLoanId, maxLoanId));
-            jobExecution.setExecutionContext(stepExecutionContext);
+            stepExecution.setExecutionContext(stepExecutionContext);
 
-            lenient().when(this.loanRepository.findAllNonClosedLoansBehindOrNullByMinAndMaxLoanId(anyLong(), anyLong(), any()))
+            lenient().when(this.loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(anyLong(), anyLong(), any()))
                     .thenReturn(splitAccounts);
 
             HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();

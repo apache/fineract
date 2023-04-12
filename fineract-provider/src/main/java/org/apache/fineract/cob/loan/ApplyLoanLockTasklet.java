@@ -64,8 +64,9 @@ public class ApplyLoanLockTasklet implements Tasklet {
                 || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
-            loanIds = new ArrayList<>(loanRepository.findAllNonClosedLoansBehindOrNullByMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
-                    loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)));
+            loanIds = new ArrayList<>(loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(
+                    loanCOBParameter.getMinLoanId(), loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil
+                            .getBusinessDateByType(BusinessDateType.COB_DATE).minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND)));
         }
         List<List<Long>> loanIdPartitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
         List<LoanAccountLock> accountLocks = new ArrayList<>();

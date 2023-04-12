@@ -32,8 +32,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 @RequiredArgsConstructor
 public class LoanIdParameterTasklet implements Tasklet {
 
-    private static final Long NUMBER_OF_DAYS_BEHIND = 1L;
-
     private final RetrieveLoanIdService retrieveLoanIdService;
 
     @Override
@@ -41,7 +39,8 @@ public class LoanIdParameterTasklet implements Tasklet {
         String businessDateParameter = (String) contribution.getStepExecution().getJobExecution().getExecutionContext()
                 .get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);
         LocalDate businessDate = LocalDate.parse(Objects.requireNonNull(businessDateParameter));
-        LoanCOBParameter minAndMaxLoanId = retrieveLoanIdService.retrieveMinAndMaxLoanIdsNDaysBehind(NUMBER_OF_DAYS_BEHIND, businessDate);
+        LoanCOBParameter minAndMaxLoanId = retrieveLoanIdService.retrieveMinAndMaxLoanIdsNDaysBehind(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND,
+                businessDate);
         if (Objects.isNull(minAndMaxLoanId)
                 || (Objects.isNull(minAndMaxLoanId.getMinLoanId()) && Objects.isNull(minAndMaxLoanId.getMaxLoanId()))) {
             contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.LOAN_COB_PARAMETER,

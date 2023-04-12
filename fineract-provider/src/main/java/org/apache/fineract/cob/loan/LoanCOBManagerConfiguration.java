@@ -83,8 +83,8 @@ public class LoanCOBManagerConfiguration {
 
     @Bean
     @JobScope
-    public LoanCOBPartitioner partitioner(@Value("#{jobExecutionContext['loanIds']}") LoanCOBParameter minAndMaxLoanId) {
-        return new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, minAndMaxLoanId);
+    public LoanCOBPartitioner partitioner(@Value("#{jobExecutionContext['loanCobParameter']}") LoanCOBParameter loanCOBParameter) {
+        return new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, loanCOBParameter);
     }
 
     @Bean
