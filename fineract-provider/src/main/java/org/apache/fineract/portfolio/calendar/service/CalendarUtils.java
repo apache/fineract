@@ -22,8 +22,8 @@ import com.google.gson.JsonElement;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
-import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
@@ -90,36 +90,13 @@ public final class CalendarUtils {
     }
 
     public static Temporal adjustDate(final Temporal date, final Temporal seedDate, final PeriodFrequencyType frequencyType) {
-        Temporal adjustedVal = date;
-        if (frequencyType.isMonthly() && seedDate.get(ChronoField.DAY_OF_MONTH) > 28 && date.get(ChronoField.DAY_OF_MONTH) > 28) {
-            switch (date.get(ChronoField.MONTH_OF_YEAR)) {
-                case 2:
-                    if (IsoChronology.INSTANCE.isLeapYear(date.get(ChronoField.YEAR))) {
-                        adjustedVal = date.with(ChronoField.DAY_OF_MONTH, 29);
-                    }
-                break;
-                case 4:
-                case 6:
-                case 9:
-                case 11:
-                    if (seedDate.get(ChronoField.DAY_OF_MONTH) > 30) {
-                        adjustedVal = date.with(ChronoField.DAY_OF_MONTH, 30);
-                    } else {
-                        adjustedVal = date.with(ChronoField.DAY_OF_MONTH, seedDate.get(ChronoField.DAY_OF_MONTH));
-                    }
-                break;
-                case 1:
-                case 3:
-                case 5:
-                case 7:
-                case 8:
-                case 10:
-                case 12:
-                    adjustedVal = date.with(ChronoField.DAY_OF_MONTH, seedDate.get(ChronoField.DAY_OF_MONTH));
-                break;
-            }
+        if (frequencyType.isMonthly() && seedDate.get(ChronoField.DAY_OF_MONTH) > 28 && date.get(ChronoField.DAY_OF_MONTH) >= 28) {
+            int noOfDaysInCurrentMonth = YearMonth.from(date).lengthOfMonth();
+            int seedDay = seedDate.get(ChronoField.DAY_OF_MONTH);
+            int adjustedDay = Math.min(noOfDaysInCurrentMonth, seedDay);
+            return date.with(ChronoField.DAY_OF_MONTH, adjustedDay);
         }
-        return adjustedVal;
+        return date;
     }
 
     private static LocalDateTime getNextRecurringDate(final Recur recur, final LocalDateTime seedDate, final LocalDateTime startDate) {
