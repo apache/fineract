@@ -37,7 +37,7 @@ import org.springframework.batch.item.ItemReader;
 @RequiredArgsConstructor
 public abstract class AbstractLoanItemReader implements ItemReader<Loan> {
 
-    private final LoanRepository loanRepository;
+    protected final LoanRepository loanRepository;
 
     @Setter(AccessLevel.PROTECTED)
     private List<Long> alreadyLockedOrProcessedAccounts;

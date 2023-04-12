@@ -121,8 +121,8 @@ public class LoanInlineCOBConfig {
     @Bean
     public ExecutionContextPromotionListener inlineCobPromotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(
-                new String[] { LoanCOBConstant.LOAN_IDS, LoanCOBConstant.BUSINESS_STEPS, LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME });
+        listener.setKeys(new String[] { LoanCOBConstant.LOAN_COB_PARAMETER, LoanCOBConstant.BUSINESS_STEPS,
+                LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME });
         return listener;
     }
 }

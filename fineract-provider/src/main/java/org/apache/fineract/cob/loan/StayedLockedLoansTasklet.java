@@ -53,7 +53,8 @@ public class StayedLockedLoansTasklet implements Tasklet {
 
     private LoanAccountsStayedLockedData buildLoanAccountData() {
         LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
-        List<LoanIdAndExternalIdAndAccountNo> stayedLockedLoanAccounts = loanRepository.findAllStayedLockedByLoanIds(cobBusinessDate);
+        List<LoanIdAndExternalIdAndAccountNo> stayedLockedLoanAccounts = loanRepository
+                .findAllStayedLockedByCobBusinessDate(cobBusinessDate);
         List<LoanAccountStayedLockedData> loanAccounts = new ArrayList<>();
         stayedLockedLoanAccounts.forEach(loanAccount -> {
             loanAccounts.add(new LoanAccountStayedLockedData(loanAccount.getId(), loanAccount.getExternalId(), loanAccount.getAccountNo()));

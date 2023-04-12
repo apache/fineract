@@ -48,4 +48,3 @@ Feature: COB Reader
     Examples:
       |loanIds|
       |-1     |
-      |0      |

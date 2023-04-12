@@ -123,7 +123,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ApplyLoanLockTasklet applyLock() {
-        return new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate);
+        return new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate, loanRepository);
     }
 
     @Bean

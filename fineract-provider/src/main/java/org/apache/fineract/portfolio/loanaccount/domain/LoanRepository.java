@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -74,7 +75,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_ALL_NON_CLOSED = "select loan.id from Loan loan where loan.loanStatus in (100,200,300,303,304)";
 
-    String FIND_ALL_NON_CLOSED_LOANS_BY_LAST_CLOSED_BUSINESS_DATE = "select loan.id from Loan loan where loan.loanStatus in (100,200,300,303,304) and (:businessDate = loan.lastClosedBusinessDate or loan.lastClosedBusinessDate is NULL)";
+    String FIND_MIN_AND_MAX_NON_CLOSED_LOAN_IDS_BY_LAST_CLOSED_BUSINESS_DATE = "select new org.apache.fineract.cob.data.LoanCOBParameter(min(loan.id), max(loan.id)) from Loan loan where loan.loanStatus in (100,200,300,303,304) "
+            + "and (:businessDate = loan.lastClosedBusinessDate or loan.lastClosedBusinessDate is NULL)";
 
     String FIND_NON_CLOSED_LOAN_THAT_BELONGS_TO_CLIENT = "select loan from Loan loan where loan.id = :loanId and loan.loanStatus = 300 and loan.client.id = :clientId";
 
@@ -89,9 +91,12 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     String FIND_ALL_NON_CLOSED_LOANS_BEHIND_OR_NULL_BY_LOAN_IDS = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in (100,200,300,303,304) and (loan.lastClosedBusinessDate < :cobBusinessDate or "
             + "loan.lastClosedBusinessDate is null)";
 
+    String FIND_ALL_NON_CLOSED_LOANS_BEHIND_OR_NULL_BY_MIN_AND_MAX_LOAN_ID = "select loan.id from Loan loan where loan.id BETWEEN :minLoanId and :maxLoanId and loan.loanStatus in (100,200,300,303,304) and (loan.lastClosedBusinessDate < "
+            + ":cobBusinessDate or loan.lastClosedBusinessDate is null)";
+
     String FIND_ALL_NON_CLOSED_LOANS_BEHIND_BY_LOAN_IDS = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in (100,200,300,303,304) and loan.lastClosedBusinessDate < :cobBusinessDate";
 
-    String FIND_ALL_STAYED_LOCKED_BY_LOAN_IDS = "select loan.id, loan.externalId, loan.accountNumber from LoanAccountLock lock left join Loan loan on lock.loanId = loan.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate";
+    String FIND_ALL_STAYED_LOCKED_BY_COB_BUSINESS_DATE = "select loan.id, loan.externalId, loan.accountNumber from LoanAccountLock lock left join Loan loan on lock.loanId = loan.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate";
 
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
@@ -189,8 +194,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_ID_BY_EXTERNAL_ID)
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);
 
-    @Query(FIND_ALL_NON_CLOSED_LOANS_BY_LAST_CLOSED_BUSINESS_DATE)
-    List<Long> findAllNonClosedLoanIdsByLastClosedBusinessDate(@Param("businessDate") LocalDate businessDate);
+    @Query(FIND_MIN_AND_MAX_NON_CLOSED_LOAN_IDS_BY_LAST_CLOSED_BUSINESS_DATE)
+    LoanCOBParameter findMinAndMaxNonClosedLoanIdsByLastClosedBusinessDate(@Param("businessDate") LocalDate businessDate);
 
     @Query(FIND_ALL_NON_CLOSED_LOANS_BEHIND_BY_LOAN_IDS)
     List<LoanIdAndLastClosedBusinessDate> findAllNonClosedLoansBehindByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate,
@@ -200,10 +205,14 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<LoanIdAndLastClosedBusinessDate> findAllNonClosedLoansBehindOrNullByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds);
 
+    @Query(FIND_ALL_NON_CLOSED_LOANS_BEHIND_OR_NULL_BY_MIN_AND_MAX_LOAN_ID)
+    List<Long> findAllNonClosedLoansBehindOrNullByMinAndMaxLoanId(@Param("minLoanId") Long minLoanId, @Param("maxLoanId") Long maxLoanId,
+            @Param("cobBusinessDate") LocalDate cobBusinessDate);
+
     @Query(FIND_OLDEST_COB_PROCESSED_LOAN)
     List<LoanIdAndLastClosedBusinessDate> findOldestCOBProcessedLoan(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
-    @Query(FIND_ALL_STAYED_LOCKED_BY_LOAN_IDS)
-    List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate);
+    @Query(FIND_ALL_STAYED_LOCKED_BY_COB_BUSINESS_DATE)
+    List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
 }
