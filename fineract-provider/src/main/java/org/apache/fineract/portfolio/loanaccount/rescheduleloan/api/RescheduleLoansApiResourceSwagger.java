@@ -173,6 +173,48 @@ final class RescheduleLoansApiResourceSwagger {
         public Set<LoanTermVariationsData> loanTermVariationsData;
     }
 
+    @Schema(description = "PostCreateRescheduleLoansRequest")
+    public static final class PostCreateRescheduleLoansRequest {
+
+        @Schema(example = "20 September 2011")
+        public String adjustedDueDate;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "1")
+        public Integer extraTerms;
+        @Schema(example = "1")
+        public Integer graceOnInterest;
+        @Schema(example = "1")
+        public Integer graceOnPrincipal;
+        @Schema(example = "1")
+        public Long loanId;
+        @Schema(example = "1.1")
+        public BigDecimal newInterestRate;
+        @Schema(example = "20 September 2011")
+        public String rescheduleFromDate;
+        @Schema(example = "comment")
+        public String rescheduleReasonComment;
+        @Schema(example = "1")
+        public Long rescheduleReasonId;
+        @Schema(example = "20 September 2011")
+        public String submittedOnDate;
+    }
+
+    @Schema(description = "PostUpdateRescheduleLoansRequest")
+    public static final class PostUpdateRescheduleLoansRequest {
+
+        @Schema(example = "20 September 2011")
+        public String approvedOnDate;
+        @Schema(example = "20 September 2011")
+        public String rejectedOnDate;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+    }
+
     @Schema(description = "PostCreateRescheduleLoansResponse ")
     public static final class PostCreateRescheduleLoansResponse {
 
