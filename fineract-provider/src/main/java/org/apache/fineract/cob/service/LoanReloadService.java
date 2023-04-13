@@ -21,14 +21,14 @@ package org.apache.fineract.cob.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class LoanReloadService implements ReloadService<Loan> {
 
-    private final LoanRepository loanRepository;
+    private final LoanAssembler loanAssembler;
 
     @Override
     public <S extends AbstractPersistableCustom> boolean canReload(S input) {
@@ -37,7 +37,7 @@ public class LoanReloadService implements ReloadService<Loan> {
 
     @Override
     public Loan reload(Loan input) {
-        return loanRepository.findById(input.getId()).get();
+        return loanAssembler.assembleFrom(input.getId());
     }
 
 }
