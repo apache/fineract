@@ -32,7 +32,6 @@ public final class LoanCOBConstant {
     public static final String IS_CATCH_UP_PARAMETER_NAME = "IS_CATCH_UP";
 
     public static final String LOAN_COB_PARTITIONER_STEP = "Loan COB partition - Step";
-    public static final String LOAN_COB_CUSTOM_JOB_PARAMETER_KEY = "CUSTOM_JOB_PARAMETER_ID";
 
     public static final Long NUMBER_OF_DAYS_BEHIND = 1L;
 
