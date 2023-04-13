@@ -49,5 +49,4 @@ dependencies {
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor'
 
     testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.0'
-
 }

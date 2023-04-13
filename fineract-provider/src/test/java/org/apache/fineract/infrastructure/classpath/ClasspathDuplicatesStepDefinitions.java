@@ -93,7 +93,8 @@ public class ClasspathDuplicatesStepDefinitions implements En {
         return resourcePath.equals("META-INF/MANIFEST.MF") || resourcePath.equals("META-INF/INDEX.LIST")
                 || resourcePath.equals("META-INF/ORACLE_J.SF") || resourcePath.toUpperCase().startsWith("META-INF/ASL")
                 || resourcePath.toUpperCase().startsWith("META-INF/NOTICE") || resourcePath.toUpperCase().startsWith("META-INF/LICENSE")
-                || resourcePath.toUpperCase().startsWith("LICENSE") || resourcePath.toUpperCase().startsWith("LICENSE/NOTICE")
+                || resourcePath.toUpperCase().startsWith("META-INF/COPYRIGHT") || resourcePath.toUpperCase().startsWith("LICENSE")
+                || resourcePath.toUpperCase().startsWith("LICENSE/NOTICE")
                 // list formerly in ClasspathHellDuplicatesCheckRule (moved here
                 // in INFRAUTILS-52)
                 || resourcePath.endsWith(".txt") || resourcePath.endsWith("LICENSE") || resourcePath.endsWith("license.html")
