@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.event.external.service.serialization.
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;

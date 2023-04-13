@@ -99,6 +99,10 @@
     "allowedVersions": "<=6.2.1"
   },
   {
+    "matchPackageNames": ["com.diffplug.spotless"],
+    "allowedVersions": "<=6.15.0"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"

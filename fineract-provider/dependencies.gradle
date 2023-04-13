@@ -169,6 +169,7 @@ dependencies {
 
     implementation 'org.apache.commons:commons-math3'
 
+    implementation 'io.github.classgraph:classgraph'
 
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
@@ -184,5 +185,4 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     testImplementation ('org.mockito:mockito-inline')
-
 }
