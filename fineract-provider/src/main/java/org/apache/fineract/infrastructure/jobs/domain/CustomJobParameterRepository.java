@@ -18,11 +18,6 @@
  */
 package org.apache.fineract.infrastructure.jobs.domain;
 
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CustomJobParameterRepository {
-
-    Long save(String jsonString);
-
-    Optional<CustomJobParameter> findById(Long Id);
-}
+public interface CustomJobParameterRepository extends JpaRepository<CustomJobParameter, Long> {}

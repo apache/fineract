@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 public class DatabaseSpecificSQLGenerator {
 
     private final DatabaseTypeResolver databaseTypeResolver;
-    public static final String SELECT_CLAUSE = "SELECT %s";
 
     @Autowired
     public DatabaseSpecificSQLGenerator(DatabaseTypeResolver databaseTypeResolver) {
@@ -167,16 +166,6 @@ public class DatabaseSpecificSQLGenerator {
             return "CURRENT_SCHEMA()";
         } else {
             throw new IllegalStateException("Database type is not supported for current schema " + databaseTypeResolver.databaseType());
-        }
-    }
-
-    public String castJson(String sql) {
-        if (databaseTypeResolver.isMySQL()) {
-            return format("%s", sql);
-        } else if (databaseTypeResolver.isPostgreSQL()) {
-            return format("%s ::json", sql);
-        } else {
-            throw new IllegalStateException("Database type is not supported for casting to json " + databaseTypeResolver.databaseType());
         }
     }
 }

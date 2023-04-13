@@ -122,5 +122,4 @@
     <include file="parts/0100_new_repayment_strategy.xml" relativeToChangelogFile="true" />
     <include file="parts/0101_update_transaction_summary_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/0102_add_external_event_for_loan_reschedule.xml" relativeToChangelogFile="true" />
-    <include file="parts/0103_modify_parameter_json_column_custom_job_parameters.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
