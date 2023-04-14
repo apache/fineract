@@ -158,6 +158,12 @@ public class DatatableHelper extends IntegrationTest {
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, deleteEntryUrl, jsonAttributeToGetBack);
     }
 
+    public String runDatatableQuery(final String datatableName, final String columnFilter, final String valueFilter,
+            final String resultColumns) {
+        return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/query" + "?columnFilter="
+                + columnFilter + "&valueFilter=" + valueFilter + "&resultColumns=" + resultColumns + "&" + Utils.TENANT_IDENTIFIER);
+    }
+
     public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String generatedDatatableName) {
         LOG.info("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");

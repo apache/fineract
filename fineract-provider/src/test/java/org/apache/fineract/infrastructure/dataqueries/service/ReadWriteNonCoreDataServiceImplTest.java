@@ -27,6 +27,7 @@ import com.google.gson.JsonObject;
 import java.util.Collections;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionException;
@@ -51,6 +52,9 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
     @Mock
     private DatabaseTypeResolver databaseTypeResolver;
+
+    @Mock
+    private DatabaseSpecificSQLGenerator sqlGenerator;
 
     @InjectMocks
     private ReadWriteNonCoreDataServiceImpl underTest;
@@ -81,6 +85,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
                 .thenReturn(sqlRS);
         when(sqlRS.next()).thenReturn(true).thenReturn(false);
         when(sqlRS.getObject(ArgumentMatchers.anyString())).thenReturn("value1").thenReturn("value2");
+        when(sqlGenerator.escape(ArgumentMatchers.anyString())).thenReturn("rc1").thenReturn("rc2").thenReturn("table").thenReturn("cf1");
         when(databaseTypeResolver.isPostgreSQL()).thenReturn(true);
 
         ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, null, null, false, false);
