@@ -204,17 +204,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     @Override
-    public List<JsonObject> queryDataTable(String datatable, String columnFilter, String valueFilter, String resultColumns) {
+    public List<JsonObject> queryDataTable(String datatable, final String columnFilter, String valueFilter, String resultColumns) {
         Arrays.asList(datatable, columnFilter, valueFilter, resultColumns).forEach(SQLInjectionValidator::validateDynamicQuery);
 
         List<ResultsetColumnHeaderData> resultsetColumnHeaderData = genericDataService.fillResultsetColumnHeaders(datatable);
         validateRequestParams(columnFilter, valueFilter, resultColumns, resultsetColumnHeaderData);
+        String filterColumnType = resultsetColumnHeaderData.stream().filter(column -> Objects.equals(columnFilter, column.getColumnName()))
+                .findFirst().map(ResultsetColumnHeaderData::getColumnType).orElse(columnFilter + " does not exist in datatable");
 
         String sql = "select " + resultColumns + " from " + datatable + " where " + columnFilter + " = ?";
         SqlRowSet rowSet = null;
-        String filterColumnType = resultsetColumnHeaderData.stream().filter(column -> Objects.equals(columnFilter, column.getColumnName()))
-                .findFirst().map(ResultsetColumnHeaderData::getColumnType).orElse(columnFilter + " does not exist in datatable");
         if (databaseTypeResolver.isPostgreSQL()) {
+            sql = "select " + escapeFieldNames(resultColumns) + " from " + sqlGenerator.escape(datatable) + " where "
+                    + escapeFieldNames(columnFilter) + " = ?";
             rowSet = callFilteredPgSql(sql, valueFilter, filterColumnType);
         } else if (databaseTypeResolver.isMySQL()) {
             rowSet = callFilteredMysql(sql, valueFilter, filterColumnType);
@@ -234,6 +236,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private void extractResults(SqlRowSet rowSet, String[] resultColumnNames, List<JsonObject> results) {
         JsonObject json = new JsonObject();
         for (String rcn : resultColumnNames) {
+            rcn = rcn.replaceAll("\"", "");
             Object rowValue = rowSet.getObject(rcn);
             if (rowValue != null) {
                 if (rowValue instanceof Character) {
@@ -330,6 +333,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             throw new PlatformApiDataValidationException(paramErrors);
         }
         return jdbcTemplate.queryForRowSet(sql, new Object[] { finalValueFilter }, argType);
+    }
+
+    private String escapeFieldNames(final String inputFields) {
+        final String delimiter = ",";
+        if (StringUtils.isBlank(inputFields)) {
+            return inputFields;
+        }
+        final String[] fieldList = StringUtils.split(inputFields, delimiter);
+        final String[] outputFields = new String[fieldList.length];
+        for (int i = 0; i < fieldList.length; i++) {
+            outputFields[i] = sqlGenerator.escape(fieldList[i].trim());
+        }
+        return String.join(",", outputFields);
     }
 
     private static void validateRequestParams(String columnFilter, String valueFilter, String resultColumns,

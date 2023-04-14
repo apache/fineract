@@ -310,6 +310,108 @@ public class DatatableIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void validateCreateReadDeleteDatatableWithCaseSensitive() throws ParseException {
+
+        // creating datatable for client entity
+        final HashMap<String, Object> columnMap = new HashMap<>();
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+        columnMap.put("datatableName", Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5));
+        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+        columnMap.put("entitySubType", "PERSON");
+        columnMap.put("multiRow", false);
+        String itsADate = "itsADate";
+        String itsADecimal = "itsADecimal";
+        String itsAString = "itsAString";
+        String dateFormat = "dateFormat";
+
+        DatatableHelper.addDatatableColumns(datatableColumnsList, itsADate, "Date", true, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, itsADecimal, "Decimal", true, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, itsAString, "String", true, 10, null);
+        columnMap.put("columns", datatableColumnsList);
+        String datatabelRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("map : {}", datatabelRequestJsonString);
+
+        HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
+        String datatableName = (String) datatableResponse.get("resourceIdentifier");
+        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+
+        // creating client with datatables
+        final Integer clientID = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+
+        // creating new client datatable entry
+        final boolean genericResultSet = true;
+
+        final HashMap<String, Object> datatableEntryMap = new HashMap<>();
+        datatableEntryMap.put(itsADate, Utils.randomDateGenerator("yyyy-MM-dd"));
+        datatableEntryMap.put(itsADecimal, Utils.randomDecimalGenerator(4, 3));
+        datatableEntryMap.put(itsAString, Utils.randomStringGenerator("", 8));
+        datatableEntryMap.put("locale", "en");
+        datatableEntryMap.put(dateFormat, "yyyy-MM-dd");
+
+        String datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("map : {}", datatabelEntryRequestJsonString);
+
+        HashMap<String, Object> datatableEntryResponse = this.datatableHelper.createDatatableEntry(datatableName, clientID,
+                genericResultSet, datatabelEntryRequestJsonString);
+        assertNotNull(datatableEntryResponse.get("resourceId"), "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+
+        // Read the Datatable entry generated with genericResultSet in true (default)
+        final HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, clientID, genericResultSet,
+                (Integer) datatableEntryResponse.get("resourceId"), "");
+        assertNotNull(items);
+        assertEquals(1, ((List) items.get("data")).size());
+
+        assertEquals("client_id", ((Map) ((List) items.get("columnHeaders")).get(0)).get("columnName"));
+        assertEquals(clientID, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(0));
+
+        assertEquals(itsADate, ((Map) ((List) items.get("columnHeaders")).get(1)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsADate),
+                Utils.arrayDateToString((List) ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(1)));
+
+        assertEquals(itsADecimal, ((Map) ((List) items.get("columnHeaders")).get(2)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsADecimal), ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(2));
+
+        assertEquals(itsAString, ((Map) ((List) items.get("columnHeaders")).get(3)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsAString), ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(3));
+
+        // Update datatable entry
+        final String randomValue = Utils.randomStringGenerator("", 8);
+        datatableEntryMap.put(itsADate, Utils.randomDateGenerator("yyyy-MM-dd"));
+        datatableEntryMap.put(itsADecimal, Utils.randomDecimalGenerator(4, 3));
+        datatableEntryMap.put(itsAString, randomValue);
+
+        datatableEntryMap.put("locale", "en");
+        datatableEntryMap.put(dateFormat, "yyyy-MM-dd");
+
+        datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("map : {}", datatabelEntryRequestJsonString);
+
+        HashMap<String, Object> updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, clientID, false,
+                datatabelEntryRequestJsonString);
+
+        assertEquals(clientID, updatedDatatableEntryResponse.get("clientId"));
+
+        assertEquals(datatableEntryMap.get(itsADate),
+                Utils.arrayDateToString((List) ((Map) updatedDatatableEntryResponse.get("changes")).get(itsADate)));
+        assertEquals(datatableEntryMap.get(itsADecimal), ((Map) updatedDatatableEntryResponse.get("changes")).get(itsADecimal));
+        assertEquals(datatableEntryMap.get(itsAString), ((Map) updatedDatatableEntryResponse.get("changes")).get(itsAString));
+
+        // Read the datatable with a query
+        LOG.info("query in {} for value : {}", itsAString, randomValue);
+        final String queryResult = this.datatableHelper.runDatatableQuery(datatableName, itsAString, randomValue, "client_id,itsADecimal");
+        assertNotNull(queryResult);
+        LOG.info("query result : {}", queryResult);
+
+        // deleting datatable entries
+        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
+        assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
+
+        // deleting the datatable
+        String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);
+        assertEquals(datatableName, deletedDataTableName, "ERROR IN DELETING THE DATATABLE");
+    }
+
+    @Test
     public void validateInsertNullValues() {
         // Fetch / Create TST code
         HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, "TST_TST_TST");
