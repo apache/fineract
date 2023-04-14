@@ -24,16 +24,19 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
+import org.apache.fineract.cob.exceptions.CustomJobParameterNotFoundException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
@@ -76,7 +79,11 @@ public class InlineLoanCOBBuildExecutionContextTasklet implements Tasklet {
         CustomJobParameter customJobParameter = customJobParameterRepository.findById(customJobParameterId)
                 .orElseThrow(() -> new LoanNotFoundException(customJobParameterId));
         String parameterJson = customJobParameter.getParameterJson();
-        return gson.fromJson(parameterJson, new TypeToken<String>() {}.getType());
+        Set<JobParameterDTO> jobParameters = gson.fromJson(parameterJson, new TypeToken<HashSet<JobParameterDTO>>() {}.getType());
+        JobParameterDTO businessDateParameter = jobParameters.stream()
+                .filter(jobParameterDTO -> jobParameterDTO.getParameterName().equals(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME))
+                .findFirst().orElseThrow(() -> new CustomJobParameterNotFoundException(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME));
+        return businessDateParameter.getParameterValue();
     }
 
     private List<Long> getLoanIdsFromJobParameters(ChunkContext chunkContext) {
@@ -85,6 +92,10 @@ public class InlineLoanCOBBuildExecutionContextTasklet implements Tasklet {
         CustomJobParameter customJobParameter = customJobParameterRepository.findById(customJobParameterId)
                 .orElseThrow(() -> new LoanNotFoundException(customJobParameterId));
         String parameterJson = customJobParameter.getParameterJson();
-        return gson.fromJson(parameterJson, new TypeToken<ArrayList<Long>>() {}.getType());
+        Set<JobParameterDTO> jobParameters = gson.fromJson(parameterJson, new TypeToken<HashSet<JobParameterDTO>>() {}.getType());
+        JobParameterDTO loanIdsParameter = jobParameters.stream()
+                .filter(jobParameterDTO -> jobParameterDTO.getParameterName().equals(LoanCOBConstant.LOAN_IDS_PARAMETER_NAME)).findFirst()
+                .orElseThrow(() -> new CustomJobParameterNotFoundException(LoanCOBConstant.LOAN_IDS_PARAMETER_NAME));
+        return gson.fromJson(loanIdsParameter.getParameterValue(), new TypeToken<ArrayList<Long>>() {}.getType());
     }
 }
