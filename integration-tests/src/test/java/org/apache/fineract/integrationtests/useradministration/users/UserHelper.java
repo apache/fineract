@@ -19,15 +19,20 @@
 package org.apache.fineract.integrationtests.useradministration.users;
 
 import com.google.gson.Gson;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
 import org.junit.jupiter.api.Assertions;
 
 public final class UserHelper {
@@ -35,6 +40,11 @@ public final class UserHelper {
     private static final String CREATE_USER_URL = "/fineract-provider/api/v1/users?" + Utils.TENANT_IDENTIFIER;
     private static final String USER_URL = "/fineract-provider/api/v1/users";
     private static final Gson GSON = new JSON().getGson();
+    private static final String REPAYMENT_LOAN_PERMISSION = "REPAYMENT_LOAN";
+    private static final String READ_LOAN_PERMISSION = "READ_LOAN";
+
+    private static boolean simpleUserCreated = false;
+    private static String simpleUsername;
 
     private UserHelper() {}
 
@@ -127,5 +137,41 @@ public final class UserHelper {
 
     private static String createRoleOperationURL(final Integer userId) {
         return USER_URL + "/" + userId + "?" + Utils.TENANT_IDENTIFIER;
+    }
+
+    public static RequestSpecification getSimpleUserWithoutBypassPermission(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
+        String password = "aA1qwerty56";
+        if (!simpleUserCreated) {
+            GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+            simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
+            String simpleRoleId = createSimpleRole(requestSpec, responseSpec);
+            PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
+                    .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
+                    .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
+                    .roles(List.of(simpleRoleId)).officeId(headOffice.getId());
+
+            PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+            Assertions.assertNotNull(userCreationResponse.getResourceId());
+            simpleUserCreated = true;
+        }
+        RequestSpecification responseRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        responseRequestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(simpleUsername, password));
+        return responseRequestSpec;
+    }
+
+    private static String createSimpleRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        addRepaymentPermissionToRole(requestSpec, responseSpec, roleId);
+        return roleId.toString();
+    }
+
+    private static void addRepaymentPermissionToRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            Integer roleId) {
+        HashMap<String, Boolean> permissionMap = new HashMap<>();
+        permissionMap.put(REPAYMENT_LOAN_PERMISSION, true);
+        permissionMap.put(READ_LOAN_PERMISSION, true);
+        RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
     }
 }

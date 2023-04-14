@@ -32,6 +32,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanAccountLockHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
@@ -59,6 +61,7 @@ import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.common.system.DatatableHelper;
+import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
@@ -2260,6 +2263,87 @@ public class BatchApiTest {
         final JsonObject changes = new FromJsonHelper().parse(responses.get(3).getBody()).getAsJsonObject().get("changes")
                 .getAsJsonObject();
         Assertions.assertEquals("true", changes.get("fraud").getAsString());
+    }
+
+    /**
+     * Tests that a loan is hard locked and if a repayment triggered in as a batch request, it returns the proper error
+     *
+     * @see org.apache.fineract.batch.command.internal.ModifyLoanApplicationByExternalIdCommandStrategy
+     */
+    @Test
+    public void shoulRetrieveTheProperErrorDuringLockedLoan() {
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
+        LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(this.requestSpec, responseSpec);
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("1000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Long applyLoanRequestId = RandomUtils.nextLong(100, 1000);
+        final Long approveLoanRequestId = applyLoanRequestId + 1;
+        final Long disburseLoanRequestId = approveLoanRequestId + 1;
+        final Long getLoanRequestId = disburseLoanRequestId + 1;
+
+        // Create product
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create client
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+
+        final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
+                LocalDate.now(ZoneId.systemDefault()).minusDays(10), "approve");
+
+        final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
+                LocalDate.now(ZoneId.systemDefault()).minusDays(8), "disburse");
+
+        final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
+                "associations=all");
+
+        // Create batch requests list
+        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, getLoanRequest);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Loan");
+
+        final Long loanId = new FromJsonHelper().parse(responses.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
+
+        loanAccountLockHelper.placeSoftLockOnLoanAccount(loanId.intValue(), "LOAN_COB_CHUNK_PROCESSING");
+
+        RequestSpecification requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(this.requestSpec, this.responseSpec);
+
+        // Create a repayment Request
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(1L);
+        br.setRelativeUrl(String.format("loans/" + loanId + "/transactions?command=repayment"));
+        br.setMethod("POST");
+        String dateString = LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": \"500\"}",
+                dateString));
+
+        final String jsonifiedRepaymentRequest = BatchHelper.toJsonString(List.of(br));
+
+        final List<BatchResponse> repaymentResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec,
+                this.responseSpec, jsonifiedRepaymentRequest);
+
+        Assertions.assertEquals(HttpStatus.SC_CONFLICT, repaymentResponse.get(0).getStatusCode(), "Verify Status Code 409 for Locked Loan");
     }
 
     /**
