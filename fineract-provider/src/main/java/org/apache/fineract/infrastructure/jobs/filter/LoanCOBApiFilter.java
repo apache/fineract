@@ -31,7 +31,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +44,7 @@ import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
@@ -85,13 +85,6 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchReque
     private static final String JOB_NAME = "INLINE_LOAN_COB";
 
     private final PlatformTransactionManager transactionManager;
-
-    @RequiredArgsConstructor
-    @Getter
-    private static class LoanIdsHardLockedException extends RuntimeException {
-
-        private final Long loanIdFromRequest;
-    }
 
     private static class Reject {
 

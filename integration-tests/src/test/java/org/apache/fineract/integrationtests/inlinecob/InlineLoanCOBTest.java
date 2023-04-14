@@ -40,18 +40,14 @@ import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
-import org.apache.fineract.client.models.PostUsersRequest;
-import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanAccountLockHelper;
@@ -62,7 +58,6 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
-import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
@@ -73,9 +68,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class InlineLoanCOBTest {
-
-    private static final String REPAYMENT_LOAN_PERMISSION = "REPAYMENT_LOAN";
-    private static final String READ_LOAN_PERMISSION = "READ_LOAN";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -290,7 +282,7 @@ public class InlineLoanCOBTest {
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 10));
 
-            createNewSimpleUserWithoutBypassPermission();
+            requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
 
             loanAccountLockHelper.placeSoftLockOnLoanAccount(loanID, "LOAN_COB_PARTITIONING");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
@@ -349,7 +341,7 @@ public class InlineLoanCOBTest {
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 10));
 
-            createNewSimpleUserWithoutBypassPermission();
+            requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
             loanTransactionHelper.makeRepayment("10 March 2020", 10.0f, loanID);
@@ -406,7 +398,7 @@ public class InlineLoanCOBTest {
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 10));
 
-            createNewSimpleUserWithoutBypassPermission();
+            requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
 
             loanAccountLockHelper.placeSoftLockOnLoanAccount(loanID, "LOAN_COB_PARTITIONING");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
@@ -441,37 +433,6 @@ public class InlineLoanCOBTest {
         List<Long> loanIds = LongStream.rangeClosed(1, 1001).boxed().toList();
         String responseUserMessage = inlineLoanCOBHelper.executeInlineCOB(loanIds, "defaultUserMessage");
         assertEquals("Size of the loan IDs list cannot be over 1000", responseUserMessage);
-    }
-
-    private void createNewSimpleUserWithoutBypassPermission() {
-        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-        String username = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
-        String password = Utils.randomStringGenerator("aA1", 10); // prefix is to conform with the password rules
-        String simpleRoleId = createSimpleRole();
-        PostUsersRequest createUserRequest = new PostUsersRequest().username(username)
-                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
-                .roles(List.of(simpleRoleId)).officeId(headOffice.getId());
-
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
-        Assertions.assertNotNull(userCreationResponse.getResourceId());
-
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, password));
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
-
-    private String createSimpleRole() {
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
-        addRepaymentPermissionToRole(roleId);
-        return roleId.toString();
-    }
-
-    private void addRepaymentPermissionToRole(Integer roleId) {
-        HashMap<String, Boolean> permissionMap = new HashMap<>();
-        permissionMap.put(REPAYMENT_LOAN_PERMISSION, true);
-        permissionMap.put(READ_LOAN_PERMISSION, true);
-        RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
     }
 
     private Integer createLoanProduct(final String chargeId) {
