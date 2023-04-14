@@ -21,8 +21,6 @@ package org.apache.fineract.cob.loan;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
@@ -48,7 +46,9 @@ public class LoanItemReaderStepDefinitions implements En {
 
     private LoanRepository loanRepository = mock(LoanRepository.class);
 
-    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository);
+    private RetrieveLoanIdService retrieveLoanIdService = mock(RetrieveLoanIdService.class);
+
+    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository, retrieveLoanIdService);
 
     private Loan loan = mock(Loan.class);
 
@@ -70,10 +70,11 @@ public class LoanItemReaderStepDefinitions implements En {
                 minLoanId = splitAccounts.get(0);
                 maxLoanId = splitAccounts.get(splitAccounts.size() - 1);
             }
-            stepExecutionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, new LoanCOBParameter(minLoanId, maxLoanId));
+            LoanCOBParameter loanCOBParameter = new LoanCOBParameter(minLoanId, maxLoanId);
+            stepExecutionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, loanCOBParameter);
             stepExecution.setExecutionContext(stepExecutionContext);
 
-            lenient().when(this.loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(anyLong(), anyLong(), any()))
+            lenient().when(this.retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter))
                     .thenReturn(splitAccounts);
 
             HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();

@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import org.apache.fineract.cob.data.LoanCOBParameter;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepExecution;
@@ -33,8 +31,11 @@ import org.springframework.batch.item.ExecutionContext;
 
 public class LoanItemReader extends AbstractLoanItemReader {
 
-    public LoanItemReader(LoanRepository loanRepository) {
+    private final RetrieveLoanIdService retrieveLoanIdService;
+
+    public LoanItemReader(LoanRepository loanRepository, RetrieveLoanIdService retrieveLoanIdService) {
         super(loanRepository);
+        this.retrieveLoanIdService = retrieveLoanIdService;
     }
 
     @BeforeStep
@@ -48,9 +49,7 @@ public class LoanItemReader extends AbstractLoanItemReader {
                 || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
-            loanIds = loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
-                    loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)
-                            .minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND));
+            loanIds = retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter);
         }
         setRemainingData(new ArrayList<>(loanIds));
     }

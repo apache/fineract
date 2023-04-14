@@ -67,6 +67,8 @@ public class LoanCOBWorkerConfiguration {
     private AppUserRepositoryWrapper userRepository;
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private RetrieveLoanIdService retrieveLoanIdService;
 
     @Autowired
     private FineractProperties fineractProperties;
@@ -123,7 +125,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ApplyLoanLockTasklet applyLock() {
-        return new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate, loanRepository);
+        return new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate, retrieveLoanIdService);
     }
 
     @Bean
@@ -134,7 +136,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public LoanItemReader cobWorkerItemReader() {
-        return new LoanItemReader(loanRepository);
+        return new LoanItemReader(loanRepository, retrieveLoanIdService);
     }
 
     @Bean
