@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.jobparameterprovider;
 
-import com.google.gson.Gson;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,40 +27,27 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
-import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
 import org.springframework.batch.core.JobParameter;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class LoanCOBJobParameterProvider extends AbstractJobParameterProvider implements InitializingBean {
+public class LoanCOBJobParameterProvider extends AbstractJobParameterProvider {
 
     private final CustomJobParameterRepository customJobParameterRepository;
-    private final GoogleGsonSerializerHelper gsonFactory;
-
-    private Gson gson;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.gson = gsonFactory.createSimpleGson();
-    }
 
     @Override
     @Transactional
     public Map<String, JobParameter> provide(Set<JobParameterDTO> jobParameterDTOSet) {
         Map<String, JobParameter> jobParameterMap = new HashMap<>();
-        CustomJobParameter customJobParameter = new CustomJobParameter();
-        customJobParameter.setParameterJson(gson.toJson(getJobParameterDTOListWithCorrectBusinessDate(jobParameterDTOSet)));
-        CustomJobParameter savedCustomJobParameter = customJobParameterRepository.saveAndFlush(customJobParameter);
-        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(savedCustomJobParameter.getId()));
+        Long customJobParameterId = customJobParameterRepository.save(getJobParameterDTOListWithCorrectBusinessDate(jobParameterDTOSet));
+        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(customJobParameterId));
         return jobParameterMap;
     }
 

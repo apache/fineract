@@ -66,8 +66,8 @@ public class LoanCOBCatchUpServiceImpl implements LoanCOBCatchUpService {
 
     @Override
     public IsCatchUpRunningDTO isCatchUpRunning() {
-        List<Long> runningCatchUpExecutionIds = jobExecutionRepository.getRunningJobsByExecutionParameter(LoanCOBConstant.JOB_NAME,
-                LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME, "true");
+        List<Long> runningCatchUpExecutionIds = jobExecutionRepository.getRunningJobsIdsByExecutionParameter(LoanCOBConstant.JOB_NAME,
+                LoanCOBConstant.LOAN_COB_CUSTOM_JOB_PARAMETER_KEY, LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME, "true");
         if (CollectionUtils.isNotEmpty(runningCatchUpExecutionIds)) {
             JobExecution jobExecution = jobExplorer.getJobExecution(runningCatchUpExecutionIds.get(0));
             String executionDateString = (String) jobExecution.getExecutionContext().get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);

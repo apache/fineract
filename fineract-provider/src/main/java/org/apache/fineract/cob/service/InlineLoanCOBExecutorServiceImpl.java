@@ -25,11 +25,13 @@ import com.google.gson.Gson;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +51,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerE
 import org.apache.fineract.infrastructure.core.exception.PlatformRequestBodyItemLimitValidationException;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
+import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.service.InlineExecutorService;
@@ -195,12 +197,13 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     private Map<String, JobParameter> getJobParametersMap(List<Long> loanIds, LocalDate businessDate) {
         // TODO: refactor for a more generic solution
         String parameterJson = gson.toJson(loanIds);
-        CustomJobParameter loanIdsJobParameter = new CustomJobParameter();
-        loanIdsJobParameter.setParameterJson(parameterJson);
-        Long loanIdsJobParameterId = customJobParameterRepository.saveAndFlush(loanIdsJobParameter).getId();
-        CustomJobParameter businessDateJobParameter = new CustomJobParameter();
-        businessDateJobParameter.setParameterJson(gson.toJson(businessDate.format(DateTimeFormatter.ISO_DATE)));
-        Long businessDateJobParameterId = customJobParameterRepository.saveAndFlush(businessDateJobParameter).getId();
+        JobParameterDTO loanIdsParameterDTO = new JobParameterDTO(LoanCOBConstant.LOAN_IDS_PARAMETER_NAME, parameterJson);
+        Set<JobParameterDTO> loanIdJobParameter = Collections.singleton(loanIdsParameterDTO);
+        Long loanIdsJobParameterId = customJobParameterRepository.save(loanIdJobParameter);
+        JobParameterDTO businessDateParameterDTO = new JobParameterDTO(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
+                businessDate.format(DateTimeFormatter.ISO_DATE));
+        Set<JobParameterDTO> businessDateJobParameter = Collections.singleton(businessDateParameterDTO);
+        Long businessDateJobParameterId = customJobParameterRepository.save(businessDateJobParameter);
         Map<String, JobParameter> jobParameterMap = new HashMap<>();
         jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(loanIdsJobParameterId));
         jobParameterMap.put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, new JobParameter(businessDateJobParameterId));
