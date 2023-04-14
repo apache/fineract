@@ -20,8 +20,6 @@ package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,7 +37,6 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.batch.core.StepContribution;
@@ -56,9 +53,9 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
     private FineractProperties fineractProperties = mock(FineractProperties.class);
     private JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
     private FineractProperties.FineractQueryProperties fineractQueryProperties = mock(FineractProperties.FineractQueryProperties.class);
-    private LoanRepository loanRepository = mock(LoanRepository.class);
+    private RetrieveLoanIdService retrieveLoanIdService = mock(RetrieveLoanIdService.class);
     private ApplyLoanLockTasklet applyLoanLockTasklet = new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate,
-            loanRepository);
+            retrieveLoanIdService);
     private RepeatStatus resultItem;
     private StepContribution stepContribution;
 
@@ -70,8 +67,9 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
             ThreadLocalContextUtil.setBusinessDates(businessDateMap);
             StepExecution stepExecution = new StepExecution("test", null);
             ExecutionContext executionContext = new ExecutionContext();
-            executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, new LoanCOBParameter(1L, 4L));
-            lenient().when(this.loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(anyLong(), anyLong(), any()))
+            LoanCOBParameter loanCOBParameter = new LoanCOBParameter(1L, 4L);
+            executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, loanCOBParameter);
+            lenient().when(this.retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter))
                     .thenReturn(List.of(1L, 2L, 3L, 4L));
             stepExecution.setExecutionContext(executionContext);
             this.stepContribution = new StepContribution(stepExecution);

@@ -32,11 +32,8 @@ import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -52,7 +49,7 @@ public class ApplyLoanLockTasklet implements Tasklet {
     private final LoanAccountLockRepository accountLockRepository;
     private final FineractProperties fineractProperties;
     private final JdbcTemplate jdbcTemplate;
-    private final LoanRepository loanRepository;
+    private final RetrieveLoanIdService retrieveLoanIdService;
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
@@ -64,9 +61,8 @@ public class ApplyLoanLockTasklet implements Tasklet {
                 || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
-            loanIds = new ArrayList<>(loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(
-                    loanCOBParameter.getMinLoanId(), loanCOBParameter.getMaxLoanId(), ThreadLocalContextUtil
-                            .getBusinessDateByType(BusinessDateType.COB_DATE).minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND)));
+            loanIds = new ArrayList<>(
+                    retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter));
         }
         List<List<Long>> loanIdPartitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
         List<LoanAccountLock> accountLocks = new ArrayList<>();
