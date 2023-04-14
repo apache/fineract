@@ -44,7 +44,8 @@ public class LockLoanTasklet implements Tasklet {
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
         String businessDateParameter = (String) contribution.getStepExecution().getJobExecution().getExecutionContext()
                 .get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);
-        LocalDate businessDate = LocalDate.parse(Objects.requireNonNull(businessDateParameter));
+        LocalDate businessDate = LocalDate.parse(Objects.requireNonNull(businessDateParameter))
+                .minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND);
         LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution().getExecutionContext()
                 .get(LoanCOBConstant.LOAN_COB_PARAMETER);
         if (Objects.isNull(loanCOBParameter)
