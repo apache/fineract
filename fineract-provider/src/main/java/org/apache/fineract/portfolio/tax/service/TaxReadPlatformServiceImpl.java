@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -51,7 +52,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Autowired
     public TaxReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
+                                      final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
         this.jdbcTemplate = jdbcTemplate;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
     }
@@ -71,13 +72,16 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     @Override
     public TaxComponentData retrieveTaxComponentTemplate() {
         return TaxComponentData.template(this.accountingDropdownReadPlatformService.retrieveAccountMappingOptions(),
-                this.accountingDropdownReadPlatformService.retrieveGLAccountTypeOptions());
+                                         this.accountingDropdownReadPlatformService.retrieveGLAccountTypeOptions());
     }
 
     @Override
     public Collection<TaxGroupData> retrieveAllTaxGroups() {
         String sql = "select " + TAX_GROUP_MAPPER.getSchema();
-        return this.jdbcTemplate.query(sql, TAX_GROUP_MAPPER); // NOSONAR
+        return this.jdbcTemplate.query(con -> con.prepareStatement(sql,
+                                                                   ResultSet.TYPE_SCROLL_SENSITIVE,
+                                                                   ResultSet.CONCUR_UPDATABLE),
+                                       TAX_GROUP_MAPPER); // NOSONAR
     }
 
     @Override
@@ -175,7 +179,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
                 }
             }
             return TaxComponentData.instance(id, name, percentage, debitAccountType, debitAccountData, creditAccountType, creditAccountData,
-                    startDate, historyDatas);
+                                             startDate, historyDatas);
         }
 
         public String getSchema() {
