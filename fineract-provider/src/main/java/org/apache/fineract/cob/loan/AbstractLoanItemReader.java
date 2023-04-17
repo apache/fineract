@@ -40,8 +40,6 @@ public abstract class AbstractLoanItemReader implements ItemReader<Loan> {
     protected final LoanRepository loanRepository;
 
     @Setter(AccessLevel.PROTECTED)
-    private List<Long> alreadyLockedOrProcessedAccounts;
-    @Setter(AccessLevel.PROTECTED)
     private List<Long> remainingData;
     private Long loanId;
 
