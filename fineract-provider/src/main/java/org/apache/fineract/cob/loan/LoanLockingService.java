@@ -21,20 +21,18 @@ package org.apache.fineract.cob.loan;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.cob.data.LoanCOBParameter;
-import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
-import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
-import org.springframework.data.repository.query.Param;
+import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.apache.fineract.cob.domain.LockOwner;
 
-public interface RetrieveLoanIdService {
+public interface LoanLockingService {
 
-    LoanCOBParameter retrieveMinAndMaxLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate);
+    void applySoftLock(LocalDate lastClosedBusinessDate, LoanCOBParameter loanCOBParameter);
 
-    List<LoanIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDateOrNull(LocalDate businessDate, List<Long> loanIds);
+    void upgradeLock(List<Long> accountsToLock, LockOwner lockOwner);
 
-    List<LoanIdAndLastClosedBusinessDate> retrieveLoanIdsOldestCobProcessed(LocalDate businessDate);
+    void deleteByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner);
 
-    List<Long> retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(LoanCOBParameter loanCOBParameter);
+    List<LoanAccountLock> findAllByLoanIdIn(List<Long> loanIds);
 
-    List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
-
+    LoanAccountLock findByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
 }

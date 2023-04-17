@@ -21,13 +21,12 @@ package org.apache.fineract.cob.listener;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
 
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LoanAccountLock;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.exceptions.LoanReadException;
+import org.apache.fineract.cob.loan.LoanLockingService;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.serialization.ThrowableSerialization;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -46,7 +45,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @RequiredArgsConstructor
 public abstract class AbstractLoanItemListener {
 
-    private final LoanAccountLockRepository accountLockRepository;
+    private final LoanLockingService loanLockingService;
 
     private final TransactionTemplate transactionTemplate;
 
@@ -57,9 +56,10 @@ public abstract class AbstractLoanItemListener {
             @Override
             protected void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
                 for (Long loanId : loanIds) {
-                    Optional<LoanAccountLock> loanAccountLock = accountLockRepository.findByLoanIdAndLockOwner(loanId, getLockOwner());
-                    loanAccountLock.ifPresent(
-                            accountLock -> accountLock.setError(String.format(msg, loanId), ThrowableSerialization.serialize(e)));
+                    LoanAccountLock loanAccountLock = loanLockingService.findByLoanIdAndLockOwner(loanId, getLockOwner());
+                    if (loanAccountLock != null) {
+                        loanAccountLock.setError(String.format(msg, loanId), ThrowableSerialization.serialize(e));
+                    }
                 }
             }
         });

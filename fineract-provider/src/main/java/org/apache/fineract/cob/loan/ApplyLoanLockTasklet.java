@@ -30,25 +30,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ApplyLoanLockTasklet implements Tasklet {
 
-    private final LoanAccountLockRepository accountLockRepository;
     private final FineractProperties fineractProperties;
-    private final JdbcTemplate jdbcTemplate;
+    private final LoanLockingService loanLockingService;
     private final RetrieveLoanIdService retrieveLoanIdService;
 
     @Override
@@ -64,9 +60,9 @@ public class ApplyLoanLockTasklet implements Tasklet {
             loanIds = new ArrayList<>(
                     retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter));
         }
-        List<List<Long>> loanIdPartitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
+        List<List<Long>> loanIdPartitions = Lists.partition(loanIds, getInClauseParameterSizeLimit());
         List<LoanAccountLock> accountLocks = new ArrayList<>();
-        loanIdPartitions.forEach(loanIdPartition -> accountLocks.addAll(accountLockRepository.findAllByLoanIdIn(loanIdPartition)));
+        loanIdPartitions.forEach(loanIdPartition -> accountLocks.addAll(loanLockingService.findAllByLoanIdIn(loanIdPartition)));
 
         Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap = accountLocks.stream()
                 .filter(e -> LockOwner.LOAN_COB_PARTITIONING.equals(e.getLockOwner()))
@@ -77,7 +73,7 @@ public class ApplyLoanLockTasklet implements Tasklet {
 
         List<Long> toBeProcessedLoanIds = new ArrayList<>(alreadySoftLockedAccountsMap.keySet());
 
-        upgradeToHardLock(toBeProcessedLoanIds);
+        loanLockingService.upgradeLock(toBeProcessedLoanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING);
 
         toBeProcessedLoanIds.addAll(alreadyLockedByChunkProcessingAccountIds);
         List<Long> alreadyLockedByInlineCOBOrProcessedLoanIds = new ArrayList<>(loanIds);
@@ -86,16 +82,6 @@ public class ApplyLoanLockTasklet implements Tasklet {
         loanIds.removeAll(alreadyLockedByInlineCOBOrProcessedLoanIds);
 
         return RepeatStatus.FINISHED;
-    }
-
-    private void upgradeToHardLock(List<Long> accountsToLock) {
-        jdbcTemplate.batchUpdate("""
-                    UPDATE m_loan_account_locks SET version= version + 1, lock_owner = ?, lock_placed_on = ? WHERE loan_id = ?
-                """, accountsToLock, getInClauseParameterSizeLimit(), (ps, id) -> {
-            ps.setString(1, LockOwner.LOAN_COB_CHUNK_PROCESSING.name());
-            ps.setObject(2, DateUtils.getOffsetDateTimeOfTenant());
-            ps.setLong(3, id);
-        });
     }
 
     private int getInClauseParameterSizeLimit() {

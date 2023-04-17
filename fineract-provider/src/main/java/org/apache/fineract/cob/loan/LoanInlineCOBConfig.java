@@ -59,6 +59,8 @@ public class LoanInlineCOBConfig {
     private TransactionTemplate transactionTemplate;
     @Autowired
     private CustomJobParameterRepository loanIdListRepository;
+    @Autowired
+    private LoanLockingService loanLockingService;
 
     @Bean
     public InlineLoanCOBBuildExecutionContextTasklet inlineLoanCOBBuildExecutionContextTasklet() {
@@ -103,14 +105,14 @@ public class LoanInlineCOBConfig {
 
     @Bean
     public InlineCOBLoanItemWriter inlineCobWorkerItemWriter() {
-        InlineCOBLoanItemWriter repositoryItemWriter = new InlineCOBLoanItemWriter(accountLockRepository);
+        InlineCOBLoanItemWriter repositoryItemWriter = new InlineCOBLoanItemWriter(loanLockingService);
         repositoryItemWriter.setRepository(loanRepository);
         return repositoryItemWriter;
     }
 
     @Bean
     public InlineCOBLoanItemListener inlineCobLoanItemListener() {
-        return new InlineCOBLoanItemListener(accountLockRepository, transactionTemplate);
+        return new InlineCOBLoanItemListener(loanLockingService, transactionTemplate);
     }
 
     @Bean
