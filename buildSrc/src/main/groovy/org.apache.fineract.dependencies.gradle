@@ -30,7 +30,7 @@ dependencyManagement {
         mavenBom 'io.cucumber:cucumber-bom:7.11.2'
         mavenBom 'io.netty:netty-bom:4.1.91.Final'
         mavenBom 'org.mockito:mockito-bom:5.3.0'
-        mavenBom 'software.amazon.awssdk:bom:2.20.45'
+        mavenBom 'software.amazon.awssdk:bom:2.20.47'
     }
 
     dependencies {
@@ -67,7 +67,7 @@ dependencyManagement {
         }
         dependency 'org.apache.commons:commons-csv:1.10.0'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'software.amazon.awssdk:bom:2.20.45'
+        dependency 'software.amazon.awssdk:bom:2.20.47'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.8.0'
@@ -176,7 +176,7 @@ dependencyManagement {
 
         dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.11.1'
 
-        dependency ('org.apache.activemq:activemq-broker:5.18.0') {
+        dependency ('org.apache.activemq:activemq-broker:5.18.1') {
             exclude 'javax.annotation:javax.annotation-api'
         }
 
@@ -199,7 +199,7 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
-        dependency ('org.liquibase:liquibase-core:4.21.0') {
+        dependency ('org.liquibase:liquibase-core:4.21.1') {
             exclude 'javax.xml.bind:jaxb-api'
         }
 
@@ -225,8 +225,8 @@ dependencyManagement {
             entry 'xml-path'
         }
 
-        dependency 'org.mapstruct:mapstruct:1.5.3.Final'
-        dependency 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+        dependency 'org.mapstruct:mapstruct:1.5.4.Final'
+        dependency 'org.mapstruct:mapstruct-processor:1.5.4.Final'
 
         dependency "org.apache.avro:avro:1.11.1"
 
