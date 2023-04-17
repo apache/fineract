@@ -21,7 +21,6 @@ package org.apache.fineract.cob.loan;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.InitialisationTasklet;
 import org.apache.fineract.cob.common.ResetContextTasklet;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -41,7 +40,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
@@ -62,8 +60,6 @@ public class LoanCOBWorkerConfiguration {
     @Autowired
     private COBBusinessStepService cobBusinessStepService;
     @Autowired
-    private LoanAccountLockRepository accountLockRepository;
-    @Autowired
     private AppUserRepositoryWrapper userRepository;
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -73,7 +69,7 @@ public class LoanCOBWorkerConfiguration {
     @Autowired
     private FineractProperties fineractProperties;
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private LoanLockingService loanLockingService;
 
     @Bean(name = LoanCOBConstant.LOAN_COB_WORKER_STEP)
     public Step loanCOBWorkerStep() {
@@ -120,12 +116,12 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ChunkProcessingLoanItemListener loanItemListener() {
-        return new ChunkProcessingLoanItemListener(accountLockRepository, transactionTemplate);
+        return new ChunkProcessingLoanItemListener(loanLockingService, transactionTemplate);
     }
 
     @Bean
     public ApplyLoanLockTasklet applyLock() {
-        return new ApplyLoanLockTasklet(accountLockRepository, fineractProperties, jdbcTemplate, retrieveLoanIdService);
+        return new ApplyLoanLockTasklet(fineractProperties, loanLockingService, retrieveLoanIdService);
     }
 
     @Bean
@@ -148,7 +144,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public LoanItemWriter cobWorkerItemWriter() {
-        LoanItemWriter repositoryItemWriter = new LoanItemWriter(accountLockRepository);
+        LoanItemWriter repositoryItemWriter = new LoanItemWriter(loanLockingService);
         repositoryItemWriter.setRepository(loanRepository);
         return repositoryItemWriter;
     }

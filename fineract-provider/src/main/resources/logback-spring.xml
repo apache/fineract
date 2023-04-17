@@ -36,7 +36,7 @@
     <logger name="org.springframework.boot.web.embedded.tomcat.TomcatWebServer" level="info"/>
     <logger name="org.apache.fineract.ServerApplication" level="info"/>
     <logger name="org.apache.fineract" level="${FINERACT_LOGGING_LEVEL:-INFO}"/>
-    <logger name="liquibase" level="info"/>
+    <logger name="liquibase" level="warn"/>
 
     <if condition="${jsonLoggingEnabled} == true">
         <then>

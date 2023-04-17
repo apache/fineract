@@ -21,7 +21,6 @@ package org.apache.fineract.cob.loan;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -32,14 +31,14 @@ import org.springframework.batch.item.data.RepositoryItemWriter;
 @RequiredArgsConstructor
 public abstract class AbstractLoanItemWriter extends RepositoryItemWriter<Loan> {
 
-    private final LoanAccountLockRepository accountLockRepository;
+    private final LoanLockingService loanLockingService;
 
     @Override
     public void write(@NotNull List<? extends Loan> items) throws Exception {
         if (!items.isEmpty()) {
             super.write(items);
             List<Long> loanIds = items.stream().map(AbstractPersistableCustom::getId).toList();
-            accountLockRepository.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
+            loanLockingService.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
         }
     }
 

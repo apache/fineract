@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.data.LoanCOBParameter;
+import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -52,6 +53,11 @@ public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdServ
         return loanRepository.findAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter.getMinLoanId(),
                 loanCOBParameter.getMaxLoanId(),
                 ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE).minusDays(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND));
+    }
+
+    @Override
+    public List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(LocalDate cobBusinessDate) {
+        return loanRepository.findAllStayedLockedByCobBusinessDate(cobBusinessDate);
     }
 
 }

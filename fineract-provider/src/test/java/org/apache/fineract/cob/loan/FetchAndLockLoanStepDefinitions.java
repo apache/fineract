@@ -19,8 +19,6 @@
 package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,26 +37,26 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 
 public class FetchAndLockLoanStepDefinitions implements En {
 
     private final LoanAccountLockRepository loanAccountLockRepository = mock(LoanAccountLockRepository.class);
-
     private final FineractProperties fineractProperties = mock(FineractProperties.class);
     private final FineractProperties.FineractQueryProperties fineractQueryProperties = mock(
             FineractProperties.FineractQueryProperties.class);
     StepContribution contribution;
+    ArgumentCaptor<LocalDate> dateValueCaptor = ArgumentCaptor.forClass(LocalDate.class);
+    ArgumentCaptor<LoanCOBParameter> loanCOBParameterValueCaptor = ArgumentCaptor.forClass(LoanCOBParameter.class);
     private LockLoanTasklet lockLoanTasklet;
     private String action;
     private RepeatStatus result;
-    private JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+    private final LoanLockingService loanLockingService = mock(LoanLockingService.class);
 
     public FetchAndLockLoanStepDefinitions() {
         Given("/^The FetchAndLockLoanTasklet.execute method with action (.*)$/", (String action) -> {
@@ -106,18 +104,21 @@ public class FetchAndLockLoanStepDefinitions implements En {
                         List.of(new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()))));
             }
 
-            lockLoanTasklet = new LockLoanTasklet(jdbcTemplate);
+            lockLoanTasklet = new LockLoanTasklet(loanLockingService);
         });
 
         When("FetchAndLockLoanTasklet.execute method executed", () -> {
-            result = this.lockLoanTasklet.execute(contribution, null);
+            result = lockLoanTasklet.execute(contribution, null);
         });
 
         Then("FetchAndLockLoanTasklet.execute result should match", () -> {
             if ("empty steps".equals(action)) {
                 assertEquals(RepeatStatus.FINISHED, result);
             } else if ("good".equals(action)) {
-                verify(jdbcTemplate).update(anyString(), (PreparedStatementSetter) any());
+                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture());
+                assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), dateValueCaptor.getValue());
+                assertEquals(1L, loanCOBParameterValueCaptor.getValue().getMinLoanId());
+                assertEquals(3L, loanCOBParameterValueCaptor.getValue().getMaxLoanId());
                 assertEquals(RepeatStatus.FINISHED, result);
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution()
                         .getExecutionContext().get(LoanCOBConstant.LOAN_COB_PARAMETER);
@@ -125,7 +126,10 @@ public class FetchAndLockLoanStepDefinitions implements En {
                 assertEquals(1L, loanCOBParameter.getMinLoanId());
                 assertEquals(3L, loanCOBParameter.getMaxLoanId());
             } else if ("soft lock".equals(action)) {
-                verify(jdbcTemplate).update(anyString(), (PreparedStatementSetter) any());
+                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture());
+                assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), dateValueCaptor.getValue());
+                assertEquals(1L, loanCOBParameterValueCaptor.getValue().getMinLoanId());
+                assertEquals(3L, loanCOBParameterValueCaptor.getValue().getMaxLoanId());
                 assertEquals(RepeatStatus.FINISHED, result);
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution()
                         .getExecutionContext().get(LoanCOBConstant.LOAN_COB_PARAMETER);
@@ -133,7 +137,10 @@ public class FetchAndLockLoanStepDefinitions implements En {
                 assertEquals(1L, loanCOBParameter.getMinLoanId());
                 assertEquals(3L, loanCOBParameter.getMaxLoanId());
             } else if ("inline cob".equals(action)) {
-                verify(jdbcTemplate).update(anyString(), (PreparedStatementSetter) any());
+                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture());
+                assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), dateValueCaptor.getValue());
+                assertEquals(1L, loanCOBParameterValueCaptor.getValue().getMinLoanId());
+                assertEquals(3L, loanCOBParameterValueCaptor.getValue().getMaxLoanId());
                 assertEquals(RepeatStatus.FINISHED, result);
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution()
                         .getExecutionContext().get(LoanCOBConstant.LOAN_COB_PARAMETER);
@@ -141,7 +148,10 @@ public class FetchAndLockLoanStepDefinitions implements En {
                 assertEquals(1L, loanCOBParameter.getMinLoanId());
                 assertEquals(3L, loanCOBParameter.getMaxLoanId());
             } else if ("chunk processing".equals(action)) {
-                verify(jdbcTemplate).update(anyString(), (PreparedStatementSetter) any());
+                verify(loanLockingService).applySoftLock(dateValueCaptor.capture(), loanCOBParameterValueCaptor.capture());
+                assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), dateValueCaptor.getValue());
+                assertEquals(1L, loanCOBParameterValueCaptor.getValue().getMinLoanId());
+                assertEquals(3L, loanCOBParameterValueCaptor.getValue().getMaxLoanId());
                 assertEquals(RepeatStatus.FINISHED, result);
                 LoanCOBParameter loanCOBParameter = (LoanCOBParameter) contribution.getStepExecution().getJobExecution()
                         .getExecutionContext().get(LoanCOBConstant.LOAN_COB_PARAMETER);

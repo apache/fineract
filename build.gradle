@@ -611,6 +611,10 @@ configure(project.fineractJavaProjects) {
         violationLogLevel="error"
         javaVersion = project.targetCompatibility
         ignoreGeneratedClasses = true
+        // Rules can be found here: https://github.com/gaul/modernizer-maven-plugin/blob/master/modernizer-maven-plugin/src/main/resources/modernizer.xml
+        exclusions = [
+            'java/util/Optional.get:()Ljava/lang/Object;' // Disable forcing the usage of Optional.orElseThrow(java.util.function.Supplier<? extends X>)
+        ]
     }
 }
 

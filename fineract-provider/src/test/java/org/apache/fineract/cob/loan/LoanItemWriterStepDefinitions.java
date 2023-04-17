@@ -25,17 +25,16 @@ import static org.mockito.Mockito.verify;
 import io.cucumber.java8.En;
 import java.util.Collections;
 import java.util.List;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.mockito.Mockito;
 
 public class LoanItemWriterStepDefinitions implements En {
 
-    private LoanAccountLockRepository accountLockRepository = mock(LoanAccountLockRepository.class);
-    private LoanRepository loanRepository = mock(LoanRepository.class);
+    private final LoanLockingService loanLockingService = mock(LoanLockingService.class);
+    private final LoanRepository loanRepository = mock(LoanRepository.class);
 
-    private LoanItemWriter loanItemWriter = new LoanItemWriter(accountLockRepository);
+    private final LoanItemWriter loanItemWriter = new LoanItemWriter(loanLockingService);
 
     private List<Loan> items;
 
@@ -45,24 +44,24 @@ public class LoanItemWriterStepDefinitions implements En {
             Loan loan = mock(Loan.class);
             lenient().when(loan.getId()).thenReturn(1L);
             if (action.equals("error")) {
-                this.items = Collections.emptyList();
+                items = Collections.emptyList();
             } else {
-                this.items = Collections.singletonList(loan);
-                lenient().doNothing().when(this.accountLockRepository).deleteByLoanIdInAndLockOwner(Mockito.anyList(), Mockito.any());
+                items = Collections.singletonList(loan);
+                lenient().doNothing().when(loanLockingService).deleteByLoanIdInAndLockOwner(Mockito.anyList(), Mockito.any());
             }
-            this.loanItemWriter.setRepository(loanRepository);
+            loanItemWriter.setRepository(loanRepository);
         });
 
         When("LoanItemWriter.write method executed", () -> {
-            this.loanItemWriter.write(items);
+            loanItemWriter.write(items);
         });
 
         Then("LoanItemWriter.write result should match", () -> {
-            verify(this.accountLockRepository, Mockito.times(1)).deleteByLoanIdInAndLockOwner(Mockito.any(), Mockito.any());
+            verify(loanLockingService, Mockito.times(1)).deleteByLoanIdInAndLockOwner(Mockito.any(), Mockito.any());
         });
 
         Then("LoanItemWriter.write should not call repository", () -> {
-            verify(this.accountLockRepository, Mockito.times(0)).deleteByLoanIdInAndLockOwner(Mockito.any(), Mockito.any());
+            verify(loanLockingService, Mockito.times(0)).deleteByLoanIdInAndLockOwner(Mockito.any(), Mockito.any());
         });
     }
 }
