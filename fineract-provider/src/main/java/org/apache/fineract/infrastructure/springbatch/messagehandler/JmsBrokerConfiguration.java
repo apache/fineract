@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.springbatch.messagehandler;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQPrefetchPolicy;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,12 +32,16 @@ public class JmsBrokerConfiguration {
 
     @Autowired
     private FineractProperties fineractProperties;
+    private static final int PREFETCH_MESSAGE_NUMBER = 1;
 
     @Bean
     public ActiveMQConnectionFactory connectionFactory() {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
         connectionFactory.setBrokerURL(fineractProperties.getRemoteJobMessageHandler().getJms().getBrokerUrl());
         connectionFactory.setTrustAllPackages(true);
+        ActiveMQPrefetchPolicy activeMQPrefetchPolicy = new ActiveMQPrefetchPolicy();
+        activeMQPrefetchPolicy.setAll(PREFETCH_MESSAGE_NUMBER);
+        connectionFactory.setPrefetchPolicy(activeMQPrefetchPolicy);
         FineractProperties.FineractRemoteJobMessageHandlerJmsProperties jmsProps = fineractProperties.getRemoteJobMessageHandler().getJms();
         if (jmsProps.isBrokerPasswordProtected()) {
             connectionFactory.setUserName(jmsProps.getBrokerUsername());
