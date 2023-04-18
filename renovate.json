@@ -103,6 +103,10 @@
     "allowedVersions": "<=6.15.0"
   },
   {
+    "matchPackageNames": ["org.liquibase:liquibase-core"],
+    "allowedVersions": "<=4.19.0"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"
