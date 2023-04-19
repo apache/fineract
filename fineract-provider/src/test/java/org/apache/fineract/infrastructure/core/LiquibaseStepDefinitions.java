@@ -34,7 +34,6 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor;
 import org.apache.fineract.infrastructure.core.service.migration.ExtendedSpringLiquibase;
 import org.apache.fineract.infrastructure.core.service.migration.ExtendedSpringLiquibaseFactory;
 import org.apache.fineract.infrastructure.core.service.migration.SchemaUpgradeNeededException;
@@ -67,8 +66,6 @@ public class LiquibaseStepDefinitions implements En {
     private SchemaUpgradeNeededException executionException;
     private DataSource defaultTenantDataSource;
     private Environment environment;
-
-    private DatabasePasswordEncryptor databasePasswordEncryptor;
 
     public LiquibaseStepDefinitions() {
         Given("Liquibase is disabled with a default tenant", () -> {
@@ -161,6 +158,7 @@ public class LiquibaseStepDefinitions implements En {
         liquibaseFactory = mock(ExtendedSpringLiquibaseFactory.class);
 
         defaultTenant = mock(FineractPlatformTenant.class);
+        given(defaultTenant.getTenantIdentifier()).willReturn("defaultTenant");
 
         allTenants = List.of(defaultTenant);
 
@@ -182,9 +180,11 @@ public class LiquibaseStepDefinitions implements En {
 
         given(tenantDetailsService.findAllTenants()).willReturn(allTenants);
         given(tenantDataSourceFactory.create(defaultTenant)).willReturn(defaultTenantDataSource);
-        given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db", "initial_switch")).willReturn(initialTenantLiquibase);
-        given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db")).willReturn(tenantLiquibase);
-        given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db", "custom_changelog")).willReturn(customChangeLogLiquibase);
+        given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db", "initial_switch", "defaultTenant"))
+                .willReturn(initialTenantLiquibase);
+        given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db", "defaultTenant")).willReturn(tenantLiquibase);
+        given(liquibaseFactory.create(defaultTenantDataSource, "tenant_db", "custom_changelog", "defaultTenant"))
+                .willReturn(customChangeLogLiquibase);
 
         tenantDatabaseUpgradeService = new TenantDatabaseUpgradeService(tenantDetailsService, tenantStoreDataSource, fineractProperties,
                 databaseStateVerifier, liquibaseFactory, tenantDataSourceFactory, environment, Arrays.asList(tenantPasswordEncryptor));
