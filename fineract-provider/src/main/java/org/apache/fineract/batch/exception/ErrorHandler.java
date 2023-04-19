@@ -19,6 +19,8 @@
 package org.apache.fineract.batch.exception;
 
 import com.google.gson.Gson;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
@@ -52,13 +54,20 @@ import org.springframework.transaction.TransactionException;
  */
 public class ErrorHandler extends RuntimeException {
 
-    private static final Gson jsonHelper = GoogleGsonSerializerHelper.createGsonBuilder(true).create();
+    private static Gson jsonHelper = GoogleGsonSerializerHelper.createGsonBuilder(true).create();
 
     /**
      * Sole Constructor
      */
     ErrorHandler() {
 
+    }
+
+    private static <E extends Exception, M extends ExceptionMapper<E>> ErrorInfo handleException(final E exception, final M mapper,
+            final int errorCode) {
+        final Response response = mapper.toResponse(exception);
+        final String errorBody = jsonHelper.toJson(response.getEntity());
+        return new ErrorInfo(response.getStatus(), errorCode, errorBody);
     }
 
     /**
@@ -68,70 +77,41 @@ public class ErrorHandler extends RuntimeException {
      * @return ErrorInfo
      */
     public static ErrorInfo handler(final RuntimeException exception) {
-
-        if (exception instanceof AbstractPlatformDomainRuleException) {
-            PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper();
-            final String errorBody = jsonHelper.toJson(mapper.toResponse((AbstractPlatformDomainRuleException) exception).getEntity());
-            return new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR, 9999, errorBody);
-        } else if (exception instanceof AbstractPlatformResourceNotFoundException) {
-
-            final PlatformResourceNotFoundExceptionMapper mapper = new PlatformResourceNotFoundExceptionMapper();
-            final String errorBody = jsonHelper
-                    .toJson(mapper.toResponse((AbstractPlatformResourceNotFoundException) exception).getEntity());
-
-            return new ErrorInfo(HttpStatus.SC_NOT_FOUND, 1001, errorBody);
-
-        } else if (exception instanceof UnsupportedParameterException) {
-
-            final UnsupportedParameterExceptionMapper mapper = new UnsupportedParameterExceptionMapper();
-            final String errorBody = jsonHelper.toJson(mapper.toResponse((UnsupportedParameterException) exception).getEntity());
-
-            return new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 2001, errorBody);
-
-        } else if (exception instanceof PlatformApiDataValidationException) {
-
-            final PlatformApiDataValidationExceptionMapper mapper = new PlatformApiDataValidationExceptionMapper();
-            final String errorBody = jsonHelper.toJson(mapper.toResponse((PlatformApiDataValidationException) exception).getEntity());
-
-            return new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 2002, errorBody);
-
-        } else if (exception instanceof PlatformDataIntegrityException) {
-
-            final PlatformDataIntegrityExceptionMapper mapper = new PlatformDataIntegrityExceptionMapper();
-            final String errorBody = jsonHelper.toJson(mapper.toResponse((PlatformDataIntegrityException) exception).getEntity());
-
-            return new ErrorInfo(HttpStatus.SC_FORBIDDEN, 3001, errorBody);
-
-        } else if (exception instanceof LinkedAccountRequiredException) {
-
-            final PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper();
-            final String errorBody = jsonHelper.toJson(mapper.toResponse((LinkedAccountRequiredException) exception).getEntity());
-
-            return new ErrorInfo(HttpStatus.SC_FORBIDDEN, 3002, errorBody);
-
-        } else if (exception instanceof MultiDisbursementDataRequiredException) {
-
-            final PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper();
-            final String errorBody = jsonHelper.toJson(mapper.toResponse((MultiDisbursementDataRequiredException) exception).getEntity());
-
-            return new ErrorInfo(HttpStatus.SC_FORBIDDEN, 3003, errorBody);
-
-        } else if (exception instanceof TransactionException) {
-            return new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 4001, "{\"Exception\": " + exception.getMessage() + "}");
-
-        } else if (exception instanceof PlatformInternalServerException) {
-
-            final PlatformInternalServerExceptionMapper mapper = new PlatformInternalServerExceptionMapper();
-            final String errorBody = jsonHelper.toJson(mapper.toResponse((PlatformInternalServerException) exception).getEntity());
-
-            return new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR, 5001, errorBody);
-        } else if (exception instanceof NonTransientDataAccessException) {
-            return new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 4001, "{\"Exception\": " + exception.getMessage() + "}");
-        } else if (exception instanceof LoanIdsHardLockedException e) {
+        if (exception instanceof AbstractPlatformResourceNotFoundException e) {
+            return handleException(e, new PlatformResourceNotFoundExceptionMapper(), 1001);
+        }
+        if (exception instanceof UnsupportedParameterException e) {
+            return handleException(e, new UnsupportedParameterExceptionMapper(), 2001);
+        }
+        if (exception instanceof PlatformApiDataValidationException e) {
+            return handleException(e, new PlatformApiDataValidationExceptionMapper(), 2002);
+        }
+        if (exception instanceof PlatformDataIntegrityException e) {
+            return handleException(e, new PlatformDataIntegrityExceptionMapper(), 3001);
+        }
+        if (exception instanceof LinkedAccountRequiredException e) {
+            return handleException(e, new PlatformDomainRuleExceptionMapper(), 3002);
+        }
+        if (exception instanceof MultiDisbursementDataRequiredException e) {
+            return handleException(e, new PlatformDomainRuleExceptionMapper(), 3003);
+        }
+        if (exception instanceof AbstractPlatformDomainRuleException e) {
+            return handleException(e, new PlatformDomainRuleExceptionMapper(), 9999);
+        }
+        if (exception instanceof TransactionException) {
+            return new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 4001, "{\"Exception\": %s}".formatted(exception.getMessage()));
+        }
+        if (exception instanceof PlatformInternalServerException e) {
+            return handleException(e, new PlatformInternalServerExceptionMapper(), 5001);
+        }
+        if (exception instanceof NonTransientDataAccessException) {
+            return new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 4002, "{\"Exception\": %s}".formatted(exception.getMessage()));
+        }
+        if (exception instanceof LoanIdsHardLockedException e) {
             String message = ApiGlobalErrorResponse.loanIsLocked(e.getLoanIdFromRequest()).toJson();
             return new ErrorInfo(HttpStatus.SC_CONFLICT, 4090, message);
         }
 
-        return new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR, 9999, "{\"Exception\": " + exception.toString() + "}");
+        return new ErrorInfo(500, 9999, "{\"Exception\": %s}".formatted(exception.getMessage()));
     }
 }
