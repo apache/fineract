@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.increasedateby1day.increasebusinessdateby1day;
 
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.jobs.service.increasedateby1day.IncreaseDateBy1DayService;
 import org.springframework.batch.core.Job;
@@ -38,6 +39,8 @@ public class IncreaseBusinessDateBy1DayConfig {
     private StepBuilderFactory steps;
     @Autowired
     private IncreaseDateBy1DayService increaseDateBy1DayService;
+    @Autowired
+    private ConfigurationDomainService configurationDomainService;
 
     @Bean
     protected Step increaseBusinessDateBy1DayStep() {
@@ -52,6 +55,6 @@ public class IncreaseBusinessDateBy1DayConfig {
 
     @Bean
     public IncreaseBusinessDateBy1DayTasklet increaseBusinessDateBy1DayTasklet() {
-        return new IncreaseBusinessDateBy1DayTasklet(increaseDateBy1DayService);
+        return new IncreaseBusinessDateBy1DayTasklet(increaseDateBy1DayService, configurationDomainService);
     }
 }
