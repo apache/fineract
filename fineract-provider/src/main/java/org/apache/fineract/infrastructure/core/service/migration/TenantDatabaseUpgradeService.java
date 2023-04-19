@@ -89,7 +89,7 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     }
 
     private void upgradeTenantStore() throws LiquibaseException {
-        log.warn("Upgrading tenant store DB at {}:{}", fineractProperties.getTenant().getHost(), fineractProperties.getTenant().getPort());
+        log.info("Upgrading tenant store DB at {}:{}", fineractProperties.getTenant().getHost(), fineractProperties.getTenant().getPort());
         logTenantStoreDetails();
         if (databaseStateVerifier.isFirstLiquibaseMigration(tenantDataSource)) {
             ExtendedSpringLiquibase liquibase = liquibaseFactory.create(tenantDataSource, TENANT_STORE_DB_CONTEXT, INITIAL_SWITCH_CONTEXT);
@@ -98,7 +98,7 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
         }
         SpringLiquibase liquibase = liquibaseFactory.create(tenantDataSource, TENANT_STORE_DB_CONTEXT);
         liquibase.afterPropertiesSet();
-        log.warn("Tenant store upgrade finished");
+        log.info("Tenant store upgrade finished");
     }
 
     private void logTenantStoreDetails() {
@@ -110,36 +110,47 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
         log.info("- fineract.tenant.identifier: {}", fineractProperties.getTenant().getIdentifier());
         log.info("- fineract.tenant.name: {}", fineractProperties.getTenant().getName());
 
-        log.info("- fineract.tenant.username: {}", fineractProperties.getTenant().getReadOnlyUsername());
-        log.info("- fineract.tenant.password: {}",
+        log.info("- fineract.tenant.readonly.username: {}", fineractProperties.getTenant().getReadOnlyUsername());
+        log.info("- fineract.tenant.readonly.password: {}",
                 StringUtils.isNotBlank(fineractProperties.getTenant().getReadOnlyPassword()) ? "****" : "");
-        log.info("- fineract.tenant.parameters: {}", fineractProperties.getTenant().getReadOnlyParameters());
-        log.info("- fineract.tenant.name: {}", fineractProperties.getTenant().getReadOnlyName());
+        log.info("- fineract.tenant.readonly.parameters: {}", fineractProperties.getTenant().getReadOnlyParameters());
+        log.info("- fineract.tenant.readonly.name: {}", fineractProperties.getTenant().getReadOnlyName());
 
     }
 
     private void upgradeIndividualTenants() throws LiquibaseException {
-        log.warn("Upgrading all tenants");
+        log.info("Upgrading all tenants");
         List<FineractPlatformTenant> tenants = tenantDetailsService.findAllTenants();
         if (isNotEmpty(tenants)) {
             for (FineractPlatformTenant tenant : tenants) {
                 upgradeIndividualTenant(tenant);
             }
         }
-        log.warn("Tenant upgrades have finished");
+        log.info("Tenant upgrades have finished");
     }
 
+    /**
+     * Upgrade each tenant's database
+     *
+     * Good to know: Each tenant's identifier is provided as a context variable to avoid caching of the liquibase
+     * migration (it was introduced as part of v4.21.0)
+     *
+     * @param tenant
+     * @throws LiquibaseException
+     */
     private void upgradeIndividualTenant(FineractPlatformTenant tenant) throws LiquibaseException {
         log.info("Upgrade for tenant {} has started", tenant.getTenantIdentifier());
         DataSource tenantDataSource = tenantDataSourceFactory.create(tenant);
         if (databaseStateVerifier.isFirstLiquibaseMigration(tenantDataSource)) {
-            ExtendedSpringLiquibase liquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, INITIAL_SWITCH_CONTEXT);
+            ExtendedSpringLiquibase liquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, INITIAL_SWITCH_CONTEXT,
+                    tenant.getTenantIdentifier());
             applyInitialLiquibase(tenantDataSource, liquibase, tenant.getTenantIdentifier(),
                     (ds) -> !databaseStateVerifier.isTenantOnLatestUpgradableVersion(ds));
         }
-        SpringLiquibase tenantLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT);
+        SpringLiquibase tenantLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, tenant.getTenantIdentifier());
         tenantLiquibase.afterPropertiesSet();
-        SpringLiquibase customChangelogLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, CUSTOM_CHANGELOG_CONTEXT);
+        SpringLiquibase customChangelogLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, CUSTOM_CHANGELOG_CONTEXT,
+                tenant.getTenantIdentifier());
         customChangelogLiquibase.afterPropertiesSet();
         log.info("Upgrade for tenant {} has finished", tenant.getTenantIdentifier());
     }
@@ -148,13 +159,13 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
             Function<DataSource, Boolean> isUpgradableFn) throws LiquibaseException {
         if (databaseStateVerifier.isFlywayPresent(dataSource)) {
             if (isUpgradableFn.apply(dataSource)) {
-                log.warn("Cannot proceed with upgrading database {}", id);
-                log.warn("It seems the database doesn't have the latest schema changes applied until the 1.6 release");
+                log.error("Cannot proceed with upgrading database {}", id);
+                log.error("It seems the database doesn't have the latest schema changes applied until the 1.6 release");
                 throw new SchemaUpgradeNeededException("Make sure to upgrade to Fineract 1.6 first and then to a newer version");
             }
-            log.warn("This is the first Liquibase migration for {}. We'll sync the changelog for you and then apply everything else", id);
+            log.info("This is the first Liquibase migration for {}. We'll sync the changelog for you and then apply everything else", id);
             liquibase.changeLogSync();
-            log.warn("Liquibase changelog sync is complete");
+            log.info("Liquibase changelog sync is complete");
         } else {
             liquibase.afterPropertiesSet();
         }
