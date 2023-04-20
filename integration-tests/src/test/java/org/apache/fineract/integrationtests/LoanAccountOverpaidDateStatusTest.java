@@ -30,8 +30,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
@@ -57,12 +55,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class LoanAccountOverpaidDateStatusTest {
 
     private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecErr400;
-    private ResponseSpecification responseSpecErr503;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private LoanTransactionHelper loanTransactionHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
     @BeforeEach
     public void setup() {
@@ -70,8 +65,6 @@ public class LoanAccountOverpaidDateStatusTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
     }
@@ -124,7 +117,7 @@ public class LoanAccountOverpaidDateStatusTest {
             GetLoansLoanIdResponse loanDetailsOverpaid = loanTransactionHelper.getLoanDetails((long) loanId);
             assertTrue(loanDetailsOverpaid.getStatus().getOverpaid());
             assertNotNull(loanDetailsOverpaid.getOverpaidOnDate());
-            assertEquals(loanDetailsOverpaid.getOverpaidOnDate(), todaysDate);
+            assertEquals(loanDetailsOverpaid.getOverpaidOnDate(), LocalDate.of(2022, 9, 9));
 
             // reverse repayment to make loan not overpaid and overpaid date is reset
             loanTransactionHelper.reverseRepayment(loanId, repaymentTransaction_4.getResourceId().intValue(), "10 September 2022");
@@ -141,7 +134,7 @@ public class LoanAccountOverpaidDateStatusTest {
             GetLoansLoanIdResponse loanDetailsOverpaid_1 = loanTransactionHelper.getLoanDetails((long) loanId);
             assertTrue(loanDetailsOverpaid_1.getStatus().getOverpaid());
             assertNotNull(loanDetailsOverpaid_1.getOverpaidOnDate());
-            assertEquals(loanDetailsOverpaid_1.getOverpaidOnDate(), todaysDate);
+            assertEquals(loanDetailsOverpaid_1.getOverpaidOnDate(), LocalDate.of(2022, 9, 11));
 
             // Credit balance refund to reset overpaid status
             loanTransactionHelper.creditBalanceRefund("12 September 2022", Float.valueOf(100), null, loanId, "");
@@ -164,7 +157,7 @@ public class LoanAccountOverpaidDateStatusTest {
             GetLoansLoanIdResponse loanDetailsOverpaid_3 = loanTransactionHelper.getLoanDetails((long) loanId);
             assertTrue(loanDetailsOverpaid_3.getStatus().getOverpaid());
             assertNotNull(loanDetailsOverpaid_3.getOverpaidOnDate());
-            assertEquals(loanDetailsOverpaid_3.getOverpaidOnDate(), todaysDate);
+            assertEquals(loanDetailsOverpaid_3.getOverpaidOnDate(), LocalDate.of(2022, 9, 14));
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }

@@ -47,9 +47,9 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
         public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {
             final Loan loan = event.get();
             log.debug("Loan Status change for loan {}", loan.getId());
-            if (loan.getStatus().isClosedObligationsMet()) {
+            if (loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid()) {
                 log.debug("Loan Status {} for loan {}", loan.getStatus().getCode(), loan.getId());
-                loanAccountDomainService.applyIncomeAccrualTransaction(loan);
+                loanAccountDomainService.applyFinalIncomeAccrualTransaction(loan);
             }
             if (loan.isOpen()) {
                 loan.handleMaturityDateActivate();

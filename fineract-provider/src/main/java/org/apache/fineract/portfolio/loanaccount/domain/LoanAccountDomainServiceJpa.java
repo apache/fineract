@@ -877,7 +877,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public void applyIncomeAccrualTransaction(Loan loan) {
+    public void applyFinalIncomeAccrualTransaction(Loan loan) {
         if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()
                 // to avoid collision with processIncomeAccrualTransactionOnLoanClosure()
                 && !(loan.getLoanInterestRecalculationDetails() != null
@@ -904,7 +904,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             if (total.isGreaterThanZero()) {
                 ExternalId externalId = externalIdFactory.create();
 
-                LoanTransaction accrualTransaction = LoanTransaction.accrueTransaction(loan, loan.getOffice(), loan.getClosedOnDate(),
+                LocalDate accrualTransactionDate = getFinalAccrualTransactionDate(loan);
+
+                LoanTransaction accrualTransaction = LoanTransaction.accrueTransaction(loan, loan.getOffice(), accrualTransactionDate,
                         total.getAmount(), interestPortion.getAmount(), feePortion.getAmount(), penaltyPortion.getAmount(), externalId);
 
                 Set<LoanChargePaidBy> accrualCharges = accrualTransaction.getLoanChargesPaid();
@@ -965,6 +967,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 });
             }
         }
+    }
+
+    private LocalDate getFinalAccrualTransactionDate(Loan loan) {
+        return switch (loan.getStatus()) {
+            case CLOSED_OBLIGATIONS_MET -> loan.getClosedOnDate();
+            case OVERPAID -> loan.getOverpaidOnDate();
+            default -> throw new IllegalStateException("Unexpected value: " + loan.getStatus());
+        };
     }
 
 }
