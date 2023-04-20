@@ -1229,6 +1229,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LoanTransaction loanTransaction = this.loanTransactionRepository.findByIdAndLoanId(command.entityId(), command.getLoanId())
                 .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId(), command.getLoanId()));
 
+        if (loanTransaction.isReversed()) {
+            throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
+                    "Loan transaction:" + transactionId + " chargeback not allowed as loan transaction repayment is reversed",
+                    transactionId);
+        }
+
+        if (!loanTransaction.isRepaymentLikeType()) {
+            throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
+                    "Loan transaction:" + transactionId + " chargeback not allowed as loan transaction is not repayment type, its type is "
+                            + loanTransaction.getTypeOf().getCode(),
+                    transactionId);
+        }
+
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) {
             throw new PlatformServiceUnavailableException("error.msg.loan.transfer.transaction.update.not.allowed",
@@ -1243,21 +1256,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     "Loan transaction:" + transactionId + " chargeback not allowed as loan product is interest recalculation enabled",
                     transactionId);
         }
-
         checkClientOrGroupActive(loan);
-
-        if (loanTransaction.isReversed()) {
-            throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
-                    "Loan transaction:" + transactionId + " chargeback not allowed as loan transaction repayment is reversed",
-                    transactionId);
-        }
-
-        if (!loanTransaction.isRepayment()) {
-            throw new PlatformServiceUnavailableException(
-                    "error.msg.loan.chargeback.operation.not.allowed", "Loan transaction:" + transactionId
-                            + " chargeback not allowed as loan transaction is not repayment, is " + loanTransaction.getTypeOf().getCode(),
-                    transactionId);
-        }
 
         final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();

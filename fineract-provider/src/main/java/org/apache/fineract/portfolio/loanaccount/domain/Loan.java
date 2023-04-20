@@ -3423,7 +3423,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         boolean isOverpaid = getTotalOverpaid() != null && getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0;
         if (isOverpaid) {
             // FIXME - kw - update account balance to negative amount.
-            handleLoanOverpayment(loanLifecycleStateMachine);
+            handleLoanOverpayment(transactionDate, loanLifecycleStateMachine);
             statusChanged = true;
         } else if (this.summary.isRepaidInFull(loanCurrency())) {
             handleLoanRepaymentInFull(transactionDate, loanLifecycleStateMachine);
@@ -3536,10 +3536,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         incomeDetailsMap.put(PENALTY, penalty);
     }
 
-    private void handleLoanOverpayment(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-
+    private void handleLoanOverpayment(LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        this.overpaidOnDate = transactionDate;
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, this);
-        this.overpaidOnDate = DateUtils.getBusinessLocalDate();
         this.closedOnDate = null;
         this.actualMaturityDate = null;
     }
