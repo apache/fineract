@@ -53,6 +53,8 @@ public final class BatchHelper {
     private static final Logger LOG = LoggerFactory.getLogger(BatchHelper.class);
     private static final String BATCH_API_URL = "/fineract-provider/api/v1/batches?" + Utils.TENANT_IDENTIFIER;
     private static final String BATCH_API_URL_EXT = BATCH_API_URL + "&enclosingTransaction=true";
+
+    private static final String BATCH_API_WITHOUT_ENCLOSING_URL_EXT = BATCH_API_URL + "&enclosingTransaction=false";
     private static final SecureRandom secureRandom = new SecureRandom();
 
     private BatchHelper() {
@@ -100,7 +102,8 @@ public final class BatchHelper {
      */
     public static List<BatchResponse> postBatchRequestsWithoutEnclosingTransaction(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
-        final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_URL, jsonifiedBatchRequests, null);
+        final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_WITHOUT_ENCLOSING_URL_EXT,
+                jsonifiedBatchRequests, null);
         LOG.info("BatchHelper Response {}", response);
         return BatchHelper.fromJsonString(response);
     }
@@ -629,6 +632,21 @@ public final class BatchHelper {
     }
 
     /**
+     * Creates a wrong {@link org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy} Request with given
+     * requestId and reference.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference ID
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest approveLoanWrongRequest(final Long requestId, final Long reference) {
+        return approveLoanWrongRequest(requestId, reference, LocalDate.now(ZoneId.systemDefault()).minusDays(10));
+    }
+
+    /**
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy} Request with
      * given requestId and reference.
      *
@@ -646,6 +664,20 @@ public final class BatchHelper {
 
         br.setRequestId(requestId);
         br.setRelativeUrl("loans/$.loanId?command=approve");
+        br.setReference(reference);
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"" + dateString + "\","
+                + "\"note\": \"Loan approval note\"}");
+
+        return br;
+    }
+
+    public static BatchRequest approveLoanWrongRequest(final Long requestId, final Long reference, LocalDate date) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl("loans/$.loanId?command=approveX");
         br.setReference(reference);
         br.setMethod("POST");
         String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));

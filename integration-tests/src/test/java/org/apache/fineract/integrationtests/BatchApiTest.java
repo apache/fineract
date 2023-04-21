@@ -77,7 +77,6 @@ import org.slf4j.LoggerFactory;
  * commandStrategy by injecting it with a {@code BatchRequest}.
  *
  * @author RishabhShukla
- *
  * @see org.apache.fineract.integrationtests.common.BatchHelper
  * @see org.apache.fineract.batch.domain.BatchRequest
  */
@@ -783,6 +782,67 @@ public class BatchApiTest {
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(4).getStatusCode(), "Verify Status Code 200 for Repayment");
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(5).getStatusCode(),
                 "Verify Status Code 200 for Credit Balance Refund");
+    }
+
+    @Test
+    public void partialFailTestForBatchRequest() {
+
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("1000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        final Long createActiveClientRequestId = 4730L;
+        final Long applyLoanRequestId = createActiveClientRequestId + 1;
+        final Long approveLoanRequestId = applyLoanRequestId + 1;
+        final Long disburseLoanRequestId = approveLoanRequestId + 1;
+        final Long fetchLoanInfoRequestId = disburseLoanRequestId + 1;
+
+        // Create a createClient Request
+        final BatchRequest br1 = BatchHelper.createActiveClientRequest(createActiveClientRequestId, "");
+
+        // Create a ApplyLoan Request
+        final BatchRequest br2 = BatchHelper.applyLoanRequest(applyLoanRequestId, createActiveClientRequestId, productId,
+                clientCollateralId);
+
+        // Create a wrong approveLoan Request
+        final BatchRequest br3 = BatchHelper.approveLoanWrongRequest(approveLoanRequestId, applyLoanRequestId);
+
+        // Fetch loan info
+        final BatchRequest br4 = BatchHelper.getLoanByIdRequest(fetchLoanInfoRequestId, applyLoanRequestId, null);
+
+        final List<BatchRequest> batchRequests = new ArrayList<>();
+
+        batchRequests.add(br1);
+        batchRequests.add(br2);
+        batchRequests.add(br3);
+        batchRequests.add(br4);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        Assertions.assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, (long) response.get(2).getStatusCode(), "Resource doesn not exists");
+        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(3).getStatusCode(),
+                "Verify Status Code 200 for fetch data after the error");
     }
 
     /**

@@ -115,15 +115,11 @@ public class BatchApiServiceImpl implements BatchApiService {
 
         for (BatchRequestNode rootNode : batchRequestNodes) {
             if (enclosingTransaction) {
-                this.callRequestRecursive(rootNode.getRequest(), rootNode, responseList, uriInfo);
+                this.callRequestRecursive(rootNode.getRequest(), rootNode, responseList, uriInfo, enclosingTransaction);
             } else {
-                responseList.addAll(callInTransaction(
-                        transactionTemplate -> transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
-                        () -> {
-                            List<BatchResponse> localResponseList = new ArrayList<>();
-                            this.callRequestRecursive(rootNode.getRequest(), rootNode, localResponseList, uriInfo);
-                            return localResponseList;
-                        }));
+                List<BatchResponse> localResponseList = new ArrayList<>();
+                this.callRequestRecursive(rootNode.getRequest(), rootNode, localResponseList, uriInfo, enclosingTransaction);
+                responseList.addAll(localResponseList);
             }
         }
         Collections.sort(responseList, Comparator.comparing(BatchResponse::getRequestId));
@@ -141,10 +137,18 @@ public class BatchApiServiceImpl implements BatchApiService {
      *            the collected responses
      * @return {@code BatchResponse}
      */
-    private void callRequestRecursive(BatchRequest request, BatchRequestNode requestNode, List<BatchResponse> responseList,
-            UriInfo uriInfo) {
+    private void callRequestRecursive(BatchRequest request, BatchRequestNode requestNode, List<BatchResponse> responseList, UriInfo uriInfo,
+            boolean enclosingTransaction) {
         // 1. run current node
-        BatchResponse response = executeRequest(request, uriInfo);
+        BatchResponse response;
+        if (enclosingTransaction) {
+            response = executeRequest(request, uriInfo);
+        } else {
+            List<BatchResponse> transactionResponse = callInTransaction(
+                    transactionTemplate -> transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
+                    () -> List.of(executeRequest(request, uriInfo)));
+            response = transactionResponse.get(0);
+        }
         responseList.add(response);
         if (response.getStatusCode() != null && response.getStatusCode() == 200) {
             requestNode.getChildRequests().forEach(childNode -> {
@@ -154,7 +158,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                 } catch (RuntimeException ex) {
                     throw new BatchExecutionException(childNode.getRequest(), ex);
                 }
-                callRequestRecursive(resolvedChildRequest, childNode, responseList, uriInfo);
+                callRequestRecursive(resolvedChildRequest, childNode, responseList, uriInfo, enclosingTransaction);
 
             });
         } else {
