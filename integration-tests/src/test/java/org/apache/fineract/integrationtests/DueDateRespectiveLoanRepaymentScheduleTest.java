@@ -610,17 +610,25 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             assertEquals(100.0, response.getTotalOverpaid());
             assertTrue(response.getStatus().getOverpaid());
 
-            assertEquals(secondRepaymentId, response.getTransactions().get(2).getId().intValue());
-            assertNull(response.getTransactions().get(2).getReversedOnDate());
-            assertTrue(response.getTransactions().get(2).getTransactionRelations().isEmpty());
-            assertTrue(response.getTransactions().get(2).getType().getRepayment());
-            assertEquals(650.0, response.getTransactions().get(2).getAmount());
-            assertEquals(550.0, response.getTransactions().get(2).getPrincipalPortion());
-            assertEquals(0.0, response.getTransactions().get(2).getPenaltyChargesPortion());
-            assertEquals(100.0, response.getTransactions().get(2).getOverpaymentPortion());
-            assertEquals(0.0, response.getTransactions().get(2).getInterestPortion());
-            assertEquals(0.0, response.getTransactions().get(2).getFeeChargesPortion());
-            assertEquals(0.0, response.getTransactions().get(2).getOutstandingLoanBalance());
+            int secondRepaymentIndex;
+            // The repayment and accrual order is not consistent
+            if (response.getTransactions().get(2).getType().getRepayment()) {
+                secondRepaymentIndex = 2;
+            } else {
+                secondRepaymentIndex = 3;
+            }
+
+            assertEquals(secondRepaymentId, response.getTransactions().get(secondRepaymentIndex).getId().intValue());
+            assertNull(response.getTransactions().get(secondRepaymentIndex).getReversedOnDate());
+            assertTrue(response.getTransactions().get(secondRepaymentIndex).getTransactionRelations().isEmpty());
+            assertTrue(response.getTransactions().get(secondRepaymentIndex).getType().getRepayment());
+            assertEquals(650.0, response.getTransactions().get(secondRepaymentIndex).getAmount());
+            assertEquals(550.0, response.getTransactions().get(secondRepaymentIndex).getPrincipalPortion());
+            assertEquals(0.0, response.getTransactions().get(secondRepaymentIndex).getPenaltyChargesPortion());
+            assertEquals(100.0, response.getTransactions().get(secondRepaymentIndex).getOverpaymentPortion());
+            assertEquals(0.0, response.getTransactions().get(secondRepaymentIndex).getInterestPortion());
+            assertEquals(0.0, response.getTransactions().get(secondRepaymentIndex).getFeeChargesPortion());
+            assertEquals(0.0, response.getTransactions().get(secondRepaymentIndex).getOutstandingLoanBalance());
 
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);

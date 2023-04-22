@@ -427,6 +427,84 @@ public class LoanChargeSpecificDueDateTest {
         }
     }
 
+    @Test
+    public void testApplyFeeAccrualWhenLoanOverpaid() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+
+            final LocalDate todaysDate = Utils.getLocalDateOfTenant();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
+
+            // Client and Loan account creation
+            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithPeriodicAccrual(
+                    loanTransactionHelper, null);
+            assertNotNull(getLoanProductsProductResponse);
+
+            LocalDate transactionDate = LocalDate.of(Utils.getLocalDateOfTenant().getYear(), 1, 1);
+            String operationDate = Utils.dateFormatter.format(transactionDate);
+            log.info("Disbursement date {}", transactionDate);
+
+            // Create Loan Account
+            final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
+                    getLoanProductsProductResponse.getId().toString(), operationDate, "1", "0");
+
+            // Get loan details
+            GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("0.00"), true);
+
+            // Apply Loan Charge with specific due date
+            String feeAmount = "10.00";
+            String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
+            final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+            assertNotNull(postChargesResponse);
+            final Long chargeId = postChargesResponse.getResourceId();
+            assertNotNull(chargeId);
+
+            // First Loan Charge
+            transactionDate = transactionDate.plusDays(1);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, transactionDate);
+            operationDate = Utils.dateFormatter.format(transactionDate);
+            log.info("Operation date {}", transactionDate);
+            payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(chargeId.toString(), operationDate, feeAmount);
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
+                    responseSpec);
+            assertNotNull(postLoansLoanIdChargesResponse);
+            final Long loanChargeId01 = postLoansLoanIdChargesResponse.getResourceId();
+            assertNotNull(loanChargeId01);
+
+            Float amount = Float.valueOf("1020.00");
+            transactionDate = transactionDate.plusDays(2);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, transactionDate);
+            operationDate = Utils.dateFormatter.format(transactionDate);
+            log.info("Operation date {}", transactionDate);
+            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                    loanId);
+            assertNotNull(loanIdTransactionsResponse);
+            log.info("Loan Transaction Id: {} {}", loanId, loanIdTransactionsResponse.getResourceId());
+
+            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            assertNotNull(getLoansLoanIdResponse);
+            loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
+
+            final Long transactionId = loanTransactionHelper.evaluateLastLoanTransactionData(getLoansLoanIdResponse,
+                    "loanTransactionType.accrual", operationDate, Double.valueOf("10.00"));
+            assertNotNull(transactionId);
+            log.info("transactionId {}", transactionId);
+
+            final GetJournalEntriesTransactionIdResponse journalEntriesResponse = journalEntryHelper.getJournalEntries("L" + transactionId);
+            assertNotNull(journalEntriesResponse);
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesResponse.getPageItems();
+            assertEquals(2, journalEntries.size());
+            assertEquals(10, journalEntries.get(0).getAmount());
+            assertEquals(10, journalEntries.get(1).getAmount());
+            assertEquals(transactionDate, journalEntries.get(0).getTransactionDate());
+            assertEquals(transactionDate, journalEntries.get(1).getTransactionDate());
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
             final Integer delinquencyBucketId) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);

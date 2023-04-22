@@ -32,7 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -69,54 +72,60 @@ public class LoanAccountFraudTest {
 
     @Test
     public void testMarkLoanAsFraud() {
-        final String command = "markAsFraud";
-        // Client and Loan account creation
-        final Integer loanId = createAccounts(15, 1);
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
+            final String command = "markAsFraud";
+            // Client and Loan account creation
+            final Integer loanId = createAccounts(15, 1);
 
-        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        assertNotNull(getLoansLoanIdResponse);
+            GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            assertNotNull(getLoansLoanIdResponse);
 
-        // Default values Not Null and False
-        assertNotNull(getLoansLoanIdResponse.getFraud());
-        assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
+            // Default values Not Null and False
+            assertNotNull(getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
 
-        String payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
-        // Send the request expecting an error because the Loan is not active yet
-        PutLoansLoanIdResponse putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload,
-                this.responseSpecError);
+            String payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
+            // Send the request, not expecting any errors (because only open loan restriction removed)
+            PutLoansLoanIdResponse putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload,
+                    this.responseSpec);
 
-        String statusCode = getLoansLoanIdResponse.getStatus().getCode();
-        log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
+            String statusCode = getLoansLoanIdResponse.getStatus().getCode();
+            log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
-        // Approve the Loan active
-        approveAndDisburseLoan(loanId, this.operationDate, this.amountVal);
+            // Approve the Loan active
+            approveAndDisburseLoan(loanId, this.operationDate, this.amountVal);
 
-        // Default values Not Null and False
-        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        assertNotNull(getLoansLoanIdResponse);
-        assertNotNull(getLoansLoanIdResponse.getFraud());
-        assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
-        statusCode = getLoansLoanIdResponse.getStatus().getCode();
-        log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
+            // Default values Not Null and False
+            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            assertNotNull(getLoansLoanIdResponse);
+            assertNotNull(getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
+            statusCode = getLoansLoanIdResponse.getStatus().getCode();
+            log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
-        // Mark On the Fraud
-        putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload, this.responseSpec);
-        assertNotNull(putLoansLoanIdResponse);
+            // Mark On the Fraud
+            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload, this.responseSpec);
+            assertNotNull(putLoansLoanIdResponse);
 
-        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        assertNotNull(getLoansLoanIdResponse);
-        assertNotNull(getLoansLoanIdResponse.getFraud());
-        assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
+            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            assertNotNull(getLoansLoanIdResponse);
+            assertNotNull(getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
 
-        // Mark Off the Fraud
-        payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "false");
-        putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload, this.responseSpec);
-        assertNotNull(putLoansLoanIdResponse);
+            // Mark Off the Fraud
+            payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "false");
+            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload, this.responseSpec);
+            assertNotNull(putLoansLoanIdResponse);
 
-        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        assertNotNull(getLoansLoanIdResponse);
-        assertNotNull(getLoansLoanIdResponse.getFraud());
-        assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
+            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            assertNotNull(getLoansLoanIdResponse);
+            assertNotNull(getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
     }
 
     private Integer createAccounts(final Integer daysToSubtract, final Integer numberOfRepayments) {
