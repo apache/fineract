@@ -43,6 +43,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.fineract.batch.command.internal.AdjustTransactionCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -1326,6 +1327,7 @@ public class BatchApiTest {
      * @see org.apache.fineract.batch.command.internal.CreateDatatableEntryCommandStrategy
      * @see org.apache.fineract.batch.command.internal.UpdateDatatableEntryOneToManyCommandStrategy
      * @see org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdCommandStrategy
+     * @see GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulCreateDataTableEntry() {
@@ -1373,8 +1375,12 @@ public class BatchApiTest {
         final BatchRequest getDatatableEntriesRequest = BatchHelper.getDatatableByIdRequest(loanId, datatableName, null,
                 updateDatatableEntryByEntryIdRequest.getReference());
 
+        // Get datatable entry by app table id batch request
+        final BatchRequest getDatatableEntryByIdRequest = BatchHelper.getDatatableEntryByIdRequest(loanId, datatableName, "$.resourceId",
+                null, updateDatatableEntryByEntryIdRequest.getReference());
+
         final List<BatchRequest> batchRequestsDatatableEntries = Arrays.asList(createDatatableEntryRequest,
-                updateDatatableEntryByEntryIdRequest, getDatatableEntriesRequest);
+                updateDatatableEntryByEntryIdRequest, getDatatableEntriesRequest, getDatatableEntryByIdRequest);
         LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsDatatableEntries));
 
         final List<BatchResponse> responseDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
@@ -1385,9 +1391,12 @@ public class BatchApiTest {
         final BatchResponse batchResponse1 = responseDatatableBatch.get(0);
         final BatchResponse batchResponse2 = responseDatatableBatch.get(1);
         final BatchResponse batchResponse3 = responseDatatableBatch.get(2);
+        final BatchResponse batchResponse4 = responseDatatableBatch.get(3);
+
         Assertions.assertEquals(HttpStatus.SC_OK, batchResponse1.getStatusCode(), "Verify Status Code 200 for create datatable entry");
         Assertions.assertEquals(HttpStatus.SC_OK, batchResponse2.getStatusCode(), "Verify Status Code 200 for update datatable entry");
         Assertions.assertEquals(HttpStatus.SC_OK, batchResponse3.getStatusCode(), "Verify Status Code 200 for get datatable entries");
+        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse4.getStatusCode(), "Verify Status Code 200 for get datatable entry by id");
 
         final String getDatatableEntriesResponse = batchResponse3.getBody();
 

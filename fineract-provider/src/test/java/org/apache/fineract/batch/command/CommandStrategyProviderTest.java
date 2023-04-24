@@ -45,6 +45,7 @@ import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandSt
 import org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetChargeByChargeExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetChargeByIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByQueryCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetLoanByExternalIdCommandStrategy;
@@ -174,6 +175,9 @@ public class CommandStrategyProviderTest {
                         mock(GetDatatableEntryByAppTableIdCommandStrategy.class)),
                 Arguments.of("datatables/test_dt_table/123?genericResultSet=true", HttpMethod.GET,
                         "getDatatableEntryByAppTableIdCommandStrategy", mock(GetDatatableEntryByAppTableIdCommandStrategy.class)),
+                Arguments.of("datatables/test_dt_table/123/1?genericResultSet=true", HttpMethod.GET,
+                        "getDatatableEntryByAppTableIdAndDataTableIdCommandStrategy",
+                        mock(GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy.class)),
                 Arguments.of("datatables/test_dt_table/123", HttpMethod.POST, "createDatatableEntryCommandStrategy",
                         mock(CreateDatatableEntryCommandStrategy.class)),
                 Arguments.of("datatables/test_dt_table/123/1", HttpMethod.PUT, "updateDatatableEntryOneToManyCommandStrategy",
@@ -185,7 +189,9 @@ public class CommandStrategyProviderTest {
                 Arguments.of("loans/123", HttpMethod.PUT, "modifyLoanApplicationCommandStrategy",
                         mock(ModifyLoanApplicationCommandStrategy.class)),
                 Arguments.of("datatables/test_dt_table/query?columnFilter=id&valueFilter=12&resultColumns=id", HttpMethod.GET,
-                        "getDatatableEntryByQueryCommandStrategy", mock(GetDatatableEntryByQueryCommandStrategy.class)));
+                        "getDatatableEntryByQueryCommandStrategy", mock(GetDatatableEntryByQueryCommandStrategy.class)),
+                Arguments.of("datatables/test_dt_table/query?columnFilter=custom_id&valueFilter=10a62-d438-2319&resultColumns=id",
+                        HttpMethod.GET, "getDatatableEntryByQueryCommandStrategy", mock(GetDatatableEntryByQueryCommandStrategy.class)));
     }
 
     /**
