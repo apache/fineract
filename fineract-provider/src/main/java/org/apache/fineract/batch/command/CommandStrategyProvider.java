@@ -50,7 +50,7 @@ public class CommandStrategyProvider {
     /**
      * Regex pattern for specifying query params
      */
-    private static final String MANDATORY_QUERY_PARAM_REGEX = "(\\?(\\w+(?:\\=[\\w,]+|&)+)+)";
+    private static final String MANDATORY_QUERY_PARAM_REGEX = "(\\?(\\w+(?:\\=[\\w\\-,]+|&)+)+)";
 
     /**
      * Regex pattern for specifying any query param that has key = 'command' or not specific anything.
@@ -202,6 +202,9 @@ public class CommandStrategyProvider {
         commandStrategies.put(CommandContext
                 .resource("datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX + OPTIONAL_QUERY_PARAM_REGEX)
                 .method(GET).build(), "getDatatableEntryByAppTableIdCommandStrategy");
+        commandStrategies.put(CommandContext.resource("datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX + "\\/"
+                + NUMBER_REGEX + OPTIONAL_QUERY_PARAM_REGEX).method(GET).build(),
+                "getDatatableEntryByAppTableIdAndDataTableIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("loans\\/" + NUMBER_REGEX + OPTIONAL_COMMAND_PARAM_REGEX).method(PUT).build(),
                 "modifyLoanApplicationCommandStrategy");
         commandStrategies.put(

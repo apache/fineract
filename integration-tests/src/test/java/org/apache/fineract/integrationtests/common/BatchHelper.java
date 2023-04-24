@@ -1167,6 +1167,38 @@ public final class BatchHelper {
     }
 
     /**
+     * Creates and returns a batch request to get datatable entry.
+     *
+     * @param loanId
+     *            the loan id
+     * @param datatableName
+     *            the name of datatable
+     * @param appTableId
+     *            the app table id
+     * @param queryParameter
+     *            the query parameters
+     * @param referenceId
+     *            the reference id
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getDatatableEntryByIdRequest(final Long loanId, final String datatableName, final String appTableId,
+            final String queryParameter, final Long referenceId) {
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl = String.format("datatables/%s/%s/%s", datatableName, loanId, appTableId);
+        if (queryParameter != null) {
+            relativeUrl = relativeUrl + "?" + queryParameter;
+        }
+
+        br.setRequestId(4572L);
+        br.setReference(referenceId);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setBody("{}");
+
+        return br;
+    }
+
+    /**
      * Creates and returns a batch request to create datatable entry.
      *
      * @param loanId
