@@ -42,6 +42,11 @@ public class CheckLoanRepaymentOverdueBusinessStep implements LoanCOBBusinessSte
     public Loan execute(Loan loan) {
         log.debug("start processing loan repayment overdue business step for loan with Id [{}]", loan.getId());
         Long numberOfDaysAfterDueDateToRaiseEvent = configurationDomainService.retrieveRepaymentOverdueDays();
+        if (loan.getLoanProduct().getOverDueDaysForRepaymentEvent() != null) {
+            if (loan.getLoanProduct().getOverDueDaysForRepaymentEvent() > 0) {
+                numberOfDaysAfterDueDateToRaiseEvent = loan.getLoanProduct().getOverDueDaysForRepaymentEvent().longValue();
+            }
+        }
         final LocalDate currentDate = DateUtils.getBusinessLocalDate();
         final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
         for (LoanRepaymentScheduleInstallment repaymentSchedule : loanRepaymentScheduleInstallments) {

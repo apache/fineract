@@ -202,6 +202,12 @@ public class LoanProduct extends AbstractPersistableCustom {
     @JoinColumn(name = "delinquency_bucket_id")
     private DelinquencyBucket delinquencyBucket;
 
+    @Column(name = "due_days_for_repayment_event")
+    private Integer dueDaysForRepaymentEvent;
+
+    @Column(name = "overdue_days_for_repayment_event")
+    private Integer overDueDaysForRepaymentEvent;
+
     public static LoanProduct assembleFromJson(final Fund fund, final String loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
@@ -373,6 +379,10 @@ public class LoanProduct extends AbstractPersistableCustom {
 
         final Integer overAppliedNumber = command.integerValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER);
 
+        final Integer dueDaysForRepaymentEvent = command.integerValueOfParameterNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT);
+        final Integer overDueDaysForRepaymentEvent = command
+                .integerValueOfParameterNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
@@ -388,7 +398,8 @@ public class LoanProduct extends AbstractPersistableCustom {
                 defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
-                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber);
+                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
+                overDueDaysForRepaymentEvent);
 
     }
 
@@ -599,7 +610,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
             final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
-            final Integer overAppliedNumber) {
+            final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
         this.name = name.trim();
@@ -681,6 +692,10 @@ public class LoanProduct extends AbstractPersistableCustom {
         if (rates != null) {
             this.rates = rates;
         }
+
+        this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
+        this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
+
         validateLoanProductPreSave();
     }
 
@@ -1184,6 +1199,21 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.overAppliedNumber = newValue;
         }
 
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, this.dueDaysForRepaymentEvent)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT);
+            actualChanges.put(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.dueDaysForRepaymentEvent = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT,
+                this.overDueDaysForRepaymentEvent)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT);
+            actualChanges.put(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.overDueDaysForRepaymentEvent = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -1569,6 +1599,14 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public void setDelinquencyBucket(DelinquencyBucket delinquencyBucket) {
         this.delinquencyBucket = delinquencyBucket;
+    }
+
+    public Integer getDueDaysForRepaymentEvent() {
+        return this.dueDaysForRepaymentEvent;
+    }
+
+    public Integer getOverDueDaysForRepaymentEvent() {
+        return this.overDueDaysForRepaymentEvent;
     }
 
 }
