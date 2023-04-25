@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.L
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,10 +76,13 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         when(configurationDomainService.retrieveRepaymentDueDays()).thenReturn(1L);
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
         Loan loanForProcessing = Mockito.mock(Loan.class);
+        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                 BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallment);
+        when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
+        when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
         // when
@@ -97,16 +101,47 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         when(configurationDomainService.retrieveRepaymentDueDays()).thenReturn(1L);
         LocalDate loanInstallmentRepaymentDueDateAfter5Days = DateUtils.getBusinessLocalDate().plusDays(5);
         Loan loanForProcessing = Mockito.mock(Loan.class);
+        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays
                 .asList(new LoanRepaymentScheduleInstallment(loanForProcessing, 1, LocalDate.now(ZoneId.systemDefault()),
                         loanInstallmentRepaymentDueDateAfter5Days, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                         BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0)));
+        when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
+        when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
         // when
         Loan processedLoan = underTest.execute(loanForProcessing);
         // then
         verify(businessEventNotifierService, times(0)).notifyPostBusinessEvent(any());
+        assertEquals(processedLoan, loanForProcessing);
+
+    }
+
+    @Test
+    public void givenLoanWithInstallmentDueAfterConfiguredDaysInLoanProductWhenStepExecutionThenBusinessEventIsRaised() {
+        ArgumentCaptor<LoanRepaymentDueBusinessEvent> loanRepaymentDueEvent = ArgumentCaptor.forClass(LoanRepaymentDueBusinessEvent.class);
+        // given
+        // Global config settings
+        when(configurationDomainService.retrieveRepaymentDueDays()).thenReturn(2L);
+        LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
+        Loan loanForProcessing = Mockito.mock(Loan.class);
+        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
+        LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
+                LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
+                BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
+        List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallment);
+        when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
+        // Loan Product setting overrides global settings
+        when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(1);
+        when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
+
+        // when
+        Loan processedLoan = underTest.execute(loanForProcessing);
+        // then
+        verify(businessEventNotifierService, times(1)).notifyPostBusinessEvent(loanRepaymentDueEvent.capture());
+        LoanRepaymentScheduleInstallment loanPayloadForEvent = loanRepaymentDueEvent.getValue().get();
+        assertEquals(repaymentInstallment, loanPayloadForEvent);
         assertEquals(processedLoan, loanForProcessing);
 
     }

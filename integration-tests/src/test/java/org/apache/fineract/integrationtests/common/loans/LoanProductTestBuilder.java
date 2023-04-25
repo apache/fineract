@@ -138,6 +138,8 @@ public class LoanProductTestBuilder {
     private String installmentAmountInMultiplesOf;
     private boolean canDefineInstallmentAmount;
     private Integer delinquencyBucketId;
+    private Integer dueDaysForRepaymentEvent = null;
+    private Integer overDueDaysForRepaymentEvent = null;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = build(chargeId, null);
@@ -265,6 +267,13 @@ public class LoanProductTestBuilder {
         }
         if (this.penaltyToIncomeAccountMappings != null) {
             map.put("penaltyToIncomeAccountMappings", this.penaltyToIncomeAccountMappings);
+        }
+
+        if (this.dueDaysForRepaymentEvent != null) {
+            map.put("dueDaysForRepaymentEvent", this.dueDaysForRepaymentEvent);
+        }
+        if (this.overDueDaysForRepaymentEvent != null) {
+            map.put("overDueDaysForRepaymentEvent", this.overDueDaysForRepaymentEvent);
         }
 
         return map;
@@ -656,4 +665,15 @@ public class LoanProductTestBuilder {
         this.feeAndPenaltyAssetAccount = account;
         return this;
     }
+
+    public LoanProductTestBuilder withDueDaysForRepaymentEvent(final Integer dueDaysForRepaymentEvent) {
+        this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
+        return this;
+    }
+
+    public LoanProductTestBuilder withOverDueDaysForRepaymentEvent(final Integer overDueDaysForRepaymentEvent) {
+        this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
+        return this;
+    }
+
 }

@@ -143,4 +143,8 @@ public interface LoanProductConstants {
     String OVER_APPLIED_NUMBER = "overAppliedNumber";
     String DELINQUENCY_BUCKET_PARAM_NAME = "delinquencyBucketId";
 
+    // repayment events related
+    String DUE_DAYS_FOR_REPAYMENT_EVENT = "dueDaysForRepaymentEvent";
+    String OVER_DUE_DAYS_FOR_REPAYMENT_EVENT = "overDueDaysForRepaymentEvent";
+
 }

@@ -216,6 +216,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.disallow_expected_disbursements as disallowExpectedDisbursements, lp.allow_approved_disbursed_amounts_over_applied as allowApprovedDisbursedAmountsOverApplied, lp.over_applied_calculation_type as overAppliedCalculationType, over_applied_number as overAppliedNumber, "
                     + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
                     + "lp.can_define_fixed_emi_amount as canDefineInstallmentAmount, lp.instalment_amount_in_multiples_of as installmentAmountInMultiplesOf, "
+                    + "lp.due_days_for_repayment_event as dueDaysForRepaymentEvent, lp.overdue_days_for_repayment_event as overDueDaysForRepaymentEvent,"
                     + "lpr.pre_close_interest_calculation_strategy as preCloseInterestCalculationStrategy, "
                     + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
                     + "lpr.rest_frequency_type_enum as restFrequencyEnum, lpr.rest_frequency_interval as restFrequencyInterval, "
@@ -345,6 +346,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final boolean useBorrowerCycle = rs.getBoolean("useBorrowerCycle");
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate closeDate = JdbcSupport.getLocalDate(rs, "closeDate");
+            final Integer dueDaysForRepaymentEvent = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "dueDaysForRepaymentEvent");
+            final Integer overDueDaysForRepaymentEvent = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "overDueDaysForRepaymentEvent");
             String status = "";
             if (closeDate != null && closeDate.isBefore(DateUtils.getBusinessLocalDate())) {
                 status = "loanProduct.inActive";
@@ -499,7 +502,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
                     maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates,
-                    isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket);
+                    isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket,
+                    dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent);
         }
     }
 

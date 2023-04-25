@@ -70,6 +70,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
 import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
+import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
+import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
@@ -1843,5 +1845,9 @@ public class LoanTransactionHelper extends IntegrationTest {
         log.info("---------------------------------GET LOANS BY STATUS---------------------------------------------");
         final String get = Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_URL, null);
         return new Gson().fromJson(get, new TypeToken<ArrayList<Integer>>() {}.getType());
+    }
+
+    public PutLoanProductsProductIdResponse updateLoanProduct(Long id, PutLoanProductsProductIdRequest requestModifyLoan) {
+        return ok(fineract().loanProducts.updateLoanProduct(id, requestModifyLoan));
     }
 }

@@ -190,6 +190,9 @@ public class LoanProductData implements Serializable {
     private final Collection<DelinquencyBucketData> delinquencyBucketOptions;
     private final DelinquencyBucketData delinquencyBucket;
 
+    private final Integer dueDaysForRepaymentEvent;
+    private final Integer overDueDaysForRepaymentEvent;
+
     /**
      * Used when returning lookup information about loan product for dropdowns.
      */
@@ -276,6 +279,8 @@ public class LoanProductData implements Serializable {
         final boolean isRatesEnabled = false;
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
+        final Integer dueDaysForRepaymentEvent = null;
+        final Integer overDueDaysForRepaymentEvent = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -293,7 +298,8 @@ public class LoanProductData implements Serializable {
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket);
+                fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
+                overDueDaysForRepaymentEvent);
 
     }
 
@@ -381,6 +387,8 @@ public class LoanProductData implements Serializable {
         final boolean isRatesEnabled = false;
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
+        final Integer dueDaysForRepaymentEvent = null;
+        final Integer overDueDaysForRepaymentEvent = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -398,7 +406,8 @@ public class LoanProductData implements Serializable {
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket);
+                fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
+                overDueDaysForRepaymentEvent);
 
     }
 
@@ -493,6 +502,8 @@ public class LoanProductData implements Serializable {
         final boolean isRatesEnabled = false;
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
+        final Integer dueDaysForRepaymentEvent = null;
+        final Integer overDueDaysForRepaymentEvent = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -510,7 +521,8 @@ public class LoanProductData implements Serializable {
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket);
+                fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
+                overDueDaysForRepaymentEvent);
 
     }
 
@@ -599,6 +611,8 @@ public class LoanProductData implements Serializable {
         final boolean isRatesEnabled = false;
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
+        final Integer dueDaysForRepaymentEvent = null;
+        final Integer overDueDaysForRepaymentEvent = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -616,7 +630,8 @@ public class LoanProductData implements Serializable {
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket);
+                fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
+                overDueDaysForRepaymentEvent);
 
     }
 
@@ -662,7 +677,8 @@ public class LoanProductData implements Serializable {
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
             Collection<RateData> rateOptions, Collection<RateData> rates, final boolean isRatesEnabled,
             final BigDecimal fixedPrincipalPercentagePerInstallment, final Collection<DelinquencyBucketData> delinquencyBucketOptions,
-            final DelinquencyBucketData delinquencyBucket) {
+            final DelinquencyBucketData delinquencyBucket, final Integer dueDaysForRepaymentEvent,
+            final Integer overDueDaysForRepaymentEvent) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -778,6 +794,8 @@ public class LoanProductData implements Serializable {
         this.isEqualAmortization = isEqualAmortization;
         this.delinquencyBucketOptions = delinquencyBucketOptions;
         this.delinquencyBucket = delinquencyBucket;
+        this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
+        this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -927,6 +945,8 @@ public class LoanProductData implements Serializable {
         this.isRatesEnabled = isRatesEnabled;
         this.delinquencyBucketOptions = delinquencyBucketOptions;
         this.delinquencyBucket = productData.delinquencyBucket;
+        this.dueDaysForRepaymentEvent = productData.dueDaysForRepaymentEvent;
+        this.overDueDaysForRepaymentEvent = productData.overDueDaysForRepaymentEvent;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

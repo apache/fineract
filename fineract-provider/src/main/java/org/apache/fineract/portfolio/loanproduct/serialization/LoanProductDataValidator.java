@@ -158,7 +158,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
             LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS,
             LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE,
-            LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME));
+            LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
+            LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -732,6 +733,16 @@ public final class LoanProductDataValidator {
             final Boolean canUseForTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.CAN_USE_FOR_TOPUP, element);
             baseDataValidator.reset().parameter(LoanProductConstants.CAN_USE_FOR_TOPUP).value(canUseForTopup).validateForBooleanValue();
         }
+
+        final Integer dueDaysForRepaymentEvent = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT).value(dueDaysForRepaymentEvent)
+                .integerZeroOrGreater();
+
+        final Integer overDueDaysForRepaymentEvent = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT).value(overDueDaysForRepaymentEvent)
+                .integerZeroOrGreater();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -1599,6 +1610,16 @@ public final class LoanProductDataValidator {
             final Boolean canUseForTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.CAN_USE_FOR_TOPUP, element);
             baseDataValidator.reset().parameter(LoanProductConstants.CAN_USE_FOR_TOPUP).value(canUseForTopup).validateForBooleanValue();
         }
+
+        final Integer dueDaysForRepaymentEvent = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT).value(dueDaysForRepaymentEvent)
+                .integerZeroOrGreater();
+
+        final Integer overDueDaysForRepaymentEvent = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT).value(overDueDaysForRepaymentEvent)
+                .integerZeroOrGreater();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

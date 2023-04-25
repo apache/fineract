@@ -149,6 +149,10 @@ final class LoanProductsApiResourceSwagger {
         public Boolean holdGuaranteeFunds;
         @Schema(example = "1")
         public Long delinquencyBucketId;
+        @Schema(example = "3")
+        public Integer dueDaysForRepaymentEvent;
+        @Schema(example = "3")
+        public Integer overDueDaysForRepaymentEvent;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -1191,6 +1195,10 @@ final class LoanProductsApiResourceSwagger {
         public GetDelinquencyBucketsResponse delinquencyBucket;
         @Schema(example = "true")
         public Boolean disallowExpectedDisbursements;
+        @Schema(example = "3")
+        public Integer dueDaysForRepaymentEvent;
+        @Schema(example = "3")
+        public Integer overDueDaysForRepaymentEvent;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1308,6 +1316,10 @@ final class LoanProductsApiResourceSwagger {
         public Boolean holdGuaranteeFunds;
         @Schema(example = "1")
         public Long delinquencyBucketId;
+        @Schema(example = "3")
+        public Integer dueDaysForRepaymentEvent;
+        @Schema(example = "3")
+        public Integer overDueDaysForRepaymentEvent;
 
         // Interest Recalculation
         @Schema(example = "false")
