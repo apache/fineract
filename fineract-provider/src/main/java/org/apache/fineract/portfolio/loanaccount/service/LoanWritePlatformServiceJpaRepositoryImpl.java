@@ -484,6 +484,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     && loanCharge.isChargePending()) {
                 disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
             }
+            if (loanCharge.isDisbursementCharge()) {
+                LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = new LoanRepaymentScheduleInstallment(loan, 0,
+                        loanCharge.getSubmittedOnDate(), loanCharge.getSubmittedOnDate(), BigDecimal.ZERO, BigDecimal.ZERO,
+                        loanCharge.amount(), BigDecimal.ZERO, false, null);
+                loanRepaymentScheduleInstallment.markAsAdditional();
+                loanRepaymentScheduleInstallment.payFeeChargesComponent(loanCharge.getSubmittedOnDate(),
+                        loanRepaymentScheduleInstallment.getFeeChargesCharged(loan.getCurrency()));
+                loan.addLoanRepaymentScheduleInstallment(loanRepaymentScheduleInstallment);
+            }
         }
 
         final Locale locale = command.extractLocale();
