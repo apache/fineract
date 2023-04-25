@@ -89,21 +89,24 @@ public class LoanAccountFraudTest {
             String payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
             // Send the request, not expecting any errors (because only open loan restriction removed)
             PutLoansLoanIdResponse putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload,
-                    this.responseSpec);
+                    this.responseSpecError);
 
             String statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
             // Approve the Loan active
-            approveAndDisburseLoan(loanId, this.operationDate, this.amountVal);
+            loanTransactionHelper.approveLoan(operationDate, this.amountVal, loanId, null);
+            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload, this.responseSpecError);
 
             // Default values Not Null and False
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
+
+            loanTransactionHelper.disburseLoanWithNetDisbursalAmount(operationDate, loanId, this.amountVal);
 
             // Mark On the Fraud
             putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, command, payload, this.responseSpec);
@@ -159,11 +162,6 @@ public class LoanAccountFraudTest {
                 .withSubmittedOnDate(operationDate) //
                 .build(clientId, loanProductId, null);
         return loanTransactionHelper.getLoanId(loanApplicationJSON);
-    }
-
-    private void approveAndDisburseLoan(final Integer loanId, final String operationDate, final String principalAmount) {
-        loanTransactionHelper.approveLoan(operationDate, principalAmount, loanId, null);
-        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(operationDate, loanId, principalAmount);
     }
 
 }
