@@ -1235,10 +1235,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     transactionId);
         }
 
-        if (!loanTransaction.isRepaymentLikeType()) {
-            throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
-                    "Loan transaction:" + transactionId + " chargeback not allowed as loan transaction is not repayment type, its type is "
-                            + loanTransaction.getTypeOf().getCode(),
+        if (!loanTransaction.isTypeAllowedForChargeback()) {
+            throw new PlatformServiceUnavailableException(
+                    "error.msg.loan.chargeback.operation.not.allowed", "Loan transaction:" + transactionId
+                            + " chargeback not allowed for loan transaction type, its type is " + loanTransaction.getTypeOf().getCode(),
                     transactionId);
         }
 
