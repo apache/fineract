@@ -416,4 +416,14 @@ public class InteropApiResource {
         return interopService.disburseLoan(accountId, apiRequestBodyAsJson);
     }
 
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("transactions/{accountId}/loanrepayment")
+    @Operation(summary = "Disburse Loan by Account Id", description = "")
+    public String loanRepayment(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context UriInfo uriInfo) {
+        return interopService.loanRepayment(accountId, apiRequestBodyAsJson);
+    }
+
 }

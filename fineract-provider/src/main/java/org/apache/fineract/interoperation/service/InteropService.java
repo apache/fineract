@@ -81,4 +81,7 @@ public interface InteropService {
 
     @NotNull
     String disburseLoan(@NotNull String accountId, String apiRequestBodyAsJson);
+
+    @NotNull
+    String loanRepayment(@NotNull String accountId, String apiRequestBodyAsJson);
 }
