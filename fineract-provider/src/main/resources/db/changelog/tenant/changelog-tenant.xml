@@ -124,4 +124,5 @@
     <include file="parts/0102_add_external_event_for_loan_reschedule.xml" relativeToChangelogFile="true" />
     <include file="parts/0103_modify_parameter_json_column_custom_job_parameters.xml" relativeToChangelogFile="true" />
     <include file="parts/0104_loan_product_add_repayment_overdue_days_config.xml" relativeToChangelogFile="true" />
+    <include file="parts/0105_add_indices_loan_table.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
