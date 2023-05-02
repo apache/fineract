@@ -655,7 +655,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     getId(), loanCharge.name());
         }
 
-        validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
+        validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate());
 
         loanCharge.update(this);
 
@@ -770,18 +770,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategyCode);
         final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<>();
-        LocalDate startDate = getDisbursementDate();
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
-            if (installmentNumber == null && charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
-
+            boolean isDue = installment.isFirstPeriod()
+                    ? charge.isDueForCollectionFromIncludingAndUpToAndIncluding(installment.getFromDate(), installment.getDueDate())
+                    : charge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), installment.getDueDate());
+            if (installmentNumber == null && isDue) {
                 chargePaymentInstallments.add(installment);
                 break;
             } else if (installmentNumber != null && installment.getInstallmentNumber().equals(installmentNumber)) {
                 chargePaymentInstallments.add(installment);
                 break;
             }
-            startDate = installment.getDueDate();
         }
         final Set<LoanCharge> loanCharges = new HashSet<>(1);
         loanCharges.add(charge);
@@ -808,13 +808,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
     }
 
-    private void validateChargeHasValidSpecifiedDateIfApplicable(final LoanCharge loanCharge, final LocalDate disbursementDate,
-            final LocalDate lastRepaymentPeriodDueDate) {
-        if (isInterestBearing() && loanCharge.isSpecifiedDueDate()
-                && !loanCharge.isDueForCollectionFromAndUpToAndIncluding(disbursementDate, lastRepaymentPeriodDueDate)) {
+    private void validateChargeHasValidSpecifiedDateIfApplicable(final LoanCharge loanCharge, final LocalDate disbursementDate) {
+        if (loanCharge.isSpecifiedDueDate() && loanCharge.getDueLocalDate().isBefore(disbursementDate)) {
             final String defaultUserMessage = "This charge with specified due date cannot be added as the it is not in schedule range.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage,
-                    getDisbursementDate(), lastRepaymentPeriodDueDate, loanCharge.name());
+                    getDisbursementDate(), loanCharge.name());
         }
     }
 
@@ -1745,7 +1743,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         if (loanCharge.isActive()) {
             clearLoanInstallmentChargesBeforeRegeneration(loanCharge);
             loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
-            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
+            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate());
         }
 
     }
@@ -5560,7 +5558,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         List<LoanCharge> loanCharges = new ArrayList<>();
         List<LoanInstallmentCharge> loanInstallmentCharges = new ArrayList<>();
         for (LoanCharge loanCharge : this.getActiveCharges()) {
-            if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, toDate)) {
+            boolean isDue = fromDate.isEqual(this.getDisbursementDate())
+                    ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(fromDate, toDate)
+                    : loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, toDate);
+            if (isDue) {
                 if (loanCharge.isPenaltyCharge() && !loanCharge.isInstalmentFee()) {
                     penalties = penalties.add(loanCharge.amount());
                     loanCharges.add(loanCharge);
@@ -6569,7 +6570,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         interestAccountedForCurrentPeriod = installment.getInterestWaived(getCurrency()).plus(installment.getInterestPaid(getCurrency()));
         for (LoanCharge loanCharge : this.charges) {
             if (loanCharge.isActive() && !loanCharge.isDueAtDisbursement()) {
-                if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), paymentDate)) {
+                boolean isDue = installment.isFirstPeriod()
+                        ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(installment.getFromDate(), paymentDate)
+                        : loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), paymentDate);
+                if (isDue) {
                     if (loanCharge.isPenaltyCharge()) {
                         penaltyForCurrentPeriod = penaltyForCurrentPeriod.plus(loanCharge.getAmount(getCurrency()));
                         penaltyAccoutedForCurrentPeriod = penaltyAccoutedForCurrentPeriod
