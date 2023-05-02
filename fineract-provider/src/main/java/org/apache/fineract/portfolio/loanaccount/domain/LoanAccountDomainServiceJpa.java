@@ -641,7 +641,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
 
             for (final LoanCharge loanCharge : loanCharges) {
-                if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), chargesTillDate)) {
+                boolean isDue = installment.isFirstPeriod()
+                        ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(installment.getFromDate(), chargesTillDate)
+                        : loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), chargesTillDate);
+                if (isDue) {
                     if (loanCharge.isFeeCharge()) {
                         dueDateFeeIncome = dueDateFeeIncome.add(loanCharge.amount());
                     } else if (loanCharge.isPenaltyCharge()) {
@@ -792,9 +795,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 loan.addLoanTransaction(accrualTransaction);
                 Set<LoanChargePaidBy> accrualCharges = accrualTransaction.getLoanChargesPaid();
                 for (LoanCharge loanCharge : loan.getActiveCharges()) {
-                    if (loanCharge.isActive() && !loanCharge.isPaid()
-                            && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, foreClosureDate)
-                                    || loanCharge.isInstalmentFee())) {
+                    boolean isDue = fromDate.isEqual(loan.getDisbursementDate())
+                            ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(fromDate, foreClosureDate)
+                            : loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, foreClosureDate);
+                    if (loanCharge.isActive() && !loanCharge.isPaid() && (isDue || loanCharge.isInstalmentFee())) {
                         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge,
                                 loanCharge.getAmountOutstanding(currency).getAmount(), null);
                         accrualCharges.add(loanChargePaidBy);

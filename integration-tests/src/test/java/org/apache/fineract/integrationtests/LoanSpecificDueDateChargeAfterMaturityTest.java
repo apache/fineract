@@ -96,53 +96,6 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
     }
 
     @Test
-    public void onlyNonInterestBearingLoanCanAcceptChargeAfterMaturity() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingWithInterestRecalculationEnabled(assetAccount,
-                incomeAccount, expenseAccount, overpaymentAccount);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
-
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "1");
-
-        final float PENALTY_PORTION = 100.0f;
-
-        Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
-
-        HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(EXPECTED_DISBURSAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-        LocalDate targetDate = LocalDate.of(2011, 3, 4);
-        final String loanDisbursementDate = dateFormatter.format(targetDate);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        targetDate = LocalDate.of(2011, 4, 5);
-        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
-
-        final String ADD_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanID + "/charges?" + Utils.TENANT_IDENTIFIER;
-        ResponseSpecification response403Spec = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final HashMap response = Utils.performServerPost(requestSpec, response403Spec, ADD_CHARGES_URL,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), penaltyCharge1AddedDate,
-                        String.valueOf(PENALTY_PORTION)),
-                "");
-        assertEquals("validation.msg.domain.rule.violation", response.get("userMessageGlobalisationCode"));
-
-    }
-
-    @Test
     public void checkPeriodicAccrualAccountingAPIFlow() {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -456,20 +409,6 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
                 .withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE).withLoanType(INDIVIDUAL_LOAN)
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-    }
-
-    private Integer createLoanProductWithPeriodicAccrualAccountingWithInterestRecalculationEnabled(final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("10000.0").withNumberOfRepayments("1")
-                .withinterestRatePerPeriod("1").withInterestRateFrequencyTypeAsYear().withInterestTypeAsDecliningBalance()
-                .withInterestCalculationPeriodTypeAsDays()
-                .withInterestRecalculationDetails(LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
-                        LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
-                        LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE)
-                .withInterestRecalculationRestFrequencyDetails(LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", null, null)
-                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).withMoratorium("0", "0")
-                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withAccountingRulePeriodicAccrual(accounts).build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer createLoanProductWithPeriodicAccrualAccountingNoInterest(final Account... accounts) {

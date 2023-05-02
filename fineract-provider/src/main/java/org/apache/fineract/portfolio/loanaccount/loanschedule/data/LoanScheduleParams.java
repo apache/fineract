@@ -477,4 +477,8 @@ public final class LoanScheduleParams {
     public void setUnCompoundedAmount(Money unCompoundedAmount) {
         this.unCompoundedAmount = unCompoundedAmount;
     }
+
+    public boolean isFirstPeriod() {
+        return 1 == instalmentNumber;
+    }
 }

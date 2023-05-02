@@ -26,6 +26,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -505,6 +507,64 @@ public class LoanChargeSpecificDueDateTest {
         }
     }
 
+    @Test
+    public void testApplyLoanSpecificDueDatePenaltyWithDisbursementDateWithMultipleDisbursement() {
+
+        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
+
+        // Client and Loan account creation
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithPeriodicAccrual(loanTransactionHelper,
+                null);
+        assertNotNull(getLoanProductsProductResponse);
+
+        // Older date to have more than one overdue installment
+        LocalDate transactionDate = todaysDate;
+        String operationDate = Utils.dateFormatter.format(transactionDate);
+        log.info("Operation date {}", transactionDate);
+
+        // Create Loan Account
+        final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
+                getLoanProductsProductResponse.getId().toString(), operationDate, "12", "0");
+
+        // Get loan details
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("0.00"), true);
+
+        // Apply Loan Charge with specific due date
+
+        final String feeAmount = "10.00";
+        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
+        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        assertNotNull(postChargesResponse);
+        final Long loanChargeId = postChargesResponse.getResourceId();
+        assertNotNull(loanChargeId);
+
+        payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), operationDate, feeAmount);
+        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
+                responseSpec);
+        assertNotNull(postLoansLoanIdChargesResponse);
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"), true);
+
+        loanTransactionHelper.disburseLoan((long) loanId, new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                .transactionAmount(new BigDecimal("1000")).locale("en").dateFormat("dd MMMM yyyy"));
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.parseDouble(principalAmount) * 2, Double.valueOf("10.00"), true);
+
+        operationDate = Utils.dateFormatter.format(transactionDate.plusMonths(1));
+        payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), operationDate, feeAmount);
+        postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON, responseSpec);
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.parseDouble(principalAmount) * 2, Double.valueOf("20.00"), true);
+    }
+
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
             final Integer delinquencyBucketId) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
@@ -515,13 +575,14 @@ public class LoanChargeSpecificDueDateTest {
     private GetLoanProductsProductIdResponse createLoanProductWithPeriodicAccrual(final LoanTransactionHelper loanTransactionHelper,
             final Integer delinquencyBucketId) {
         final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account assetFeeAndPenaltyAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder()
+        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withMultiDisburse()
+                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withInterestTypeAsDecliningBalance()
                 .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                .withDisallowExpectedDisbursements(true) //
                 .build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);
@@ -539,7 +600,7 @@ public class LoanChargeSpecificDueDateTest {
                 .build(clientId, loanProductId, null);
         final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
         loanTransactionHelper.approveLoan(operationDate, principalAmount, loanId, null);
-        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(operationDate, loanId, principalAmount);
+        loanTransactionHelper.disburseLoanWithTransactionAmount(operationDate, loanId, principalAmount);
         return loanId;
     }
 
