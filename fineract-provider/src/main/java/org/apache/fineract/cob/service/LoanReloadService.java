@@ -18,19 +18,17 @@
  */
 package org.apache.fineract.cob.service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class LoanReloadService implements ReloadService<Loan> {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final LoanAssembler loanAssembler;
 
     @Override
     public <S extends AbstractPersistableCustom> boolean canReload(S input) {
@@ -39,9 +37,7 @@ public class LoanReloadService implements ReloadService<Loan> {
 
     @Override
     public Loan reload(Loan input) {
-        entityManager.flush();
-        entityManager.refresh(input);
-        return input;
+        return loanAssembler.assembleFrom(input.getId());
     }
 
 }
