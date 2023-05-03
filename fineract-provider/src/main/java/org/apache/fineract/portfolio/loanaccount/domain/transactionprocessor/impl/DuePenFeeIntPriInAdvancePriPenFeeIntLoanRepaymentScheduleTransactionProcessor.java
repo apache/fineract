@@ -39,7 +39,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
  * Due/late principal In advance principal In advance penalty In advance fee In advance interest
  */
 @SuppressWarnings("unused")
-public class DueDateRespectiveLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
+public class DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactionProcessor
+        extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     private static final String STRATEGY_CODE = "due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy";
 

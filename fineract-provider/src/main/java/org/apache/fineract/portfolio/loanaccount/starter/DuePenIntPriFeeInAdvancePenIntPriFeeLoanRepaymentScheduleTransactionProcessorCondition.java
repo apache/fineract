@@ -21,11 +21,11 @@ package org.apache.fineract.portfolio.loanaccount.starter;
 import org.apache.fineract.infrastructure.core.condition.PropertiesCondition;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 
-public class DueDateRespectiveLoanRepaymentScheduleTransactionProcessorCondition extends PropertiesCondition {
+public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactionProcessorCondition extends PropertiesCondition {
 
     @Override
     protected boolean matches(FineractProperties properties) {
-        return properties.getLoan().getTransactionProcessor().getDuePenaltyFeeInterestPrincipalInAdvancePrincipalPenaltyFeeInterest()
+        return properties.getLoan().getTransactionProcessor().getDuePenaltyInterestPrincipalFeeInAdvancePenaltyInterestPrincipalFee()
                 .isEnabled();
     }
 }
