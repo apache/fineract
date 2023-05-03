@@ -326,6 +326,7 @@ public class FineractProperties {
         private FineractTransactionProcessorItemProperties principalInterestPenaltiesFees;
         private FineractTransactionProcessorItemProperties rbiIndia;
         private FineractTransactionProcessorItemProperties duePenaltyFeeInterestPrincipalInAdvancePrincipalPenaltyFeeInterest;
+        private FineractTransactionProcessorItemProperties duePenaltyInterestPrincipalFeeInAdvancePenaltyInterestPrincipalFee;
         private boolean errorNotFoundFail;
     }
 
