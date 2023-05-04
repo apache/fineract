@@ -217,7 +217,10 @@ public class BatchApiServiceImpl implements BatchApiService {
             BatchCallHandler callHandler = new BatchCallHandler(this.batchFilters, commandStrategy::execute);
             if (BatchRequestContextHolder.getEnclosingTransaction().isPresent()) {
                 if (BatchRequestContextHolder.getEnclosingTransaction().get().isRollbackOnly()) {
-                    return new BatchResponse();
+                    BatchResponse br = new BatchResponse();
+                    br.setBody("Parent request was erroneous!");
+                    br.setRequestId(request.getRequestId());
+                    return br;
                 }
                 entityManager.flush();
             }
@@ -314,7 +317,11 @@ public class BatchApiServiceImpl implements BatchApiService {
                 errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
                 errResponse.setRequestId(res.getRequestId());
                 if (statusCode == -1) {
-                    statusCode = res.getStatusCode();
+                    if (res.getStatusCode() != null) {
+                        statusCode = res.getStatusCode();
+                    } else {
+                        statusCode = Status.INTERNAL_SERVER_ERROR.getStatusCode();
+                    }
                 }
                 break;
             }
