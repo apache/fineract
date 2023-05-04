@@ -18,10 +18,14 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.message;
 
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +50,20 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MessageFactory implements InitializingBean {
 
-    private final ByteBufferConverter byteBufferConverter;
+    public static final DateTimeFormatter CUSTOM_ISO_LOCAL_DATE_TIME_FORMATTER;
     private static final String SOURCE_UUID = UUID.randomUUID().toString();
+
+    private static final DateTimeFormatter CUSTOM_ISO_LOCAL_TIME_FORMATTER;
+
+    static {
+        CUSTOM_ISO_LOCAL_TIME_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral(':')
+                .appendValue(ChronoField.MINUTE_OF_HOUR, 2).optionalStart().appendLiteral(':').appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+                .optionalStart().appendFraction(ChronoField.NANO_OF_SECOND, 6, 9, true).toFormatter();
+        CUSTOM_ISO_LOCAL_DATE_TIME_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive().append(ISO_LOCAL_DATE)
+                .appendLiteral('T').append(CUSTOM_ISO_LOCAL_TIME_FORMATTER).toFormatter();
+    }
+
+    private final ByteBufferConverter byteBufferConverter;
 
     public MessageV1 createMessage(MessageId id, MessageSource source, MessageType type, MessageCategory category,
             MessageCreatedAt createdAt, MessageBusinessDate businessDate, MessageIdempotencyKey idempotencyKey,
@@ -84,11 +100,11 @@ public class MessageFactory implements InitializingBean {
     }
 
     private String getMessageCreatedAt(OffsetDateTime createdAt) {
-        return createdAt.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        return createdAt.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime().format(CUSTOM_ISO_LOCAL_DATE_TIME_FORMATTER);
     }
 
     private String getMessageBusinessDate(LocalDate businessDate) {
-        return businessDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        return businessDate.format(ISO_LOCAL_DATE);
     }
 
     @Override
