@@ -19,6 +19,7 @@
 package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.common.InitialisationTasklet;
 import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
@@ -71,6 +72,9 @@ public class LoanCOBWorkerConfiguration {
     @Autowired
     private LoanLockingService loanLockingService;
 
+    @Autowired
+    private CustomJobParameterResolver customJobParameterResolver;
+
     @Bean(name = LoanCOBConstant.LOAN_COB_WORKER_STEP)
     public Step loanCOBWorkerStep() {
         return stepBuilderFactory.get("Loan COB worker - Step").inputChannel(inboundRequests).flow(flow()).build();
@@ -122,7 +126,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ApplyLoanLockTasklet applyLock() {
-        return new ApplyLoanLockTasklet(fineractProperties, loanLockingService, retrieveLoanIdService);
+        return new ApplyLoanLockTasklet(fineractProperties, loanLockingService, retrieveLoanIdService, customJobParameterResolver);
     }
 
     @Bean
@@ -133,7 +137,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public LoanItemReader cobWorkerItemReader() {
-        return new LoanItemReader(loanRepository, retrieveLoanIdService);
+        return new LoanItemReader(loanRepository, retrieveLoanIdService, customJobParameterResolver);
     }
 
     @Bean
