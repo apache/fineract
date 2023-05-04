@@ -28,6 +28,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -41,11 +42,12 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ApplyLoanLockTasklet implements Tasklet, LoanCatchUpSupport {
+public class ApplyLoanLockTasklet implements Tasklet {
 
     private final FineractProperties fineractProperties;
     private final LoanLockingService loanLockingService;
     private final RetrieveLoanIdService retrieveLoanIdService;
+    private final CustomJobParameterResolver customJobParameterResolver;
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
@@ -57,8 +59,11 @@ public class ApplyLoanLockTasklet implements Tasklet, LoanCatchUpSupport {
                 || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
-            loanIds = new ArrayList<>(retrieveLoanIdService
-                    .retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter, isCatchUp(contribution)));
+            loanIds = new ArrayList<>(
+                    retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter,
+                            customJobParameterResolver
+                                    .getCustomJobParameterById(contribution.getStepExecution(), LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)
+                                    .map(Boolean::parseBoolean).orElse(false)));
         }
         List<List<Long>> loanIdPartitions = Lists.partition(loanIds, getInClauseParameterSizeLimit());
         List<LoanAccountLock> accountLocks = new ArrayList<>();

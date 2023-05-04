@@ -16,18 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.jobs.domain;
 
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.StepExecution;
+import lombok.Data;
 
-public interface LoanCatchUpSupport {
+@Data
+public class RunningJobWithCustomParameters {
 
-    default boolean isCatchUp(StepContribution contribution) {
-        return isCatchUp(contribution.getStepExecution());
-    }
-
-    default boolean isCatchUp(StepExecution execution) {
-        return "true".equalsIgnoreCase(execution.getExecutionContext().getString(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME, "false"));
-    }
+    private Long executionId;
+    private String parameter;
 }
