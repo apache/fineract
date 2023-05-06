@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,6 +48,8 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
@@ -111,6 +114,33 @@ public class SavingsAccountTransactionsApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccount,
+                SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+    }
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "List Savings Account Transactions", description = "The list capability of savings account transactions can support pagination, sorting and filtering.\n\n"
+            + "Example Requests:\n" + "\n" + "savingsaccounts/{savingsId}/transactions\n" + "\n"
+            + "savingsaccounts/{savingsId}/transactions?offset=10&limit=50\n" + "\n"
+            + "savingsaccounts/{savingsId}/transactions?orderBy=displayName&sortOrder=DESC")
+    // @ApiResponses({
+    // @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation =
+    // SavingsAccountTransactionsApiResourceSwagger.GetClientsResponse.class))) })
+    public String retrieveAll(@Context final UriInfo uriInfo,
+            @PathParam("savingsId") @Parameter(description = "savingsId") final Long savingsId,
+            @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+
+        this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+        final Page<SavingsAccountTransactionData> savingsAccountTransactionsData = savingsAccountReadPlatformService
+                .retrieveAllTransactions(savingsId, DepositAccountType.SAVINGS_DEPOSIT, searchParameters);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, savingsAccountTransactionsData,
                 SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 

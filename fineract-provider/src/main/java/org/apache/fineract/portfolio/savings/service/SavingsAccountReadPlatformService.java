@@ -45,6 +45,9 @@ public interface SavingsAccountReadPlatformService {
 
     Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType);
 
+    Page<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType,
+            SearchParameters searchParameters);
+
     // Collection<SavingsAccountAnnualFeeData>
     // retrieveAccountsWithAnnualFeeDue();
 

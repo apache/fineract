@@ -1268,6 +1268,41 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
+    public Page<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId, DepositAccountType depositAccountType,
+            SearchParameters searchParameters) {
+
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
+        sqlBuilder.append(this.transactionsMapper.schema());
+        sqlBuilder.append(" where sa.id = ? and sa.deposit_type_enum = ? ");
+        final Object[] objectArray = new Object[2];
+        objectArray[0] = savingsId;
+        objectArray[1] = depositAccountType.getValue();
+
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append(" order by ").append("tr.").append(searchParameters.getOrderBy());
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
+
+            if (searchParameters.isSortOrderProvided()) {
+                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
+            }
+        } else {
+            sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
+        }
+
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" ");
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
+            }
+        }
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), objectArray, this.transactionsMapper);
+    }
+
+    @Override
     public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId,
             DepositAccountType depositAccountType) {
 
