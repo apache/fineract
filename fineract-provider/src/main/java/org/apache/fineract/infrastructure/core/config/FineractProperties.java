@@ -86,6 +86,27 @@ public class FineractProperties {
         private String readOnlyPassword;
         private String readOnlyParameters;
         private String readOnlyName;
+
+        private FineractConfigProperties config;
+    }
+
+    /**
+     * Configuration properties to override configurations stored in the tenants database
+     */
+    @Getter
+    @Setter
+    public static class FineractConfigProperties {
+
+        private int minPoolSize;
+        private int maxPoolSize;
+
+        public boolean isMinPoolSizeSet() {
+            return minPoolSize != -1;
+        }
+
+        public boolean isMaxPoolSizeSet() {
+            return maxPoolSize != -1;
+        }
     }
 
     @Getter

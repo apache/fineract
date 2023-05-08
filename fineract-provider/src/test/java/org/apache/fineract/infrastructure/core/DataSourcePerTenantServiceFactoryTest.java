@@ -155,9 +155,16 @@ public class DataSourcePerTenantServiceFactoryTest {
         given(tenantHikariConfig.isAutoCommit()).willReturn(MASTER_DB_AUTO_COMMIT_ENABLED);
 
         given(hikariDataSourceFactory.create(any())).willReturn(mock(HikariDataSource.class));
+
+        FineractProperties.FineractConfigProperties configProperties = new FineractProperties.FineractConfigProperties();
+        configProperties.setMinPoolSize(-1);
+        configProperties.setMaxPoolSize(-1);
+
         FineractProperties.FineractTenantProperties tenantPropertiesMock = mock(FineractProperties.FineractTenantProperties.class);
         given(tenantPropertiesMock.getEncryption()).willReturn(MASTER_ENCRYPTION);
         given(tenantPropertiesMock.getMasterPassword()).willReturn(MASTER_MASTER_PASSWORD);
+
+        given(tenantPropertiesMock.getConfig()).willReturn(configProperties);
         given(fineractProperties.getTenant()).willReturn(tenantPropertiesMock);
 
         given(databasePasswordEncryptor.isMasterPasswordHashValid(any())).willReturn(true);
@@ -189,6 +196,104 @@ public class DataSourcePerTenantServiceFactoryTest {
         assertEquals(MASTER_DB_PASSWORD, hikariConfig.getPassword());
         assertEquals(MASTER_DB_INITIAL_SIZE, hikariConfig.getMinimumIdle());
         assertEquals(MASTER_DB_MAX_ACTIVE, hikariConfig.getMaximumPoolSize());
+        assertEquals(MASTER_DB_VALIDATION_INTERVAL, hikariConfig.getValidationTimeout());
+        assertEquals(MASTER_DB_DRIVER_CLASS_NAME, hikariConfig.getDriverClassName());
+        assertEquals(MASTER_DB_CONN_TEST_QUERY, hikariConfig.getConnectionTestQuery());
+        assertEquals(MASTER_DB_AUTO_COMMIT_ENABLED, hikariConfig.isAutoCommit());
+    }
+
+    @Test
+    void testCreateNewDataSourceFor_ShouldOverridesMinPoolConfiguration_WhenConfigured() {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(MASTER_DB_AUTO_COMMIT_ENABLED,
+                MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+
+        int minPoolSize = 10;
+
+        FineractProperties.FineractConfigProperties config = fineractProperties.getTenant().getConfig();
+        config.setMinPoolSize(minPoolSize);
+
+        // when
+        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+
+        // then
+        assertNotNull(dataSource);
+        verify(hikariDataSourceFactory).create(hikariConfigCaptor.capture());
+        HikariConfig hikariConfig = hikariConfigCaptor.getValue();
+        assertFalse(hikariConfig.isReadOnly());
+        assertEquals(MASTER_DB_JDBC_URL, hikariConfig.getJdbcUrl());
+        assertEquals(MASTER_DB_SCHEMA_NAME + "_pool", hikariConfig.getPoolName());
+        assertEquals(MASTER_DB_USERNAME, hikariConfig.getUsername());
+        assertEquals(MASTER_DB_PASSWORD, hikariConfig.getPassword());
+        assertEquals(minPoolSize, hikariConfig.getMinimumIdle());
+        assertEquals(MASTER_DB_MAX_ACTIVE, hikariConfig.getMaximumPoolSize());
+        assertEquals(MASTER_DB_VALIDATION_INTERVAL, hikariConfig.getValidationTimeout());
+        assertEquals(MASTER_DB_DRIVER_CLASS_NAME, hikariConfig.getDriverClassName());
+        assertEquals(MASTER_DB_CONN_TEST_QUERY, hikariConfig.getConnectionTestQuery());
+        assertEquals(MASTER_DB_AUTO_COMMIT_ENABLED, hikariConfig.isAutoCommit());
+    }
+
+    @Test
+    void testCreateNewDataSourceFor_ShouldOverridesMaxPoolConfiguration_WhenConfigured() {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(MASTER_DB_AUTO_COMMIT_ENABLED,
+                MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+
+        int maxPoolSize = 10;
+
+        FineractProperties.FineractConfigProperties config = fineractProperties.getTenant().getConfig();
+        config.setMaxPoolSize(maxPoolSize);
+
+        // when
+        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+
+        // then
+        assertNotNull(dataSource);
+        verify(hikariDataSourceFactory).create(hikariConfigCaptor.capture());
+        HikariConfig hikariConfig = hikariConfigCaptor.getValue();
+        assertFalse(hikariConfig.isReadOnly());
+        assertEquals(MASTER_DB_JDBC_URL, hikariConfig.getJdbcUrl());
+        assertEquals(MASTER_DB_SCHEMA_NAME + "_pool", hikariConfig.getPoolName());
+        assertEquals(MASTER_DB_USERNAME, hikariConfig.getUsername());
+        assertEquals(MASTER_DB_PASSWORD, hikariConfig.getPassword());
+        assertEquals(MASTER_DB_INITIAL_SIZE, hikariConfig.getMinimumIdle());
+        assertEquals(maxPoolSize, hikariConfig.getMaximumPoolSize());
+        assertEquals(MASTER_DB_VALIDATION_INTERVAL, hikariConfig.getValidationTimeout());
+        assertEquals(MASTER_DB_DRIVER_CLASS_NAME, hikariConfig.getDriverClassName());
+        assertEquals(MASTER_DB_CONN_TEST_QUERY, hikariConfig.getConnectionTestQuery());
+        assertEquals(MASTER_DB_AUTO_COMMIT_ENABLED, hikariConfig.isAutoCommit());
+    }
+
+    @Test
+    void testCreateNewDataSourceFor_ShouldOverridesMinAndMaxPoolConfiguration_WhenBothConfigured() {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(MASTER_DB_AUTO_COMMIT_ENABLED,
+                MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+
+        int minPoolSize = 10;
+        int maxPoolSize = 10;
+
+        FineractProperties.FineractConfigProperties config = fineractProperties.getTenant().getConfig();
+        config.setMinPoolSize(minPoolSize);
+        config.setMaxPoolSize(maxPoolSize);
+
+        // when
+        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+
+        // then
+        assertNotNull(dataSource);
+        verify(hikariDataSourceFactory).create(hikariConfigCaptor.capture());
+        HikariConfig hikariConfig = hikariConfigCaptor.getValue();
+        assertFalse(hikariConfig.isReadOnly());
+        assertEquals(MASTER_DB_JDBC_URL, hikariConfig.getJdbcUrl());
+        assertEquals(MASTER_DB_SCHEMA_NAME + "_pool", hikariConfig.getPoolName());
+        assertEquals(MASTER_DB_USERNAME, hikariConfig.getUsername());
+        assertEquals(MASTER_DB_PASSWORD, hikariConfig.getPassword());
+        assertEquals(minPoolSize, hikariConfig.getMinimumIdle());
+        assertEquals(maxPoolSize, hikariConfig.getMaximumPoolSize());
         assertEquals(MASTER_DB_VALIDATION_INTERVAL, hikariConfig.getValidationTimeout());
         assertEquals(MASTER_DB_DRIVER_CLASS_NAME, hikariConfig.getDriverClassName());
         assertEquals(MASTER_DB_CONN_TEST_QUERY, hikariConfig.getConnectionTestQuery());

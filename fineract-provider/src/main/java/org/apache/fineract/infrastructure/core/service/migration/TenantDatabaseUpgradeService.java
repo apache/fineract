@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service.migration;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +30,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -102,19 +102,22 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     }
 
     private void logTenantStoreDetails() {
-        log.info("- fineract.tenant.username: {}", fineractProperties.getTenant().getUsername());
+        FineractProperties.FineractTenantProperties tenant = fineractProperties.getTenant();
+        log.info("- fineract.tenant.username: {}", tenant.getUsername());
         log.info("- fineract.tenant.password: ****");
-        log.info("- fineract.tenant.parameters: {}", fineractProperties.getTenant().getParameters());
-        log.info("- fineract.tenant.timezone: {}", fineractProperties.getTenant().getTimezone());
-        log.info("- fineract.tenant.description: {}", fineractProperties.getTenant().getDescription());
-        log.info("- fineract.tenant.identifier: {}", fineractProperties.getTenant().getIdentifier());
-        log.info("- fineract.tenant.name: {}", fineractProperties.getTenant().getName());
+        log.info("- fineract.tenant.parameters: {}", tenant.getParameters());
+        log.info("- fineract.tenant.timezone: {}", tenant.getTimezone());
+        log.info("- fineract.tenant.description: {}", tenant.getDescription());
+        log.info("- fineract.tenant.identifier: {}", tenant.getIdentifier());
+        log.info("- fineract.tenant.name: {}", tenant.getName());
 
-        log.info("- fineract.tenant.readonly.username: {}", fineractProperties.getTenant().getReadOnlyUsername());
-        log.info("- fineract.tenant.readonly.password: {}",
-                StringUtils.isNotBlank(fineractProperties.getTenant().getReadOnlyPassword()) ? "****" : "");
-        log.info("- fineract.tenant.readonly.parameters: {}", fineractProperties.getTenant().getReadOnlyParameters());
-        log.info("- fineract.tenant.readonly.name: {}", fineractProperties.getTenant().getReadOnlyName());
+        String readOnlyUsername = tenant.getReadOnlyUsername();
+        if (isNotBlank(readOnlyUsername)) {
+            log.info("- fineract.tenant.readonly.username: {}", readOnlyUsername);
+            log.info("- fineract.tenant.readonly.password: {}", isNotBlank(tenant.getReadOnlyPassword()) ? "****" : "");
+            log.info("- fineract.tenant.readonly.parameters: {}", tenant.getReadOnlyParameters());
+            log.info("- fineract.tenant.readonly.name: {}", tenant.getReadOnlyName());
+        }
 
     }
 
