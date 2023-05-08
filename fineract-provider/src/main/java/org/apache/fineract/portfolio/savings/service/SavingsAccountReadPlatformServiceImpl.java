@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import javax.validation.constraints.DecimalMin;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -48,6 +49,7 @@ import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.teller.exception.InvalidDateInputException;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
@@ -58,6 +60,7 @@ import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
@@ -1269,15 +1272,71 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public Page<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId, DepositAccountType depositAccountType,
-            SearchParameters searchParameters) {
+            SearchParameters searchParameters, LocalDate fromDate, LocalDate toDate,
+            @DecimalMin(value = "0", message = "must be greater than or equal to 0") BigDecimal fromAmount,
+            @DecimalMin(value = "0", message = "must be greater than or equal to 0") BigDecimal toAmount, String transactionType) {
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.transactionsMapper.schema());
         sqlBuilder.append(" where sa.id = ? and sa.deposit_type_enum = ? ");
-        final Object[] objectArray = new Object[2];
+        final Object[] objectArray = new Object[12];
         objectArray[0] = savingsId;
         objectArray[1] = depositAccountType.getValue();
+        int arrayPos = 2;
+
+        if (StringUtils.isNotEmpty(transactionType)) {
+            Integer transcationTypeEnum = null;
+            if ("deposit".equals(transactionType)) {
+                transcationTypeEnum = SavingsAccountTransactionType.DEPOSIT.getValue();
+            } else if ("withdrawal".equals(transactionType)) {
+                transcationTypeEnum = SavingsAccountTransactionType.WITHDRAWAL.getValue();
+            } else {
+                transcationTypeEnum = SavingsAccountTransactionType.INVALID.getValue();
+            }
+            sqlBuilder.append(" and ").append(" tr.transaction_type_enum = ? ");
+            objectArray[arrayPos] = transcationTypeEnum;
+            arrayPos = arrayPos + 1;
+        }
+
+        if (fromDate != null || toDate != null) {
+            if (fromDate != null && toDate != null) {
+                if (toDate.isBefore(fromDate)) {
+                    throw new InvalidDateInputException(fromDate.toString(), toDate.toString());
+                }
+                sqlBuilder.append(" and ").append(" tr.transaction_date between ? and ? ");
+                objectArray[arrayPos] = fromDate;
+                arrayPos = arrayPos + 1;
+                objectArray[arrayPos] = toDate;
+                arrayPos = arrayPos + 1;
+            } else if (fromDate != null) {
+                sqlBuilder.append(" and ").append(" tr.transaction_date >= ? ");
+                objectArray[arrayPos] = fromDate;
+                arrayPos = arrayPos + 1;
+            } else {
+                sqlBuilder.append(" and ").append(" tr.transaction_date <= ? ");
+                objectArray[arrayPos] = toDate;
+                arrayPos = arrayPos + 1;
+            }
+        }
+
+        if (fromAmount != null || toAmount != null) {
+            if (fromAmount != null && toAmount != null) {
+                sqlBuilder.append(" and ").append(" tr.amount between ? and ? ");
+                objectArray[arrayPos] = fromAmount;
+                arrayPos = arrayPos + 1;
+                objectArray[arrayPos] = toAmount;
+                arrayPos = arrayPos + 1;
+            } else if (fromAmount != null) {
+                sqlBuilder.append(" and ").append(" tr.amount >= ? ");
+                objectArray[arrayPos] = fromAmount;
+                arrayPos = arrayPos + 1;
+            } else {
+                sqlBuilder.append(" and ").append(" tr.amount <= ? ");
+                objectArray[arrayPos] = toAmount;
+                arrayPos = arrayPos + 1;
+            }
+        }
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append("tr.").append(searchParameters.getOrderBy());
@@ -1299,7 +1358,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), objectArray, this.transactionsMapper);
+
+        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.transactionsMapper);
     }
 
     @Override
