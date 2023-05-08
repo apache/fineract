@@ -1335,13 +1335,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     if (installment.getFeeChargesCharged(getCurrency()).isLessThan(fee)
                             || installment.getInterestCharged(getCurrency()).isLessThan(interest)
                             || installment.getPenaltyChargesCharged(getCurrency()).isLessThan(penality)
-                            || (getAccruedTill().isEqual(loanTransaction.getTransactionDate())
+                            || (isInterestBearing() && getAccruedTill().isEqual(loanTransaction.getTransactionDate())
                                     && !installment.getDueDate().isEqual(getAccruedTill()))) {
                         interest = interest.minus(loanTransaction.getInterestPortion(getCurrency()));
                         fee = fee.minus(loanTransaction.getFeeChargesPortion(getCurrency()));
                         penality = penality.minus(loanTransaction.getPenaltyChargesPortion(getCurrency()));
                         loanTransaction.reverse();
                     }
+
                 }
             }
             installment.updateAccrualPortion(interest, fee, penality);
@@ -5339,8 +5340,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean isInterestBearing() {
-        return getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()
-                && BigDecimal.ZERO.compareTo(getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate()) < 0;
+        return BigDecimal.ZERO.compareTo(getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate()) < 0;
     }
 
     public LocalDate getExpectedMaturityDate() {
