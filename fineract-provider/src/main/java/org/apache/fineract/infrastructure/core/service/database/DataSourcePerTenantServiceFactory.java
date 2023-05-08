@@ -92,8 +92,8 @@ public class DataSourcePerTenantServiceFactory {
         config.setPoolName(schemaName + "_pool");
         config.setUsername(schemaUsername);
         config.setPassword(databasePasswordEncryptor.decrypt(schemaPassword));
-        config.setMinimumIdle(tenantConnection.getInitialSize());
-        config.setMaximumPoolSize(tenantConnection.getMaxActive());
+        config.setMinimumIdle(getMinPoolSize(tenantConnection));
+        config.setMaximumPoolSize(getMaxPoolSize(tenantConnection));
         config.setValidationTimeout(tenantConnection.getValidationInterval());
         config.setDriverClassName(hikariConfig.getDriverClassName());
         config.setConnectionTestQuery(hikariConfig.getConnectionTestQuery());
@@ -109,6 +109,28 @@ public class DataSourcePerTenantServiceFactory {
         config.setDataSourceProperties(hikariConfig.getDataSourceProperties());
 
         return hikariDataSourceFactory.create(config);
+    }
+
+    private int getMaxPoolSize(FineractPlatformTenantConnection tenantConnection) {
+        FineractProperties.FineractConfigProperties configOverride = fineractProperties.getTenant().getConfig();
+        if (configOverride.isMaxPoolSizeSet()) {
+            int maxPoolSize = configOverride.getMaxPoolSize();
+            log.info("Overriding tenant datasource maximum pool size configuration to {}", maxPoolSize);
+            return maxPoolSize;
+        } else {
+            return tenantConnection.getMaxActive();
+        }
+    }
+
+    private int getMinPoolSize(FineractPlatformTenantConnection tenantConnection) {
+        FineractProperties.FineractConfigProperties configOverride = fineractProperties.getTenant().getConfig();
+        if (configOverride.isMinPoolSizeSet()) {
+            int minPoolSize = configOverride.getMinPoolSize();
+            log.info("Overriding tenant datasource minimum pool size configuration to {}", minPoolSize);
+            return minPoolSize;
+        } else {
+            return tenantConnection.getInitialSize();
+        }
     }
 
 }
