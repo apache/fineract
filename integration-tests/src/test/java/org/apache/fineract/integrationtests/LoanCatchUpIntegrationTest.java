@@ -114,19 +114,19 @@ public class LoanCatchUpIntegrationTest {
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 3, 2));
             loanAccountLockHelper.placeSoftLockOnLoanAccount(loanID, "LOAN_INLINE_COB_PROCESSING", "Sample error");
 
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 10));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 5));
 
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
             loanCOBCatchUpHelper.executeLoanCOBCatchUp();
 
-            Utils.conditionalSleepWithMaxWait(30, 1000, () -> loanCOBCatchUpHelper.isLoanCOBCatchUpRunning());
+            Utils.conditionalSleepWithMaxWait(30, 5, () -> loanCOBCatchUpHelper.isLoanCOBCatchUpRunning());
 
             GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
-            Assertions.assertEquals(LocalDate.of(2020, 3, 9), loan.getLastClosedBusinessDate());
+            Assertions.assertEquals(LocalDate.of(2020, 3, 4), loan.getLastClosedBusinessDate());
 
             requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
 
-            final BatchRequest br1 = BatchHelper.repayLoanRequestWithGivenLoanId(4730L, loanID, "10", LocalDate.of(2020, 3, 10));
+            final BatchRequest br1 = BatchHelper.repayLoanRequestWithGivenLoanId(4730L, loanID, "10", LocalDate.of(2020, 3, 5));
 
             final List<BatchRequest> batchRequests = new ArrayList<>();
 
@@ -139,7 +139,7 @@ public class LoanCatchUpIntegrationTest {
             Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(0).getStatusCode(), "Verify Status Code 200 for Repayment");
 
             loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
-            Assertions.assertEquals(LocalDate.of(2020, 3, 9), loan.getLastClosedBusinessDate());
+            Assertions.assertEquals(LocalDate.of(2020, 3, 4), loan.getLastClosedBusinessDate());
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
