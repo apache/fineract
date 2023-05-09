@@ -23,4 +23,6 @@ public interface PropertyService {
     Integer getPartitionSize(String jobName);
 
     Integer getChunkSize(String jobName);
+
+    Integer getRetryLimit(String jobName);
 }
