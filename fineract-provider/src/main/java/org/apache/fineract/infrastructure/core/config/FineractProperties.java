@@ -147,6 +147,7 @@ public class FineractProperties {
         private Integer chunkSize;
         private Integer partitionSize;
         private Integer threadCount;
+        private Integer retryLimit;
     }
 
     @Getter

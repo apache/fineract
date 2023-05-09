@@ -93,7 +93,8 @@ public class LoanCOBWorkerConfiguration {
     public Step loanBusinessStep(@Value("#{stepExecutionContext['partition']}") String partitionName) {
         return localStepBuilderFactory.get("Loan Business - Step:" + partitionName)
                 .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).reader(cobWorkerItemReader())
-                .processor(cobWorkerItemProcessor()).writer(cobWorkerItemWriter()).faultTolerant().skip(Exception.class)
+                .processor(cobWorkerItemProcessor()).writer(cobWorkerItemWriter()).faultTolerant().retry(Exception.class)
+                .retryLimit(propertyService.getRetryLimit(LoanCOBConstant.JOB_NAME)).skip(Exception.class)
                 .skipLimit(propertyService.getChunkSize(JobName.LOAN_COB.name()) + 1).listener(loanItemListener()).build();
     }
 

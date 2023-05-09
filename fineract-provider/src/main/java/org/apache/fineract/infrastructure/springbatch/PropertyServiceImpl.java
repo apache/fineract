@@ -50,4 +50,15 @@ public class PropertyServiceImpl implements PropertyService {
                 .map(FineractProperties.PartitionedJobProperty::getChunkSize) //
                 .orElse(1);
     }
+
+    @Override
+    public Integer getRetryLimit(String jobName) {
+        List<FineractProperties.PartitionedJobProperty> jobProperties = fineractProperties.getPartitionedJob()
+                .getPartitionedJobProperties();
+        return jobProperties.stream() //
+                .filter(jobProperty -> jobName.equals(jobProperty.getJobName())) //
+                .findFirst() //
+                .map(FineractProperties.PartitionedJobProperty::getRetryLimit) //
+                .orElse(1);
+    }
 }
