@@ -1323,12 +1323,17 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private void applyPeriodicAccruals(final Collection<LoanTransaction> accruals) {
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (LoanRepaymentScheduleInstallment installment : installments) {
+
             Money interest = Money.zero(getCurrency());
             Money fee = Money.zero(getCurrency());
             Money penality = Money.zero(getCurrency());
             for (LoanTransaction loanTransaction : accruals) {
-                if (loanTransaction.getTransactionDate().isAfter(installment.getFromDate())
-                        && !loanTransaction.getTransactionDate().isAfter(installment.getDueDate())) {
+                boolean isInRange = installment.isFirstPeriod()
+                        ? !loanTransaction.getTransactionDate().isBefore(installment.getFromDate())
+                                && !loanTransaction.getTransactionDate().isAfter(installment.getDueDate())
+                        : loanTransaction.getTransactionDate().isAfter(installment.getFromDate())
+                                && !loanTransaction.getTransactionDate().isAfter(installment.getDueDate());
+                if (isInRange) {
                     interest = interest.plus(loanTransaction.getInterestPortion(getCurrency()));
                     fee = fee.plus(loanTransaction.getFeeChargesPortion(getCurrency()));
                     penality = penality.plus(loanTransaction.getPenaltyChargesPortion(getCurrency()));

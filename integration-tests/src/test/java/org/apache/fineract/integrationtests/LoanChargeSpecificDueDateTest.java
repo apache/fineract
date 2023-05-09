@@ -545,6 +545,8 @@ public class LoanChargeSpecificDueDateTest {
                 responseSpec);
         assertNotNull(postLoansLoanIdChargesResponse);
 
+        periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(operationDate);
+
         // Get loan details expecting to have a delinquency classification
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"), true);
@@ -560,6 +562,74 @@ public class LoanChargeSpecificDueDateTest {
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), operationDate, feeAmount);
         postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON, responseSpec);
 
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.parseDouble(principalAmount) * 2, Double.valueOf("20.00"), true);
+    }
+
+    @Test
+    public void testApplyLoanSpecificDueDatePenaltyAccrualWithDisbursementDateWithMultipleDisbursement() {
+
+        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
+
+        // Client and Loan account creation
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithPeriodicAccrual(loanTransactionHelper,
+                null);
+        assertNotNull(getLoanProductsProductResponse);
+
+        // Older date to have more than one overdue installment
+        LocalDate transactionDate = todaysDate.minusDays(2);
+        String operationDate = Utils.dateFormatter.format(transactionDate);
+        log.info("Operation date {}", transactionDate);
+
+        // Create Loan Account
+        final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
+                getLoanProductsProductResponse.getId().toString(), operationDate, "12", "0");
+
+        // Get loan details
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("0.00"), true);
+
+        // Apply Loan Charge with specific due date
+
+        final String feeAmount = "10.00";
+        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
+        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        assertNotNull(postChargesResponse);
+        final Long loanChargeId = postChargesResponse.getResourceId();
+        assertNotNull(loanChargeId);
+
+        payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), operationDate, feeAmount);
+        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
+                responseSpec);
+        assertNotNull(postLoansLoanIdChargesResponse);
+
+        periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(operationDate);
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"), true);
+
+        transactionDate = transactionDate.plusDays(1);
+        operationDate = Utils.dateFormatter.format(transactionDate);
+
+        loanTransactionHelper.disburseLoan((long) loanId, new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                .transactionAmount(new BigDecimal("1000")).locale("en").dateFormat("dd MMMM yyyy"));
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.parseDouble(principalAmount) * 2, Double.valueOf("10.00"), true);
+
+        periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(operationDate);
+
+        operationDate = Utils.dateFormatter.format(transactionDate.plusMonths(1));
+        payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), operationDate, feeAmount);
+        postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON, responseSpec);
+
+        transactionDate = transactionDate.plusDays(1);
+        operationDate = Utils.dateFormatter.format(transactionDate);
+        periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(operationDate);
         // Get loan details expecting to have a delinquency classification
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         validateLoanAccount(getLoansLoanIdResponse, Double.parseDouble(principalAmount) * 2, Double.valueOf("20.00"), true);
