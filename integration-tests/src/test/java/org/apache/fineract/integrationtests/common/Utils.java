@@ -150,14 +150,14 @@ public final class Utils {
      *
      * @param maxRun
      *            max number of times to run the condition
-     * @param waitInMs
-     *            wait time between evaluation in milliseconds
+     * @param seconds
+     *            wait time between evaluation in seconds
      * @param waitCondition
      *            condition to evaluate
      */
-    public static void conditionalSleepWithMaxWait(int maxRun, int waitInMs, Supplier<Boolean> waitCondition) {
+    public static void conditionalSleepWithMaxWait(int maxRun, int seconds, Supplier<Boolean> waitCondition) {
         do {
-            sleep(waitInMs);
+            sleep(seconds);
             maxRun--;
         } while (maxRun > 0 && waitCondition.get());
     }
