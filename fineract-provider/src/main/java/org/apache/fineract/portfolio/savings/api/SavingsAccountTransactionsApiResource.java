@@ -127,13 +127,12 @@ public class SavingsAccountTransactionsApiResource {
     @Operation(summary = "List Savings Account Transactions", description = "The list capability of savings account transactions can support pagination, sorting and filtering.\n\n"
             + "Example Requests:\n" + "\n" + "savingsaccounts/{savingsId}/transactions\n" + "\n"
             + "savingsaccounts/{savingsId}/transactions?offset=10&limit=50\n" + "\n"
-            + "savingsaccounts/{savingsId}/transactions?orderBy=displayName&sortOrder=DESC" + "\n"
-            + "savingsaccounts/{savingsId}/transactions?dateFormat=yyyy-MM-dd&locale=en&fromDate=2013-01-01&toDate=2013-12-01" + "\n"
-            + "savingsaccounts/{savingsId}/transactions?fromAmount=500&toAmount=1000" + "\n"
+            + "savingsaccounts/{savingsId}/transactions?orderBy=displayName&sortOrder=DESC\n" + "\n"
+            + "savingsaccounts/{savingsId}/transactions?dateFormat=yyyy-MM-dd&locale=en&fromDate=2013-01-01&toDate=2013-12-01\n" + "\n"
+            + "savingsaccounts/{savingsId}/transactions?fromAmount=500&toAmount=1000\n" + "\n"
             + "savingsaccounts/{savingsId}/transactions?transactionType=deposit")
-    // @ApiResponses({
-    // @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation =
-    // SavingsAccountTransactionsApiResourceSwagger.GetSavingsAccountTransactionsResponse.class))) })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.GetSavingsAccountTransactionsResponse.class))) })
     public String retrieveAll(@Context final UriInfo uriInfo,
             @PathParam("savingsId") @Parameter(description = "savingsId") final Long savingsId,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
