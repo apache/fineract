@@ -198,7 +198,8 @@ public class RescheduleLoansApiResource {
     @Operation(summary = "Retrieve all reschedule requests", description = "Retrieve all reschedule requests.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class)))) })
-    public String retrieveAllRescheduleRequest(@Context final UriInfo uriInfo, @QueryParam("command") final String command) {
+    public String retrieveAllRescheduleRequest(@Context final UriInfo uriInfo, @QueryParam("command") final String command,
+            @QueryParam("loanId") Long loanId) {
 
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
 
@@ -209,28 +210,8 @@ public class RescheduleLoansApiResource {
                     RescheduleLoansApiConstants.rejectCommandParamName);
         }
         final List<LoanRescheduleRequestData> loanRescheduleRequestsData = this.loanRescheduleRequestReadPlatformService
-                .retrieveAllRescheduleRequests(command);
+                .retrieveAllRescheduleRequests(command, loanId);
 
         return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleRequestsData);
     }
-
-    /*
-     * @GET
-     *
-     * @Path("{scheduleId}")
-     *
-     * @Consumes({ MediaType.APPLICATION_JSON })
-     *
-     * @Produces({ MediaType.APPLICATION_JSON }) public String retrieveTemplate(@Context final UriInfo uriInfo) {
-     *
-     * this.platformSecurityContext.authenticatedUser().
-     * validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME); final ApiRequestJsonSerializationSettings
-     * settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-     *
-     * LoanRescheduleRequestData loanRescheduleReasons = null; loanRescheduleReasons =
-     * this.loanRescheduleRequestReadPlatformService .retrieveAllRescheduleReasons(RescheduleLoansApiConstants.
-     * LOAN_RESCHEDULE_REASON);
-     *
-     * return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleReasons); }
-     */
 }
