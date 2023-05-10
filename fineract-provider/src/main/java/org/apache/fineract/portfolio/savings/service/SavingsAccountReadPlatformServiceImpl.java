@@ -1287,9 +1287,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         if (StringUtils.isNotEmpty(transactionType)) {
             Integer transcationTypeEnum = null;
-            if ("deposit".equals(transactionType)) {
+            if ("deposit".equals(transactionType.toLowerCase())) {
                 transcationTypeEnum = SavingsAccountTransactionType.DEPOSIT.getValue();
-            } else if ("withdrawal".equals(transactionType)) {
+            } else if ("withdrawal".equals(transactionType.toLowerCase())) {
                 transcationTypeEnum = SavingsAccountTransactionType.WITHDRAWAL.getValue();
             } else {
                 transcationTypeEnum = SavingsAccountTransactionType.INVALID.getValue();

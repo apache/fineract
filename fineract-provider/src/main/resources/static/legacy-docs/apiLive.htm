@@ -29369,6 +29369,243 @@ No Request Body:
 	    </div>
 	</div>
 
+	<a id="savingsaccounts_transactions_list" name="savingsaccounts_transactions_list" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>List Savings Account Transactions</h4>
+			<p>The <i>list</i> capability of savings account transactions can support <b>filtering</b>,<b>pagination</b> and <b>sorting</b>.</p>
+			<h5>Optional Arguments</h5>
+			<dl class="argument-list">
+				<dt>offset</dt>
+				<dd>
+					Integer <span>optional</span>, defaults to 0
+				</dd>
+				<dd>Indicates from what result to start from.</dd>
+
+				<dt>limit</dt>
+				<dd>
+					Integer <span>optional</span>, defaults to 200
+				</dd>
+				<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+
+				<dt>orderBy</dt>
+				<dd>
+					String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
+				</dd>
+				<dd>Orders the results by the field indicated.</dd>
+
+				<dt>sortBy</dt>
+				<dd>
+					String <span>optional</span>, one of <span>ASC, DESC</span>
+				</dd>
+				<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+
+				<dt>fromDate</dt>
+				<dd>
+					Date<span>optional</span>
+				</dd>
+				<dd>Filters for Savings account transactions whose transcation date
+					is greater than or equal to the passed in Date, Requires dateFormat and locale parameters
+				</dd>
+				<dt>toDate</dt>
+				<dd>
+					Date <span>optional</span>
+				</dd>
+				<dd>Filters for Savings account transactions whose transcation date
+					is lesser than or equal to the passed in Date. Requires dateFormat and locale parameters
+				</dd>
+
+				<dt>fromAmount</dt>
+				<dd>
+					BigDecimal <span>optional</span>
+				</dd>
+				<dd>Filters for Savings account transactions whose amount
+					is greater than or equal to the passed in amount
+				</dd>
+
+				<dt>toAmount</dt>
+				<dd>
+					BigDecimal <span>optional</span>
+				</dd>
+				<dd>Filters for Savings account transactions whose amount
+					is lesser than or equal to the passed in amount
+				</dd>
+
+				<dt>transactionType</dt>
+				<dd>
+					String <span>optional</span>
+				</dd>
+				<dd>Filters for the type of transcation.
+					<b>Supported values: deposit/withdrawal</b>
+				</dd>
+				
+			</dl>
+			<p>Example Requests:</p>
+			<div class=apiClick>savingsaccounts/1/transactions</div>
+			<br>
+			<div class=apiClick>savingsaccounts/1/transactions?transactionType=deposit</div>
+			<br>
+			<div class=apiClick>savingsaccounts/1/transactions?fromDate=1 July 2013&toDate=15 July 2013&dateFormat=dd MMMM yyyy&locale=en</div>
+			<br>
+			<div class=apiClick>savingsaccounts/1/transactions?fromAmount=500&toAmount=1000</div>
+			<br>
+			<div class=apiClick>savingsaccounts/1/transactions?offset=10&limit=50</div>
+			<br>
+			<div class=apiClick>savingsaccounts/1/transactions?orderBy=amount&sortOrder=DESC</div>
+			<br>
+		</div>
+		<div class="method-example">
+			<code class="method-declaration">
+GET https://DomainName/api/v1/savingsaccount/1/transactions?transactionType=deposit
+			</code>
+			<code class="method-response">
+				{
+					"totalFilteredRecords": 2,
+					"pageItems": [
+						{
+							"id": 1,
+							"transactionType": {
+								"id": 1,
+								"code": "savingsAccountTransactionType.deposit",
+								"value": "Deposit",
+								"deposit": true,
+								"dividendPayout": false,
+								"withdrawal": false,
+								"interestPosting": false,
+								"feeDeduction": false,
+								"initiateTransfer": false,
+								"approveTransfer": false,
+								"withdrawTransfer": false,
+								"rejectTransfer": false,
+								"overdraftInterest": false,
+								"writtenoff": false,
+								"overdraftFee": true,
+								"withholdTax": false,
+								"escheat": false,
+								"amountHold": false,
+								"amountRelease": false
+							},
+							"accountId": 1,
+							"accountNo": "000000001",
+							"date": [
+								2013,
+								5,
+								27
+							],
+							"currency": {
+								"code": "USD",
+								"name": "US Dollar",
+								"decimalPlaces": 2,
+								"inMultiplesOf": 0,
+								"displaySymbol": "$",
+								"nameCode": "currency.USD",
+								"displayLabel": "US Dollar ($)"
+							},
+							"paymentDetailData": {
+								"id": 1,
+								"paymentType": {
+									"id": 1,
+									"name": "Money Transfer",
+									"isSystemDefined": false
+								},
+								"accountNumber": "acc123",
+								"checkNumber": "che123",
+								"routingCode": "rou123",
+								"receiptNumber": "rec123",
+								"bankNumber": "ban123"
+							},
+							"amount": 500.000000,
+							"runningBalance": 500.000000,
+							"reversed": false,
+							"submittedOnDate": [
+								2023,
+								5,
+								7
+							],
+							"interestedPostedAsOn": false,
+							"submittedByUsername": "mifos",
+							"isManualTransaction": false,
+							"isReversal": false,
+							"originalTransactionId": 0,
+							"lienTransaction": false,
+							"releaseTransactionId": 0,
+							"chargesPaidByData": []
+						},
+						{
+							"id": 192,
+							"transactionType": {
+								"id": 1,
+								"code": "savingsAccountTransactionType.deposit",
+								"value": "Deposit",
+								"deposit": true,
+								"dividendPayout": false,
+								"withdrawal": false,
+								"interestPosting": false,
+								"feeDeduction": false,
+								"initiateTransfer": false,
+								"approveTransfer": false,
+								"withdrawTransfer": false,
+								"rejectTransfer": false,
+								"overdraftInterest": false,
+								"writtenoff": false,
+								"overdraftFee": true,
+								"withholdTax": false,
+								"escheat": false,
+								"amountHold": false,
+								"amountRelease": false
+							},
+							"accountId": 1,
+							"accountNo": "000000001",
+							"date": [
+								2023,
+								5,
+								5
+							],
+							"currency": {
+								"code": "USD",
+								"name": "US Dollar",
+								"decimalPlaces": 2,
+								"inMultiplesOf": 0,
+								"displaySymbol": "$",
+								"nameCode": "currency.USD",
+								"displayLabel": "US Dollar ($)"
+							},
+							"paymentDetailData": {
+								"id": 192,
+								"paymentType": {
+									"id": 1,
+									"name": "Money Transfer",
+									"isSystemDefined": false
+								},
+								"accountNumber": "acc123",
+								"checkNumber": "che123",
+								"routingCode": "rou123",
+								"receiptNumber": "rec123",
+								"bankNumber": "ban123"
+							},
+							"amount": 500.000000,
+							"runningBalance": 1321.610000,
+							"reversed": false,
+							"submittedOnDate": [
+								2023,
+								5,
+								8
+							],
+							"interestedPostedAsOn": false,
+							"submittedByUsername": "mifos",
+							"isManualTransaction": false,
+							"isReversal": false,
+							"originalTransactionId": 0,
+							"lienTransaction": false,
+							"releaseTransactionId": 0,
+							"chargesPaidByData": []
+						}
+					]
+				}
+			</code>
+		</div>
+	</div>
+
 <a id="savingsaccounts_transaction" name="savingsaccounts_transaction" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
