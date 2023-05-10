@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -271,19 +273,32 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     }
 
     @Override
-    public List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command) {
+    public List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command, Long loanId) {
         LoanRescheduleRequestRowMapperForBulkApproval loanRescheduleRequestRowMapperForBulkApproval = new LoanRescheduleRequestRowMapperForBulkApproval();
         String sql = "select " + loanRescheduleRequestRowMapperForBulkApproval.schema();
+        List<String> extraFilters = new ArrayList<>();
+        List<Object> extraParams = new ArrayList<>();
+
         if (!StringUtils.isEmpty(command) && !command.equalsIgnoreCase(RescheduleLoansApiConstants.allCommandParamName)) {
-            sql = sql + " where lrr.status_enum = ? ";
-            Integer statusParam = 100;
+            int statusParam = 100;
             if (command.equalsIgnoreCase(RescheduleLoansApiConstants.approveCommandParamName)) {
                 statusParam = 200;
             } else if (command.equalsIgnoreCase(RescheduleLoansApiConstants.rejectCommandParamName)) {
                 statusParam = 300;
             }
-            return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval, statusParam); // NOSONAR
+
+            extraFilters.add("lrr.status_enum = ?");
+            extraParams.add(statusParam);
         }
-        return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval); // NOSONAR
+
+        if (loanId != null) {
+            extraFilters.add("loan.id = ?");
+            extraParams.add(loanId);
+        }
+
+        if (isNotEmpty(extraFilters)) {
+            sql += " where " + String.join(" AND ", extraFilters);
+        }
+        return jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval, extraParams.toArray()); // NOSONAR
     }
 }

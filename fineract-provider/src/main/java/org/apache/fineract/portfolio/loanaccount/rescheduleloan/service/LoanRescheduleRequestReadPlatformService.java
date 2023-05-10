@@ -67,5 +67,5 @@ public interface LoanRescheduleRequestReadPlatformService {
      *            pending for approval reject - give all rejected requests
      * @return list of LoanRescheduleRequestData objects
      **/
-    List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command);
+    List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command, Long loanId);
 }
