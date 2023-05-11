@@ -98,7 +98,7 @@ public class GetLoanByIdCommandStrategyTest {
     private BatchRequest getBatchRequest(final Long loanId, final String associations, final String exclude, final String fields) {
 
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/" + loanId;
+        String relativeUrl = "v1/loans/" + loanId;
 
         Set<String> queryParams = new HashSet<>();
         if (associations != null) {

@@ -67,7 +67,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformS
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.stereotype.Component;
 
-@Path("/loans")
+@Path("/v1/loans")
 @Component
 @Tag(name = "Loan Charges", description = "Its typical for MFIs to add extra costs for their loan products. They can be either Fees or Penalties.\n"
         + "\n"

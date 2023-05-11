@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 @Profile("test")
 @Component
-@Path("/instance-mode")
+@Path("/v1/instance-mode")
 @Tag(name = "Instance Mode", description = "Instance mode changing API")
 @RequiredArgsConstructor
 @Slf4j

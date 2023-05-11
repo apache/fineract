@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.isRelativeUrlVersioned;
+
 import com.google.common.collect.Lists;
 import io.github.resilience4j.core.functions.Either;
 import java.io.IOException;
@@ -76,10 +78,10 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchReque
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
-    public static final Pattern IGNORE_LOAN_PATH_PATTERN = Pattern.compile("\\/loans\\/catch-up");
-    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("\\/(?:reschedule)?loans\\/(?:external-id\\/)?([^\\/\\?]+).*");
+    public static final Pattern IGNORE_LOAN_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/loans/catch-up");
+    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/(?:reschedule)?loans/(?:external-id/)?([^/?]+).*");
 
-    public static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("\\/loans\\/glimAccount\\/(\\d+).*");
+    public static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/loans/glimAccount/(\\d+).*");
     private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find()
             || LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(s).find();
     private static final String JOB_NAME = "INLINE_LOAN_COB";
@@ -223,7 +225,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchReque
     }
 
     private boolean isRescheduleLoans(String pathInfo) {
-        return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("/rescheduleloans/");
+        return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("/v1/rescheduleloans/");
     }
 
     private boolean isOnApiList(String pathInfo, String method) {
@@ -244,10 +246,16 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchReque
         tr.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
         return tr.execute(status -> {
             try {
-                if (isOnApiList("/" + batchRequest.getRelativeUrl(), batchRequest.getMethod())) {
+                String method = batchRequest.getMethod();
+                String relativeUrl = "/" + batchRequest.getRelativeUrl();
+                if (!isRelativeUrlVersioned(batchRequest.getRelativeUrl())) {
+                    // to support pre-versioned relative paths
+                    relativeUrl = "/v1/" + batchRequest.getRelativeUrl();
+                }
+                if (isOnApiList(relativeUrl, method)) {
                     boolean bypassUser = isBypassUser();
                     if (!bypassUser) {
-                        List<Long> result = calculateRelevantLoanIds("/" + batchRequest.getRelativeUrl());
+                        List<Long> result = calculateRelevantLoanIds(relativeUrl);
                         if (!result.isEmpty() && (isLoanSoftLocked(result) || isLoanBehind(result))) {
                             executeInlineCob(result);
                         }

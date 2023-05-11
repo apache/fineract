@@ -55,7 +55,7 @@ import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.springframework.stereotype.Component;
 
-@Path("/funds")
+@Path("/v1/funds")
 @Component
 @Tag(name = "Funds", description = "")
 @RequiredArgsConstructor

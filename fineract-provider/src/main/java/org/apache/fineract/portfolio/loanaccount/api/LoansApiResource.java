@@ -159,7 +159,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-@Path("/loans")
+@Path("/v1/loans")
 @Component
 @Tag(name = "Loans", description = "The API concept of loans models the loan application process and the loan contract/monitoring process.\n"
         + "\n" + "Field Descriptions\n" + "accountNo\n"

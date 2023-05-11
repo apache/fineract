@@ -26,35 +26,24 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.teller.data.TellerData;
 import org.apache.fineract.organisation.teller.data.TellerJournalData;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.apache.fineract.organisation.teller.util.DateRange;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("cashiersjournal")
+@Path("/v1/cashiersjournal")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Cashier Journals", description = "")
+@RequiredArgsConstructor
 public class TellerJournalApiResource {
 
     private final PlatformSecurityContext securityContext;
     private final DefaultToApiJsonSerializer<TellerData> jsonSerializer;
     private final TellerManagementReadPlatformService readPlatformService;
-
-    @Autowired
-    public TellerJournalApiResource(final PlatformSecurityContext securityContext,
-            final DefaultToApiJsonSerializer<TellerData> jsonSerializer, final TellerManagementReadPlatformService readPlatformService) {
-
-        this.securityContext = securityContext;
-        this.jsonSerializer = jsonSerializer;
-        this.readPlatformService = readPlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })

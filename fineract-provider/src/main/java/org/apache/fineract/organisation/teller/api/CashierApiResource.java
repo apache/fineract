@@ -28,30 +28,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("cashiers")
+@Path("/v1/cashiers")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Cashiers", description = "")
+@RequiredArgsConstructor
 public class CashierApiResource {
 
     private final DefaultToApiJsonSerializer<CashierData> jsonSerializer;
     private final TellerManagementReadPlatformService readPlatformService;
-
-    @Autowired
-    public CashierApiResource(DefaultToApiJsonSerializer<CashierData> jsonSerializer,
-            TellerManagementReadPlatformService readPlatformService) {
-        this.jsonSerializer = jsonSerializer;
-        this.readPlatformService = readPlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })

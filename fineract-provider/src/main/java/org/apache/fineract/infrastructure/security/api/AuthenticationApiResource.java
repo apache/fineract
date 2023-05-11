@@ -39,6 +39,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
@@ -48,11 +49,9 @@ import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.Role;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -60,10 +59,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 @Component
-@Scope("singleton")
 @ConditionalOnProperty("fineract.security.basicauth.enabled")
-@Path("/authentication")
+@Path("/v1/authentication")
 @Tag(name = "Authentication HTTP Basic", description = "An API capability that allows client applications to verify authentication details using HTTP Basic Authentication.")
+@RequiredArgsConstructor
 public class AuthenticationApiResource {
 
     @Value("${fineract.security.2fa.enabled}")
@@ -75,22 +74,11 @@ public class AuthenticationApiResource {
         public String password;
     }
 
+    @Qualifier("customAuthenticationProvider")
     private final DaoAuthenticationProvider customAuthenticationProvider;
     private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
     private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
     private final ClientReadPlatformService clientReadPlatformService;
-
-    @Autowired
-    public AuthenticationApiResource(
-            @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
-            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService,
-            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext,
-            ClientReadPlatformService aClientReadPlatformService) {
-        this.customAuthenticationProvider = customAuthenticationProvider;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
-        clientReadPlatformService = aClientReadPlatformService;
-    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -45,7 +45,7 @@ import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.service.NotificationReadPlatformService;
 import org.springframework.stereotype.Component;
 
-@Path("/notifications")
+@Path("/v1/notifications")
 @Component
 @Tag(name = "Notification", description = "")
 @RequiredArgsConstructor

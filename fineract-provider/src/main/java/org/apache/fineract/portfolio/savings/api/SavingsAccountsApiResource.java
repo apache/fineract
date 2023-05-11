@@ -75,7 +75,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-@Path("/savingsaccounts")
+@Path("/v1/savingsaccounts")
 @Component
 @Tag(name = "Savings Account", description = "Savings accounts are instances of a particular savings product created for an individual or group. An application process around the creation of accounts is also supported.")
 @RequiredArgsConstructor

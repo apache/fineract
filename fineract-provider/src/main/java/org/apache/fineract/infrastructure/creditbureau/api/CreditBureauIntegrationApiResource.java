@@ -62,10 +62,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Path("/creditBureauIntegration")
+@Path("/v1/creditBureauIntegration")
 @Component
 @RequiredArgsConstructor
-public class CreditBureauIntegrationAPI {
+public class CreditBureauIntegrationApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "creditBureauId", "nrc", "creditReport"));
 
@@ -76,7 +76,7 @@ public class CreditBureauIntegrationAPI {
     private final CreditReportWritePlatformService creditReportWritePlatformService;
     private final CreditReportReadPlatformService creditReportReadPlatformService;
     private final DefaultToApiJsonSerializer<CreditReportData> toApiJsonSerializer;
-    private static final Logger LOG = LoggerFactory.getLogger(CreditBureauIntegrationAPI.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CreditBureauIntegrationApiResource.class);
 
     @POST
     @Path("creditReport")

@@ -41,6 +41,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -60,15 +61,15 @@ import org.apache.fineract.portfolio.client.data.ClientChargeData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.service.ClientChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientTransactionReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-@Path("/clients/{clientId}/charges")
+@Path("/v1/clients/{clientId}/charges")
 @Component
 @Tag(name = "Client Charges", description = "It is typical for MFI's to directly associate charges with an implicit Client account. These can be either fees or penalties\n"
         + "\n"
         + "Client Charges are client specific instances of Charges. Refer Charges for documentation of the various properties of a charge, Only additional properties ( specific to the context of a Charge being associated with a Client account) are described here")
+@RequiredArgsConstructor
 public class ClientChargesApiResource {
 
     private final PlatformSecurityContext context;
@@ -78,22 +79,6 @@ public class ClientChargesApiResource {
     private final DefaultToApiJsonSerializer<ClientChargeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public ClientChargesApiResource(final PlatformSecurityContext context, final ChargeReadPlatformService chargeReadPlatformService,
-            final ClientChargeReadPlatformService clientChargeReadPlatformService,
-            final DefaultToApiJsonSerializer<ClientChargeData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ClientTransactionReadPlatformService clientTransactionReadPlatformService) {
-        this.context = context;
-        this.chargeReadPlatformService = chargeReadPlatformService;
-        this.clientChargeReadPlatformService = clientChargeReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.clientTransactionReadPlatformService = clientTransactionReadPlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
 import com.google.common.base.Splitter;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +65,7 @@ public class GetTransactionByExternalIdCommandStrategy implements CommandStrateg
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final String relativeUrl = request.getRelativeUrl();
+        final String relativeUrl = relativeUrlWithoutVersion(request);
 
         // Expected pattern - loans\/external-id\/[\w\d_-]+\/transactions\/external-id\/[\w\d_-]+
         // Get the loan and transaction ids for use in loanTransactionsApiResource

@@ -39,6 +39,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -49,14 +50,12 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementData;
 import org.apache.fineract.portfolio.collateralmanagement.service.CollateralManagementReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/collateral-management")
+@Path("/v1/collateral-management")
 @Component
-@Scope("singleton")
 @Tag(name = "Collateral Management", description = "Collateral Management is for managing collateral operations")
+@RequiredArgsConstructor
 public class CollateralManagementApiResource {
 
     private final DefaultToApiJsonSerializer<CollateralManagementData> apiJsonSerializerService;
@@ -65,20 +64,6 @@ public class CollateralManagementApiResource {
     private final PlatformSecurityContext context;
     private final CollateralManagementReadPlatformService collateralManagementReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
-
-    @Autowired
-    public CollateralManagementApiResource(final DefaultToApiJsonSerializer<CollateralManagementData> apiJsonSerializerService,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final PlatformSecurityContext context,
-            final CollateralManagementReadPlatformService collateralManagementReadPlatformService,
-            final CurrencyReadPlatformService currencyReadPlatformService,
-            final DefaultToApiJsonSerializer<CurrencyData> apiJsonSerializerServiceForCurrency) {
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.context = context;
-        this.collateralManagementReadPlatformService = collateralManagementReadPlatformService;
-        this.currencyReadPlatformService = currencyReadPlatformService;
-        this.apiJsonSerializerServiceForCurrency = apiJsonSerializerServiceForCurrency;
-    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })

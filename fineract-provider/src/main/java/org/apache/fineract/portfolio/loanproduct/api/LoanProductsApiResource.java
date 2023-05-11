@@ -86,7 +86,7 @@ import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.service.RateReadService;
 import org.springframework.stereotype.Component;
 
-@Path("/loanproducts")
+@Path("/v1/loanproducts")
 @Component
 @Tag(name = "Loan Products", description = "A Loan product is a template that is used when creating a loan. Much of the template definition can be overridden during loan creation.")
 @RequiredArgsConstructor

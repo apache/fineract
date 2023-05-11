@@ -30,20 +30,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.group.data.GroupLevelData;
 import org.apache.fineract.portfolio.group.service.GroupLevelReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/grouplevels")
+@Path("/v1/grouplevels")
 @Component
-@Scope("singleton")
 @Tag(name = "Groups Level", description = "")
+@RequiredArgsConstructor
 public class GroupsLevelApiResource {
 
     private static final Set<String> GROUPLEVEL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("levelId", "levelName", "parentLevelId",
@@ -53,15 +52,6 @@ public class GroupsLevelApiResource {
     private final GroupLevelReadPlatformService groupLevelReadPlatformService;
     private final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-
-    @Autowired
-    public GroupsLevelApiResource(final PlatformSecurityContext context, final GroupLevelReadPlatformService groupLevelReadPlatformService,
-            final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
-        this.context = context;
-        this.groupLevelReadPlatformService = groupLevelReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -41,6 +41,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -70,14 +71,12 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorRead
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/{loanId}/guarantors")
+@Path("/v1/loans/{loanId}/guarantors")
 @Component
-@Scope("singleton")
 @Tag(name = "Guarantors", description = "")
+@RequiredArgsConstructor
 public class GuarantorsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -101,26 +100,6 @@ public class GuarantorsApiResource {
     private final LoanReadPlatformService loanReadPlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-
-    @Autowired
-    public GuarantorsApiResource(final PlatformSecurityContext context, final GuarantorReadPlatformService guarantorReadPlatformService,
-            final DefaultToApiJsonSerializer<GuarantorData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
-            final LoanReadPlatformService loanReadPlatformService, final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.context = context;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiJsonSerializerService = toApiJsonSerializer;
-        this.guarantorReadPlatformService = guarantorReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
-        this.loanReadPlatformService = loanReadPlatformService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-    }
 
     @GET
     @Path("template")

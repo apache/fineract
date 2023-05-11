@@ -38,6 +38,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -54,14 +55,12 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansA
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestData;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanReschedulePreviewPlatformService;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanRescheduleRequestReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/rescheduleloans")
+@Path("/v1/rescheduleloans")
 @Component
-@Scope("singleton")
 @Tag(name = "Reschedule Loans", description = "")
+@RequiredArgsConstructor
 public class RescheduleLoansApiResource {
 
     private final DefaultToApiJsonSerializer<LoanRescheduleRequestData> loanRescheduleRequestToApiJsonSerializer;
@@ -71,23 +70,6 @@ public class RescheduleLoansApiResource {
     private final LoanRescheduleRequestReadPlatformService loanRescheduleRequestReadPlatformService;
     private final LoanReschedulePreviewPlatformService loanReschedulePreviewPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-
-    @Autowired
-    public RescheduleLoansApiResource(final DefaultToApiJsonSerializer<LoanRescheduleRequestData> loanRescheduleRequestToApiJsonSerializer,
-            final PlatformSecurityContext platformSecurityContext,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final LoanRescheduleRequestReadPlatformService loanRescheduleRequestReadPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<LoanScheduleData> loanRescheduleToApiJsonSerializer,
-            final LoanReschedulePreviewPlatformService loanReschedulePreviewPlatformService) {
-        this.loanRescheduleRequestToApiJsonSerializer = loanRescheduleRequestToApiJsonSerializer;
-        this.platformSecurityContext = platformSecurityContext;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.loanRescheduleRequestReadPlatformService = loanRescheduleRequestReadPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.loanRescheduleToApiJsonSerializer = loanRescheduleToApiJsonSerializer;
-        this.loanReschedulePreviewPlatformService = loanReschedulePreviewPlatformService;
-    }
 
     @GET
     @Path("template")

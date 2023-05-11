@@ -66,7 +66,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
 
-@Path("/staff")
+@Path("/v1/staff")
 @Component
 @Tag(name = "Staff", description = "Allows you to model staff members. At present the key role of significance is whether this staff member is a loan officer or not.")
 @RequiredArgsConstructor

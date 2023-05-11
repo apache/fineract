@@ -24,31 +24,22 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.self.registration.SelfServiceApiConstants;
 import org.apache.fineract.portfolio.self.registration.service.SelfServiceRegistrationWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/self/registration")
+@Path("/v1/self/registration")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Self Service Registration", description = "")
+@RequiredArgsConstructor
 public class SelfServiceRegistrationApiResource {
 
     private final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService;
     private final DefaultToApiJsonSerializer<AppUser> toApiJsonSerializer;
-
-    @Autowired
-    public SelfServiceRegistrationApiResource(final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService,
-            final DefaultToApiJsonSerializer<AppUser> toApiJsonSerializer) {
-        this.selfServiceRegistrationWritePlatformService = selfServiceRegistrationWritePlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-    }
 
     @POST
     @Produces({ MediaType.APPLICATION_JSON })

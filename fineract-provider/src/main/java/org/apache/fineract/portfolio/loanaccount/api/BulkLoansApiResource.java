@@ -33,6 +33,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -49,14 +50,12 @@ import org.apache.fineract.organisation.staff.data.StaffAccountSummaryCollection
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/loanreassignment")
+@Path("/v1/loans/loanreassignment")
 @Component
-@Scope("singleton")
 @Tag(name = "Bulk Loans", description = "")
+@RequiredArgsConstructor
 public class BulkLoansApiResource {
 
     public static final String OFFICE_ID = "officeId";
@@ -77,21 +76,6 @@ public class BulkLoansApiResource {
     private final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public BulkLoansApiResource(final PlatformSecurityContext context, final StaffReadPlatformService staffReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final BulkLoansReadPlatformService bulkLoansReadPlatformService,
-            final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.bulkLoansReadPlatformService = bulkLoansReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Path("template")

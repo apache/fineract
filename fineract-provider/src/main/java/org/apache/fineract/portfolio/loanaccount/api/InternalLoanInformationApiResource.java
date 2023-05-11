@@ -49,7 +49,7 @@ import org.springframework.stereotype.Component;
 
 @Profile("test")
 @Component
-@Path("/internal/loan")
+@Path("/v1/internal/loan")
 @RequiredArgsConstructor
 @Slf4j
 public class InternalLoanInformationApiResource implements InitializingBean {

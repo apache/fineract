@@ -25,7 +25,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,9 +38,8 @@ import org.springframework.stereotype.Component;
  * @author Michael Vorburger.ch
  */
 @Component
-@Path("/echo")
-@Scope("singleton")
-public class EchoHeadersResource {
+@Path("/v1/echo")
+public class EchoHeadersApiResource {
 
     @GET
     @Consumes({ MediaType.WILDCARD })

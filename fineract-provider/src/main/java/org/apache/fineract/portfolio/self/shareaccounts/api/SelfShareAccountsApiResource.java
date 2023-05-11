@@ -62,7 +62,7 @@ import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatf
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Component;
 
-@Path("/self/shareaccounts")
+@Path("/v1/self/shareaccounts")
 @Component
 @Tag(name = "Self Share Accounts", description = "")
 @RequiredArgsConstructor

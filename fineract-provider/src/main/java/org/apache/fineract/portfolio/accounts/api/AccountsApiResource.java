@@ -39,6 +39,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -59,15 +60,13 @@ import org.apache.fineract.portfolio.products.exception.ResourceNotFoundExceptio
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/accounts/{type}")
+@Path("/v1/accounts/{type}")
 @Component
-@Scope("singleton")
 @Tag(name = "Share Account", description = "Share accounts are instances of a praticular share product created for an individual. An application process around the creation of accounts is also supported.")
+@RequiredArgsConstructor
 public class AccountsApiResource {
 
     private final ApplicationContext applicationContext;
@@ -77,21 +76,6 @@ public class AccountsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-
-    @Autowired
-    public AccountsApiResource(final ApplicationContext applicationContext, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<AccountData> toApiJsonSerializer, final PlatformSecurityContext platformSecurityContext,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.applicationContext = applicationContext;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.platformSecurityContext = platformSecurityContext;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-    }
 
     @GET
     @Path("template")

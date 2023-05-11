@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
@@ -56,7 +58,7 @@ public class UpdateClientCommandStrategy implements CommandStrategy {
         response.setHeaders(request.getHeaders());
 
         // Get the clientID
-        final String relativeUrl = request.getRelativeUrl();
+        final String relativeUrl = relativeUrlWithoutVersion(request);
         final Long clientId = Long.parseLong(relativeUrl.substring(relativeUrl.indexOf('/') + 1));
 
         // Calls 'update' function from 'ClientsApiResource' to update a

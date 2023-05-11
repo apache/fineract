@@ -34,6 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -50,15 +51,13 @@ import org.apache.fineract.infrastructure.creditbureau.service.CreditBureauReadC
 import org.apache.fineract.infrastructure.creditbureau.service.CreditBureauReadPlatformService;
 import org.apache.fineract.infrastructure.creditbureau.service.OrganisationCreditBureauReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/CreditBureauConfiguration")
+@Path("/v1/CreditBureauConfiguration")
 @Component
-@Scope("singleton")
 @Tag(name = "Credit Bureau Configuration", description = "")
-public class CreditBureauConfigurationAPI {
+@RequiredArgsConstructor
+public class CreditBureauConfigurationApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("creditBureauId", "alias", "country", "creditBureauProductId", "startDate", "endDate", "isActive"));
@@ -74,32 +73,6 @@ public class CreditBureauConfigurationAPI {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CreditBureauReadConfigurationService creditBureauConfiguration;
-
-    @Autowired
-    public CreditBureauConfigurationAPI(final PlatformSecurityContext context, final CreditBureauReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<CreditBureauData> toApiJsonSerializer,
-            final CreditBureauLoanProductMappingReadPlatformService readPlatformServiceCreditBureauLoanProduct,
-            final CreditBureauReadConfigurationService readPlatformServiceCreditBureauConfiguration,
-            final DefaultToApiJsonSerializer<CreditBureauLoanProductMappingData> toApiJsonSerializerCreditBureauLoanProduct,
-            final OrganisationCreditBureauReadPlatformService readPlatformServiceOrganisationCreditBureau,
-            final DefaultToApiJsonSerializer<OrganisationCreditBureauData> toApiJsonSerializerOrganisationCreditBureau,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final DefaultToApiJsonSerializer<CreditBureauConfigurationData> toApiJsonSerializerReport,
-            final CreditBureauReadConfigurationService creditBureauConfiguration) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.readPlatformServiceCreditBureauLoanProduct = readPlatformServiceCreditBureauLoanProduct;
-        this.toApiJsonSerializerCreditBureauLoanProduct = toApiJsonSerializerCreditBureauLoanProduct;
-        this.readPlatformServiceOrganisationCreditBureau = readPlatformServiceOrganisationCreditBureau;
-        this.toApiJsonSerializerOrganisationCreditBureau = toApiJsonSerializerOrganisationCreditBureau;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiJsonSerializerReport = toApiJsonSerializerReport;
-        this.creditBureauConfiguration = creditBureauConfiguration;
-
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

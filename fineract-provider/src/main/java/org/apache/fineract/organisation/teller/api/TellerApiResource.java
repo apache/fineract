@@ -40,6 +40,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -57,32 +58,18 @@ import org.apache.fineract.organisation.teller.data.TellerJournalData;
 import org.apache.fineract.organisation.teller.data.TellerTransactionData;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.apache.fineract.organisation.teller.util.DateRange;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("tellers")
+@Path("/v1/tellers")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Teller Cash Management", description = "Teller cash management which will allow an organization to manage their cash transactions at branches or head office more effectively.")
+@RequiredArgsConstructor
 public class TellerApiResource {
 
     private final PlatformSecurityContext securityContext;
     private final DefaultToApiJsonSerializer<TellerData> jsonSerializer;
     private final TellerManagementReadPlatformService readPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
-
-    @Autowired
-    public TellerApiResource(PlatformSecurityContext securityContext, DefaultToApiJsonSerializer<TellerData> jsonSerializer,
-            TellerManagementReadPlatformService readPlatformService,
-            PortfolioCommandSourceWritePlatformService commandWritePlatformService) {
-
-        this.securityContext = securityContext;
-        this.jsonSerializer = jsonSerializer;
-        this.readPlatformService = readPlatformService;
-        this.commandWritePlatformService = commandWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })

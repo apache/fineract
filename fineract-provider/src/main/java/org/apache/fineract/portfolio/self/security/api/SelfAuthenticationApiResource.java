@@ -30,26 +30,20 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.api.AuthenticationApiResource;
 import org.apache.fineract.infrastructure.security.api.AuthenticationApiResourceSwagger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
-@Scope("singleton")
 @ConditionalOnProperty("fineract.security.basicauth.enabled")
-@Path("/self/authentication")
+@Path("/v1/self/authentication")
 @Tag(name = "Self Authentication", description = "Authenticates the credentials provided and returns the set roles and permissions allowed")
+@RequiredArgsConstructor
 public class SelfAuthenticationApiResource {
 
     private final AuthenticationApiResource authenticationApiResource;
-
-    @Autowired
-    public SelfAuthenticationApiResource(final AuthenticationApiResource authenticationApiResource) {
-        this.authenticationApiResource = authenticationApiResource;
-    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })

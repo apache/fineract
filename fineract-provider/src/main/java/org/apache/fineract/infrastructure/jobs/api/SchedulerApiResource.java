@@ -47,9 +47,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Path("/scheduler")
+@Path("/v1/scheduler")
 @Component
-
 @Tag(name = "Scheduler", description = "")
 public class SchedulerApiResource {
 

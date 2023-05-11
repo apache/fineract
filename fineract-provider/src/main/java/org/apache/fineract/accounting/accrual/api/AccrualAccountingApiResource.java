@@ -37,12 +37,10 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/runaccruals")
+@Path("/v1/runaccruals")
 @Component
-@Scope("singleton")
 @Tag(name = "Periodic Accrual Accounting", description = "Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.\n")
 @RequiredArgsConstructor
 public class AccrualAccountingApiResource {

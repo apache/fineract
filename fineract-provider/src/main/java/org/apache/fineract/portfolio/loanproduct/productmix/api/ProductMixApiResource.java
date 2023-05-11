@@ -34,6 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,14 +47,12 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixData;
 import org.apache.fineract.portfolio.loanproduct.productmix.service.ProductMixReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loanproducts/{productId}/productmix")
+@Path("/v1/loanproducts/{productId}/productmix")
 @Component
-@Scope("singleton")
 @Tag(name = "Product Mix")
+@RequiredArgsConstructor
 public class ProductMixApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "PRODUCTMIX";
@@ -68,20 +67,6 @@ public class ProductMixApiResource {
 
     private final ProductMixReadPlatformService productMixReadPlatformService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
-
-    @Autowired
-    public ProductMixApiResource(final PlatformSecurityContext context,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final DefaultToApiJsonSerializer<ProductMixData> toApiJsonSerializer,
-            final ProductMixReadPlatformService productMixReadPlatformService,
-            final LoanProductReadPlatformService loanProductReadPlatformService) {
-        this.context = context;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.productMixReadPlatformService = productMixReadPlatformService;
-        this.loanProductReadPlatformService = loanProductReadPlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
