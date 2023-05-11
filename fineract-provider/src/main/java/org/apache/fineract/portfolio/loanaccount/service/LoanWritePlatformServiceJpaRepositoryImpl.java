@@ -192,6 +192,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -245,6 +246,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final ExternalIdFactory externalIdFactory;
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
+    private final JdbcTemplate jdbcTemplate;
 
     @Transactional
     @Override
@@ -483,6 +485,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()
                     && loanCharge.isChargePending()) {
                 disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
+            }
+            if (loanCharge.isDisbursementCharge()) {
+                String transactionSql = "INSERT INTO m_loan_transaction  (loan_id,office_id,is_reversed,transaction_type_enum,transaction_date,amount,"
+                        + "fee_charges_portion_derived, submitted_on_date, created_by, last_modified_by, created_on_utc, last_modified_on_utc) "
+                        + "VALUES (?, ?, false, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                AppUser user = context.authenticatedUser();
+                jdbcTemplate.update(transactionSql, loanId, loan.getOfficeId(), LoanTransactionType.ACCRUAL.getValue(),
+                        actualDisbursementDate, loanCharge.amount(), loanCharge.amount(), DateUtils.getBusinessLocalDate(), user.getId(),
+                        user.getId(), DateUtils.getOffsetDateTimeOfTenant(), DateUtils.getOffsetDateTimeOfTenant());
             }
         }
 
