@@ -53,11 +53,11 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.springframework.stereotype.Component;
 
-@Path("/jobs")
+@Path("/v1/jobs")
 @Component
 @Tag(name = "Business Step Configuration", description = "")
 @RequiredArgsConstructor
-public class ConfigureBusinessStepResource {
+public class ConfigureBusinessStepApiResource {
 
     private static final Set<String> BUSINESS_STEP_CONFIG_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("jobName", "businessSteps"));

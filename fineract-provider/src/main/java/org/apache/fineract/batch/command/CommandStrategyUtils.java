@@ -20,10 +20,15 @@ package org.apache.fineract.batch.command;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
 
 public final class CommandStrategyUtils {
+
+    private static final Pattern VERSIONED_RELATIVE_URL_PATTERN = Pattern.compile("^(v[1-9][0-9]*/)(.*)$");
 
     private CommandStrategyUtils() {
 
@@ -59,6 +64,26 @@ public final class CommandStrategyUtils {
         for (Map.Entry<String, String> entry : queryParameters.entrySet()) {
             uriInfo.addAdditionalQueryParameter(entry.getKey(), entry.getValue());
         }
+    }
+
+    public static String relativeUrlWithoutVersion(BatchRequest request) {
+        String relativeUrl = request.getRelativeUrl();
+        Matcher m = VERSIONED_RELATIVE_URL_PATTERN.matcher(relativeUrl);
+        if (m.matches()) {
+            return m.group(2);
+        } else {
+            return relativeUrl;
+        }
+    }
+
+    public static boolean isResourceVersioned(CommandContext commandContext) {
+        String relativeUrl = commandContext.getResource();
+        return isRelativeUrlVersioned(relativeUrl);
+    }
+
+    public static boolean isRelativeUrlVersioned(String relativeUrl) {
+        Matcher m = VERSIONED_RELATIVE_URL_PATTERN.matcher(relativeUrl);
+        return m.matches();
     }
 
 }

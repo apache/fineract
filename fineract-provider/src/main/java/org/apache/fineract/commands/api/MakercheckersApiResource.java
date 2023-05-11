@@ -53,12 +53,10 @@ import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamE
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/makercheckers")
+@Path("/v1/makercheckers")
 @Component
-@Scope("singleton")
 @Tag(name = "Maker Checker (or 4-eye) functionality")
 @RequiredArgsConstructor
 public class MakercheckersApiResource {

@@ -38,23 +38,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
 import org.apache.fineract.portfolio.address.service.FieldConfigurationReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/fieldconfiguration/{entity}")
+@Path("/v1/fieldconfiguration/{entity}")
 @Component
-@Scope("singleton")
 @Tag(name = "Entity Field Configuration", description = "Entity Field configuration API is a generic and extensible \n"
         + "wherein various entities and subentities can be related.\n" + "Also it gives the user an ability to enable/disable fields,\n"
         + "add regular expression for validation")
-public class EntityFieldConfigurationApiResources {
+@RequiredArgsConstructor
+public class EntityFieldConfigurationApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("clientAddressId", "client_id", "address_id", "address_type_id", "isActive", "fieldConfigurationId", "entity",
@@ -64,17 +63,6 @@ public class EntityFieldConfigurationApiResources {
     private final FieldConfigurationReadPlatformService readPlatformServicefld;
     private final DefaultToApiJsonSerializer<FieldConfigurationData> toApiJsonSerializerfld;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-
-    @Autowired
-    public EntityFieldConfigurationApiResources(final PlatformSecurityContext context,
-            final FieldConfigurationReadPlatformService readPlatformServicefld,
-            final DefaultToApiJsonSerializer<FieldConfigurationData> toApiJsonSerializerfld,
-            final ApiRequestParameterHelper apiRequestParameterHelper) {
-        this.context = context;
-        this.readPlatformServicefld = readPlatformServicefld;
-        this.toApiJsonSerializerfld = toApiJsonSerializerfld;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

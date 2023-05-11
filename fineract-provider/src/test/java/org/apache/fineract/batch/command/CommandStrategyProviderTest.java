@@ -208,12 +208,37 @@ public class CommandStrategyProviderTest {
      */
     @ParameterizedTest
     @MethodSource("provideCommandStrategies")
-    public void testGetCommandStrategySuccess(final String url, final String httpMethod, final String beanName,
+    public void testGetCommandStrategySuccess_OldUrls(final String url, final String httpMethod, final String beanName,
             final CommandStrategy commandStrategy) {
         final ApplicationContext applicationContext = mock(ApplicationContext.class);
         final CommandStrategyProvider commandStrategyProvider = new CommandStrategyProvider(applicationContext);
         when(applicationContext.getBean(beanName)).thenReturn(commandStrategy);
         final CommandStrategy result = commandStrategyProvider.getCommandStrategy(CommandContext.resource(url).method(httpMethod).build());
+        assertEquals(commandStrategy, result);
+    }
+
+    /**
+     * Tests {@link CommandStrategyProvider#getCommandStrategy} for success scenarios.
+     *
+     * @param url
+     *            the resource URL
+     * @param httpMethod
+     *            the resource HTTP method
+     * @param beanName
+     *            the context bean name
+     * @param commandStrategy
+     *            the command strategy
+     */
+    @ParameterizedTest
+    @MethodSource("provideCommandStrategies")
+    public void testGetCommandStrategySuccess_VersionedUrls(final String url, final String httpMethod, final String beanName,
+            final CommandStrategy commandStrategy) {
+        String versionedUrl = "v1/" + url;
+        final ApplicationContext applicationContext = mock(ApplicationContext.class);
+        final CommandStrategyProvider commandStrategyProvider = new CommandStrategyProvider(applicationContext);
+        when(applicationContext.getBean(beanName)).thenReturn(commandStrategy);
+        final CommandStrategy result = commandStrategyProvider
+                .getCommandStrategy(CommandContext.resource(versionedUrl).method(httpMethod).build());
         assertEquals(commandStrategy, result);
     }
 

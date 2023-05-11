@@ -42,6 +42,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -55,15 +56,12 @@ import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransferEnumerations;
 import org.apache.fineract.portfolio.self.account.data.SelfBeneficiariesTPTData;
 import org.apache.fineract.portfolio.self.account.service.SelfBeneficiariesTPTReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/self/beneficiaries/tpt")
+@Path("/v1/self/beneficiaries/tpt")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Self Third Party Transfer", description = "")
+@RequiredArgsConstructor
 public class SelfBeneficiariesTPTApiResource {
 
     private final PlatformSecurityContext context;
@@ -76,18 +74,6 @@ public class SelfBeneficiariesTPTApiResource {
             SelfBeneficiariesTPTApiConstants.ACCOUNT_NUMBER_PARAM_NAME, SelfBeneficiariesTPTApiConstants.ACCOUNT_TYPE_PARAM_NAME,
             SelfBeneficiariesTPTApiConstants.TRANSFER_LIMIT_PARAM_NAME, SelfBeneficiariesTPTApiConstants.ID_PARAM_NAME,
             SelfBeneficiariesTPTApiConstants.CLIENT_NAME_PARAM_NAME, SelfBeneficiariesTPTApiConstants.ACCOUNT_TYPE_OPTIONS_PARAM_NAME));
-
-    @Autowired
-    public SelfBeneficiariesTPTApiResource(final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<SelfBeneficiariesTPTData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final SelfBeneficiariesTPTReadPlatformService readPlatformService) {
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.readPlatformService = readPlatformService;
-    }
 
     @GET
     @Path("template")

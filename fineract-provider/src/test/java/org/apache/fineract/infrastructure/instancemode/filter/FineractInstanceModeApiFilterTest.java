@@ -74,7 +74,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, true, true, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans");
+        given(request.getPathInfo()).willReturn("/v1/loans");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -87,7 +87,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans");
+        given(request.getPathInfo()).willReturn("/v1/loans");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -115,7 +115,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/loans");
+        given(request.getPathInfo()).willReturn("/v1/loans");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -129,7 +129,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/jobs/1");
+        given(request.getPathInfo()).willReturn("/v1/jobs/1");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -143,7 +143,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans");
+        given(request.getPathInfo()).willReturn("/v1/loans");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -156,7 +156,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/loans");
+        given(request.getPathInfo()).willReturn("/v1/loans");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -169,7 +169,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.PUT.name());
-        given(request.getPathInfo()).willReturn("/loans/1");
+        given(request.getPathInfo()).willReturn("/v1/loans/1");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -196,7 +196,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/jobs/1");
+        given(request.getPathInfo()).willReturn("/v1/jobs/1");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -210,7 +210,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/jobs/1");
+        given(request.getPathInfo()).willReturn("/v1/jobs/1");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -224,7 +224,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/jobs");
+        given(request.getPathInfo()).willReturn("/v1/jobs");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -251,7 +251,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/batches");
+        given(request.getPathInfo()).willReturn("/v1/batches");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -264,7 +264,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/batches");
+        given(request.getPathInfo()).willReturn("/v1/batches");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -277,7 +277,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/batches");
+        given(request.getPathInfo()).willReturn("/v1/batches");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -290,7 +290,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, false, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/loans/catch-up");
+        given(request.getPathInfo()).willReturn("/v1/loans/catch-up");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -304,7 +304,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/loans/catch-up");
+        given(request.getPathInfo()).willReturn("/v1/loans/catch-up");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -319,7 +319,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, false, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/loans/is-catch-up-running");
+        given(request.getPathInfo()).willReturn("/v1/loans/is-catch-up-running");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -333,7 +333,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/loans/is-catch-up-running");
+        given(request.getPathInfo()).willReturn("/v1/loans/is-catch-up-running");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -348,7 +348,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans/oldest-cob-closed");
+        given(request.getPathInfo()).willReturn("/v1/loans/oldest-cob-closed");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -362,7 +362,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans/oldest-cob-closed");
+        given(request.getPathInfo()).willReturn("/v1/loans/oldest-cob-closed");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -375,7 +375,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, false, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/scheduler?command=start");
+        given(request.getPathInfo()).willReturn("/v1/scheduler?command=start");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
@@ -388,7 +388,7 @@ class FineractInstanceModeApiFilterTest {
         FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, true, true, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
-        given(request.getPathInfo()).willReturn("/scheduler?command=start");
+        given(request.getPathInfo()).willReturn("/v1/scheduler?command=start");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then

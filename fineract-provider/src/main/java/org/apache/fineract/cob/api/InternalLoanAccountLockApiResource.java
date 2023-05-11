@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Profile("test")
 @Component
-@Path("/internal/loans")
+@Path("/v1/internal/loans")
 @RequiredArgsConstructor
 @Slf4j
 public class InternalLoanAccountLockApiResource implements InitializingBean {

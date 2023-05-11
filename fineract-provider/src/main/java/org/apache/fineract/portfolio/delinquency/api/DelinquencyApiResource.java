@@ -54,7 +54,7 @@ import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatform
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-@Path("delinquency")
+@Path("/v1/delinquency")
 @Component
 @Tag(name = "Delinquency Range and Buckets Management", description = "Delinquency Range and Buckets management enables you to set up, fetch and adjust Delinquency overdue ranges")
 public class DelinquencyApiResource {

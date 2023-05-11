@@ -28,6 +28,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -38,14 +39,13 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementReadPlatformService;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loan-collateral-management")
+@Path("/v1/loan-collateral-management")
 @Component
-@Scope("singleton")
 @Tag(name = "Loan Collateral Management", description = "Loan Collateral Management is for managing collateral operations")
-public class LoanCollateralManagementApiResources {
+@RequiredArgsConstructor
+public class LoanCollateralManagementApiResource {
 
     private final DefaultToApiJsonSerializer<LoanCollateralResponseData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
@@ -53,19 +53,6 @@ public class LoanCollateralManagementApiResources {
     private final PlatformSecurityContext context;
     private final LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-
-    public LoanCollateralManagementApiResources(final DefaultToApiJsonSerializer<LoanCollateralResponseData> apiJsonSerializerService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final PlatformSecurityContext context,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService) {
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.context = context;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.loanCollateralManagementReadPlatformService = loanCollateralManagementReadPlatformService;
-    }
 
     @DELETE
     @Path("{id}")

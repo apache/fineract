@@ -36,6 +36,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,39 +47,21 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/externalservice")
+@Path("/v1/externalservice")
 @Component
-@Scope("singleton")
 @Tag(name = "External Services", description = "External Services Configuration related to set of supported configurations for third party services like Amazon S3 and SMTP:\n"
         + "\n" + "S3 (Amazon S3):\n" + "s3_access_key -\n" + "s3_bucket_name -\n" + "s3_secret_key -\n" + "\n" + "\n"
         + "SMTP (Email Service):\n" + "username -\n" + "password -\n" + "host -\n" + "port -\n" + "useTLS -")
+@RequiredArgsConstructor
 public class ExternalServicesConfigurationApiResource {
 
     private final PlatformSecurityContext context;
     private final ExternalServicesPropertiesReadPlatformService externalServicePropertiesReadPlatformService;
     private final ToApiJsonSerializer<ExternalServicesPropertiesData> toApiJsonSerializer;
-    // private final ToApiJsonSerializer<S3CredentialsData>
-    // s3ToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public ExternalServicesConfigurationApiResource(final PlatformSecurityContext context,
-            final ExternalServicesPropertiesReadPlatformService readPlatformService,
-            final ToApiJsonSerializer<ExternalServicesPropertiesData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.externalServicePropertiesReadPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        // this.s3ToApiJsonSerializer = s3ToApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Path("{servicename}")

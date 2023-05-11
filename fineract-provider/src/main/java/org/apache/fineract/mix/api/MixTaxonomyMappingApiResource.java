@@ -30,6 +30,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -40,15 +41,12 @@ import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 import org.apache.fineract.mix.service.MixTaxonomyMappingReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/mixmapping")
+@Path("/v1/mixmapping")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Mix Mapping", description = "")
+@RequiredArgsConstructor
 public class MixTaxonomyMappingApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("identifier", "config"));
@@ -58,20 +56,6 @@ public class MixTaxonomyMappingApiResource {
     private final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-
-    @Autowired
-    public MixTaxonomyMappingApiResource(final PlatformSecurityContext context,
-            final ToApiJsonSerializer<MixTaxonomyMappingData> toApiJsonSerializer,
-            final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper) {
-
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.readTaxonomyMappingService = readTaxonomyMappingService;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

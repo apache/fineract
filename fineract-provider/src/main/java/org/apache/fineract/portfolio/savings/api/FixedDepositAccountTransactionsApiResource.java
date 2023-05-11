@@ -33,6 +33,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -49,14 +50,12 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/fixeddepositaccounts/{fixedDepositAccountId}/transactions")
+@Path("/v1/fixeddepositaccounts/{fixedDepositAccountId}/transactions")
 @Component
-@Scope("singleton")
 @Tag(name = "Fixed Deposit Account Transactions", description = "")
+@RequiredArgsConstructor
 public class FixedDepositAccountTransactionsApiResource {
 
     private final PlatformSecurityContext context;
@@ -70,21 +69,6 @@ public class FixedDepositAccountTransactionsApiResource {
                     DepositsApiConstants.accountNoParamName, DepositsApiConstants.currencyParamName, DepositsApiConstants.amountParamName,
                     DepositsApiConstants.dateParamName, DepositsApiConstants.paymentDetailDataParamName,
                     DepositsApiConstants.runningBalanceParamName, DepositsApiConstants.reversedParamName));
-
-    @Autowired
-    public FixedDepositAccountTransactionsApiResource(final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<SavingsAccountTransactionData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
-    }
 
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);

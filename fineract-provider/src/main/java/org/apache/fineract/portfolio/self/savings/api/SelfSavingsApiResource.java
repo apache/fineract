@@ -39,6 +39,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.savings.api.SavingsAccountChargesApiResource;
@@ -50,15 +51,12 @@ import org.apache.fineract.portfolio.self.savings.data.SelfSavingsAccountConstan
 import org.apache.fineract.portfolio.self.savings.data.SelfSavingsDataValidator;
 import org.apache.fineract.portfolio.self.savings.service.AppuserSavingsMapperReadService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/self/savingsaccounts")
+@Path("/v1/self/savingsaccounts")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Self Savings Account", description = "")
+@RequiredArgsConstructor
 public class SelfSavingsApiResource {
 
     private final PlatformSecurityContext context;
@@ -68,21 +66,6 @@ public class SelfSavingsApiResource {
     private final AppuserSavingsMapperReadService appuserSavingsMapperReadService;
     private final SelfSavingsDataValidator dataValidator;
     private final AppuserClientMapperReadService appUserClientMapperReadService;
-
-    @Autowired
-    public SelfSavingsApiResource(final PlatformSecurityContext context, final SavingsAccountsApiResource savingsAccountsApiResource,
-            final SavingsAccountChargesApiResource savingsAccountChargesApiResource,
-            final SavingsAccountTransactionsApiResource savingsAccountTransactionsApiResource,
-            final AppuserSavingsMapperReadService appuserSavingsMapperReadService, final SelfSavingsDataValidator dataValidator,
-            final AppuserClientMapperReadService appUserClientMapperReadService) {
-        this.context = context;
-        this.savingsAccountsApiResource = savingsAccountsApiResource;
-        this.savingsAccountChargesApiResource = savingsAccountChargesApiResource;
-        this.savingsAccountTransactionsApiResource = savingsAccountTransactionsApiResource;
-        this.appuserSavingsMapperReadService = appuserSavingsMapperReadService;
-        this.dataValidator = dataValidator;
-        this.appUserClientMapperReadService = appUserClientMapperReadService;
-    }
 
     @GET
     @Path("{accountId}")

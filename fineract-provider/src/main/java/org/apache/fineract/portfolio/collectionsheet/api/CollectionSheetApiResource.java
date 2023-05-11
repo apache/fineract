@@ -35,6 +35,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -49,15 +50,13 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
 import org.apache.fineract.portfolio.collectionsheet.data.IndividualCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/collectionsheet")
+@Path("/v1/collectionsheet")
 @Component
-@Scope("singleton")
 @Tag(name = "Collection Sheet", description = "")
-public class CollectionSheetApiResourse {
+@RequiredArgsConstructor
+public class CollectionSheetApiResource {
 
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
@@ -65,19 +64,6 @@ public class CollectionSheetApiResourse {
     private final ApiRequestParameterHelper apiRequestPrameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
-
-    @Autowired
-    public CollectionSheetApiResourse(final CollectionSheetReadPlatformService collectionSheetReadPlatformService,
-            final ToApiJsonSerializer<Object> toApiJsonSerializer, final FromJsonHelper fromJsonHelper,
-            final ApiRequestParameterHelper apiRequestPrameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final PlatformSecurityContext context) {
-        this.collectionSheetReadPlatformService = collectionSheetReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.fromJsonHelper = fromJsonHelper;
-        this.apiRequestPrameterHelper = apiRequestPrameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.context = context;
-    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })

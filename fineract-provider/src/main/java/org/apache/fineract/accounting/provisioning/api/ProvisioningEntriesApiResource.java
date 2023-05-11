@@ -56,12 +56,10 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/provisioningentries")
+@Path("/v1/provisioningentries")
 @Component
-@Scope("singleton")
 @Tag(name = "Provisioning Entries", description = "This defines the Provisioning Entries for all active loan products\n" + "\n"
         + "Field Descriptions\n" + "date\n" + "Date on which day provisioning entries should be created\n" + "createjournalentries\n"
         + "Boolean variable whether to add journal entries for generated provisioning entries\n")

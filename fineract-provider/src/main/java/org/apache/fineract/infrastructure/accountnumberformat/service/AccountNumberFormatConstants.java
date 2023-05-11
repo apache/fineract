@@ -34,7 +34,7 @@ public final class AccountNumberFormatConstants {
     public static final String dateFormatParamName = "dateFormat";
 
     // REST end point
-    public static final String resourceRelativeURL = "/accountnumberformats";
+    public static final String resourceRelativeURL = "/v1/accountnumberformats";
 
     // request parameters
     public static final String idParamName = "id";

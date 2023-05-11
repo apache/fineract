@@ -42,6 +42,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -54,14 +55,12 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path(AccountNumberFormatConstants.resourceRelativeURL)
 @Component
-@Scope("singleton")
 @Tag(name = "Account number format", description = "Account number preferences are used to describe custom formats for account numbers associated with Customer, Loan and Savings accounts.")
+@RequiredArgsConstructor
 public class AccountNumberFormatsApiResource {
 
     private final PlatformSecurityContext context;
@@ -73,19 +72,6 @@ public class AccountNumberFormatsApiResource {
             Arrays.asList(AccountNumberFormatConstants.idParamName, AccountNumberFormatConstants.accountTypeParamName,
                     AccountNumberFormatConstants.prefixTypeParamName, AccountNumberFormatConstants.accountTypeOptionsParamName,
                     AccountNumberFormatConstants.prefixTypeOptionsParamName));
-
-    @Autowired
-    public AccountNumberFormatsApiResource(final PlatformSecurityContext context,
-            final ToApiJsonSerializer<AccountNumberFormatData> toApiJsonSerializer,
-            final AccountNumberFormatReadPlatformService accountNumberFormatReadPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.accountNumberFormatReadPlatformService = accountNumberFormatReadPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-    }
 
     @GET
     @Path("template")

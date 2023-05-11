@@ -42,6 +42,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -80,19 +81,17 @@ import org.apache.fineract.portfolio.savings.service.SavingsDropdownReadPlatform
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-@Path("/recurringdepositproducts")
+@Path("/v1/recurringdepositproducts")
 @Component
-@Scope("singleton")
 @Tag(name = "Recurring Deposit Product", description = "Recurring Deposits are a special kind of Term Deposits offered by MFI's. The Recurring Deposit Products (aka RD) product offerings are modeled using this API.\n"
         + "\n"
         + "Recurring Deposits help people with regular incomes to deposit a fixed amount every month (specified recurring frequency) into their Recurring Deposit account.\n"
         + "\n"
         + "When creating recurring deposit accounts, the details from the recurring deposit product are used to auto fill details of the recurring deposit account application process.")
+@RequiredArgsConstructor
 public class RecurringDepositProductsApiResource {
 
     private final DepositProductReadPlatformService depositProductReadPlatformService;
@@ -111,38 +110,6 @@ public class RecurringDepositProductsApiResource {
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final TaxReadPlatformService taxReadPlatformService;
-
-    @Autowired
-    public RecurringDepositProductsApiResource(final DepositProductReadPlatformService depositProductReadPlatformService,
-            final SavingsDropdownReadPlatformService savingsDropdownReadPlatformService,
-            final CurrencyReadPlatformService currencyReadPlatformService, final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<RecurringDepositProductData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
-            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService, final InterestRateChartReadPlatformService chartReadPlatformService,
-            final InterestRateChartReadPlatformService interestRateChartReadPlatformService,
-            final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService,
-            final DropdownReadPlatformService dropdownReadPlatformService,
-            final PaymentTypeReadPlatformService paymentTypeReadPlatformService, final TaxReadPlatformService taxReadPlatformService) {
-        this.depositProductReadPlatformService = depositProductReadPlatformService;
-        this.savingsDropdownReadPlatformService = savingsDropdownReadPlatformService;
-        this.currencyReadPlatformService = currencyReadPlatformService;
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
-        this.accountMappingReadPlatformService = accountMappingReadPlatformService;
-        this.chargeReadPlatformService = chargeReadPlatformService;
-        this.chartReadPlatformService = chartReadPlatformService;
-        this.interestRateChartReadPlatformService = interestRateChartReadPlatformService;
-        this.depositsDropdownReadPlatformService = depositsDropdownReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
-        this.taxReadPlatformService = taxReadPlatformService;
-    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })

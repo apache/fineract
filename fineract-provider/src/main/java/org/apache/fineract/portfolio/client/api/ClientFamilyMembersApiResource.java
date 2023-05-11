@@ -36,6 +36,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,15 +47,13 @@ import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 import org.apache.fineract.portfolio.client.service.ClientFamilyMembersReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/clients/{clientId}/familymembers")
+@Path("/v1/clients/{clientId}/familymembers")
 @Component
-@Scope("singleton")
 @Tag(name = "Client Family Member", description = "")
-public class ClientFamilyMembersApiResources {
+@RequiredArgsConstructor
+public class ClientFamilyMembersApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName",
             "lastName", "qualification", "relationship", "maritalStatus", "gender", "dateOfBirth", "profession", "clientFamilyMemberId"));
@@ -64,20 +63,6 @@ public class ClientFamilyMembersApiResources {
     private final ToApiJsonSerializer<ClientFamilyMembersData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public ClientFamilyMembersApiResources(final PlatformSecurityContext context,
-            final ClientFamilyMembersReadPlatformService readPlatformService,
-            final ToApiJsonSerializer<ClientFamilyMembersData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-
-    }
 
     @GET
     @Path("/{familyMemberId}")

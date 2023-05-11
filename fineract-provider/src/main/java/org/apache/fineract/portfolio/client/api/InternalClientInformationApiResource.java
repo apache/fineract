@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 
 @Profile("test")
 @Component
-@Path("/internal/client")
+@Path("/v1/internal/client")
 @RequiredArgsConstructor
 @Slf4j
 public class InternalClientInformationApiResource implements InitializingBean {

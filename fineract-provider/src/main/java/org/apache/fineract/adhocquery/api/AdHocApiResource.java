@@ -46,12 +46,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/adhocquery")
+@Path("/v1/adhocquery")
 @Component
-@Scope("singleton")
 @Tag(name = "AdhocQuery Api", description = "")
 @RequiredArgsConstructor
 public class AdHocApiResource {

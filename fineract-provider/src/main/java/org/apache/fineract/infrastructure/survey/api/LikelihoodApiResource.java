@@ -27,6 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -35,35 +36,21 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.survey.data.LikelihoodData;
 import org.apache.fineract.infrastructure.survey.service.ReadLikelihoodService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * Created by Cieyou on 3/12/14.
  */
-@Path("/likelihood")
+@Path("/v1/likelihood")
 @Component
-@Scope("singleton")
 @Tag(name = "Likelihood", description = "")
+@RequiredArgsConstructor
 public class LikelihoodApiResource {
 
     private final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer;
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ReadLikelihoodService readService;
-
-    @Autowired
-    LikelihoodApiResource(final PlatformSecurityContext context,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer, final ReadLikelihoodService readService) {
-
-        this.context = context;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.readService = readService;
-
-    }
 
     @GET
     @Path("{ppiName}")

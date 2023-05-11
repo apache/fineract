@@ -37,6 +37,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -49,17 +50,15 @@ import org.apache.fineract.infrastructure.survey.data.ClientScoresOverview;
 import org.apache.fineract.infrastructure.survey.data.SurveyData;
 import org.apache.fineract.infrastructure.survey.data.SurveyDataTableData;
 import org.apache.fineract.infrastructure.survey.service.ReadSurveyService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * Created by Cieyou on 2/27/14.
  */
-@Path("/survey")
+@Path("/v1/survey")
 @Component
-@Scope("singleton")
 @Tag(name = "Survey", description = "")
+@RequiredArgsConstructor
 public class SurveyApiResource {
 
     private final DefaultToApiJsonSerializer<SurveyData> toApiJsonSerializer;
@@ -68,20 +67,6 @@ public class SurveyApiResource {
     private final ReadSurveyService readSurveyService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final GenericDataService genericDataService;
-
-    @Autowired
-    public SurveyApiResource(final DefaultToApiJsonSerializer<SurveyData> toApiJsonSerializer, final PlatformSecurityContext context,
-            final ReadSurveyService readSurveyService, final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final DefaultToApiJsonSerializer<ClientScoresOverview> toApiJsonClientScoreOverviewSerializer,
-            final GenericDataService genericDataService) {
-
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.context = context;
-        this.readSurveyService = readSurveyService;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiJsonClientScoreOverviewSerializer = toApiJsonClientScoreOverviewSerializer;
-        this.genericDataService = genericDataService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -45,6 +45,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
@@ -70,34 +71,19 @@ import org.apache.fineract.interoperation.data.InteropTransferResponseData;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 import org.apache.fineract.interoperation.domain.InteropTransferActionType;
 import org.apache.fineract.interoperation.service.InteropService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/interoperation") // api/v1/
+@Path("/v1/interoperation") // api/v1/
 @Component
-@Scope("singleton")
 @Tag(name = "Inter Operation", description = "")
+@RequiredArgsConstructor
 public class InteropApiResource {
 
-    private PlatformSecurityContext context;
-    private ApiRequestParameterHelper apiRequestParameterHelper;
-
-    private DefaultToApiJsonSerializer<CommandProcessingResult> jsonSerializer;
-
-    private InteropService interopService;
-    private PortfolioCommandSourceWritePlatformService commandsSourceService;
-
-    @Autowired
-    public InteropApiResource(PlatformSecurityContext context, ApiRequestParameterHelper apiRequestParameterHelper,
-            DefaultToApiJsonSerializer<CommandProcessingResult> defaultToApiJsonSerializer, InteropService interopService,
-            PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService) {
-        this.context = context;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.jsonSerializer = defaultToApiJsonSerializer;
-        this.interopService = interopService;
-        this.commandsSourceService = portfolioCommandSourceWritePlatformService;
-    }
+    private final PlatformSecurityContext context;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final DefaultToApiJsonSerializer<CommandProcessingResult> jsonSerializer;
+    private final InteropService interopService;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceService;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

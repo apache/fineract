@@ -58,12 +58,10 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/smscampaigns")
+@Path("/v1/smscampaigns")
 @Component
-@Scope("singleton")
 @RequiredArgsConstructor
 public class SmsCampaignApiResource {
 

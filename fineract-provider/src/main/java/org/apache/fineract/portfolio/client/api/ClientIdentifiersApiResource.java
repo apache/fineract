@@ -42,6 +42,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -57,15 +58,13 @@ import org.apache.fineract.portfolio.client.data.ClientIdentifierData;
 import org.apache.fineract.portfolio.client.exception.DuplicateClientIdentifierException;
 import org.apache.fineract.portfolio.client.service.ClientIdentifierReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/clients/{clientId}/identifiers")
+@Path("/v1/clients/{clientId}/identifiers")
 @Component
-@Scope("singleton")
 @Tag(name = "Client Identifier", description = "Client Identifiers refer to documents that are used to uniquely identify a customer\n"
         + "Ex: Drivers License, Passport, Ration card etc ")
+@RequiredArgsConstructor
 public class ClientIdentifiersApiResource {
 
     private static final Set<String> CLIENT_IDENTIFIER_DATA_PARAMETERS = new HashSet<>(
@@ -80,22 +79,6 @@ public class ClientIdentifiersApiResource {
     private final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public ClientIdentifiersApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ClientIdentifierReadPlatformService clientIdentifierReadPlatformService) {
-        this.context = context;
-        this.clientReadPlatformService = readPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.clientIdentifierReadPlatformService = clientIdentifierReadPlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

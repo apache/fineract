@@ -51,14 +51,14 @@ public interface RunReportsApi {
      *            isSelfServiceUserReport (optional, default to false)
      * @return Call&lt;GetReportNameResponse&gt;
      */
-    @GET("runreports/{reportName}")
+    @GET("v1/runreports/{reportName}")
     Call<RunReportsResponse> runReportGetData(@retrofit2.http.Path("reportName") String reportName,
             @QueryMap Map<String, String> parameters, @retrofit2.http.Query("isSelfServiceUserReport") Boolean isSelfServiceUserReport);
 
     /**
      * Run Report which returns a response such as a PDF, CSV, XLS or XSLX file.
      */
-    @GET("runreports/{reportName}")
+    @GET("v1/runreports/{reportName}")
     Call<ResponseBody> runReportGetFile(@retrofit2.http.Path("reportName") String reportName, @QueryMap Map<String, String> parameters,
             @retrofit2.http.Query("isSelfServiceUserReport") Boolean isSelfServiceUserReport);
 
