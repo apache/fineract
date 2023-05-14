@@ -491,7 +491,7 @@
     <changeSet author="fineract" id="391">
         <addColumn tableName="m_savings_account_transaction">
             <column name="ref_no" type="VARCHAR(128)">
-                <constraints unique="true"/>
+                <constraints uniqueConstraintName="transaction_ref_no" unique="true"/>
             </column>
         </addColumn>
     </changeSet>

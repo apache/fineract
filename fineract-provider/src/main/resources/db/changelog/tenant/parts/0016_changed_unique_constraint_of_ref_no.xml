@@ -26,6 +26,6 @@
         <dropUniqueConstraint tableName="m_savings_account_transaction" constraintName="m_savings_account_transaction_ref_no_key"/>
     </changeSet>
     <changeSet author="fineract" id="1" context="mysql">
-        <dropUniqueConstraint tableName="m_savings_account_transaction" constraintName="ref_no"/>
+        <dropUniqueConstraint tableName="m_savings_account_transaction" constraintName="transaction_ref_no"/>
     </changeSet>
 </databaseChangeLog>

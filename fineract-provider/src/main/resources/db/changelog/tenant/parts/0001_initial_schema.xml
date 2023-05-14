@@ -3871,7 +3871,7 @@
             <column defaultValueComputed="NULL" name="release_id_of_hold_amount" type="BIGINT"/>
             <column defaultValueComputed="NULL" name="is_loan_disbursement" type="boolean"/>
             <column name="ref_no" type="VARCHAR(128)">
-                <constraints unique="true"/>
+                <constraints uniqueConstraintName="transaction_ref_no" unique="true"/>
             </column>
         </createTable>
     </changeSet>
