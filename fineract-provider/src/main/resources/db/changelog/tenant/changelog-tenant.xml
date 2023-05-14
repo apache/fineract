@@ -126,4 +126,5 @@
     <include file="parts/0104_loan_product_add_repayment_overdue_days_config.xml" relativeToChangelogFile="true" />
     <include file="parts/0105_add_indices_loan_table.xml" relativeToChangelogFile="true" />
     <include file="parts/0106_new_repayment_strategy.xml" relativeToChangelogFile="true" />
+    <include file="parts/0107_add_configuration_charges_accrual_date.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
