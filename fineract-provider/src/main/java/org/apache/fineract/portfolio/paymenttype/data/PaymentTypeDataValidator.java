@@ -83,7 +83,7 @@ public class PaymentTypeDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.ISCASHPAYMENT, element)) {
-            final Boolean isCashPayment = this.fromApiJsonHelper.extractBooleanNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT,
+            final String isCashPayment = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT,
                     element);
             baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.ISCASHPAYMENT).value(isCashPayment)
                     .validateForBooleanValue();
@@ -102,7 +102,7 @@ public class PaymentTypeDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED, element)) {
-            final Boolean isSystemDefined = this.fromApiJsonHelper.extractBooleanNamed(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED,
+            final String isSystemDefined = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED,
                     element);
             baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED).value(isSystemDefined)
                     .validateForBooleanValue();
@@ -145,7 +145,7 @@ public class PaymentTypeDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.ISCASHPAYMENT, element)) {
-            final Boolean isCashPayment = this.fromApiJsonHelper.extractBooleanNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT,
+            final String isCashPayment = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT,
                     element);
             baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.ISCASHPAYMENT).value(isCashPayment)
                     .validateForBooleanValue();
@@ -164,7 +164,7 @@ public class PaymentTypeDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED, element)) {
-            final Boolean isSystemDefined = this.fromApiJsonHelper.extractBooleanNamed(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED,
+            final String isSystemDefined = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED,
                     element);
             baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED).value(isSystemDefined)
                     .validateForBooleanValue();

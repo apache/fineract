@@ -590,19 +590,19 @@ public class DepositAccountDataValidator {
                 .positiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists(isMandatoryDepositParamName, element)) {
-            final Boolean isMandatoryDeposit = this.fromApiJsonHelper.extractBooleanNamed(isMandatoryDepositParamName, element);
+            final String isMandatoryDeposit = this.fromApiJsonHelper.extractStringNamed(isMandatoryDepositParamName, element);
             baseDataValidator.reset().parameter(isMandatoryDepositParamName).value(isMandatoryDeposit).ignoreIfNull()
                     .validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(allowWithdrawalParamName, element)) {
-            final Boolean allowWithdrawal = this.fromApiJsonHelper.extractBooleanNamed(allowWithdrawalParamName, element);
+            final String allowWithdrawal = this.fromApiJsonHelper.extractStringNamed(allowWithdrawalParamName, element);
             baseDataValidator.reset().parameter(allowWithdrawalParamName).value(allowWithdrawal).ignoreIfNull().validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(adjustAdvanceTowardsFuturePaymentsParamName, element)) {
-            final Boolean adjustAdvanceTowardsFuturePayments = this.fromApiJsonHelper
-                    .extractBooleanNamed(adjustAdvanceTowardsFuturePaymentsParamName, element);
+            final String adjustAdvanceTowardsFuturePayments = this.fromApiJsonHelper
+                    .extractStringNamed(adjustAdvanceTowardsFuturePaymentsParamName, element);
             baseDataValidator.reset().parameter(adjustAdvanceTowardsFuturePaymentsParamName).value(adjustAdvanceTowardsFuturePayments)
                     .ignoreIfNull().validateForBooleanValue();
         }

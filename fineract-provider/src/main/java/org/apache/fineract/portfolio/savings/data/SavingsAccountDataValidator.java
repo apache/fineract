@@ -205,8 +205,8 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
-            final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper
-                    .extractBooleanNamed(withdrawalFeeForTransfersParamName, element);
+            final String isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper
+                    .extractStringNamed(withdrawalFeeForTransfersParamName, element);
             baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
                     .ignoreIfNull().validateForBooleanValue();
         }
@@ -397,8 +397,8 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
-            final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper
-                    .extractBooleanNamed(withdrawalFeeForTransfersParamName, element);
+            final String isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper
+                    .extractStringNamed(withdrawalFeeForTransfersParamName, element);
             baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
                     .ignoreIfNull().validateForBooleanValue();
         }
@@ -420,7 +420,7 @@ public class SavingsAccountDataValidator {
 
     private void validateLienParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         if (this.fromApiJsonHelper.parameterExists(lienAllowedParamName, element)) {
-            final Boolean lienAllowed = this.fromApiJsonHelper.extractBooleanNamed(lienAllowedParamName, element);
+            final String lienAllowed = this.fromApiJsonHelper.extractStringNamed(lienAllowedParamName, element);
             baseDataValidator.reset().parameter(lienAllowedParamName).value(lienAllowed).ignoreIfNull().validateForBooleanValue();
         }
 
@@ -443,7 +443,7 @@ public class SavingsAccountDataValidator {
 
     private void validateOverdraftParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         if (this.fromApiJsonHelper.parameterExists(allowOverdraftParamName, element)) {
-            final Boolean allowOverdraft = this.fromApiJsonHelper.extractBooleanNamed(allowOverdraftParamName, element);
+            final String allowOverdraft = this.fromApiJsonHelper.extractStringNamed(allowOverdraftParamName, element);
             baseDataValidator.reset().parameter(allowOverdraftParamName).value(allowOverdraft).ignoreIfNull().validateForBooleanValue();
         }
 

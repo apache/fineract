@@ -229,8 +229,8 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("calendar");
 
         if (this.fromApiJsonHelper.parameterExists(CalendarSupportedParameters.RESCHEDULE_BASED_ON_MEETING_DATES.getValue(), element)) {
-            final Boolean rescheduleBasedOnMeetingDates = this.fromApiJsonHelper
-                    .extractBooleanNamed(CalendarSupportedParameters.RESCHEDULE_BASED_ON_MEETING_DATES.getValue(), element);
+            final String rescheduleBasedOnMeetingDates = this.fromApiJsonHelper
+                    .extractStringNamed(CalendarSupportedParameters.RESCHEDULE_BASED_ON_MEETING_DATES.getValue(), element);
             baseDataValidator.reset().parameter(CalendarSupportedParameters.RESCHEDULE_BASED_ON_MEETING_DATES.getValue())
                     .value(rescheduleBasedOnMeetingDates).validateForBooleanValue();
         }
