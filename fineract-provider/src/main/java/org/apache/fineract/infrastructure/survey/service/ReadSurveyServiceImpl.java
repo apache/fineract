@@ -59,7 +59,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
         String sql = this.retrieveAllSurveySQL("");
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, new Object[] {this.context.authenticatedUser().getId(), DataTableApiConstant.CATEGORY_PPI});
 
         final List<SurveyDataTableData> surveyDataTables = new ArrayList<>();
         while (rs.next()) {
@@ -83,9 +83,9 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
                 + " left join c_configuration cf on x_registered_table.registered_table_name = cf.name " + " where exists" + " (select 'f'"
                 + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId()
+                + " where ur.appuser_id = ?"
                 + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
-                + " and x_registered_table.category = " + DataTableApiConstant.CATEGORY_PPI + andClause
+                + " and x_registered_table.category = ?" + andClause
                 + " order by application_table_name, registered_table_name";
     }
 
@@ -143,7 +143,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     @Override
     public List<ClientScoresOverview> retrieveClientSurveyScoreOverview(Long clientId) {
         final String surveyNameSql = retrieveAllSurveyNameSQL();
-        final SqlRowSet surveyNames = this.jdbcTemplate.queryForRowSet(surveyNameSql);
+        final SqlRowSet surveyNames = this.jdbcTemplate.queryForRowSet(surveyNameSql, new Object[] {this.context.authenticatedUser().getId(), DataTableApiConstant.CATEGORY_PPI});
 
         ArrayList<String> sqls = new ArrayList<>();
 
@@ -153,13 +153,13 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
                     + " tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + surveyNames.getString("name") + "' AND enabled = '"
                     + LikelihoodStatus.ENABLED + "' JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
                     + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
-                    + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = " + clientId);
+                    + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ?");
         }
 
         List<ClientScoresOverview> scoresOverviews = new ArrayList<>();
 
         for (String sql : sqls) {
-            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, new Object[] {clientId});
 
             while (rs.next()) {
                 scoresOverviews.add(new ClientScoresOverview().setLikelihoodCode(rs.getString("code"))
@@ -180,9 +180,9 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
         return "select cf.name from x_registered_table " + " join c_configuration cf on x_registered_table.registered_table_name = cf.name "
                 + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId()
+                + " where ur.appuser_id = ?"
                 + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
-                + " and x_registered_table.category = " + DataTableApiConstant.CATEGORY_PPI
+                + " and x_registered_table.category = ?"
                 + " order by application_table_name, registered_table_name";
     }
 
