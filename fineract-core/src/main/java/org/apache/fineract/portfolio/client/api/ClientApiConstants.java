@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.client.api;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.fineract.portfolio.client.data.ClientData;
 
 @SuppressWarnings({ "HideUtilityClassConstructor" })
 public class ClientApiConstants {
@@ -189,8 +188,8 @@ public class ClientApiConstants {
             Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts"));
 
     /**
-     * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get
-     * response parameters to match those of request parameters.
+     * These parameters will match the class level parameters of ClientData. Where possible, we try to get response
+     * parameters to match those of request parameters.
      */
     protected static final Set<String> CLIENT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, accountNoParamName,
             externalIdParamName, statusParamName, activeParamName, activationDateParamName, firstnameParamName, middlenameParamName,

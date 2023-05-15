@@ -35,7 +35,6 @@ dependencies {
             'com.google.code.gson:gson',
 
             'org.apache.commons:commons-lang3',
-            'org.liquibase:liquibase-core',
 
             'com.jayway.jsonpath:json-path',
 
@@ -49,7 +48,12 @@ dependencies {
 
             'io.github.resilience4j:resilience4j-spring-boot2',
             )
-
+    implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
+        exclude group: 'org.hibernate'
+    }
+    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
+        exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
+    }
     implementation('org.springframework.boot:spring-boot-starter-jersey') {
         exclude group: 'org.glassfish.hk2.external', module: 'aopalliance-repackaged'
         exclude group: 'org.glassfish.hk2', module: 'hk2-runlevel'
