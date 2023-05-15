@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.infrastructure.core.service.migration;
 
-dependencies {
-    implementation(project(':fineract-core'))
-    implementation(project(':fineract-provider'))
-    implementation(project(':custom:acme:loan:cob'))
-    implementation(project(':custom:acme:loan:processor'))
-    implementation('org.springframework.boot:spring-boot-starter')
-    testImplementation(project(':fineract-provider'))
-    testImplementation('org.springframework.boot:spring-boot-starter-jdbc')
-    testImplementation('org.springframework.boot:spring-boot-starter-data-jpa')
+import liquibase.changelog.IncludeAllFilter;
+
+public class TenantModuleRootFilter implements IncludeAllFilter {
+
+    @Override
+    public boolean include(String changeLogPath) {
+        return changeLogPath.endsWith("module-changelog-master.xml");
+    }
 }

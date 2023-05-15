@@ -20,6 +20,7 @@
 dependencies {
     implementation(project(':custom:acme:note:service'))
     implementation('org.springframework.boot:spring-boot-starter')
+    testImplementation(project(':fineract-core'))
     testImplementation(project(':fineract-provider'))
     testImplementation('org.springframework.boot:spring-boot-starter-jdbc')
     testImplementation('org.springframework.boot:spring-boot-starter-data-jpa')

@@ -48,6 +48,8 @@ war {
 }
 
 dependencies {
+    implementation project(':fineract-core')
+    implementation project(':fineract-investor')
     implementation project(':fineract-provider')
 }
 

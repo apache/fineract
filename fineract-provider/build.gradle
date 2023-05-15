@@ -25,6 +25,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'com.google.cloud.tools.jib'
+apply plugin: 'org.springframework.boot'
 
 check.dependsOn('cucumber')
 

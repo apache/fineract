@@ -27,7 +27,9 @@ buildscript {
         fineractJavaProjects = subprojects.findAll{
             [
                 'fineract-api',
+                'fineract-core',
                 'fineract-provider',
+                'fineract-investor',
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
@@ -39,7 +41,8 @@ buildscript {
             [
                 'fineract-avro-schemas',
                 'fineract-client',
-                'fineract-provider'
+                'fineract-provider',
+                'fineract-investor'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
@@ -301,7 +304,9 @@ configure(project.fineractJavaProjects) {
         implementation.setCanBeResolved(true)
         api.setCanBeResolved(true)
     }
-
+    tasks.withType(Copy) {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
     tasks.withType(JavaCompile) {
         options.compilerArgs += [
             "-Xlint:unchecked",
