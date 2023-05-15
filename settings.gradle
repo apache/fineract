@@ -17,7 +17,9 @@
  * under the License.
  */
 rootProject.name='fineract'
+include ':fineract-core'
 include ':fineract-provider'
+include ':fineract-investor'
 include ':fineract-war'
 include ':integration-tests'
 include ':twofactor-tests'
