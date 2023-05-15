@@ -59,8 +59,8 @@ public class ExternalServicesReadPlatformServiceImpl implements ExternalServices
             default:
                 throw new ExternalServiceConfigurationNotFoundException(serviceName);
         }
-        final String sql = "SELECT es.name as name, es.id as id FROM c_external_service es where es.name='" + serviceNameToUse + "'";
-        final ExternalServicesData externalServicesData = this.jdbcTemplate.query(sql, resultSetExtractor); // NOSONAR
+        final String sql = "SELECT es.name as name, es.id as id FROM c_external_service es where es.name = ?";
+        final ExternalServicesData externalServicesData = this.jdbcTemplate.query(sql, resultSetExtractor, new Object[]{serviceNameToUse}); // NOSONAR
         return externalServicesData;
     }
 
