@@ -33,7 +33,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.fineract.infrastructure.security.service.PlatformUserRightsContext;
 import org.springframework.stereotype.Component;
 
-@Path("/external-asset-owners")
+@Path("/v1/external-asset-owners")
 @Component
 @Tag(name = "External Asset Owners", description = "External Asset Owners")
 @RequiredArgsConstructor

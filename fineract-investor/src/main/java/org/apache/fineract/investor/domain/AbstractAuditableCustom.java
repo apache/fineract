@@ -16,25 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.domain;
+package org.apache.fineract.investor.domain;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import org.springframework.data.domain.Auditable;
-import org.springframework.data.jpa.domain.AbstractAuditable;
 
 /**
- * A custom copy of {@link AbstractAuditable} to override the column names used on database. It also uses Instant
- * instead of LocalDateTime for created and modified.
- *
- * Abstract base class for auditable entities. Stores the audit values in persistent fields.
- *
- * @param <U>
- *            the auditing type. Typically some kind of user.
- * @param <PK>
- *            the type of the auditing type's identifier
+ * This class is a copy paste from the fineract-provider module since EclipseLink not weaves the class properly if it's
+ * placed in the fineract-core module.
  */
 @MappedSuperclass
 public abstract class AbstractAuditableCustom extends AbstractPersistableCustom implements Auditable<Long, Long, LocalDateTime> {
