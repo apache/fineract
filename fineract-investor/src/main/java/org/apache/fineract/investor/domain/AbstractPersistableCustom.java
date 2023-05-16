@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.domain;
+package org.apache.fineract.investor.domain;
 
 import java.io.Serializable;
 import javax.persistence.GeneratedValue;
@@ -33,14 +33,8 @@ import lombok.Setter;
 import org.springframework.data.domain.Persistable;
 
 /**
- * Abstract base class for entities.
- *
- * Inspired by {@link org.springframework.data.jpa.domain.AbstractPersistable}, but Id is always Long (and this class
- * thus does not require generic parameterization), and auto-generation is of strategy
- * {@link javax.persistence.GenerationType#IDENTITY}.
- *
- * The {@link #equals(Object)} and {@link #hashCode()} methods are NOT implemented here, which is untypical for JPA
- * (it's usually implemented based on the Id), because "we end up with issues on OpenJPA" (TODO clarify this).
+ * This class is a copy paste from the fineract-provider module since EclipseLink not weaves the class properly if it's
+ * placed in the fineract-core module.
  */
 @MappedSuperclass
 @Getter
