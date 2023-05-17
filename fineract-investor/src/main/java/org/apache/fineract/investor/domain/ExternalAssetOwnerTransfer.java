@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -33,10 +35,14 @@ import lombok.Setter;
 @Table(name = "m_external_asset_owner_transfer")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class ExternalAssetOwnerTransfer extends AbstractAuditableCustom {
+public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "owner_id")
     private Long ownerId;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", insertable = false, updatable = false)
+    private ExternalAssetOwner owner;
 
     @Column(name = "external_id", length = 100)
     private String externalId;

@@ -31,7 +31,7 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "m_external_asset_owner")
-public class ExternalAssetOwner extends AbstractAuditableCustom {
+public class ExternalAssetOwner extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "external_id", nullable = false, length = 100, unique = true)
     private String externalId;
