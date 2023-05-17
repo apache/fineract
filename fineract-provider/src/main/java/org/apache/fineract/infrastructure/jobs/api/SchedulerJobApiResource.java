@@ -63,7 +63,7 @@ import org.apache.fineract.infrastructure.security.exception.NoAuthorizationExce
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
-@Path("/jobs")
+@Path("/v1/jobs")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component

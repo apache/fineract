@@ -56,14 +56,12 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
-@Scope("singleton")
-@Path("{entity}/{entityId}/images")
+@Path("/v1/{entity}/{entityId}/images")
 public class ImagesApiResource {
 
     private final PlatformSecurityContext context;

@@ -40,6 +40,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -51,13 +52,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/configurations")
+@Path("/v1/configurations")
 @Component
-@Scope("singleton")
 @Tag(name = "Global Configuration", description = "Global configuration related to set of supported enable/disable configurations:\n" + "\n"
         + "maker-checker - defaults to false - if true turns on maker-checker functionality\n"
         + "reschedule-future-repayments - defaults to false - if true reschedules repayemnts which falls on a non-working day to configured repayment rescheduling rule\n"
@@ -67,6 +65,7 @@ import org.springframework.stereotype.Component;
         + "savings-interest-posting-current-period-end - Set it at the database level before any savings interest is posted. When set as false(default), interest will be posted on the first date of next period. If set as true, interest will be posted on last date of current period. There is no difference in the interest amount posted.\n"
         + "financial-year-beginning-month - Set it at the database level before any savings interest is posted. Allowed values 1 - 12 (January - December). Interest posting periods are evaluated based on this configuration.\n"
         + "meetings-mandatory-for-jlg-loans - if set to true, enforces all JLG loans to follow a meeting schedule belonging to either the parent group or Center.")
+@RequiredArgsConstructor
 public class GlobalConfigurationApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("globalConfiguration"));
@@ -79,20 +78,6 @@ public class GlobalConfigurationApiResource {
     private final DefaultToApiJsonSerializer<GlobalConfigurationPropertyData> propertyDataJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public GlobalConfigurationApiResource(final PlatformSecurityContext context, final ConfigurationReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<GlobalConfigurationData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final DefaultToApiJsonSerializer<GlobalConfigurationPropertyData> propertyDataJsonSerializer) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.propertyDataJsonSerializer = propertyDataJsonSerializer;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

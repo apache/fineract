@@ -112,13 +112,13 @@ public class LoanCOBManagerConfiguration {
     @Bean
     @JobScope
     public LoanIdParameterTasklet loanIdParameterTasklet() {
-        return new LoanIdParameterTasklet(retrieveLoanIdService);
+        return new LoanIdParameterTasklet(retrieveLoanIdService, customJobParameterResolver);
     }
 
     @Bean
     @JobScope
     public LockLoanTasklet lockLoanTasklet() {
-        return new LockLoanTasklet(loanLockingService);
+        return new LockLoanTasklet(loanLockingService, customJobParameterResolver);
     }
 
     @Bean

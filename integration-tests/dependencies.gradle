@@ -22,6 +22,8 @@ dependencies {
     //
     tomcat 'org.apache.tomcat:tomcat:9.0.69@zip'
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
+            project(path: ':fineract-core', configuration: 'runtimeElements'),
+            project(path: ':fineract-investor', configuration: 'runtimeElements'),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-avro-schemas', configuration: 'runtimeElements'),
             project(path: ':fineract-client', configuration: 'runtimeElements'),

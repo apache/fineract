@@ -46,7 +46,7 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.springframework.stereotype.Component;
 
-@Path("/loans")
+@Path("/v1/loans")
 @Component
 @Tag(name = "Loan Account Lock", description = "")
 @RequiredArgsConstructor

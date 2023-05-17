@@ -42,6 +42,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -54,16 +55,14 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/codes/{codeId}/codevalues")
+@Path("/v1/codes/{codeId}/codevalues")
 @Component
-@Scope("singleton")
 @Tag(name = "Code Values", description = "Code and code values: Codes represent a specific category of data, their code values are a specific instance of that category.\n"
         + "\n"
         + "Codes are mostly system defined which means the code itself comes out of the box and cannot be modified however its code values can be. e.g. 'Customer Identifier', it defaults to a code value of 'Passport' but could be 'Drivers License, National Id' etc")
+@RequiredArgsConstructor
 public class CodeValuesApiResource {
 
     /**
@@ -80,17 +79,6 @@ public class CodeValuesApiResource {
     private final DefaultToApiJsonSerializer<CodeValueData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public CodeValuesApiResource(final PlatformSecurityContext context, final CodeValueReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<CodeValueData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

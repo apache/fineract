@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jetbrains.annotations.NotNull;
@@ -29,13 +30,16 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 
-public class LoanItemReader extends AbstractLoanItemReader implements LoanCatchUpSupport {
+public class LoanItemReader extends AbstractLoanItemReader {
 
     private final RetrieveLoanIdService retrieveLoanIdService;
+    private final CustomJobParameterResolver customJobParameterResolver;
 
-    public LoanItemReader(LoanRepository loanRepository, RetrieveLoanIdService retrieveLoanIdService) {
+    public LoanItemReader(LoanRepository loanRepository, RetrieveLoanIdService retrieveLoanIdService,
+            CustomJobParameterResolver customJobParameterResolver) {
         super(loanRepository);
         this.retrieveLoanIdService = retrieveLoanIdService;
+        this.customJobParameterResolver = customJobParameterResolver;
     }
 
     @BeforeStep
@@ -50,7 +54,8 @@ public class LoanItemReader extends AbstractLoanItemReader implements LoanCatchU
             loanIds = Collections.emptyList();
         } else {
             loanIds = retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter,
-                    isCatchUp(stepExecution));
+                    customJobParameterResolver.getCustomJobParameterById(stepExecution, LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)
+                            .map(Boolean::parseBoolean).orElse(false));
         }
         setRemainingData(new ArrayList<>(loanIds));
     }

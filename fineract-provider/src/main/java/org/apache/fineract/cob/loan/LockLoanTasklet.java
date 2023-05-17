@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
@@ -31,9 +32,10 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LockLoanTasklet implements Tasklet, LoanCatchUpSupport {
+public class LockLoanTasklet implements Tasklet {
 
     private final LoanLockingService loanLockingService;
+    private final CustomJobParameterResolver customJobParameterResolver;
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
@@ -47,7 +49,10 @@ public class LockLoanTasklet implements Tasklet, LoanCatchUpSupport {
                 || (Objects.isNull(loanCOBParameter.getMinLoanId()) && Objects.isNull(loanCOBParameter.getMaxLoanId()))) {
             loanCOBParameter = new LoanCOBParameter(0L, 0L);
         }
-        loanLockingService.applySoftLock(lastClosedBusinessDate, loanCOBParameter, isCatchUp(contribution));
+        loanLockingService.applySoftLock(lastClosedBusinessDate, loanCOBParameter,
+                customJobParameterResolver
+                        .getCustomJobParameterById(contribution.getStepExecution(), LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)
+                        .map(Boolean::parseBoolean).orElse(false));
 
         return RepeatStatus.FINISHED;
     }

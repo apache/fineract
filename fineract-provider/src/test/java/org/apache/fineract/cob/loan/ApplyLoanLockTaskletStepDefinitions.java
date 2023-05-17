@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -29,6 +30,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -51,8 +54,10 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
     private FineractProperties fineractProperties = mock(FineractProperties.class);
     private FineractProperties.FineractQueryProperties fineractQueryProperties = mock(FineractProperties.FineractQueryProperties.class);
     private RetrieveLoanIdService retrieveLoanIdService = mock(RetrieveLoanIdService.class);
+
+    private CustomJobParameterResolver customJobParameterResolver = mock(CustomJobParameterResolver.class);
     private ApplyLoanLockTasklet applyLoanLockTasklet = new ApplyLoanLockTasklet(fineractProperties, loanLockingService,
-            retrieveLoanIdService);
+            retrieveLoanIdService, customJobParameterResolver);
     private RepeatStatus resultItem;
     private StepContribution stepContribution;
 
@@ -86,6 +91,7 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
                 lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
                 lenient().when(loanLockingService.findAllByLoanIdIn(Mockito.anyList())).thenReturn(accountLocks);
             }
+            lenient().when(customJobParameterResolver.getCustomJobParameterSet(any())).thenReturn(Optional.empty());
 
         });
 

@@ -31,5 +31,6 @@
     <include file="tenant-store/changelog-tenant-store.xml" relativeToChangelogFile="true" context="tenant_store_db AND !initial_switch"/>
     <include file="tenant/initial-switch-changelog-tenant.xml" relativeToChangelogFile="true" context="tenant_db AND initial_switch"/>
     <include file="tenant/changelog-tenant.xml" relativeToChangelogFile="true" context="tenant_db AND !initial_switch"/>
+    <includeAll path="db/changelog/tenant/module" errorIfMissingOrEmpty="false" context="tenant_db AND custom_changelog" filter="org.apache.fineract.infrastructure.core.service.migration.TenantModuleRootFilter" />
     <includeAll path="db/custom-changelog" errorIfMissingOrEmpty="false" context="tenant_db AND custom_changelog" />
 </databaseChangeLog>

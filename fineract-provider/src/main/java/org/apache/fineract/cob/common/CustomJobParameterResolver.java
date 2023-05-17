@@ -20,7 +20,11 @@ package org.apache.fineract.cob.common;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.exceptions.CustomJobParameterNotFoundException;
@@ -29,7 +33,9 @@ import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -50,7 +56,8 @@ public class CustomJobParameterResolver implements InitializingBean {
 
     public void resolve(StepContribution contribution, ChunkContext chunkContext, String customJobParameterKey,
             String parameterNameInExecutionContext) {
-        Set<JobParameterDTO> jobParameterDTOList = getCustomJobParameterSet(chunkContext);
+        Set<JobParameterDTO> jobParameterDTOList = getCustomJobParameterSet(chunkContext.getStepContext().getStepExecution())
+                .orElseThrow(() -> new CustomJobParameterNotFoundException(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY));
         JobParameterDTO businessDateParameter = jobParameterDTOList.stream()
                 .filter(jobParameterDTO -> customJobParameterKey.equals(jobParameterDTO.getParameterName())) //
                 .findFirst().orElseThrow(() -> new CustomJobParameterNotFoundException(customJobParameterKey));
@@ -58,12 +65,38 @@ public class CustomJobParameterResolver implements InitializingBean {
                 businessDateParameter.getParameterValue());
     }
 
-    private Set<JobParameterDTO> getCustomJobParameterSet(ChunkContext chunkContext) {
-        Long customJobParameterId = (Long) chunkContext.getStepContext().getJobParameters()
-                .get(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY);
-        CustomJobParameter customJobParameter = customJobParameterRepository.findById(customJobParameterId)
-                .orElseThrow(() -> new CustomJobParameterNotFoundException(customJobParameterId));
-        String parameterJson = customJobParameter.getParameterJson();
-        return gson.fromJson(parameterJson, new TypeToken<HashSet<JobParameterDTO>>() {}.getType());
+    /**
+     * Get parameter set from custom job parameter table
+     *
+     * @param stepExecution
+     * @return
+     */
+    public Optional<Set<JobParameterDTO>> getCustomJobParameterSet(StepExecution stepExecution) {
+        Long customJobParameterId = (Long) getJobParameters(stepExecution).get(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY);
+        return customJobParameterRepository.findById(customJobParameterId).map(CustomJobParameter::getParameterJson)
+                .map(json -> gson.fromJson(json, new TypeToken<HashSet<JobParameterDTO>>() {}.getType()));
     }
+
+    public Optional<String> getCustomJobParameterById(StepExecution stepExecution, String key) {
+        return getCustomJobParameterSet(stepExecution)
+                .flatMap(paramterList -> paramterList.stream().filter(dto -> dto.getParameterName().equals(key)).findFirst())
+                .map(JobParameterDTO::getParameterValue);
+    }
+
+    /**
+     * Resolve job parameters from step execution context,
+     * like @org.springframework.batch.core.scope.context.StepContext#getJobParameters()
+     *
+     * @param stepExecution
+     *            StepExecution context
+     * @return
+     */
+    private Map<String, Object> getJobParameters(StepExecution stepExecution) {
+        Map<String, Object> result = new HashMap<>();
+        for (Map.Entry<String, JobParameter> entry : stepExecution.getJobParameters().getParameters().entrySet()) {
+            result.put(entry.getKey(), entry.getValue().getValue());
+        }
+        return Collections.unmodifiableMap(result);
+    }
+
 }

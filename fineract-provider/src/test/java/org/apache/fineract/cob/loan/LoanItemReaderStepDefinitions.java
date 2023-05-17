@@ -21,6 +21,7 @@ package org.apache.fineract.cob.loan;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.exceptions.LoanReadException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -48,7 +50,9 @@ public class LoanItemReaderStepDefinitions implements En {
 
     private RetrieveLoanIdService retrieveLoanIdService = mock(RetrieveLoanIdService.class);
 
-    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository, retrieveLoanIdService);
+    private CustomJobParameterResolver customJobParameterResolver = mock(CustomJobParameterResolver.class);
+
+    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository, retrieveLoanIdService, customJobParameterResolver);
 
     private Loan loan = mock(Loan.class);
 
@@ -83,12 +87,12 @@ public class LoanItemReaderStepDefinitions implements En {
             businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
             businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
             ThreadLocalContextUtil.setBusinessDates(businessDates);
+            lenient().when(customJobParameterResolver.getCustomJobParameterSet(any())).thenReturn(Optional.empty());
 
             loanItemReader.beforeStep(stepExecution);
 
             lenient().when(this.loanRepository.findById(1L)).thenReturn(Optional.of(loan));
             lenient().when(this.loanRepository.findById(-1L)).thenThrow(new RuntimeException("fail"));
-
         });
 
         When("LoanItemReader.read method executed", () -> {

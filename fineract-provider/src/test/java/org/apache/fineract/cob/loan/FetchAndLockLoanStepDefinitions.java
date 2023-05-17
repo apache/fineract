@@ -29,6 +29,8 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
@@ -60,6 +62,8 @@ public class FetchAndLockLoanStepDefinitions implements En {
     private RepeatStatus result;
     private final LoanLockingService loanLockingService = mock(LoanLockingService.class);
 
+    private final CustomJobParameterResolver customJobParameterResolver = mock(CustomJobParameterResolver.class);
+
     public FetchAndLockLoanStepDefinitions() {
         Given("/^The FetchAndLockLoanTasklet.execute method with action (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
@@ -73,7 +77,7 @@ public class FetchAndLockLoanStepDefinitions implements En {
             contribution = new StepContribution(stepExecution);
             contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
                     LocalDate.now(ZoneId.systemDefault()).toString());
-
+            lenient().when(customJobParameterResolver.getCustomJobParameterSet(Mockito.any())).thenReturn(Optional.empty());
             if ("empty loanIds".equals(action)) {
                 contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.LOAN_COB_PARAMETER,
                         new LoanCOBParameter(0L, 0L));
@@ -106,7 +110,7 @@ public class FetchAndLockLoanStepDefinitions implements En {
                         List.of(new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()))));
             }
 
-            lockLoanTasklet = new LockLoanTasklet(loanLockingService);
+            lockLoanTasklet = new LockLoanTasklet(loanLockingService, customJobParameterResolver);
         });
 
         When("FetchAndLockLoanTasklet.execute method executed", () -> {

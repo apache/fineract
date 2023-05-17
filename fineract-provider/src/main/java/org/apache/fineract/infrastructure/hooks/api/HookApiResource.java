@@ -55,7 +55,7 @@ import org.apache.fineract.infrastructure.hooks.service.HookReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
-@Path("/hooks")
+@Path("/v1/hooks")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component

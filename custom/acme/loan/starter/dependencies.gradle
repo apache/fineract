@@ -18,6 +18,7 @@
  */
 
 dependencies {
+    implementation(project(':fineract-core'))
     implementation(project(':fineract-provider'))
     implementation(project(':custom:acme:loan:cob'))
     implementation(project(':custom:acme:loan:processor'))

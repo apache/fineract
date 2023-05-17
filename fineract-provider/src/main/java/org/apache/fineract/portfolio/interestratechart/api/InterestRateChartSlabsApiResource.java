@@ -53,6 +53,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -64,14 +65,12 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSlabData;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/interestratecharts/{chartId}/chartslabs")
+@Path("/v1/interestratecharts/{chartId}/chartslabs")
 @Component
-@Scope("singleton")
 @Tag(name = "Interest Rate Slab (A.K.A interest bands)", description = "The slabs a.k.a interest bands are associated with Interest Rate Chart. These bands allow to define different interest rates for different deposit term periods.")
+@RequiredArgsConstructor
 public class InterestRateChartSlabsApiResource {
 
     private final InterestRateChartSlabReadPlatformService interestRateChartSlabReadPlatformService;
@@ -83,19 +82,6 @@ public class InterestRateChartSlabsApiResource {
             Arrays.asList(InterestRateChartSlabApiConstants.localeParamName, InterestRateChartSlabApiConstants.idParamName,
                     descriptionParamName, periodTypeParamName, fromPeriodParamName, toPeriodParamName, amountRangeFromParamName,
                     amountRangeToParamName, annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
-
-    @Autowired
-    public InterestRateChartSlabsApiResource(final InterestRateChartSlabReadPlatformService interestRateChartSlabReadPlatformService,
-            final PlatformSecurityContext context, final DefaultToApiJsonSerializer<InterestRateChartSlabData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper) {
-
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.interestRateChartSlabReadPlatformService = interestRateChartSlabReadPlatformService;
-    }
 
     @GET
     @Path("template")

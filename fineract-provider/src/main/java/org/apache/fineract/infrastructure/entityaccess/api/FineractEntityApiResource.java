@@ -31,6 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -42,16 +43,14 @@ import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelati
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/entitytoentitymapping")
+@Path("/v1/entitytoentitymapping")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Scope("singleton")
 @Tag(name = "Fineract Entity", description = "")
+@RequiredArgsConstructor
 public class FineractEntityApiResource {
 
     private final PlatformSecurityContext context;
@@ -60,20 +59,6 @@ public class FineractEntityApiResource {
     private final DefaultToApiJsonSerializer<FineractEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public FineractEntityApiResource(final PlatformSecurityContext context, final FineractEntityAccessReadService readPlatformService,
-            final DefaultToApiJsonSerializer<FineractEntityRelationData> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<FineractEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiJsonSerializerOfficeToLoanProducts = toApiJsonSerializerOfficeToLoanProducts;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -75,7 +75,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
 
-@Path("/clients")
+@Path("/v1/clients")
 @Component
 @Tag(name = "Client", description = "Clients are people and businesses that have applied (or may apply) to an MFI for loans.\n" + "\n"
         + "Clients can be created in Pending or straight into Active state.")

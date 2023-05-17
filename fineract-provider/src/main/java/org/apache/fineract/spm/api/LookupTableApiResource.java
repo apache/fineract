@@ -35,6 +35,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.data.LookupTableData;
 import org.apache.fineract.spm.domain.LookupTable;
@@ -44,29 +45,18 @@ import org.apache.fineract.spm.exception.SurveyNotFoundException;
 import org.apache.fineract.spm.service.LookupTableService;
 import org.apache.fineract.spm.service.SpmService;
 import org.apache.fineract.spm.util.LookupTableMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Path("/surveys/{surveyId}/lookuptables")
+@Path("/v1/surveys/{surveyId}/lookuptables")
 @Component
-@Scope("singleton")
 @Tag(name = "SPM API - LookUp Table", description = "The Apache Fineract SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.")
+@RequiredArgsConstructor
 public class LookupTableApiResource {
 
     private final PlatformSecurityContext securityContext;
     private final SpmService spmService;
     private final LookupTableService lookupTableService;
-
-    @Autowired
-    public LookupTableApiResource(final PlatformSecurityContext securityContext, final SpmService spmService,
-            final LookupTableService lookupTableService) {
-
-        this.securityContext = securityContext;
-        this.spmService = spmService;
-        this.lookupTableService = lookupTableService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

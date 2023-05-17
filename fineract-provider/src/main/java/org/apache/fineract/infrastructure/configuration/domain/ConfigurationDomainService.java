@@ -136,4 +136,7 @@ public interface ConfigurationDomainService {
     Long retrieveExternalEventBatchSize();
 
     String retrieveReportExportS3FolderName();
+
+    String getAccrualDateConfigForCharge();
+
 }

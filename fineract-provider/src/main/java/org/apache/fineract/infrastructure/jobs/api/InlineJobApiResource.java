@@ -41,7 +41,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.springframework.stereotype.Component;
 
-@Path("/jobs")
+@Path("/v1/jobs")
 @Component
 @Tag(name = "Inline Job", description = "")
 @RequiredArgsConstructor

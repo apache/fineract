@@ -19,6 +19,7 @@
 package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.InlineCOBLoanItemListener;
@@ -58,13 +59,17 @@ public class LoanInlineCOBConfig {
     @Autowired
     private TransactionTemplate transactionTemplate;
     @Autowired
-    private CustomJobParameterRepository loanIdListRepository;
+    private CustomJobParameterRepository customJobParameterRepository;
+    @Autowired
+    private CustomJobParameterResolver customJobParameterResolver;
+
     @Autowired
     private LoanLockingService loanLockingService;
 
     @Bean
     public InlineLoanCOBBuildExecutionContextTasklet inlineLoanCOBBuildExecutionContextTasklet() {
-        return new InlineLoanCOBBuildExecutionContextTasklet(cobBusinessStepService, loanIdListRepository);
+        return new InlineLoanCOBBuildExecutionContextTasklet(cobBusinessStepService, customJobParameterRepository,
+                customJobParameterResolver);
     }
 
     @Bean

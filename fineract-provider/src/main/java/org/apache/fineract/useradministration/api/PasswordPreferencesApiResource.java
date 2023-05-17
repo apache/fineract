@@ -36,6 +36,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,16 +47,14 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.data.PasswordValidationPolicyData;
 import org.apache.fineract.useradministration.service.PasswordValidationPolicyReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/" + PasswordPreferencesApiConstants.RESOURCE_NAME)
+@Path("/v1/" + PasswordPreferencesApiConstants.RESOURCE_NAME)
 @Component
-@Scope("singleton")
 @Tag(name = "Password preferences", description = "This API enables management of password policy for user administration.\n" + "\n"
         + "There is no Apache Fineract functionality for creating a validation policy. The validation policies come pre-installed.\n" + "\n"
         + "Validation policies may be updated")
+@RequiredArgsConstructor
 public class PasswordPreferencesApiResource {
 
     private final PlatformSecurityContext context;
@@ -63,19 +62,6 @@ public class PasswordPreferencesApiResource {
     private final DefaultToApiJsonSerializer<PasswordValidationPolicyData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public PasswordPreferencesApiResource(final PlatformSecurityContext context,
-            final PasswordValidationPolicyReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<PasswordValidationPolicyData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.passwordValidationPolicyReadPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

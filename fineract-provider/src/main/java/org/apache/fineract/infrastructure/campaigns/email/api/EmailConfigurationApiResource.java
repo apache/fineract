@@ -27,26 +27,24 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailConfigurationReadPlatformService;
-import org.apache.fineract.infrastructure.campaigns.email.service.EmailReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/email/configuration")
+@Path("/v1/email/configuration")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Scope("singleton")
+@RequiredArgsConstructor
 public class EmailConfigurationApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "EMAIL_CONFIGURATION";
@@ -55,19 +53,6 @@ public class EmailConfigurationApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService;
-
-    @Autowired
-    public EmailConfigurationApiResource(final PlatformSecurityContext context, final EmailReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<EmailConfigurationData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService) {
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.emailConfigurationReadPlatformService = emailConfigurationReadPlatformService;
-    }
 
     @GET
     public String retrieveAll(@Context final UriInfo uriInfo) {

@@ -163,37 +163,6 @@ public class JobExecutionRepository implements InitializingBean {
                 """, Map.of("status", FAILED.name(), "jobExecutionId", stuckJobId));
     }
 
-    public List<Long> getRunningJobsByExecutionParameter(String jobName, String parameterKeyName, String parameterValue) {
-        return namedParameterJdbcTemplate.queryForList("""
-                    SELECT bje.JOB_EXECUTION_ID
-                    FROM BATCH_JOB_INSTANCE bji
-                    INNER JOIN BATCH_JOB_EXECUTION bje
-                    ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
-                    INNER JOIN BATCH_JOB_EXECUTION_PARAMS bjep
-                    ON bje.JOB_EXECUTION_ID = bjep.JOB_EXECUTION_ID
-                    WHERE
-                        bje.STATUS IN (:statuses)
-                        AND
-                        bji.JOB_NAME = :jobName
-                        AND
-                        bjep.KEY_NAME = :parameterKeyName
-                        AND
-                        bjep.STRING_VAL = :parameterValue
-                        AND
-                        bje.JOB_INSTANCE_ID NOT IN (
-                            SELECT bje.JOB_INSTANCE_ID
-                            FROM BATCH_JOB_INSTANCE bji
-                            INNER JOIN BATCH_JOB_EXECUTION bje
-                            ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
-                            WHERE
-                                bje.STATUS = :completedStatus
-                                AND
-                                bji.JOB_NAME = :jobName
-                        )
-                """, Map.of("statuses", List.of(STARTED.name(), STARTING.name()), "jobName", jobName, "completedStatus", COMPLETED.name(),
-                "parameterKeyName", parameterKeyName, "parameterValue", parameterValue), Long.class);
-    }
-
     public List<Long> getRunningJobsIdsByExecutionParameter(String jobName, String jobCustomParamKeyName, String parameterKeyName,
             String parameterValue) {
         final StringBuilder sqlStatementBuilder = new StringBuilder();
@@ -218,7 +187,6 @@ public class JobExecutionRepository implements InitializingBean {
         } else {
             throw new IllegalStateException("Database type is not supported for json query " + databaseTypeResolver.databaseType());
         }
-
     }
 
 }

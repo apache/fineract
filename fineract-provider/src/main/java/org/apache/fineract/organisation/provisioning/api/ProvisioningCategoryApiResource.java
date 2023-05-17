@@ -31,6 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -41,15 +42,12 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryData;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCategoryReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/provisioningcategory")
+@Path("/v1/provisioningcategory")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Provisioning Category", description = "")
+@RequiredArgsConstructor
 public class ProvisioningCategoryApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;
@@ -57,19 +55,6 @@ public class ProvisioningCategoryApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final DefaultToApiJsonSerializer<ProvisioningCategoryData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public ProvisioningCategoryApiResource(final PlatformSecurityContext platformSecurityContext,
-            final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<ProvisioningCategoryData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.platformSecurityContext = platformSecurityContext;
-        this.provisioningCategoryReadPlatformService = provisioningCategoryReadPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

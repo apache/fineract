@@ -70,12 +70,10 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/glaccounts")
+@Path("/v1/glaccounts")
 @Component
-@Scope("singleton")
 @Tag(name = "General Ledger Account", description = "Ledger accounts represent an Individual account within an Organizations Chart Of Accounts(COA) and are assigned a name and unique number by which they can be identified. \n"
         + "All transactions relating to a company's assets, liabilities, owners' equity, revenue and expenses are recorded against these accounts")
 @RequiredArgsConstructor

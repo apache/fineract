@@ -29,16 +29,14 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanproduct.api.LoanProductsApiResource;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/self/loanproducts")
+@Path("/v1/self/loanproducts")
 @Component
-@Scope("singleton")
 @Tag(name = "Self Loan Products", description = "A Loan product is a template that is used when creating a loan. Much of the template definition can be overridden during loan creation.\n"
         + "\n" + "Field Descriptions\n" + "name\n" + "Name associated with loan product on system.\n" + "shortName\n"
         + "Short name associated with a loan product. \n"
@@ -115,18 +113,11 @@ import org.springframework.stereotype.Component;
         + "Example Values:1=Calculate till pre closure date, 2=Calculate till rest frequency date\n" + "isArrearsBasedOnOriginalSchedule\n"
         + "If Specified as true, arrears will be identified based on original schedule.\n" + "allowAttributeOverrides\n"
         + "Specifies if select attributes may be overridden for individual loan accounts.")
+@RequiredArgsConstructor
 public class SelfLoanProductsApiResource {
 
     private final LoanProductsApiResource loanProductsApiResource;
     private final AppuserClientMapperReadService appUserClientMapperReadService;
-
-    @Autowired
-    public SelfLoanProductsApiResource(final LoanProductsApiResource loanProductsApiResource,
-            final AppuserClientMapperReadService appUserClientMapperReadService) {
-        this.loanProductsApiResource = loanProductsApiResource;
-        this.appUserClientMapperReadService = appUserClientMapperReadService;
-
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

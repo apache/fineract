@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -30,9 +31,10 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LoanIdParameterTasklet implements Tasklet, LoanCatchUpSupport {
+public class LoanIdParameterTasklet implements Tasklet {
 
     private final RetrieveLoanIdService retrieveLoanIdService;
+    private final CustomJobParameterResolver customJobParameterResolver;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -40,7 +42,8 @@ public class LoanIdParameterTasklet implements Tasklet, LoanCatchUpSupport {
                 .get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);
         LocalDate businessDate = LocalDate.parse(Objects.requireNonNull(businessDateParameter));
         LoanCOBParameter minAndMaxLoanId = retrieveLoanIdService.retrieveMinAndMaxLoanIdsNDaysBehind(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND,
-                businessDate, isCatchUp(contribution));
+                businessDate, customJobParameterResolver.getCustomJobParameterById(chunkContext.getStepContext().getStepExecution(),
+                        LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME).map(Boolean::parseBoolean).orElse(false));
         if (Objects.isNull(minAndMaxLoanId)
                 || (Objects.isNull(minAndMaxLoanId.getMinLoanId()) && Objects.isNull(minAndMaxLoanId.getMaxLoanId()))) {
             contribution.getStepExecution().getJobExecution().getExecutionContext().put(LoanCOBConstant.LOAN_COB_PARAMETER,

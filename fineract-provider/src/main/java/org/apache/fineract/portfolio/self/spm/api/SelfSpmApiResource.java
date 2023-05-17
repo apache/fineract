@@ -26,29 +26,21 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.api.SpmApiResource;
 import org.apache.fineract.spm.data.SurveyData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Path("/self/surveys")
+@Path("/v1/self/surveys")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Self Spm", description = "")
+@RequiredArgsConstructor
 public class SelfSpmApiResource {
 
     private final PlatformSecurityContext securityContext;
     private final SpmApiResource spmApiResource;
-
-    @Autowired
-    public SelfSpmApiResource(final PlatformSecurityContext securityContext, final SpmApiResource spmApiResource) {
-        this.securityContext = securityContext;
-        this.spmApiResource = spmApiResource;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

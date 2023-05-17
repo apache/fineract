@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command;
 
+import lombok.Getter;
+
 /**
  * Provides an object to {@link org.apache.fineract.batch.service.BatchApiService} to get the proper commandStrategy for
  * each request in BatchRequest. It uses Builder pattern to create object of this type.
@@ -26,6 +28,7 @@ package org.apache.fineract.batch.command;
  *
  * @see org.apache.fineract.batch.service.BatchApiService
  */
+@Getter
 public final class CommandContext {
 
     /**
@@ -57,7 +60,6 @@ public final class CommandContext {
     private final String method;
 
     private CommandContext(final String resource, final String method) {
-
         this.resource = resource;
         this.method = method;
     }

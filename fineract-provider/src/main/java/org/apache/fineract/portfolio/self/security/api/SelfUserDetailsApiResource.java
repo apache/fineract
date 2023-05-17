@@ -28,26 +28,19 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.api.UserDetailsApiResource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/self/userdetails")
+@Path("/v1/self/userdetails")
 @Component
 @ConditionalOnProperty("fineract.security.oauth.enabled")
-@Scope("singleton")
-
 @Tag(name = "Self User Details", description = "")
+@RequiredArgsConstructor
 public class SelfUserDetailsApiResource {
 
     private final UserDetailsApiResource userDetailsApiResource;
-
-    @Autowired
-    public SelfUserDetailsApiResource(final UserDetailsApiResource userDetailsApiResource) {
-        this.userDetailsApiResource = userDetailsApiResource;
-    }
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })

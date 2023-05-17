@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
 import com.google.common.base.Splitter;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class GetChargeByChargeExternalIdCommandStrategy implements CommandStrate
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final String relativeUrl = request.getRelativeUrl();
+        final String relativeUrl = relativeUrlWithoutVersion(request);
 
         // Expected pattern - loans\/external-id\/[\w\d_-]+\/charges\/external-id\/[\w\d_-]+
         // Get the loan and charge external ids for use in loanChargesApiResource

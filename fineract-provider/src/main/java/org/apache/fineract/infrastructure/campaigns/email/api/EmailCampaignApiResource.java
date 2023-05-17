@@ -50,18 +50,16 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * Created with IntelliJ IDEA. User: andrew Date: 19-5-14 Time: 15:17 To change this template use File | Settings | File
  * Templates.
  */
-@Path("/email/campaign")
+@Path("/v1/email/campaign")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Scope("singleton")
 @RequiredArgsConstructor
 public class EmailCampaignApiResource {
 

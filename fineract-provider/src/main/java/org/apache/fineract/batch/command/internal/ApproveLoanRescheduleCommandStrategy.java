@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
 import com.google.common.base.Splitter;
 import java.util.List;
 import javax.ws.rs.core.UriInfo;
@@ -43,7 +45,7 @@ public class ApproveLoanRescheduleCommandStrategy implements CommandStrategy {
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
+        final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrlWithoutVersion(request));
         final Long scheduleId = Long.parseLong(pathParameters.get(1).substring(0, pathParameters.get(1).indexOf("?")));
 
         // Calls 'approve' function from 'Loans reschedule Request' to

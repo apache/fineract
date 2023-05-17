@@ -25,6 +25,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -32,17 +33,15 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.TwoFactorConfigurationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/twofactor/configure")
+@Path("/v1/twofactor/configure")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Scope("singleton")
 @ConditionalOnProperty("fineract.security.2fa.enabled")
+@RequiredArgsConstructor
 public class TwoFactorConfigurationApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "TWOFACTOR_CONFIG";
@@ -51,16 +50,6 @@ public class TwoFactorConfigurationApiResource {
     private final TwoFactorConfigurationService configurationService;
     private final DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public TwoFactorConfigurationApiResource(PlatformSecurityContext context, TwoFactorConfigurationService configurationService,
-            DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
-            PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.configurationService = configurationService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     public String retrieveAll() {
