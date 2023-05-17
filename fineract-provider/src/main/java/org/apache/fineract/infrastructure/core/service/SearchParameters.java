@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.apache.commons.lang3.StringUtils;
 
 public final class SearchParameters {
@@ -49,6 +51,13 @@ public final class SearchParameters {
     private final Long productId;
     private final Long categoryId;
     private final boolean isSelfUser;
+
+    // SavingsAccount Transactions Search Params
+    private final String transactionType;
+    private final BigDecimal fromAmount;
+    private final BigDecimal toAmount;
+    private final LocalDate fromDate;
+    private final LocalDate toDate;
 
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy) {
@@ -269,7 +278,11 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = null;
-
+        this.transactionType = null;
+        this.fromAmount = null;
+        this.toAmount = null;
+        this.fromDate = null;
+        this.toDate = null;
     }
 
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
@@ -298,6 +311,11 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = status;
+        this.transactionType = null;
+        this.fromAmount = null;
+        this.toAmount = null;
+        this.fromDate = null;
+        this.toDate = null;
 
     }
 
@@ -327,6 +345,11 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = null;
+        this.transactionType = null;
+        this.fromAmount = null;
+        this.toAmount = null;
+        this.fromDate = null;
+        this.toDate = null;
     }
 
     private SearchParameters(final Long provisioningEntryId, final Long officeId, final Long productId, final Long categoryId,
@@ -353,7 +376,42 @@ public final class SearchParameters {
         this.categoryId = categoryId;
         this.isSelfUser = false;
         this.status = null;
+        this.transactionType = null;
+        this.fromAmount = null;
+        this.toAmount = null;
+        this.fromDate = null;
+        this.toDate = null;
+    }
 
+    private SearchParameters(final Integer offset, final Integer limit, final String sortOrder, final String orderBy,
+            final String transactionType, final BigDecimal fromAmount, final BigDecimal toAmount, LocalDate fromDate, LocalDate toDate) {
+        this.sqlSearch = null;
+        this.externalId = null;
+        this.name = null;
+        this.hierarchy = null;
+        this.firstname = null;
+        this.lastname = null;
+        this.orderBy = orderBy;
+        this.sortOrder = sortOrder;
+        this.staffId = null;
+        this.accountNo = null;
+        this.loanId = null;
+        this.savingsId = null;
+        this.orphansOnly = null;
+        this.currencyCode = null;
+        this.officeId = null;
+        this.offset = offset;
+        this.limit = limit;
+        this.provisioningEntryId = null;
+        this.productId = null;
+        this.categoryId = null;
+        this.isSelfUser = false;
+        this.status = null;
+        this.transactionType = transactionType;
+        this.fromAmount = fromAmount;
+        this.toAmount = toAmount;
+        this.fromDate = fromDate;
+        this.toDate = toDate;
     }
 
     public SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name, final String hierarchy,
@@ -382,7 +440,11 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = false;
         this.status = null;
-
+        this.transactionType = null;
+        this.fromAmount = null;
+        this.toAmount = null;
+        this.fromDate = null;
+        this.toDate = null;
     }
 
     public boolean isOrderByRequested() {
@@ -544,6 +606,46 @@ public final class SearchParameters {
         return this.isSelfUser;
     }
 
+    public String getTransactionType() {
+        return this.transactionType;
+    }
+
+    public BigDecimal getFromAmount() {
+        return this.fromAmount;
+    }
+
+    public BigDecimal getToAmount() {
+        return this.toAmount;
+    }
+
+    public LocalDate getFromDate() {
+        return this.fromDate;
+    }
+
+    public LocalDate getToDate() {
+        return this.toDate;
+    }
+
+    public boolean isTransactionTypeProvided() {
+        return StringUtils.isNotBlank(this.transactionType);
+    }
+
+    public boolean isFromAmountProvided() {
+        return this.fromAmount != null;
+    }
+
+    public boolean isToAmountProvided() {
+        return this.toAmount != null;
+    }
+
+    public boolean isFromDateProvided() {
+        return this.fromDate != null;
+    }
+
+    public boolean isToDateProvided() {
+        return this.toDate != null;
+    }
+
     /**
      * creates an instance of the SearchParameters from a request for the report mailing job run history
      *
@@ -568,5 +670,17 @@ public final class SearchParameters {
 
         return new SearchParameters(null, null, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder, null, null, null,
                 null, null, false);
+    }
+
+    /**
+     * creates an instance of the {@link SearchParameters} from a request savings account transactions
+     *
+     * @return {@link SearchParameters} object
+     */
+    public static SearchParameters forSavingsAccountTranscations(Integer offset, Integer limit, String orderBy, String sortOrder,
+            String transactionType, BigDecimal fromAmount, BigDecimal toAmount, LocalDate fromDate, LocalDate toDate) {
+        final Integer maxLimitAllowed = getCheckedLimit(limit);
+
+        return new SearchParameters(offset, maxLimitAllowed, sortOrder, orderBy, transactionType, fromAmount, toAmount, fromDate, toDate);
     }
 }

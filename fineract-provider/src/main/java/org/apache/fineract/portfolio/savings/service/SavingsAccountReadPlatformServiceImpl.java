@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,12 +30,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import javax.validation.constraints.DecimalMin;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -49,7 +54,6 @@ import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
-import org.apache.fineract.organisation.teller.exception.InvalidDateInputException;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
@@ -61,6 +65,7 @@ import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
+import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
@@ -72,6 +77,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTOV2;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
@@ -79,6 +85,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargesPaidByData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxDetailsData;
@@ -87,6 +94,10 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -94,6 +105,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@Slf4j
 public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -121,6 +133,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final ColumnValidator columnValidator;
     private final SavingsAccountAssembler savingAccountAssembler;
 
+    private final SavingsAccountTransactionRepository savingsAccountTransactionsRepository;
+
     @Autowired
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final ClientReadPlatformService clientReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
@@ -129,7 +143,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final ChargeReadPlatformService chargeReadPlatformService,
             final EntityDatatableChecksReadService entityDatatableChecksReadService, final ColumnValidator columnValidator,
             final SavingsAccountAssembler savingAccountAssembler, PaginationHelper paginationHelper,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
+            DatabaseSpecificSQLGenerator sqlGenerator, SavingsAccountTransactionRepository savingsAccountTransactionsRepository) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.clientReadPlatformService = clientReadPlatformService;
@@ -148,6 +162,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         this.paginationHelper = paginationHelper;
         this.savingAccountMapperForInterestPosting = new SavingAccountMapperForInterestPosting();
         this.savingAccountAssembler = savingAccountAssembler;
+        this.savingsAccountTransactionsRepository = savingsAccountTransactionsRepository;
     }
 
     @Override
@@ -1272,95 +1287,91 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public Page<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId, DepositAccountType depositAccountType,
-            SearchParameters searchParameters, LocalDate fromDate, LocalDate toDate,
-            @DecimalMin(value = "0", message = "must be greater than or equal to 0") BigDecimal fromAmount,
-            @DecimalMin(value = "0", message = "must be greater than or equal to 0") BigDecimal toAmount, String transactionType) {
+            SearchParameters searchParameters) {
+        // validate the search parameters
+        validateSearchParameters(searchParameters);
 
-        final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(this.transactionsMapper.schema());
-        sqlBuilder.append(" where sa.id = ? and sa.deposit_type_enum = ? ");
-        final Object[] objectArray = new Object[12];
-        objectArray[0] = savingsId;
-        objectArray[1] = depositAccountType.getValue();
-        int arrayPos = 2;
-
-        if (StringUtils.isNotEmpty(transactionType)) {
-            Integer transcationTypeEnum = null;
-            if ("deposit".equals(transactionType.toLowerCase())) {
-                transcationTypeEnum = SavingsAccountTransactionType.DEPOSIT.getValue();
-            } else if ("withdrawal".equals(transactionType.toLowerCase())) {
-                transcationTypeEnum = SavingsAccountTransactionType.WITHDRAWAL.getValue();
-            } else {
-                transcationTypeEnum = SavingsAccountTransactionType.INVALID.getValue();
-            }
-            sqlBuilder.append(" and ").append(" tr.transaction_type_enum = ? ");
-            objectArray[arrayPos] = transcationTypeEnum;
-            arrayPos = arrayPos + 1;
+        Integer page = 0;
+        Integer size = SavingsApiConstants.SAVINGS_ACCOUNT_TRANSACTIONS_DEFAULT_LIMIT;
+        if (searchParameters.isLimited() && searchParameters.isOffset()) {
+            Integer limit = searchParameters.getLimit();
+            page = searchParameters.getOffset() / limit;
+            size = limit;
         }
-
-        if (fromDate != null || toDate != null) {
-            if (fromDate != null && toDate != null) {
-                if (toDate.isBefore(fromDate)) {
-                    throw new InvalidDateInputException(fromDate.toString(), toDate.toString());
-                }
-                sqlBuilder.append(" and ").append(" tr.transaction_date between ? and ? ");
-                objectArray[arrayPos] = fromDate;
-                arrayPos = arrayPos + 1;
-                objectArray[arrayPos] = toDate;
-                arrayPos = arrayPos + 1;
-            } else if (fromDate != null) {
-                sqlBuilder.append(" and ").append(" tr.transaction_date >= ? ");
-                objectArray[arrayPos] = fromDate;
-                arrayPos = arrayPos + 1;
-            } else {
-                sqlBuilder.append(" and ").append(" tr.transaction_date <= ? ");
-                objectArray[arrayPos] = toDate;
-                arrayPos = arrayPos + 1;
-            }
-        }
-
-        if (fromAmount != null || toAmount != null) {
-            if (fromAmount != null && toAmount != null) {
-                sqlBuilder.append(" and ").append(" tr.amount between ? and ? ");
-                objectArray[arrayPos] = fromAmount;
-                arrayPos = arrayPos + 1;
-                objectArray[arrayPos] = toAmount;
-                arrayPos = arrayPos + 1;
-            } else if (fromAmount != null) {
-                sqlBuilder.append(" and ").append(" tr.amount >= ? ");
-                objectArray[arrayPos] = fromAmount;
-                arrayPos = arrayPos + 1;
-            } else {
-                sqlBuilder.append(" and ").append(" tr.amount <= ? ");
-                objectArray[arrayPos] = toAmount;
-                arrayPos = arrayPos + 1;
-            }
-        }
-
+        Pageable pageable = PageRequest.of(page, size);
         if (searchParameters.isOrderByRequested()) {
-            sqlBuilder.append(" order by ").append("tr.").append(searchParameters.getOrderBy());
-            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-
+            pageable = PageRequest.of(page, size, Sort.by(searchParameters.getOrderBy()));
             if (searchParameters.isSortOrderProvided()) {
-                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
-                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
+
+                pageable = PageRequest.of(page, size,
+                        Sort.by(searchParameters.getSortOrder().equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.Direction.ASC
+                                : Sort.Direction.DESC, searchParameters.getOrderBy()));
             }
         } else {
-            sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
-        }
+            List<Order> orders = new ArrayList<Order>();
+            Order order1 = new Order(Sort.Direction.DESC, "dateOf");
+            orders.add(order1);
 
-        if (searchParameters.isLimited()) {
-            sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
-                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
-            } else {
-                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
+            Order order2 = new Order(Sort.Direction.DESC, "createdDate");
+            orders.add(order2);
+
+            Order order3 = new Order(Sort.Direction.DESC, "id");
+            orders.add(order3);
+            pageable = PageRequest.of(page, size, Sort.by(orders));
+        }
+        Integer transactionTypeEnum = null;
+        if (searchParameters.isTransactionTypeProvided()) {
+            transactionTypeEnum = SavingsAccountTransactionType.fromString(searchParameters.getTransactionType()).getValue();
+        }
+        org.springframework.data.domain.Page<SavingsAccountTransactionDTOV2> resultPage = savingsAccountTransactionsRepository
+                .findAll(savingsId, depositAccountType.getValue(), transactionTypeEnum, searchParameters, pageable);
+        resultPage.forEach(data -> {
+            log.info(
+                    "Savings Account Transaction Result - Savings Account Id: {}, Transaction Id: {}, Transaction Amount: {}, App User Name: {}",
+                    data.getTransactionId(), data.getTransactionId(), data.getTransactionAmount(), data.getAppUser().getDisplayName());
+        });
+        List<SavingsAccountTransactionData> savingsAccountTransactionDataList = resultPage.stream()
+                .map(SavingsAccountTransactionDTOV2::tosavingsAccountTransactionData).collect(Collectors.toList());
+        return new Page<>(savingsAccountTransactionDataList, Long.valueOf(resultPage.getTotalElements()).intValue());
+    }
+
+    private void validateSearchParameters(final SearchParameters searchParameters) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        if (searchParameters.isFromDateProvided() && searchParameters.isToDateProvided()) {
+            if (searchParameters.getToDate().isBefore(searchParameters.getFromDate())) {
+                final StringBuilder validationErrorCode = new StringBuilder("validation.msg").append(".")
+                        .append(SavingsApiConstants.toDateParamName).append(".can.not.be.before").append(".")
+                        .append(SavingsApiConstants.fromDateParamName);
+                final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(SavingsApiConstants.toDateParamName)
+                        .append("` must be less than the provided ").append(SavingsApiConstants.fromDateParamName);
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                        defaultEnglishMessage.toString(), SavingsApiConstants.toDateParamName,
+                        searchParameters.getToDate().format(DateTimeFormatter.ISO_LOCAL_DATE),
+                        searchParameters.getFromDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
+                dataValidationErrors.add(error);
             }
         }
 
-        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.transactionsMapper);
+        if (searchParameters.isTransactionTypeProvided() && !isValidTransactionType(searchParameters.getTransactionType())) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg").append(".")
+                    .append(SavingsApiConstants.transactionTypeParamName).append(".invalid");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `")
+                    .append(SavingsApiConstants.transactionTypeParamName).append("` provided is not a valid transaction type ");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), SavingsApiConstants.transactionTypeParamName, searchParameters.getTransactionType());
+            dataValidationErrors.add(error);
+        }
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
+
+    private boolean isValidTransactionType(String transactionType) {
+        if (Objects.nonNull(SavingsAccountTransactionType.fromString(transactionType))) {
+            return true;
+        }
+        return false;
     }
 
     @Override

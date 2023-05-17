@@ -132,6 +132,22 @@ public class AccountTransferTransaction extends AbstractPersistableCustom {
         this.reversed = true;
     }
 
+    public LocalDate getDate() {
+        return this.date;
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public boolean isReversed() {
+        return this.reversed;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
     public void updateToLoanTransaction(LoanTransaction toLoanTransaction) {
         this.toLoanTransaction = toLoanTransaction;
     }

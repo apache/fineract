@@ -124,6 +124,15 @@ public enum SavingsAccountTransactionType {
         return savingsAccountTransactionType;
     }
 
+    public static SavingsAccountTransactionType fromString(String transactionTypeName) {
+        for (SavingsAccountTransactionType savingsAccountTransactionType : SavingsAccountTransactionType.values()) {
+            if (savingsAccountTransactionType.name().toLowerCase().equals(transactionTypeName.toLowerCase())) {
+                return savingsAccountTransactionType;
+            }
+        }
+        return null;
+    }
+
     public boolean isDeposit() {
         return this.value.equals(SavingsAccountTransactionType.DEPOSIT.getValue());
     }

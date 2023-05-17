@@ -21,6 +21,9 @@ package org.apache.fineract.portfolio.savings.domain;
 import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.LockModeType;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTOV2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -53,4 +56,28 @@ public interface SavingsAccountTransactionRepository
     @Query("select sat from SavingsAccountTransaction sat where sat.savingsAccount.id = :savingsId and sat.dateOf <= :transactionDate and sat.reversed=false")
     List<SavingsAccountTransaction> findBySavingsAccountIdAndLessThanDateOfAndReversedIsFalse(@Param("savingsId") Long savingsId,
             @Param("transactionDate") LocalDate transactionDate, Pageable pageable);
+
+    @Query("""
+                    SELECT NEW org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTOV2(tr.id,
+                tr.typeOf, tr.dateOf, tr.amount, tr.releaseIdOfHoldAmountTransaction, tr.reasonForBlock,
+                tr.createdDate, tr.appUser, nt.note, tr.runningBalance, tr.reversed,
+                tr.reversalTransaction, tr.originalTxnId, tr.lienTransaction, tr.isManualTransaction,
+                fromTran, toTran, tr.savingsAccount, tr.paymentDetail, currency
+                )
+                    FROM SavingsAccountTransaction tr
+                    JOIN ApplicationCurrency currency ON (currency.code = tr.savingsAccount.currency.code)
+                    LEFT JOIN AccountTransferTransaction fromtran ON (fromtran.fromSavingsTransaction = tr)
+                    LEFT JOIN AccountTransferTransaction totran ON (totran.toSavingsTransaction = tr)
+                    LEFT JOIN tr.notes nt ON (nt.savingsTransaction = tr)
+                    WHERE tr.savingsAccount.id = :savingsId
+                    AND tr.savingsAccount.depositType = :depositType
+                    AND (:transactionType IS NULL OR tr.typeOf = :transactionType )
+                    AND (:#{#searchParameters.fromDate} IS NULL OR tr.dateOf >= :#{#searchParameters.fromDate} )
+                    AND (:#{#searchParameters.toDate} IS NULL OR tr.dateOf <= :#{#searchParameters.toDate} )
+                    AND (:#{#searchParameters.fromAmount} IS NULL OR tr.amount >= :#{#searchParameters.fromAmount} )
+                    AND (:#{#searchParameters.toAmount} IS NULL OR tr.amount <= :#{#searchParameters.toAmount} )
+            """)
+    Page<SavingsAccountTransactionDTOV2> findAll(@Param("savingsId") Long savingsId, @Param("depositType") Integer depositType,
+            @Param("transactionType") Integer transactionType, @Param("searchParameters") SearchParameters searchParameters,
+            Pageable pageable);
 }

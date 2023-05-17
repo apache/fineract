@@ -121,4 +121,16 @@ public final class PaymentDetail extends AbstractPersistableCustom {
     public String getRoutingCode() {
         return routingCode;
     }
+
+    public String getAccountNumber() {
+        return this.accountNumber;
+    }
+
+    public String getBankNumber() {
+        return this.bankNumber;
+    }
+
+    public String getCheckNumber() {
+        return this.checkNumber;
+    }
 }

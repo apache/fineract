@@ -25,6 +25,7 @@ public class SavingsApiConstants {
     public static final String SAVINGS_ACCOUNT_RESOURCE_NAME = "savingsaccount";
     public static final String SAVINGS_ACCOUNT_TRANSACTION_RESOURCE_NAME = "savingsaccount.transaction";
     public static final String SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME = "savingsaccountcharge";
+    public static final Integer SAVINGS_ACCOUNT_TRANSACTIONS_DEFAULT_LIMIT = 100;
 
     // actions
     public static final String postInterestValidationOnClosure = "postInterestValidationOnClosure";
@@ -152,6 +153,11 @@ public class SavingsApiConstants {
     public static final String runningBalanceParamName = "runningBalance";
     public static final String reversedParamName = "reversed";
     public static final String dateParamName = "date";
+    public static final String fromDateParamName = "fromDate";
+    public static final String toDateParamName = "toDate";
+    public static final String fromAmountParamName = "fromAmount";
+    public static final String toAmountParamName = "toDate";
+    public static final String transactionTypeParamName = "transactionType";
 
     // charges parameters
     public static final String chargeIdParamName = "chargeId";

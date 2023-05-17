@@ -135,7 +135,6 @@ public class SavingsAccountTransactionsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.GetSavingsAccountTransactionsResponse.class))) })
     public String retrieveAll(@Context final UriInfo uriInfo,
             @PathParam("savingsId") @Parameter(description = "savingsId") final Long savingsId,
-            @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
@@ -149,8 +148,6 @@ public class SavingsAccountTransactionsApiResource {
             @QueryParam("transactionType") @Parameter(description = "transcationType") final String transactionType) {
 
         this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
-        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
-
         LocalDate fromDate = null;
         if (fromDateParam != null) {
             fromDate = fromDateParam.getDate("fromDate", dateFormat, locale);
@@ -159,12 +156,13 @@ public class SavingsAccountTransactionsApiResource {
         if (toDateParam != null) {
             toDate = toDateParam.getDate("toDate", dateFormat, locale);
         }
-
+        final SearchParameters searchParameters = SearchParameters.forSavingsAccountTranscations(offset, limit, orderBy, sortOrder,
+                transactionType, fromAmount, toAmount, fromDate, toDate);
         final Page<SavingsAccountTransactionData> savingsAccountTransactionsData = savingsAccountReadPlatformService
-                .retrieveAllTransactions(savingsId, DepositAccountType.SAVINGS_DEPOSIT, searchParameters, fromDate, toDate, fromAmount,
-                        toAmount, transactionType);
+                .retrieveAllTransactions(savingsId, DepositAccountType.SAVINGS_DEPOSIT, searchParameters);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return toApiJsonSerializer.serialize(settings, savingsAccountTransactionsData,
+        return toApiJsonSerializer.serialize(settings,
+                new Page<>(savingsAccountTransactionsData.getPageItems(), savingsAccountTransactionsData.getTotalFilteredRecords()),
                 SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
