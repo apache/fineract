@@ -30,7 +30,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-import javax.validation.constraints.DecimalMin;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -126,8 +125,8 @@ public class SavingsAccountTransactionsApiResource {
             @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat,
             @QueryParam("fromDate") @Parameter(description = "fromDate") final DateParam fromDateParam,
             @QueryParam("toDate") @Parameter(description = "toDate") final DateParam toDateParam,
-            @QueryParam("fromAmount") @Parameter(description = "fromAmount") @DecimalMin(value = "0", message = "must be greater than or equal to 0") final BigDecimal fromAmount,
-            @QueryParam("toAmount") @Parameter(description = "toAmount") @DecimalMin(value = "0", message = "must be greater than or equal to 0") final BigDecimal toAmount,
+            @QueryParam("fromAmount") @Parameter(description = "fromAmount") final BigDecimal fromAmount,
+            @QueryParam("toAmount") @Parameter(description = "toAmount") final BigDecimal toAmount,
             @QueryParam("locale") @Parameter(description = "locale") final String locale,
             @QueryParam("transactionType") @Parameter(description = "transcationType") final String transactionType) {
 

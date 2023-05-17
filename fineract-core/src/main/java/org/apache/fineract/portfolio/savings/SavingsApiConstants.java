@@ -156,7 +156,7 @@ public class SavingsApiConstants {
     public static final String fromDateParamName = "fromDate";
     public static final String toDateParamName = "toDate";
     public static final String fromAmountParamName = "fromAmount";
-    public static final String toAmountParamName = "toDate";
+    public static final String toAmountParamName = "toAmount";
     public static final String transactionTypeParamName = "transactionType";
 
     // charges parameters

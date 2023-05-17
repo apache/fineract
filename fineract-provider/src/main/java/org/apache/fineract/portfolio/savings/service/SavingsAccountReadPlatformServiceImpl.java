@@ -1362,9 +1362,55 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             dataValidationErrors.add(error);
         }
 
+        if (searchParameters.isFromAmountProvided() && searchParameters.isToAmountProvided()
+                && !isValidAmount(searchParameters.getFromAmount(), searchParameters.getToAmount())) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg").append(".")
+                    .append(SavingsApiConstants.fromAmountParamName).append(".or").append(SavingsApiConstants.toAmountParamName)
+                    .append(".invalid");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(SavingsApiConstants.fromAmountParamName)
+                    .append("` should be less than ").append(SavingsApiConstants.toAmountParamName);
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), SavingsApiConstants.fromAmountParamName, searchParameters.getFromAmount());
+            dataValidationErrors.add(error);
+        } else if (searchParameters.isFromAmountProvided() && !isValidAmount(searchParameters.getFromAmount())) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg").append(".")
+                    .append(SavingsApiConstants.fromAmountParamName).append(".invalid");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(SavingsApiConstants.fromAmountParamName)
+                    .append("` provided is not a valid amount ");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), SavingsApiConstants.fromAmountParamName, searchParameters.getFromAmount());
+            dataValidationErrors.add(error);
+        } else if (searchParameters.isToAmountProvided() && !isValidAmount(searchParameters.getToAmount())) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg").append(".")
+                    .append(SavingsApiConstants.toAmountParamName).append(".invalid");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(SavingsApiConstants.toAmountParamName)
+                    .append("` provided is not a valid amount ");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), SavingsApiConstants.toAmountParamName, searchParameters.getToAmount());
+            dataValidationErrors.add(error);
+        }
+
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
+    }
+
+    private boolean isValidAmount(BigDecimal amount) {
+        BigDecimal zero = BigDecimal.ZERO;
+        BigDecimal maxValue = BigDecimal.valueOf(Double.MAX_VALUE);
+
+        return (amount.compareTo(zero) >= 0) && (amount.compareTo(maxValue) <= 0);
+    }
+
+    private boolean isValidAmount(BigDecimal fromAmount, BigDecimal toAmount) {
+        BigDecimal zero = BigDecimal.ZERO;
+        BigDecimal maxValue = BigDecimal.valueOf(Double.MAX_VALUE);
+
+        boolean isValidFromAmount = isValidAmount(fromAmount);
+        boolean isValidToAmount = isValidAmount(toAmount);
+        boolean isValidFromToAmount = fromAmount.compareTo(toAmount) <= 0;
+
+        return isValidFromAmount && isValidToAmount && isValidFromToAmount;
     }
 
     private boolean isValidTransactionType(String transactionType) {
