@@ -25,6 +25,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
 @Getter
 @Setter
@@ -34,6 +35,6 @@ import lombok.Setter;
 public class ExternalAssetOwner extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "external_id", nullable = false, length = 100, unique = true)
-    private String externalId;
+    private ExternalId externalId;
 
 }

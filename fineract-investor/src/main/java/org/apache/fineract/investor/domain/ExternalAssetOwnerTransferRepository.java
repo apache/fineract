@@ -18,10 +18,16 @@
  */
 package org.apache.fineract.investor.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ExternalAssetOwnerTransferRepository
         extends JpaRepository<ExternalAssetOwnerTransfer, Long>, JpaSpecificationExecutor<ExternalAssetOwnerTransfer> {
 
+    @Query("select e from ExternalAssetOwnerTransfer e where (:loanId is null or e.loanId = :loanId) and (:loanExternalId is null or e.externalLoanId = :loanExternalId) and (:transferExternalId is null or e.externalId = :transferExternalId)")
+    List<ExternalAssetOwnerTransfer> findAllByIncomingId(@Param("loanId") Long loanId, @Param("loanExternalId") String loanExternalId,
+            @Param("transferExternalId") String transferExternalId);
 }

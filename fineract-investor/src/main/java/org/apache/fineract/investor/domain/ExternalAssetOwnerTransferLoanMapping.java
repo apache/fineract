@@ -39,7 +39,7 @@ public class ExternalAssetOwnerTransferLoanMapping extends AbstractAuditableWith
     private Long loanId;
 
     @ManyToOne
-    @JoinColumn(name = "owner_transfer_id", insertable = false, updatable = false)
+    @JoinColumn(name = "owner_transfer_id")
     private ExternalAssetOwnerTransfer ownerTransfer;
 
 }
