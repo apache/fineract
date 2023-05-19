@@ -29,6 +29,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
 @Getter
 @Setter
@@ -45,7 +46,7 @@ public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTime
     private ExternalAssetOwner owner;
 
     @Column(name = "external_id", length = 100)
-    private String externalId;
+    private ExternalId externalId;
 
     @Column(name = "status", length = 50)
     private String status;
@@ -61,5 +62,11 @@ public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTime
 
     @Column(name = "effective_date_to")
     private LocalDate effectiveDateTo;
+
+    @Column(name = "loan_id", nullable = false)
+    private Long loanId;
+
+    @Column(name = "external_loan_id", length = 100)
+    private ExternalId externalLoanId;
 
 }

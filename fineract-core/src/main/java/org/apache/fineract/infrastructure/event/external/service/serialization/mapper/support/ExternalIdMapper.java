@@ -16,12 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support;
 
-import org.mapstruct.Builder;
-import org.mapstruct.MapperConfig;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.springframework.stereotype.Component;
 
-@MapperConfig(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR, builder = @Builder(disableBuilder = true))
-public class MapstructMapperConfig {}
+@Component
+public class ExternalIdMapper {
+
+    public String mapExternalId(ExternalId source) {
+        if (source == null) {
+            return null;
+        }
+        return source.getValue();
+    }
+}

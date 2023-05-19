@@ -16,22 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.data;
+package org.apache.fineract.investor.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import lombok.Data;
+import java.util.List;
+import org.apache.fineract.investor.data.ExternalTransferData;
 
-@Data
-public class ExternalTransferData {
+public interface ExternalAssetOwnersReadService {
 
-    private Long transferId;
-    private ExternalTransferOwnerData owner;
-    private ExternalTransferLoanMappingData loan;
-    private String transferExternalId;
-    private BigDecimal purchasePriceRatio;
-    private LocalDate settlementDate;
-    private ExternalTransferStatus status;
-    private LocalDate effectiveFrom;
-    private LocalDate effectiveTo;
+    List<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId);
 }
