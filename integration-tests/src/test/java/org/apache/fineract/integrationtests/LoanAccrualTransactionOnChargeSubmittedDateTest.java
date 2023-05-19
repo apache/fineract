@@ -521,6 +521,76 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
         }
     }
 
+    @Test
+    public void loanAccrualTransactionOnChargeSubmitted_multiple_disbursement_reversal_test_Loan_COB() {
+        try {
+
+            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+            // Accounts oof periodic accrual
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+            // Set business date
+            LocalDate currentDate = LocalDate.of(2023, 03, 3);
+
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            // Loan ExternalId
+            String loanExternalIdStr = UUID.randomUUID().toString();
+
+            // Client and Loan account creation
+
+            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductMultipleDisbursements(
+                    loanTransactionHelper, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+            assertNotNull(getLoanProductsProductResponse);
+
+            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+                    loanExternalIdStr);
+
+            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1000");
+
+            // Add Charge Penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+
+            LocalDate targetDate = LocalDate.of(2023, 3, 9);
+            final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+
+            assertNotNull(penalty1LoanChargeId);
+
+            // Run cob job for business date + 1
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate.plusDays(1));
+
+            final String jobName = "Loan COB";
+            schedulerJobHelper.executeAndAwaitJob(jobName);
+
+            // verify accrual transaction created for charges create date
+            checkAccrualTransaction(currentDate, 0.0f, 0.0f, 10.0f, loanId);
+
+            // Set business date
+            LocalDate futureDate = LocalDate.of(2023, 03, 4);
+
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, futureDate);
+
+            loanTransactionHelper.disburseLoanWithTransactionAmount("04 March 2023", loanId, "300");
+
+            // verify accrual transaction exists with same date,amount and is not reversed by regeneration of repayment
+            // schedule
+            checkAccrualTransaction(currentDate, 0.0f, 0.0f, 10.0f, loanId);
+
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+        }
+    }
+
     private void checkAccrualTransactionsForMultipleRepaymentSchedulesChargeDueDate(LocalDate transactionDate, Integer loanId) {
         ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
                 this.responseSpec, loanId);
@@ -589,6 +659,33 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
                 .build(null);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
         return loanTransactionHelper.getLoanProduct(loanProductId);
+    }
+
+    private GetLoanProductsProductIdResponse createLoanProductMultipleDisbursements(final LoanTransactionHelper loanTransactionHelper,
+            final Account... accounts) {
+
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+                .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
+                .withAccountingRulePeriodicAccrual(accounts).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30")
+                .withDaysInYear("365").withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true).build(null);
+        final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProduct(loanProductId);
+    }
+
+    private Integer createLoanAccountMultipleRepaymentsDisbursement(final Integer clientID, final Long loanProductID,
+            final String externalId) {
+
+        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
+                .withLoanTermFrequencyAsDays().withNumberOfRepayments("10").withRepaymentEveryAfter("3").withRepaymentFrequencyTypeAsDays()
+                .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 March 2023")
+                .withSubmittedOnDate("03 March 2023").withLoanType("individual").withExternalId(externalId)
+                .build(clientID.toString(), loanProductID.toString(), null);
+
+        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
+        loanTransactionHelper.approveLoan("03 March 2023", "1000", loanId, null);
+        return loanId;
     }
 
     private Integer createLoanAccountMultipleRepayments(final Integer clientID, final Long loanProductID, final String externalId) {

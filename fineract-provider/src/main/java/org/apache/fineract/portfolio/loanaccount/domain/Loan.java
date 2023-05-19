@@ -1322,17 +1322,21 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private void applyPeriodicAccruals(final Collection<LoanTransaction> accruals) {
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
+        boolean isBasedOnSubmittedOnDate = TemporaryConfigurationServiceContainer.getAccrualDateConfigForCharge()
+                .equalsIgnoreCase("submitted-date");
         for (LoanRepaymentScheduleInstallment installment : installments) {
-
             Money interest = Money.zero(getCurrency());
             Money fee = Money.zero(getCurrency());
             Money penality = Money.zero(getCurrency());
             for (LoanTransaction loanTransaction : accruals) {
+                LocalDate transactionDateForRange = isBasedOnSubmittedOnDate
+                        ? loanTransaction.getLoanChargesPaid().stream().findFirst().get().getLoanCharge().getDueDate()
+                        : loanTransaction.getTransactionDate();
                 boolean isInRange = installment.isFirstPeriod()
-                        ? !loanTransaction.getTransactionDate().isBefore(installment.getFromDate())
-                                && !loanTransaction.getTransactionDate().isAfter(installment.getDueDate())
-                        : loanTransaction.getTransactionDate().isAfter(installment.getFromDate())
-                                && !loanTransaction.getTransactionDate().isAfter(installment.getDueDate());
+                        ? !transactionDateForRange.isBefore(installment.getFromDate())
+                                && !transactionDateForRange.isAfter(installment.getDueDate())
+                        : transactionDateForRange.isAfter(installment.getFromDate())
+                                && !transactionDateForRange.isAfter(installment.getDueDate());
                 if (isInRange) {
                     interest = interest.plus(loanTransaction.getInterestPortion(getCurrency()));
                     fee = fee.plus(loanTransaction.getFeeChargesPortion(getCurrency()));
