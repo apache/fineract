@@ -38,6 +38,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
@@ -48,14 +49,12 @@ import org.apache.fineract.infrastructure.security.exception.NoAuthorizationExce
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/runreports")
+@Path("/v1/runreports")
 @Component
-@Scope("singleton")
 @Tag(name = "Run Reports", description = "")
+@RequiredArgsConstructor
 public class RunreportsApiResource {
 
     public static final String IS_SELF_SERVICE_USER_REPORT_PARAMETER = "isSelfServiceUserReport";
@@ -63,14 +62,6 @@ public class RunreportsApiResource {
     private final PlatformSecurityContext context;
     private final ReadReportingService readExtraDataAndReportingService;
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
-
-    @Autowired
-    public RunreportsApiResource(final PlatformSecurityContext context, final ReadReportingService readExtraDataAndReportingService,
-            final ReportingProcessServiceProvider reportingProcessServiceProvider) {
-        this.context = context;
-        this.readExtraDataAndReportingService = readExtraDataAndReportingService;
-        this.reportingProcessServiceProvider = reportingProcessServiceProvider;
-    }
 
     @GET
     @Path("/availableExports/{reportName}")

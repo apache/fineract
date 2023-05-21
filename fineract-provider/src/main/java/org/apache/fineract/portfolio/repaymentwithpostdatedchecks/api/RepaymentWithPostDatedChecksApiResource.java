@@ -37,6 +37,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,14 +47,12 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksData;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.RepaymentWithPostDatedChecksReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/{loanId}/postdatedchecks")
+@Path("/v1/loans/{loanId}/postdatedchecks")
 @Component
-@Scope("singleton")
 @Tag(name = "repayment with post dated checks", description = "Repay with post dated checks")
+@RequiredArgsConstructor
 public class RepaymentWithPostDatedChecksApiResource {
 
     private final PlatformSecurityContext context;
@@ -61,18 +60,6 @@ public class RepaymentWithPostDatedChecksApiResource {
     private final DefaultToApiJsonSerializer<PostDatedChecksData> apiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final RepaymentWithPostDatedChecksReadPlatformService repaymentWithPostDatedChecksReadPlatformService;
-
-    @Autowired
-    public RepaymentWithPostDatedChecksApiResource(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
-            final DefaultToApiJsonSerializer<PostDatedChecksData> apiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService,
-            final RepaymentWithPostDatedChecksReadPlatformService repaymentWithPostDatedChecksReadPlatformService) {
-        this.context = context;
-        this.fromJsonHelper = fromJsonHelper;
-        this.apiJsonSerializer = apiJsonSerializer;
-        this.commandsSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
-        this.repaymentWithPostDatedChecksReadPlatformService = repaymentWithPostDatedChecksReadPlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -92,33 +92,34 @@ class LoanCOBApiFilterTest {
     @Test
     void shouldLoanAndExternalMatchToo() {
         String externalId = UUID.randomUUID().toString();
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId).matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").matches());
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).matches());
         Assertions.assertTrue(
-                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId + "?additional=parameter").matches());
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12").replaceAll("$1"));
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/12?correct=parameter").replaceAll("$1"));
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12").replaceAll("$1"));
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/rescheduleloans/12?correct=parameter").replaceAll("$1"));
+                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").matches());
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12").replaceAll("$1"));
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").replaceAll("$1"));
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12").replaceAll("$1"));
+        Assertions.assertEquals("12",
+                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").replaceAll("$1"));
         Assertions.assertEquals(externalId,
-                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId).replaceAll("$1"));
-        Assertions.assertEquals(externalId,
-                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/loans/external-id/" + externalId + "?additional=parameter").replaceAll("$1"));
+                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).replaceAll("$1"));
+        Assertions.assertEquals(externalId, LoanCOBApiFilter.LOAN_PATH_PATTERN
+                .matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").replaceAll("$1"));
     }
 
     @Test
     void shouldGlimAccountMatch() {
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/loans/glimAccount/12").matches());
-        Assertions
-                .assertTrue(LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/loans/glimAccount/12?additional=parameter").matches());
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/loans/glimAccount/12").replaceAll("$1"));
+        Assertions.assertTrue(LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12").matches());
+        Assertions.assertTrue(
+                LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").matches());
+        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12").replaceAll("$1"));
         Assertions.assertEquals("12",
-                LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/loans/glimAccount/12?additional=parameter").replaceAll("$1"));
+                LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").replaceAll("$1"));
     }
 
     @Test
@@ -127,7 +128,7 @@ class LoanCOBApiFilterTest {
         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
 
-        given(request.getPathInfo()).willReturn("/jobs/2/inline");
+        given(request.getPathInfo()).willReturn("/v1/jobs/2/inline");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -147,7 +148,7 @@ class LoanCOBApiFilterTest {
         businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
 
-        given(request.getPathInfo()).willReturn("/loans/invalid2LoanId/charges");
+        given(request.getPathInfo()).willReturn("/v1/loans/invalid2LoanId/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(context.authenticatedUser()).willReturn(appUser);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
@@ -167,7 +168,7 @@ class LoanCOBApiFilterTest {
         FilterChain filterChain = mock(FilterChain.class);
         AppUser appUser = mock(AppUser.class);
 
-        given(request.getPathInfo()).willReturn("/jobs/2/inline");
+        given(request.getPathInfo()).willReturn("/v1/jobs/2/inline");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(context.authenticatedUser()).willReturn(appUser);
         given(appUser.isBypassUser()).willReturn(true);
@@ -189,7 +190,7 @@ class LoanCOBApiFilterTest {
         businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
 
-        given(request.getPathInfo()).willReturn("/loans/2/charges");
+        given(request.getPathInfo()).willReturn("/v1/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
@@ -217,7 +218,7 @@ class LoanCOBApiFilterTest {
         businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
         String uuid = UUID.randomUUID().toString();
-        given(request.getPathInfo()).willReturn("/loans/external-id/" + uuid + "/charges");
+        given(request.getPathInfo()).willReturn("/v1/loans/external-id/" + uuid + "/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
@@ -246,7 +247,7 @@ class LoanCOBApiFilterTest {
         businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
         Long resourceId = 123L;
-        given(request.getPathInfo()).willReturn("/rescheduleloans/" + resourceId + "/charges");
+        given(request.getPathInfo()).willReturn("/v1/rescheduleloans/" + resourceId + "/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
@@ -271,7 +272,7 @@ class LoanCOBApiFilterTest {
         FilterChain filterChain = mock(FilterChain.class);
         AppUser appUser = mock(AppUser.class);
 
-        given(request.getPathInfo()).willReturn("/loans/2/charges");
+        given(request.getPathInfo()).willReturn("/v1/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(true);
@@ -298,7 +299,7 @@ class LoanCOBApiFilterTest {
 
         LoanIdAndLastClosedBusinessDate result = mock(LoanIdAndLastClosedBusinessDate.class);
         given(result.getId()).willReturn(2L);
-        given(request.getPathInfo()).willReturn("/loans/2?command=approve");
+        given(request.getPathInfo()).willReturn("/v1/loans/2?command=approve");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(true);
@@ -331,7 +332,7 @@ class LoanCOBApiFilterTest {
 
         LoanIdAndLastClosedBusinessDate result = mock(LoanIdAndLastClosedBusinessDate.class);
         given(result.getId()).willReturn(2L);
-        given(request.getPathInfo()).willReturn("/loans/2?command=approve");
+        given(request.getPathInfo()).willReturn("/v1/loans/2?command=approve");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
@@ -355,7 +356,7 @@ class LoanCOBApiFilterTest {
         FilterChain filterChain = mock(FilterChain.class);
         AppUser appUser = mock(AppUser.class);
 
-        given(request.getPathInfo()).willReturn("/loans");
+        given(request.getPathInfo()).willReturn("/v1/loans");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
 
         given(context.authenticatedUser()).willReturn(appUser);
@@ -372,7 +373,7 @@ class LoanCOBApiFilterTest {
         FilterChain filterChain = mock(FilterChain.class);
         AppUser appUser = mock(AppUser.class);
 
-        given(request.getPathInfo()).willReturn("/loans/catch-up");
+        given(request.getPathInfo()).willReturn("/v1/loans/catch-up");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
 
         given(context.authenticatedUser()).willReturn(appUser);
@@ -390,7 +391,7 @@ class LoanCOBApiFilterTest {
         PrintWriter writer = mock(PrintWriter.class);
         AppUser appUser = mock(AppUser.class);
 
-        given(request.getPathInfo()).willReturn("/loans/2/charges");
+        given(request.getPathInfo()).willReturn("/v1/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(true);
         given(response.getWriter()).willReturn(writer);
@@ -411,7 +412,7 @@ class LoanCOBApiFilterTest {
         Long loanId = 2L;
         AppUser appUser = mock(AppUser.class);
 
-        given(request.getPathInfo()).willReturn("/loans/glimAccount/2");
+        given(request.getPathInfo()).willReturn("/v1/loans/glimAccount/2");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(glimAccountInfoRepository.findOneByIsAcceptingChildAndApplicationId(true, BigDecimal.valueOf(2))).willReturn(glimAccount);
         given(glimAccount.getChildLoan()).willReturn(Collections.singleton(loan));

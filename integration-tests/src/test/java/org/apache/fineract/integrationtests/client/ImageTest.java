@@ -256,13 +256,13 @@ public class ImageTest extends IntegrationTest {
     interface ImagesApiWithHeadersForTest extends ImagesApi {
 
         @Headers("Accept: text/plain")
-        @GET("{entityType}/{entityId}/images")
+        @GET("v1/{entityType}/{entityId}/images")
         Call<ResponseBody> getText(@retrofit2.http.Path("entityType") String entityType, @retrofit2.http.Path("entityId") Long entityId,
                 @retrofit2.http.Query("maxWidth") Integer maxWidth, @retrofit2.http.Query("maxHeight") Integer maxHeight,
                 @retrofit2.http.Query("output") String output);
 
         @Headers("Accept: application/octet-stream")
-        @GET("{entityType}/{entityId}/images")
+        @GET("v1/{entityType}/{entityId}/images")
         Call<ResponseBody> getBytes(@retrofit2.http.Path("entityType") String entityType, @retrofit2.http.Path("entityId") Long entityId,
                 @retrofit2.http.Query("maxWidth") Integer maxWidth, @retrofit2.http.Query("maxHeight") Integer maxHeight,
                 @retrofit2.http.Query("output") String output);

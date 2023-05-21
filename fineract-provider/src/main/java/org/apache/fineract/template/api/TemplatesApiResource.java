@@ -47,6 +47,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -61,21 +62,18 @@ import org.apache.fineract.template.domain.TemplateEntity;
 import org.apache.fineract.template.domain.TemplateType;
 import org.apache.fineract.template.service.TemplateDomainService;
 import org.apache.fineract.template.service.TemplateMergeService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/templates")
+@Path("/v1/templates")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Scope("singleton")
-
 @Tag(name = "User Generated Documents", description = "User Generated Documents(alternatively, Templates) are used for end-user features such as custom user defined document generation (AKA UGD). They are based on {{ moustache }} templates. Think of them as a sort of built-in \"mail merge\" functionality.\n"
         + "\n"
         + "User Generated Documents (and other types of templates) can aggregate data from several Apache Fineract back-end API calls via mappers. Mappers can even access non-Apache Fineract REST services from other servers. UGDs can render such data in tables, show images, etc. TBD: Please have a look at some of the Example UGDs included in Apache Fineract (or the Wiki page, for now.).\n"
         + "\n"
         + "UGDs can be assigned to an entity like client or loan and be of a type like Document or SMS. The entity and type of a UGD is only there for the convenience of user agents (UIs), in order to know where to show UGDs for the user (i.e. which tab). The Template Engine back-end runner does not actually need this metadata.")
+@RequiredArgsConstructor
 public class TemplatesApiResource {
 
     public static final String ID = "id";
@@ -93,22 +91,6 @@ public class TemplatesApiResource {
     private final TemplateDomainService templateService;
     private final TemplateMergeService templateMergeService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public TemplatesApiResource(final PlatformSecurityContext context, final DefaultToApiJsonSerializer<Template> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<TemplateData> templateDataApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final TemplateDomainService templateService,
-            final TemplateMergeService templateMergeService,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.templateDataApiJsonSerializer = templateDataApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.templateService = templateService;
-        this.templateMergeService = templateMergeService;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Operation(summary = "Retrieve all UGDs", description = "Example Requests:\n" + "\n" + "templates\n" + "\n"

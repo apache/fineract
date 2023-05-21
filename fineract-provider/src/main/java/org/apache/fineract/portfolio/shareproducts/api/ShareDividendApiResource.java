@@ -29,6 +29,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -43,15 +44,12 @@ import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountDividendReadPlatformService;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductDividendPayOutData;
 import org.apache.fineract.portfolio.shareproducts.service.ShareProductDividendReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/shareproduct/{productId}/dividend")
+@Path("/v1/shareproduct/{productId}/dividend")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Self Dividend", description = "")
+@RequiredArgsConstructor
 public class ShareDividendApiResource {
 
     public static final String APPROVE = "approve";
@@ -62,21 +60,6 @@ public class ShareDividendApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     private final ShareProductDividendReadPlatformService shareProductDividendReadPlatformService;
-
-    @Autowired
-    public ShareDividendApiResource(final DefaultToApiJsonSerializer<ShareProductDividendPayOutData> toApiJsonSerializer,
-            final PlatformSecurityContext platformSecurityContext,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final DefaultToApiJsonSerializer<ShareAccountDividendData> toApiDividendsJsonSerializer,
-            final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
-            final ShareProductDividendReadPlatformService shareProductDividendReadPlatformService) {
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.platformSecurityContext = platformSecurityContext;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiAccountDetailJsonSerializer = toApiDividendsJsonSerializer;
-        this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
-        this.shareProductDividendReadPlatformService = shareProductDividendReadPlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

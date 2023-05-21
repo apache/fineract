@@ -41,6 +41,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -55,15 +56,12 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/self/clients")
+@Path("/v1/self/clients")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Self Client", description = "")
+@RequiredArgsConstructor
 public class SelfClientsApiResource {
 
     private final PlatformSecurityContext context;
@@ -73,20 +71,6 @@ public class SelfClientsApiResource {
     private final ClientTransactionsApiResource clientTransactionsApiResource;
     private final AppuserClientMapperReadService appUserClientMapperReadService;
     private final SelfClientDataValidator dataValidator;
-
-    @Autowired
-    public SelfClientsApiResource(final PlatformSecurityContext context, final ClientsApiResource clientApiResource,
-            final ImagesApiResource imagesApiResource, final ClientChargesApiResource clientChargesApiResource,
-            final ClientTransactionsApiResource clientTransactionsApiResource,
-            final AppuserClientMapperReadService appUserClientMapperReadService, final SelfClientDataValidator dataValidator) {
-        this.context = context;
-        this.clientApiResource = clientApiResource;
-        this.imagesApiResource = imagesApiResource;
-        this.clientChargesApiResource = clientChargesApiResource;
-        this.clientTransactionsApiResource = clientTransactionsApiResource;
-        this.appUserClientMapperReadService = appUserClientMapperReadService;
-        this.dataValidator = dataValidator;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

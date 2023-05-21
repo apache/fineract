@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3050,6 +3051,8 @@ public class ClientLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
+        ArrayList<HashMap> loanTransactionDetails = loanTransactionHelper.getLoanTransactionDetails(requestSpec, responseSpec, loanID);
+        validateAccrualTransactionForDisbursementCharge(loanTransactionDetails);
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
@@ -4742,6 +4745,16 @@ public class ClientLoanIntegrationTest {
         this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+    }
+
+    private void validateAccrualTransactionForDisbursementCharge(ArrayList<HashMap> loanTransactionDetails) {
+        List<HashMap> disbursementTransactions = loanTransactionDetails.stream()
+                .filter(transactionDetail -> (Boolean) ((LinkedHashMap) transactionDetail.get("type")).get("repaymentAtDisbursement"))
+                .toList();
+        List<HashMap> accrualTransactions = loanTransactionDetails.stream()
+                .filter(transactionDetail -> (Boolean) ((LinkedHashMap) transactionDetail.get("type")).get("accrual")).toList();
+        assertEquals(disbursementTransactions.size(), accrualTransactions.size(), 1);
+        assertEquals((Float) disbursementTransactions.get(0).get("amount"), (Float) accrualTransactions.get(0).get("amount"));
     }
 
     private void addRepaymentValues(List<Map<String, Object>> expectedvalues, Calendar todaysDate, int addPeriod, boolean isAddDays,

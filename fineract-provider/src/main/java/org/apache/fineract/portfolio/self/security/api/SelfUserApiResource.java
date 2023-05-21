@@ -35,34 +35,25 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.api.UsersApiResource;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Path("/self/user")
+@Path("/v1/self/user")
 @Component
-
 @Tag(name = "Self User", description = "")
+@RequiredArgsConstructor
 public class SelfUserApiResource {
 
     private final UsersApiResource usersApiResource;
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("password", "repeatPassword"));
-
-    @Autowired
-    public SelfUserApiResource(final UsersApiResource usersApiResource, final PlatformSecurityContext context,
-            final FromJsonHelper fromApiJsonHelper) {
-
-        this.usersApiResource = usersApiResource;
-        this.context = context;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
 
     @PUT
     @Operation(summary = "Update User", description = "This API can be used by Self Service user to update their own user information. Currently, \"password\" and \"repeatPassword\" are the only parameters accepted.")

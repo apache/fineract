@@ -68,6 +68,7 @@ jib {
     allowInsecureRegistries = true
 
     dependencies {
+        implementation project(':fineract-core')
         implementation project(':fineract-provider')
         // NOTE: dynamically load all custom modules
         file("${rootDir}/custom").eachDir { companyDir ->

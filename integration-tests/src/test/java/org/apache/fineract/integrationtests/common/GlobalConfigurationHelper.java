@@ -120,8 +120,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 50 global configurations.
-        Assertions.assertEquals(50, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(50, actualGlobalConfigurations.size());
+        Assertions.assertEquals(51, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(51, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -556,6 +556,16 @@ public class GlobalConfigurationHelper {
         loanArrearsDelinquencyDisplayData.put("enabled", true);
         loanArrearsDelinquencyDisplayData.put("trapDoor", false);
         defaults.add(loanArrearsDelinquencyDisplayData);
+
+        HashMap<String, Object> accrualForChargeDate = new HashMap<>();
+        accrualForChargeDate.put("id", 56);
+        accrualForChargeDate.put("name", "charge-accrual-date");
+        accrualForChargeDate.put("value", 0);
+        accrualForChargeDate.put("enabled", true);
+        accrualForChargeDate.put("trapDoor", false);
+        accrualForChargeDate.put("string_value", "due-date");
+        defaults.add(accrualForChargeDate);
+
         return defaults;
     }
 
@@ -665,6 +675,19 @@ public class GlobalConfigurationHelper {
             final ResponseSpecification responseSpec, final boolean enabled) {
         long configId = 50;
         return updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configId, enabled);
+    }
+
+    public static Integer updateChargeAccrualDateConfiguration(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String stringValue) {
+        long configId = 56;
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("stringValue", stringValue);
+        log.info("map :  {}", map);
+        final String configValue = GSON.toJson(map);
+        final String GLOBAL_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------UPDATE VALUE FOR GLOBAL CONFIG---------------------------------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, GLOBAL_CONFIG_UPDATE_URL, configValue, "resourceId");
+
     }
 
 }

@@ -30,21 +30,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.service.MixTaxonomyReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/mixtaxonomy")
+@Path("/v1/mixtaxonomy")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Mix Taxonomy", description = "")
+@RequiredArgsConstructor
 public class MixTaxonomyApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -54,15 +52,6 @@ public class MixTaxonomyApiResource {
     private final ToApiJsonSerializer<MixTaxonomyData> toApiJsonSerializer;
     private final MixTaxonomyReadPlatformService readTaxonomyService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-
-    @Autowired
-    public MixTaxonomyApiResource(final PlatformSecurityContext context, final ToApiJsonSerializer<MixTaxonomyData> toApiJsonSerializer,
-            final MixTaxonomyReadPlatformService readTaxonomyService, final ApiRequestParameterHelper apiRequestParameterHelper) {
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.readTaxonomyService = readTaxonomyService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

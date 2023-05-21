@@ -52,7 +52,7 @@ import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.service.ClientTransactionReadPlatformService;
 import org.springframework.stereotype.Component;
 
-@Path("/clients/{clientId}/transactions")
+@Path("/v1/clients/{clientId}/transactions")
 @Component
 @Tag(name = "Client Transaction", description = "Client Transactions refer to transactions made directly against a Client's internal account. Currently, these transactions are only created as a result of charge payments/waivers. You are allowed to undo a transaction, however you cannot explicitly create one. ")
 @RequiredArgsConstructor

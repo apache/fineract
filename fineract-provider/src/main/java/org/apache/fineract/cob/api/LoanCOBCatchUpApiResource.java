@@ -38,7 +38,7 @@ import org.apache.fineract.cob.service.LoanCOBCatchUpService;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.springframework.stereotype.Component;
 
-@Path("/loans")
+@Path("/v1/loans")
 @Component
 @Tag(name = "Loan COB Catch Up", description = "")
 @RequiredArgsConstructor

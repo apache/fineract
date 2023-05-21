@@ -31,6 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -41,14 +42,12 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/{loanId}/disbursements")
+@Path("/v1/loans/{loanId}/disbursements")
 @Component
-@Scope("singleton")
 @Tag(name = "Loan Disbursement Details", description = "")
+@RequiredArgsConstructor
 public class LoanDisbursementDetailApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -61,17 +60,6 @@ public class LoanDisbursementDetailApiResource {
     private final PlatformSecurityContext context;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final LoanReadPlatformService loanReadPlatformService;
-
-    @Autowired
-    public LoanDisbursementDetailApiResource(final DefaultToApiJsonSerializer<DisbursementData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final PlatformSecurityContext context,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final LoanReadPlatformService loanReadPlatformService) {
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.context = context;
-        this.loanReadPlatformService = loanReadPlatformService;
-    }
 
     @PUT
     @Path("{disbursementId}")

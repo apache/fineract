@@ -18,5 +18,6 @@
  */
 
 dependencies {
+    implementation(project(':fineract-core'))
     implementation(project(':fineract-provider'))
 }

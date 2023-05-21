@@ -33,6 +33,8 @@ import lombok.Setter;
 import org.springframework.data.domain.Persistable;
 
 /**
+ * Make sure to modify the same class in the modules (fineract-investor, etc)
+ *
  * Abstract base class for entities.
  *
  * Inspired by {@link org.springframework.data.jpa.domain.AbstractPersistable}, but Id is always Long (and this class

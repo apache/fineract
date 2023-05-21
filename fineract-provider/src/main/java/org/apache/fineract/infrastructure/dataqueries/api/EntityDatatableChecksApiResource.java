@@ -38,7 +38,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -51,13 +51,11 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecks
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/entityDatatableChecks")
-@AllArgsConstructor
+@Path("/v1/entityDatatableChecks")
+@RequiredArgsConstructor
 @Component
-@Scope("singleton")
 @Tag(name = "Entity Data Table", description = "This defines Entity-Datatable Check.")
 public class EntityDatatableChecksApiResource {
 

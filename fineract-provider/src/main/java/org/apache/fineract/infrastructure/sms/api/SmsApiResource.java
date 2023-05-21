@@ -49,7 +49,7 @@ import org.apache.fineract.infrastructure.sms.data.SmsData;
 import org.apache.fineract.infrastructure.sms.service.SmsReadPlatformService;
 import org.springframework.stereotype.Component;
 
-@Path("/sms")
+@Path("/v1/sms")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component

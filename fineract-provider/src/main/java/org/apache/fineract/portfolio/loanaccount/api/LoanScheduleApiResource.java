@@ -36,6 +36,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -47,14 +48,12 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/{loanId}/schedule")
+@Path("/v1/loans/{loanId}/schedule")
 @Component
-@Scope("singleton")
 @Tag(name = "Loan Rescheduling", description = "Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.")
+@RequiredArgsConstructor
 public class LoanScheduleApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
@@ -63,19 +62,6 @@ public class LoanScheduleApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-
-    @Autowired
-    public LoanScheduleApiResource(final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<LoanScheduleData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final LoanScheduleCalculationPlatformService calculationPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper) {
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.calculationPlatformService = calculationPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })

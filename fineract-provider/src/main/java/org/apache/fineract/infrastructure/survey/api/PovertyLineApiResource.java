@@ -25,39 +25,24 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.survey.data.LikeliHoodPovertyLineData;
 import org.apache.fineract.infrastructure.survey.data.PpiPovertyLineData;
 import org.apache.fineract.infrastructure.survey.service.PovertyLineService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/povertyLine")
+@Path("/v1/povertyLine")
 @Component
-@Scope("singleton")
 @Tag(name = "Poverty Line", description = "")
+@RequiredArgsConstructor
 public class PovertyLineApiResource {
 
     private final DefaultToApiJsonSerializer<PpiPovertyLineData> toApiJsonSerializer;
     private final DefaultToApiJsonSerializer<LikeliHoodPovertyLineData> likelihoodToApiJsonSerializer;
-    // private final DefaultToApiJsonSerializer<PpiPovertyLineData>
-    // toApiJsonSerializer;
     private final PlatformSecurityContext context;
     private final PovertyLineService readService;
-
-    @Autowired
-    PovertyLineApiResource(final PlatformSecurityContext context, final DefaultToApiJsonSerializer<PpiPovertyLineData> toApiJsonSerializer,
-            final PovertyLineService readService,
-            final DefaultToApiJsonSerializer<LikeliHoodPovertyLineData> likelihoodToApiJsonSerializer) {
-
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.readService = readService;
-        this.likelihoodToApiJsonSerializer = likelihoodToApiJsonSerializer;
-
-    }
 
     @GET
     @Path("{ppiName}")

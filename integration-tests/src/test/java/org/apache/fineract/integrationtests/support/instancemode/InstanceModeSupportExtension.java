@@ -24,22 +24,38 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 
-public class InstanceModeSupportExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
+public class InstanceModeSupportExtension
+        implements BeforeAllCallback, BeforeTestExecutionCallback, AfterAllCallback, AfterTestExecutionCallback {
 
     private static final Namespace INSTANCE_MODE_NAMESPACE = Namespace.create(InstanceModeSupportExtension.class);
     private static final String AUTH_KEY = "AUTH_KEY";
+
+    @Override
+    public void beforeAll(ExtensionContext context) throws Exception {
+        Utils.initializeRESTAssured();
+        resetInstanceMode(context);
+    }
+
+    @Override
+    public void afterAll(ExtensionContext context) throws Exception {
+        Utils.initializeRESTAssured();
+        resetInstanceMode(context);
+    }
 
     @Override
     public void beforeTestExecution(ExtensionContext context) throws Exception {
         context.getTestMethod().ifPresent(m -> {
             ConfigureInstanceMode annotation = m.getAnnotation(ConfigureInstanceMode.class);
             if (annotation != null) {
+                Utils.initializeRESTAssured();
                 boolean readEnabled = annotation.readEnabled();
                 boolean writeEnabled = annotation.writeEnabled();
                 boolean batchWorkerEnabled = annotation.batchWorkerEnabled();
@@ -54,9 +70,14 @@ public class InstanceModeSupportExtension implements BeforeTestExecutionCallback
         context.getTestMethod().ifPresent(m -> {
             ConfigureInstanceMode annotation = m.getAnnotation(ConfigureInstanceMode.class);
             if (annotation != null) {
-                changeInstanceMode(context, true, true, true, true);
+                Utils.initializeRESTAssured();
+                resetInstanceMode(context);
             }
         });
+    }
+
+    private void resetInstanceMode(ExtensionContext context) {
+        changeInstanceMode(context, true, true, true, true);
     }
 
     private void changeInstanceMode(ExtensionContext extensionContext, boolean readEnabled, boolean writeEnabled,

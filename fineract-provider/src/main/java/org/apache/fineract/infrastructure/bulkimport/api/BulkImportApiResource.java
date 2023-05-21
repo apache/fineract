@@ -30,6 +30,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.data.ImportData;
 import org.apache.fineract.infrastructure.bulkimport.exceptions.ImportTypeNotFoundException;
@@ -39,14 +40,12 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/imports")
+@Path("/v1/imports")
 @Component
-@Scope("singleton")
 @Tag(name = "Bulk Import", description = "")
+@RequiredArgsConstructor
 public class BulkImportApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSION = "IMPORT";
@@ -55,15 +54,6 @@ public class BulkImportApiResource {
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final DefaultToApiJsonSerializer<ImportData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-
-    @Autowired
-    public BulkImportApiResource(final PlatformSecurityContext context, final BulkImportWorkbookService bulkImportWorkbookService,
-            final DefaultToApiJsonSerializer<ImportData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
-        this.context = context;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

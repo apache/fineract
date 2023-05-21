@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
 import com.google.common.base.Splitter;
 import java.util.List;
 import javax.ws.rs.core.UriInfo;
@@ -57,7 +59,7 @@ public class CreateChargeCommandStrategy implements CommandStrategy {
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
+        final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrlWithoutVersion(request));
         final Long loanId = Long.parseLong(pathParameters.get(1));
 
         // Calls 'executeLoanCharge' function from 'LoanChargesApiResource'

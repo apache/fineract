@@ -31,6 +31,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
@@ -40,10 +41,8 @@ import org.apache.fineract.infrastructure.security.service.SpringSecurityPlatfor
 import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.Role;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,11 +51,11 @@ import org.springframework.stereotype.Component;
 /*
  * Implementation of Oauth2 authentication APIs, loaded only when "oauth" profile is enabled.
  */
-@Path("/userdetails")
+@Path("/v1/userdetails")
 @Component
 @ConditionalOnProperty("fineract.security.oauth.enabled")
-@Scope("singleton")
 @Tag(name = "Fetch authenticated user details", description = "")
+@RequiredArgsConstructor
 public class UserDetailsApiResource {
 
     private final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService;
@@ -64,13 +63,6 @@ public class UserDetailsApiResource {
 
     @Value("${fineract.security.2fa.enabled}")
     private boolean twoFactorEnabled;
-
-    @Autowired
-    public UserDetailsApiResource(final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService,
-            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext) {
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
-    }
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })

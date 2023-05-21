@@ -39,6 +39,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -49,14 +50,12 @@ import org.apache.fineract.portfolio.search.data.AdHocSearchQueryData;
 import org.apache.fineract.portfolio.search.data.SearchConditions;
 import org.apache.fineract.portfolio.search.data.SearchData;
 import org.apache.fineract.portfolio.search.service.SearchReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/search")
+@Path("/v1/search")
 @Component
-@Scope("singleton")
 @Tag(name = "Search API", description = "Search API allows to search scoped resources clients, loans and groups on specified fields.")
+@RequiredArgsConstructor
 public class SearchApiResource {
 
     private static final Set<String> SEARCH_RESPONSE_PARAMETERS = SearchResponseParameters.getAllValues();
@@ -65,18 +64,6 @@ public class SearchApiResource {
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final AdHocQueryDataValidator fromApiJsonDeserializer;
-
-    @Autowired
-    public SearchApiResource(final SearchReadPlatformService searchReadPlatformService,
-            final ToApiJsonSerializer<Object> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final AdHocQueryDataValidator fromApiJsonDeserializer) {
-
-        this.searchReadPlatformService = searchReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-
-    }
 
     @GET
     @Path("/template")

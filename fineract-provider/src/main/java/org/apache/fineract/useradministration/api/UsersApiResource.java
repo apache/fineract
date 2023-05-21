@@ -45,6 +45,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -63,15 +64,12 @@ import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.fineract.useradministration.service.AppUserReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/users")
+@Path("/v1/users")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Users", description = "An API capability to support administration of application users.")
+@RequiredArgsConstructor
 public class UsersApiResource {
 
     /**
@@ -90,23 +88,6 @@ public class UsersApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
-
-    @Autowired
-    public UsersApiResource(final PlatformSecurityContext context, final AppUserReadPlatformService readPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final DefaultToApiJsonSerializer<AppUserData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
-            final BulkImportWorkbookService bulkImportWorkbookService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-    }
 
     @GET
     @Operation(summary = "Retrieve list of users", description = "Example Requests:\n" + "\n" + "users\n" + "\n" + "\n"

@@ -39,6 +39,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -56,14 +57,12 @@ import org.apache.fineract.portfolio.calendar.exception.CalendarEntityTypeNotSup
 import org.apache.fineract.portfolio.calendar.service.CalendarDropdownReadPlatformService;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/{entityType}/{entityId}/calendars")
+@Path("/v1/{entityType}/{entityId}/calendars")
 @Component
-@Scope("singleton")
 @Tag(name = "Calendar", description = "")
+@RequiredArgsConstructor
 public class CalendarsApiResource {
 
     /**
@@ -83,19 +82,6 @@ public class CalendarsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CalendarDropdownReadPlatformService dropdownReadPlatformService;
-
-    @Autowired
-    public CalendarsApiResource(final PlatformSecurityContext context, final CalendarReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<CalendarData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CalendarDropdownReadPlatformService dropdownReadPlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
-    }
 
     @GET
     @Path("{calendarId}")

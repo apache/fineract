@@ -51,7 +51,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-@Path("/externalevents/configuration")
+@Path("/v1/externalevents/configuration")
 @Component
 @Tag(name = "External event configuration", description = "External event configuration enables user to enable/disable event posting to downstream message channel")
 public class ExternalEventConfigurationApiResource {

@@ -39,32 +39,24 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.data.SurveyData;
 import org.apache.fineract.spm.domain.Survey;
 import org.apache.fineract.spm.service.SpmService;
 import org.apache.fineract.spm.util.SurveyMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Path("/surveys")
+@Path("/v1/surveys")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Spm-Surveys", description = "")
+@RequiredArgsConstructor
 public class SpmApiResource {
 
     private final PlatformSecurityContext securityContext;
     private final SpmService spmService;
-
-    @Autowired
-    public SpmApiResource(final PlatformSecurityContext securityContext, final SpmService spmService) {
-        this.securityContext = securityContext;
-        this.spmService = spmService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

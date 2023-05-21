@@ -30,6 +30,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -44,16 +45,14 @@ import org.apache.fineract.infrastructure.security.domain.TFAccessToken;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/twofactor")
+@Path("/v1/twofactor")
 @Component
 @ConditionalOnProperty("fineract.security.2fa.enabled")
-@Scope("singleton")
 @Tag(name = "Two Factor", description = "")
+@RequiredArgsConstructor
 public class TwoFactorApiResource {
 
     private final ToApiJsonSerializer<OTPMetadata> otpRequestSerializer;
@@ -64,20 +63,6 @@ public class TwoFactorApiResource {
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final TwoFactorService twoFactorService;
-
-    @Autowired
-    public TwoFactorApiResource(ToApiJsonSerializer<OTPMetadata> otpRequestSerializer,
-            ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer, ToApiJsonSerializer<AccessTokenData> accessTokenSerializer,
-            DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer, PlatformSecurityContext context,
-            PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, TwoFactorService twoFactorService) {
-        this.otpRequestSerializer = otpRequestSerializer;
-        this.otpDeliveryMethodSerializer = otpDeliveryMethodSerializer;
-        this.accessTokenSerializer = accessTokenSerializer;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.context = context;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.twoFactorService = twoFactorService;
-    }
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })

@@ -18,6 +18,8 @@
  */
 
 dependencies {
+    implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-investor'))
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.

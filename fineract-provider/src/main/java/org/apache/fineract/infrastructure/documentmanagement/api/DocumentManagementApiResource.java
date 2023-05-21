@@ -45,6 +45,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -58,17 +59,15 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
-@Scope("singleton")
-@Path("{entityType}/{entityId}/documents")
+@Path("/v1/{entityType}/{entityId}/documents")
 @Tag(name = "Documents", description = "Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system\n"
         + "\n" + "Note: The currently allowed Entities are\n" + "\n" + "Clients: URL Pattern as clients\n" + "Staff: URL Pattern as staff\n"
         + "Loans: URL Pattern as loans\n" + "Savings: URL Pattern as savings\n" + "Client Identifiers: URL Pattern as client_identifiers\n"
         + "Groups: URL Pattern as groups")
+@RequiredArgsConstructor
 public class DocumentManagementApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -82,19 +81,6 @@ public class DocumentManagementApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<DocumentData> toApiJsonSerializer;
     private final FileUploadValidator fileUploadValidator;
-
-    @Autowired
-    public DocumentManagementApiResource(final PlatformSecurityContext context,
-            final DocumentReadPlatformService documentReadPlatformService, final DocumentWritePlatformService documentWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final ToApiJsonSerializer<DocumentData> toApiJsonSerializer,
-            final FileUploadValidator fileUploadValidator) {
-        this.context = context;
-        this.documentReadPlatformService = documentReadPlatformService;
-        this.documentWritePlatformService = documentWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.fileUploadValidator = fileUploadValidator;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -42,6 +42,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -53,14 +54,12 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/reports")
+@Path("/v1/reports")
 @Component
-@Scope("singleton")
 @Tag(name = "Reports", description = "Non-core reports can be added, updated and deleted.")
+@RequiredArgsConstructor
 public class ReportsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "reportName", "reportType",
@@ -73,19 +72,6 @@ public class ReportsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
-
-    @Autowired
-    public ReportsApiResource(final PlatformSecurityContext context, final ReadReportingService readReportingService,
-            final ToApiJsonSerializer<ReportData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper, ReportingProcessServiceProvider reportingProcessServiceProvider) {
-        this.context = context;
-        this.readReportingService = readReportingService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.reportingProcessServiceProvider = reportingProcessServiceProvider;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

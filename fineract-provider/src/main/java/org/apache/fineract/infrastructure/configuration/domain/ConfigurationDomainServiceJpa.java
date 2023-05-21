@@ -51,6 +51,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     private static final String REPORT_EXPORT_S3_FOLDER_NAME = "report-export-s3-folder-name";
 
+    public static final String CHARGE_ACCRUAL_DATE_CRITERIA = "charge-accrual-date";
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -501,4 +502,16 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(REPORT_EXPORT_S3_FOLDER_NAME);
         return property.getStringValue();
     }
+
+    @Override
+    public String getAccrualDateConfigForCharge() {
+        String defaultValue = "due-date";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(CHARGE_ACCRUAL_DATE_CRITERIA);
+        String value = property.getStringValue();
+        if (StringUtils.isBlank(value)) {
+            return defaultValue;
+        }
+        return value;
+    }
+
 }

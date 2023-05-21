@@ -48,6 +48,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -81,15 +82,13 @@ import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformS
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-@Path("/fixeddepositaccounts")
+@Path("/v1/fixeddepositaccounts")
 @Component
-@Scope("singleton")
 @Tag(name = "Fixed Deposit Account", description = "Fixed Deposit accounts are instances of a praticular fixed deposit product created. An application process around the creation of accounts is also supported.")
+@RequiredArgsConstructor
 public class FixedDepositAccountsApiResource {
 
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
@@ -103,29 +102,6 @@ public class FixedDepositAccountsApiResource {
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-
-    @Autowired
-    public FixedDepositAccountsApiResource(final DepositAccountReadPlatformService depositAccountReadPlatformService,
-            final PlatformSecurityContext context, final DefaultToApiJsonSerializer<DepositAccountData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService,
-            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.depositAccountReadPlatformService = depositAccountReadPlatformService;
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
-        this.fromJsonHelper = fromJsonHelper;
-        this.accountPreMatureCalculationPlatformService = accountPreMatureCalculationPlatformService;
-        this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-    }
 
     @GET
     @Path("template")

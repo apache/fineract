@@ -43,6 +43,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -55,13 +56,12 @@ import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralM
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralTemplateData;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.collateralmanagement.service.ClientCollateralManagementReadPlatformService;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/clients/{clientId}/collaterals")
+@Path("/v1/clients/{clientId}/collaterals")
 @Component
-@Scope("singleton")
 @Tag(name = "Client Collateral Management", description = "Client Collateral Management is for managing collateral operations")
+@RequiredArgsConstructor
 public class ClientCollateralManagementApiResource {
 
     private final DefaultToApiJsonSerializer<ClientCollateralManagement> apiJsonSerializerService;
@@ -74,23 +74,6 @@ public class ClientCollateralManagementApiResource {
     private final ClientCollateralManagementReadPlatformService clientCollateralManagementReadPlatformService;
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("name", "quantity", "total", "totalCollateral", "clientId", "loanTransactionData"));
-
-    public ClientCollateralManagementApiResource(final DefaultToApiJsonSerializer<ClientCollateralManagement> apiJsonSerializerService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final PlatformSecurityContext context,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final ClientCollateralManagementReadPlatformService clientCollateralManagementReadPlatformService,
-            final DefaultToApiJsonSerializer<ClientCollateralManagementData> apiJsonSerializerDataService,
-            final DefaultToApiJsonSerializer<LoanCollateralTemplateData> apiJsonSerializerForLoanCollateralTemplateService) {
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.context = context;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.clientCollateralManagementReadPlatformService = clientCollateralManagementReadPlatformService;
-        this.apiJsonSerializerDataService = apiJsonSerializerDataService;
-        this.apiJsonSerializerForLoanCollateralTemplateService = apiJsonSerializerForLoanCollateralTemplateService;
-    }
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })

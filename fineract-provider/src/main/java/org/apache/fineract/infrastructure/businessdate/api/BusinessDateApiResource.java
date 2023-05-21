@@ -51,7 +51,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-@Path("businessdate")
+@Path("/v1/businessdate")
 @Component
 @Tag(name = "Business Date Management", description = "Business date management enables you to set up, fetch and adjust organisation business dates")
 public class BusinessDateApiResource {
