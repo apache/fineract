@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.core.jersey;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
