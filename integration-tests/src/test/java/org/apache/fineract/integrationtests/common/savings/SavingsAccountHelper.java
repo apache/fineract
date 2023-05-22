@@ -36,6 +36,8 @@ import java.util.Locale;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import org.apache.fineract.client.models.GetSavingsAccountTransactionsResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -49,6 +51,7 @@ public class SavingsAccountHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
+    private static final Gson GSON = new JSON().getGson();
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountHelper.class);
 
     private static final String SAVINGS_ACCOUNT_URL = "/fineract-provider/api/v1/savingsaccounts";
@@ -644,6 +647,27 @@ public class SavingsAccountHelper {
     public HashMap getSavingsTransaction(final Integer savingsID, final Integer savingsTransactionId) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + savingsTransactionId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+    }
+
+    public GetSavingsAccountTransactionsResponse getSavingsTransactionsV2(final Integer savingsID) {
+        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions" + "?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, URL, null);
+        return GSON.fromJson(response, GetSavingsAccountTransactionsResponse.class);
+    }
+
+    public GetSavingsAccountTransactionsResponse getSavingsTransactionsWithQueryParams(final Integer savingsID,
+            Map<String, String> queryParamMap) {
+        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions" + "?" + Utils.TENANT_IDENTIFIER;
+        StringBuilder builder = new StringBuilder(URL);
+
+        for (Map.Entry<String, String> entry : queryParamMap.entrySet()) {
+            if (builder.length() > 0) {
+                builder.append("&");
+            }
+            builder.append(entry.getKey()).append("=").append(entry.getValue());
+        }
+        final String response = Utils.performServerGet(requestSpec, responseSpec, builder.toString(), null);
+        return GSON.fromJson(response, GetSavingsAccountTransactionsResponse.class);
     }
 
     public List<HashMap> getSavingsTransactions(final Integer savingsID) {

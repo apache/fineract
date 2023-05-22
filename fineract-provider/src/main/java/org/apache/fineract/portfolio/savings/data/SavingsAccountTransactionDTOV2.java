@@ -114,7 +114,7 @@ public class SavingsAccountTransactionDTOV2 {
         if (Objects.nonNull(transferFrom)) {
             final Long fromTransferId = transferFrom.getId();
             final LocalDate fromTransferDate = transferFrom.getDate();
-            final BigDecimal fromTransferAmount = Optional.ofNullable(transferFrom.getAmount()).orElse(BigDecimal.ZERO);
+            final BigDecimal fromTransferAmount = getOrDefault(transferFrom.getAmount(), BigDecimal.ZERO);
             final boolean fromTransferReversed = transferFrom.isReversed();
             final String fromTransferDescription = transferFrom.getDescription();
 
@@ -123,18 +123,25 @@ public class SavingsAccountTransactionDTOV2 {
         } else if (Objects.nonNull(transferTo)) {
             final Long toTransferId = transferTo.getId();
             final LocalDate toTransferDate = transferTo.getDate();
-            final BigDecimal toTransferAmount = Optional.ofNullable(transferTo.getAmount()).orElse(BigDecimal.ZERO);
+            final BigDecimal toTransferAmount = getOrDefault(transferTo.getAmount(), BigDecimal.ZERO);
             final boolean toTransferReversed = transferTo.isReversed();
             final String toTransferDescription = transferTo.getDescription();
 
             transfer = AccountTransferData.transferBasicDetails(toTransferId, currency, toTransferAmount, toTransferDate,
                     toTransferDescription, toTransferReversed);
         }
-        final String submittedByUsername = dto.getAppUser().getUsername();
+        String submittedByUsername = null;
+        if (Objects.nonNull(dto.getAppUser())) {
+            submittedByUsername = getOrDefault(dto.getAppUser().getUsername(), null);
+        }
         final String note = dto.getNote();
 
         return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency, amount,
                 outstandingChargeAmount, runningBalance, reversed, transfer, submittedOnDate, postInterestAsOn, submittedByUsername, note,
                 isReversal, originalTransactionId, lienTransaction, releaseTransactionId, reasonForBlock);
+    }
+
+    private static <T> T getOrDefault(T input, T defaultValue) {
+        return Optional.ofNullable(input).orElse(defaultValue);
     }
 }

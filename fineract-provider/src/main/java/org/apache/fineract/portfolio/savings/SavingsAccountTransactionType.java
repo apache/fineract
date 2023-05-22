@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.savings;
 
+import com.google.common.base.Splitter;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 /**
@@ -124,10 +127,15 @@ public enum SavingsAccountTransactionType {
         return savingsAccountTransactionType;
     }
 
-    public static SavingsAccountTransactionType fromString(String transactionTypeName) {
+    public static SavingsAccountTransactionType fromString(String transactionType) {
         for (SavingsAccountTransactionType savingsAccountTransactionType : SavingsAccountTransactionType.values()) {
-            if (savingsAccountTransactionType.name().toLowerCase().equals(transactionTypeName.toLowerCase())) {
-                return savingsAccountTransactionType;
+            List<String> codeParts = Splitter.on('.').splitToList(savingsAccountTransactionType.getCode());
+            if (codeParts.size() > 1) {
+                String transactionTypeCodeAfterSeparator = codeParts.get(1);
+                if (StringUtils.isNotBlank(transactionTypeCodeAfterSeparator)
+                        && transactionTypeCodeAfterSeparator.equalsIgnoreCase(transactionType)) {
+                    return savingsAccountTransactionType;
+                }
             }
         }
         return null;

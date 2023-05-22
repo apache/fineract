@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -105,7 +104,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
-@Slf4j
 public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -1325,11 +1323,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         }
         org.springframework.data.domain.Page<SavingsAccountTransactionDTOV2> resultPage = savingsAccountTransactionsRepository
                 .findAll(savingsId, depositAccountType.getValue(), transactionTypeEnum, searchParameters, pageable);
-        resultPage.forEach(data -> {
-            log.info(
-                    "Savings Account Transaction Result - Savings Account Id: {}, Transaction Id: {}, Transaction Amount: {}, App User Name: {}",
-                    data.getTransactionId(), data.getTransactionId(), data.getTransactionAmount(), data.getAppUser().getDisplayName());
-        });
         List<SavingsAccountTransactionData> savingsAccountTransactionDataList = resultPage.stream()
                 .map(SavingsAccountTransactionDTOV2::tosavingsAccountTransactionData).collect(Collectors.toList());
         return new Page<>(savingsAccountTransactionDataList, Long.valueOf(resultPage.getTotalElements()).intValue());
