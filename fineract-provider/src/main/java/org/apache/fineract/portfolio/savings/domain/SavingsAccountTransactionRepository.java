@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.domain;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.portfolio.savings.domain.search.SavingsTransactionsSearchRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -28,8 +29,8 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SavingsAccountTransactionRepository
-        extends JpaRepository<SavingsAccountTransaction, Long>, JpaSpecificationExecutor<SavingsAccountTransaction> {
+public interface SavingsAccountTransactionRepository extends JpaRepository<SavingsAccountTransaction, Long>,
+        JpaSpecificationExecutor<SavingsAccountTransaction>, SavingsTransactionsSearchRepository {
 
     @Query("select sat from SavingsAccountTransaction sat where sat.id = :transactionId and sat.savingsAccount.id = :savingsId")
     SavingsAccountTransaction findOneByIdAndSavingsAccountId(@Param("transactionId") Long transactionId,

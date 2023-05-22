@@ -275,6 +275,23 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public DataValidatorBuilder notExceedingListLengthOf(final Integer maxLength) {
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
+
+        if (this.value instanceof List && ((List<?>) this.value).size() > maxLength) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                    .append(this.parameter).append(".exceeds.max.length.allowed");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
+                    .append("` exceeds allowed max length of ").append(maxLength).append(".");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), this.parameter);
+            this.dataValidationErrors.add(error);
+        }
+        return this;
+    }
+
     public DataValidatorBuilder inMinMaxRange(final Integer min, final Integer max) {
         if (this.value == null && this.ignoreNullValue) {
             return this;

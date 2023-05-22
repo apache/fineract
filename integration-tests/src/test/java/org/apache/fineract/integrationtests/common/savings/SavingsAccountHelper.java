@@ -36,6 +36,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.fineract.client.models.PagedRequestSavingsTransactionSearch;
+import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -49,6 +52,7 @@ public class SavingsAccountHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
+    private static final Gson GSON = new JSON().getGson();
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountHelper.class);
 
     private static final String SAVINGS_ACCOUNT_URL = "/fineract-provider/api/v1/savingsaccounts";
@@ -644,6 +648,15 @@ public class SavingsAccountHelper {
     public HashMap getSavingsTransaction(final Integer savingsID, final Integer savingsTransactionId) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + savingsTransactionId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+    }
+
+    public SavingsAccountTransactionsSearchResponse searchTransactions(Integer savingsId,
+            PagedRequestSavingsTransactionSearch searchReqeust) {
+        final String SAVINGS_TRANSACTIONS_SEARCH_URL = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search" + "?"
+                + Utils.TENANT_IDENTIFIER;
+        String jsonBodyToSend = GSON.toJson(searchReqeust);
+        String response = Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_TRANSACTIONS_SEARCH_URL, jsonBodyToSend);
+        return GSON.fromJson(response, SavingsAccountTransactionsSearchResponse.class);
     }
 
     public List<HashMap> getSavingsTransactions(final Integer savingsID) {
