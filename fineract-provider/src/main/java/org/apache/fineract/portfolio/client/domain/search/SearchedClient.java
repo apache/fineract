@@ -31,7 +31,7 @@ public class SearchedClient {
     private final Long id;
     private final String displayName;
     private final ExternalId externalId;
-    private final String accountNo;
+    private final String accountNumber;
     private final Long officeId;
     private final String officeName;
     private final String mobileNo;

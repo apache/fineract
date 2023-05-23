@@ -30,7 +30,7 @@ public class ClientSearchData {
     private Long id;
     private String displayName;
     private ExternalId externalId;
-    private String accountNo;
+    private String accountNumber;
     private Long officeId;
     private String officeName;
     private String mobileNo;

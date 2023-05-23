@@ -51,6 +51,29 @@ public class ClientSearchTest {
     }
 
     @Test
+    public void testClientSearchWorks_WithLastnameText_WithPaging() {
+        // given
+        String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
+        PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
+        request1.setLastname(lastname);
+        clientHelper.createClient(request1);
+
+        PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
+        request2.setLastname(lastname);
+        clientHelper.createClient(request2);
+
+        PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
+        request3.setLastname(lastname);
+        clientHelper.createClient(request3);
+        // when
+        PageClientSearchData result = clientHelper.searchClients(lastname, 0, 1);
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getNumberOfElements()).isEqualTo(1);
+        assertThat(result.getTotalPages()).isEqualTo(3);
+    }
+
+    @Test
     public void testClientSearchWorks_WithLastnameTextOnDefaultOrdering() {
         // given
         String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
@@ -135,7 +158,7 @@ public class ClientSearchTest {
         PageClientSearchData result = clientHelper.searchClients(client2Data.getAccountNo());
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).getAccountNo()).isEqualTo(client2Data.getAccountNo());
+        assertThat(result.getContent().get(0).getAccountNumber()).isEqualTo(client2Data.getAccountNo());
     }
 
     @Test
