@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
@@ -197,7 +198,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     Loan findLoanAccountByAccountNumber(@Param("accountNumber") String accountNumber);
 
     @Query(GET_NON_CLOSED_LOAN_BY_LOAN_ID)
-    Loan getNonClosedLoanIdAndExternalIdByLoanId(@Param("loanId") Long loanId);
+    Optional<Loan> getNonClosedLoanIdAndExternalIdByLoanId(@Param("loanId") Long loanId);
 
     @Query(EXISTS_NON_CLOSED_BY_EXTERNAL_LOAN_ID)
     boolean existsNonClosedLoanByExternalLoanId(@Param("externalLoanId") ExternalId externalLoanId);

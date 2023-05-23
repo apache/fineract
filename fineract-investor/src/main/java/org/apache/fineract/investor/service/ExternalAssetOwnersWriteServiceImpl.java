@@ -22,17 +22,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.data.LoanIdAndExternalIdData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -64,9 +69,10 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     public CommandProcessingResult saleLoanByLoanId(JsonCommand command) {
         Long loanId = command.getLoanId();
         LoanIdAndExternalIdData loanIdAndExternalId = loanReadPlatformService.getTransferableLoanIdAndExternalId(loanId);
+        validateLoanStatus(loanIdAndExternalId);
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = parseJson(loanId, command.json(), loanIdAndExternalId.getLoanExternalId(),
                 ExternalTransferStatus.PENDING);
-        validateSale(externalAssetOwnerTransfer, loanIdAndExternalId);
+        validateSale(externalAssetOwnerTransfer);
         ExternalAssetOwnerTransfer savedExternalAssetOwnerTransfer = externalAssetOwnerTransferRepository.save(externalAssetOwnerTransfer);
         return buildResponseData(savedExternalAssetOwnerTransfer);
     }
@@ -76,8 +82,9 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     public CommandProcessingResult buyBackLoanByLoanId(JsonCommand command) {
         Long loanId = command.getLoanId();
         LoanIdAndExternalIdData loanIdAndExternalId = loanReadPlatformService.getTransferableLoanIdAndExternalId(loanId);
-        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = parseJson(command.getLoanId(), command.json(),
-                loanIdAndExternalId.getLoanExternalId(), ExternalTransferStatus.BUYBACK);
+        validateLoanStatus(loanIdAndExternalId);
+        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = parseJson(loanId, command.json(), loanIdAndExternalId.getLoanExternalId(),
+                ExternalTransferStatus.BUYBACK);
         validateBuyBack(externalAssetOwnerTransfer);
         ExternalAssetOwnerTransfer savedExternalAssetOwnerTransfer = externalAssetOwnerTransferRepository.save(externalAssetOwnerTransfer);
         return buildResponseData(savedExternalAssetOwnerTransfer);
@@ -99,10 +106,9 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
                 .with(changes).build();
     }
 
-    private void validateSale(ExternalAssetOwnerTransfer externalAssetOwnerTransfer, LoanIdAndExternalIdData loanIdAndExternalId) {
+    private void validateSale(ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
         validateSettlementDate(externalAssetOwnerTransfer);
         validateTransferStatusForSale(externalAssetOwnerTransfer);
-        validateLoanStatus(loanIdAndExternalId);
     }
 
     private void validateBuyBack(ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
@@ -117,7 +123,8 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     }
 
     private void validateLoanStatus(LoanIdAndExternalIdData loanIdAndExternalIdAndExternalId) {
-        if (Objects.isNull(loanIdAndExternalIdAndExternalId)) {
+        if (Objects.isNull(loanIdAndExternalIdAndExternalId.getLoanId())
+                && Objects.isNull(loanIdAndExternalIdAndExternalId.getLoanExternalId())) {
             throw new ExternalAssetOwnerInitiateTransferException("Loan is not in active status");
         }
     }
@@ -182,6 +189,25 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
                         ExternalTransferRequestParameters.DATEFORMAT, ExternalTransferRequestParameters.LOCALE));
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, apiRequestBodyAsJson, requestParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loantransfer");
+        final JsonElement json = fromApiJsonHelper.parse(apiRequestBodyAsJson);
+
+        String ownerExternalId = fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.OWNER_EXTERNAL_ID, json);
+        baseDataValidator.reset().parameter(ExternalTransferRequestParameters.OWNER_EXTERNAL_ID).value(ownerExternalId).notBlank()
+                .notExceedingLengthOf(100);
+
+        String transferExternalId = fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID, json);
+        baseDataValidator.reset().parameter(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID).value(transferExternalId).ignoreIfNull()
+                .notExceedingLengthOf(100);
+
+        String purchasePriceRatio = fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO, json);
+        baseDataValidator.reset().parameter(ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO).value(purchasePriceRatio).notBlank()
+                .notExceedingLengthOf(50);
+
+        LocalDate settlementDate = fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, json);
+        baseDataValidator.reset().parameter(ExternalTransferRequestParameters.SETTLEMENT_DATE).value(settlementDate).notNull();
     }
 
     private LocalDate getSettlementDateFromJson(JsonElement json) {
@@ -193,7 +219,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
 
     private ExternalId getTransferExternalIdFromJson(JsonElement json) {
         String transferExternalId = fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID, json);
-        return ExternalIdFactory.produce(transferExternalId);
+        return StringUtils.isEmpty(transferExternalId) ? ExternalId.generate() : ExternalIdFactory.produce(transferExternalId);
     }
 
     private String getPurchasePriceRatioFromJson(JsonElement json) {
@@ -210,6 +236,6 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     private ExternalAssetOwner createAndGetAssetOwner(String externalId) {
         ExternalAssetOwner externalAssetOwner = new ExternalAssetOwner();
         externalAssetOwner.setExternalId(ExternalIdFactory.produce(externalId));
-        return externalAssetOwnerRepository.save(externalAssetOwner);
+        return externalAssetOwnerRepository.saveAndFlush(externalAssetOwner);
     }
 }
