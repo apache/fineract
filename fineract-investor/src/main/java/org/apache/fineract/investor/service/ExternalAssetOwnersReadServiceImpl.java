@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.investor.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
@@ -33,12 +35,17 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
 
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
     private final ExternalAssetOwnersTransferMapper mapper;
-    private final ExternalAssetOwnersTransferMapper externalAssetOwnersTransferMapper;
 
     @Override
     public List<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId) {
-        List<ExternalAssetOwnerTransfer> result = externalAssetOwnerTransferRepository.findAllByIncomingId(loanId, externalLoanId,
-                transferExternalId);
+        List<ExternalAssetOwnerTransfer> result = new ArrayList<>();
+        if (loanId != null) {
+            result.addAll(externalAssetOwnerTransferRepository.findAllByLoanId(loanId));
+        } else if (externalLoanId != null) {
+            result.addAll(externalAssetOwnerTransferRepository.findAllByExternalLoanId(ExternalIdFactory.produce(externalLoanId)));
+        } else if (transferExternalId != null) {
+            result.addAll(externalAssetOwnerTransferRepository.findAllByExternalId(ExternalIdFactory.produce(transferExternalId)));
+        }
         return result.stream().map(mapper::mapTransfer).toList();
     }
 }

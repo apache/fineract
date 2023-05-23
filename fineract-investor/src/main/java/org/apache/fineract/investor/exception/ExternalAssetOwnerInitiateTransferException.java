@@ -16,24 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.domain;
+package org.apache.fineract.investor.exception;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
+public class ExternalAssetOwnerInitiateTransferException extends RuntimeException {
 
-@Getter
-@Setter
-@Entity
-@NoArgsConstructor
-@Table(name = "m_external_asset_owner")
-public class ExternalAssetOwner extends AbstractAuditableWithUTCDateTimeCustom {
-
-    @Column(name = "external_id", nullable = false, length = 100, unique = true)
-    private ExternalId externalId;
-
+    public ExternalAssetOwnerInitiateTransferException(String message) {
+        super(message);
+    }
 }

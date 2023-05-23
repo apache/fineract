@@ -16,24 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.domain;
+package org.apache.fineract.investor.data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import java.time.LocalDate;
+import lombok.Data;
 
-@Getter
-@Setter
-@Entity
-@NoArgsConstructor
-@Table(name = "m_external_asset_owner")
-public class ExternalAssetOwner extends AbstractAuditableWithUTCDateTimeCustom {
+@Data
+public class ExternalTransferChangedData {
 
-    @Column(name = "external_id", nullable = false, length = 100, unique = true)
-    private ExternalId externalId;
-
+    private LocalDate settlementDate;
+    private String transferExternalId;
+    private String ownerExternalId;
+    private String purchasePriceRatio;
 }

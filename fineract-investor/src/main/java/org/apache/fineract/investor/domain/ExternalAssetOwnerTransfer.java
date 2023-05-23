@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.investor.domain;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,7 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 @Getter
 @Setter
 @Table(name = "m_external_asset_owner_transfer")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Entity
 public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTimeCustom {
 
@@ -51,8 +49,8 @@ public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTime
     @Column(name = "status", length = 50)
     private String status;
 
-    @Column(name = "purchase_price_ratio", precision = 19, scale = 6)
-    private BigDecimal purchasePriceRatio;
+    @Column(name = "purchase_price_ratio", length = 50)
+    private String purchasePriceRatio;
 
     @Column(name = "settlement_date")
     private LocalDate settlementDate;
