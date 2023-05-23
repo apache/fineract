@@ -109,6 +109,16 @@ public class ClientHelper extends IntegrationTest {
         return searchClients(request);
     }
 
+    public PageClientSearchData searchClients(String text, int page, int pageSize) {
+        ClientTextSearch clientTextSearch = new ClientTextSearch();
+        clientTextSearch.setText(text);
+        PagedRequestClientTextSearch request = new PagedRequestClientTextSearch();
+        request.setRequest(clientTextSearch);
+        request.setPage(page);
+        request.setSize(pageSize);
+        return searchClients(request);
+    }
+
     public PageClientSearchData searchClients(String text, SortOrder sortOrder) {
         ClientTextSearch clientTextSearch = new ClientTextSearch();
         clientTextSearch.setText(text);

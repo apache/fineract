@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.domain.search;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
@@ -32,8 +33,8 @@ import org.apache.fineract.infrastructure.core.jpa.CriteriaQueryFactory;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -55,28 +56,33 @@ public class SearchingClientRepositoryImpl implements SearchingClientRepository 
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<SearchedClient> query = cb.createQuery(SearchedClient.class);
+
         Root<Client> root = query.from(Client.class);
         Path<Office> office = root.get("office");
+
+        Specification<Client> spec = (r, q, builder) -> {
+            Path<Office> o = r.get("office");
+
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.like(o.get("hierarchy"), hierarchyLikeValue));
+
+            String searchLikeValue = "%" + searchText + "%";
+            predicates.add(cb.or(cb.like(r.get("accountNumber"), searchLikeValue), cb.like(r.get("displayName"), searchLikeValue),
+                    cb.like(r.get("externalId"), searchLikeValue), cb.like(r.get("mobileNo"), searchLikeValue)));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        criteriaQueryFactory.applySpecificationToCriteria(root, spec, query);
+
+        List<Order> orders = criteriaQueryFactory.ordersFromPageable(pageable, cb, root, () -> cb.desc(root.get("id")));
+        query.orderBy(orders);
 
         query.select(cb.construct(SearchedClient.class, root.get("id"), root.get("displayName"), root.get("externalId"),
                 root.get("accountNumber"), office.get("id"), office.get("name"), root.get("mobileNo"), root.get("status"),
                 root.get("activationDate"), root.get("createdDate")));
 
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.like(office.get("hierarchy"), hierarchyLikeValue));
+        TypedQuery<SearchedClient> queryToExecute = entityManager.createQuery(query);
 
-        String searchLikeValue = "%" + searchText + "%";
-        predicates.add(cb.or(cb.like(root.get("accountNumber"), searchLikeValue), cb.like(root.get("displayName"), searchLikeValue),
-                cb.like(root.get("externalId"), searchLikeValue), cb.like(root.get("mobileNo"), searchLikeValue)));
-
-        query.where(cb.and(predicates.toArray(new Predicate[0])));
-
-        List<Order> orders = criteriaQueryFactory.fromPageable(pageable, cb, root, () -> cb.desc(root.get("id")));
-        query.orderBy(orders);
-
-        List<SearchedClient> result = entityManager.createQuery(query).setFirstResult(pageable.getPageNumber())
-                .setMaxResults(pageable.getPageSize()).getResultList();
-
-        return new PageImpl<>(result, pageable, result.size());
+        return criteriaQueryFactory.readPage(queryToExecute, Client.class, pageable, spec);
     }
 }
