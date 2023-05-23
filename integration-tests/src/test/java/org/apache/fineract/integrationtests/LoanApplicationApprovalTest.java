@@ -127,9 +127,6 @@ public class LoanApplicationApprovalTest {
 
     }
 
-
-
-
     /*
      * Negative test case: Approved amount non zero is greater than proposed amount
      */
