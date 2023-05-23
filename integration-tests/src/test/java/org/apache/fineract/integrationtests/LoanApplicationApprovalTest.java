@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -68,6 +69,40 @@ public class LoanApplicationApprovalTest {
     }
 
     /*
+     * Equal test case: Approved amount non zero is equal to proposed amount
+     */
+    @Test
+    public void loanApplicationApprovedAmountEqualToProposedAmount() {
+
+        final String proposedAmount = "8000";
+        final String approvalAmount = "8000";
+        final String approveDate = "20 September 2012";
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        final String expectedDisbursementDate = null;
+        List<HashMap> approveTranches = null;
+        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
+                loanID, approveTranches);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+    }
+
+    /*
+    * Loan Product Rejection: Negative interest rate
+    */
+    @Test
+    public void NewLoanProductRejectedNegativeInterestRate(){
+        assertThrows(AssertionError.class, ()->{
+                    this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().withinterestRatePerPeriod("-6").build(null));});
+    }
+
+    /*
      * Positive test case: Approved amount non zero is less than proposed amount
      */
     @Test
@@ -92,30 +127,8 @@ public class LoanApplicationApprovalTest {
 
     }
 
-    /*
-     * Equal test case: Approved amount non zero is equal to proposed amount
-     */
-    @Test
-    public void loanApplicationApprovedAmountEqualToProposedAmount() {
 
-        final String proposedAmount = "8000";
-        final String approvalAmount = "8000";
-        final String approveDate = "20 September 2012";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        final String expectedDisbursementDate = null;
-        List<HashMap> approveTranches = null;
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
-                loanID, approveTranches);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-    }
 
     /*
      * Negative test case: Approved amount non zero is greater than proposed amount
