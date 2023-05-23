@@ -594,8 +594,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public LoanIdAndExternalIdData getTransferableLoanIdAndExternalId(Long loanId) {
-        Loan loan = loanRepositoryWrapper.getNonClosedLoanIdAndExternalIdByLoanId(loanId);
-        return new LoanIdAndExternalIdData(loan.getId(), loan.getExternalId());
+        Optional<Loan> loan = loanRepositoryWrapper.getNonClosedLoanIdAndExternalIdByLoanId(loanId);
+        return loan.map(value -> new LoanIdAndExternalIdData(value.getId(), value.getExternalId()))
+                .orElseGet(() -> new LoanIdAndExternalIdData(null, null));
     }
 
     @Override

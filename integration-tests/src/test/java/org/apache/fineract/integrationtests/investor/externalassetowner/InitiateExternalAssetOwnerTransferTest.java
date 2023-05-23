@@ -124,6 +124,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
     }
@@ -180,6 +181,62 @@ public class InitiateExternalAssetOwnerTransferTest {
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
+    @Test
+    public void saleIsNotAllowedWhenLoanIsNotActive() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
+
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            Assertions.assertNotNull(clientID);
+
+            Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
+            Assertions.assertNotNull(overdueFeeChargeId);
+
+            final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+            Assertions.assertNotNull(loanProductID);
+            HashMap loanStatusHashMap;
+
+            final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "10 January 2020");
+
+            Assertions.assertNotNull(loanID);
+
+            loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+            loanStatusHashMap = loanTransactionHelper.approveLoan("01 March 2020", loanID);
+            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+            String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+            loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2020", loanID,
+                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 4));
+
+            loanTransactionHelper.makeRepayment("04 March 2020", 16000.0f, loanID);
+
+            externalAssetOwnerHelper = new ExternalAssetOwnerHelper(requestSpec, responseSpecError);
+            String transferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
+            String saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
+                    getSaleRequestJson("05 March 2020", transferExternalId));
+            Type type = new TypeToken<Map<String, Object>>() {}.getType();
+            Map<String, Object> errorResponseMap = new Gson().fromJson(saleResponse, type);
+            assertEquals("Loan is not in active status", errorResponseMap.get("developerMessage"));
+        } finally {
+            requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+            requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+            requestSpec.header("Fineract-Platform-TenantId", "default");
+            responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
     }
@@ -244,6 +301,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
     }
@@ -292,7 +350,7 @@ public class InitiateExternalAssetOwnerTransferTest {
         map.put("owner_external_id", "1234567890987654321");
         map.put("transfer_external_id", transferExternalId);
         map.put("purchase_price_ratio", "1.234");
-        map.put("dateformat", "dd MMMM yyyy");
+        map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         return new Gson().toJson(map);
     }
