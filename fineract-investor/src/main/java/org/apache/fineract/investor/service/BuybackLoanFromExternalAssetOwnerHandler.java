@@ -16,24 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.domain;
+package org.apache.fineract.investor.service;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.annotation.CommandType;
+import org.apache.fineract.commands.handler.NewCommandSourceHandler;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.stereotype.Service;
 
-@Converter(autoApply = true)
-public class ExternalIdConverter implements AttributeConverter<ExternalId, String> {
+@RequiredArgsConstructor
+@Service
+@CommandType(entity = "LOAN", action = "BUYBACK")
+public class BuybackLoanFromExternalAssetOwnerHandler implements NewCommandSourceHandler {
+
+    private final ExternalAssetOwnersWriteService externalAssetOwnersWriteService;
 
     @Override
-    public String convertToDatabaseColumn(ExternalId externalId) {
-        return externalId != null ? externalId.getValue() : null;
+    public CommandProcessingResult processCommand(JsonCommand command) {
+        return externalAssetOwnersWriteService.buyBackLoanByLoanId(command);
     }
-
-    @Override
-    public ExternalId convertToEntityAttribute(String externalId) {
-        return StringUtils.isBlank(externalId) ? ExternalId.empty() : ExternalIdFactory.produce(externalId);
-    }
-
 }

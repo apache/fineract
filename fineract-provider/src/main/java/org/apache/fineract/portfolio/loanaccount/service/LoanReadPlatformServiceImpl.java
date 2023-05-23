@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.LoanIdAndExternalIdData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -144,7 +145,7 @@ import org.springframework.util.CollectionUtils;
 @AllArgsConstructor
 @Service
 @Transactional(readOnly = true)
-public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
+public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, LoanReadPlatformServiceCommon {
 
     private static final String ACCRUAL_ON_CHARGE_SUBMITTED_ON_DATE = "submitted-date";
     private final JdbcTemplate jdbcTemplate;
@@ -589,6 +590,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanTransactionNotFoundException(transactionId, e);
         }
+    }
+
+    @Override
+    public LoanIdAndExternalIdData getTransferableLoanIdAndExternalId(Long loanId) {
+        Loan loan = loanRepositoryWrapper.getNonClosedLoanIdAndExternalIdByLoanId(loanId);
+        return new LoanIdAndExternalIdData(loan.getId(), loan.getExternalId());
+    }
+
+    @Override
+    public Long getLoanIdByLoanExternalId(String externalId) {
+        return loanRepositoryWrapper.findIdByExternalId(ExternalIdFactory.produce(externalId));
     }
 
     private static final class LoanMapper implements RowMapper<LoanAccountData> {

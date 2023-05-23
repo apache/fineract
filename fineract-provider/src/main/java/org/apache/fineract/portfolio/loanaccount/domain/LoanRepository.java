@@ -85,6 +85,11 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber";
 
+    String GET_NON_CLOSED_LOAN_BY_LOAN_ID = "select loan from Loan loan where loan.id = :loanId and loan.loanStatus in (100,200,300,"
+            + "303,304)";
+
+    String EXISTS_NON_CLOSED_BY_EXTERNAL_LOAN_ID = "select case when (count (loan) > 0) then 'true' else 'false' end from Loan loan where loan.externalId = :externalLoanId and loan.loanStatus in (100,200,300,303,304)";
+
     String FIND_ID_BY_EXTERNAL_ID = "SELECT loan.id FROM Loan loan WHERE loan.externalId = :externalId";
 
     // should follow the logic of `FIND_ALL_NON_CLOSED_LOANS_BY_LAST_CLOSED_BUSINESS_DATE` query
@@ -190,6 +195,12 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query(FIND_BY_ACCOUNT_NUMBER)
     Loan findLoanAccountByAccountNumber(@Param("accountNumber") String accountNumber);
+
+    @Query(GET_NON_CLOSED_LOAN_BY_LOAN_ID)
+    Loan getNonClosedLoanIdAndExternalIdByLoanId(@Param("loanId") Long loanId);
+
+    @Query(EXISTS_NON_CLOSED_BY_EXTERNAL_LOAN_ID)
+    boolean existsNonClosedLoanByExternalLoanId(@Param("externalLoanId") ExternalId externalLoanId);
 
     boolean existsByExternalId(@Param("externalId") ExternalId externalId);
 

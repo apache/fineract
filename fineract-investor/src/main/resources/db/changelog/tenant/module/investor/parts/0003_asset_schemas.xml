@@ -44,4 +44,24 @@
 
   </changeSet>
 
+  <changeSet author="fineract" id="3" context="mysql">
+
+    <addColumn tableName="m_external_asset_owner_transfer">
+      <column name="external_loan_id" type="varchar(100)"/>
+      <column name="loan_id" type="bigint" remarks="Loan ID">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="fineract" id="4" context="mysql">
+
+    <addForeignKeyConstraint baseColumnNames="loan_id"
+                             baseTableName="m_external_asset_owner_transfer"
+                             constraintName="FK_external_asset_owner_transfer_loan_id" deferrable="false"
+                             initiallyDeferred="false"
+                             onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                             referencedTableName="m_loan" validate="true"/>
+
+  </changeSet>
+
 </databaseChangeLog>

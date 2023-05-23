@@ -3622,4 +3622,20 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions?command=undo-charge-off";
         return this;
     }
+
+    public CommandWrapperBuilder saleLoanToExternalAssetOwner(final Long loanId) {
+        this.actionName = "SALE";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/external-asset-owners/transfers/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder buybackLoanToExternalAssetOwner(final Long loanId) {
+        this.actionName = "BUYBACK";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/external-asset-owners/transfers/loans/" + loanId;
+        return this;
+    }
 }

@@ -20,11 +20,17 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-  <include relativeToChangelogFile="true" file="parts/0001_initial_schema.xml"/>
-  <include relativeToChangelogFile="true" file="parts/0002_asset_schemas.xml"/>
-  <include relativeToChangelogFile="true" file="parts/0003_asset_schemas.xml"/>
-  <include relativeToChangelogFile="true" file="parts/0004_change_purchase_price_ratio_type.xml"/>
-  <include relativeToChangelogFile="true" file="parts/0005_add_sale_and_buyback_command.xml"/>
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="fineract" id="1" context="postgresql">
+        <modifyDataType columnName="purchase_price_ratio"
+                        newDataType="VARCHAR(50)"
+                        tableName="m_external_asset_owner_transfer"/>
+    </changeSet>
+    <changeSet author="fineract" id="2" context="mysql">
+        <modifyDataType columnName="purchase_price_ratio"
+                        newDataType="VARCHAR(50)"
+                        tableName="m_external_asset_owner_transfer"/>
+    </changeSet>
 </databaseChangeLog>

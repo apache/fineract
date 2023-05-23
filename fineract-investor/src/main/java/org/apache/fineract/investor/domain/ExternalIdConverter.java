@@ -18,22 +18,23 @@
  */
 package org.apache.fineract.investor.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 
-@Getter
-@Setter
-@Entity
-@NoArgsConstructor
-@Table(name = "m_external_asset_owner")
-public class ExternalAssetOwner extends AbstractAuditableWithUTCDateTimeCustom {
+@Converter(autoApply = true)
+public class ExternalIdConverter implements AttributeConverter<ExternalId, String> {
 
-    @Column(name = "external_id", nullable = false, length = 100, unique = true)
-    private ExternalId externalId;
+    @Override
+    public String convertToDatabaseColumn(ExternalId externalId) {
+        return externalId != null ? externalId.getValue() : null;
+    }
+
+    @Override
+    public ExternalId convertToEntityAttribute(String externalId) {
+        return StringUtils.isBlank(externalId) ? ExternalId.empty() : ExternalIdFactory.produce(externalId);
+    }
 
 }

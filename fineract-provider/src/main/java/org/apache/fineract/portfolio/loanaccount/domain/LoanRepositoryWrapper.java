@@ -262,4 +262,8 @@ public class LoanRepositoryWrapper {
     public List<Long> findLoanIdsByStatusId(Integer statusId) {
         return repository.findLoanIdByStatusId(statusId);
     }
+
+    public Loan getNonClosedLoanIdAndExternalIdByLoanId(Long loanId) {
+        return repository.getNonClosedLoanIdAndExternalIdByLoanId(loanId);
+    }
 }
