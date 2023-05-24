@@ -123,8 +123,8 @@ eclipse {
 }
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
-sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
+sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
+sourceSets.test.output.resourcesDir = sourceSets.test.java.classesDirectory
 
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
     sourceSets {
@@ -154,10 +154,10 @@ dependencies {
     driver 'mysql:mysql-connector-java:8.0.32'
 }
 
-URLClassLoader loader = GroovyObject.class.classLoader
-configurations.driver.each {File file ->
-    loader.addURL(file.toURL())
-}
+//URLClassLoader loader = GroovyObject.class.classLoader
+//configurations.driver.each {File file ->
+//    loader.addURL(file.toURL())
+//}
 
 task createDB {
     description= "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
@@ -235,7 +235,7 @@ bootJar {
     manifest {
         attributes('Main-Class': 'org.springframework.boot.loader.PropertiesLauncher', 'Implementation-Title': 'Apache Fineract', 'Implementation-Version': project.version)
     }
-    classifier = ''
+    archiveClassifier = ''
     dependsOn resolve
 }
 
@@ -346,4 +346,4 @@ checkstyleTest.dependsOn resolve
 rat.dependsOn prepareInputYaml
 spotbugsTest.dependsOn resolve
 compileTestJava.dependsOn ':fineract-client:processResources', ':fineract-avro-schemas:processResources'
-bootJarMainClassName.dependsOn resolve
+resolveMainClassName.dependsOn resolve

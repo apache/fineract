@@ -44,7 +44,7 @@ war {
         into "WEB-INF/" // no leading slash
     }
     enabled = true
-    classifier = ''
+    archiveClassifier = ''
 }
 
 dependencies {
@@ -56,7 +56,7 @@ dependencies {
 
 tasks.withType(Tar) {
     compression Compression.GZIP
-    extension 'tar.gz'
+    archiveExtension = 'tar.gz'
 }
 
 distributions {
