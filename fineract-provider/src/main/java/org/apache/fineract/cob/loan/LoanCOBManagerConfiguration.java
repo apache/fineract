@@ -73,8 +73,6 @@ public class LoanCOBManagerConfiguration {
     private BusinessEventNotifierService businessEventNotifierService;
     @Autowired
     private CustomJobParameterResolver customJobParameterResolver;
-    @Autowired
-    private LoanLockingService loanLockingService;
 
     @Bean
     @JobScope
@@ -91,11 +89,6 @@ public class LoanCOBManagerConfiguration {
     @Bean
     public Step loanIdParameterStep() {
         return localStepBuilderFactory.get("Set loan ID parameter - Step").tasklet(loanIdParameterTasklet()).build();
-    }
-
-    @Bean
-    public Step lockStep() {
-        return localStepBuilderFactory.get("Lock loan accounts - Step").tasklet(lockLoanTasklet()).build();
     }
 
     @Bean
@@ -117,12 +110,6 @@ public class LoanCOBManagerConfiguration {
 
     @Bean
     @JobScope
-    public LockLoanTasklet lockLoanTasklet() {
-        return new LockLoanTasklet(loanLockingService, customJobParameterResolver);
-    }
-
-    @Bean
-    @JobScope
     public ResolveLoanCOBCustomJobParametersTasklet resolveCustomJobParametersTasklet() {
         return new ResolveLoanCOBCustomJobParametersTasklet(customJobParameterResolver);
     }
@@ -138,7 +125,7 @@ public class LoanCOBManagerConfiguration {
         return jobBuilderFactory.get(JobName.LOAN_COB.name()) //
                 .listener(new COBExecutionListenerRunner(applicationContext, JobName.LOAN_COB.name())) //
                 .start(resolveCustomJobParametersStep()) //
-                .next(loanIdParameterStep()).next(lockStep()).next(loanCOBStep()).next(stayedLockedStep()) //
+                .next(loanIdParameterStep()).next(loanCOBStep()).next(stayedLockedStep()) //
                 .incrementer(new RunIdIncrementer()) //
                 .build();
     }

@@ -27,7 +27,5 @@ public interface LoanAccountLockService {
 
     boolean isLoanHardLocked(Long loanId);
 
-    boolean isLoanSoftLocked(Long loanId);
-
     void updateCobAndRemoveLocks();
 }

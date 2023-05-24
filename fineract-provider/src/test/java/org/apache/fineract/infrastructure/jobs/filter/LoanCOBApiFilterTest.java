@@ -193,7 +193,6 @@ class LoanCOBApiFilterTest {
         given(request.getPathInfo()).willReturn("/v1/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
-        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
         given(context.authenticatedUser()).willReturn(appUser);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
@@ -221,7 +220,6 @@ class LoanCOBApiFilterTest {
         given(request.getPathInfo()).willReturn("/v1/loans/external-id/" + uuid + "/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
-        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
         given(context.authenticatedUser()).willReturn(appUser);
         given(loanRepository.findIdByExternalId(any())).willReturn(2L);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
@@ -250,7 +248,6 @@ class LoanCOBApiFilterTest {
         given(request.getPathInfo()).willReturn("/v1/rescheduleloans/" + resourceId + "/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
-        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
         LoanRescheduleRequest rescheduleRequest = mock(LoanRescheduleRequest.class);
@@ -262,24 +259,6 @@ class LoanCOBApiFilterTest {
                         .willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
-        verify(filterChain, times(1)).doFilter(request, response);
-    }
-
-    @Test
-    void shouldRunInlineCOBAndProceedWhenLoanIsSoftLocked() throws ServletException, IOException {
-        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
-        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
-        FilterChain filterChain = mock(FilterChain.class);
-        AppUser appUser = mock(AppUser.class);
-
-        given(request.getPathInfo()).willReturn("/v1/loans/2/charges");
-        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
-        given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
-        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(true);
-        given(context.authenticatedUser()).willReturn(appUser);
-
-        testObj.doFilterInternal(request, response, filterChain);
-        verify(inlineLoanCOBExecutorService, times(1)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
         verify(filterChain, times(1)).doFilter(request, response);
     }
 
@@ -299,16 +278,15 @@ class LoanCOBApiFilterTest {
 
         LoanIdAndLastClosedBusinessDate result = mock(LoanIdAndLastClosedBusinessDate.class);
         given(result.getId()).willReturn(2L);
+        given(result.getLastClosedBusinessDate()).willReturn(businessDate.minusDays(2));
         given(request.getPathInfo()).willReturn("/v1/loans/2?command=approve");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
-        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(true);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
-        given(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(
+        given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
                         .willReturn(Collections.singletonList(result));
-
         given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -335,7 +313,6 @@ class LoanCOBApiFilterTest {
         given(request.getPathInfo()).willReturn("/v1/loans/2?command=approve");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
-        given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
         given(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(

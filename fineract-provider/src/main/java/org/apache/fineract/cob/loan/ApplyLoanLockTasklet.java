@@ -22,10 +22,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
@@ -69,23 +66,13 @@ public class ApplyLoanLockTasklet implements Tasklet {
         List<LoanAccountLock> accountLocks = new ArrayList<>();
         loanIdPartitions.forEach(loanIdPartition -> accountLocks.addAll(loanLockingService.findAllByLoanIdIn(loanIdPartition)));
 
-        Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap = accountLocks.stream()
-                .filter(e -> LockOwner.LOAN_COB_PARTITIONING.equals(e.getLockOwner()))
-                .collect(Collectors.toMap(LoanAccountLock::getLoanId, Function.identity()));
-
         List<Long> alreadyLockedByChunkProcessingAccountIds = accountLocks.stream()
                 .filter(e -> LockOwner.LOAN_COB_CHUNK_PROCESSING.equals(e.getLockOwner())).map(LoanAccountLock::getLoanId).toList();
 
-        List<Long> toBeProcessedLoanIds = new ArrayList<>(alreadySoftLockedAccountsMap.keySet());
+        List<Long> toBeProcessedLoanIds = new ArrayList<>(loanIds);
+        toBeProcessedLoanIds.removeAll(alreadyLockedByChunkProcessingAccountIds);
 
-        loanLockingService.upgradeLock(toBeProcessedLoanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING);
-
-        toBeProcessedLoanIds.addAll(alreadyLockedByChunkProcessingAccountIds);
-        List<Long> alreadyLockedByInlineCOBOrProcessedLoanIds = new ArrayList<>(loanIds);
-        alreadyLockedByInlineCOBOrProcessedLoanIds.removeAll(toBeProcessedLoanIds);
-
-        loanIds.removeAll(alreadyLockedByInlineCOBOrProcessedLoanIds);
-
+        loanLockingService.applyLock(toBeProcessedLoanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING);
         return RepeatStatus.FINISHED;
     }
 
