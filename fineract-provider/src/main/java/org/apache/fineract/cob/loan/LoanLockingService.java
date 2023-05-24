@@ -18,15 +18,11 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
 
 public interface LoanLockingService {
-
-    void applySoftLock(LocalDate lastClosedBusinessDate, LoanCOBParameter loanCOBParameter, boolean isCatchUp);
 
     void upgradeLock(List<Long> accountsToLock, LockOwner lockOwner);
 
@@ -35,4 +31,6 @@ public interface LoanLockingService {
     List<LoanAccountLock> findAllByLoanIdIn(List<Long> loanIds);
 
     LoanAccountLock findByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
+
+    void applyLock(List<Long> loanIds, LockOwner lockOwner);
 }

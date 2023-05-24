@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -53,24 +53,13 @@ public class LoanLockingServiceImpl implements LoanLockingService {
                     AND (? = loan.last_closed_business_date)
             """;
 
+    private static final String BATCH_LOAN_LOCK_INSERT = """
+                INSERT INTO m_loan_account_locks (loan_id, version, lock_owner, lock_placed_on, lock_placed_on_cob_business_date) VALUES (?,?,?,?,?)
+            """;
+
     private final JdbcTemplate jdbcTemplate;
     private final FineractProperties fineractProperties;
     private final LoanAccountLockRepository loanAccountLockRepository;
-
-    @Override
-    public void applySoftLock(LocalDate lastClosedBusinessDate, LoanCOBParameter loanCOBParameter, boolean isCatchUp) {
-
-        LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
-        jdbcTemplate.update(isCatchUp ? CATCH_UP_LOAN_INSERT : NORMAL_LOAN_INSERT, ps -> {
-            ps.setLong(1, 1);
-            ps.setString(2, LockOwner.LOAN_COB_PARTITIONING.name());
-            ps.setObject(3, DateUtils.getOffsetDateTimeOfTenant());
-            ps.setObject(4, cobBusinessDate);
-            ps.setObject(5, loanCOBParameter.getMinLoanId());
-            ps.setObject(6, loanCOBParameter.getMaxLoanId());
-            ps.setObject(7, lastClosedBusinessDate);
-        });
-    }
 
     @Override
     public void upgradeLock(List<Long> accountsToLock, LockOwner lockOwner) {
@@ -93,6 +82,18 @@ public class LoanLockingServiceImpl implements LoanLockingService {
         return loanAccountLockRepository.findByLoanIdAndLockOwner(loanId, lockOwner).orElseGet(() -> {
             log.warn("There is no lock for loan account with id: {}", loanId);
             return null;
+        });
+    }
+
+    @Override
+    public void applyLock(List<Long> loanIds, LockOwner lockOwner) {
+        LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        jdbcTemplate.batchUpdate(BATCH_LOAN_LOCK_INSERT, loanIds, loanIds.size(), (PreparedStatement ps, Long loanId) -> {
+            ps.setLong(1, loanId);
+            ps.setLong(2, 1);
+            ps.setString(3, lockOwner.name());
+            ps.setObject(4, DateUtils.getOffsetDateTimeOfTenant());
+            ps.setObject(5, cobBusinessDate);
         });
     }
 

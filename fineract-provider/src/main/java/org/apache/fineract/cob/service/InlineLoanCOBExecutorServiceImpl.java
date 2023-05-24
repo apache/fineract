@@ -226,7 +226,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     }
 
     private boolean isLockOverrulable(LoanAccountLock loanAccountLock) {
-        if (LockOwner.LOAN_COB_PARTITIONING.equals(loanAccountLock.getLockOwner()) || isBypassUser()) {
+        if (isBypassUser()) {
             return true;
         } else {
             return StringUtils.isNotBlank(loanAccountLock.getError());
