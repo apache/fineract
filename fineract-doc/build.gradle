@@ -117,5 +117,5 @@ task doc(type: Zip) {
             }
         }
     }
-    archiveName "${project.name}-${project.version}.zip"
+    archiveFileName = "${project.name}-${project.version}.zip"
 }

@@ -70,7 +70,7 @@ plugins {
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
     id 'org.openapi.generator' version '6.2.1' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.12' apply false
-    id 'org.springframework.boot' version '2.7.10' apply false
+    id 'org.springframework.boot' version '3.1.0' apply false
     id 'net.ltgt.errorprone' version '3.0.1' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.9' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
@@ -95,7 +95,7 @@ description = '''\
 Run as:
 gradle clean bootRun'''
 
-ext['groovy.version'] = '3.0.10'
+ext['groovy.version'] = '4.0.6'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.yaml".toString()
 
 allprojects  {
@@ -299,8 +299,8 @@ configure(project.fineractJavaProjects) {
     targetCompatibility = JavaVersion.VERSION_17
 
     /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-    sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
-    sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
+    sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
+    sourceSets.test.output.resourcesDir = sourceSets.test.java.classesDirectory
 
     configurations {
         implementation.setCanBeResolved(true)
@@ -412,13 +412,13 @@ configure(project.fineractJavaProjects) {
     // https://www.eclemma.org/jacoco/
     jacoco {
         toolVersion = jacocoVersion
-        reportsDir = file("$buildDir/reports/jacoco")
+        reportsDirectory = file("$buildDir/reports/jacoco")
     }
 
     jacocoTestReport {
         reports {
-            html.enabled=true
-            xml.enabled=true
+            html.required = true
+            xml.required = true
             html.destination file("${buildDir}/code-coverage")
         }
     }
