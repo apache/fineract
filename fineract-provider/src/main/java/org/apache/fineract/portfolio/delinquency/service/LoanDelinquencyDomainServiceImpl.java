@@ -139,10 +139,12 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
             collectionData.setDelinquentDate(overdueSinceDate);
         }
         collectionData.setDelinquentAmount(outstandingAmount);
-
-        if (overdueDays > 0) {
-            collectionData.setDelinquentDays(overdueDays - graceDays);
+        collectionData.setDelinquentDays(0L);
+        Long delinquentDays = overdueDays - graceDays;
+        if (delinquentDays > 0) {
+            collectionData.setDelinquentDays(delinquentDays);
         }
+
         log.debug("Result: {}", collectionData.toString());
         return collectionData;
     }
