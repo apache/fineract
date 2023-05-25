@@ -194,7 +194,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         return loanAccountLocks;
     }
 
-    private Map<String, JobParameter> getJobParametersMap(List<Long> loanIds, LocalDate businessDate) {
+    private Map<String, JobParameter<?>> getJobParametersMap(List<Long> loanIds, LocalDate businessDate) {
         // TODO: refactor for a more generic solution
         String parameterJson = gson.toJson(loanIds);
         JobParameterDTO loanIdsParameterDTO = new JobParameterDTO(LoanCOBConstant.LOAN_IDS_PARAMETER_NAME, parameterJson);
@@ -204,9 +204,9 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
                 businessDate.format(DateTimeFormatter.ISO_DATE));
         Set<JobParameterDTO> businessDateJobParameter = Collections.singleton(businessDateParameterDTO);
         Long businessDateJobParameterId = customJobParameterRepository.save(businessDateJobParameter);
-        Map<String, JobParameter> jobParameterMap = new HashMap<>();
-        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(loanIdsJobParameterId));
-        jobParameterMap.put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, new JobParameter(businessDateJobParameterId));
+        Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
+        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter<>(loanIdsJobParameterId, Long.class));
+        jobParameterMap.put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, new JobParameter<>(businessDateJobParameterId, Long.class));
         return jobParameterMap;
     }
 

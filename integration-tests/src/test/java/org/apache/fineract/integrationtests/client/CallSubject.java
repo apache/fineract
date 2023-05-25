@@ -21,7 +21,7 @@ package org.apache.fineract.integrationtests.client;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import org.apache.fineract.client.util.Calls;
 import retrofit2.Call;
 

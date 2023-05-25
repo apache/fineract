@@ -23,7 +23,7 @@ import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrl
 import com.google.common.base.Splitter;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.command.CommandStrategy;

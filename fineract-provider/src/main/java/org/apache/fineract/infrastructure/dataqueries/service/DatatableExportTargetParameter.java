@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 public enum DatatableExportTargetParameter {
 

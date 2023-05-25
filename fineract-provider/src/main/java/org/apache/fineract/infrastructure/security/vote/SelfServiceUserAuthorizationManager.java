@@ -18,44 +18,33 @@
  */
 package org.apache.fineract.infrastructure.security.vote;
 
-import java.util.Collection;
+import java.util.function.Supplier;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.FilterInvocation;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
-public class SelfServiceUserAccessVote implements AccessDecisionVoter<FilterInvocation> {
-
+public class SelfServiceUserAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
     @Override
-    public boolean supports(@SuppressWarnings("unused") ConfigAttribute attribute) {
-        // This implementation supports any attribute, because it does not rely
-        // on it.
-        return true;
-    }
+    public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext fi) {
+        if (!"OPTIONS".equalsIgnoreCase(fi.getRequest().getMethod())) {
+            AppUser user = (AppUser) authentication.get().getPrincipal();
 
-    @Override
-    public boolean supports(Class<?> clazz) {
-        return FilterInvocation.class.isAssignableFrom(clazz);
-    }
-
-    @Override
-    public int vote(final Authentication authentication, final FilterInvocation fi,
-            @SuppressWarnings("unused") final Collection<ConfigAttribute> attributes) {
-        if (!"OPTIONS".equalsIgnoreCase(fi.getHttpRequest().getMethod())) {
-            AppUser user = (AppUser) authentication.getPrincipal();
-
-            String pathURL = fi.getRequestUrl();
+            String pathURL = fi.getRequest().getRequestURL().toString();
             boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));
 
             boolean notAllowed = ((isSelfServiceRequest && !user.isSelfServiceUser())
                     || (!isSelfServiceRequest && user.isSelfServiceUser()));
 
             if (notAllowed) {
-                return ACCESS_DENIED;
+                return new AuthorizationDecision(false);
             }
         }
-        return ACCESS_GRANTED;
+        return new AuthorizationDecision(true);
     }
 
+    public static SelfServiceUserAuthorizationManager selfServiceUserAuthManager() {
+        return new SelfServiceUserAuthorizationManager();
+    }
 }

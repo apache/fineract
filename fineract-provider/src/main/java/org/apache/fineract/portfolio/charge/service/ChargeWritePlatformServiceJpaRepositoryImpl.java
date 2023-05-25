@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.charge.service;
 
 import java.util.Collection;
 import java.util.Map;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;

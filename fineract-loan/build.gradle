@@ -34,7 +34,7 @@ compileJava.doLast {
         description = 'Performs EclipseLink static weaving of entity classes'
         def target = source
         main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
-        args '-persistenceinfo', source, '-classpath', sourceSets.main.runtimeClasspath, source, target
+        args '-persistenceinfo', source, source, target
         classpath sourceSets.main.runtimeClasspath
     }
     delete {
@@ -94,8 +94,8 @@ eclipse {
 }
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
-sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
+sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
+sourceSets.test.output.resourcesDir = sourceSets.test.java.classesDirectory
 
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
     sourceSets {

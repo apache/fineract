@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+plugins {
+    id 'org.openapi.generator' version '6.6.0'
+}
 description = 'Fineract Client'
-
-apply plugin: 'org.openapi.generator'
 
 apply from: 'dependencies.gradle'
 

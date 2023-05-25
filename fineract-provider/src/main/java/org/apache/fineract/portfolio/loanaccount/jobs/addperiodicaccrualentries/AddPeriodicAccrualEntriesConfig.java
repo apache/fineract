@@ -22,31 +22,33 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class AddPeriodicAccrualEntriesConfig {
-
     @Autowired
-    private JobBuilderFactory jobs;
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private LoanAccrualPlatformService loanAccrualPlatformService;
 
     @Bean
     protected Step addPeriodicAccrualEntriesStep() {
-        return steps.get(JobName.ADD_PERIODIC_ACCRUAL_ENTRIES.name()).tasklet(addPeriodicAccrualEntriesTasklet()).build();
+        return new StepBuilder(JobName.ADD_PERIODIC_ACCRUAL_ENTRIES.name(), jobRepository)
+                .tasklet(addPeriodicAccrualEntriesTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job addPeriodicAccrualEntriesJob() {
-        return jobs.get(JobName.ADD_PERIODIC_ACCRUAL_ENTRIES.name()).start(addPeriodicAccrualEntriesStep())
+        return new JobBuilder(JobName.ADD_PERIODIC_ACCRUAL_ENTRIES.name(), jobRepository).start(addPeriodicAccrualEntriesStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 

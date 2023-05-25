@@ -20,7 +20,7 @@ package org.apache.fineract.organisation.teller.service;
 
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;

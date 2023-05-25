@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.springbatch.messagehandler;
 
-import javax.jms.ConnectionFactory;
+import jakarta.jms.ConnectionFactory;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.springbatch.OutputChannelInterceptor;
 import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.JmsManagerCondition;

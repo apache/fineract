@@ -34,19 +34,13 @@ compileJava.doLast {
         description = 'Performs EclipseLink static weaving of entity classes'
         def target = source
         main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
-        args '-persistenceinfo', source, '-classpath', sourceSets.main.runtimeClasspath, source, target
+        args '-persistenceinfo', source, source, target
         classpath sourceSets.main.runtimeClasspath
     }
     delete {
         delete "${source}/META-INF/persistence.xml"
     }
 }
-
-// Configuration for Swagger documentation generation task
-// https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
-import org.apache.tools.ant.filters.ReplaceTokens
-
-
 
 configurations {
     providedRuntime // needed for Spring Boot executable WAR

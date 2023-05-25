@@ -55,7 +55,7 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        Map<String, JobParameter> jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters().getParameters();
+        Map<String, JobParameter<?>> jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters().getParameters();
         if (!jobParameters.isEmpty()) {
             final String officeId = (String) jobParameters.get("officeId").getValue();
             log.debug("recalculateInterest: officeId={}", officeId);

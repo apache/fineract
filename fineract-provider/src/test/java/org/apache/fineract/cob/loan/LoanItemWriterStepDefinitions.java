@@ -23,11 +23,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.cucumber.java8.En;
-import java.util.Collections;
-import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.mockito.Mockito;
+import org.springframework.batch.item.Chunk;
 
 public class LoanItemWriterStepDefinitions implements En {
 
@@ -36,7 +35,7 @@ public class LoanItemWriterStepDefinitions implements En {
 
     private final LoanItemWriter loanItemWriter = new LoanItemWriter(loanLockingService);
 
-    private List<Loan> items;
+    private Chunk<Loan> items;
 
     public LoanItemWriterStepDefinitions() {
         Given("/^The LoanItemWriter.write method with action (.*)$/", (String action) -> {
@@ -44,9 +43,9 @@ public class LoanItemWriterStepDefinitions implements En {
             Loan loan = mock(Loan.class);
             lenient().when(loan.getId()).thenReturn(1L);
             if (action.equals("error")) {
-                items = Collections.emptyList();
+                items = new Chunk<>();
             } else {
-                items = Collections.singletonList(loan);
+                items = new Chunk<>(loan);
                 lenient().doNothing().when(loanLockingService).deleteByLoanIdInAndLockOwner(Mockito.anyList(), Mockito.any());
             }
             loanItemWriter.setRepository(loanRepository);

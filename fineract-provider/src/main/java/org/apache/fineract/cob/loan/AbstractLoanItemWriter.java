@@ -25,6 +25,7 @@ import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 
 @Slf4j
@@ -34,10 +35,10 @@ public abstract class AbstractLoanItemWriter extends RepositoryItemWriter<Loan> 
     private final LoanLockingService loanLockingService;
 
     @Override
-    public void write(@NotNull List<? extends Loan> items) throws Exception {
+    public void write(@NotNull Chunk<? extends Loan> items) throws Exception {
         if (!items.isEmpty()) {
             super.write(items);
-            List<Long> loanIds = items.stream().map(AbstractPersistableCustom::getId).toList();
+            List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
             loanLockingService.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
         }
     }

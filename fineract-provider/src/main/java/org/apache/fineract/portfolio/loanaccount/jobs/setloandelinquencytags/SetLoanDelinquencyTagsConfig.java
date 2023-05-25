@@ -25,18 +25,22 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @AllArgsConstructor
 public class SetLoanDelinquencyTagsConfig {
-
-    private JobBuilderFactory jobs;
-    private StepBuilderFactory steps;
+    @Autowired
+    private JobRepository jobRepository;
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     private DelinquencyWritePlatformService delinquencyWritePlatformService;
     private LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
@@ -44,12 +48,12 @@ public class SetLoanDelinquencyTagsConfig {
 
     @Bean
     public Step setLoanDelinquencyTagsStep() {
-        return steps.get(JobName.LOAN_DELINQUENCY_CLASSIFICATION.name()).tasklet(setLoanDelinquencyTagsTasklet()).build();
+        return new StepBuilder(JobName.LOAN_DELINQUENCY_CLASSIFICATION.name(), jobRepository).tasklet(setLoanDelinquencyTagsTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job setLoanDelinquencyTagsJob() {
-        return jobs.get(JobName.LOAN_DELINQUENCY_CLASSIFICATION.name()).start(setLoanDelinquencyTagsStep())
+        return new JobBuilder(JobName.LOAN_DELINQUENCY_CLASSIFICATION.name(), jobRepository).start(setLoanDelinquencyTagsStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 

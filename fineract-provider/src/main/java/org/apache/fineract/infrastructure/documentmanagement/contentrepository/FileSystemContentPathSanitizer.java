@@ -22,7 +22,7 @@ import java.io.BufferedInputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.Pattern;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;

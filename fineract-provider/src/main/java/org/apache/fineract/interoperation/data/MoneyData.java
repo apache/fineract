@@ -27,7 +27,7 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.util.MathUtil;

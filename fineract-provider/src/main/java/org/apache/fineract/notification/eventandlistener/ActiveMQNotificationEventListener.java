@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.notification.eventandlistener;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.Session;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.condition.EnableFineractEventListenerCondition;
 import org.apache.fineract.notification.data.NotificationData;

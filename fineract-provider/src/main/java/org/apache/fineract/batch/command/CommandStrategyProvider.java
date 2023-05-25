@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.batch.command;
 
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
+import static jakarta.ws.rs.HttpMethod.GET;
+import static jakarta.ws.rs.HttpMethod.POST;
+import static jakarta.ws.rs.HttpMethod.PUT;
 import static org.apache.fineract.batch.command.CommandStrategyUtils.isResourceVersioned;
 
 import java.util.Map;

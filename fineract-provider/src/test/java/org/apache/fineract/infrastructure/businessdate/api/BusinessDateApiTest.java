@@ -25,8 +25,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.io.IOException;
 import java.util.List;
-import javax.servlet.ServletException;
-import javax.ws.rs.core.UriInfo;
+import jakarta.servlet.ServletException;
+import jakarta.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;

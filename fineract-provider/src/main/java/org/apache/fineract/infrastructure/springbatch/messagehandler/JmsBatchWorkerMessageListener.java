@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.springbatch.messagehandler;
 
-import javax.jms.JMSException;
-import javax.jms.MessageListener;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.springbatch.ContextualMessage;
@@ -49,7 +49,7 @@ public class JmsBatchWorkerMessageListener implements MessageListener, Initializ
 
     @Override
     @SuppressWarnings({ "unchecked" })
-    public void onMessage(javax.jms.Message message) {
+    public void onMessage(jakarta.jms.Message message) {
         try {
             Message<ContextualMessage> msg = (Message<ContextualMessage>) converter.fromMessage(message);
             log.debug("Received JMS partition message {}", msg);

@@ -19,15 +19,17 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
-import java.util.Arrays;
+import static org.apache.fineract.infrastructure.security.vote.SelfServiceUserAuthorizationManager.selfServiceUserAuthManager;
+import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
+import static org.springframework.security.authorization.AuthorizationManagers.allOf;
+
 import java.util.Collection;
-import java.util.List;
 import org.apache.fineract.infrastructure.core.exceptionmapper.OAuth2ExceptionEntryPoint;
 import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareTenantIdentifierFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
-import org.apache.fineract.infrastructure.security.vote.SelfServiceUserAccessVote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -36,14 +38,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.access.AccessDecisionManager;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.vote.AuthenticatedVoter;
-import org.springframework.security.access.vote.RoleVoter;
-import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -55,14 +51,14 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.web.access.expression.WebExpressionVoter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.context.SecurityContextPersistenceFilter;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 
 @Configuration
 @ConditionalOnProperty("fineract.security.oauth.enabled")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class OAuth2SecurityConfig extends WebSecurityConfigurerAdapter {
+public class OAuth2SecurityConfig {
 
     @Autowired
     private TwoFactorAuthenticationFilter twoFactorAuthenticationFilter;
@@ -78,34 +74,34 @@ public class OAuth2SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
 
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http //
-                .csrf().disable() // NOSONAR only creating a service that is used by non-browser clients
-                .antMatcher("/api/**").authorizeRequests() //
-                .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
-                .antMatchers(HttpMethod.POST, "/api/*/echo").permitAll() //
-                .antMatchers(HttpMethod.POST, "/api/*/authentication").permitAll() //
-                .antMatchers(HttpMethod.POST, "/api/*/self/authentication").permitAll() //
-                .antMatchers(HttpMethod.POST, "/api/*/self/registration").permitAll() //
-                .antMatchers(HttpMethod.POST, "/api/*/self/registration/user").permitAll() //
-                .antMatchers(HttpMethod.POST, "/api/*/twofactor/validate").fullyAuthenticated() //
-                .antMatchers("/api/*/twofactor").fullyAuthenticated() //
-                .antMatchers("/api/**").access("isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')") //
-                .accessDecisionManager(accessDecisionManager()).and() //
-                .exceptionHandling().authenticationEntryPoint(new OAuth2ExceptionEntryPoint()).and()
+                .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
+                .securityMatcher("/api/**").authorizeHttpRequests((auth) -> {
+                    auth
+                            .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
+                            .requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll() //
+                            .requestMatchers(HttpMethod.POST, "/api/*/authentication").permitAll() //
+                            .requestMatchers(HttpMethod.POST, "/api/*/self/authentication").permitAll() //
+                            .requestMatchers(HttpMethod.POST, "/api/*/self/registration").permitAll() //
+                            .requestMatchers(HttpMethod.POST, "/api/*/self/registration/user").permitAll() //
+                            .requestMatchers(HttpMethod.POST, "/api/*/twofactor/validate").fullyAuthenticated() //
+                            .requestMatchers("/api/*/twofactor").fullyAuthenticated() //
+                            .requestMatchers("/api/**").access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"), selfServiceUserAuthManager())); //
+                }) //
+                .exceptionHandling((ehc) -> ehc.authenticationEntryPoint(new OAuth2ExceptionEntryPoint()))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter()))
                         .authenticationEntryPoint(new OAuth2ExceptionEntryPoint())) //
-                .sessionManagement() //
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //
-                .and() //
-                .addFilterAfter(tenantAwareTenantIdentifierFilter, SecurityContextPersistenceFilter.class) //
+                .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
+                .addFilterAfter(tenantAwareTenantIdentifierFilter, SecurityContextHolderFilter.class) //
                 .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class); //
 
         if (serverProperties.getSsl().isEnabled()) {
-            http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
+            http.requiresChannel(channel -> channel.requestMatchers("/api/**").requiresSecure());
         }
+        return http.build();
     }
 
     @Bean
@@ -124,14 +120,6 @@ public class OAuth2SecurityConfig extends WebSecurityConfigurerAdapter {
                 throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN), ex);
             }
         };
-    }
-
-    @Bean
-    public AccessDecisionManager accessDecisionManager() {
-        List<AccessDecisionVoter<? extends Object>> decisionVoters = Arrays.asList(new RoleVoter(), new AuthenticatedVoter(),
-                new WebExpressionVoter(), new SelfServiceUserAccessVote());
-
-        return new UnanimousBased(decisionVoters);
     }
 
     @Bean

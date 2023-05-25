@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.notification.eventandlistener;
 
-import javax.jms.Queue;
+import jakarta.jms.Queue;
 import lombok.RequiredArgsConstructor;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.fineract.infrastructure.core.condition.EnableFineractEventsCondition;

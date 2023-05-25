@@ -38,16 +38,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class LoanCOBJobParameterProvider extends AbstractJobParameterProvider {
+public class LoanCOBJobParameterProvider extends AbstractJobParameterProvider<Long> {
 
     private final CustomJobParameterRepository customJobParameterRepository;
 
     @Override
     @Transactional
-    public Map<String, JobParameter> provide(Set<JobParameterDTO> jobParameterDTOSet) {
-        Map<String, JobParameter> jobParameterMap = new HashMap<>();
+    public Map<String, JobParameter<Long>> provide(Set<JobParameterDTO> jobParameterDTOSet) {
+        Map<String, JobParameter<Long>> jobParameterMap = new HashMap<>();
         Long customJobParameterId = customJobParameterRepository.save(getJobParameterDTOListWithCorrectBusinessDate(jobParameterDTOSet));
-        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(customJobParameterId));
+        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter<>(customJobParameterId, Long.class));
         return jobParameterMap;
     }
 

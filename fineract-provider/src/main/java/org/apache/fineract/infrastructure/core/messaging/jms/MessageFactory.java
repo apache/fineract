@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.messaging.jms;
 
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
+import jakarta.jms.BytesMessage;
+import jakarta.jms.JMSException;
 
 public interface MessageFactory {
 
