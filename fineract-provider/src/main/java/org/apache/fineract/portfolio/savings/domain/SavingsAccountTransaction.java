@@ -47,6 +47,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.domain.interest.EndOfDayBalance;
+import org.apache.fineract.portfolio.savings.domain.interest.SavingsAccountTransactionDetailsForPostingPeriod;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -925,5 +926,12 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public boolean isReversalTransaction() {
         return reversalTransaction;
+    }
+
+    public SavingsAccountTransactionDetailsForPostingPeriod toSavingsAccountTransactionDetailsForPostingPeriod(MonetaryCurrency currency,
+            boolean isAllowOverDraft) {
+        return new SavingsAccountTransactionDetailsForPostingPeriod(getId(), this.dateOf, this.balanceEndDate, this.runningBalance,
+                this.amount, currency, this.balanceNumberOfDays, isDeposit(), isWithdrawal(), isAllowOverDraft,
+                isChargeTransactionAndNotReversed(), isDividendPayoutAndNotReversed());
     }
 }
