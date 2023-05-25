@@ -21,8 +21,8 @@ package org.apache.fineract.infrastructure.core.exceptionmapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.Response;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.security.exception.InvalidInstanceTypeMethodException;
 import org.junit.jupiter.api.Test;

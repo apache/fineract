@@ -23,7 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy;
 import org.apache.fineract.batch.command.internal.AdjustChargeByChargeExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.AdjustChargeCommandStrategy;

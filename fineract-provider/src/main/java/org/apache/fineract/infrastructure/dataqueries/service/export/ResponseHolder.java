@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.service.export;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;

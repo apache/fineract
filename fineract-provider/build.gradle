@@ -40,7 +40,7 @@ compileJava.doLast {
         description = 'Performs EclipseLink static weaving of entity classes'
         def target = source
         main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
-        args '-persistenceinfo', source, '-classpath', sourceSets.main.runtimeClasspath, source, target
+        args '-persistenceinfo', source, source, target
         classpath sourceSets.main.runtimeClasspath
     }
     delete {
@@ -71,6 +71,7 @@ resolve {
     outputFormat = 'JSONANDYAML'
     prettyPrint = false
     classpath = sourceSets.main.runtimeClasspath
+    buildClasspath = classpath
     outputDir = file("${buildDir}/classes/java/main/static")
     openApiFile = file("${buildDir}/tmp/swagger/fineract-input.yaml")
     sortOutput = true

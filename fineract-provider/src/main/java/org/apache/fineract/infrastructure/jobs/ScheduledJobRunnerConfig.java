@@ -23,11 +23,9 @@ import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactio
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
@@ -51,17 +49,6 @@ public class ScheduledJobRunnerConfig {
     }
 
     @Bean
-    public BatchConfigurer batchConfigurer(RoutingDataSource routingDataSource, PlatformTransactionManager platformTransactionManager) {
-        return new DefaultBatchConfigurer(routingDataSource) {
-
-            @Override
-            public PlatformTransactionManager getTransactionManager() {
-                return platformTransactionManager;
-            }
-        };
-    }
-
-    @Bean
     public JobRepositoryFactoryBean jobRepositoryFactoryBean(RoutingDataSource routingDataSource,
             PlatformTransactionManager transactionManager) throws Exception {
         JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
@@ -78,8 +65,8 @@ public class ScheduledJobRunnerConfig {
     }
 
     @Bean
-    public SimpleJobLauncher jobLauncher(JobRepository jobRepository) throws Exception {
-        SimpleJobLauncher launcher = new SimpleJobLauncher();
+    public TaskExecutorJobLauncher jobLauncher(JobRepository jobRepository) throws Exception {
+        TaskExecutorJobLauncher launcher = new TaskExecutorJobLauncher();
         launcher.setJobRepository(jobRepository);
         launcher.afterPropertiesSet();
         return launcher;

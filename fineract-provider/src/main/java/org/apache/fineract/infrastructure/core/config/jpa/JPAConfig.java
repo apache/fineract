@@ -46,6 +46,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
@@ -75,7 +76,8 @@ public class JPAConfig extends JpaBaseConfiguration {
     @Bean
     @Primary
     @DependsOn("tenantDatabaseUpgradeService")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder) {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder,
+			PersistenceManagedTypes persistenceManagedTypes) {
         Map<String, Object> vendorProperties = getVendorProperties();
         String[] packagesToScan = getPackagesToScan();
         return factoryBuilder.dataSource(getDataSource()).properties(vendorProperties).persistenceUnit("jpa-pu").packages(packagesToScan)
@@ -92,7 +94,6 @@ public class JPAConfig extends JpaBaseConfiguration {
         return vendorProperties;
     }
 
-    @Override
     protected String[] getPackagesToScan() {
         Set<String> packagesToScan = new HashSet<>();
         packagesToScan.add("org.apache.fineract");

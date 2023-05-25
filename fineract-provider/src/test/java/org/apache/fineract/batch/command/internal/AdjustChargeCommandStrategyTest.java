@@ -24,8 +24,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;

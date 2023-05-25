@@ -19,8 +19,8 @@
 package org.apache.fineract.infrastructure.configuration.domain;
 
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

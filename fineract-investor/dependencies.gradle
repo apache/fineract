@@ -41,7 +41,7 @@ dependencies {
             'com.jayway.jsonpath:json-path',
 
             'com.github.spotbugs:spotbugs-annotations',
-            'io.swagger.core.v3:swagger-annotations',
+            'io.swagger.core.v3:swagger-annotations-jakarta',
 
             'com.squareup.retrofit2:converter-gson',
 

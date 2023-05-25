@@ -23,20 +23,21 @@ import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourc
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class UpdateTrialBalanceDetailsConfig {
-
     @Autowired
-    private JobBuilderFactory jobs;
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private RoutingDataSourceServiceFactory dataSourceServiceFactory;
     @Autowired
@@ -44,12 +45,12 @@ public class UpdateTrialBalanceDetailsConfig {
 
     @Bean
     protected Step updateTrialBalanceDetailsStep() {
-        return steps.get(JobName.UPDATE_TRIAL_BALANCE_DETAILS.name()).tasklet(updateTrialBalanceDetailsTasklet()).build();
+        return new StepBuilder(JobName.UPDATE_TRIAL_BALANCE_DETAILS.name(), jobRepository).tasklet(updateTrialBalanceDetailsTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job updateTrialBalanceDetailsJob() {
-        return jobs.get(JobName.UPDATE_TRIAL_BALANCE_DETAILS.name()).start(updateTrialBalanceDetailsStep())
+        return new JobBuilder(JobName.UPDATE_TRIAL_BALANCE_DETAILS.name(), jobRepository).start(updateTrialBalanceDetailsStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 

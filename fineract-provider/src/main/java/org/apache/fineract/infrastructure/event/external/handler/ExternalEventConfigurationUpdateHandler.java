@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.handler;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;

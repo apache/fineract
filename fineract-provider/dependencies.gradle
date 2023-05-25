@@ -78,7 +78,7 @@ dependencies {
             'javax.cache:cache-api',
 
             'com.github.spotbugs:spotbugs-annotations',
-            'io.swagger.core.v3:swagger-annotations',
+            'io.swagger.core.v3:swagger-annotations-jakarta',
 
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8',
             'com.squareup.retrofit2:converter-gson',
@@ -110,7 +110,7 @@ dependencies {
     implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
         exclude group: 'jakarta.activation'
     }
-    implementation ('org.apache.activemq:activemq-broker') {
+    implementation ('org.apache.activemq:activemq-client-jakarta') {
         exclude group: 'org.apache.geronimo.specs'
         exclude group: 'javax.annotation', module: 'javax.annotation-api'
     }

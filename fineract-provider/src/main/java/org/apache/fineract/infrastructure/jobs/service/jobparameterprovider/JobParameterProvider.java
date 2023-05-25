@@ -23,9 +23,9 @@ import java.util.Set;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.springframework.batch.core.JobParameter;
 
-public interface JobParameterProvider {
+public interface JobParameterProvider<T> {
 
-    Map<String, JobParameter> provide(Set<JobParameterDTO> jobParameterDTOList);
+    Map<String, JobParameter<T>> provide(Set<JobParameterDTO> jobParameterDTOList);
 
     boolean canProvideParametersForJob(String jobName);
 }

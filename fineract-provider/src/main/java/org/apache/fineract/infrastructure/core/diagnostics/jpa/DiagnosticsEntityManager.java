@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.core.diagnostics.jpa;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.sessions.changesets.UnitOfWorkChangeSet;
 import org.springframework.beans.BeansException;

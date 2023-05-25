@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.apache.fineract.infrastructure.event.external.exception.ExternalEventConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.event.external.repository.CustomExternalEventConfigurationRepositoryImpl;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;

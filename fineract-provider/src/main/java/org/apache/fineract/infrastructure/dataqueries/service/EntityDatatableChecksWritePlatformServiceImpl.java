@@ -23,7 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;

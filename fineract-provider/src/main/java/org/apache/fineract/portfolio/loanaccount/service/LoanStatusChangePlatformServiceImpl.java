@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;

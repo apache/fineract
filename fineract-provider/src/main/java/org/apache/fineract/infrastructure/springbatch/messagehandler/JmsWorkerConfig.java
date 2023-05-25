@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.springbatch.messagehandler;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Session;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Session;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.JmsWorkerCondition;
 import org.springframework.batch.core.step.StepLocator;

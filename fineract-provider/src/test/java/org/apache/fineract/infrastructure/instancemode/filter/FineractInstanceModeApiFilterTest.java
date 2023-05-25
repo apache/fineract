@@ -24,10 +24,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.instancemode.InstanceModeMock;
 import org.apache.hc.core5.http.HttpStatus;

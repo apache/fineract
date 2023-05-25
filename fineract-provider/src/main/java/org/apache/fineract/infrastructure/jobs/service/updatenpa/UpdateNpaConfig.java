@@ -25,21 +25,21 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class UpdateNpaConfig {
-
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private RoutingDataSourceServiceFactory dataSourceServiceFactory;
     @Autowired
@@ -52,12 +52,12 @@ public class UpdateNpaConfig {
 
     @Bean
     protected Step updateNpaStep() {
-        return steps.get(JobName.UPDATE_NPA.name()).tasklet(updateNpaTasklet()).build();
+        return new StepBuilder(JobName.UPDATE_NPA.name(), jobRepository).tasklet(updateNpaTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job updateNpaJob() {
-        return jobs.get(JobName.UPDATE_NPA.name()).start(updateNpaStep()).incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.UPDATE_NPA.name(), jobRepository).start(updateNpaStep()).incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

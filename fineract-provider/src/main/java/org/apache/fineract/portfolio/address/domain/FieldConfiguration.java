@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.address.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity

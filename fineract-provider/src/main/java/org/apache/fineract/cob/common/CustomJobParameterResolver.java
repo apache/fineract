@@ -37,22 +37,15 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
-public class CustomJobParameterResolver implements InitializingBean {
+public class CustomJobParameterResolver {
 
-    private final GoogleGsonSerializerHelper gsonFactory;
     private final CustomJobParameterRepository customJobParameterRepository;
 
-    protected Gson gson;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.gson = gsonFactory.createSimpleGson();
-    }
+    protected Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     public void resolve(StepContribution contribution, ChunkContext chunkContext, String customJobParameterKey,
             String parameterNameInExecutionContext) {
@@ -93,7 +86,7 @@ public class CustomJobParameterResolver implements InitializingBean {
      */
     private Map<String, Object> getJobParameters(StepExecution stepExecution) {
         Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, JobParameter> entry : stepExecution.getJobParameters().getParameters().entrySet()) {
+        for (Map.Entry<String, JobParameter<?>> entry : stepExecution.getJobParameters().getParameters().entrySet()) {
             result.put(entry.getKey(), entry.getValue().getValue());
         }
         return Collections.unmodifiableMap(result);

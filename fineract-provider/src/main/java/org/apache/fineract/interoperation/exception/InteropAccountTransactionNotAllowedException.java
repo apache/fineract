@@ -19,7 +19,7 @@
 
 package org.apache.fineract.interoperation.exception;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 public class InteropAccountTransactionNotAllowedException extends AbstractPlatformDomainRuleException {

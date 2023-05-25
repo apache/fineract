@@ -128,4 +128,5 @@
     <include file="parts/0106_new_repayment_strategy.xml" relativeToChangelogFile="true" />
     <include file="parts/0107_add_configuration_charges_accrual_date.xml" relativeToChangelogFile="true" />
     <include file="parts/0108_precondition_check_cob_loan_account_lock.xml" relativeToChangelogFile="true" />
+    <include file="parts/0109_spring_batch_5_upgrade.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

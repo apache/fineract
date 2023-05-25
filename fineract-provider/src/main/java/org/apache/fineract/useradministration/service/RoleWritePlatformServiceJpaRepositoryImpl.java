@@ -21,7 +21,7 @@ package org.apache.fineract.useradministration.service;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;

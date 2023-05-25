@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.collateralmanagement.handler;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;

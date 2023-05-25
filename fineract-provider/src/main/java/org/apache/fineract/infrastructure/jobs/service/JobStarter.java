@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
@@ -51,13 +52,13 @@ public class JobStarter {
     private final JobExplorer jobExplorer;
     private final JobLauncher jobLauncher;
     private final JobParameterRepository jobParameterRepository;
-    private final List<JobParameterProvider> jobParameterProviders;
+    private final List<JobParameterProvider<?>> jobParameterProviders;
     private final JobNameService jobNameService;
 
     public void run(Job job, ScheduledJobDetail scheduledJobDetail, Set<JobParameterDTO> jobParameterDTOSet)
             throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException,
             JobRestartException {
-        Map<String, JobParameter> jobParameterMap = getJobParameter(scheduledJobDetail);
+        Map<String, JobParameter<?>> jobParameterMap = getJobParameter(scheduledJobDetail);
         JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(job)
                 .addJobParameters(new JobParameters(jobParameterMap))
                 .addJobParameters(new JobParameters(provideCustomJobParameters(
@@ -66,19 +67,20 @@ public class JobStarter {
         jobLauncher.run(job, jobParameters);
     }
 
-    public Map<String, org.springframework.batch.core.JobParameter> getJobParameter(ScheduledJobDetail scheduledJobDetail) {
+    public Map<String, org.springframework.batch.core.JobParameter<?>> getJobParameter(ScheduledJobDetail scheduledJobDetail) {
         List<org.apache.fineract.infrastructure.jobs.domain.JobParameter> jobParameterList = jobParameterRepository
                 .findJobParametersByJobId(scheduledJobDetail.getId());
-        Map<String, JobParameter> jobParameterMap = new HashMap<>();
+        Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
         for (org.apache.fineract.infrastructure.jobs.domain.JobParameter jobParameter : jobParameterList) {
-            jobParameterMap.put(jobParameter.getParameterName(), new JobParameter(jobParameter.getParameterValue()));
+            jobParameterMap.put(jobParameter.getParameterName(), new JobParameter<>(jobParameter.getParameterValue(), String.class));
         }
         return jobParameterMap;
     }
 
-    private Map<String, JobParameter> provideCustomJobParameters(String jobName, Set<JobParameterDTO> jobParameterDTOSet) {
-        Optional<JobParameterProvider> jobParameterProvider = jobParameterProviders.stream()
+    private Map<String, JobParameter<?>> provideCustomJobParameters(String jobName, Set<JobParameterDTO> jobParameterDTOSet) {
+        Optional<JobParameterProvider<?>> jobParameterProvider = jobParameterProviders.stream()
                 .filter(provider -> provider.canProvideParametersForJob(jobName)).findFirst();
-        return jobParameterProvider.map(parameterProvider -> parameterProvider.provide(jobParameterDTOSet)).orElse(Collections.emptyMap());
+        Map<String, ? extends JobParameter<?>> map = jobParameterProvider.map(parameterProvider -> parameterProvider.provide(jobParameterDTOSet)).orElse(Collections.emptyMap());
+        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

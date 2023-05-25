@@ -19,9 +19,9 @@
 package org.apache.fineract.infrastructure.dataqueries.service.export;
 
 import java.util.Map;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;

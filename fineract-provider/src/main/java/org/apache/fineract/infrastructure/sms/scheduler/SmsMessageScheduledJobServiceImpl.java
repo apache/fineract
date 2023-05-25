@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
@@ -82,7 +82,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         if (responseOne != null) {
             // String smsResponse = responseOne.getBody();
             if (!responseOne.getStatusCode().equals(HttpStatus.ACCEPTED)) {
-                log.debug("{}", responseOne.getStatusCode().name());
+                log.debug("{}", responseOne.getStatusCode().value());
                 throw new ConnectionFailureException(SmsCampaignConstants.SMS);
             }
         }

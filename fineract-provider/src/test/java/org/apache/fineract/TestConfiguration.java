@@ -42,9 +42,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.batch.core.configuration.ListableJobLocator;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
@@ -98,12 +95,6 @@ public class TestConfiguration {
 
     @Primary
     @Bean
-    public JobBuilderFactory jobBuilderFactory() {
-        return mock(JobBuilderFactory.class, RETURNS_MOCKS);
-    }
-
-    @Primary
-    @Bean
     public JobExplorer jobExplorer() {
         return mock(JobExplorer.class, RETURNS_MOCKS);
     }
@@ -112,12 +103,6 @@ public class TestConfiguration {
     @Bean
     public JobLauncher jobLauncher() {
         return mock(JobLauncher.class, RETURNS_MOCKS);
-    }
-
-    @Primary
-    @Bean
-    public StepBuilderFactory stepBuilderFactory() {
-        return mock(StepBuilderFactory.class, RETURNS_MOCKS);
     }
 
     @Bean
@@ -182,12 +167,6 @@ public class TestConfiguration {
     @Bean
     public JdbcTemplate jdbcTemplate() {
         return mock(JdbcTemplate.class);
-    }
-
-    @Primary
-    @Bean
-    public BatchConfigurer batchConfigurer() {
-        return mock(BatchConfigurer.class, RETURNS_MOCKS);
     }
 
     @Primary

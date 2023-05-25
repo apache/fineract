@@ -25,21 +25,21 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformServic
 import org.apache.fineract.portfolio.loanaccount.service.RecalculateInterestPoster;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class RecalculateInterestForLoanConfig {
-
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private LoanReadPlatformService loanReadPlatformService;
@@ -55,12 +55,12 @@ public class RecalculateInterestForLoanConfig {
 
     @Bean
     protected Step recalculateInterestForLoanStep() {
-        return steps.get(JobName.RECALCULATE_INTEREST_FOR_LOAN.name()).tasklet(recalculateInterestForLoanTasklet()).build();
+        return new StepBuilder(JobName.RECALCULATE_INTEREST_FOR_LOAN.name(), jobRepository).tasklet(recalculateInterestForLoanTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job recalculateInterestForLoanJob() {
-        return jobs.get(JobName.RECALCULATE_INTEREST_FOR_LOAN.name()).start(recalculateInterestForLoanStep())
+        return new JobBuilder(JobName.RECALCULATE_INTEREST_FOR_LOAN.name(), jobRepository).start(recalculateInterestForLoanStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 

@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;

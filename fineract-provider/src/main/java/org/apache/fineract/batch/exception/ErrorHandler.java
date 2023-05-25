@@ -19,8 +19,8 @@
 package org.apache.fineract.batch.exception;
 
 import com.google.gson.Gson;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;

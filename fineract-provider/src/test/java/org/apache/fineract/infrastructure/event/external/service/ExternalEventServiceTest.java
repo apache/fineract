@@ -33,7 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.apache.fineract.avro.BulkMessageItemV1;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;

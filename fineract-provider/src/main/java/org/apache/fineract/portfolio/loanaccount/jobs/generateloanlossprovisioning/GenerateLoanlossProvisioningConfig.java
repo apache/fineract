@@ -23,20 +23,22 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class GenerateLoanlossProvisioningConfig {
-
     @Autowired
-    private JobBuilderFactory jobs;
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
+    private StepBuilder steps;
     @Autowired
     private ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     @Autowired
@@ -44,12 +46,12 @@ public class GenerateLoanlossProvisioningConfig {
 
     @Bean
     protected Step generateLoanlossProvisioningStep() {
-        return steps.get(JobName.GENERATE_LOANLOSS_PROVISIONING.name()).tasklet(generateLoanlossProvisioningTasklet()).build();
+        return new StepBuilder(JobName.GENERATE_LOANLOSS_PROVISIONING.name(), jobRepository).tasklet(generateLoanlossProvisioningTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job generateLoanlossProvisioningJob() {
-        return jobs.get(JobName.GENERATE_LOANLOSS_PROVISIONING.name()).start(generateLoanlossProvisioningStep())
+        return new JobBuilder(JobName.GENERATE_LOANLOSS_PROVISIONING.name(), jobRepository).start(generateLoanlossProvisioningStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 
