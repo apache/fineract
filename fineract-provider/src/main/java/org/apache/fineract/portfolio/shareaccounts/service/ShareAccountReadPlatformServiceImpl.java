@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.accounts.exceptions.ShareAccountNotFoundException;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.util.ConvertChargeDataToSpecificChargeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.products.constants.ProductsApiConstants;
@@ -246,7 +247,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     public Collection<ShareAccountChargeData> convertChargesToShareAccountCharges(Collection<ChargeData> productCharges) {
         final Collection<ShareAccountChargeData> savingsCharges = new ArrayList<>();
         for (final ChargeData chargeData : productCharges) {
-            final ShareAccountChargeData savingsCharge = chargeData.toShareAccountChargeData();
+            final ShareAccountChargeData savingsCharge = ConvertChargeDataToSpecificChargeData.toShareAccountChargeData(chargeData);
             savingsCharges.add(savingsCharge);
         }
         return savingsCharges;

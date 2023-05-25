@@ -29,7 +29,7 @@ include::{rootdir}/fineract-provider/src/main/resources/application.properties[l
 .Loan Transaction Processor Interface
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/transactionprocessor/LoanRepaymentScheduleTransactionProcessor.java[lines=19..]
+include::{rootdir}/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/transactionprocessor/LoanRepaymentScheduleTransactionProcessor.java[lines=19..]
 ----
 
 .Custom Loan Transaction Processor Example
@@ -88,7 +88,7 @@ IMPORTANT: It is preferable to use the processor code to lookup processor instan
 .Loan Transaction Processor Factory Implementation
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/LoanRepaymentScheduleTransactionProcessorFactory.java[lines=19..]
+include::{rootdir}/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/LoanRepaymentScheduleTransactionProcessorFactory.java[lines=19..]
 ----
 
 This is the default factory auto-configuration.

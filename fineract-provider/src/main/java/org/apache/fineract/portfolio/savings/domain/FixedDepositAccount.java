@@ -63,6 +63,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
+import org.apache.fineract.portfolio.savings.domain.interest.SavingsAccountTransactionDetailsForPostingPeriod;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -317,15 +318,18 @@ public class FixedDepositAccount extends SavingsAccount {
         final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
         boolean isInterestTransfer = false;
         final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
+        List<SavingsAccountTransactionDetailsForPostingPeriod> savingsAccountTransactionDetailsForPostingPeriodList = toSavingsAccountTransactionDetailsForPostingPeriodList(
+                transactions);
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
             boolean isUserPosting = false;
             if (postedAsOnTransactionDates.contains(periodInterval.endDate())) {
                 isUserPosting = true;
             }
-            final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance, transactions, this.currency,
-                    compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(), maturityDate,
-                    interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
-                    isSavingsInterestPostingAtCurrentPeriodEnd, isUserPosting, financialYearBeginningMonth);
+            final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
+                    savingsAccountTransactionDetailsForPostingPeriodList, this.currency, compoundingPeriodType, interestCalculationType,
+                    interestRateAsFraction, daysInYearType.getValue(), maturityDate, interestPostTransactions, isInterestTransfer,
+                    minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, isUserPosting,
+                    financialYearBeginningMonth);
 
             periodStartingBalance = postingPeriod.closingBalance();
 

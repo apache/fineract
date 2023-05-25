@@ -60,8 +60,7 @@ public class CustomAuditingHandler extends AuditingHandler {
     }
 
     private DateTimeProvider fetchDateTimeProvider(Object bean) {
-        if (bean instanceof AbstractAuditableWithUTCDateTimeCustom
-                || bean instanceof org.apache.fineract.investor.domain.AbstractAuditableWithUTCDateTimeCustom) {
+        if (bean instanceof AbstractAuditableWithUTCDateTimeCustom) {
             return CustomDateTimeProvider.TENANT;
         } else {
             return CustomDateTimeProvider.INSTANCE;
