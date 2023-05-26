@@ -64,6 +64,7 @@ import org.apache.fineract.client.services.DelinquencyRangeAndBucketsManagementA
 import org.apache.fineract.client.services.DocumentsApiFixed;
 import org.apache.fineract.client.services.EntityDataTableApi;
 import org.apache.fineract.client.services.EntityFieldConfigurationApi;
+import org.apache.fineract.client.services.ExternalAssetOwnersApi;
 import org.apache.fineract.client.services.ExternalEventConfigurationApi;
 import org.apache.fineract.client.services.ExternalServicesApi;
 import org.apache.fineract.client.services.FetchAuthenticatedUserDetailsApi;
@@ -287,10 +288,13 @@ public final class FineractClient {
     public final UsersApi users;
     public final WorkingDaysApi workingDays;
 
+    public final ExternalAssetOwnersApi externalAssetOwners;
+
     private FineractClient(OkHttpClient okHttpClient, Retrofit retrofit) {
         this.okHttpClient = okHttpClient;
         this.retrofit = retrofit;
 
+        externalAssetOwners = retrofit.create(ExternalAssetOwnersApi.class);
         glClosures = retrofit.create(AccountingClosureApi.class);
         accountingRules = retrofit.create(AccountingRulesApi.class);
         accountNumberFormats = retrofit.create(AccountNumberFormatApi.class);

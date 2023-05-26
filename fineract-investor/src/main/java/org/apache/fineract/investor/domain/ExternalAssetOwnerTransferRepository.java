@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.investor.domain;
 
-import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -29,11 +30,11 @@ import org.springframework.data.repository.query.Param;
 public interface ExternalAssetOwnerTransferRepository
         extends JpaRepository<ExternalAssetOwnerTransfer, Long>, JpaSpecificationExecutor<ExternalAssetOwnerTransfer> {
 
-    List<ExternalAssetOwnerTransfer> findAllByLoanId(Long loanId);
+    Page<ExternalAssetOwnerTransfer> findAllByLoanId(Long loanId, PageRequest pageable);
 
-    List<ExternalAssetOwnerTransfer> findAllByExternalLoanId(ExternalId externalLoanId);
+    Page<ExternalAssetOwnerTransfer> findAllByExternalLoanId(ExternalId externalLoanId, PageRequest pageable);
 
-    List<ExternalAssetOwnerTransfer> findAllByExternalId(ExternalId externalId);
+    Page<ExternalAssetOwnerTransfer> findAllByExternalId(ExternalId externalId, PageRequest pageable);
 
     @Query("select e from ExternalAssetOwnerTransfer e where e.loanId = :loanId and e.id = (select max(ex.id) from ExternalAssetOwnerTransfer ex where ex.loanId = :loanId)")
     Optional<ExternalAssetOwnerTransfer> findLatestByLoanId(@Param("loanId") Long loanId);
