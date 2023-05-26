@@ -16,20 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
+package org.apache.fineract.infrastructure.core.service;
 
-import org.apache.fineract.avro.loan.v1.LoanChargeDataRangeViewV1;
-import org.apache.fineract.avro.loan.v1.LoanChargeDataV1;
-import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
-import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@Mapper(config = AvroMapperConfig.class)
-public interface LoanChargeDataMapper {
+@Component
+public class DataEnricherProcessor {
 
-    @Mapping(target = "externalOwnerId", ignore = true)
-    LoanChargeDataV1 map(LoanChargeData source);
+    private final List<DataEnricher<?>> enhancers;
 
-    LoanChargeDataRangeViewV1 mapRangeView(LoanChargeData source);
+    @Autowired
+    public DataEnricherProcessor(Optional<List<DataEnricher<?>>> enhancers) {
+        this.enhancers = enhancers.orElse(new ArrayList<>());
+    }
+
+    public <T> T enrich(T source) {
+        for (DataEnricher enhancer : enhancers) {
+            if (enhancer.isDataTypeSupported(source.getClass())) {
+                enhancer.enrich(source);
+            }
+        }
+        return source;
+    }
 }

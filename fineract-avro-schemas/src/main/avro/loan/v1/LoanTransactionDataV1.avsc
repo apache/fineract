@@ -149,6 +149,14 @@
         },
         {
             "default": null,
+            "name": "externalOwnerId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "transfer",
             "type": [
                 "null",

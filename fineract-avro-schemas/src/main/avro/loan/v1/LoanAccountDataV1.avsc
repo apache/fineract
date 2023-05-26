@@ -29,6 +29,30 @@
         },
         {
             "default": null,
+            "name": "externalOwnerId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "settlementDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "purchasePriceRatio",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "status",
             "type": [
                 "null",

@@ -103,7 +103,6 @@ public class LoanRepaymentBusinessEventSerializerTest {
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
 

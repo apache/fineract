@@ -50,6 +50,7 @@ import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferResponseData;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformServiceCommon;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -57,6 +58,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Tag(name = "External Asset Owners", description = "External Asset Owners")
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "fineract.module.external-asset-owner.enabled", havingValue = "true")
 public class ExternalAssetOwnersApiResource {
 
     private final PlatformUserRightsContext platformUserRightsContext;

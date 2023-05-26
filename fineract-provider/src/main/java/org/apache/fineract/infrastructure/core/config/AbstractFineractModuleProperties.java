@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
+package org.apache.fineract.infrastructure.core.config;
 
-import org.apache.fineract.avro.loan.v1.LoanChargeDataRangeViewV1;
-import org.apache.fineract.avro.loan.v1.LoanChargeDataV1;
-import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
-import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import lombok.Getter;
+import lombok.Setter;
 
-@Mapper(config = AvroMapperConfig.class)
-public interface LoanChargeDataMapper {
+@Getter
+@Setter
+public class AbstractFineractModuleProperties {
 
-    @Mapping(target = "externalOwnerId", ignore = true)
-    LoanChargeDataV1 map(LoanChargeData source);
-
-    LoanChargeDataRangeViewV1 mapRangeView(LoanChargeData source);
+    private boolean enabled;
 }
