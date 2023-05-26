@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.investor.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,15 +38,27 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
     private final ExternalAssetOwnersTransferMapper mapper;
 
     @Override
-    public List<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId) {
-        List<ExternalAssetOwnerTransfer> result = new ArrayList<>();
-        if (loanId != null) {
-            result.addAll(externalAssetOwnerTransferRepository.findAllByLoanId(loanId));
-        } else if (externalLoanId != null) {
-            result.addAll(externalAssetOwnerTransferRepository.findAllByExternalLoanId(ExternalIdFactory.produce(externalLoanId)));
-        } else if (transferExternalId != null) {
-            result.addAll(externalAssetOwnerTransferRepository.findAllByExternalId(ExternalIdFactory.produce(transferExternalId)));
+    public Page<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId, Integer offset,
+            Integer limit) {
+        Page<ExternalAssetOwnerTransfer> result;
+        if (offset == null) {
+            offset = 0;
         }
-        return result.stream().map(mapper::mapTransfer).toList();
+        if (limit == null) {
+            limit = 100;
+        }
+        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by("id"));
+        if (loanId != null) {
+            result = externalAssetOwnerTransferRepository.findAllByLoanId(loanId, pageRequest);
+        } else if (externalLoanId != null) {
+            result = externalAssetOwnerTransferRepository.findAllByExternalLoanId(ExternalIdFactory.produce(externalLoanId), pageRequest);
+        } else if (transferExternalId != null) {
+            result = externalAssetOwnerTransferRepository.findAllByExternalId(ExternalIdFactory.produce(transferExternalId), pageRequest);
+        } else {
+            throw new IllegalArgumentException(
+                    "At least one of the following parameters must be provided: loanId, externalLoanId, transferExternalId");
+        }
+        return result.map(mapper::mapTransfer);
     }
+
 }

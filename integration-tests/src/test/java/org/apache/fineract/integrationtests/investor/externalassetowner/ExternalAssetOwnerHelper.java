@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.investor.externalassetowner;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -45,9 +46,11 @@ public class ExternalAssetOwnerHelper extends IntegrationTest {
         return Utils.performServerGet(requestSpec, responseSpec, RETRIEVE_TRANSFER_URL);
     }
 
-    public String retrieveTransferByLoanId(Long loanId) {
-        final String RETRIEVE_TRANSFER_URL = "/fineract-provider/api/v1/external-asset-owners/transfers?" + Utils.TENANT_IDENTIFIER
-                + "&loanId=" + loanId;
-        return Utils.performServerGet(requestSpec, responseSpec, RETRIEVE_TRANSFER_URL);
+    public PageExternalTransferData retrieveTransferByLoanId(Long loanId) {
+        return ok(fineract().externalAssetOwners.getTransfer1(null, loanId, null, 0, 100));
+    }
+
+    public PageExternalTransferData retrieveTransferByLoanId(Long loanId, int offset, int limit) {
+        return ok(fineract().externalAssetOwners.getTransfer1(null, loanId, null, offset, limit));
     }
 }

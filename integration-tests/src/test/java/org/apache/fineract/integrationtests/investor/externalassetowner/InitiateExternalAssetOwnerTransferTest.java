@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.ExternalTransferData;
+import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -113,18 +115,16 @@ public class InitiateExternalAssetOwnerTransferTest {
             Map<String, Object> responseMap = new Gson().fromJson(saleResponse, type);
             assertEquals(responseMap.get("resourceExternalId"), transferExternalId);
 
-            String retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
-            Type retrieveType = new TypeToken<List<Map<String, Object>>>() {}.getType();
-            List<Map<String, Object>> retrieveResponseMap = new Gson().fromJson(retrieveResponse, retrieveType);
-            assertEquals(1, retrieveResponseMap.size());
-            assertEquals(retrieveResponseMap.get(0).get("transferExternalId"), transferExternalId);
-            assertEquals(retrieveResponseMap.get(0).get("status"), "PENDING");
+            PageExternalTransferData retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
+            List<ExternalTransferData> retrieveResponseMap = retrieveResponse.getContent();
+            assertEquals(1, retrieveResponse.getTotalElements());
+            assertEquals(retrieveResponseMap.get(0).getTransferExternalId(), transferExternalId);
+            assertEquals(retrieveResponseMap.get(0).getStatus(), ExternalTransferData.StatusEnum.PENDING);
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
     }
@@ -288,20 +288,26 @@ public class InitiateExternalAssetOwnerTransferTest {
             Map<String, Object> buybackResponseMap = new Gson().fromJson(buybackResponse, type);
             assertEquals(buybackResponseMap.get("resourceExternalId"), buybackTransferExternalId);
 
-            String retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
-            Type retrieveType = new TypeToken<List<Map<String, Object>>>() {}.getType();
-            List<Map<String, Object>> retrieveResponseMap = new Gson().fromJson(retrieveResponse, retrieveType);
-            assertEquals(2, retrieveResponseMap.size());
-            assertEquals(retrieveResponseMap.get(0).get("transferExternalId"), transferExternalId);
-            assertEquals(retrieveResponseMap.get(0).get("status"), "PENDING");
-            assertEquals(retrieveResponseMap.get(1).get("transferExternalId"), buybackTransferExternalId);
-            assertEquals(retrieveResponseMap.get(1).get("status"), "BUYBACK");
+            PageExternalTransferData retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue(), 0, 1);
+            List<ExternalTransferData> retrieveResponseMap = retrieveResponse.getContent();
+
+            assertEquals(2, retrieveResponse.getTotalElements());
+            assertEquals(1, retrieveResponse.getNumberOfElements());
+            assertEquals(retrieveResponseMap.get(0).getTransferExternalId(), transferExternalId);
+            assertEquals(retrieveResponseMap.get(0).getStatus(), ExternalTransferData.StatusEnum.PENDING);
+
+            retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue(), 1, 1);
+            retrieveResponseMap = retrieveResponse.getContent();
+
+            assertEquals(2, retrieveResponse.getTotalElements());
+            assertEquals(1, retrieveResponse.getNumberOfElements());
+            assertEquals(retrieveResponseMap.get(0).getTransferExternalId(), buybackTransferExternalId);
+            assertEquals(retrieveResponseMap.get(0).getStatus(), ExternalTransferData.StatusEnum.BUYBACK);
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
     }

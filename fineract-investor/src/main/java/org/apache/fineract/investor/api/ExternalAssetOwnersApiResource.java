@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -44,7 +43,6 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformUserRightsContext;
@@ -52,6 +50,7 @@ import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferResponseData;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformServiceCommon;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/external-asset-owners")
@@ -105,18 +104,15 @@ public class ExternalAssetOwnersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(tags = {
             "External Asset Owners" }, summary = "Retrieve External Asset Owner Transfers", description = "Retrieve External Asset Owner Transfer items by transferExternalId, loanId or loanExternalId")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.GetExternalTransferResponse.class))) })
-    public String getTransfer(
+    public Page<ExternalTransferData> getTransfer(
             @QueryParam("transferExternalId") @Parameter(description = "transferExternalId") final String transferExternalId,
             @QueryParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @QueryParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
-            @Context final UriInfo uriInfo) {
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit, @Context final UriInfo uriInfo) {
         platformUserRightsContext.isAuthenticated();
-        List<ExternalTransferData> transferDataList = externalAssetOwnersReadService.retrieveTransferData(loanId, loanExternalId,
-                transferExternalId);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return apiJsonSerializerService.serialize(settings, transferDataList);
+        return externalAssetOwnersReadService.retrieveTransferData(loanId, loanExternalId, transferExternalId, offset, limit);
+
     }
 
     private String getResult(Long loanId, String apiRequestBodyAsJson, String commandParam) {
