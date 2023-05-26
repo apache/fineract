@@ -37,4 +37,5 @@ public interface ExternalAssetOwnerTransferRepository
 
     @Query("select e from ExternalAssetOwnerTransfer e where e.loanId = :loanId and e.id = (select max(ex.id) from ExternalAssetOwnerTransfer ex where ex.loanId = :loanId)")
     Optional<ExternalAssetOwnerTransfer> findLatestByLoanId(@Param("loanId") Long loanId);
+
 }

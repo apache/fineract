@@ -50,6 +50,7 @@ import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerInitiateTransferException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformServiceCommon;
@@ -61,6 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersWriteService {
 
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
+    private final ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
     private final ExternalAssetOwnerRepository externalAssetOwnerRepository;
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanReadPlatformServiceCommon loanReadPlatformService;
@@ -80,7 +82,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
 
     @Override
     @Transactional
-    public CommandProcessingResult buyBackLoanByLoanId(JsonCommand command) {
+    public CommandProcessingResult buybackLoanByLoanId(JsonCommand command) {
         Long loanId = command.getLoanId();
         LoanIdAndExternalIdData loanIdAndExternalId = loanReadPlatformService.getTransferableLoanIdAndExternalId(loanId);
         validateLoanStatus(loanIdAndExternalId);
@@ -135,7 +137,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
                 .findLatestByLoanId(externalAssetOwnerTransfer.getLoanId());
         if (latestTransferOptional.isPresent()) {
             ExternalAssetOwnerTransfer latestTransfer = latestTransferOptional.get();
-            ExternalTransferStatus latestTransferStatus = ExternalTransferStatus.valueOf(latestTransfer.getStatus());
+            ExternalTransferStatus latestTransferStatus = latestTransfer.getStatus();
             if (latestTransferStatus.equals(ExternalTransferStatus.PENDING)) {
                 throw new ExternalAssetOwnerInitiateTransferException(
                         "External asset owner transfer is already in PENDING state for this loan.");
@@ -154,7 +156,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
                     "This loan cannot be bought back, because it is not owned by an external asset owner");
         } else {
             ExternalAssetOwnerTransfer latestTransfer = latestTransferOptional.get();
-            ExternalTransferStatus latestTransferStatus = ExternalTransferStatus.valueOf(latestTransfer.getStatus());
+            ExternalTransferStatus latestTransferStatus = latestTransfer.getStatus();
             if (latestTransferStatus.equals(ExternalTransferStatus.BUYBACK)) {
                 throw new ExternalAssetOwnerInitiateTransferException(
                         "External asset owner transfer is already in BUYBACK state for this loan.");
@@ -173,7 +175,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         externalAssetOwnerTransfer.setOwnerId(owner.getId());
         externalAssetOwnerTransfer.setOwner(owner);
         externalAssetOwnerTransfer.setExternalId(getTransferExternalIdFromJson(json));
-        externalAssetOwnerTransfer.setStatus(status.name());
+        externalAssetOwnerTransfer.setStatus(status);
         externalAssetOwnerTransfer.setPurchasePriceRatio(getPurchasePriceRatioFromJson(json));
         externalAssetOwnerTransfer.setSettlementDate(getSettlementDateFromJson(json));
         externalAssetOwnerTransfer.setEffectiveDateFrom(ThreadLocalContextUtil.getBusinessDate());
@@ -188,7 +190,9 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
                 Arrays.asList(ExternalTransferRequestParameters.SETTLEMENT_DATE, ExternalTransferRequestParameters.OWNER_EXTERNAL_ID,
                         ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID, ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO,
                         ExternalTransferRequestParameters.DATEFORMAT, ExternalTransferRequestParameters.LOCALE));
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, apiRequestBodyAsJson, requestParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

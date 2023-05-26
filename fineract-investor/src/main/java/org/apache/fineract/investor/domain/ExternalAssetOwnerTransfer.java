@@ -21,6 +21,8 @@ package org.apache.fineract.investor.domain;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -29,6 +31,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.investor.data.ExternalTransferStatus;
+import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 
 @Getter
 @Setter
@@ -37,29 +41,34 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 @Entity
 public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTimeCustom {
 
-    @Column(name = "owner_id")
+    @Column(name = "owner_id", nullable = false)
     private Long ownerId;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", insertable = false, updatable = false)
+    @JoinColumn(name = "owner_id", insertable = false, updatable = false, nullable = false)
     private ExternalAssetOwner owner;
 
-    @Column(name = "external_id", length = 100)
+    @Column(name = "external_id", length = 100, nullable = false)
     private ExternalId externalId;
 
-    @Column(name = "status", length = 50)
-    private String status;
+    @Column(name = "status", length = 50, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ExternalTransferStatus status;
 
-    @Column(name = "purchase_price_ratio", length = 50)
+    @Column(name = "sub_status", length = 50)
+    @Enumerated(EnumType.STRING)
+    private ExternalTransferSubStatus subStatus;
+
+    @Column(name = "purchase_price_ratio", length = 50, nullable = false)
     private String purchasePriceRatio;
 
-    @Column(name = "settlement_date")
+    @Column(name = "settlement_date", nullable = false)
     private LocalDate settlementDate;
 
-    @Column(name = "effective_date_from")
+    @Column(name = "effective_date_from", nullable = false)
     private LocalDate effectiveDateFrom;
 
-    @Column(name = "effective_date_to")
+    @Column(name = "effective_date_to", nullable = false)
     private LocalDate effectiveDateTo;
 
     @Column(name = "loan_id", nullable = false)

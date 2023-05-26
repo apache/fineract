@@ -24,4 +24,5 @@ import org.apache.fineract.investor.data.ExternalTransferData;
 public interface ExternalAssetOwnersReadService {
 
     List<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId);
+
 }
