@@ -23,7 +23,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Getter
 @Setter
 @Table(name = "m_external_asset_owner_transfer_loan_mapping")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Entity
 public class ExternalAssetOwnerTransferLoanMapping extends AbstractAuditableWithUTCDateTimeCustom {
 
@@ -40,7 +39,7 @@ public class ExternalAssetOwnerTransferLoanMapping extends AbstractAuditableWith
     private Long loanId;
 
     @ManyToOne
-    @JoinColumn(name = "owner_transfer_id")
+    @JoinColumn(name = "owner_transfer_id", nullable = false)
     private ExternalAssetOwnerTransfer ownerTransfer;
 
 }
