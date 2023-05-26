@@ -18,15 +18,16 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer;
 
-import java.io.IOException;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 
 public interface BusinessEventSerializer {
 
     <T> boolean canSerialize(BusinessEvent<T> event);
 
-    <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException;
-
     Class<? extends GenericContainer> getSupportedSchema();
+
+    <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent);
+
 }

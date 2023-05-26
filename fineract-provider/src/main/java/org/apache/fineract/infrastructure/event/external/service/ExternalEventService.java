@@ -21,12 +21,15 @@ package org.apache.fineract.infrastructure.event.external.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.BulkMessageItemV1;
 import org.apache.fineract.avro.BulkMessagePayloadV1;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
+import org.apache.fineract.infrastructure.core.service.DataEnricherProcessor;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
@@ -50,6 +53,7 @@ public class ExternalEventService {
     private final BusinessEventSerializerFactory serializerFactory;
     private final ByteBufferConverter byteBufferConverter;
     private final BulkMessageItemFactory bulkMessageItemFactory;
+    private final DataEnricherProcessor dataEnricherProcessor;
 
     private EntityManager entityManager;
 
@@ -98,7 +102,9 @@ public class ExternalEventService {
         String idempotencyKey = idempotencyKeyGenerator.generate(event);
         BusinessEventSerializer serializer = serializerFactory.create(event);
         String schema = serializer.getSupportedSchema().getName();
-        byte[] data = serializer.serialize(event);
+        ByteBufferSerializable avroDto = dataEnricherProcessor.enrich(serializer.toAvroDTO(event));
+        ByteBuffer buffer = avroDto.toByteBuffer();
+        byte[] data = byteBufferConverter.convert(buffer);
         Long aggregateRootId = event.getAggregateRootId();
 
         return new ExternalEvent(eventType, eventCategory, schema, data, idempotencyKey, aggregateRootId);

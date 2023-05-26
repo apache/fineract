@@ -25,14 +25,14 @@ import org.apache.fineract.avro.loan.v1.LoanProductDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.product.LoanProductBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanProductDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanProductBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class LoanProductBusinessEventSerializer implements BusinessEventSerializer {
 
     private final LoanProductReadPlatformService service;
     private final LoanProductDataMapper mapper;
@@ -43,7 +43,7 @@ public class LoanProductBusinessEventSerializer extends AbstractBusinessEventSer
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         LoanProductBusinessEvent event = (LoanProductBusinessEvent) rawEvent;
         LoanProductData data = service.retrieveLoanProduct(event.get().getId());
         return mapper.map(data);

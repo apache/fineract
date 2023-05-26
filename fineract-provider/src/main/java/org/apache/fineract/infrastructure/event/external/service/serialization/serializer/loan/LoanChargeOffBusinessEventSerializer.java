@@ -56,7 +56,7 @@ public class LoanChargeOffBusinessEventSerializer extends LoanTransactionBusines
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         LoanTransactionDataV1 transactionDataV1 = (LoanTransactionDataV1) super.toAvroDTO(rawEvent);
         LoanTransactionBusinessEvent event = (LoanTransactionBusinessEvent) rawEvent;
         List<UnpaidChargeData> unpaidChargeDataList = loanTransactionRepository.fetchTotalUnpaidChargesForLoan(event.get().getLoan());

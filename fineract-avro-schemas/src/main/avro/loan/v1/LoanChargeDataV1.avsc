@@ -243,6 +243,14 @@
         },
         {
             "default": null,
+            "name": "externalOwnerId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "submittedOnDate",
             "type": [
                 "null",

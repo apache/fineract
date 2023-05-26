@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanRepaymentPastDueDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentPastDueData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -40,14 +40,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanRepaymentBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class LoanRepaymentBusinessEventSerializer implements BusinessEventSerializer {
 
     private final AvroDateTimeMapper dataTimeMapper;
     private final LoanRepaymentPastDueDataMapper pastDueDataMapper;
     private final LoanCalculateRepaymentPastDueService pastDueService;
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
 
         LoanRepaymentBusinessEvent event = (LoanRepaymentBusinessEvent) rawEvent;
         LoanRepaymentScheduleInstallment repaymentInstallment = event.get();

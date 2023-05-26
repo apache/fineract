@@ -25,7 +25,7 @@ import org.apache.fineract.avro.recurringdeposit.v1.RecurringDepositAccountDataV
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.RecurringDepositAccountBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.recurringdeposit.RecurringDepositAccountDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.RecurringDepositAccountData;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RecurringDepositAccountBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class RecurringDepositAccountBusinessEventSerializer implements BusinessEventSerializer {
 
     private final DepositAccountReadPlatformService service;
     private final RecurringDepositAccountDataMapper mapper;
@@ -44,7 +44,7 @@ public class RecurringDepositAccountBusinessEventSerializer extends AbstractBusi
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         RecurringDepositAccountBusinessEvent event = (RecurringDepositAccountBusinessEvent) rawEvent;
         RecurringDepositAccountData data = (RecurringDepositAccountData) service.retrieveOne(DepositAccountType.RECURRING_DEPOSIT,
                 event.get().getId());

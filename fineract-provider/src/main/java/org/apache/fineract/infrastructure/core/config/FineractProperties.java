@@ -65,6 +65,8 @@ public class FineractProperties {
 
     private FineractSamplingProperties sampling;
 
+    private FineractModulesProperties module;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -402,5 +404,18 @@ public class FineractProperties {
         private int samplingRate;
         private String sampledClasses;
         private int resetPeriodSec;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractModulesProperties {
+
+        private FineractExternalAssetOwnerModuleProperties externalAssetOwner;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExternalAssetOwnerModuleProperties extends AbstractFineractModuleProperties {
+
     }
 }

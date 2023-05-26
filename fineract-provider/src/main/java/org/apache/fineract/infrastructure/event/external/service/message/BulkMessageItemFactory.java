@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.avro.BulkMessageItemV1;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
+import org.apache.fineract.infrastructure.core.service.DataEnricherProcessor;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializerFactory;
@@ -34,10 +36,13 @@ public class BulkMessageItemFactory {
 
     private final BusinessEventSerializerFactory serializerFactory;
     private final ByteBufferConverter byteBufferConverter;
+    private final DataEnricherProcessor dataEnricherProcessor;
 
     public BulkMessageItemV1 createBulkMessageItem(int id, BusinessEvent<?> event) throws IOException {
         BusinessEventSerializer eventSerializer = serializerFactory.create(event);
-        byte[] serializedContent = eventSerializer.serialize(event);
+        ByteBufferSerializable avroDto = dataEnricherProcessor.enrich(eventSerializer.toAvroDTO(event));
+        ByteBuffer buffer = avroDto.toByteBuffer();
+        byte[] serializedContent = byteBufferConverter.convert(buffer);
         String type = event.getType();
         String category = "nocategory"; // TODO: switch this to the actual category when implemented
         String schema = eventSerializer.getSupportedSchema().getName();

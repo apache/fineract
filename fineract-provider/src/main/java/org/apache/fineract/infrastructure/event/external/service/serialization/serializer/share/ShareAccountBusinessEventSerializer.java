@@ -25,14 +25,14 @@ import org.apache.fineract.avro.share.v1.ShareAccountDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareAccountBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.share.ShareAccountDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ShareAccountBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class ShareAccountBusinessEventSerializer implements BusinessEventSerializer {
 
     private final ShareAccountReadPlatformService service;
     private final ShareAccountDataMapper mapper;
@@ -43,7 +43,7 @@ public class ShareAccountBusinessEventSerializer extends AbstractBusinessEventSe
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         ShareAccountBusinessEvent event = (ShareAccountBusinessEvent) rawEvent;
         ShareAccountData data = service.retrieveOne(event.get().getId(), false);
         return mapper.map(data);

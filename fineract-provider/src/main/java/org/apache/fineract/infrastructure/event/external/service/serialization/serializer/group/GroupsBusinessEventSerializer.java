@@ -25,12 +25,12 @@ import org.apache.fineract.avro.generic.v1.CommandProcessingResultV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.group.GroupsBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic.CommandProcessingResultMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class GroupsBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class GroupsBusinessEventSerializer implements BusinessEventSerializer {
 
     private final CommandProcessingResultMapper mapper;
 
@@ -40,7 +40,7 @@ public class GroupsBusinessEventSerializer extends AbstractBusinessEventSerializ
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         GroupsBusinessEvent event = (GroupsBusinessEvent) rawEvent;
         return mapper.map(event.get());
     }

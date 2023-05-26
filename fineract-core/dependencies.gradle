@@ -23,6 +23,7 @@ dependencies {
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
     // We also (normally should have) no need to ever use 'compileOnly'.
 
+
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(

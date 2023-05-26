@@ -26,12 +26,12 @@ import org.apache.fineract.cob.data.LoanAccountsStayedLockedData;
 import org.apache.fineract.cob.loan.LoanAccountsStayedLockedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanAccountsStayedLockedDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanAccountsStayedLockedBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class LoanAccountsStayedLockedBusinessEventSerializer implements BusinessEventSerializer {
 
     private final LoanAccountsStayedLockedDataMapper mapper;
 
@@ -41,7 +41,7 @@ public class LoanAccountsStayedLockedBusinessEventSerializer extends AbstractBus
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         LoanAccountsStayedLockedBusinessEvent event = (LoanAccountsStayedLockedBusinessEvent) rawEvent;
         LoanAccountsStayedLockedData loanAccounts = event.get();
         return mapper.map(loanAccounts);
