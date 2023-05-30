@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
@@ -57,7 +57,7 @@ import org.springframework.security.web.context.SecurityContextHolderFilter;
 
 @Configuration
 @ConditionalOnProperty("fineract.security.oauth.enabled")
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class OAuth2SecurityConfig {
 
     @Autowired
@@ -76,9 +76,8 @@ public class OAuth2SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain authorizationFilterChain(HttpSecurity http) throws Exception {
         http //
-                .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
                 .securityMatcher("/api/**").authorizeHttpRequests((auth) -> {
                     auth
                             .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
@@ -90,7 +89,14 @@ public class OAuth2SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/*/twofactor/validate").fullyAuthenticated() //
                             .requestMatchers("/api/*/twofactor").fullyAuthenticated() //
                             .requestMatchers("/api/**").access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"), selfServiceUserAuthManager())); //
-                }) //
+                });
+        return http.build();
+    }
+
+    @Bean
+    public SecurityFilterChain FilterChain(HttpSecurity http) throws Exception {
+        http //
+                .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
                 .exceptionHandling((ehc) -> ehc.authenticationEntryPoint(new OAuth2ExceptionEntryPoint()))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter()))
                         .authenticationEntryPoint(new OAuth2ExceptionEntryPoint())) //

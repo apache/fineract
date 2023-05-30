@@ -37,6 +37,7 @@ import org.springframework.batch.core.annotation.OnSkipInProcess;
 import org.springframework.batch.core.annotation.OnSkipInRead;
 import org.springframework.batch.core.annotation.OnSkipInWrite;
 import org.springframework.batch.core.annotation.OnWriteError;
+import org.springframework.batch.item.Chunk;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -79,25 +80,25 @@ public abstract class AbstractLoanItemListener {
     }
 
     @OnWriteError
-    public void onWriteError(Exception e, @NotNull List<? extends Loan> items) {
-        List<Long> loanIds = items.stream().map(AbstractPersistableCustom::getId).toList();
+    public void onWriteError(Exception e, @NotNull Chunk<? extends Loan> items) {
+        List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
         log.warn("Error was triggered during writing of Loans (ids={}) due to: {}", loanIds, ThrowableSerialization.serialize(e));
 
         updateAccountLockWithError(loanIds, "Loan (id: %d) writing is failed", e);
     }
 
     @OnSkipInRead
-    public void onSkipInRead(@NotNull Exception e) {
+    public void onSkipInRead(@NotNull Throwable e) {
         log.warn("Skipping was triggered during read!");
     }
 
     @OnSkipInProcess
-    public void onSkipInProcess(@NotNull Loan item, @NotNull Exception e) {
+    public void onSkipInProcess(@NotNull Loan item, @NotNull Throwable e) {
         log.warn("Skipping was triggered during processing of Loan (id={})", item.getId());
     }
 
     @OnSkipInWrite
-    public void onSkipInWrite(@NotNull Loan item, @NotNull Exception e) {
+    public void onSkipInWrite(@NotNull Loan item, @NotNull Throwable e) {
         log.warn("Skipping was triggered during writing of Loan (id={})", item.getId());
     }
 

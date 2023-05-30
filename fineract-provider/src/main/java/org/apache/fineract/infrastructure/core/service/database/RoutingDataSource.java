@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
  * The {@link RoutingDataSourceService} is responsible for returning the appropriate {@link DataSource} for the tenant
  * of this request.
  */
-@Service(value = "routingDataSource")
+@Service(value = "dataSource")
 @Primary
 public class RoutingDataSource extends AbstractDataSource {
 

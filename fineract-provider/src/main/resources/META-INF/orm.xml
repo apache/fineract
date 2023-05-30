@@ -29,10 +29,10 @@
     <persistence-unit-metadata>
         <persistence-unit-defaults>
             <delimited-identifiers/>
-            <entity-listeners>
-                <entity-listener
-                    class="org.springframework.data.jpa.domain.support.AuditingEntityListener" />
-            </entity-listeners>
+<!--            <entity-listeners>-->
+<!--                <entity-listener-->
+<!--                    class="org.springframework.data.jpa.domain.support.AuditingEntityListener" />-->
+<!--            </entity-listeners>-->
         </persistence-unit-defaults>
     </persistence-unit-metadata>
 
