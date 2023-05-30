@@ -111,7 +111,7 @@ dependencyManagement {
         dependency 'org.apache.httpcomponents:httpclient:4.5.14'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-        dependency 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
+        dependency 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         dependency 'org.glassfish.jersey.media:jersey-media-multipart:2.36'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.6'
