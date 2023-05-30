@@ -58,7 +58,6 @@ import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -687,7 +686,6 @@ public class RecurringDepositTest {
     }
 
     @Test
-    @Disabled // TODO FINERACT-1248
     public void testRecurringDepositAccountWithClosureTypeTransferToSavings_WITH_HOLD_TAX() throws InterruptedException {
         this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
