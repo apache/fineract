@@ -20,8 +20,8 @@ package org.apache.fineract.infrastructure.core.diagnostics.performance.sampling
 
 import static java.util.stream.Collectors.toMap;
 
+import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.diagnostics.performance.sampling.core.SamplingConfiguration;
@@ -54,8 +54,9 @@ public class SamplingScheduler implements InitializingBean {
             log.warn("Reset period for sampling cannot be smaller than 10 seconds, setting back the minimum 10");
             resetPeriodInSec = 10;
         }
-        PeriodicTrigger trigger = new PeriodicTrigger(resetPeriodInSec, TimeUnit.SECONDS);
-        trigger.setInitialDelay(resetPeriodInSec);
+        Duration resetPeriodInSecDuration = Duration.ofSeconds(resetPeriodInSec);
+        PeriodicTrigger trigger = new PeriodicTrigger(resetPeriodInSecDuration);
+        trigger.setInitialDelay(resetPeriodInSecDuration);
         taskScheduler.schedule(this::printAndResetPeriodically, trigger);
     }
 

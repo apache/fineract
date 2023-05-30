@@ -16,26 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache;
+package org.apache.fineract.infrastructure.jobs.config;
 
-import org.apache.fineract.infrastructure.cache.service.RuntimeDelegatingCacheManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurer;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
+import org.springframework.batch.core.repository.ExecutionContextSerializer;
+import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 
-@Configuration
-@EnableCaching
-public class PlatformCacheConfiguration implements CachingConfigurer {
 
-    @Autowired
-    private RuntimeDelegatingCacheManager delegatingCacheManager;
-
-    @Bean
+//@Configuration(proxyBeanMethods = false)
+public class FineractBatchConfiguration extends DefaultBatchConfiguration {
     @Override
-    public CacheManager cacheManager() {
-        return this.delegatingCacheManager;
+    protected ExecutionContextSerializer getExecutionContextSerializer() {
+        return new Jackson2ExecutionContextStringSerializer();
     }
 }

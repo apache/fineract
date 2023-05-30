@@ -25,8 +25,11 @@ import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourc
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
@@ -34,7 +37,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableBatchProcessing
 public class ScheduledJobRunnerConfig {
 
@@ -49,19 +52,31 @@ public class ScheduledJobRunnerConfig {
     }
 
     @Bean
-    public JobRepositoryFactoryBean jobRepositoryFactoryBean(RoutingDataSource routingDataSource,
-            PlatformTransactionManager transactionManager) throws Exception {
+    public Jackson2ExecutionContextStringSerializer executionContextSerializer() {
+        return new Jackson2ExecutionContextStringSerializer();
+    }
+
+    @Bean
+    public JobRepository jobRepository(RoutingDataSource routingDataSource,
+                                       PlatformTransactionManager transactionManager) throws Exception {
         JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
         factory.setDataSource(routingDataSource);
         factory.setTransactionManager(transactionManager);
         factory.setIsolationLevelForCreate("ISOLATION_READ_COMMITTED");
+        factory.setSerializer(executionContextSerializer());
         factory.afterPropertiesSet();
-        return factory;
+        return factory.getObject();
     }
 
     @Bean
-    public JobRepository jobRepository(JobRepositoryFactoryBean factory) throws Exception {
-        return factory.getObject();
+    public JobExplorer jobExplorer(RoutingDataSource routingDataSource,
+                                   PlatformTransactionManager transactionManager) throws Exception {
+        JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
+        jobExplorerFactoryBean.setDataSource(routingDataSource);
+        jobExplorerFactoryBean.setTransactionManager(transactionManager);
+        jobExplorerFactoryBean.setSerializer(executionContextSerializer());
+        jobExplorerFactoryBean.afterPropertiesSet();
+        return jobExplorerFactoryBean.getObject();
     }
 
     @Bean

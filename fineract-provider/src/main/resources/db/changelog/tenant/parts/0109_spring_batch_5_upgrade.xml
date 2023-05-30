@@ -30,6 +30,40 @@
         <dropColumn tableName="BATCH_JOB_EXECUTION" columnName="JOB_CONFIGURATION_LOCATION"/>
     </changeSet>
     <changeSet author="fineract" id="2" context="postgresql">
+        <sql>
+            UPDATE BATCH_JOB_EXECUTION_PARAMS
+            SET STRING_VAL = TO_CHAR(DATE_VAL, 'YYYY-MM-DDTHH:MM:SSZ')
+            WHERE TYPE_CD = 'DATE'
+        </sql>
+        <sql>
+            UPDATE BATCH_JOB_EXECUTION_PARAMS
+            SET STRING_VAL = CAST(LONG_VAL AS CHAR)
+            WHERE TYPE_CD = 'LONG'
+        </sql>
+        <sql>
+            UPDATE BATCH_JOB_EXECUTION_PARAMS
+            SET STRING_VAL = CAST(DOUBLE_VAL AS CHAR)
+            WHERE TYPE_CD = 'DOUBLE'
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="2" context="mysql">
+        <sql>
+            UPDATE BATCH_JOB_EXECUTION_PARAMS
+            SET STRING_VAL = DATE_FORMAT(DATE_VAL, 'YYYY-MM-DDTHH:MM:SSZ')
+            WHERE TYPE_CD = 'DATE'
+        </sql>
+        <sql>
+            UPDATE BATCH_JOB_EXECUTION_PARAMS
+            SET STRING_VAL = LONG_VAL::text
+            WHERE TYPE_CD = 'LONG'
+        </sql>
+        <sql>
+            UPDATE BATCH_JOB_EXECUTION_PARAMS
+            SET STRING_VAL = DOUBLE_VAL::text
+            WHERE TYPE_CD = 'DOUBLE'
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="4" context="postgresql">
         <!--
             org/springframework/batch/core/migration/5.0/migration-postgresql.sql
         -->
@@ -58,7 +92,7 @@
 
         </sql>
     </changeSet>
-    <changeSet author="fineract" id="3" context="mysql">
+    <changeSet author="fineract" id="4" context="mysql">
         <!--
             org/springframework/batch/core/migration/5.0/migration-mysql.sql
         -->
@@ -74,5 +108,23 @@
             ALTER TABLE BATCH_JOB_EXECUTION_PARAMS CHANGE COLUMN KEY_NAME PARAMETER_NAME VARCHAR(100);
             ALTER TABLE BATCH_JOB_EXECUTION_PARAMS CHANGE COLUMN STRING_VAL PARAMETER_VALUE VARCHAR(2500);
         </sql>
+    </changeSet>
+    <changeSet author="fineract" id="5">
+        <update tableName="BATCH_JOB_EXECUTION_PARAMS">
+            <column name="PARAMETER_TYPE" value="java.lang.Long"/>
+            <where>PARAMETER_TYPE='LONG'</where>
+        </update>
+        <update tableName="BATCH_JOB_EXECUTION_PARAMS">
+            <column name="PARAMETER_TYPE" value="java.lang.String"/>
+            <where>PARAMETER_TYPE='STRING'</where>
+        </update>
+        <update tableName="BATCH_JOB_EXECUTION_PARAMS">
+            <column name="PARAMETER_TYPE" value="java.lang.Double"/>
+            <where>PARAMETER_TYPE='DOUBLE'</where>
+        </update>
+        <update tableName="BATCH_JOB_EXECUTION_PARAMS">
+            <column name="PARAMETER_TYPE" value="java.util.Date"/>
+            <where>PARAMETER_TYPE='DATE'</where>
+        </update>
     </changeSet>
 </databaseChangeLog>

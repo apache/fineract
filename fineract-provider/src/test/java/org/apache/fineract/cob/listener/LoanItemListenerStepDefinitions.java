@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.mockito.Mockito;
+import org.springframework.batch.item.Chunk;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -107,7 +108,7 @@ public class LoanItemListenerStepDefinitions implements En {
         });
 
         When("LoanItemListener.onWriteError method executed", () -> {
-            loanItemListener.onWriteError(exception, List.of(loan));
+            loanItemListener.onWriteError(exception, new Chunk<>(List.of(loan)));
         });
 
         Then("LoanItemListener.onWriteError result should match", () -> {
