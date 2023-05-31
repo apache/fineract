@@ -105,7 +105,7 @@ final class ExternalAssetOwnersApiResourceSwagger {
         public String purchasePriceRatio;
 
         @Schema(example = "yyyy-MM-dd")
-        public String dateformat;
+        public String dateFormat;
 
         @Schema(example = "en")
         public String locale;
@@ -131,7 +131,7 @@ final class ExternalAssetOwnersApiResourceSwagger {
         public ExternalAssetOwnerTransferChangesData changes;
 
         @Schema(example = "yyyy-MM-dd")
-        public String dateformat;
+        public String dateFormat;
 
         @Schema(example = "en")
         public String locale;
