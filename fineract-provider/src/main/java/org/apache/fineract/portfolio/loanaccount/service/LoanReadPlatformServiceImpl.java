@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -601,7 +602,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public Long getLoanIdByLoanExternalId(String externalId) {
-        return loanRepositoryWrapper.findIdByExternalId(ExternalIdFactory.produce(externalId));
+        ExternalId loanExternalId = ExternalIdFactory.produce(externalId);
+        Long loanId = loanRepositoryWrapper.findIdByExternalId(loanExternalId);
+        if (Objects.isNull(loanId)) {
+            throw new LoanNotFoundException(loanExternalId);
+        }
+        return loanId;
     }
 
     private static final class LoanMapper implements RowMapper<LoanAccountData> {
