@@ -40,6 +40,12 @@ public class ExternalAssetOwnerHelper extends IntegrationTest {
         return Utils.performServerPost(requestSpec, responseSpec, INITIATE_TRANSFER_URL, json);
     }
 
+    public String initiateTransferByLoanExternalId(String loanExternalId, String command, String json) {
+        final String INITIATE_TRANSFER_URL = "/fineract-provider/api/v1/external-asset-owners/transfers/loans/external-id/" + loanExternalId
+                + "?" + Utils.TENANT_IDENTIFIER + "&command=" + command;
+        return Utils.performServerPost(requestSpec, responseSpec, INITIATE_TRANSFER_URL, json);
+    }
+
     public String retrieveTransferByTransferExternalId(String transferExternalId) {
         final String RETRIEVE_TRANSFER_URL = "/fineract-provider/api/v1/external-asset-owners/transfers?" + Utils.TENANT_IDENTIFIER
                 + "&transferExternalId=" + transferExternalId;

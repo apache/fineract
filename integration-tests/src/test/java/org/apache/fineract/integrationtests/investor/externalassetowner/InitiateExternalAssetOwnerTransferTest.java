@@ -56,6 +56,7 @@ public class InitiateExternalAssetOwnerTransferTest {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecError;
+    private ResponseSpecification responseSpecNotFound;
     private RequestSpecification requestSpec;
     private ExternalAssetOwnerHelper externalAssetOwnerHelper;
     private LoanTransactionHelper loanTransactionHelper;
@@ -68,6 +69,7 @@ public class InitiateExternalAssetOwnerTransferTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         responseSpecError = new ResponseSpecBuilder().expectStatusCode(403).build();
+        responseSpecNotFound = new ResponseSpecBuilder().expectStatusCode(404).build();
         externalAssetOwnerHelper = new ExternalAssetOwnerHelper(requestSpec, responseSpec);
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
@@ -308,6 +310,32 @@ public class InitiateExternalAssetOwnerTransferTest {
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
+    @Test
+    public void getNotFoundErrorIfTheLoanDoesNotExistWithTheGivenID() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
+
+            externalAssetOwnerHelper = new ExternalAssetOwnerHelper(requestSpec, responseSpecNotFound);
+            String transferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
+            String nonExistingLoanExternalID = "NonExistingLoanExternalID";
+            String saleResponse = externalAssetOwnerHelper.initiateTransferByLoanExternalId(nonExistingLoanExternalID, "sale",
+                    getSaleRequestJson("05 March 2020", transferExternalId));
+            Type type = new TypeToken<Map<String, Object>>() {}.getType();
+            Map<String, Object> errorResponseMap = new Gson().fromJson(saleResponse, type);
+            assertEquals("The requested resource is not available.", errorResponseMap.get("developerMessage"));
+        } finally {
+            requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+            requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+            requestSpec.header("Fineract-Platform-TenantId", "default");
+            responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
     }
