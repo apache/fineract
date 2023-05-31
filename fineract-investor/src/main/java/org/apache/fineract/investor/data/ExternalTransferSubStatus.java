@@ -16,15 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.investor.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-
-public interface ExternalAssetOwnersWriteService {
-
-    CommandProcessingResult saleLoanByLoanId(JsonCommand command);
-
-    CommandProcessingResult buybackLoanByLoanId(JsonCommand command);
-
+public enum ExternalTransferSubStatus {
+    BALANCE_ZERO, BALANCE_NEGATIVE, SAMEDAY_TRANSFERS, USER_REQUESTED
 }

@@ -387,8 +387,8 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withInArrearsTolerance(final String amountCanBeWaved) {
-        this.inArrearsTolerance = amountCanBeWaved;
+    public LoanProductTestBuilder withInArrearsTolerance(final String inArrearsTolerance) {
+        this.inArrearsTolerance = inArrearsTolerance;
         return this;
     }
 

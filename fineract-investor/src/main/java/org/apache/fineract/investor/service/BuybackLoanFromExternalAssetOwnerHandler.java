@@ -34,6 +34,6 @@ public class BuybackLoanFromExternalAssetOwnerHandler implements NewCommandSourc
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return externalAssetOwnersWriteService.buyBackLoanByLoanId(command);
+        return externalAssetOwnersWriteService.buybackLoanByLoanId(command);
     }
 }
