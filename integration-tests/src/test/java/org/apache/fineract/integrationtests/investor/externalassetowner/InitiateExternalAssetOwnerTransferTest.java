@@ -346,10 +346,10 @@ public class InitiateExternalAssetOwnerTransferTest {
 
     private String getSaleRequestJson(String date, String transferExternalId) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("settlement_date", date);
-        map.put("owner_external_id", "1234567890987654321");
-        map.put("transfer_external_id", transferExternalId);
-        map.put("purchase_price_ratio", "1.234");
+        map.put("settlementDate", date);
+        map.put("ownerExternalId", "1234567890987654321");
+        map.put("transferExternalId", transferExternalId);
+        map.put("purchasePriceRatio", "1.234");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         return new Gson().toJson(map);
