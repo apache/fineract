@@ -23,17 +23,38 @@ import static org.springframework.security.authorization.AuthenticatedAuthorizat
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
 
+import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
+import org.apache.fineract.cob.service.LoanAccountLockService;
+import org.apache.fineract.commands.domain.CommandSourceRepository;
+import org.apache.fineract.commands.service.CommandSourceService;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
+import org.apache.fineract.infrastructure.core.filters.CorrelationHeaderFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
+import org.apache.fineract.infrastructure.core.filters.RequestResponseFilter;
+import org.apache.fineract.infrastructure.core.filters.ResponseCorsFilter;
+import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.MDCWrapper;
 import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
+import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.filter.InsecureTwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
+import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
+import org.apache.fineract.infrastructure.security.service.TwoFactorService;
+import org.apache.fineract.notification.service.UserNotificationService;
+import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -48,24 +69,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty("fineract.security.basicauth.enabled")
 @EnableMethodSecurity
 public class SecurityConfig {
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Autowired
     private TenantAwareJpaPlatformUserDetailsService userDetailsService;
-
-    @Autowired
-    private TwoFactorAuthenticationFilter twoFactorAuthenticationFilter;
-
-    @Autowired
-    private FineractInstanceModeApiFilter fineractInstanceModeApiFilter;
-    @Autowired
-    private LoanCOBApiFilter loanCOBApiFilter;
 
     @Autowired
     private FineractProperties fineractProperties;
@@ -74,8 +89,40 @@ public class SecurityConfig {
     private ServerProperties serverProperties;
 
     @Autowired
-    private IdempotencyStoreFilter idempotencyStoreFilter;
+    private ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
+    @Autowired
+    private ConfigurationDomainService configurationDomainService;
+    @Autowired
+    private CacheWritePlatformService cacheWritePlatformService;
+    @Autowired
+    private UserNotificationService userNotificationService;
+    @Autowired
+    private BasicAuthTenantDetailsService basicAuthTenantDetailsService;
+    @Autowired
+    private BusinessDateReadPlatformService businessDateReadPlatformService;
+    @Autowired
+    private MDCWrapper mdcWrapper;
+    @Autowired
+    private CommandSourceRepository commandSourceRepository;
+    @Autowired
+    private CommandSourceService commandSourceService;
+    @Autowired
+    private FineractRequestContextHolder fineractRequestContextHolder;
 
+    @Autowired
+    private GLIMAccountInfoRepository glimAccountInfoRepository;
+    @Autowired
+    private LoanAccountLockService loanAccountLockService;
+    @Autowired
+    private PlatformSecurityContext context;
+    @Autowired
+    private InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
+    @Autowired
+    private LoanRepository loanRepository;
+    @Autowired
+    private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Bean
     public SecurityFilterChain authorizationFilterChain(HttpSecurity http) throws Exception {
@@ -93,20 +140,7 @@ public class SecurityConfig {
                             .requestMatchers("/api/*/twofactor").fullyAuthenticated() //
                             .requestMatchers("/api/**").access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"))); //
                 }) //
-                .httpBasic((httpBasic) -> httpBasic.authenticationEntryPoint(basicAuthenticationEntryPoint())); //
-        return http.build();
-    }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http //
-                .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
-                .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
-                .addFilterAfter(fineractInstanceModeApiFilter, SecurityContextHolderFilter.class) //
-                .addFilterAfter(tenantAwareBasicAuthenticationFilter(), FineractInstanceModeApiFilter.class) //
-                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class) //
-                .addFilterAfter(loanCOBApiFilter, InsecureTwoFactorAuthenticationFilter.class) //
-                .addFilterBefore(idempotencyStoreFilter, ExceptionTranslationFilter.class); //
+                .httpBasic((httpBasic) -> httpBasic.authenticationEntryPoint(basicAuthenticationEntryPoint()));
 
         if (serverProperties.getSsl().isEnabled()) {
             http.requiresChannel(channel -> channel.requestMatchers("/api/**").requiresSecure());
@@ -115,8 +149,68 @@ public class SecurityConfig {
     }
 
     @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http //
+                .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
+                .securityContext((securityContext) -> securityContext.requireExplicitSave(false))
+                .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
+                .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class)
+                .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class)
+                .addFilterAfter(responseCorsFilter(), CorrelationHeaderFilter.class) //
+                .addFilterAfter(fineractInstanceModeApiFilter(), ResponseCorsFilter.class) //
+                .addFilterAfter(tenantAwareBasicAuthenticationFilter(), FineractInstanceModeApiFilter.class) //
+                .addFilterAfter(loanCOBApiFilter(), TenantAwareBasicAuthenticationFilter.class) //
+                .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
+
+        if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
+            http.addFilterAfter(twoFactorAuthenticationFilter(), FineractInstanceModeApiFilter.class);
+        } else {
+            http.addFilterAfter(insecureTwoFactorAuthenticationFilter(), FineractInstanceModeApiFilter.class);
+        }
+
+        return http.build();
+    }
+
+    public RequestResponseFilter requestResponseFilter() {
+        return new RequestResponseFilter();
+    }
+
+    public LoanCOBApiFilter loanCOBApiFilter() {
+        return new LoanCOBApiFilter(glimAccountInfoRepository, loanAccountLockService, context, inlineLoanCOBExecutorService, loanRepository, fineractProperties, loanRescheduleRequestRepository, transactionManager);
+    }
+
+    public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
+        TwoFactorService twoFactorService = applicationContext.getBean(TwoFactorService.class);
+        return new TwoFactorAuthenticationFilter(twoFactorService);
+    }
+
+    public InsecureTwoFactorAuthenticationFilter insecureTwoFactorAuthenticationFilter() {
+        return new InsecureTwoFactorAuthenticationFilter();
+    }
+
+    public FineractInstanceModeApiFilter fineractInstanceModeApiFilter() {
+        return new FineractInstanceModeApiFilter(fineractProperties);
+    }
+
+    public IdempotencyStoreFilter idempotencyStoreFilter() {
+        return new IdempotencyStoreFilter(commandSourceRepository, commandSourceService, fineractProperties, fineractRequestContextHolder);
+    }
+
+    public CorrelationHeaderFilter correlationHeaderFilter() {
+        return new CorrelationHeaderFilter(fineractProperties, mdcWrapper);
+    }
+
+    public ResponseCorsFilter responseCorsFilter() {
+        return new ResponseCorsFilter();
+    }
+
     public TenantAwareBasicAuthenticationFilter tenantAwareBasicAuthenticationFilter() throws Exception {
-        return new TenantAwareBasicAuthenticationFilter(authenticationManagerBean(), basicAuthenticationEntryPoint());
+        TenantAwareBasicAuthenticationFilter filter = new TenantAwareBasicAuthenticationFilter(authenticationManagerBean(), basicAuthenticationEntryPoint(),
+                toApiJsonSerializer, configurationDomainService, cacheWritePlatformService,
+                userNotificationService, basicAuthTenantDetailsService,
+                businessDateReadPlatformService);
+        filter.setRequestMatcher(AntPathRequestMatcher.antMatcher("/api/**"));
+        return filter;
     }
 
     @Bean
@@ -144,22 +238,5 @@ public class SecurityConfig {
         ProviderManager providerManager = new ProviderManager(authProvider());
         providerManager.setEraseCredentialsAfterAuthentication(false);
         return providerManager;
-    }
-
-    @Bean
-    public FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> tenantAwareBasicAuthenticationFilterRegistration()
-            throws Exception {
-        FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> registration = new FilterRegistrationBean<TenantAwareBasicAuthenticationFilter>(
-                tenantAwareBasicAuthenticationFilter());
-        registration.setEnabled(false);
-        return registration;
-    }
-
-    @Bean
-    public FilterRegistrationBean<TwoFactorAuthenticationFilter> twoFactorAuthenticationFilterRegistration() {
-        FilterRegistrationBean<TwoFactorAuthenticationFilter> registration = new FilterRegistrationBean<TwoFactorAuthenticationFilter>(
-                twoFactorAuthenticationFilter);
-        registration.setEnabled(false);
-        return registration;
     }
 }

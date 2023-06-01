@@ -25,15 +25,21 @@ import static org.springframework.security.authorization.AuthorityAuthorizationM
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
 
 import java.util.Collection;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.exceptionmapper.OAuth2ExceptionEntryPoint;
+import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
+import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareTenantIdentifierFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
+import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
+import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -55,16 +61,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty("fineract.security.oauth.enabled")
 @EnableMethodSecurity
 public class OAuth2SecurityConfig {
-
-    @Autowired
-    private TwoFactorAuthenticationFilter twoFactorAuthenticationFilter;
-
-    @Autowired
-    private TenantAwareTenantIdentifierFilter tenantAwareTenantIdentifierFilter;
 
     @Autowired
     private TenantAwareJpaPlatformUserDetailsService userDetailsService;
@@ -72,8 +72,25 @@ public class OAuth2SecurityConfig {
     @Autowired
     private ServerProperties serverProperties;
 
-    private static final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+    @Autowired
+    private TwoFactorService twoFactorService;
 
+    @Autowired
+    private BasicAuthTenantDetailsService basicAuthTenantDetailsService;
+
+    @Autowired
+    private ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
+
+    @Autowired
+    private ConfigurationDomainService configurationDomainService;
+
+    @Autowired
+    private CacheWritePlatformService cacheWritePlatformService;
+
+    @Autowired
+    private BusinessDateReadPlatformService businessDateReadPlatformService;
+
+    private static final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     @Bean
     public SecurityFilterChain authorizationFilterChain(HttpSecurity http) throws Exception {
@@ -90,24 +107,38 @@ public class OAuth2SecurityConfig {
                             .requestMatchers("/api/*/twofactor").fullyAuthenticated() //
                             .requestMatchers("/api/**").access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"), selfServiceUserAuthManager())); //
                 });
+
+        if (serverProperties.getSsl().isEnabled()) {
+            http.requiresChannel(channel -> channel.requestMatchers("/api/**").requiresSecure());
+        }
+
         return http.build();
     }
 
     @Bean
-    public SecurityFilterChain FilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http //
                 .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
                 .exceptionHandling((ehc) -> ehc.authenticationEntryPoint(new OAuth2ExceptionEntryPoint()))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter()))
                         .authenticationEntryPoint(new OAuth2ExceptionEntryPoint())) //
                 .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
-                .addFilterAfter(tenantAwareTenantIdentifierFilter, SecurityContextHolderFilter.class) //
-                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class); //
+                .addFilterAfter(tenantAwareTenantIdentifierFilter(), SecurityContextHolderFilter.class) //
+                .addFilterAfter(twoFactorAuthenticationFilter(), BasicAuthenticationFilter.class); //
 
         if (serverProperties.getSsl().isEnabled()) {
             http.requiresChannel(channel -> channel.requestMatchers("/api/**").requiresSecure());
         }
+
         return http.build();
+    }
+
+    public TenantAwareTenantIdentifierFilter tenantAwareTenantIdentifierFilter() {
+        return new TenantAwareTenantIdentifierFilter(basicAuthTenantDetailsService, toApiJsonSerializer, configurationDomainService, cacheWritePlatformService, businessDateReadPlatformService);
+    }
+
+    public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
+        return new TwoFactorAuthenticationFilter(twoFactorService);
     }
 
     @Bean
@@ -126,21 +157,5 @@ public class OAuth2SecurityConfig {
                 throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN), ex);
             }
         };
-    }
-
-    @Bean
-    public FilterRegistrationBean<TenantAwareTenantIdentifierFilter> tenantAwareTenantIdentifierFilterRegistration() throws Exception {
-        FilterRegistrationBean<TenantAwareTenantIdentifierFilter> registration = new FilterRegistrationBean<TenantAwareTenantIdentifierFilter>(
-                tenantAwareTenantIdentifierFilter);
-        registration.setEnabled(false);
-        return registration;
-    }
-
-    @Bean
-    public FilterRegistrationBean<TwoFactorAuthenticationFilter> twoFactorAuthenticationFilterRegistration() {
-        FilterRegistrationBean<TwoFactorAuthenticationFilter> registration = new FilterRegistrationBean<TwoFactorAuthenticationFilter>(
-                twoFactorAuthenticationFilter);
-        registration.setEnabled(false);
-        return registration;
     }
 }

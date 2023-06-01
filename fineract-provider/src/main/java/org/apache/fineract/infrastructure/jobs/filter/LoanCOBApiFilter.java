@@ -22,6 +22,10 @@ import static org.apache.fineract.batch.command.CommandStrategyUtils.isRelativeU
 
 import com.google.common.collect.Lists;
 import io.github.resilience4j.core.functions.Either;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -29,10 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,13 +57,11 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanResch
 import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.apache.http.HttpStatus;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
 @RequiredArgsConstructor
 public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchRequestPreprocessor {
 

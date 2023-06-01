@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.infrastructure.core.filters;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -39,13 +39,11 @@ import org.apache.fineract.commands.service.SynchronousCommandProcessingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @RequiredArgsConstructor
 @Slf4j
-@Component
 public class IdempotencyStoreFilter extends OncePerRequestFilter implements BatchFilter {
 
     private final CommandSourceRepository commandSourceRepository;

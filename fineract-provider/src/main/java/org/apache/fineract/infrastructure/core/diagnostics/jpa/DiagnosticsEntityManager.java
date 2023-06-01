@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.diagnostics.jpa;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.EntityManagerFactory;
+import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.sessions.changesets.UnitOfWorkChangeSet;
 import org.springframework.beans.BeansException;
@@ -38,7 +39,7 @@ import org.springframework.stereotype.Component;
  * <br>
  * To enable this, run Fineract with the <b>diagnostics</b> profile.
  */
-@Profile("diagnostics")
+@Profile(FineractProfiles.DIAGNOSTICS)
 @Component
 public class DiagnosticsEntityManager implements ApplicationContextAware {
 
