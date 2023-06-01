@@ -21,23 +21,21 @@ package org.apache.fineract.infrastructure.instancemode.filter;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter.ExceptionListItem.item;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.function.Function;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
+import java.io.IOException;
+import java.util.List;
+import java.util.function.Function;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
 @RequiredArgsConstructor
 public class FineractInstanceModeApiFilter extends OncePerRequestFilter {
 

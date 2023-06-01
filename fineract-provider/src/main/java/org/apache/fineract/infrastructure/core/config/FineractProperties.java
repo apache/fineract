@@ -57,6 +57,7 @@ public class FineractProperties {
 
     private FineractQueryProperties query;
     private FineractApiProperties api;
+    private FineractSecurityProperties security;
 
     private FineractNotificationProperties notification;
 
@@ -351,6 +352,41 @@ public class FineractProperties {
         private FineractTransactionProcessorItemProperties duePenaltyInterestPrincipalFeeInAdvancePenaltyInterestPrincipalFee;
         private boolean errorNotFoundFail;
     }
+
+    @Getter
+    @Setter
+    public static class FineractSecurityProperties {
+
+        private FineractSecurityBasicAuth basicauth;
+        private FineractSecurityTwoFactorAuth twoFactor;
+        private FineractSecurityOAuth oauth;
+
+        public void set2fa(FineractSecurityTwoFactorAuth twoFactor) {
+            this.twoFactor = twoFactor;
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSecurityBasicAuth {
+
+        private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSecurityTwoFactorAuth {
+
+        private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSecurityOAuth {
+
+        private boolean enabled;
+    }
+
 
     @Getter
     @Setter

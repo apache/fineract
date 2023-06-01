@@ -18,23 +18,22 @@
  */
 package org.apache.fineract.infrastructure.security.filter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
 import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
 import org.apache.fineract.infrastructure.security.domain.TFAccessToken;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,7 +41,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 import org.springframework.web.filter.GenericFilterBean;
 
 /**
@@ -56,16 +54,10 @@ import org.springframework.web.filter.GenericFilterBean;
  * An authenticated platform user with permission 'BYPASS_TWOFACTOR' will always be granted 'TWOFACTOR_AUTHENTICATED'
  * authority regardless of the value of the 'Fineract-Platform-TFA-Token' header.
  */
-@Service
-@ConditionalOnProperty("fineract.security.2fa.enabled")
+@RequiredArgsConstructor
 public class TwoFactorAuthenticationFilter extends GenericFilterBean {
 
     private final TwoFactorService twoFactorService;
-
-    @Autowired
-    public TwoFactorAuthenticationFilter(TwoFactorService twoFactorService) {
-        this.twoFactorService = twoFactorService;
-    }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {

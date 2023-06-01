@@ -50,7 +50,7 @@ dependencyManagement {
         dependency 'org.codehaus.janino:janino:3.1.9'
 
 
-        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.1'
+        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.0'
         dependency 'com.google.guava:guava:31.1-jre'
         dependency 'com.google.code.gson:gson:2.10.1'
         dependency 'com.google.truth:truth:1.1.3'
@@ -64,6 +64,7 @@ dependencyManagement {
         dependency 'com.github.librepdf:openpdf:1.3.30'
         dependency ('org.mnode.ical4j:ical4j:3.2.11') {
             exclude 'com.sun.mail:javax.mail'
+            exclude 'org.codehaus.groovy:groovy'
         }
         dependency 'org.apache.commons:commons-csv:1.10.0'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
@@ -233,6 +234,8 @@ dependencyManagement {
             entry 'json-path'
             entry 'xml-path'
         }
+        dependency 'org.apache.groovy:groovy-xml:4.0.6'
+        dependency 'org.apache.groovy:groovy-json:4.0.6'
 
         dependency 'org.mapstruct:mapstruct:1.5.4.Final'
         dependency 'org.mapstruct:mapstruct-processor:1.5.4.Final'

@@ -18,36 +18,31 @@
  */
 package org.apache.fineract.infrastructure.core.filters;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerResponseContext;
-import jakarta.ws.rs.container.ContainerResponseFilter;
-import jakarta.ws.rs.ext.Provider;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Filter that returns a response with headers that allows for Cross-Origin Requests (CORs) to be performed against the
  * platform API.
  */
 
-@Provider
-@Component
-@Scope("singleton")
-public class ResponseCorsFilter implements ContainerResponseFilter {
+public class ResponseCorsFilter extends OncePerRequestFilter {
 
     @Override
-    public void filter(final ContainerRequestContext request, final ContainerResponseContext response) {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
-        response.getHeaders().add("Access-Control-Allow-Origin", "*");
-        // .header("Access-Control-Expose-Headers",
-        // "Fineract-Platform-TenantId")
-        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        final String reqHead = request.getHeader("Access-Control-Request-Headers");
 
-        final String reqHead = request.getHeaders().getFirst("Access-Control-Request-Headers");
-
-        if (null != reqHead && StringUtils.hasText(reqHead)) {
-            response.getHeaders().add("Access-Control-Allow-Headers", reqHead);
+        if (StringUtils.hasText(reqHead)) {
+            response.addHeader("Access-Control-Allow-Headers", reqHead);
         }
+        filterChain.doFilter(request, response);
     }
 }

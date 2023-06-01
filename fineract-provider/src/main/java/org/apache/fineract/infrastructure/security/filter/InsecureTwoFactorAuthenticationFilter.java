@@ -18,16 +18,15 @@
  */
 package org.apache.fineract.infrastructure.security.filter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,15 +34,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 /**
  * A dummy {@link TwoFactorAuthenticationFilter} filter used when 'twofactor' environment profile is not active.
  *
  * This filter adds 'TWOFACTOR_AUTHENTICATED' authority to every authenticated platform user.
  */
-@Service
-@ConditionalOnProperty(name = "fineract.security.2fa.enabled", havingValue = "false")
 public class InsecureTwoFactorAuthenticationFilter extends TwoFactorAuthenticationFilter {
 
     public InsecureTwoFactorAuthenticationFilter() {
