@@ -1072,6 +1072,8 @@ final class LoansApiResourceSwagger {
         public LocalDate overpaidOnDate;
         @Schema(example = "false")
         public Boolean chargedOff;
+        @Schema(example = "3")
+        public Integer inArrearsTolerance;
     }
 
     @Schema(description = "GetLoansResponse")
