@@ -112,8 +112,7 @@ public class LoanDelinquencyDomainServiceTest {
 
         // when
         when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
-        when(loanProduct.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getCurrency()).thenReturn(currency);
 
@@ -137,8 +136,7 @@ public class LoanDelinquencyDomainServiceTest {
 
         // when
         when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
-        when(loanProduct.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getLoanTransactions(Mockito.any(Predicate.class))).thenReturn(Collections.emptyList());
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
@@ -174,8 +172,7 @@ public class LoanDelinquencyDomainServiceTest {
 
         // when
         when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
-        when(loanProduct.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getCurrency()).thenReturn(currency);
 
