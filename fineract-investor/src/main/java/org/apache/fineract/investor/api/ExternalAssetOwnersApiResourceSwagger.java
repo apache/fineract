@@ -92,8 +92,8 @@ final class ExternalAssetOwnersApiResourceSwagger {
 
         private PostInitiateTransferRequest() {}
 
-        @Schema(example = "[2023, 5, 23]")
-        public LocalDate settlementDate;
+        @Schema(example = "2023-5-23")
+        public String settlementDate;
 
         @Schema(example = "1234567890987654321abc")
         public String ownerExternalId;
