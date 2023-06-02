@@ -42,7 +42,6 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.data.LoanIdAndExternalIdData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -591,13 +590,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanTransactionNotFoundException(transactionId, e);
         }
-    }
-
-    @Override
-    public LoanIdAndExternalIdData getTransferableLoanIdAndExternalId(Long loanId) {
-        Optional<Loan> loan = loanRepositoryWrapper.getNonClosedLoanIdAndExternalIdByLoanId(loanId);
-        return loan.map(value -> new LoanIdAndExternalIdData(value.getId(), value.getExternalId()))
-                .orElseGet(() -> new LoanIdAndExternalIdData(null, null));
     }
 
     @Override

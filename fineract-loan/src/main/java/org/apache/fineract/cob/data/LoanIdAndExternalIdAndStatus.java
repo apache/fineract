@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.cob.data;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
-public interface LoanIdAndExternalId {
+@AllArgsConstructor
+@Getter
+public class LoanIdAndExternalIdAndStatus {
 
-    Long getId();
-
-    ExternalId getExternalId();
+    Long id;
+    ExternalId externalId;
+    Integer loanStatus;
 }

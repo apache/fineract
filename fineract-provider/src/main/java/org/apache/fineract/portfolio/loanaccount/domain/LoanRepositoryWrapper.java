@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -264,10 +263,4 @@ public class LoanRepositoryWrapper {
         return repository.findLoanIdByStatusId(statusId);
     }
 
-    public Optional<Loan> getNonClosedLoanIdAndExternalIdByLoanId(Long loanId) {
-        if (repository.findById(loanId).isEmpty()) {
-            throw new LoanNotFoundException(loanId);
-        }
-        return repository.getNonClosedLoanIdAndExternalIdByLoanId(loanId);
-    }
 }

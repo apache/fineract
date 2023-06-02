@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.investor.domain;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.domain.Page;
@@ -39,4 +41,6 @@ public interface ExternalAssetOwnerTransferRepository
     @Query("select e from ExternalAssetOwnerTransfer e where e.loanId = :loanId and e.id = (select max(ex.id) from ExternalAssetOwnerTransfer ex where ex.loanId = :loanId)")
     Optional<ExternalAssetOwnerTransfer> findLatestByLoanId(@Param("loanId") Long loanId);
 
+    @Query("SELECT t FROM ExternalAssetOwnerTransfer t WHERE t.loanId = :loanId AND t.effectiveDateTo > :effectiveDate")
+    List<ExternalAssetOwnerTransfer> findEffectiveTransfers(@Param("loanId") Long loanId, @Param("effectiveDate") LocalDate effectiveDate);
 }

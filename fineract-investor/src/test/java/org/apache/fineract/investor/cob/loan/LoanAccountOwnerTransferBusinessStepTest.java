@@ -33,6 +33,7 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -80,7 +81,6 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         Long loanId = 1L;
-        LocalDate settlementDate = actualDate;
         when(loanForProcessing.getId()).thenReturn(loanId);
         // when
         final Loan processedLoan = underTest.execute(loanForProcessing);
@@ -90,33 +90,13 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     }
 
     @Test
-    public void givenLoanTooManyTransfer() {
-        // given
-        final Loan loanForProcessing = Mockito.mock(Loan.class);
-        Long loanId = 1L;
-        LocalDate settlementDate = actualDate;
-        when(loanForProcessing.getId()).thenReturn(loanId);
-        ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        ExternalAssetOwnerTransfer thirdResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem, secondResponseItem, thirdResponseItem);
-        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
-                .thenReturn(response);
-        // when
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> underTest.execute(loanForProcessing));
-        // then
-        assertEquals("Found too many owner transfers(3) by the settlement date(" + actualDate + ")", exception.getMessage());
-        verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
-
-    }
-
-    @Test
-    public void givenLoanTwoTransferButInvalidSecondTransfer() {
+    public void givenLoanTwoTransferButInvalidTransfers() {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.PENDING);
         when(secondResponseItem.getStatus()).thenReturn(ExternalTransferStatus.ACTIVE);
         List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem, secondResponseItem);
         when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
@@ -124,26 +104,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         // when
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> underTest.execute(loanForProcessing));
         // then
-        assertEquals("Illegal transfer found. Expected BUYBACK, found: ACTIVE", exception.getMessage());
-        verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
-    }
-
-    @Test
-    public void givenLoanTwoTransferButInvalidFirstTransfer() {
-        // given
-        final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
-        ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.BUYBACK);
-        when(secondResponseItem.getStatus()).thenReturn(ExternalTransferStatus.BUYBACK);
-        List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem, secondResponseItem);
-        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
-                .thenReturn(response);
-        // when
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> underTest.execute(loanForProcessing));
-        // then
-        assertEquals("Illegal transfer found. Expected PENDING or ACTIVE, found: BUYBACK", exception.getMessage());
+        assertEquals("Illegal transfer found. Expected PENDING and BUYBACK, found: PENDING and ACTIVE", exception.getMessage());
         verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
     }
 
@@ -208,11 +169,12 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanForProcessing.getId()).thenReturn(1L);
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.ACTIVE);
-        when(secondResponseItem.getStatus()).thenReturn(ExternalTransferStatus.BUYBACK);
-        List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem, secondResponseItem);
+        when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.BUYBACK);
+        when(firstResponseItem.getEffectiveDateFrom()).thenReturn(actualDate);
+        List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem);
         when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
                 .thenReturn(response);
+        when(externalAssetOwnerTransferRepository.findOne(any(Specification.class))).thenReturn(Optional.of(secondResponseItem));
         ArgumentCaptor<ExternalAssetOwnerTransfer> externalAssetOwnerTransferArgumentCaptor = ArgumentCaptor
                 .forClass(ExternalAssetOwnerTransfer.class);
         when(externalAssetOwnerTransferRepository.save(firstResponseItem)).thenReturn(firstResponseItem);
@@ -221,29 +183,12 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         final Loan processedLoan = underTest.execute(loanForProcessing);
         // then
         verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
-        verify(firstResponseItem).setEffectiveDateTo(actualDate);
+        verify(firstResponseItem).setEffectiveDateTo(firstResponseItem.getEffectiveDateFrom());
         verify(externalAssetOwnerTransferRepository, times(2)).save(externalAssetOwnerTransferArgumentCaptor.capture());
-        verify(secondResponseItem).setEffectiveDateTo(secondResponseItem.getEffectiveDateFrom());
+        verify(secondResponseItem).setEffectiveDateTo(actualDate);
         verify(externalAssetOwnerTransferLoanMappingRepository, times(1)).deleteByLoanIdAndOwnerTransfer(1L, secondResponseItem);
 
         assertEquals(processedLoan, loanForProcessing);
-    }
-
-    @Test
-    public void givenLoanOneTransferButInvalidTransfer() {
-        // given
-        final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
-        ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.ACTIVE);
-        List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem);
-        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
-                .thenReturn(response);
-        // when
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> underTest.execute(loanForProcessing));
-        // then
-        assertEquals("Illegal transfer found. Expected PENDING, found: ACTIVE", exception.getMessage());
-        verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
     }
 
     @Test
@@ -288,6 +233,86 @@ public class LoanAccountOwnerTransferBusinessStepTest {
                 .save(externalAssetOwnerTransferLoanMappingArgumentCaptor.capture());
         assertEquals(1L, externalAssetOwnerTransferLoanMappingArgumentCaptor.getValue().getLoanId());
         assertEquals(newTransfer, externalAssetOwnerTransferLoanMappingArgumentCaptor.getValue().getOwnerTransfer());
+        assertEquals(processedLoan, loanForProcessing);
+    }
+
+    @Test
+    public void givenLoanSaleButBalanceIsZero() {
+        // given
+        final Loan loanForProcessing = Mockito.mock(Loan.class);
+        when(loanForProcessing.getId()).thenReturn(1L);
+        ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.PENDING);
+        List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem);
+        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
+                .thenReturn(response);
+        ArgumentCaptor<ExternalAssetOwnerTransfer> externalAssetOwnerTransferArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer newTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        when(externalAssetOwnerTransferRepository.save(any())).thenReturn(firstResponseItem).thenReturn(newTransfer);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
+        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
+        when(loanForProcessing.getTotalOverpaid()).thenReturn(BigDecimal.ZERO);
+        // when
+        final Loan processedLoan = underTest.execute(loanForProcessing);
+        // then
+        verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
+        verify(firstResponseItem).setEffectiveDateTo(actualDate);
+        verify(externalAssetOwnerTransferRepository, times(2)).save(externalAssetOwnerTransferArgumentCaptor.capture());
+
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getOwner(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getOwner());
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getExternalId(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getExternalId());
+        assertEquals(ExternalTransferStatus.DECLINED, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getStatus());
+        assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getSettlementDate());
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getLoanId(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getLoanId());
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getPurchasePriceRatio(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getPurchasePriceRatio());
+        assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateFrom());
+        assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateTo());
+        assertEquals(processedLoan, loanForProcessing);
+    }
+
+    @Test
+    public void givenLoanSaleButBalanceIsNegative() {
+        // given
+        final Loan loanForProcessing = Mockito.mock(Loan.class);
+        when(loanForProcessing.getId()).thenReturn(1L);
+        ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.PENDING);
+        List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem);
+        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
+                .thenReturn(response);
+        ArgumentCaptor<ExternalAssetOwnerTransfer> externalAssetOwnerTransferArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer newTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        when(externalAssetOwnerTransferRepository.save(any())).thenReturn(firstResponseItem).thenReturn(newTransfer);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
+        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ONE.negate());
+        when(loanForProcessing.getTotalOverpaid()).thenReturn(BigDecimal.ONE.negate());
+        // when
+        final Loan processedLoan = underTest.execute(loanForProcessing);
+        // then
+        verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
+        verify(firstResponseItem).setEffectiveDateTo(actualDate);
+        verify(externalAssetOwnerTransferRepository, times(2)).save(externalAssetOwnerTransferArgumentCaptor.capture());
+
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getOwner(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getOwner());
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getExternalId(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getExternalId());
+        assertEquals(ExternalTransferStatus.DECLINED, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getStatus());
+        assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getSettlementDate());
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getLoanId(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getLoanId());
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getPurchasePriceRatio(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getPurchasePriceRatio());
+        assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateFrom());
+        assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateTo());
         assertEquals(processedLoan, loanForProcessing);
     }
 
