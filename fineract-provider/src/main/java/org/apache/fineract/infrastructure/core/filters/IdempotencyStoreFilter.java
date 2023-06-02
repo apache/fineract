@@ -22,7 +22,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -30,11 +29,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.domain.Header;
-import org.apache.fineract.commands.domain.CommandSourceRepository;
-import org.apache.fineract.commands.service.CommandSourceService;
 import org.apache.fineract.commands.service.SynchronousCommandProcessingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
@@ -44,31 +38,28 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @RequiredArgsConstructor
 @Slf4j
-public class IdempotencyStoreFilter extends OncePerRequestFilter implements BatchFilter {
-
-    private final CommandSourceRepository commandSourceRepository;
-    private final CommandSourceService commandSourceService;
-
-    private final FineractProperties fineractProperties;
+public class IdempotencyStoreFilter extends OncePerRequestFilter {
 
     private final FineractRequestContextHolder fineractRequestContextHolder;
+    private final IdempotencyStoreHelper helper;
+    private final FineractProperties fineractProperties;
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
             @NotNull FilterChain filterChain) throws ServletException, IOException {
         Mutable<ContentCachingResponseWrapper> wrapper = new MutableObject<>();
-        if (isAllowedContentTypeRequest(request)) {
+        if (helper.isAllowedContentTypeRequest(request)) {
             wrapper.setValue(new ContentCachingResponseWrapper(response));
         }
         extractIdempotentKeyFromHttpServletRequest(request).ifPresent(idempotentKey -> fineractRequestContextHolder
                 .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey, request));
 
         filterChain.doFilter(request, wrapper.getValue() != null ? wrapper.getValue() : response);
-        Optional<Long> commandId = getCommandId(request);
-        boolean isSuccessWithoutStored = isStoreIdempotencyKey(request) && commandId.isPresent() && isAllowedContentTypeResponse(response)
+        Optional<Long> commandId = helper.getCommandId(request);
+        boolean isSuccessWithoutStored = helper.isStoreIdempotencyKey(request) && commandId.isPresent() && helper.isAllowedContentTypeResponse(response)
                 && wrapper.getValue() != null;
         if (isSuccessWithoutStored) {
-            storeCommandResult(false, response.getStatus(), Optional.ofNullable(wrapper.getValue())
+            helper.storeCommandResult(false, response.getStatus(), Optional.ofNullable(wrapper.getValue())
                     .map(ContentCachingResponseWrapper::getContentAsByteArray).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null),
                     commandId);
         }
@@ -77,66 +68,7 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter implements Batc
         }
     }
 
-    private void storeCommandResult(boolean batch, int response, String body, Optional<Long> commandId) {
-        commandSourceRepository.findById(commandId.get()).ifPresent(commandSource -> {
-            commandSource.setResultStatusCode(response);
-            commandSource.setResult(body);
-            if (batch) {
-                commandSourceService.saveResultNoTransaction(commandSource);
-            } else {
-                commandSourceService.saveResult(commandSource);
-            }
-        });
-    }
-
     private Optional<String> extractIdempotentKeyFromHttpServletRequest(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(fineractProperties.getIdempotencyKeyHeaderName()));
-    }
-
-    private boolean isAllowedContentTypeResponse(HttpServletResponse response) {
-        return Optional.ofNullable(response.getContentType()).map(String::toLowerCase).map(ct -> ct.contains("application/json"))
-                .orElse(false) || (response.getStatus() > 200 && response.getStatus() < 300);
-    }
-
-    private boolean isAllowedContentTypeRequest(HttpServletRequest request) {
-        return Optional.ofNullable(request.getContentType()).map(String::toLowerCase).map(ct -> ct.contains("application/json"))
-                .orElse(false);
-    }
-
-    private boolean isStoreIdempotencyKey(HttpServletRequest request) {
-        return Optional
-                .ofNullable(
-                        fineractRequestContextHolder.getAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_STORE_FLAG, request))
-                .filter(Boolean.class::isInstance).map(Boolean.class::cast).orElse(false);
-    }
-
-    private Optional<Long> getCommandId(HttpServletRequest request) {
-        return Optional
-                .ofNullable(fineractRequestContextHolder.getAttribute(SynchronousCommandProcessingService.COMMAND_SOURCE_ID, request))
-                .filter(Long.class::isInstance).map(Long.class::cast);
-    }
-
-    private Optional<String> extractIdempotentKeyFromBatchRequest(BatchRequest request) {
-        if (request.getHeaders() == null) {
-            return Optional.empty();
-        }
-        return request.getHeaders() //
-                .stream().filter(header -> header.getName().equals(fineractProperties.getIdempotencyKeyHeaderName())) //
-                .map(Header::getValue) //
-                .findAny(); //
-
-    }
-
-    @Override
-    public BatchResponse doFilter(BatchRequest batchRequest, UriInfo uriInfo, BatchFilterChain chain) {
-        extractIdempotentKeyFromBatchRequest(batchRequest).ifPresent(idempotentKey -> fineractRequestContextHolder
-                .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey));
-        BatchResponse result = chain.serviceCall(batchRequest, uriInfo);
-        Optional<Long> commandId = getCommandId(null);
-        boolean isSuccessWithoutStored = isStoreIdempotencyKey(null) && commandId.isPresent();
-        if (isSuccessWithoutStored) {
-            storeCommandResult(true, result.getStatusCode(), result.getBody(), commandId);
-        }
-        return result;
     }
 }
