@@ -19,9 +19,9 @@
 package org.apache.fineract.organisation.monetary.domain;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.annotation.PostConstruct;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import jakarta.annotation.PostConstruct;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

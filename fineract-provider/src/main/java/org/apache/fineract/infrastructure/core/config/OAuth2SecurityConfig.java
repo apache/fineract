@@ -96,8 +96,7 @@ public class OAuth2SecurityConfig {
     public SecurityFilterChain authorizationFilterChain(HttpSecurity http) throws Exception {
         http //
                 .securityMatcher("/api/**").authorizeHttpRequests((auth) -> {
-                    auth
-                            .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
                             .requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll() //
                             .requestMatchers(HttpMethod.POST, "/api/*/authentication").permitAll() //
                             .requestMatchers(HttpMethod.POST, "/api/*/self/authentication").permitAll() //
@@ -105,7 +104,8 @@ public class OAuth2SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/*/self/registration/user").permitAll() //
                             .requestMatchers(HttpMethod.POST, "/api/*/twofactor/validate").fullyAuthenticated() //
                             .requestMatchers("/api/*/twofactor").fullyAuthenticated() //
-                            .requestMatchers("/api/**").access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"), selfServiceUserAuthManager())); //
+                            .requestMatchers("/api/**")
+                            .access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"), selfServiceUserAuthManager())); //
                 });
 
         if (serverProperties.getSsl().isEnabled()) {
@@ -134,7 +134,8 @@ public class OAuth2SecurityConfig {
     }
 
     public TenantAwareTenantIdentifierFilter tenantAwareTenantIdentifierFilter() {
-        return new TenantAwareTenantIdentifierFilter(basicAuthTenantDetailsService, toApiJsonSerializer, configurationDomainService, cacheWritePlatformService, businessDateReadPlatformService);
+        return new TenantAwareTenantIdentifierFilter(basicAuthTenantDetailsService, toApiJsonSerializer, configurationDomainService,
+                cacheWritePlatformService, businessDateReadPlatformService);
     }
 
     public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {

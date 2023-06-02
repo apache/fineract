@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +33,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class AccountRunningBalanceUpdateConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -42,7 +43,8 @@ public class AccountRunningBalanceUpdateConfig {
 
     @Bean
     protected Step accountRunningBalanceUpdateStep() {
-        return new StepBuilder(JobName.ACCOUNTING_RUNNING_BALANCE_UPDATE.name(), jobRepository).tasklet(accountRunningBalanceUpdateTasklet(), transactionManager).build();
+        return new StepBuilder(JobName.ACCOUNTING_RUNNING_BALANCE_UPDATE.name(), jobRepository)
+                .tasklet(accountRunningBalanceUpdateTasklet(), transactionManager).build();
     }
 
     @Bean

@@ -26,9 +26,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +37,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @AllArgsConstructor
 public class SetLoanDelinquencyTagsConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -48,7 +49,8 @@ public class SetLoanDelinquencyTagsConfig {
 
     @Bean
     public Step setLoanDelinquencyTagsStep() {
-        return new StepBuilder(JobName.LOAN_DELINQUENCY_CLASSIFICATION.name(), jobRepository).tasklet(setLoanDelinquencyTagsTasklet(), transactionManager).build();
+        return new StepBuilder(JobName.LOAN_DELINQUENCY_CLASSIFICATION.name(), jobRepository)
+                .tasklet(setLoanDelinquencyTagsTasklet(), transactionManager).build();
     }
 
     @Bean

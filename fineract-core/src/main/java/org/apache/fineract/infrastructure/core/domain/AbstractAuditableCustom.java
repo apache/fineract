@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.data.domain.Auditable;
 import org.springframework.data.jpa.domain.AbstractAuditable;
 

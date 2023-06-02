@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.accountnumberformat.service;
 
+import jakarta.persistence.PersistenceException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import jakarta.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.data.AccountNumberFormatDataValidator;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;

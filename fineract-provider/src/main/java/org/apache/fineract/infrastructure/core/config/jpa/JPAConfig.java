@@ -77,7 +77,7 @@ public class JPAConfig extends JpaBaseConfiguration {
     @Primary
     @DependsOn("tenantDatabaseUpgradeService")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder,
-			PersistenceManagedTypes persistenceManagedTypes) {
+            PersistenceManagedTypes persistenceManagedTypes) {
         Map<String, Object> vendorProperties = getVendorProperties();
         String[] packagesToScan = getPackagesToScan();
         return factoryBuilder.dataSource(getDataSource()).properties(vendorProperties).persistenceUnit("jpa-pu").packages(packagesToScan)

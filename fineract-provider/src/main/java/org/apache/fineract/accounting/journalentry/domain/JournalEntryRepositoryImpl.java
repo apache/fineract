@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.accounting.journalentry.domain;
 
-import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 @Repository

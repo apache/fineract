@@ -48,6 +48,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 public class LoanCOBFilterHelper {
+
     private final GLIMAccountInfoRepository glimAccountInfoRepository;
     private final LoanAccountLockService loanAccountLockService;
     private final PlatformSecurityContext context;
@@ -123,6 +124,7 @@ public class LoanCOBFilterHelper {
     private boolean isLoanHardLocked(List<Long> loanIds) {
         return loanIds.stream().anyMatch(loanAccountLockService::isLoanHardLocked);
     }
+
     public boolean isLoanBehind(List<Long> loanIds) {
         List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());

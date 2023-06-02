@@ -26,10 +26,10 @@ import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_SCENARIO
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_SUB_SCENARIO;
 
 import com.google.gson.JsonObject;
-import java.util.Arrays;
-import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropInitiatorType;

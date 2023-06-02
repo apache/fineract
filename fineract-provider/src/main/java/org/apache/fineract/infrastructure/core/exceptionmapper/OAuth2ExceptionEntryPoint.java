@@ -19,10 +19,10 @@
 package org.apache.fineract.infrastructure.core.exceptionmapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.springframework.security.core.AuthenticationException;

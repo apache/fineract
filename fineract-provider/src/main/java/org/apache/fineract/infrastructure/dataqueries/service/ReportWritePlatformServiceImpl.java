@@ -20,10 +20,10 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import jakarta.persistence.PersistenceException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import jakarta.persistence.PersistenceException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;

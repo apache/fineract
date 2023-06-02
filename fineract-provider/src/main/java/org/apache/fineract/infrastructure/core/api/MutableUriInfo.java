@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.core.api;
 
-import java.net.URI;
-import java.util.List;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

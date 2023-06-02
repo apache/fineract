@@ -56,8 +56,8 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, wrapper.getValue() != null ? wrapper.getValue() : response);
         Optional<Long> commandId = helper.getCommandId(request);
-        boolean isSuccessWithoutStored = helper.isStoreIdempotencyKey(request) && commandId.isPresent() && helper.isAllowedContentTypeResponse(response)
-                && wrapper.getValue() != null;
+        boolean isSuccessWithoutStored = helper.isStoreIdempotencyKey(request) && commandId.isPresent()
+                && helper.isAllowedContentTypeResponse(response) && wrapper.getValue() != null;
         if (isSuccessWithoutStored) {
             helper.storeCommandResult(false, response.getStatus(), Optional.ofNullable(wrapper.getValue())
                     .map(ContentCachingResponseWrapper::getContentAsByteArray).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null),

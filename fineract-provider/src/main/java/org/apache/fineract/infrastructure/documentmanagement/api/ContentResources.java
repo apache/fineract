@@ -19,10 +19,10 @@
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
 import com.google.common.io.ByteSource;
-import java.io.IOException;
-import java.io.InputStream;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
+import java.io.IOException;
+import java.io.InputStream;
 import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

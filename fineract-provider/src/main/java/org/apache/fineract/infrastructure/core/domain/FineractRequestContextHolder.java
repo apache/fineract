@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
-import java.util.Optional;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

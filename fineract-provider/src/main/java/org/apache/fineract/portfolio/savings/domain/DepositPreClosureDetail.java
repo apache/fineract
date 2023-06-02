@@ -23,11 +23,11 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClos
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;

@@ -28,9 +28,9 @@ import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPos
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +40,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 public class PostInterestForSavingConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -63,12 +64,13 @@ public class PostInterestForSavingConfig {
 
     @Bean
     protected Step postInterestForSavingStep(PostInterestForSavingTasklet postInterestForSavingTasklet) {
-        return new StepBuilder(JobName.POST_INTEREST_FOR_SAVINGS.name(), jobRepository).tasklet(postInterestForSavingTasklet, transactionManager).build();
+        return new StepBuilder(JobName.POST_INTEREST_FOR_SAVINGS.name(), jobRepository)
+                .tasklet(postInterestForSavingTasklet, transactionManager).build();
     }
 
     @Bean
     public Job postInterestForSavingJob(PostInterestForSavingTasklet postInterestForSavingTasklet) {
-        return new JobBuilder(JobName.POST_INTEREST_FOR_SAVINGS.name(), jobRepository).start(postInterestForSavingStep(postInterestForSavingTasklet))
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.POST_INTEREST_FOR_SAVINGS.name(), jobRepository)
+                .start(postInterestForSavingStep(postInterestForSavingTasklet)).incrementer(new RunIdIncrementer()).build();
     }
 }

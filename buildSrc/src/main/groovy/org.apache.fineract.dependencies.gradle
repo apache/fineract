@@ -124,7 +124,7 @@ dependencyManagement {
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.15.0'
         dependency 'org.webjars:webjars-locator-core:0.52'
-        dependency 'com.icegreen:greenmail-junit5:1.6.14'
+        dependency 'com.icegreen:greenmail-junit5:2.0.0'
         dependency 'com.intuit.karate:karate-junit5:1.4.0'
 
         // fineract client dependencies

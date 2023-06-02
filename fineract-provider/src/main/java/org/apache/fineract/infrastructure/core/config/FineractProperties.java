@@ -387,7 +387,6 @@ public class FineractProperties {
         private boolean enabled;
     }
 
-
     @Getter
     @Setter
     public static class FineractTransactionProcessorItemProperties {

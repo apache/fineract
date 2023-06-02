@@ -19,12 +19,12 @@
 
 package org.apache.fineract.accounting.glaccount.domain;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

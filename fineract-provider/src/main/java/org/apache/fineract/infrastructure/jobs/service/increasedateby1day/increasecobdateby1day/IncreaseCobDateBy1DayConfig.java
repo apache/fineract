@@ -24,9 +24,9 @@ import org.apache.fineract.infrastructure.jobs.service.increasedateby1day.Increa
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +34,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class IncreaseCobDateBy1DayConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -45,13 +46,14 @@ public class IncreaseCobDateBy1DayConfig {
 
     @Bean
     protected Step increaseCobDateBy1DayStep() {
-        return new StepBuilder(JobName.INCREASE_COB_DATE_BY_1_DAY.name(), jobRepository).tasklet(increaseCobDateBy1DayTasklet(), transactionManager).build();
+        return new StepBuilder(JobName.INCREASE_COB_DATE_BY_1_DAY.name(), jobRepository)
+                .tasklet(increaseCobDateBy1DayTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job increaseCobDateBy1DayJob() {
-        return new JobBuilder(JobName.INCREASE_COB_DATE_BY_1_DAY.name(), jobRepository).start(increaseCobDateBy1DayStep()).incrementer(new RunIdIncrementer())
-                .build();
+        return new JobBuilder(JobName.INCREASE_COB_DATE_BY_1_DAY.name(), jobRepository).start(increaseCobDateBy1DayStep())
+                .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

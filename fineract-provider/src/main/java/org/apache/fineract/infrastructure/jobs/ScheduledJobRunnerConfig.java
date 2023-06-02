@@ -57,8 +57,8 @@ public class ScheduledJobRunnerConfig {
     }
 
     @Bean
-    public JobRepository jobRepository(RoutingDataSource routingDataSource,
-                                       PlatformTransactionManager transactionManager) throws Exception {
+    public JobRepository jobRepository(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager)
+            throws Exception {
         JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
         factory.setDataSource(routingDataSource);
         factory.setTransactionManager(transactionManager);
@@ -69,8 +69,7 @@ public class ScheduledJobRunnerConfig {
     }
 
     @Bean
-    public JobExplorer jobExplorer(RoutingDataSource routingDataSource,
-                                   PlatformTransactionManager transactionManager) throws Exception {
+    public JobExplorer jobExplorer(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager) throws Exception {
         JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
         jobExplorerFactoryBean.setDataSource(routingDataSource);
         jobExplorerFactoryBean.setTransactionManager(transactionManager);

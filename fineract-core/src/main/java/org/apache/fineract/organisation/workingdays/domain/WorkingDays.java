@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.organisation.workingdays.domain;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;

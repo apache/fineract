@@ -81,7 +81,10 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     private RequestMatcher requestMatcher = AnyRequestMatcher.INSTANCE;
 
     public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,
-                                                final AuthenticationEntryPoint authenticationEntryPoint, ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer, ConfigurationDomainService configurationDomainService, CacheWritePlatformService cacheWritePlatformService, UserNotificationService userNotificationService, BasicAuthTenantDetailsService basicAuthTenantDetailsService, BusinessDateReadPlatformService businessDateReadPlatformService) {
+            final AuthenticationEntryPoint authenticationEntryPoint, ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
+            ConfigurationDomainService configurationDomainService, CacheWritePlatformService cacheWritePlatformService,
+            UserNotificationService userNotificationService, BasicAuthTenantDetailsService basicAuthTenantDetailsService,
+            BusinessDateReadPlatformService businessDateReadPlatformService) {
         super(authenticationManager, authenticationEntryPoint);
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.configurationDomainService = configurationDomainService;
@@ -121,7 +124,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                     if (pathInfo != null && pathInfo.contains("report")) {
                         isReportRequest = true;
                     }
-                    final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
+                    final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier,
+                            isReportRequest);
                     ThreadLocalContextUtil.setTenant(tenant);
                     HashMap<BusinessDateType, LocalDate> businessDates = this.businessDateReadPlatformService.getBusinessDates();
                     ThreadLocalContextUtil.setBusinessDates(businessDates);
