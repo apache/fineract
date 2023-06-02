@@ -188,6 +188,7 @@ allprojects  {
             '**/*.github/**',
             '**/MANIFEST.MF',
             '**/spring.factories',
+            '**/org.springframework.boot.autoconfigure.AutoConfiguration.imports',
             '**/*.json',
             '**/*.json.template',
             '**/*.txt',
