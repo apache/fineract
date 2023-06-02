@@ -20,11 +20,11 @@ As soon as we can publish Fineract module JARs to Maven Central you'll have more
 1. Create a folder under `custom` and name it according to your company/organisation (e. g. `acme` if your company is `ACME Inc.`); this way your custom modules can't clash even with other companies' modules
 2. Under your company folder create a folder for the `category` or `domain` your module is targeting; e. g. "loan", "client", "account" etc.
 3. Finally, setup `library` folders for the actual modules you want to create; usually that will be to replace/extend some existing service, so there could be a `service` folder, maybe even a `core` folder, e. g. if you want to add additional DTOs etc.; we have also an example for COB business steps
-4. Per `category`/`domain` you should have a `starter` library; means: a Spring Boot auto-configuration setup that makes including your module in Fineract easier ("hands-free"); the necessary parts for a auto-configuration library are a Spring Java configuration class (annotated with `@Configuration`) and a text file at `META-INF/spring.factories` in your starter resource folder:
+4. Per `category`/`domain` you should have a `starter` library; means: a Spring Boot auto-configuration setup that makes including your module in Fineract easier ("hands-free"); the necessary parts for a auto-configuration library are a Spring Java configuration class (annotated with `@Configuration`) and a text file at `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` in your starter resource folder:
 +
 [source,properties]
 ----
-include::{rootdir}/custom/acme/note/starter/src/main/resources/META-INF/spring.factories[]
+include::{rootdir}/custom/acme/note/starter/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports[]
 ----
 +
 Please make sure that your module libraries have proper `build.gradle` files:

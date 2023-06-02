@@ -17,7 +17,7 @@
     +++++++++ 0001_acme_note_initial.xml
     ++++++++ changelog-acme-note.xml
     ++++++ META-INF
-    +++++++ spring.factories
+    +++++++ spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
     +++++ build.gradle
     +++++ dependencies.gradle
     }
