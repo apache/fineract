@@ -55,10 +55,10 @@ public class SecurityFilterChainDiagnostics implements InitializingBean {
 
         log.info("""
 
-                Filter chain matcher: %s
+                Filter chain matcher: {}
                 Filters in order:
-                %s
-                """.formatted(filterChain.getRequestMatcher(), getFormattedFilters(filterChain)));
+                {}
+                """, filterChain.getRequestMatcher(), getFormattedFilters(filterChain));
     }
 
     private String getFormattedFilters(DefaultSecurityFilterChain filterChain) {
@@ -74,7 +74,7 @@ public class SecurityFilterChainDiagnostics implements InitializingBean {
     private void printUnknownFilterChain(SecurityFilterChain filterChain) {
         log.info("""
                 Filter chain:
-                %s
-                """.formatted(filterChain));
+                {}
+                """, filterChain);
     }
 }
