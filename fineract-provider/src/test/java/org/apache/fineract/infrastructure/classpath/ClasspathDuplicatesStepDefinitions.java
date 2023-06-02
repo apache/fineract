@@ -114,6 +114,12 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 || resourcePath.equals("META-INF/BC1024KE.DSA") || resourcePath.equals("META-INF/BC2048KE.SF")
                 || resourcePath.equals("META-INF/BC1024KE.SF") || resourcePath.equals("OSGI-INF/bundle.info")
                 || resourcePath.equals("META-INF/DUMMY.SF") || resourcePath.equals("META-INF/DUMMY.DSA")
+                || resourcePath.equals("META-INF/validation-mapping-1.0.xsd") || resourcePath.equals("META-INF/validation-mapping-1.1.xsd")
+                || resourcePath.equals("META-INF/validation-mapping-2.0.xsd") || resourcePath.equals("META-INF/validation-mapping-3.0.xsd")
+                || resourcePath.equals("META-INF/validation-configuration-1.0.xsd")
+                || resourcePath.equals("META-INF/validation-configuration-1.1.xsd")
+                || resourcePath.equals("META-INF/validation-configuration-2.0.xsd")
+                || resourcePath.equals("META-INF/validation-configuration-3.0.xsd")
                 // Spring Framework knows what they are do..
                 || resourcePath.startsWith("META-INF/spring") || resourcePath.startsWith("META-INF/additional-spring")
                 || resourcePath.startsWith("META-INF/terracotta")
