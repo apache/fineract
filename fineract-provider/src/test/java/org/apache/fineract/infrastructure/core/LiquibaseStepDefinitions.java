@@ -19,11 +19,10 @@
 package org.apache.fineract.infrastructure.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -119,15 +118,16 @@ public class LiquibaseStepDefinitions implements En {
 
         Then("The tenant store upgrade fails with a schema upgrade needed", () -> {
             assertThat(executionException).isNotNull();
-            verify(liquibaseFactory).create(eq(tenantStoreDataSource), any());
+            verify(liquibaseFactory).create(eq(tenantStoreDataSource), anyString(), anyString());
             verifyNoMoreInteractions(liquibaseFactory);
             verifyNoInteractions(initialTenantStoreLiquibase, tenantStoreLiquibase, initialTenantLiquibase, tenantLiquibase);
         });
 
         Then("The default tenant upgrade fails with a schema upgrade needed", () -> {
             assertThat(executionException).isNotNull();
-            verify(liquibaseFactory, times(2)).create(eq(tenantStoreDataSource), any());
-            verify(liquibaseFactory).create(eq(defaultTenantDataSource), any());
+            verify(liquibaseFactory).create(eq(tenantStoreDataSource), anyString(), anyString());
+            verify(liquibaseFactory).create(eq(tenantStoreDataSource), anyString());
+            verify(liquibaseFactory).create(eq(defaultTenantDataSource), anyString(), anyString(), anyString());
             verifyNoMoreInteractions(liquibaseFactory);
             verify(initialTenantStoreLiquibase).changeLogSync();
             verify(tenantStoreLiquibase).afterPropertiesSet();
