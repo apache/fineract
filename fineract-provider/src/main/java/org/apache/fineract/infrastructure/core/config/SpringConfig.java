@@ -22,9 +22,11 @@ package org.apache.fineract.infrastructure.core.config;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 
 @Configuration
 public class SpringConfig {
@@ -39,11 +41,17 @@ public class SpringConfig {
     // The application events (for importing) rely on the inheritable thread local security context strategy
     // This is NOT compatible with threadpools so if we use threadpools the below will need to be reworked
     @Bean
-    public MethodInvokingFactoryBean methodInvokingFactoryBean() {
+    public MethodInvokingFactoryBean overrideSecurityContextHolderStrategy() {
         MethodInvokingFactoryBean mifb = new MethodInvokingFactoryBean();
         mifb.setTargetClass(SecurityContextHolder.class);
         mifb.setTargetMethod("setStrategyName");
         mifb.setArguments("MODE_INHERITABLETHREADLOCAL");
         return mifb;
+    }
+
+    @Bean
+    @DependsOn("overrideSecurityContextHolderStrategy")
+    public SecurityContextHolderStrategy securityContextHolderStrategy() {
+        return SecurityContextHolder.getContextHolderStrategy();
     }
 }

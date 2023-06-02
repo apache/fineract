@@ -30,6 +30,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.springframework.beans.factory.InitializingBean;
@@ -43,6 +44,7 @@ public class JobExecutionRepository implements InitializingBean {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final FineractProperties fineractProperties;
     private final DatabaseTypeResolver databaseTypeResolver;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final GoogleGsonSerializerHelper gsonFactory;
     private Gson gson;
 
@@ -169,7 +171,7 @@ public class JobExecutionRepository implements InitializingBean {
         String jsonString = gson.toJson(new JobParameterDTO(parameterKeyName, parameterValue));
         sqlStatementBuilder.append(
                 "SELECT bje.JOB_EXECUTION_ID FROM BATCH_JOB_INSTANCE bji INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID INNER JOIN BATCH_JOB_EXECUTION_PARAMS bjep ON bje.JOB_EXECUTION_ID = bjep.JOB_EXECUTION_ID"
-                        + " WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bjep.KEY_NAME = :jobCustomParamKeyName AND bjep.LONG_VAL IN ("
+                        + " WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bjep.PARAMETER_NAME = :jobCustomParamKeyName AND " + sqlGenerator.castBigInt("bjep.PARAMETER_VALUE") + " IN ("
                         + getSubQueryForCustomJobParameters()
                         + ") AND bje.JOB_INSTANCE_ID NOT IN (SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID"
                         + " WHERE bje.STATUS = :completedStatus AND bji.JOB_NAME = :jobName)");

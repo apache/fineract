@@ -23,8 +23,6 @@ import static org.springframework.security.authorization.AuthenticatedAuthorizat
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
 
-import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
-import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.service.CommandSourceService;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
@@ -33,12 +31,14 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.filters.CorrelationHeaderFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
+import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreHelper;
 import org.apache.fineract.infrastructure.core.filters.RequestResponseFilter;
 import org.apache.fineract.infrastructure.core.filters.ResponseCorsFilter;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.MDCWrapper;
 import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
+import org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.filter.InsecureTwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
@@ -48,9 +48,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.notification.service.UserNotificationService;
-import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -69,10 +66,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration(proxyBeanMethods = false)
+@Configuration
 @ConditionalOnProperty("fineract.security.basicauth.enabled")
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -110,19 +107,11 @@ public class SecurityConfig {
     private FineractRequestContextHolder fineractRequestContextHolder;
 
     @Autowired
-    private GLIMAccountInfoRepository glimAccountInfoRepository;
-    @Autowired
-    private LoanAccountLockService loanAccountLockService;
+    private LoanCOBFilterHelper loanCOBFilterHelper;
     @Autowired
     private PlatformSecurityContext context;
     @Autowired
-    private InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
-    @Autowired
-    private LoanRepository loanRepository;
-    @Autowired
-    private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
+    private IdempotencyStoreHelper idempotencyStoreHelper;
 
     @Bean
     public SecurityFilterChain authorizationFilterChain(HttpSecurity http) throws Exception {
@@ -152,14 +141,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http //
                 .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
-                .securityContext((securityContext) -> securityContext.requireExplicitSave(false))
                 .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
+                .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class)
                 .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class)
                 .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class)
                 .addFilterAfter(responseCorsFilter(), CorrelationHeaderFilter.class) //
                 .addFilterAfter(fineractInstanceModeApiFilter(), ResponseCorsFilter.class) //
-                .addFilterAfter(tenantAwareBasicAuthenticationFilter(), FineractInstanceModeApiFilter.class) //
-                .addFilterAfter(loanCOBApiFilter(), TenantAwareBasicAuthenticationFilter.class) //
+                .addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
                 .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
 
         if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
@@ -176,7 +164,7 @@ public class SecurityConfig {
     }
 
     public LoanCOBApiFilter loanCOBApiFilter() {
-        return new LoanCOBApiFilter(glimAccountInfoRepository, loanAccountLockService, context, inlineLoanCOBExecutorService, loanRepository, fineractProperties, loanRescheduleRequestRepository, transactionManager);
+        return new LoanCOBApiFilter(loanCOBFilterHelper);
     }
 
     public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
@@ -193,7 +181,7 @@ public class SecurityConfig {
     }
 
     public IdempotencyStoreFilter idempotencyStoreFilter() {
-        return new IdempotencyStoreFilter(commandSourceRepository, commandSourceService, fineractProperties, fineractRequestContextHolder);
+        return new IdempotencyStoreFilter(fineractRequestContextHolder, idempotencyStoreHelper, fineractProperties);
     }
 
     public CorrelationHeaderFilter correlationHeaderFilter() {

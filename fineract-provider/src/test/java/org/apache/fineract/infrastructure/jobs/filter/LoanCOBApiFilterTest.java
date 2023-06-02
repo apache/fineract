@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
+import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper.LOAN_GLIMACCOUNT_PATH_PATTERN;
+import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper.LOAN_PATH_PATTERN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +29,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.sun.research.ws.wadl.HTTPMethods;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -36,8 +40,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
@@ -55,6 +57,7 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanResch
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -69,8 +72,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class LoanCOBApiFilterTest {
 
-    @InjectMocks
     private LoanCOBApiFilter testObj;
+    @InjectMocks
+    private LoanCOBFilterHelper helper;
     @Mock
     private LoanAccountLockService loanAccountLockService;
     @Mock
@@ -85,41 +89,45 @@ class LoanCOBApiFilterTest {
     private FineractProperties fineractProperties;
     @Mock
     private FineractProperties.FineractQueryProperties fineractQueryProperties;
-
     @Mock
     private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
+
+    @BeforeEach
+    public void setUp() {
+        testObj = new LoanCOBApiFilter(helper);
+    }
 
     @Test
     void shouldLoanAndExternalMatchToo() {
         String externalId = UUID.randomUUID().toString();
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").matches());
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).matches());
+        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/loans/12").matches());
+        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").matches());
+        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").matches());
+        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12").matches());
+        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").matches());
+        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").matches());
+        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).matches());
         Assertions.assertTrue(
-                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").matches());
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12").replaceAll("$1"));
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").replaceAll("$1"));
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12").replaceAll("$1"));
+                LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").matches());
+        Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/loans/12").replaceAll("$1"));
+        Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").replaceAll("$1"));
+        Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12").replaceAll("$1"));
         Assertions.assertEquals("12",
-                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").replaceAll("$1"));
+                LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").replaceAll("$1"));
         Assertions.assertEquals(externalId,
-                LoanCOBApiFilter.LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).replaceAll("$1"));
-        Assertions.assertEquals(externalId, LoanCOBApiFilter.LOAN_PATH_PATTERN
+                LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).replaceAll("$1"));
+        Assertions.assertEquals(externalId, LOAN_PATH_PATTERN
                 .matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").replaceAll("$1"));
     }
 
     @Test
     void shouldGlimAccountMatch() {
-        Assertions.assertTrue(LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12").matches());
+        Assertions.assertTrue(LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12").matches());
         Assertions.assertTrue(
-                LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").matches());
-        Assertions.assertEquals("12", LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12").replaceAll("$1"));
+                LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").matches());
+        Assertions.assertEquals("12", LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12").replaceAll("$1"));
         Assertions.assertEquals("12",
-                LoanCOBApiFilter.LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").replaceAll("$1"));
+                LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").replaceAll("$1"));
     }
 
     @Test

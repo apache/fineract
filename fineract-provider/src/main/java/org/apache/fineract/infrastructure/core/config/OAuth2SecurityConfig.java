@@ -61,7 +61,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 
-@Configuration(proxyBeanMethods = false)
+@Configuration
 @ConditionalOnProperty("fineract.security.oauth.enabled")
 @EnableMethodSecurity
 public class OAuth2SecurityConfig {
