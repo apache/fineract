@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,6 +85,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
     @Test
     public void testQueryDataTableSuccess() {
+        mockDatatableValidation();
         SqlRowSet sqlRS = Mockito.mock(SqlRowSet.class);
         when(jdbcTemplate.queryForRowSet(eq("select rc1,rc2 from table where cf1 = ?"), any(Object.class))).thenReturn(sqlRS);
         when(sqlRS.next()).thenReturn(true).thenReturn(false);
@@ -107,13 +109,22 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
     @Test
     public void testQueryDataTableValidationError() {
+        mockDatatableValidation();
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(emptyList());
         assertThrows(PlatformApiDataValidationException.class, () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));
+    }
+
+    @Test
+    public void testDatatableValidationError() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(0);
+
+        assertThrows(DatatableNotFoundException.class, () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));
     }
 
     @ParameterizedTest
     @MethodSource("provideParameters")
     public void testQueryDataTableInvalidParameterError(String columnType, String errorMessage) {
+        mockDatatableValidation();
         ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", columnType, 10L, false, false, emptyList(), null, false,
                 false);
         ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, emptyList(), null, false,
@@ -127,6 +138,10 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
         assertEquals(1, thrown.getErrors().size());
         assertEquals(errorMessage, thrown.getErrors().get(0).getUserMessageGlobalisationCode());
+    }
+
+    private void mockDatatableValidation() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
     }
 
     private static Stream<Arguments> provideParameters() {

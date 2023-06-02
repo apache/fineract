@@ -196,6 +196,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public List<JsonObject> queryDataTable(String datatable, final String columnFilter, String valueFilter, String resultColumns) {
         asList(datatable, columnFilter, valueFilter, resultColumns).forEach(SQLInjectionValidator::validateDynamicQuery);
+        validateDatatable(datatable);
 
         List<ResultsetColumnHeaderData> resultsetColumnHeaderData = genericDataService.fillResultsetColumnHeaders(datatable);
         validateRequestParams(columnFilter, valueFilter, resultColumns, resultsetColumnHeaderData);
@@ -1857,6 +1858,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         return applicationTableName;
+    }
+
+    private void validateDatatable(final String datatable) {
+        final String sql = "SELECT COUNT(application_table_name) FROM x_registered_table WHERE registered_table_name = ?";
+        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, datatable);
+        if (count == 0) {
+            throw new DatatableNotFoundException(datatable);
+        }
     }
 
     private String getFKField(final String applicationTableName) {
