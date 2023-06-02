@@ -29,10 +29,10 @@
     <changeSet author="fineract" id="1">
         <dropColumn tableName="BATCH_JOB_EXECUTION" columnName="JOB_CONFIGURATION_LOCATION"/>
     </changeSet>
-    <changeSet author="fineract" id="2" context="postgresql">
+    <changeSet author="fineract" id="2" context="mysql">
         <sql>
             UPDATE BATCH_JOB_EXECUTION_PARAMS
-            SET STRING_VAL = TO_CHAR(DATE_VAL, 'YYYY-MM-DDTHH:MM:SSZ')
+            SET STRING_VAL = DATE_FORMAT(DATE_VAL, 'YYYY-MM-DDTHH:MM:SSZ')
             WHERE TYPE_CD = 'DATE'
         </sql>
         <sql>
@@ -46,10 +46,10 @@
             WHERE TYPE_CD = 'DOUBLE'
         </sql>
     </changeSet>
-    <changeSet author="fineract" id="2" context="mysql">
+    <changeSet author="fineract" id="2" context="postgresql">
         <sql>
             UPDATE BATCH_JOB_EXECUTION_PARAMS
-            SET STRING_VAL = DATE_FORMAT(DATE_VAL, 'YYYY-MM-DDTHH:MM:SSZ')
+            SET STRING_VAL = TO_CHAR(DATE_VAL, 'YYYY-MM-DDTHH:MM:SSZ')
             WHERE TYPE_CD = 'DATE'
         </sql>
         <sql>
