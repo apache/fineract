@@ -24,9 +24,9 @@ import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatform
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +34,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class UpdateDepositsAccountMaturityDetailsConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -45,14 +46,14 @@ public class UpdateDepositsAccountMaturityDetailsConfig {
 
     @Bean
     protected Step updateDepositsAccountMaturityDetailsStep() {
-        return new StepBuilder(JobName.UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS.name(), jobRepository).tasklet(updateDepositsAccountMaturityDetailsTasklet(), transactionManager)
-                .build();
+        return new StepBuilder(JobName.UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS.name(), jobRepository)
+                .tasklet(updateDepositsAccountMaturityDetailsTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job updateDepositsAccountMaturityDetailsJob() {
-        return new JobBuilder(JobName.UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS.name(), jobRepository).start(updateDepositsAccountMaturityDetailsStep())
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS.name(), jobRepository)
+                .start(updateDepositsAccountMaturityDetailsStep()).incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

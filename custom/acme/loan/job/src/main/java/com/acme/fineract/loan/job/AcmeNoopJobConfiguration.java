@@ -31,6 +31,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class AcmeNoopJobConfiguration {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -45,7 +46,8 @@ public class AcmeNoopJobConfiguration {
 
     @Bean
     public Job acmeNoopJob() {
-        return new JobBuilder(AcmeJobName.ACME_NOOP_JOB.name(), jobRepository).start(acmeNoopJobStep()).incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(AcmeJobName.ACME_NOOP_JOB.name(), jobRepository).start(acmeNoopJobStep()).incrementer(new RunIdIncrementer())
+                .build();
     }
 
 }

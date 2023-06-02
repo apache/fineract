@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.tax.domain;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 
 @Entity

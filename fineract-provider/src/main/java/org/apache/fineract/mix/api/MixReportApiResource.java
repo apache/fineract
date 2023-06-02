@@ -19,12 +19,12 @@
 package org.apache.fineract.mix.api;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.sql.Date;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import java.sql.Date;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.mix.data.XBRLData;
 import org.apache.fineract.mix.service.XBRLBuilder;

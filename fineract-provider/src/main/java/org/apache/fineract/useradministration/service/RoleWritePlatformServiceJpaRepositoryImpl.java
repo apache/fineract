@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.useradministration.service;
 
+import jakarta.persistence.PersistenceException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;

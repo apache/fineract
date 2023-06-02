@@ -25,6 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
@@ -33,7 +34,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jakarta.persistence.EntityManager;
 import org.apache.fineract.avro.BulkMessageItemV1;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;

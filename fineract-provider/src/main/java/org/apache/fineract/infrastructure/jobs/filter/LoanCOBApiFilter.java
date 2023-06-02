@@ -33,6 +33,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 public class LoanCOBApiFilter extends OncePerRequestFilter {
+
     private final LoanCOBFilterHelper helper;
 
     private static class Reject {

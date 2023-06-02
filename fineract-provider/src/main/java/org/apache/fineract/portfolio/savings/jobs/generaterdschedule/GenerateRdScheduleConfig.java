@@ -24,9 +24,9 @@ import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformS
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +34,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class GenerateRdScheduleConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -45,12 +46,14 @@ public class GenerateRdScheduleConfig {
 
     @Bean
     protected Step generateRdScheduleStep() {
-        return new StepBuilder(JobName.GENERATE_RD_SCEHDULE.name(), jobRepository).tasklet(generateRdScheduleTasklet(), transactionManager).build();
+        return new StepBuilder(JobName.GENERATE_RD_SCEHDULE.name(), jobRepository).tasklet(generateRdScheduleTasklet(), transactionManager)
+                .build();
     }
 
     @Bean
     public Job generateRdScheduleJob() {
-        return new JobBuilder(JobName.GENERATE_RD_SCEHDULE.name(), jobRepository).start(generateRdScheduleStep()).incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.GENERATE_RD_SCEHDULE.name(), jobRepository).start(generateRdScheduleStep())
+                .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

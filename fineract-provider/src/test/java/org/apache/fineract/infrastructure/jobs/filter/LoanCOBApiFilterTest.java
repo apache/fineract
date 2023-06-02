@@ -107,24 +107,20 @@ class LoanCOBApiFilterTest {
         Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").matches());
         Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").matches());
         Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).matches());
-        Assertions.assertTrue(
-                LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").matches());
+        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").matches());
         Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/loans/12").replaceAll("$1"));
         Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/loans/12?correct=parameter").replaceAll("$1"));
         Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12").replaceAll("$1"));
-        Assertions.assertEquals("12",
-                LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").replaceAll("$1"));
+        Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/rescheduleloans/12?correct=parameter").replaceAll("$1"));
+        Assertions.assertEquals(externalId, LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).replaceAll("$1"));
         Assertions.assertEquals(externalId,
-                LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId).replaceAll("$1"));
-        Assertions.assertEquals(externalId, LOAN_PATH_PATTERN
-                .matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").replaceAll("$1"));
+                LOAN_PATH_PATTERN.matcher("/v1/loans/external-id/" + externalId + "?additional=parameter").replaceAll("$1"));
     }
 
     @Test
     void shouldGlimAccountMatch() {
         Assertions.assertTrue(LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12").matches());
-        Assertions.assertTrue(
-                LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").matches());
+        Assertions.assertTrue(LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").matches());
         Assertions.assertEquals("12", LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12").replaceAll("$1"));
         Assertions.assertEquals("12",
                 LOAN_GLIMACCOUNT_PATH_PATTERN.matcher("/v1/loans/glimAccount/12?additional=parameter").replaceAll("$1"));

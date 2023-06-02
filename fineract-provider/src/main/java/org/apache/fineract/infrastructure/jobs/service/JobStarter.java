@@ -80,7 +80,8 @@ public class JobStarter {
     private Map<String, JobParameter<?>> provideCustomJobParameters(String jobName, Set<JobParameterDTO> jobParameterDTOSet) {
         Optional<JobParameterProvider<?>> jobParameterProvider = jobParameterProviders.stream()
                 .filter(provider -> provider.canProvideParametersForJob(jobName)).findFirst();
-        Map<String, ? extends JobParameter<?>> map = jobParameterProvider.map(parameterProvider -> parameterProvider.provide(jobParameterDTOSet)).orElse(Collections.emptyMap());
+        Map<String, ? extends JobParameter<?>> map = jobParameterProvider
+                .map(parameterProvider -> parameterProvider.provide(jobParameterDTOSet)).orElse(Collections.emptyMap());
         return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

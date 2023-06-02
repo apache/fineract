@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import jakarta.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,7 +30,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

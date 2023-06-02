@@ -95,13 +95,14 @@ public class LoanCOBManagerConfiguration {
 
     @Bean
     public Step resolveCustomJobParametersStep() {
-        return new StepBuilder("Resolve custom job parameters - Step", jobRepository).tasklet(resolveCustomJobParametersTasklet(), transactionManager)
-                .listener(customJobParametersPromotionListener()).build();
+        return new StepBuilder("Resolve custom job parameters - Step", jobRepository)
+                .tasklet(resolveCustomJobParametersTasklet(), transactionManager).listener(customJobParametersPromotionListener()).build();
     }
 
     @Bean
     public Step stayedLockedStep() {
-        return new StepBuilder("Stayed locked loan accounts - Step", jobRepository).tasklet(stayedLockedTasklet(), transactionManager).build();
+        return new StepBuilder("Stayed locked loan accounts - Step", jobRepository).tasklet(stayedLockedTasklet(), transactionManager)
+                .build();
     }
 
     @Bean

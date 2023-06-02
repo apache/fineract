@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.filters;
 
+import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.function.BiFunction;
-import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;

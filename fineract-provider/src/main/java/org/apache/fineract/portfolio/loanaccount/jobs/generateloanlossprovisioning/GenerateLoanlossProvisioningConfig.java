@@ -24,9 +24,9 @@ import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteri
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +34,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class GenerateLoanlossProvisioningConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -46,7 +47,8 @@ public class GenerateLoanlossProvisioningConfig {
 
     @Bean
     protected Step generateLoanlossProvisioningStep() {
-        return new StepBuilder(JobName.GENERATE_LOANLOSS_PROVISIONING.name(), jobRepository).tasklet(generateLoanlossProvisioningTasklet(), transactionManager).build();
+        return new StepBuilder(JobName.GENERATE_LOANLOSS_PROVISIONING.name(), jobRepository)
+                .tasklet(generateLoanlossProvisioningTasklet(), transactionManager).build();
     }
 
     @Bean

@@ -34,6 +34,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Component
 @RequiredArgsConstructor
 public class LoanCOBBatchPreprocessor implements BatchRequestPreprocessor {
+
     private final LoanCOBFilterHelper helper;
 
     private final PlatformTransactionManager transactionManager;

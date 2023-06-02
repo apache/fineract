@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.portfolio.self.client.data;
 
+import jakarta.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import jakarta.ws.rs.core.UriInfo;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.springframework.stereotype.Component;

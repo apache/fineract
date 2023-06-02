@@ -171,8 +171,8 @@ public class JobExecutionRepository implements InitializingBean {
         String jsonString = gson.toJson(new JobParameterDTO(parameterKeyName, parameterValue));
         sqlStatementBuilder.append(
                 "SELECT bje.JOB_EXECUTION_ID FROM BATCH_JOB_INSTANCE bji INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID INNER JOIN BATCH_JOB_EXECUTION_PARAMS bjep ON bje.JOB_EXECUTION_ID = bjep.JOB_EXECUTION_ID"
-                        + " WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bjep.PARAMETER_NAME = :jobCustomParamKeyName AND " + sqlGenerator.castBigInt("bjep.PARAMETER_VALUE") + " IN ("
-                        + getSubQueryForCustomJobParameters()
+                        + " WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bjep.PARAMETER_NAME = :jobCustomParamKeyName AND "
+                        + sqlGenerator.castBigInt("bjep.PARAMETER_VALUE") + " IN (" + getSubQueryForCustomJobParameters()
                         + ") AND bje.JOB_INSTANCE_ID NOT IN (SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID"
                         + " WHERE bje.STATUS = :completedStatus AND bji.JOB_NAME = :jobName)");
         return namedParameterJdbcTemplate.queryForList(

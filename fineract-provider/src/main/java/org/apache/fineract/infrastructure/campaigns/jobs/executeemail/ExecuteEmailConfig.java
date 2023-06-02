@@ -30,9 +30,9 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +40,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class ExecuteEmailConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -69,7 +70,8 @@ public class ExecuteEmailConfig {
 
     @Bean
     public Job executeEmailJob() {
-        return new JobBuilder(JobName.EXECUTE_EMAIL.name(), jobRepository).start(executeEmailStep()).incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.EXECUTE_EMAIL.name(), jobRepository).start(executeEmailStep()).incrementer(new RunIdIncrementer())
+                .build();
     }
 
     @Bean

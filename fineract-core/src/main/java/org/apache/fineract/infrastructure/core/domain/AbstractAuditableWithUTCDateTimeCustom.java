@@ -23,10 +23,10 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY_DB_FIELD;
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE_DB_FIELD;
 
-import java.time.OffsetDateTime;
-import java.util.Optional;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

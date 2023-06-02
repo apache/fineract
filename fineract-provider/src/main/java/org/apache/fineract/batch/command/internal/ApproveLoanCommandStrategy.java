@@ -21,8 +21,8 @@ package org.apache.fineract.batch.command.internal;
 import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
 
 import com.google.common.base.Splitter;
-import java.util.List;
 import jakarta.ws.rs.core.UriInfo;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;

@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.core.persistence;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.FlushModeType;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.JpaTransactionManager;

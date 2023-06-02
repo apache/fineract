@@ -166,8 +166,7 @@ public class DatabaseSpecificSQLGenerator {
         } else if (databaseTypeResolver.isPostgreSQL()) {
             return format("%s::BIGINT", sql);
         } else {
-            throw new IllegalStateException(
-                    "Database type is not supported for casting to bigint " + databaseTypeResolver.databaseType());
+            throw new IllegalStateException("Database type is not supported for casting to bigint " + databaseTypeResolver.databaseType());
         }
     }
 

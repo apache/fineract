@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 
 /**

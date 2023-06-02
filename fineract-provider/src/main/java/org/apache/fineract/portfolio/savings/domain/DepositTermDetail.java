@@ -25,12 +25,12 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maxDepo
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepositTermParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepositTermTypeIdParamName;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;

@@ -22,9 +22,9 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +32,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class ApplyHolidaysToLoansConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -39,12 +40,13 @@ public class ApplyHolidaysToLoansConfig {
 
     @Bean
     protected Step applyHolidaysToLoansStep(ApplyHolidaysToLoansTasklet applyHolidaysToLoansTasklet) {
-        return new StepBuilder(JobName.APPLY_HOLIDAYS_TO_LOANS.name(), jobRepository).tasklet(applyHolidaysToLoansTasklet, transactionManager).build();
+        return new StepBuilder(JobName.APPLY_HOLIDAYS_TO_LOANS.name(), jobRepository)
+                .tasklet(applyHolidaysToLoansTasklet, transactionManager).build();
     }
 
     @Bean
     public Job applyHolidaysToLoansJob(ApplyHolidaysToLoansTasklet applyHolidaysToLoansTasklet) {
-        return new JobBuilder(JobName.APPLY_HOLIDAYS_TO_LOANS.name(), jobRepository).start(applyHolidaysToLoansStep(applyHolidaysToLoansTasklet))
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.APPLY_HOLIDAYS_TO_LOANS.name(), jobRepository)
+                .start(applyHolidaysToLoansStep(applyHolidaysToLoansTasklet)).incrementer(new RunIdIncrementer()).build();
     }
 }

@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
-import java.math.BigDecimal;
-import java.util.Map;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.math.BigDecimal;
+import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 

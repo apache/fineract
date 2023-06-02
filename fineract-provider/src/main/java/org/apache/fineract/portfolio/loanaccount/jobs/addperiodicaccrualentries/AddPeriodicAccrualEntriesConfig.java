@@ -33,6 +33,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class AddPeriodicAccrualEntriesConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired

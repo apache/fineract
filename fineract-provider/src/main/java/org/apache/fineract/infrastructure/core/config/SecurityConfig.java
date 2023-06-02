@@ -73,6 +73,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @ConditionalOnProperty("fineract.security.basicauth.enabled")
 @EnableMethodSecurity
 public class SecurityConfig {
+
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -117,8 +118,7 @@ public class SecurityConfig {
     public SecurityFilterChain authorizationFilterChain(HttpSecurity http) throws Exception {
         http //
                 .securityMatcher("/api/**").authorizeHttpRequests((auth) -> {
-                    auth
-                            .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
                             .requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll() //
                             .requestMatchers(HttpMethod.POST, "/api/*/authentication").permitAll() //
                             .requestMatchers(HttpMethod.POST, "/api/*/self/authentication").permitAll() //
@@ -193,10 +193,9 @@ public class SecurityConfig {
     }
 
     public TenantAwareBasicAuthenticationFilter tenantAwareBasicAuthenticationFilter() throws Exception {
-        TenantAwareBasicAuthenticationFilter filter = new TenantAwareBasicAuthenticationFilter(authenticationManagerBean(), basicAuthenticationEntryPoint(),
-                toApiJsonSerializer, configurationDomainService, cacheWritePlatformService,
-                userNotificationService, basicAuthTenantDetailsService,
-                businessDateReadPlatformService);
+        TenantAwareBasicAuthenticationFilter filter = new TenantAwareBasicAuthenticationFilter(authenticationManagerBean(),
+                basicAuthenticationEntryPoint(), toApiJsonSerializer, configurationDomainService, cacheWritePlatformService,
+                userNotificationService, basicAuthTenantDetailsService, businessDateReadPlatformService);
         filter.setRequestMatcher(AntPathRequestMatcher.antMatcher("/api/**"));
         return filter;
     }

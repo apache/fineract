@@ -20,10 +20,10 @@ package org.apache.fineract.infrastructure.core.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
+import jakarta.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import jakarta.ws.rs.core.Response.Status;
 
 /**
  *

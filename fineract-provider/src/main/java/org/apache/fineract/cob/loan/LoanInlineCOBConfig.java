@@ -31,10 +31,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +45,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Configuration
 @EnableBatchIntegration
 public class LoanInlineCOBConfig {
+
     @Autowired
     private JobRepository jobRepository;
     @Autowired
@@ -75,13 +76,14 @@ public class LoanInlineCOBConfig {
 
     @Bean
     protected Step inlineCOBBuildExecutionContextStep() {
-        return new StepBuilder("Inline COB build execution context step", jobRepository).tasklet(inlineLoanCOBBuildExecutionContextTasklet(), transactionManager)
-                .listener(inlineCobPromotionListener()).build();
+        return new StepBuilder("Inline COB build execution context step", jobRepository)
+                .tasklet(inlineLoanCOBBuildExecutionContextTasklet(), transactionManager).listener(inlineCobPromotionListener()).build();
     }
 
     @Bean
     public Step inlineLoanCOBStep() {
-        return new StepBuilder("Inline Loan COB Step", jobRepository).<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name()), transactionManager)
+        return new StepBuilder("Inline Loan COB Step", jobRepository)
+                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name()), transactionManager)
                 .reader(inlineCobWorkerItemReader()).processor(inlineCobWorkerItemProcessor()).writer(inlineCobWorkerItemWriter())
                 .listener(inlineCobLoanItemListener()).build();
     }

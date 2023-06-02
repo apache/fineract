@@ -22,9 +22,9 @@ import org.springframework.batch.core.configuration.support.DefaultBatchConfigur
 import org.springframework.batch.core.repository.ExecutionContextSerializer;
 import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 
-
 //@Configuration(proxyBeanMethods = false)
 public class FineractBatchConfiguration extends DefaultBatchConfiguration {
+
     @Override
     protected ExecutionContextSerializer getExecutionContextSerializer() {
         return new Jackson2ExecutionContextStringSerializer();

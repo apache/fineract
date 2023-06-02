@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class SecurityFilterChainDiagnostics implements InitializingBean {
+
     private final List<SecurityFilterChain> filterChains;
 
     @Override
@@ -52,9 +53,8 @@ public class SecurityFilterChainDiagnostics implements InitializingBean {
 
     private void printDefaultFilterChain(DefaultSecurityFilterChain filterChain) {
 
-        log.info(
-                """
-                
+        log.info("""
+
                 Filter chain matcher: %s
                 Filters in order:
                 %s
@@ -72,8 +72,7 @@ public class SecurityFilterChainDiagnostics implements InitializingBean {
     }
 
     private void printUnknownFilterChain(SecurityFilterChain filterChain) {
-        log.info(
-                """
+        log.info("""
                 Filter chain:
                 %s
                 """.formatted(filterChain));
