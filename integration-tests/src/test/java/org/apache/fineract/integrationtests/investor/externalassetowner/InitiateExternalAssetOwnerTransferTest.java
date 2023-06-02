@@ -19,48 +19,63 @@
 package org.apache.fineract.integrationtests.investor.externalassetowner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 import org.apache.fineract.client.models.ExternalTransferData;
 import org.apache.fineract.client.models.PageExternalTransferData;
+import org.apache.fineract.client.models.PostInitiateTransferRequest;
+import org.apache.fineract.client.models.PostInitiateTransferResponse;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
+import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class InitiateExternalAssetOwnerTransferTest {
 
     private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecError;
-    private ResponseSpecification responseSpecNotFound;
     private RequestSpecification requestSpec;
     private ExternalAssetOwnerHelper externalAssetOwnerHelper;
     private LoanTransactionHelper loanTransactionHelper;
+    private SchedulerJobHelper schedulerJobHelper;
     private LocalDate todaysDate;
+
+    @BeforeAll
+    public static void setupInvestorBusinessStep() {
+        new BusinessStepHelper().updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
+                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
+                "EXTERNAL_ASSET_OWNER_TRANSFER");
+    }
 
     @BeforeEach
     public void setup() {
@@ -68,16 +83,15 @@ public class InitiateExternalAssetOwnerTransferTest {
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        responseSpecError = new ResponseSpecBuilder().expectStatusCode(403).build();
-        responseSpecNotFound = new ResponseSpecBuilder().expectStatusCode(404).build();
-        externalAssetOwnerHelper = new ExternalAssetOwnerHelper(requestSpec, responseSpec);
+        externalAssetOwnerHelper = new ExternalAssetOwnerHelper();
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
         todaysDate = Utils.getLocalDateOfTenant();
     }
 
     @Test
-    public void saleActiveLoanToExternalAssetOwner() {
+    public void saleActiveLoanToExternalAssetOwnerAndBuybackADayLater() {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
@@ -110,18 +124,96 @@ public class InitiateExternalAssetOwnerTransferTest {
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-            String transferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
-            String saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
-                    getSaleRequestJson("04 March 2020", transferExternalId));
-            Type type = new TypeToken<Map<String, Object>>() {}.getType();
-            Map<String, Object> responseMap = new Gson().fromJson(saleResponse, type);
-            assertEquals(responseMap.get("resourceExternalId"), transferExternalId);
+            String transferExternalId = UUID.randomUUID().toString();
+            PostInitiateTransferResponse saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
+                    new PostInitiateTransferRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(transferExternalId).ownerExternalId("1234567890").purchasePriceRatio("1.0"));
+            assertEquals(transferExternalId, saleResponse.getResourceExternalId());
 
             PageExternalTransferData retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
-            List<ExternalTransferData> retrieveResponseMap = retrieveResponse.getContent();
-            assertEquals(1, retrieveResponse.getTotalElements());
-            assertEquals(retrieveResponseMap.get(0).getTransferExternalId(), transferExternalId);
-            assertEquals(retrieveResponseMap.get(0).getStatus(), ExternalTransferData.StatusEnum.PENDING);
+
+            assertEquals(1, retrieveResponse.getNumberOfElements());
+            ExternalTransferData externalTransferData = retrieveResponse.getContent().get(0);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.PENDING, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 3));
+            // Run the Loan COB Job
+            final String jobName = "Loan COB";
+            schedulerJobHelper.executeAndAwaitJob(jobName);
+
+            retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
+
+            assertEquals(2, retrieveResponse.getNumberOfElements());
+            externalTransferData = retrieveResponse.getContent().get(0);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.PENDING, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(1);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.ACTIVE, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+
+            String buybackTransferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
+            PostInitiateTransferResponse buybackResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "buyback",
+                    new PostInitiateTransferRequest().settlementDate("2020-03-03").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(buybackTransferExternalId));
+
+            assertEquals(buybackResponse.getResourceExternalId(), buybackTransferExternalId);
+
+            retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
+
+            assertEquals(3, retrieveResponse.getNumberOfElements());
+            externalTransferData = retrieveResponse.getContent().get(0);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.PENDING, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(1);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.ACTIVE, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(2);
+            assertEquals(buybackTransferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 4));
+
+            schedulerJobHelper.executeAndAwaitJob(jobName);
+
+            retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
+            assertEquals(3, retrieveResponse.getNumberOfElements());
+            externalTransferData = retrieveResponse.getContent().get(0);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.PENDING, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(1);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.ACTIVE, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(2);
+            assertEquals(buybackTransferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveTo());
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -165,19 +257,17 @@ public class InitiateExternalAssetOwnerTransferTest {
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-            String transferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
-            String saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
-                    getSaleRequestJson("04 March 2020", transferExternalId));
-            Type type = new TypeToken<Map<String, Object>>() {}.getType();
-            Map<String, Object> responseMap = new Gson().fromJson(saleResponse, type);
-            assertEquals(responseMap.get("resourceExternalId"), transferExternalId);
+            String transferExternalId = UUID.randomUUID().toString();
+            PostInitiateTransferResponse saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
+                    new PostInitiateTransferRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(transferExternalId).ownerExternalId("1234567890").purchasePriceRatio("1.0"));
+            assertEquals(transferExternalId, saleResponse.getResourceExternalId());
 
-            externalAssetOwnerHelper = new ExternalAssetOwnerHelper(requestSpec, responseSpecError);
-            String errorResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
-                    getSaleRequestJson("04 March 2020", transferExternalId));
-            Map<String, Object> errorResponseMap = new Gson().fromJson(errorResponse, type);
-            assertEquals("External asset owner transfer is already in PENDING state for this loan.",
-                    errorResponseMap.get("developerMessage"));
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
+                            new PostInitiateTransferRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale("en")
+                                    .transferExternalId(transferExternalId).ownerExternalId("1234567890").purchasePriceRatio("1.0")));
+            assertTrue(exception.getMessage().contains("External asset owner transfer is already in PENDING state for this loan"));
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -226,13 +316,12 @@ public class InitiateExternalAssetOwnerTransferTest {
 
             loanTransactionHelper.makeRepayment("04 March 2020", 16000.0f, loanID);
 
-            externalAssetOwnerHelper = new ExternalAssetOwnerHelper(requestSpec, responseSpecError);
             String transferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
-            String saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
-                    getSaleRequestJson("05 March 2020", transferExternalId));
-            Type type = new TypeToken<Map<String, Object>>() {}.getType();
-            Map<String, Object> errorResponseMap = new Gson().fromJson(saleResponse, type);
-            assertEquals("Loan is not in active status", errorResponseMap.get("developerMessage"));
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
+                            new PostInitiateTransferRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale("en")
+                                    .transferExternalId(transferExternalId).ownerExternalId("1234567890").purchasePriceRatio("1.0")));
+            assertTrue(exception.getMessage().contains("Loan is not in active status"));
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -278,58 +367,147 @@ public class InitiateExternalAssetOwnerTransferTest {
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
             String transferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
-            String saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
-                    getSaleRequestJson("04 March 2020", transferExternalId));
-            Type type = new TypeToken<Map<String, Object>>() {}.getType();
-            Map<String, Object> responseMap = new Gson().fromJson(saleResponse, type);
-            assertEquals(responseMap.get("resourceExternalId"), transferExternalId);
+            PostInitiateTransferResponse saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
+                    new PostInitiateTransferRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(transferExternalId).ownerExternalId("1234567890").purchasePriceRatio("1.0"));
+            assertEquals(transferExternalId, saleResponse.getResourceExternalId());
 
-            String buybackTransferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
-            String buybackResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "buyback",
-                    getSaleRequestJson("04 March 2020", buybackTransferExternalId));
-            Map<String, Object> buybackResponseMap = new Gson().fromJson(buybackResponse, type);
-            assertEquals(buybackResponseMap.get("resourceExternalId"), buybackTransferExternalId);
+            PostInitiateTransferResponse buybackResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "buyback",
+                    new PostInitiateTransferRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(transferExternalId));
 
-            PageExternalTransferData retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue(), 0, 1);
-            List<ExternalTransferData> retrieveResponseMap = retrieveResponse.getContent();
+            assertEquals(buybackResponse.getResourceExternalId(), transferExternalId);
 
-            assertEquals(2, retrieveResponse.getTotalElements());
-            assertEquals(1, retrieveResponse.getNumberOfElements());
-            assertEquals(retrieveResponseMap.get(0).getTransferExternalId(), transferExternalId);
-            assertEquals(retrieveResponseMap.get(0).getStatus(), ExternalTransferData.StatusEnum.PENDING);
+            PageExternalTransferData retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
+            assertEquals(2, retrieveResponse.getNumberOfElements());
+            ExternalTransferData externalTransferData = retrieveResponse.getContent().get(0);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.PENDING, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(1);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
 
-            retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue(), 1, 1);
-            retrieveResponseMap = retrieveResponse.getContent();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 3));
+            final String jobName = "Loan COB";
+            schedulerJobHelper.executeAndAwaitJob(jobName);
 
-            assertEquals(2, retrieveResponse.getTotalElements());
-            assertEquals(1, retrieveResponse.getNumberOfElements());
-            assertEquals(retrieveResponseMap.get(0).getTransferExternalId(), buybackTransferExternalId);
-            assertEquals(retrieveResponseMap.get(0).getStatus(), ExternalTransferData.StatusEnum.BUYBACK);
+            retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
+            assertEquals(4, retrieveResponse.getNumberOfElements());
+            externalTransferData = retrieveResponse.getContent().get(0);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.PENDING, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(1);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(2);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.CANCELLED, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(3);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.CANCELLED, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
     }
 
     @Test
-    public void getNotFoundErrorIfTheLoanDoesNotExistWithTheGivenID() {
+    public void saleAndBuybackMultipleTimes() {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
             GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
 
-            externalAssetOwnerHelper = new ExternalAssetOwnerHelper(requestSpec, responseSpecNotFound);
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            Assertions.assertNotNull(clientID);
+
+            Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
+            Assertions.assertNotNull(overdueFeeChargeId);
+
+            final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+            Assertions.assertNotNull(loanProductID);
+            HashMap loanStatusHashMap;
+
+            final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "10 January 2020");
+
+            Assertions.assertNotNull(loanID);
+
+            loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+            loanStatusHashMap = loanTransactionHelper.approveLoan("01 March 2020", loanID);
+            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+            String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+            loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2020", loanID,
+                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
             String transferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
-            String nonExistingLoanExternalID = "NonExistingLoanExternalID";
-            String saleResponse = externalAssetOwnerHelper.initiateTransferByLoanExternalId(nonExistingLoanExternalID, "sale",
-                    getSaleRequestJson("05 March 2020", transferExternalId));
-            Type type = new TypeToken<Map<String, Object>>() {}.getType();
-            Map<String, Object> errorResponseMap = new Gson().fromJson(saleResponse, type);
-            assertEquals("The requested resource is not available.", errorResponseMap.get("developerMessage"));
+            PostInitiateTransferResponse saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
+                    new PostInitiateTransferRequest().settlementDate("2020-03-04").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(transferExternalId).ownerExternalId("1234567890").purchasePriceRatio("1.0"));
+
+            assertEquals(transferExternalId, saleResponse.getResourceExternalId());
+
+            String buybackTransferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
+            PostInitiateTransferResponse buybackResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "buyback",
+                    new PostInitiateTransferRequest().settlementDate("2020-03-04").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(buybackTransferExternalId));
+
+            assertEquals(buybackResponse.getResourceExternalId(), buybackTransferExternalId);
+            PageExternalTransferData retrieveResponse = externalAssetOwnerHelper.retrieveTransferByLoanId(loanID.longValue());
+            assertEquals(2, retrieveResponse.getNumberOfElements());
+            ExternalTransferData externalTransferData = retrieveResponse.getContent().get(0);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.PENDING, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 4), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+            externalTransferData = retrieveResponse.getContent().get(1);
+            assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
+            assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
+            assertEquals(LocalDate.of(2020, 3, 4), externalTransferData.getSettlementDate());
+            assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
+            assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
+                            new PostInitiateTransferRequest().settlementDate("2020-03-04").dateFormat("yyyy-MM-dd").locale("en")
+                                    .transferExternalId(transferExternalId).ownerExternalId("1234567890").purchasePriceRatio("1.0")));
+
+            assertTrue(exception.getMessage().contains("This loan cannot be sold, there is already an in progress transfer"));
+
+            CallFailedRuntimeException exception2 = assertThrows(CallFailedRuntimeException.class,
+                    () -> externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "buyback",
+                            new PostInitiateTransferRequest().settlementDate("2020-03-04").dateFormat("yyyy-MM-dd").locale("en")
+                                    .transferExternalId(buybackTransferExternalId)));
+            assertTrue(exception2.getMessage()
+                    .contains("This loan cannot be bought back, external asset owner buyback transfer is already in progress"));
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -376,17 +554,6 @@ public class InitiateExternalAssetOwnerTransferTest {
         collateral.put("clientCollateralId", collateralId.toString());
         collateral.put("quantity", quantity.toString());
         return collateral;
-    }
-
-    private String getSaleRequestJson(String date, String transferExternalId) {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("settlementDate", date);
-        map.put("ownerExternalId", "1234567890987654321");
-        map.put("transferExternalId", transferExternalId);
-        map.put("purchasePriceRatio", "1.234");
-        map.put("dateFormat", "dd MMMM yyyy");
-        map.put("locale", "en");
-        return new Gson().toJson(map);
     }
 
 }

@@ -18,11 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.infrastructure.core.data.LoanIdAndExternalIdData;
-
 public interface LoanReadPlatformServiceCommon {
-
-    LoanIdAndExternalIdData getTransferableLoanIdAndExternalId(Long loanId);
 
     Long getLoanIdByLoanExternalId(String externalId);
 }
