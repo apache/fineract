@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
+import org.apache.fineract.infrastructure.jobs.config.FineractDataFieldMaxValueIncrementerFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
@@ -31,6 +32,7 @@ import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.context.annotation.Bean;
@@ -57,6 +59,13 @@ public class ScheduledJobRunnerConfig {
     }
 
     @Bean
+    public DataFieldMaxValueIncrementerFactory incrementerFactory(RoutingDataSource routingDataSource) {
+        // The DefaultDataFieldMaxValueIncrementerFactory has to be overridden because Spring 6 introduced
+        // a new MariaDB incrementer that's incompatible with Spring Batch 4.x
+        return new FineractDataFieldMaxValueIncrementerFactory(routingDataSource);
+    }
+
+    @Bean
     public JobRepository jobRepository(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager)
             throws Exception {
         JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
@@ -64,6 +73,7 @@ public class ScheduledJobRunnerConfig {
         factory.setTransactionManager(transactionManager);
         factory.setIsolationLevelForCreate("ISOLATION_READ_COMMITTED");
         factory.setSerializer(executionContextSerializer());
+        factory.setIncrementerFactory(incrementerFactory(routingDataSource));
         factory.afterPropertiesSet();
         return factory.getObject();
     }
