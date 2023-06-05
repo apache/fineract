@@ -71,6 +71,7 @@
         <class>org.apache.fineract.investor.domain.ExternalAssetOwner</class>
         <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer</class>
         <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferDetails</class>
         <!-- Fineract loan module -->
         <class>org.apache.fineract.portfolio.collateral.domain.LoanCollateral</class>
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement</class>

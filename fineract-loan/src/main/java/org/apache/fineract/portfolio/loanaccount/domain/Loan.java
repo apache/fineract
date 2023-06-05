@@ -3213,7 +3213,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         if (loanTransaction.isRecoveryRepayment()
-                && loanTransaction.getAmount(loanCurrency()).getAmount().compareTo(getSummary().getTotalWrittenOff()) > 0) {
+                && loanTransaction.getAmount(loanCurrency()).getAmount().compareTo(getLoanSummary().getTotalWrittenOff()) > 0) {
             final String errorMessage = "The transaction amount cannot greater than the remaining written off amount.";
             throw new InvalidLoanStateTransitionException("transaction", "cannot.be.greater.than.total.written.off", errorMessage);
         }
@@ -3884,13 +3884,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 addLoanTransaction(mapEntry.getValue());
             }
             updateLoanSummaryDerivedFields();
-            LoanTransaction loanTransaction = findlatestTransaction();
+            LoanTransaction loanTransaction = getLatestTransaction();
             doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
         }
         return changedTransactionDetail;
     }
 
-    private LoanTransaction findlatestTransaction() {
+    public LoanTransaction getLatestTransaction() {
         LoanTransaction transaction = null;
         for (LoanTransaction loanTransaction : this.loanTransactions) {
             if (!loanTransaction.isReversed()
@@ -4470,10 +4470,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public Staff getLoanOfficer() {
         return this.loanOfficer;
-    }
-
-    public LoanSummary getSummary() {
-        return this.summary;
     }
 
     public Set<LoanCollateral> getCollateral() {
@@ -6511,7 +6507,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LoanRepaymentScheduleInstallment fetchLoanForeclosureDetail(final LocalDate closureDate) {
         Money[] receivables = retriveIncomeOutstandingTillDate(closureDate);
-        Money totalPrincipal = Money.of(getCurrency(), this.getSummary().getTotalPrincipalOutstanding());
+        Money totalPrincipal = Money.of(getCurrency(), this.getLoanSummary().getTotalPrincipalOutstanding());
         totalPrincipal = totalPrincipal.minus(receivables[3]);
         final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
         final LocalDate currentDate = DateUtils.getBusinessLocalDate();

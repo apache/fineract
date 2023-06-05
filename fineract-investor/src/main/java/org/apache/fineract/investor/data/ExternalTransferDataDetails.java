@@ -18,20 +18,17 @@
  */
 package org.apache.fineract.investor.data;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import lombok.Data;
 
 @Data
-public class ExternalTransferData {
+public class ExternalTransferDataDetails {
 
-    private Long transferId;
-    private ExternalTransferOwnerData owner;
-    private ExternalTransferLoanMappingData loan;
-    private ExternalTransferDataDetails details;
-    private String transferExternalId;
-    private String purchasePriceRatio;
-    private LocalDate settlementDate;
-    private ExternalTransferStatus status;
-    private LocalDate effectiveFrom;
-    private LocalDate effectiveTo;
+    private Long detailsId;
+    private BigDecimal totalOutstanding;
+    private BigDecimal totalPrincipalOutstanding;
+    private BigDecimal totalInterestOutstanding;
+    private BigDecimal totalFeeChargesOutstanding;
+    private BigDecimal totalPenaltyChargesOutstanding;
+    private BigDecimal totalOverpaid;
 }
