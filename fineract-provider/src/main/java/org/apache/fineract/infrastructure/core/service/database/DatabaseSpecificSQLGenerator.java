@@ -160,11 +160,11 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String castBigInt(String sql) {
+    public String castInteger(String sql) {
         if (databaseTypeResolver.isMySQL()) {
-            return format("CAST(%s AS BIGINT)", sql);
+            return format("CAST(%s AS SIGNED INTEGER)", sql);
         } else if (databaseTypeResolver.isPostgreSQL()) {
-            return format("%s::BIGINT", sql);
+            return format("%s::INTEGER", sql);
         } else {
             throw new IllegalStateException("Database type is not supported for casting to bigint " + databaseTypeResolver.databaseType());
         }
