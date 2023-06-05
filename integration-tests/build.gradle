@@ -41,7 +41,7 @@ dependencies {
 }
 
 cargo {
-    containerId "tomcat9x"
+    containerId "tomcat10x"
 
     // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
     deployable {
@@ -79,6 +79,7 @@ cargo {
             property 'cargo.start.jvmargs', jvmArgs
             property 'cargo.tomcat.connector.keystoreFile', file("$rootDir/fineract-provider/src/main/resources/keystore.jks")
             property 'cargo.tomcat.connector.keystorePass', 'openmf'
+            property 'cargo.tomcat.connector.keystoreType', 'JKS'
             property 'cargo.tomcat.httpSecure', true
             property 'cargo.tomcat.connector.sslProtocol', 'TLS'
             property 'cargo.tomcat.connector.clientAuth', false
