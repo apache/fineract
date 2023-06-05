@@ -54,19 +54,19 @@ public class JobExecutionRepository implements InitializingBean {
     public List<String> getStuckJobNames(NamedParameterJdbcTemplate jdbcTemplate) {
         int threshold = fineractProperties.getJob().getStuckRetryThreshold();
         return jdbcTemplate.queryForList("""
-                SELECT DISTINCT(bji.JOB_NAME) as STUCK_JOB_NAME
-                FROM BATCH_JOB_INSTANCE bji
-                INNER JOIN BATCH_JOB_EXECUTION bje
-                ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                SELECT DISTINCT(BJI.JOB_NAME) as STUCK_JOB_NAME
+                FROM BATCH_JOB_INSTANCE BJI
+                INNER JOIN BATCH_JOB_EXECUTION BJE
+                ON BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID
                 WHERE
-                    bje.STATUS IN (:statuses)
+                    BJE.STATUS IN (:statuses)
                     AND
-                    bje.JOB_INSTANCE_ID NOT IN (
-                        SELECT bje.JOB_INSTANCE_ID
-                        FROM BATCH_JOB_INSTANCE bji
-                        INNER JOIN BATCH_JOB_EXECUTION bje
-                        ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
-                        WHERE bje.STATUS IN (:completedStatuses)
+                    BJE.JOB_INSTANCE_ID NOT IN (
+                        SELECT IBJE.JOB_INSTANCE_ID
+                        FROM BATCH_JOB_INSTANCE IBJI
+                        INNER JOIN BATCH_JOB_EXECUTION IBJE
+                        ON IBJI.JOB_INSTANCE_ID = IBJE.JOB_INSTANCE_ID
+                        WHERE IBJE.STATUS IN (:completedStatuses)
                     )
                 GROUP BY BJI.JOB_INSTANCE_ID
                 HAVING COUNT(BJI.JOB_INSTANCE_ID) <= :threshold
@@ -77,24 +77,24 @@ public class JobExecutionRepository implements InitializingBean {
     public Long getStuckJobCountByJobName(String jobName) {
         int threshold = fineractProperties.getJob().getStuckRetryThreshold();
         return namedParameterJdbcTemplate.queryForObject("""
-                    SELECT COUNT(DISTINCT bji.JOB_NAME) as STUCK_JOB_COUNT
-                    FROM BATCH_JOB_INSTANCE bji
-                    INNER JOIN BATCH_JOB_EXECUTION bje
-                    ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                    SELECT COUNT(DISTINCT BJI.JOB_NAME) as STUCK_JOB_COUNT
+                    FROM BATCH_JOB_INSTANCE BJI
+                    INNER JOIN BATCH_JOB_EXECUTION BJE
+                    ON BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID
                     WHERE
-                        bje.STATUS IN (:statuses)
+                        BJE.STATUS IN (:statuses)
                         AND
-                        bji.JOB_NAME = :jobName
+                        BJI.JOB_NAME = :jobName
                         AND
-                        bje.JOB_INSTANCE_ID NOT IN (
-                            SELECT bje.JOB_INSTANCE_ID
-                            FROM BATCH_JOB_INSTANCE bji
-                            INNER JOIN BATCH_JOB_EXECUTION bje
-                            ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                        BJE.JOB_INSTANCE_ID NOT IN (
+                            SELECT IBJE.JOB_INSTANCE_ID
+                            FROM BATCH_JOB_INSTANCE IBJI
+                            INNER JOIN BATCH_JOB_EXECUTION IBJE
+                            ON IBJI.JOB_INSTANCE_ID = IBJE.JOB_INSTANCE_ID
                             WHERE
-                                bje.STATUS IN (:completedStatuses)
+                                IBJE.STATUS IN (:completedStatuses)
                                 AND
-                                bji.JOB_NAME = :jobName
+                                IBJI.JOB_NAME = :jobName
                         )
                     GROUP BY BJI.JOB_INSTANCE_ID
                     HAVING COUNT(BJI.JOB_INSTANCE_ID) <= :threshold
@@ -105,24 +105,24 @@ public class JobExecutionRepository implements InitializingBean {
     public List<Long> getStuckJobIdsByJobName(String jobName) {
         int threshold = fineractProperties.getJob().getStuckRetryThreshold();
         return namedParameterJdbcTemplate.queryForList("""
-                    SELECT bje.JOB_EXECUTION_ID
-                    FROM BATCH_JOB_INSTANCE bji
-                    INNER JOIN BATCH_JOB_EXECUTION bje
-                    ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                    SELECT BJE.JOB_EXECUTION_ID
+                    FROM BATCH_JOB_INSTANCE BJI
+                    INNER JOIN BATCH_JOB_EXECUTION BJE
+                    ON BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID
                     WHERE
-                        bje.STATUS IN (:statuses)
+                        BJE.STATUS IN (:statuses)
                         AND
-                        bji.JOB_NAME = :jobName
+                        BJI.JOB_NAME = :jobName
                         AND
-                        bje.JOB_INSTANCE_ID NOT IN (
-                            SELECT bje.JOB_INSTANCE_ID
-                            FROM BATCH_JOB_INSTANCE bji
-                            INNER JOIN BATCH_JOB_EXECUTION bje
-                            ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID
+                        BJE.JOB_INSTANCE_ID NOT IN (
+                            SELECT IBJE.JOB_INSTANCE_ID
+                            FROM BATCH_JOB_INSTANCE IBJI
+                            INNER JOIN BATCH_JOB_EXECUTION IBJE
+                            ON IBJI.JOB_INSTANCE_ID = IBJE.JOB_INSTANCE_ID
                             WHERE
-                            bje.STATUS IN (:completedStatuses)
+                            IBJE.STATUS IN (:completedStatuses)
                             AND
-                            bji.JOB_NAME = :jobName
+                            IBJI.JOB_NAME = :jobName
                         )
                     GROUP BY BJI.JOB_INSTANCE_ID, BJE.JOB_EXECUTION_ID
                     HAVING COUNT(BJI.JOB_INSTANCE_ID) <= :threshold
@@ -133,13 +133,13 @@ public class JobExecutionRepository implements InitializingBean {
     public Long getNotCompletedPartitionsCount(Long jobExecutionId, String partitionerStepName) {
         return namedParameterJdbcTemplate.queryForObject("""
                     SELECT COUNT(bse.STEP_EXECUTION_ID)
-                    FROM BATCH_STEP_EXECUTION bse
+                    FROM BATCH_STEP_EXECUTION BSE
                     WHERE
-                        bse.JOB_EXECUTION_ID = :jobExecutionId
+                        BSE.JOB_EXECUTION_ID = :jobExecutionId
                         AND
-                        bse.STEP_NAME <> :stepName
+                        BSE.STEP_NAME <> :stepName
                         AND
-                        bse.status <> :status
+                        BSE.status <> :status
                 """, Map.of("jobExecutionId", jobExecutionId, "stepName", partitionerStepName, "status", COMPLETED.name()), Long.class);
     }
 
