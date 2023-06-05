@@ -50,11 +50,9 @@ public interface LoanAccountLockRepository extends JpaRepository<LoanAccountLock
     void updateLoanFromAccountLocks();
 
     @Query("""
-            update LoanAccountLock lck set
-            lck.error = null, lck.lockOwner=org.apache.fineract.cob.domain.LockOwner.LOAN_COB_PARTITIONING
-            where lck.lockPlacedOnCobBusinessDate is not null and lck.error is not null and
+            delete from LoanAccountLock lck where lck.lockPlacedOnCobBusinessDate is not null and lck.error is not null and
             lck.lockOwner in (org.apache.fineract.cob.domain.LockOwner.LOAN_COB_CHUNK_PROCESSING,org.apache.fineract.cob.domain.LockOwner.LOAN_INLINE_COB_PROCESSING)
             """)
     @Modifying(flushAutomatically = true)
-    void updateToSoftLockByOwner();
+    void removeLockByOwner();
 }

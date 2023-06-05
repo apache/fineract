@@ -84,7 +84,7 @@ modernizer {
 // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
 // set the classes directory to point to Eclipse's default build directory
 if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
-    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-core/bin/main")
+    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-investor/bin/main")
 }
 
 eclipse {

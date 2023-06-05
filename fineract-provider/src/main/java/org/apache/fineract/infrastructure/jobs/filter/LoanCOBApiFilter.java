@@ -121,7 +121,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchReque
                 } else {
                     try {
                         List<Long> loanIds = calculateRelevantLoanIds(request.getPathInfo());
-                        if (!loanIds.isEmpty() && (isLoanSoftLocked(loanIds) || isLoanBehind(loanIds))) {
+                        if (!loanIds.isEmpty() && isLoanBehind(loanIds)) {
                             executeInlineCob(loanIds);
                         }
                         proceed(filterChain, request, response);
@@ -184,17 +184,8 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchReque
         }
     }
 
-    private boolean isLoanSoftLocked(List<Long> loanIds) {
-        return isLoanLocked(loanIds, false);
-    }
-
     private boolean isLoanHardLocked(List<Long> loanIds) {
-        return isLoanLocked(loanIds, true);
-    }
-
-    private boolean isLoanLocked(List<Long> loanIds, boolean isHardLock) {
-        return isHardLock ? loanIds.stream().anyMatch(loanAccountLockService::isLoanHardLocked)
-                : loanIds.stream().anyMatch(loanAccountLockService::isLoanSoftLocked);
+        return loanIds.stream().anyMatch(loanAccountLockService::isLoanHardLocked);
     }
 
     private void proceed(FilterChain filterChain, HttpServletRequest request, HttpServletResponse response)
@@ -256,7 +247,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchReque
                     boolean bypassUser = isBypassUser();
                     if (!bypassUser) {
                         List<Long> result = calculateRelevantLoanIds(relativeUrl);
-                        if (!result.isEmpty() && (isLoanSoftLocked(result) || isLoanBehind(result))) {
+                        if (!result.isEmpty() && isLoanBehind(result)) {
                             executeInlineCob(result);
                         }
                     }

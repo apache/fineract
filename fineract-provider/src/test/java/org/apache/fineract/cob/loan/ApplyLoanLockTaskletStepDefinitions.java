@@ -83,10 +83,9 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
                 lenient().when(loanLockingService.findAllByLoanIdIn(Mockito.anyList())).thenThrow(new RuntimeException("fail"));
             } else {
                 LoanAccountLock lock1 = new LoanAccountLock(1L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()));
-                LoanAccountLock lock2 = new LoanAccountLock(2L, LockOwner.LOAN_COB_PARTITIONING, LocalDate.now(ZoneId.systemDefault()));
                 LoanAccountLock lock3 = new LoanAccountLock(3L, LockOwner.LOAN_INLINE_COB_PROCESSING,
                         LocalDate.now(ZoneId.systemDefault()));
-                List<LoanAccountLock> accountLocks = List.of(lock1, lock2, lock3);
+                List<LoanAccountLock> accountLocks = List.of(lock1, lock3);
                 lenient().when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
                 lenient().when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
                 lenient().when(loanLockingService.findAllByLoanIdIn(Mockito.anyList())).thenReturn(accountLocks);
@@ -101,7 +100,7 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
 
         Then("ApplyLoanLockTasklet.execute result should match", () -> {
             assertEquals(RepeatStatus.FINISHED, resultItem);
-            verify(loanLockingService, Mockito.times(1)).upgradeLock(valueCaptor.capture(), lockOwnerValueCaptor.capture());
+            verify(loanLockingService, Mockito.times(1)).applyLock(valueCaptor.capture(), lockOwnerValueCaptor.capture());
             List<Long> values = valueCaptor.getValue();
             assertEquals(2L, values.get(0));
             assertEquals(LockOwner.LOAN_COB_CHUNK_PROCESSING, lockOwnerValueCaptor.getValue());

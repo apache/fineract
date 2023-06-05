@@ -120,11 +120,8 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         }
 
         Integer graceDays = 0;
-        if (loan.getLoanProduct().getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null) {
-            graceDays = loan.getLoanProduct().getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
-            if (graceDays == null) {
-                graceDays = 0;
-            }
+        if (loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null) {
+            graceDays = loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
         }
         log.debug("Loan id {} with overdue since date {} and outstanding amount {}", loan.getId(), overdueSinceDate, outstandingAmount);
 
@@ -139,10 +136,12 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
             collectionData.setDelinquentDate(overdueSinceDate);
         }
         collectionData.setDelinquentAmount(outstandingAmount);
-
-        if (overdueDays > 0) {
-            collectionData.setDelinquentDays(overdueDays - graceDays);
+        collectionData.setDelinquentDays(0L);
+        Long delinquentDays = overdueDays - graceDays;
+        if (delinquentDays > 0) {
+            collectionData.setDelinquentDays(delinquentDays);
         }
+
         log.debug("Result: {}", collectionData.toString());
         return collectionData;
     }

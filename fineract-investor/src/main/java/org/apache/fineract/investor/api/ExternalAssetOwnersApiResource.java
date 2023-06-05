@@ -22,10 +22,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -37,13 +37,20 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformUserRightsContext;
 import org.apache.fineract.investor.data.ExternalTransferData;
+import org.apache.fineract.investor.data.ExternalTransferResponseData;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformServiceCommon;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/external-asset-owners")
@@ -56,29 +63,40 @@ public class ExternalAssetOwnersApiResource {
     private final ExternalAssetOwnersReadService externalAssetOwnersReadService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final DefaultToApiJsonSerializer<ExternalTransferData> apiJsonSerializerService;
+    private final DefaultToApiJsonSerializer<ExternalTransferResponseData> postApiJsonSerializerService;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final LoanReadPlatformServiceCommon loanReadPlatformService;
 
     @POST
     @Path("/transfers/loans/{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated") })
     public String transferRequestWithLoanId(@PathParam("loanId") final Long loanId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         platformUserRightsContext.isAuthenticated();
-
-        throw new NotImplementedException("Not implemented yet");
+        return getResult(loanId, apiRequestBodyAsJson, commandParam);
     }
 
     @POST
     @Path("/transfers/loans/external-id/{loanExternalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String transferRequestWithLoanExternalId(@PathParam("loanExternalId") final Long loanId,
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated") })
+    public String transferRequestWithLoanExternalId(@PathParam("loanExternalId") final String externalLoanId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         platformUserRightsContext.isAuthenticated();
+        Long loanId = loanReadPlatformService.getLoanIdByLoanExternalId(externalLoanId);
 
-        throw new NotImplementedException("Not implemented yet");
+        return getResult(loanId, apiRequestBodyAsJson, commandParam);
     }
 
     @GET
@@ -86,17 +104,31 @@ public class ExternalAssetOwnersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(tags = {
             "External Asset Owners" }, summary = "Retrieve External Asset Owner Transfers", description = "Retrieve External Asset Owner Transfer items by transferExternalId, loanId or loanExternalId")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.GetExternalTransferResponse.class))) })
-    public String getTransfer(
+    public Page<ExternalTransferData> getTransfer(
             @QueryParam("transferExternalId") @Parameter(description = "transferExternalId") final String transferExternalId,
             @QueryParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @QueryParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
-            @Context final UriInfo uriInfo) {
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit, @Context final UriInfo uriInfo) {
         platformUserRightsContext.isAuthenticated();
-        List<ExternalTransferData> transferDataList = externalAssetOwnersReadService.retrieveTransferData(loanId, loanExternalId,
-                transferExternalId);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return apiJsonSerializerService.serialize(settings, transferDataList);
+        return externalAssetOwnersReadService.retrieveTransferData(loanId, loanExternalId, transferExternalId, offset, limit);
+
+    }
+
+    private String getResult(Long loanId, String apiRequestBodyAsJson, String commandParam) {
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        CommandWrapper commandRequest = null;
+        if (CommandParameterUtil.is(commandParam, "sale")) {
+            commandRequest = builder.saleLoanToExternalAssetOwner(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "buyback")) {
+            commandRequest = builder.buybackLoanToExternalAssetOwner(loanId).build();
+        }
+
+        if (commandRequest == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
+        CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return postApiJsonSerializerService.serialize(result);
     }
 }

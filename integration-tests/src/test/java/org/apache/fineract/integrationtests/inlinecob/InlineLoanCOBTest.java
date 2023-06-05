@@ -284,7 +284,6 @@ public class InlineLoanCOBTest {
 
             requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
 
-            loanAccountLockHelper.placeSoftLockOnLoanAccount(loanID, "LOAN_COB_PARTITIONING");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
             loanTransactionHelper.makeRepayment("10 March 2020", 10.0f, loanID);
@@ -399,8 +398,6 @@ public class InlineLoanCOBTest {
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 10));
 
             requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
-
-            loanAccountLockHelper.placeSoftLockOnLoanAccount(loanID, "LOAN_COB_PARTITIONING");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
             final BatchRequest br1 = BatchHelper.oldRepayLoanRequestWithGivenLoanId(4730L, loanID, "10", LocalDate.of(2020, 3, 10));
@@ -468,8 +465,6 @@ public class InlineLoanCOBTest {
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 10));
 
             requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
-
-            loanAccountLockHelper.placeSoftLockOnLoanAccount(loanID, "LOAN_COB_PARTITIONING");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
             final BatchRequest br1 = BatchHelper.repayLoanRequestWithGivenLoanId(4730L, loanID, "10", LocalDate.of(2020, 3, 10));

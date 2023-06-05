@@ -308,8 +308,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             for (ClientCollateralManagement clientCollateralManagement : clientCollateralManagements) {
                 BigDecimal total = clientCollateralManagement.getTotal();
                 BigDecimal totalCollateral = clientCollateralManagement.getTotalCollateral(total);
-                clientCollateralManagementDataSet
-                        .add(ClientCollateralManagementData.setCollateralValues(clientCollateralManagement, total, totalCollateral));
+                clientCollateralManagementDataSet.add(new ClientCollateralManagementData(clientCollateralManagement.getId(),
+                        clientCollateralManagement.getCollaterals().getName(), clientCollateralManagement.getQuantity(),
+                        clientCollateralManagement.getCollaterals().getPctToBase(),
+                        clientCollateralManagement.getCollaterals().getBasePrice(), total, totalCollateral));
             }
 
             final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();

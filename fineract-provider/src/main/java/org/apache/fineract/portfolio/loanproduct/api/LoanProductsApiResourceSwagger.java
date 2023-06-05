@@ -1199,6 +1199,8 @@ final class LoanProductsApiResourceSwagger {
         public Integer dueDaysForRepaymentEvent;
         @Schema(example = "3")
         public Integer overDueDaysForRepaymentEvent;
+        @Schema(example = "3")
+        public Integer inArrearsTolerance;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")

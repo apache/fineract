@@ -60,7 +60,11 @@ public class CustomAuditingHandler extends AuditingHandler {
     }
 
     private DateTimeProvider fetchDateTimeProvider(Object bean) {
-        return bean instanceof AbstractAuditableWithUTCDateTimeCustom ? CustomDateTimeProvider.TENANT : CustomDateTimeProvider.INSTANCE;
+        if (bean instanceof AbstractAuditableWithUTCDateTimeCustom) {
+            return CustomDateTimeProvider.TENANT;
+        } else {
+            return CustomDateTimeProvider.INSTANCE;
+        }
     }
 
     /**

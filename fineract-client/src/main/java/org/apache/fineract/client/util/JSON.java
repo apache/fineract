@@ -37,6 +37,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import org.apache.fineract.client.models.ExternalId;
+import org.apache.fineract.client.util.adapter.ExternalIdAdapter;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -51,12 +53,14 @@ public class JSON {
     private final SqlDateTypeAdapter sqlDateTypeAdapter = new SqlDateTypeAdapter();
     private final OffsetDateTimeTypeAdapter offsetDateTimeTypeAdapter = new OffsetDateTimeTypeAdapter();
     private final LocalDateTypeAdapter localDateTypeAdapter = new LocalDateTypeAdapter();
+    private final ExternalIdAdapter externalIdAdapter = new ExternalIdAdapter();
 
     public JSON() {
         gson = new GsonFireBuilder().createGsonBuilder().registerTypeAdapter(Date.class, dateTypeAdapter)
                 .registerTypeAdapter(java.sql.Date.class, sqlDateTypeAdapter)
                 .registerTypeAdapter(OffsetDateTime.class, offsetDateTimeTypeAdapter)
-                .registerTypeAdapter(LocalDate.class, localDateTypeAdapter).create();
+                .registerTypeAdapter(LocalDate.class, localDateTypeAdapter).registerTypeAdapter(ExternalId.class, externalIdAdapter)
+                .create();
     }
 
     public Gson getGson() {

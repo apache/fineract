@@ -50,15 +50,10 @@ public class LoanAccountLockServiceImpl implements LoanAccountLockService {
     }
 
     @Override
-    public boolean isLoanSoftLocked(Long loanId) {
-        return loanAccountLockRepository.existsByLoanIdAndLockOwner(loanId, LockOwner.LOAN_COB_PARTITIONING);
-    }
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateCobAndRemoveLocks() {
         loanAccountLockRepository.updateLoanFromAccountLocks();
-        loanAccountLockRepository.updateToSoftLockByOwner();
+        loanAccountLockRepository.removeLockByOwner();
     }
 
 }

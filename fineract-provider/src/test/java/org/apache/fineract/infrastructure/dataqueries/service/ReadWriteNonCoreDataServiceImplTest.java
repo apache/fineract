@@ -18,23 +18,27 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonObject;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -81,44 +85,53 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @Test
     public void testQueryDataTableSuccess() {
         SqlRowSet sqlRS = Mockito.mock(SqlRowSet.class);
-        when(jdbcTemplate.queryForRowSet(eq("select rc1,rc2 from table where cf1 = ?"), any(Object[].class), any(int[].class)))
-                .thenReturn(sqlRS);
+        when(jdbcTemplate.queryForRowSet(eq("select rc1,rc2 from table where cf1 = ?"), any(Object.class))).thenReturn(sqlRS);
         when(sqlRS.next()).thenReturn(true).thenReturn(false);
-        when(sqlRS.getObject(ArgumentMatchers.anyString())).thenReturn("value1").thenReturn("value2");
-        when(sqlGenerator.escape(ArgumentMatchers.anyString())).thenReturn("rc1").thenReturn("rc2").thenReturn("table").thenReturn("cf1");
+        when(sqlRS.getObject(anyString())).thenReturn("value1").thenReturn("value2");
+        when(sqlGenerator.escape(anyString())).thenReturn("rc1").thenReturn("rc2").thenReturn("table").thenReturn("cf1");
         when(databaseTypeResolver.isPostgreSQL()).thenReturn(true);
 
-        ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, null, null, false, false);
-        ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, null, null, false, false);
-        ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, null, null, false, false);
+        ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, emptyList(), null, false,
+                false);
+        ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, emptyList(), null, false,
+                false);
+        ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, emptyList(), null, false,
+                false);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
         List<JsonObject> results = underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2");
 
-        Assertions.assertEquals("value1", results.get(0).get("rc1").getAsString());
-        Assertions.assertEquals("value2", results.get(0).get("rc2").getAsString());
+        assertEquals("value1", results.get(0).get("rc1").getAsString());
+        assertEquals("value2", results.get(0).get("rc2").getAsString());
     }
 
     @Test
     public void testQueryDataTableValidationError() {
-        when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(Collections.emptyList());
+        when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(emptyList());
         assertThrows(PlatformApiDataValidationException.class, () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));
     }
 
-    @Test
-    public void testInvalidDatabase() {
-        SqlRowSet sqlRS = Mockito.mock(SqlRowSet.class);
-        when(jdbcTemplate.queryForRowSet(eq("select rc1,rc2 from table where cf1 = ?"), any(Object[].class), any(int[].class)))
-                .thenReturn(sqlRS);
-        when(sqlRS.next()).thenReturn(true).thenReturn(false);
-        when(sqlRS.getObject(ArgumentMatchers.anyString())).thenReturn("value1").thenReturn("value2");
-        when(databaseTypeResolver.isPostgreSQL()).thenReturn(false);
-        when(databaseTypeResolver.isMySQL()).thenReturn(false);
-        ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, null, null, false, false);
-        ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, null, null, false, false);
-        ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, null, null, false, false);
+    @ParameterizedTest
+    @MethodSource("provideParameters")
+    public void testQueryDataTableInvalidParameterError(String columnType, String errorMessage) {
+        ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", columnType, 10L, false, false, emptyList(), null, false,
+                false);
+        ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, emptyList(), null, false,
+                false);
+        ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, emptyList(), null, false,
+                false);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
-        assertThrows(IllegalStateException.class, () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));
+        PlatformApiDataValidationException thrown = assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));
+
+        assertEquals(1, thrown.getErrors().size());
+        assertEquals(errorMessage, thrown.getErrors().get(0).getUserMessageGlobalisationCode());
+    }
+
+    private static Stream<Arguments> provideParameters() {
+        return Stream.of(Arguments.of("timestamp without time zone", "validation.msg.invalid.dateFormat.format"),
+                Arguments.of("INTEGER", "validation.msg.invalid.integer.format"),
+                Arguments.of("BOOLEAN", "validation.msg.invalid.boolean.format"));
     }
 }

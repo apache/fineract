@@ -38,18 +38,22 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.ClientTextSearch;
 import org.apache.fineract.client.models.DeleteClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.GetClientTransferProposalDateResponse;
 import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetObligeeData;
+import org.apache.fineract.client.models.PageClientSearchData;
+import org.apache.fineract.client.models.PagedRequestClientTextSearch;
 import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PutClientsClientIdResponse;
+import org.apache.fineract.client.models.SortOrder;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -95,6 +99,37 @@ public class ClientHelper extends IntegrationTest {
 
     public PostClientsResponse createClient(final PostClientsRequest request) {
         return ok(fineract().clients.create6(request));
+    }
+
+    public PageClientSearchData searchClients(String text) {
+        ClientTextSearch clientTextSearch = new ClientTextSearch();
+        clientTextSearch.setText(text);
+        PagedRequestClientTextSearch request = new PagedRequestClientTextSearch();
+        request.setRequest(clientTextSearch);
+        return searchClients(request);
+    }
+
+    public PageClientSearchData searchClients(String text, int page, int pageSize) {
+        ClientTextSearch clientTextSearch = new ClientTextSearch();
+        clientTextSearch.setText(text);
+        PagedRequestClientTextSearch request = new PagedRequestClientTextSearch();
+        request.setRequest(clientTextSearch);
+        request.setPage(page);
+        request.setSize(pageSize);
+        return searchClients(request);
+    }
+
+    public PageClientSearchData searchClients(String text, SortOrder sortOrder) {
+        ClientTextSearch clientTextSearch = new ClientTextSearch();
+        clientTextSearch.setText(text);
+        PagedRequestClientTextSearch request = new PagedRequestClientTextSearch();
+        request.setRequest(clientTextSearch);
+        request.setSorts(List.of(sortOrder));
+        return searchClients(request);
+    }
+
+    public PageClientSearchData searchClients(PagedRequestClientTextSearch request) {
+        return ok(fineract().clientSearchV2.searchByText(request));
     }
 
     public static PostClientsResponse addClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

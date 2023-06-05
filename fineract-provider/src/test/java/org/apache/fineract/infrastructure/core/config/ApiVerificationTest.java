@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.Path;
 import org.apache.fineract.AbstractSpringTest;
+import org.apache.fineract.infrastructure.core.jersey.JerseyConfig;
 import org.assertj.core.api.SoftAssertions;
 import org.glassfish.jersey.server.model.Resource;
 import org.junit.jupiter.api.Test;

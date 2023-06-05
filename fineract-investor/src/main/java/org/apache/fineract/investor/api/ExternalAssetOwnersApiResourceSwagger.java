@@ -19,7 +19,6 @@
 package org.apache.fineract.investor.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
@@ -68,7 +67,7 @@ final class ExternalAssetOwnersApiResourceSwagger {
             public String transferExternalId;
 
             @Schema(example = "1")
-            public BigDecimal purchasePriceRatio;
+            public String purchasePriceRatio;
 
             @Schema(example = "[2023, 5, 23]")
             public LocalDate settlementDate;
@@ -86,5 +85,71 @@ final class ExternalAssetOwnersApiResourceSwagger {
         @Schema(example = "20")
         public Integer totalFilteredRecords;
         public Set<GetExternalTransferPageItems> pageItems;
+    }
+
+    @Schema(description = "PostInitiateTransferRequest")
+    public static final class PostInitiateTransferRequest {
+
+        private PostInitiateTransferRequest() {}
+
+        @Schema(example = "2023-5-23")
+        public String settlementDate;
+
+        @Schema(example = "1234567890987654321abc")
+        public String ownerExternalId;
+
+        @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e")
+        public String transferExternalId;
+
+        @Schema(example = "1.2345678")
+        public String purchasePriceRatio;
+
+        @Schema(example = "yyyy-MM-dd")
+        public String dateFormat;
+
+        @Schema(example = "en")
+        public String locale;
+    }
+
+    @Schema(description = "PostInitiateTransferResponse")
+    public static final class PostInitiateTransferResponse {
+
+        private PostInitiateTransferResponse() {}
+
+        @Schema(example = "1", description = "transfer ID")
+        public Long resourceId;
+
+        @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e", description = "transfer external ID")
+        public String resourceExternalId;
+
+        @Schema(example = "2", description = "loan ID")
+        public Long subResourceId;
+
+        @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c2e", description = "loan external ID")
+        public String subResourceExternalId;
+
+        public ExternalAssetOwnerTransferChangesData changes;
+
+        @Schema(example = "yyyy-MM-dd")
+        public String dateFormat;
+
+        @Schema(example = "en")
+        public String locale;
+
+        @Schema(description = "ExternalAssetOwnerTransferChangesData")
+        static final class ExternalAssetOwnerTransferChangesData {
+
+            @Schema(example = "[2023, 5, 23]")
+            public LocalDate settlementDate;
+
+            @Schema(example = "1234567890987654321abc")
+            public String ownerExternalId;
+
+            @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e")
+            public String transferExternalId;
+
+            @Schema(example = "1.23456789")
+            public String purchasePriceRatio;
+        }
     }
 }

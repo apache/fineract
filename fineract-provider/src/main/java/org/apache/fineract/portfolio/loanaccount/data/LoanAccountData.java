@@ -41,6 +41,7 @@ import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.util.ConvertChargeDataToSpecificChargeData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -472,7 +473,7 @@ public class LoanAccountData {
         final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
         for (final ChargeData charge : product.charges()) {
             if (!charge.isOverdueInstallmentCharge()) {
-                charges.add(charge.toLoanChargeData());
+                charges.add(ConvertChargeDataToSpecificChargeData.toLoanChargeData(charge));
             }
         }
 
@@ -565,7 +566,7 @@ public class LoanAccountData {
 
         final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
         for (final ChargeData charge : product.charges()) {
-            charges.add(charge.toLoanChargeData());
+            charges.add(ConvertChargeDataToSpecificChargeData.toLoanChargeData(charge));
         }
 
         BigDecimal netDisbursalAmount = product.getPrincipal();

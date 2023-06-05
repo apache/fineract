@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -144,7 +145,7 @@ import org.springframework.util.CollectionUtils;
 @AllArgsConstructor
 @Service
 @Transactional(readOnly = true)
-public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
+public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, LoanReadPlatformServiceCommon {
 
     private static final String ACCRUAL_ON_CHARGE_SUBMITTED_ON_DATE = "submitted-date";
     private final JdbcTemplate jdbcTemplate;
@@ -589,6 +590,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanTransactionNotFoundException(transactionId, e);
         }
+    }
+
+    @Override
+    public Long getLoanIdByLoanExternalId(String externalId) {
+        ExternalId loanExternalId = ExternalIdFactory.produce(externalId);
+        Long loanId = loanRepositoryWrapper.findIdByExternalId(loanExternalId);
+        if (Objects.isNull(loanId)) {
+            throw new LoanNotFoundException(loanExternalId);
+        }
+        return loanId;
     }
 
     private static final class LoanMapper implements RowMapper<LoanAccountData> {

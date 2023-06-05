@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.investor.service;
 
-import java.util.List;
 import org.apache.fineract.investor.data.ExternalTransferData;
+import org.springframework.data.domain.Page;
 
 public interface ExternalAssetOwnersReadService {
 
-    List<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId);
+    Page<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId, Integer offset,
+            Integer limit);
 }
