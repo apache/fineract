@@ -195,7 +195,7 @@ dependencyManagement {
             // Spring needs this version
             exclude 'com.sun.activation:jakarta.activation'
         }
-        dependency ('jakarta.xml.bind:jakarta.xml.bind-api:2.3.3') {
+        dependency ('jakarta.xml.bind:jakarta.xml.bind-api:4.0.0') {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
