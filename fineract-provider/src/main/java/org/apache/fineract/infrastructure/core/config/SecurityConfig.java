@@ -22,6 +22,7 @@ package org.apache.fineract.infrastructure.core.config;
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.service.CommandSourceService;
@@ -67,7 +68,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @ConditionalOnProperty("fineract.security.basicauth.enabled")
@@ -115,47 +115,40 @@ public class SecurityConfig {
     private IdempotencyStoreHelper idempotencyStoreHelper;
 
     @Bean
-    public SecurityFilterChain authorizationFilterChain(HttpSecurity http) throws Exception {
-        http //
-                .securityMatcher("/api/**").authorizeHttpRequests((auth) -> {
-                    auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/authentication").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/self/authentication").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/self/registration").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/self/registration/user").permitAll() //
-                            .requestMatchers(HttpMethod.PUT, "/api/*/instance-mode").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/twofactor/validate").fullyAuthenticated() //
-                            .requestMatchers("/api/*/twofactor").fullyAuthenticated() //
-                            .requestMatchers("/api/**").access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"))); //
-                }) //
-                .httpBasic((httpBasic) -> httpBasic.authenticationEntryPoint(basicAuthenticationEntryPoint()));
-
-        if (serverProperties.getSsl().isEnabled()) {
-            http.requiresChannel(channel -> channel.requestMatchers("/api/**").requiresSecure());
-        }
-        return http.build();
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http //
+                .securityMatcher(antMatcher("/api/**")).authorizeHttpRequests((auth) -> {
+                    auth.requestMatchers(antMatcher(HttpMethod.OPTIONS, "/api/**")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/echo")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
+                            .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
+                            .requestMatchers(antMatcher("/api/**"))
+                            .access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"))); //
+                }).httpBasic((httpBasic) -> httpBasic.authenticationEntryPoint(basicAuthenticationEntryPoint())) //
                 .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
                 .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
-                .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class)
-                .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class)
-                .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class)
+                .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class) //
+                .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class) //
+                .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class) //
                 .addFilterAfter(responseCorsFilter(), CorrelationHeaderFilter.class) //
                 .addFilterAfter(fineractInstanceModeApiFilter(), ResponseCorsFilter.class) //
                 .addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
                 .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
 
         if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
-            http.addFilterAfter(twoFactorAuthenticationFilter(), FineractInstanceModeApiFilter.class);
+            http.addFilterAfter(twoFactorAuthenticationFilter(), ResponseCorsFilter.class);
         } else {
-            http.addFilterAfter(insecureTwoFactorAuthenticationFilter(), FineractInstanceModeApiFilter.class);
+            http.addFilterAfter(insecureTwoFactorAuthenticationFilter(), ResponseCorsFilter.class);
         }
 
+        if (serverProperties.getSsl().isEnabled()) {
+            http.requiresChannel(channel -> channel.requestMatchers(antMatcher("/api/**")).requiresSecure());
+        }
         return http.build();
     }
 
@@ -196,7 +189,7 @@ public class SecurityConfig {
         TenantAwareBasicAuthenticationFilter filter = new TenantAwareBasicAuthenticationFilter(authenticationManagerBean(),
                 basicAuthenticationEntryPoint(), toApiJsonSerializer, configurationDomainService, cacheWritePlatformService,
                 userNotificationService, basicAuthTenantDetailsService, businessDateReadPlatformService);
-        filter.setRequestMatcher(AntPathRequestMatcher.antMatcher("/api/**"));
+        filter.setRequestMatcher(antMatcher("/api/**"));
         return filter;
     }
 

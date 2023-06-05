@@ -106,6 +106,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
                 // ignore to allow 'preflight' requests from AJAX applications
                 // in different origin (domain name)
+                filterChain.doFilter(request, response);
             } else {
                 if (requestMatcher.matches(request)) {
                     String tenantIdentifier = request.getHeader(this.tenantRequestHeader);

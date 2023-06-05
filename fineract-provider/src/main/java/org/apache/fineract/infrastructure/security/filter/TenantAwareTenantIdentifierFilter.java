@@ -42,9 +42,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentifierException;
 import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 import org.springframework.web.filter.GenericFilterBean;
 
 /**
@@ -58,8 +56,6 @@ import org.springframework.web.filter.GenericFilterBean;
  *
  * Used to support Oauth2 authentication and the service is loaded only when "oauth" profile is active.
  */
-@Service
-@ConditionalOnProperty("fineract.security.oauth.enabled")
 @RequiredArgsConstructor
 @Slf4j
 public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {

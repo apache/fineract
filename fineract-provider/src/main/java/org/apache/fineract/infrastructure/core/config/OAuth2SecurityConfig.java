@@ -23,6 +23,7 @@ import static org.apache.fineract.infrastructure.security.vote.SelfServiceUserAu
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 import java.util.Collection;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
@@ -32,6 +33,7 @@ import org.apache.fineract.infrastructure.core.exceptionmapper.OAuth2ExceptionEn
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
+import org.apache.fineract.infrastructure.security.filter.InsecureTwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareTenantIdentifierFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
@@ -40,6 +42,7 @@ import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -73,7 +76,7 @@ public class OAuth2SecurityConfig {
     private ServerProperties serverProperties;
 
     @Autowired
-    private TwoFactorService twoFactorService;
+    private FineractProperties fineractProperties;
 
     @Autowired
     private BasicAuthTenantDetailsService basicAuthTenantDetailsService;
@@ -89,45 +92,40 @@ public class OAuth2SecurityConfig {
 
     @Autowired
     private BusinessDateReadPlatformService businessDateReadPlatformService;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private static final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     @Bean
-    public SecurityFilterChain authorizationFilterChain(HttpSecurity http) throws Exception {
-        http //
-                .securityMatcher("/api/**").authorizeHttpRequests((auth) -> {
-                    auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/authentication").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/self/authentication").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/self/registration").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/self/registration/user").permitAll() //
-                            .requestMatchers(HttpMethod.POST, "/api/*/twofactor/validate").fullyAuthenticated() //
-                            .requestMatchers("/api/*/twofactor").fullyAuthenticated() //
-                            .requestMatchers("/api/**")
-                            .access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"), selfServiceUserAuthManager())); //
-                });
-
-        if (serverProperties.getSsl().isEnabled()) {
-            http.requiresChannel(channel -> channel.requestMatchers("/api/**").requiresSecure());
-        }
-
-        return http.build();
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http //
-                .csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
+                .securityMatcher(antMatcher("/api/**")).authorizeHttpRequests((auth) -> {
+                    auth.requestMatchers(antMatcher(HttpMethod.OPTIONS, "/api/**")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/echo")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
+                            .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
+                            .requestMatchers(antMatcher("/api/**"))
+                            .access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"), selfServiceUserAuthManager())); //
+                }).csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that is used by non-browser clients
                 .exceptionHandling((ehc) -> ehc.authenticationEntryPoint(new OAuth2ExceptionEntryPoint()))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter()))
                         .authenticationEntryPoint(new OAuth2ExceptionEntryPoint())) //
                 .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
-                .addFilterAfter(tenantAwareTenantIdentifierFilter(), SecurityContextHolderFilter.class) //
-                .addFilterAfter(twoFactorAuthenticationFilter(), BasicAuthenticationFilter.class); //
+                .addFilterAfter(tenantAwareTenantIdentifierFilter(), SecurityContextHolderFilter.class);
+
+        if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
+            http.addFilterAfter(twoFactorAuthenticationFilter(), BasicAuthenticationFilter.class);
+        } else {
+            http.addFilterAfter(insecureTwoFactorAuthenticationFilter(), BasicAuthenticationFilter.class);
+        }
 
         if (serverProperties.getSsl().isEnabled()) {
-            http.requiresChannel(channel -> channel.requestMatchers("/api/**").requiresSecure());
+            http.requiresChannel(channel -> channel.requestMatchers(antMatcher("/api/**")).requiresSecure());
         }
 
         return http.build();
@@ -139,7 +137,12 @@ public class OAuth2SecurityConfig {
     }
 
     public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
+        TwoFactorService twoFactorService = applicationContext.getBean(TwoFactorService.class);
         return new TwoFactorAuthenticationFilter(twoFactorService);
+    }
+
+    public InsecureTwoFactorAuthenticationFilter insecureTwoFactorAuthenticationFilter() {
+        return new InsecureTwoFactorAuthenticationFilter();
     }
 
     @Bean
