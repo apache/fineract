@@ -23,7 +23,7 @@ apply plugin: 'io.spring.dependency-management'
 dependencyManagement {
     imports {
         mavenBom 'org.springframework:spring-framework-bom:5.3.27'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.10'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.1.0'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.8.20'
         mavenBom 'org.junit:junit-bom:5.9.2'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.2'
