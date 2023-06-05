@@ -19,6 +19,8 @@
 package org.apache.fineract.integrationtests.investor.externalassetowner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -124,6 +126,13 @@ public class InitiateExternalAssetOwnerTransferTest {
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
+            // Add Charge Penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "02 March 2020", "10"));
+            assertNotNull(penalty1LoanChargeId);
+
             String transferExternalId = UUID.randomUUID().toString();
             PostInitiateTransferResponse saleResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "sale",
                     new PostInitiateTransferRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale("en")
@@ -154,12 +163,14 @@ public class InitiateExternalAssetOwnerTransferTest {
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
             externalTransferData = retrieveResponse.getContent().get(1);
             assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.ACTIVE, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+            validateExternalTransferDataDetailsWithPenalty(externalTransferData);
 
             String buybackTransferExternalId = "36efeb06-d835-48a1-99eb-09bd1d348c1e";
             PostInitiateTransferResponse buybackResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanID.longValue(), "buyback",
@@ -177,18 +188,21 @@ public class InitiateExternalAssetOwnerTransferTest {
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
             externalTransferData = retrieveResponse.getContent().get(1);
             assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.ACTIVE, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+            validateExternalTransferDataDetailsWithPenalty(externalTransferData);
             externalTransferData = retrieveResponse.getContent().get(2);
             assertEquals(buybackTransferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 4));
 
@@ -202,18 +216,21 @@ public class InitiateExternalAssetOwnerTransferTest {
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
             externalTransferData = retrieveResponse.getContent().get(1);
             assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.ACTIVE, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveTo());
+            validateExternalTransferDataDetailsWithPenalty(externalTransferData);
             externalTransferData = retrieveResponse.getContent().get(2);
             assertEquals(buybackTransferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 3), externalTransferData.getEffectiveTo());
+            validateExternalTransferDataDetailsWithPenalty(externalTransferData);
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -221,6 +238,16 @@ public class InitiateExternalAssetOwnerTransferTest {
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
+    }
+
+    private static void validateExternalTransferDataDetailsWithPenalty(ExternalTransferData externalTransferData) {
+        assertNotNull(externalTransferData.getDetails());
+        assertEquals(new BigDecimal("15767.420000"), externalTransferData.getDetails().getTotalOutstanding());
+        assertEquals(new BigDecimal("15000.000000"), externalTransferData.getDetails().getTotalPrincipalOutstanding());
+        assertEquals(new BigDecimal("757.420000"), externalTransferData.getDetails().getTotalInterestOutstanding());
+        assertEquals(new BigDecimal("10.000000"), externalTransferData.getDetails().getTotalPenaltyChargesOutstanding());
+        assertEquals(new BigDecimal("0.000000"), externalTransferData.getDetails().getTotalFeeChargesOutstanding());
+        assertEquals(new BigDecimal("0.000000"), externalTransferData.getDetails().getTotalOverpaid());
     }
 
     @Test
@@ -386,12 +413,14 @@ public class InitiateExternalAssetOwnerTransferTest {
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
             externalTransferData = retrieveResponse.getContent().get(1);
             assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(9999, 12, 31), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 3));
             final String jobName = "Loan COB";
@@ -405,24 +434,28 @@ public class InitiateExternalAssetOwnerTransferTest {
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
             externalTransferData = retrieveResponse.getContent().get(1);
             assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.BUYBACK, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
             externalTransferData = retrieveResponse.getContent().get(2);
             assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.CANCELLED, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
             externalTransferData = retrieveResponse.getContent().get(3);
             assertEquals(transferExternalId, externalTransferData.getTransferExternalId());
             assertEquals(ExternalTransferData.StatusEnum.CANCELLED, externalTransferData.getStatus());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getSettlementDate());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveFrom());
             assertEquals(LocalDate.of(2020, 3, 2), externalTransferData.getEffectiveTo());
+            assertNull(externalTransferData.getDetails());
         } finally {
             requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());

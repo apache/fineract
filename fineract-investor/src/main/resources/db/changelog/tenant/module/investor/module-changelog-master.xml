@@ -28,4 +28,5 @@
   <include relativeToChangelogFile="true" file="parts/0004_change_purchase_price_ratio_type.xml"/>
   <include relativeToChangelogFile="true" file="parts/0005_add_sale_and_buyback_command.xml"/>
   <include relativeToChangelogFile="true" file="parts/0006_asset_schemas.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0007_add_external_asset_owner_transfer_details.xml"/>
 </databaseChangeLog>

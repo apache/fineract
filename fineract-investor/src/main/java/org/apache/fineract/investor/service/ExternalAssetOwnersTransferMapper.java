@@ -20,9 +20,11 @@ package org.apache.fineract.investor.service;
 
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.investor.data.ExternalTransferData;
+import org.apache.fineract.investor.data.ExternalTransferDataDetails;
 import org.apache.fineract.investor.data.ExternalTransferOwnerData;
 import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferDetails;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -39,8 +41,12 @@ public interface ExternalAssetOwnersTransferMapper {
     @Mapping(target = "purchasePriceRatio", source = "purchasePriceRatio")
     @Mapping(target = "settlementDate", source = "settlementDate")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "details", source = "externalAssetOwnerTransferDetails")
     ExternalTransferData mapTransfer(ExternalAssetOwnerTransfer source);
 
     ExternalTransferOwnerData mapOwner(ExternalAssetOwner source);
+
+    @Mapping(target = "detailsId", source = "id")
+    ExternalTransferDataDetails mapDetails(ExternalAssetOwnerTransferDetails details);
 
 }

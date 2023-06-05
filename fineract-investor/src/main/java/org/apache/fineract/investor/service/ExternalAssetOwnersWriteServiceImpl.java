@@ -144,7 +144,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
 
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
         externalAssetOwnerTransfer.setExternalId(externalId);
-        externalAssetOwnerTransfer.setOwnerId(effectiveTransfer.getOwnerId());
+        externalAssetOwnerTransfer.setOwner(effectiveTransfer.getOwner());
         externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.BUYBACK);
         externalAssetOwnerTransfer.setLoanId(effectiveTransfer.getLoanId());
         externalAssetOwnerTransfer.setExternalLoanId(effectiveTransfer.getExternalLoanId());
@@ -218,7 +218,6 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         final JsonElement json = fromApiJsonHelper.parse(apiRequestBodyAsJson);
 
         ExternalAssetOwner owner = getOwner(json);
-        externalAssetOwnerTransfer.setOwnerId(owner.getId());
         externalAssetOwnerTransfer.setOwner(owner);
         externalAssetOwnerTransfer.setExternalId(getTransferExternalIdFromJson(json));
         externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.PENDING);

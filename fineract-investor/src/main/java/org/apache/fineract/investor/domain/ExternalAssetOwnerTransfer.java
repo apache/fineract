@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.investor.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.Getter;
@@ -41,12 +43,12 @@ import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 @Entity
 public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTimeCustom {
 
-    @Column(name = "owner_id", nullable = false)
-    private Long ownerId;
-
     @ManyToOne
-    @JoinColumn(name = "owner_id", insertable = false, updatable = false, nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     private ExternalAssetOwner owner;
+
+    @OneToOne(mappedBy = "externalAssetOwnerTransfer", cascade = CascadeType.ALL)
+    private ExternalAssetOwnerTransferDetails externalAssetOwnerTransferDetails;
 
     @Column(name = "external_id", length = 100, nullable = false)
     private ExternalId externalId;

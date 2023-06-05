@@ -167,6 +167,8 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
+        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.BUYBACK);
