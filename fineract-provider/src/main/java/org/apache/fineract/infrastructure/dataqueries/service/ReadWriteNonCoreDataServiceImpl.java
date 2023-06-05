@@ -23,6 +23,7 @@ import static java.util.Locale.ENGLISH;
 import static org.apache.fineract.infrastructure.core.data.ApiParameterError.parameterErrorWithValue;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -39,14 +40,21 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,11 +73,14 @@ import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavaila
 import org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
+import org.apache.fineract.infrastructure.core.service.PagedRequest;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
+import org.apache.fineract.infrastructure.dataqueries.data.ColumnFilter;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableSearchRequest;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
@@ -84,6 +95,11 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -108,6 +124,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private static final ImmutableMap<String, String> apiTypeToPostgreSQL = ImmutableMap.<String, String>builder().put("string", "VARCHAR")
             .put("number", "INT").put("boolean", "boolean").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "TIMESTAMP")
             .put("text", "TEXT").put("dropdown", "INT").build();
+    private static final ImmutableList<String> validOperationsList = ImmutableList.of("CONTAINS", "NOT_CONTAINS", "GTE", "LTE", "GT", "LT",
+            "EQUALS", "NOT_EQUALS");
 
     private static final List<String> stringDataTypes = asList("char", "varchar", "blob", "text", "tinyblob", "tinytext", "mediumblob",
             "mediumtext", "longblob", "longtext");
@@ -213,6 +231,173 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         return results;
+    }
+
+    @Override
+    public Page<JsonObject> queryDataTableSearch(PagedRequest<DatatableSearchRequest> searchRequest) {
+
+        Objects.requireNonNull(searchRequest, "Search Request Should not be Empty");
+        Optional<DatatableSearchRequest> request = searchRequest.getRequest();
+        List<String> resultColumnList = request.map(DatatableSearchRequest::getResultColumns).orElse(Collections.emptyList());
+        List<ColumnFilter> columnFilters = request.map(DatatableSearchRequest::getColumnFilters).orElse(Collections.emptyList());
+        String datatable = request.map(DatatableSearchRequest::getDatatable).orElse(null);
+        Pageable pageable = searchRequest.toPageable();
+
+        this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
+        List<JsonObject> results = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(columnFilters) && CollectionUtils.isNotEmpty(resultColumnList)) {
+
+            String resultColumns = resultColumnList.stream().collect(Collectors.joining(","));
+
+            validateSqlInjectionForDynamicQuery(columnFilters, datatable, resultColumns);
+
+            List<ResultsetColumnHeaderData> resultsetColumnHeaderData = genericDataService.fillResultsetColumnHeaders(datatable);
+
+            if (CollectionUtils.isNotEmpty(resultsetColumnHeaderData)) {
+
+                Map<String, String> dataTableColumnMap = resultsetColumnHeaderData.stream()
+                        .collect(Collectors.toMap(ResultsetColumnHeaderData::getColumnName, ResultsetColumnHeaderData::getColumnType));
+                columnFilters.forEach(column -> {
+                    validateRequestParamsSearch(column.getColumnName(), column.getColumnValue(), column.getColumnOperation(), resultColumns,
+                            dataTableColumnMap);
+                });
+
+                // Attach the selection
+                StringBuilder sqlBuilder = new StringBuilder();
+                StringBuilder countQueryBuilder = new StringBuilder();
+
+                sqlBuilder.append("SELECT ").append(escapeFieldNames(resultColumns)).append(" FROM ")
+                        .append(sqlGenerator.escape(datatable));
+
+                // Attach the count selection
+                countQueryBuilder.append(" SELECT COUNT(*) FROM ").append(datatable);
+
+                // Build base & count query with filters
+                buildBaseQueryWithFilters(sqlBuilder, countQueryBuilder, columnFilters, dataTableColumnMap, resultsetColumnHeaderData);
+
+                // Attach the ORDER
+                attachOrdering(sqlBuilder, pageable.getSort());
+                // Attach the PAGINATION
+                applyPagination(sqlBuilder, pageable);
+
+                SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlBuilder.toString());
+
+                // Execute the count Query
+                Integer totalElements = jdbcTemplate.queryForObject(countQueryBuilder.toString(), Integer.class);
+                String[] resultColumnNames = resultColumns.split(",");
+
+                while (rowSet.next()) {
+                    extractResults(rowSet, resultColumnNames, results);
+                }
+                return PageableExecutionUtils.getPage(results, pageable, () -> totalElements);
+
+            }
+        }
+        return PageableExecutionUtils.getPage(results, pageable, () -> 0);
+
+    }
+
+    private static void validateRequestParamsSearch(String columnName, String columnValue, String columnOperation, String resultColumns,
+            Map<String, String> dataTableColumnMap) {
+        List<ApiParameterError> paramErrors = new ArrayList<>();
+        if (MapUtils.isNotEmpty(dataTableColumnMap)) {
+            if (columnName == null || columnName.isEmpty()) {
+                paramErrors.add(parameterErrorWithValue("400", "Column Name filter is empty!", "columnName", columnName));
+            } else {
+                if (!dataTableColumnMap.containsKey(columnName)) {
+                    paramErrors.add(parameterErrorWithValue("400", "Column Name filter not exist in datatable!", "columnName", columnName));
+                }
+            }
+
+            if (columnValue == null || columnValue.isEmpty()) {
+                paramErrors.add(parameterErrorWithValue("400", "Column Value is empty!", "columnValue", columnValue));
+            }
+            if (columnOperation == null || columnOperation.isEmpty()) {
+                paramErrors.add(parameterErrorWithValue("400", "Valid Operations are ", "columnOperations",
+                        validOperationsList.stream().collect(Collectors.joining(","))));
+            }
+            if (resultColumns == null || resultColumns.isEmpty()) {
+                paramErrors.add(parameterErrorWithValue("400", "Result columns filter is empty!", "resultColumns", resultColumns));
+            } else {
+                asList(resultColumns.split(",")).forEach(rcn -> {
+                    if (!dataTableColumnMap.containsKey(rcn)) {
+                        paramErrors.add(parameterErrorWithValue("400", "Result column not exist in datatable!", "resultColumns", rcn));
+                    }
+                });
+            }
+
+        }
+        if (!paramErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(paramErrors);
+        }
+
+    }
+
+    private void applyPagination(StringBuilder query, Pageable pageable) {
+        if (pageable.isPaged()) {
+            query.append(sqlGenerator.limit(pageable.getPageSize(), (int) pageable.getOffset()));
+        }
+    }
+
+    private void attachOrdering(StringBuilder query, Sort sort) {
+        if (sort.isSorted()) {
+            query.append(buildOrderByClause(sort.toList()));
+        }
+    }
+
+    private String buildOrderByClause(List<Order> orders) {
+        return orders.stream().map(order -> String.join(" ", order.getProperty(), order.getDirection().name()))
+                .collect(Collectors.joining(", "));
+    }
+
+    private void buildBaseQueryWithFilters(StringBuilder sqlBuilder, StringBuilder countQueryBuilder, List<ColumnFilter> columnFilters,
+            Map<String, String> dataTableColumnMap, List<ResultsetColumnHeaderData> resultsetColumnHeaderData) {
+        StringBuilder filterQueryBuilder = new StringBuilder();
+        int count = 0;
+        for (ColumnFilter column : columnFilters) {
+            if (count == 0) {
+                sqlBuilder.append(" WHERE ");
+                countQueryBuilder.append(" WHERE ");
+            }
+            String columnName = escapeFieldNames(column.getColumnName());
+            String columnValue = column.getColumnValue();
+            Object valueFilter = getValidatedValueFilter(column.getColumnName(), columnValue, resultsetColumnHeaderData);
+
+            if ("EQUALS".equalsIgnoreCase(column.getColumnOperation())) {
+                filterQueryBuilder.append(String.format(" %s %s '%s' ", columnName, "=", valueFilter));
+            } else if ("NOT_EQUALS".equalsIgnoreCase(column.getColumnOperation())) {
+                filterQueryBuilder.append(String.format(" %s %s '%s' ", columnName, "<>", valueFilter));
+            } else if ("CONTAINS".equalsIgnoreCase(column.getColumnOperation())) {
+                filterQueryBuilder.append(String.format(" %s %s '%%%s%%' ", columnName, "LIKE", valueFilter));
+            } else if ("NOT_CONTAINS".equalsIgnoreCase(column.getColumnOperation())) {
+                filterQueryBuilder.append(String.format(" %s %s '%%%s%%' ", columnName, "NOT LIKE", valueFilter));
+            } else if ("GTE".equalsIgnoreCase(column.getColumnOperation())) {
+                filterQueryBuilder.append(String.format(" %s %s '%s' ", columnName, ">=", valueFilter));
+            } else if ("LTE".equalsIgnoreCase(column.getColumnOperation())) {
+                filterQueryBuilder.append(String.format(" %s %s '%s' ", columnName, "<=", valueFilter));
+            } else if ("GT".equalsIgnoreCase(column.getColumnOperation())) {
+                filterQueryBuilder.append(String.format(" %s %s '%s' ", column.getColumnName(), ">", valueFilter));
+            } else if ("LT".equalsIgnoreCase(column.getColumnOperation())) {
+                filterQueryBuilder.append(String.format(" %s %s '%s' ", columnName, "<", valueFilter));
+            }
+            if (count < columnFilters.size() - 1) {
+                filterQueryBuilder.append(" AND ");
+                count++;
+            }
+        }
+        sqlBuilder.append(filterQueryBuilder);
+        countQueryBuilder.append(filterQueryBuilder);
+    }
+
+    private void validateSqlInjectionForDynamicQuery(List<ColumnFilter> columnFilters, String datatable, String resultColumn) {
+        // Validate SQL Injection
+        Arrays.asList(datatable, resultColumn).forEach(SQLInjectionValidator::validateDynamicQuery);
+
+        columnFilters.stream().forEach(e -> {
+            SQLInjectionValidator.validateDynamicQuery(e.getColumnName());
+            SQLInjectionValidator.validateDynamicQuery(e.getColumnValue());
+            SQLInjectionValidator.validateDynamicQuery(e.getColumnOperation());
+        });
     }
 
     private Object getValidatedValueFilter(String columnFilter, String valueFilter,

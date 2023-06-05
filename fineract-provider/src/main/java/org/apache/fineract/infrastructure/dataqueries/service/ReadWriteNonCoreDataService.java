@@ -22,8 +22,11 @@ import com.google.gson.JsonObject;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.service.PagedRequest;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableSearchRequest;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ReadWriteNonCoreDataService {
@@ -73,4 +76,6 @@ public interface ReadWriteNonCoreDataService {
     String getDataTableName(String Url);
 
     Long countDatatableEntries(String datatableName, Long appTableId, String foreignKeyColumn);
+
+    Page<JsonObject> queryDataTableSearch(PagedRequest<DatatableSearchRequest> searchRequest);
 }
