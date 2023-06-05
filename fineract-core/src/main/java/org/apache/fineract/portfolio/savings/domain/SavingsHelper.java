@@ -161,6 +161,8 @@ public final class SavingsHelper {
                 }
                 periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
             break;
+            case ACTIVATIONDATE:
+                periodEndDate = periodStartDate.plusMonths(1).minusDays(1);
         }
         // interest posting always occurs on next day after the period end date.
         periodEndDate = periodEndDate.plusDays(1);

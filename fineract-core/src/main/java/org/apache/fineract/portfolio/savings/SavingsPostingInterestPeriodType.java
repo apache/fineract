@@ -31,7 +31,9 @@ public enum SavingsPostingInterestPeriodType {
     DAILY(1, "savingsPostingInterestPeriodType.daily"), //
     MONTHLY(4, "savingsPostingInterestPeriodType.monthly"), //
     QUATERLY(5, "savingsPostingInterestPeriodType.quarterly"), //
-    BIANNUAL(6, "savingsPostingInterestPeriodType.biannual"), ANNUAL(7, "savingsPostingInterestPeriodType.annual");
+    BIANNUAL(6, "savingsPostingInterestPeriodType.biannual"),
+    ANNUAL(7, "savingsPostingInterestPeriodType.annual"),
+    ACTIVATIONDATE(8, "savingsPostingInterestPeriodType.activationDate");
 
     private final Integer value;
     private final String code;
