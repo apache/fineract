@@ -44,7 +44,7 @@ dependencies {
 
             'com.squareup.retrofit2:converter-gson',
 
-            'org.springdoc:springdoc-openapi-security',
+            'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot2',
