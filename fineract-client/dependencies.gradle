@@ -19,7 +19,7 @@
 dependencies {
     // this needs to stay on exactly this version because the OpenAPI Generator
     // only handles javax annotations, not jakarta ones
-    implementation 'jakarta.annotation:jakarta.annotation-api:1.3.5'
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
 
     implementation(
