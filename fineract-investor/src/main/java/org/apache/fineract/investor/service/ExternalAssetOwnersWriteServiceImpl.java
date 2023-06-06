@@ -80,7 +80,6 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     public CommandProcessingResult saleLoanByLoanId(JsonCommand command) {
         final JsonElement json = fromApiJsonHelper.parse(command.json());
         Long loanId = command.getLoanId();
-        LocalDate settlementDate = getSettlementDateFromJson(json);
         LoanIdAndExternalIdAndStatus loanIdAndExternalIdAndStatus = fetchLoanDetails(loanId);
         validateLoanStatus(loanIdAndExternalIdAndStatus);
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = createSaleTransfer(loanId, command.json(),
@@ -97,8 +96,6 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         Long loanId = command.getLoanId();
         LocalDate settlementDate = getSettlementDateFromJson(json);
         ExternalId externalId = getTransferExternalIdFromJson(json);
-        LoanIdAndExternalIdAndStatus loanIdAndExternalIdAndStatus = fetchLoanDetails(loanId);
-        validateLoanStatus(loanIdAndExternalIdAndStatus);
         validateSettlementDate(settlementDate);
         ExternalAssetOwnerTransfer effectiveTransfer = fetchAndValidateEffectiveTransferForBuyback(loanId, settlementDate);
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = createBuybackTransfer(effectiveTransfer, settlementDate, externalId);
