@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.integrationtests.client.IntegrationTest.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -28,8 +29,12 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
@@ -38,12 +43,17 @@ import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsAddressRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class ClientTest {
 
@@ -263,4 +273,63 @@ public class ClientTest {
         assertThat(addressResponse.getPostalCode()).isEqualTo(postalCode);
     }
 
+    @Test
+    public void testActivateAlreadyActiveClient() {
+        // create active client
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
+
+        final HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+        ClientStatusChecker.verifyClientIsActive(status);
+
+        // activate client again
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(HttpStatus.SC_FORBIDDEN).build();
+        final ClientHelper clientHelperWithError = new ClientHelper(this.requestSpec, errorResponse);
+        final ArrayList<HashMap<String, Object>> clientErrorData = clientHelperWithError.activateClient(clientId,
+                CommonConstants.RESPONSE_ERROR);
+
+        // validate
+        assertEquals(1, clientErrorData.size());
+        final HashMap<String, Object> clientError = clientErrorData.get(0);
+        assertEquals("error.msg.clients.already.active", clientError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        assertEquals("Cannot activate client. Client is already active.",
+                clientError.get(CommonConstants.RESPONSE_ERROR_DEVELOPER_MESSAGE));
+        assertEquals("Cannot activate client. Client is already active.",
+                clientError.get(CommonConstants.RESPONSE_ERROR_DEFAULT_USER_MESSAGE));
+    }
+
+    @ParameterizedTest
+    @MethodSource("clientErrorProvider")
+    public void testActivationDateInFuture(final LocalDate activationDate, final LocalDate submittedOnDate, final String errorCode,
+            final String errorMessage) {
+        // given
+        final PostClientsRequest clientRequest = ClientHelper.defaultClientCreationRequest()
+                .activationDate(activationDate.format(Utils.dateFormatter)).submittedOnDate(submittedOnDate.format(Utils.dateFormatter));
+        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(HttpStatus.SC_FORBIDDEN).build();
+
+        // when
+        final ArrayList<HashMap<String, Object>> clientErrorData = ClientHelper.createClientWithValidationError(requestSpec, responseSpec,
+                clientRequest);
+
+        // then
+        assertEquals(1, clientErrorData.size());
+        final HashMap<String, Object> clientError = clientErrorData.get(0);
+        assertEquals(errorCode, clientError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        assertEquals(errorMessage, clientError.get(CommonConstants.RESPONSE_ERROR_DEVELOPER_MESSAGE));
+        assertEquals(errorMessage, clientError.get(CommonConstants.RESPONSE_ERROR_DEFAULT_USER_MESSAGE));
+        final List<LinkedHashMap<String, String>> args = (ArrayList) clientError.get(CommonConstants.RESPONSE_ERROR_ARGS);
+        assertEquals(1, args.size());
+        assertEquals(activationDate.toString(), args.get(0).get(CommonConstants.RESPONSE_ERROR_ARG_VALUE));
+    }
+
+    private static Stream<Arguments> clientErrorProvider() {
+        return Stream.of(
+                Arguments.of(Utils.getLocalDateOfTenant().plusYears(1), Utils.getLocalDateOfTenant().plusYears(1),
+                        "error.msg.clients.submittedOnDate.in.the.future", "submitted date cannot be in the future."),
+                Arguments.of(Utils.getLocalDateOfTenant().plusYears(1), Utils.getLocalDateOfTenant(),
+                        "error.msg.clients.activationDate.in.the.future", "Activation date cannot be in the future."),
+                Arguments.of(Utils.getLocalDateOfTenant().withYear(2008), Utils.getLocalDateOfTenant().withYear(2008),
+                        "error.msg.clients.activationDate.cannot.be.before.office.activation.date",
+                        "Client activation date cannot be a date before the office opening date."));
+    }
 }

@@ -16,19 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests.common;
+package org.apache.fineract.portfolio.client.exception;
 
-public interface CommonConstants {
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-    String LOCALE = "en";
-    String DATE_FORMAT = "dd MMMM yyyy";
-    String RESPONSE_RESOURCE_ID = "resourceId";
-    String RESPONSE_CHANGES = "changes";
-    String RESPONSE_STATUS = "status";
-    String RESPONSE_ERROR = "errors";
-    String RESPONSE_ERROR_MESSAGE_CODE = "userMessageGlobalisationCode";
-    String RESPONSE_ERROR_DEVELOPER_MESSAGE = "developerMessage";
-    String RESPONSE_ERROR_DEFAULT_USER_MESSAGE = "defaultUserMessage";
-    String RESPONSE_ERROR_ARGS = "args";
-    String RESPONSE_ERROR_ARG_VALUE = "value";
+/**
+ * {@link AbstractPlatformDomainRuleException} thrown when client is already active.
+ */
+public class ClientAlreadyActiveException extends AbstractPlatformDomainRuleException {
+
+    /**
+     * Constructor.
+     */
+    public ClientAlreadyActiveException() {
+        super("error.msg.clients.already.active", "Cannot activate client. Client is already active.");
+    }
 }

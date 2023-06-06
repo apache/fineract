@@ -320,6 +320,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public LoanTransaction saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
         try {
+            this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
+            this.loanTransactionRepository.delete(newRepaymentTransaction);
             return this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             raiseValidationExceptionForUniqueConstraintViolation(e);

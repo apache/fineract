@@ -720,7 +720,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             runEntityDatatableCheck(clientId, client.getLegalForm());
 
             final AppUser currentUser = this.context.authenticatedUser();
-            client.activate(currentUser, fmt, activationDate);
+            client.activate(currentUser, activationDate);
             CommandProcessingResult result = openSavingsAccount(client, fmt);
             clientRepository.saveAndFlush(client);
             businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(client));

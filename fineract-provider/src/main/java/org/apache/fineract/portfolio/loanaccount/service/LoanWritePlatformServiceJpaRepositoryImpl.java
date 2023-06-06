@@ -628,6 +628,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          */
         try {
             loanRepaymentScheduleInstallmentRepository.saveAll(loan.getRepaymentScheduleInstallments());
+            loanRepaymentScheduleInstallmentRepository.delete(loan.getRepaymentScheduleInstallments().get(0));
             return this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();

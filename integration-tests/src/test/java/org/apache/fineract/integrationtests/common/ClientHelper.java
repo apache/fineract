@@ -132,6 +132,11 @@ public class ClientHelper extends IntegrationTest {
         return ok(fineract().clientSearchV2.searchByText(request));
     }
 
+    public static ArrayList<HashMap<String, Object>> createClientWithValidationError(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, PostClientsRequest request) {
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, GSON.toJson(request), CommonConstants.RESPONSE_ERROR);
+    }
+
     public static PostClientsResponse addClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String jsonPayload) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, jsonPayload);

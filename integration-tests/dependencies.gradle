@@ -54,4 +54,5 @@ dependencies {
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor'
 
     testImplementation 'com.github.tomakehurst:wiremock:3.0.0-beta-8'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
 }

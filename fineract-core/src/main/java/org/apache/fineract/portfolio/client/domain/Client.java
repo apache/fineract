@@ -30,7 +30,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +49,8 @@ import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerat
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.exception.ClientAlreadyActiveException;
+import org.apache.fineract.portfolio.client.exception.InvalidClientActivationDateException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -310,26 +311,19 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     private void validate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateNameParts(dataValidationErrors);
-        validateActivationDate(dataValidationErrors);
-
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
+        validateActivationDate();
     }
 
     public void validateUpdate() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         // Not validating name parts while update request as firstname/lastname
         // can be along with fullname
         // when we change clientType from Individual to Organisation or
         // vice-cersa
-        validateActivationDate(dataValidationErrors);
-
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
+        validateActivationDate();
     }
 
     public boolean isAccountNumberRequiresAutoGeneration() {
@@ -349,17 +343,10 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.accountNumberRequiresAutoGeneration = false;
     }
 
-    public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+    public void activate(final AppUser currentUser, final LocalDate activationLocalDate) {
 
         if (isActive()) {
-            final String defaultUserMessage = "Cannot activate client. Client is already active.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.already.active", defaultUserMessage,
-                    ClientApiConstants.activationDateParamName, activationLocalDate.format(formatter));
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
+            throw new ClientAlreadyActiveException();
         }
 
         this.activationDate = activationLocalDate;
@@ -443,51 +430,32 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         }
     }
 
-    private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
+    private void validateActivationDate() {
 
         if (getSubmittedOnDate() != null && isDateInTheFuture(getSubmittedOnDate())) {
-
-            final String defaultUserMessage = "submitted date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.in.the.future",
-                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, this.submittedOnDate);
-
-            dataValidationErrors.add(error);
+            throw new InvalidClientActivationDateException("submittedOnDate.in.the.future", "submitted date cannot be in the future.",
+                    getSubmittedOnDate());
         }
 
         if (getActivationLocalDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getActivationLocalDate())) {
-
-            final String defaultUserMessage = "submitted date cannot be after the activation date";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.after.activation.date",
-                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, this.submittedOnDate);
-
-            dataValidationErrors.add(error);
+            throw new InvalidClientActivationDateException("submittedOnDate.after.activation.date",
+                    "submitted date cannot be after the activation date", getSubmittedOnDate());
         }
 
         if (getReopenedDate() != null && getActivationLocalDate() != null && getReopenedDate().isAfter(getActivationLocalDate())) {
-
-            final String defaultUserMessage = "reopened date cannot be after the submittedon date";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.after.reopened.date",
-                    defaultUserMessage, ClientApiConstants.reopenedDateParamName, this.reopenedDate);
-
-            dataValidationErrors.add(error);
+            throw new InvalidClientActivationDateException("submittedOnDate.after.reopened.date",
+                    "reopened date cannot be after the submittedon date", this.reopenedDate);
         }
 
         if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
-
-            final String defaultUserMessage = "Activation date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
-                    defaultUserMessage, ClientApiConstants.activationDateParamName, getActivationLocalDate());
-
-            dataValidationErrors.add(error);
+            throw new InvalidClientActivationDateException("activationDate.in.the.future", "Activation date cannot be in the future.",
+                    getActivationLocalDate());
         }
 
         if (getActivationLocalDate() != null) {
             if (this.office.isOpeningDateAfter(getActivationLocalDate())) {
-                final String defaultUserMessage = "Client activation date cannot be a date before the office opening date.";
-                final ApiParameterError error = ApiParameterError.parameterError(
-                        "error.msg.clients.activationDate.cannot.be.before.office.activation.date", defaultUserMessage,
-                        ClientApiConstants.activationDateParamName, getActivationLocalDate());
-                dataValidationErrors.add(error);
+                throw new InvalidClientActivationDateException("activationDate.cannot.be.before.office.activation.date",
+                        "Client activation date cannot be a date before the office opening date.", getActivationLocalDate());
             }
         }
     }

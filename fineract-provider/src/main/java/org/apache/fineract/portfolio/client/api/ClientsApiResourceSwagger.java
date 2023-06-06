@@ -320,6 +320,8 @@ final class ClientsApiResourceSwagger {
         public Boolean active;
         @Schema(example = "04 March 2009")
         public String activationDate;
+        @Schema(example = "04 March 2009")
+        public String submittedOnDate;
         @Schema(example = "+353851239876")
         public String mobileNo;
         @Schema(description = "List of PostClientsDatatable")

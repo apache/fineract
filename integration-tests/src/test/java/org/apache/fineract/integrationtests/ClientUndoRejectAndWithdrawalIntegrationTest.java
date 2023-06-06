@@ -272,7 +272,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testValidateReopenedDate() {
-        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
         final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
 
         // CREATE CLIENT

@@ -99,13 +99,13 @@ public class ErrorHandler extends RuntimeException {
             return handleException(e, new PlatformDomainRuleExceptionMapper(), 9999);
         }
         if (exception instanceof TransactionException) {
-            return new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 4001, "{\"Exception\": %s}".formatted(exception.getMessage()));
+            return new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR, 4001, "{\"Exception\": %s}".formatted(exception.getMessage()));
         }
         if (exception instanceof PlatformInternalServerException e) {
             return handleException(e, new PlatformInternalServerExceptionMapper(), 5001);
         }
         if (exception instanceof NonTransientDataAccessException) {
-            return new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 4002, "{\"Exception\": %s}".formatted(exception.getMessage()));
+            return new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR, 4002, "{\"Exception\": %s}".formatted(exception.getMessage()));
         }
         if (exception instanceof LoanIdsHardLockedException e) {
             String message = ApiGlobalErrorResponse.loanIsLocked(e.getLoanIdFromRequest()).toJson();
