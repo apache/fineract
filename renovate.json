@@ -15,20 +15,8 @@
     "schedule": ["monthly"]
   },
   {
-    "matchPackageNames": ["org.eclipse.persistence:eclipselink"],
-    "allowedVersions": "<=2.7.10"
-  },
-  {
-    "matchPackageNames": ["org.eclipse.persistence:org.eclipse.persistence.jpa"],
-    "allowedVersions": "<=2.7.10"
-  },
-  {
     "matchPackageNames": ["org.glassfish.jaxb:jaxb-runtime"],
     "allowedVersions": "<=2.3.6"
-  },
-  {
-    "matchPackageNames": ["com.sun.mail:jakarta.mail"],
-    "allowedVersions": "<=1.6.7"
   },
   {
     "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.common"],
@@ -43,64 +31,8 @@
     "allowedVersions": "<=1.0.1"
   },
   {
-    "matchPackageNames": ["org.glassfish.jersey.media:jersey-media-multipart"],
-    "allowedVersions": "<=2.36"
-  },
-  {
-    "matchPackageNames": ["ch.qos.logback:logback-core"],
-    "allowedVersions": "<=1.2.11"
-  },
-  {
-    "matchPackageNames": ["ch.qos.logback:logback-classic"],
-    "allowedVersions": "<=1.2.11"
-  },
-  {
-    "matchPackageNames": ["org.slf4j:slf4j-api", "org.slf4j:slf4j-simple", "org.slf4j:jcl-over-slf4j", "org.slf4j:jul-to-slf4j", "org.slf4j:log4j-over-slf4j"],
-    "allowedVersions": "<=1.7.36"
-  },
-  {
-    "matchPackageNames": ["org.springframework:spring-framework-bom"],
-    "allowedVersions": "<6.0.0"
-  },
-  {
-    "matchPackageNames": ["org.springframework.boot"],
-    "allowedVersions": "<3.0.0"
-  },
-  {
-    "matchPackageNames": ["jakarta.ws.rs"],
-    "allowedVersions": "<3.0.0"
-  },
-  {
-    "matchPackageNames": ["jakarta.jms"],
-    "allowedVersions": "<3.0.0"
-  },
-  {
-    "matchPackageNames": ["jakarta.annotation"],
-    "allowedVersions": "<2.0.0"
-  },
-  {
-    "matchPackageNames": ["io.rest-assured"],
-    "allowedVersions": "<5.0.0"
-  },
-  {
-    "matchPackageNames": ["gradle"],
-    "allowedVersions": "<=7.5.1"
-  },
-  {
     "matchPackageNames": ["org.mariadb.jdbc:mariadb-java-client"],
     "allowedVersions": "<=3.0.9"
-  },
-  {
-    "matchPackageNames": ["org.apache.tomcat:tomcat"],
-    "allowedVersions": "<=9.0.69"
-  },
-  {
-    "matchPackageNames": ["org.openapi.generator"],
-    "allowedVersions": "<=6.2.1"
-  },
-  {
-    "matchPackageNames": ["com.diffplug.spotless"],
-    "allowedVersions": "<=6.15.0"
   },
   {
     "depTypeList": ["dependencies"],

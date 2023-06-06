@@ -120,19 +120,19 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
         private final StringBuilder sqlBuilder = new StringBuilder(
                 " g.id as id, g.loan_id as loanId, g.client_reln_cv_id clientRelationshipTypeId, g.entity_id as entityId, g.type_enum guarantorType ,g.firstname as firstname, g.lastname as lastname, g.dob as dateOfBirth, g.address_line_1 as addressLine1, g.address_line_2 as addressLine2, g.city as city, g.state as state, g.country as country, g.zip as zip, g.house_phone_number as housePhoneNumber, g.mobile_number as mobilePhoneNumber, g.comment as comment, ")
-                        .append(" g.is_active as guarantorStatus,")//
-                        .append(" cv.code_value as typeName, ")//
-                        .append("gfd.amount,")//
-                        .append(this.guarantorFundingMapper.schema())//
-                        .append(",")//
-                        .append(this.guarantorTransactionMapper.schema())//
-                        .append(" FROM m_guarantor g") //
-                        .append(" left JOIN m_code_value cv on g.client_reln_cv_id = cv.id")//
-                        .append(" left JOIN m_guarantor_funding_details gfd on g.id = gfd.guarantor_id")//
-                        .append(" left JOIN m_portfolio_account_associations aa on gfd.account_associations_id = aa.id and aa.is_active = true and aa.association_type_enum = ?")//
-                        .append(" left JOIN m_savings_account sa on sa.id = aa.linked_savings_account_id ")//
-                        .append(" left join m_guarantor_transaction gt on gt.guarantor_fund_detail_id = gfd.id") //
-                        .append(" left join m_deposit_account_on_hold_transaction oht on oht.id = gt.deposit_on_hold_transaction_id");
+                .append(" g.is_active as guarantorStatus,")//
+                .append(" cv.code_value as typeName, ")//
+                .append("gfd.amount,")//
+                .append(this.guarantorFundingMapper.schema())//
+                .append(",")//
+                .append(this.guarantorTransactionMapper.schema())//
+                .append(" FROM m_guarantor g") //
+                .append(" left JOIN m_code_value cv on g.client_reln_cv_id = cv.id")//
+                .append(" left JOIN m_guarantor_funding_details gfd on g.id = gfd.guarantor_id")//
+                .append(" left JOIN m_portfolio_account_associations aa on gfd.account_associations_id = aa.id and aa.is_active = true and aa.association_type_enum = ?")//
+                .append(" left JOIN m_savings_account sa on sa.id = aa.linked_savings_account_id ")//
+                .append(" left join m_guarantor_transaction gt on gt.guarantor_fund_detail_id = gfd.id") //
+                .append(" left join m_deposit_account_on_hold_transaction oht on oht.id = gt.deposit_on_hold_transaction_id");
 
         public String schema() {
             return this.sqlBuilder.toString();

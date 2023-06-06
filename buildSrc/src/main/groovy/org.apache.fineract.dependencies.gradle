@@ -247,6 +247,5 @@ dependencyManagement {
         dependency 'org.apache.commons:commons-math3:3.6.1'
 
         dependency 'org.mockito:mockito-inline:5.2.0'
-
     }
 }

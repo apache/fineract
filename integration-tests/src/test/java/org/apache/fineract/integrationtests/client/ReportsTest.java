@@ -102,13 +102,13 @@ public class ReportsTest extends IntegrationTest {
     void testGeneralLedgerReportTableReportRunsSuccessfully() {
         assertThat(fineract().reportsRun.runReportGetData("GeneralLedgerReport Table",
                 Map.of("R_endDate", "2013-04-30", "R_officeId", "1", "R_startDate", "2013-04-16", "R_GLAccountNO", "1"), false))
-                        .hasHttpStatus(200);
+                .hasHttpStatus(200);
     }
 
     @Test
     void testBalanceSheetTableReportRunsSuccessfully() {
         assertThat(
                 fineract().reportsRun.runReportGetData("Balance Sheet Table", Map.of("R_endDate", "2013-04-30", "R_officeId", "1"), false))
-                        .hasHttpStatus(200);
+                .hasHttpStatus(200);
     }
 }
