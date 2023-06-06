@@ -54,7 +54,7 @@ public class StaffTest extends IntegrationTest {
         return ok(fineract().staff
                 .create3(new PostStaffRequest().officeId(1L).firstname("StaffTest " + random()).lastname("Staffer " + random())
                         .externalId(random()).joiningDate(LocalDate.now(ZoneId.of("UTC"))).dateFormat(dateFormat()).locale("en_US")))
-                                .getResourceId();
+                .getResourceId();
     }
 
     Optional<Long> retrieveFirst() {

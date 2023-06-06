@@ -125,11 +125,11 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         Request request = null;
         Request.Builder baseRequestBuilder = createRequestBuilder(subscriptionKey, subscriptionId, token, okHttpUrl);
         switch (process) {
-            case UPLOAD_CREDIT_REPORT -> request = createRequest(baseRequestBuilder, () -> new MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("file", fileData.getFileName(), RequestBody.create(file, MediaType.parse("multipart/form-data")))
-                    .addFormDataPart("BODY", "formdata").addFormDataPart("userName", userName).build(),
-                    (requestBody, builder) -> builder.header(CONTENT_TYPE, MULTIPART_FORM_DATA).post(requestBody).build());
+            case UPLOAD_CREDIT_REPORT ->
+                request = createRequest(baseRequestBuilder, () -> new MultipartBody.Builder().setType(MultipartBody.FORM)
+                        .addFormDataPart("file", fileData.getFileName(), RequestBody.create(file, MediaType.parse("multipart/form-data")))
+                        .addFormDataPart("BODY", "formdata").addFormDataPart("userName", userName).build(),
+                        (requestBody, builder) -> builder.header(CONTENT_TYPE, MULTIPART_FORM_DATA).post(requestBody).build());
             case "CreditReport" -> request = createRequest(baseRequestBuilder,
                     builder -> builder.header(CONTENT_TYPE, APPLICATION_FORM_URLENCODED).get().build());
             case "token" -> request = createRequest(baseRequestBuilder,

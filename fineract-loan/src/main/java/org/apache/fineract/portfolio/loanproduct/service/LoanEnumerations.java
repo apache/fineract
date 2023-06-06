@@ -90,8 +90,8 @@ public final class LoanEnumerations {
                     codePrefix + PeriodFrequencyType.MONTHS.getCode(), "Months");
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
-            default -> new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(),
-                    "Invalid");
+            default ->
+                new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -110,8 +110,8 @@ public final class LoanEnumerations {
                     codePrefix + PeriodFrequencyType.MONTHS.getCode(), "Months");
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
-            default -> new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(),
-                    "Invalid");
+            default ->
+                new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -165,8 +165,8 @@ public final class LoanEnumerations {
                     codePrefix + PeriodFrequencyType.MONTHS.getCode(), "Months");
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
-            default -> new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(),
-                    "Invalid");
+            default ->
+                new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -183,8 +183,8 @@ public final class LoanEnumerations {
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Per year");
             case WHOLE_TERM -> new EnumOptionData(PeriodFrequencyType.WHOLE_TERM.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.WHOLE_TERM.getCode(), "Whole term");
-            default -> new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(),
-                    "Invalid");
+            default ->
+                new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -198,8 +198,8 @@ public final class LoanEnumerations {
                     AmortizationMethod.EQUAL_INSTALLMENTS.getCode(), "Equal installments");
             case EQUAL_PRINCIPAL -> new EnumOptionData(AmortizationMethod.EQUAL_PRINCIPAL.getValue().longValue(),
                     AmortizationMethod.EQUAL_PRINCIPAL.getCode(), "Equal principal payments");
-            default -> new EnumOptionData(AmortizationMethod.INVALID.getValue().longValue(), AmortizationMethod.INVALID.getCode(),
-                    "Invalid");
+            default ->
+                new EnumOptionData(AmortizationMethod.INVALID.getValue().longValue(), AmortizationMethod.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -224,9 +224,9 @@ public final class LoanEnumerations {
         return switch (type) {
             case DAILY -> new EnumOptionData(InterestCalculationPeriodMethod.DAILY.getValue().longValue(),
                     InterestCalculationPeriodMethod.DAILY.getCode(), "Daily");
-            case SAME_AS_REPAYMENT_PERIOD -> new EnumOptionData(
-                    InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue().longValue(),
-                    InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getCode(), "Same as repayment period");
+            case SAME_AS_REPAYMENT_PERIOD ->
+                new EnumOptionData(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue().longValue(),
+                        InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getCode(), "Same as repayment period");
             default -> new EnumOptionData(InterestCalculationPeriodMethod.INVALID.getValue().longValue(),
                     InterestCalculationPeriodMethod.INVALID.getCode(), "Invalid");
         };
@@ -244,9 +244,9 @@ public final class LoanEnumerations {
                     LoanTransactionType.DISBURSEMENT.getCode(), "Disbursement");
             case REPAYMENT -> new LoanTransactionEnumData(LoanTransactionType.REPAYMENT.getValue().longValue(),
                     LoanTransactionType.REPAYMENT.getCode(), "Repayment");
-            case REPAYMENT_AT_DISBURSEMENT -> new LoanTransactionEnumData(
-                    LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue().longValue(),
-                    LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getCode(), "Repayment (at time of disbursement)");
+            case REPAYMENT_AT_DISBURSEMENT ->
+                new LoanTransactionEnumData(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue().longValue(),
+                        LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getCode(), "Repayment (at time of disbursement)");
             case CONTRA -> new LoanTransactionEnumData(LoanTransactionType.CONTRA.getValue().longValue(),
                     LoanTransactionType.CONTRA.getCode(), "Reversal");
             case WAIVE_INTEREST -> new LoanTransactionEnumData(LoanTransactionType.WAIVE_INTEREST.getValue().longValue(),
@@ -323,9 +323,9 @@ public final class LoanEnumerations {
                     LoanStatus.CLOSED_OBLIGATIONS_MET.getCode(), "Closed (obligations met)");
             case CLOSED_WRITTEN_OFF -> new LoanStatusEnumData(LoanStatus.CLOSED_WRITTEN_OFF.getValue().longValue(),
                     LoanStatus.CLOSED_WRITTEN_OFF.getCode(), "Closed (written off)");
-            case CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT -> new LoanStatusEnumData(
-                    LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getValue().longValue(),
-                    LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getCode(), "Closed (rescheduled)");
+            case CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT ->
+                new LoanStatusEnumData(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getValue().longValue(),
+                        LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getCode(), "Closed (rescheduled)");
             case OVERPAID -> new LoanStatusEnumData(LoanStatus.OVERPAID.getValue().longValue(), LoanStatus.OVERPAID.getCode(), "Overpaid");
             case TRANSFER_IN_PROGRESS -> new LoanStatusEnumData(LoanStatus.TRANSFER_IN_PROGRESS.getValue().longValue(),
                     LoanStatus.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress");
@@ -361,8 +361,8 @@ public final class LoanEnumerations {
                     LoanProductParamType.INTERESTRATE.getCode(), "Interest rate");
             case REPAYMENT -> new EnumOptionData(LoanProductParamType.REPAYMENT.getValue().longValue(),
                     LoanProductParamType.REPAYMENT.getCode(), "repayment");
-            default -> new EnumOptionData(LoanProductParamType.INVALID.getValue().longValue(), LoanProductParamType.INVALID.getCode(),
-                    "Invalid");
+            default ->
+                new EnumOptionData(LoanProductParamType.INVALID.getValue().longValue(), LoanProductParamType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -390,9 +390,9 @@ public final class LoanEnumerations {
                     LoanTermVariationType.GRACE_ON_PRINCIPAL.getCode(), "graceOnPrincipal");
             case EXTEND_REPAYMENT_PERIOD -> new EnumOptionData(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue().longValue(),
                     LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getCode(), "extendRepaymentPeriod");
-            case INTEREST_RATE_FROM_INSTALLMENT -> new EnumOptionData(
-                    LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
-                    LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
+            case INTEREST_RATE_FROM_INSTALLMENT ->
+                new EnumOptionData(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
+                        LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
             default -> new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(), LoanTermVariationType.INVALID.getCode(),
                     "Invalid");
         };
@@ -456,12 +456,12 @@ public final class LoanEnumerations {
         return switch (type) {
             case REDUCE_EMI_AMOUNT -> new EnumOptionData(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT.getValue().longValue(),
                     LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT.getCode(), "Reduce EMI amount");
-            case REDUCE_NUMBER_OF_INSTALLMENTS -> new EnumOptionData(
-                    LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getValue().longValue(),
-                    LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getCode(), "Reduce number of installments");
-            case RESCHEDULE_NEXT_REPAYMENTS -> new EnumOptionData(
-                    LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getValue().longValue(),
-                    LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getCode(), "Reschedule next repayments");
+            case REDUCE_NUMBER_OF_INSTALLMENTS ->
+                new EnumOptionData(LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getValue().longValue(),
+                        LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getCode(), "Reduce number of installments");
+            case RESCHEDULE_NEXT_REPAYMENTS ->
+                new EnumOptionData(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getValue().longValue(),
+                        LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getCode(), "Reschedule next repayments");
             default -> new EnumOptionData(LoanRescheduleStrategyMethod.INVALID.getValue().longValue(),
                     LoanRescheduleStrategyMethod.INVALID.getCode(), "Invalid");
         };

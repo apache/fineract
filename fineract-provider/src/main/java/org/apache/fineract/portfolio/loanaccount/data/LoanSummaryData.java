@@ -199,14 +199,13 @@ public class LoanSummaryData {
                 defaultSummaryData.totalOutstanding, defaultSummaryData.totalOverdue, defaultSummaryData.overdueSinceDate,
                 defaultSummaryData.writeoffReasonId, defaultSummaryData.writeoffReason, defaultSummaryData.totalRecovered,
                 defaultSummaryData.chargeOffReasonId, defaultSummaryData.chargeOffReason).setTotalMerchantRefund(totalMerchantRefund)
-                        .setTotalMerchantRefundReversed(totalMerchantRefundReversed).setTotalPayoutRefund(totalPayoutRefund)
-                        .setTotalPayoutRefundReversed(totalPayoutRefundReversed).setTotalGoodwillCredit(totalGoodwillCredit)
-                        .setTotalGoodwillCreditReversed(totalGoodwillCreditReversed).setTotalChargeAdjustment(totalChargeAdjustment)
-                        .setTotalChargeAdjustmentReversed(totalChargeAdjustmentReversed).setTotalChargeback(totalChargeback)
-                        .setTotalCreditBalanceRefund(totalCreditBalanceRefund)
-                        .setTotalCreditBalanceRefundReversed(totalCreditBalanceRefundReversed)
-                        .setTotalRepaymentTransaction(totalRepaymentTransaction)
-                        .setTotalRepaymentTransactionReversed(totalRepaymentTransactionReversed);
+                .setTotalMerchantRefundReversed(totalMerchantRefundReversed).setTotalPayoutRefund(totalPayoutRefund)
+                .setTotalPayoutRefundReversed(totalPayoutRefundReversed).setTotalGoodwillCredit(totalGoodwillCredit)
+                .setTotalGoodwillCreditReversed(totalGoodwillCreditReversed).setTotalChargeAdjustment(totalChargeAdjustment)
+                .setTotalChargeAdjustmentReversed(totalChargeAdjustmentReversed).setTotalChargeback(totalChargeback)
+                .setTotalCreditBalanceRefund(totalCreditBalanceRefund).setTotalCreditBalanceRefundReversed(totalCreditBalanceRefundReversed)
+                .setTotalRepaymentTransaction(totalRepaymentTransaction)
+                .setTotalRepaymentTransactionReversed(totalRepaymentTransactionReversed);
     }
 
     private static BigDecimal computeTotalAmountForReversedTransactions(LoanTransactionType transactionType,

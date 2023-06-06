@@ -159,7 +159,7 @@ class LoanCOBApiFilterTest {
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
         given(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
-                        .willReturn(Collections.emptyList());
+                .willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
@@ -202,7 +202,7 @@ class LoanCOBApiFilterTest {
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
         given(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
-                        .willReturn(Collections.emptyList());
+                .willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
@@ -230,7 +230,7 @@ class LoanCOBApiFilterTest {
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
         given(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
-                        .willReturn(Collections.emptyList());
+                .willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
@@ -260,7 +260,7 @@ class LoanCOBApiFilterTest {
 
         given(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
-                        .willReturn(Collections.emptyList());
+                .willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
@@ -290,7 +290,7 @@ class LoanCOBApiFilterTest {
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
         given(loanRepository.findAllNonClosedLoansBehindByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
-                        .willReturn(Collections.singletonList(result));
+                .willReturn(Collections.singletonList(result));
         given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -321,7 +321,7 @@ class LoanCOBApiFilterTest {
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
         given(loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(
                 eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)), anyList()))
-                        .willReturn(Collections.emptyList());
+                .willReturn(Collections.emptyList());
 
         given(context.authenticatedUser()).willReturn(appUser);
 
