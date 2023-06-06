@@ -31,8 +31,14 @@
     "allowedVersions": "<=1.0.1"
   },
   {
-    "matchPackageNames": ["org.mariadb.jdbc:mariadb-java-client"],
-    "allowedVersions": "<=3.0.9"
+    "matchPackageNames": ["org.eclipse.persistence:eclipselink"],
+    "allowedVersions": "<=4.0.0",
+    "description": "EclipseLink 4.0.1 has a bug which has been fixed but haven't been released. Try 4.0.2. https://github.com/eclipse-ee4j/eclipselink/issues/1832"
+  },
+  {
+    "matchPackageNames": ["org.eclipse.persistence:org.eclipse.persistence.jpa"],
+    "allowedVersions": "<=4.0.0",
+    "description": "EclipseLink 4.0.1 has a bug which has been fixed but haven't been released. Try 4.0.2. https://github.com/eclipse-ee4j/eclipselink/issues/1832"
   },
   {
     "depTypeList": ["dependencies"],
