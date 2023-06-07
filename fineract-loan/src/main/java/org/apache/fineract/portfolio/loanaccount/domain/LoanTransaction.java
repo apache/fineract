@@ -229,12 +229,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 principalPortion, interestPortion, feesPortion, penaltiesPortion, overPaymentPortion, reversed, paymentDetail, externalId);
     }
 
-    public static LoanTransaction accrual(final Loan loan, final Office office, final Money amount, final Money interest,
-            final Money feeCharges, final Money penaltyCharges, final LocalDate transactionDate, final ExternalId externalId) {
-        return accrueTransaction(loan, office, transactionDate, amount.getAmount(), interest.getAmount(), feeCharges.getAmount(),
-                penaltyCharges.getAmount(), externalId);
-    }
-
     public static LoanTransaction accrueTransaction(final Loan loan, final Office office, final LocalDate dateOf, final BigDecimal amount,
             final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
             final ExternalId externalId) {
