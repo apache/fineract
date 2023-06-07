@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -75,6 +76,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
     private final ConfigurationDomainService configurationDomainService;
+    private final ExternalIdFactory externalIdFactory;
 
     @Override
     @Transactional
@@ -263,13 +265,13 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             BigDecimal totalAccInterest, BigDecimal feePortion, BigDecimal totalAccFee, BigDecimal penaltyPortion,
             BigDecimal totalAccPenalty, final LocalDate accruedTill) throws DataAccessException {
         AppUser user = context.authenticatedUser();
-        String transactionSql = "INSERT INTO m_loan_transaction  (loan_id,office_id,is_reversed,transaction_type_enum,transaction_date,amount,interest_portion_derived,"
+        String transactionSql = "INSERT INTO m_loan_transaction  (loan_id,office_id,is_reversed,external_id,transaction_type_enum,transaction_date,amount,interest_portion_derived,"
                 + "fee_charges_portion_derived,penalty_charges_portion_derived, submitted_on_date, created_by, last_modified_by, created_on_utc, last_modified_on_utc) "
-                + "VALUES (?, ?, false, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, false, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
-                LoanTransactionType.ACCRUAL.getValue(), accruedTill, amount, interestPortion, feePortion, penaltyPortion,
-                DateUtils.getBusinessLocalDate(), user.getId(), user.getId(), DateUtils.getOffsetDateTimeOfTenant(),
-                DateUtils.getOffsetDateTimeOfTenant());
+                externalIdFactory.create().getValue(), LoanTransactionType.ACCRUAL.getValue(), accruedTill, amount, interestPortion,
+                feePortion, penaltyPortion, DateUtils.getBusinessLocalDate(), user.getId(), user.getId(),
+                DateUtils.getOffsetDateTimeOfTenant(), DateUtils.getOffsetDateTimeOfTenant());
         final Long transactionId = this.jdbcTemplate.queryForObject("SELECT " + sqlGenerator.lastInsertId(), Long.class); // NOSONAR
 
         Map<LoanChargeData, BigDecimal> applicableCharges = scheduleAccrualData.getApplicableCharges();
