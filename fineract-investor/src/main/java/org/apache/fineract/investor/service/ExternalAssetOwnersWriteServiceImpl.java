@@ -78,7 +78,6 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     @Override
     @Transactional
     public CommandProcessingResult saleLoanByLoanId(JsonCommand command) {
-        final JsonElement json = fromApiJsonHelper.parse(command.json());
         Long loanId = command.getLoanId();
         LoanIdAndExternalIdAndStatus loanIdAndExternalIdAndStatus = fetchLoanDetails(loanId);
         validateLoanStatus(loanIdAndExternalIdAndStatus);
@@ -107,8 +106,19 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         List<ExternalAssetOwnerTransfer> effectiveTransfers = externalAssetOwnerTransferRepository
                 .findEffectiveTransfers(externalAssetOwnerTransfer.getLoanId(), externalAssetOwnerTransfer.getSettlementDate());
 
-        if (effectiveTransfers.size() > 0) {
+        if (effectiveTransfers.size() == 2) {
             throw new ExternalAssetOwnerInitiateTransferException("This loan cannot be sold, there is already an in progress transfer");
+        } else if (effectiveTransfers.size() == 1) {
+            if (ExternalTransferStatus.PENDING.equals(effectiveTransfers.get(0).getStatus())) {
+                throw new ExternalAssetOwnerInitiateTransferException(
+                        "External asset owner transfer is already in PENDING state for this loan");
+            } else if (ExternalTransferStatus.ACTIVE.equals(effectiveTransfers.get(0).getStatus())) {
+                throw new ExternalAssetOwnerInitiateTransferException(
+                        "This loan cannot be sold, because it is owned by an external asset owner");
+            } else {
+                throw new ExternalAssetOwnerInitiateTransferException(String.format(
+                        "This loan cannot be sold, because it is incorrect state! (transferId = %s)", effectiveTransfers.get(0).getId()));
+            }
         }
     }
 
@@ -170,14 +180,11 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
 
     private void validateSale(ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
         validateSettlementDate(externalAssetOwnerTransfer);
-        validateTransferStatusForSale(externalAssetOwnerTransfer);
         validateEffectiveTransferForSale(externalAssetOwnerTransfer);
     }
 
     private void validateSettlementDate(ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
-        if (externalAssetOwnerTransfer.getSettlementDate().isBefore(ThreadLocalContextUtil.getBusinessDate())) {
-            throw new ExternalAssetOwnerInitiateTransferException("Settlement date cannot be in the past");
-        }
+        validateSettlementDate(externalAssetOwnerTransfer.getSettlementDate());
     }
 
     private void validateSettlementDate(LocalDate settlementDate) {
@@ -189,22 +196,6 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     private void validateLoanStatus(LoanIdAndExternalIdAndStatus entity) {
         if (!NON_CLOSED_LOAN_STATUSES.contains(LoanStatus.fromInt(entity.getLoanStatus()))) {
             throw new ExternalAssetOwnerInitiateTransferException("Loan is not in active status");
-        }
-    }
-
-    private void validateTransferStatusForSale(ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
-        Optional<ExternalAssetOwnerTransfer> latestTransferOptional = externalAssetOwnerTransferRepository
-                .findLatestByLoanId(externalAssetOwnerTransfer.getLoanId());
-        if (latestTransferOptional.isPresent()) {
-            ExternalAssetOwnerTransfer latestTransfer = latestTransferOptional.get();
-            ExternalTransferStatus latestTransferStatus = latestTransfer.getStatus();
-            if (latestTransferStatus.equals(ExternalTransferStatus.PENDING)) {
-                throw new ExternalAssetOwnerInitiateTransferException(
-                        "External asset owner transfer is already in PENDING state for this loan");
-            } else if (latestTransferStatus.equals(ExternalTransferStatus.ACTIVE)) {
-                throw new ExternalAssetOwnerInitiateTransferException(
-                        "This loan cannot be sold, because it is owned by an external asset owner");
-            }
         }
     }
 
