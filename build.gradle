@@ -565,7 +565,6 @@ configure(project.fineractJavaProjects) {
                 'io.cucumber:cucumber-java8',
                 'io.cucumber:cucumber-junit-platform-engine',
                 )
-        implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.9'
     }
 
     test {
