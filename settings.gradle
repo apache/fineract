@@ -18,8 +18,8 @@
  */
 
 plugins {
-    id 'com.gradle.enterprise' version '3.12.5'
-    id 'com.gradle.common-custom-user-data-gradle-plugin' version '1.10'
+    id 'com.gradle.enterprise' version '3.13.3'
+    id 'com.gradle.common-custom-user-data-gradle-plugin' version '1.11'
 }
 
 def isCI = System.getenv('JENKINS_URL') != null
