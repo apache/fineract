@@ -172,7 +172,6 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.BUYBACK);
-        when(firstResponseItem.getEffectiveDateFrom()).thenReturn(actualDate);
         List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem);
         when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
                 .thenReturn(response);
@@ -185,7 +184,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         final Loan processedLoan = underTest.execute(loanForProcessing);
         // then
         verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
-        verify(firstResponseItem).setEffectiveDateTo(firstResponseItem.getEffectiveDateFrom());
+        verify(firstResponseItem).setEffectiveDateTo(actualDate);
         verify(externalAssetOwnerTransferRepository, times(2)).save(externalAssetOwnerTransferArgumentCaptor.capture());
         verify(secondResponseItem).setEffectiveDateTo(actualDate);
         verify(externalAssetOwnerTransferLoanMappingRepository, times(1)).deleteByLoanIdAndOwnerTransfer(1L, secondResponseItem);
