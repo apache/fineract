@@ -87,9 +87,9 @@ jobs:
           FINERACT_REPORT_EXPORT_S3_ENABLED: true
           FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
         run: |
-            ./gradlew --no-daemon --console=plain build test --fail-fast -x doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=mysql
-            ./gradlew --no-daemon --console=plain :twofactor-tests:test --fail-fast -PdbType=mysql
-            ./gradlew --no-daemon --console=plain :oauth2-tests:test --fail-fast -PdbType=mysql
+            ./gradlew --no-daemon --console=plain build test -x doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=mysql
+            ./gradlew --no-daemon --console=plain :twofactor-tests:test -PdbType=mysql
+            ./gradlew --no-daemon --console=plain :oauth2-tests:test -PdbType=mysql
 
       - name: Archive test results
         if: always()
