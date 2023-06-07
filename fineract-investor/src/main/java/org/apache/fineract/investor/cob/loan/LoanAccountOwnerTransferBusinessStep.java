@@ -103,7 +103,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
     private ExternalAssetOwnerTransfer buybackAsset(final Loan loan, final LocalDate settlementDate,
             ExternalAssetOwnerTransfer buybackExternalAssetOwnerTransfer, ExternalAssetOwnerTransfer activeExternalAssetOwnerTransfer) {
         activeExternalAssetOwnerTransfer.setEffectiveDateTo(settlementDate);
-        buybackExternalAssetOwnerTransfer.setEffectiveDateTo(buybackExternalAssetOwnerTransfer.getEffectiveDateFrom());
+        buybackExternalAssetOwnerTransfer.setEffectiveDateTo(settlementDate);
         buybackExternalAssetOwnerTransfer
                 .setExternalAssetOwnerTransferDetails(createAssetOwnerTransferDetails(loan, buybackExternalAssetOwnerTransfer));
         externalAssetOwnerTransferRepository.save(activeExternalAssetOwnerTransfer);
