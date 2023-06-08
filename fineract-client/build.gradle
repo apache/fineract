@@ -32,7 +32,7 @@ openApiMeta {
     generatorName = 'Fineract'
     packageName = 'org.apache.fineract.client'
     outputFolder = "$buildDir/meta".toString()
-    // trick to make sure fineract.yaml is generated first
+    // trick to make sure fineract.json is generated first
 }
 
 openApiValidate {
