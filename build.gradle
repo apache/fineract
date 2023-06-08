@@ -98,7 +98,7 @@ Run as:
 gradle clean bootRun'''
 
 ext['groovy.version'] = '4.0.6'
-ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.yaml".toString()
+ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.json".toString()
 
 allprojects  {
     group = 'org.apache.fineract'
