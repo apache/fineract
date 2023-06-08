@@ -20,7 +20,6 @@ package org.apache.fineract.cob.service;
 
 import com.google.gson.Gson;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.data.IsCatchUpRunningDTO;
@@ -34,7 +33,6 @@ import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerialize
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.stereotype.Service;
 
@@ -77,15 +75,9 @@ public class LoanCOBCatchUpServiceImpl implements LoanCOBCatchUpService {
 
     @Override
     public IsCatchUpRunningDTO isCatchUpRunning() {
-        List<Long> runningCatchUpExecutionIds = jobExecutionRepository.getRunningJobsIdsByExecutionParameter(LoanCOBConstant.JOB_NAME,
-                LoanCOBConstant.LOAN_COB_CUSTOM_JOB_PARAMETER_KEY, LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME, "true");
-        return runningCatchUpExecutionIds //
-                .stream() //
-                .findFirst() //
-                .map(jobExplorer::getJobExecution) //
-                .map(JobExecution::getExecutionContext) //
-                .map(executionContext -> executionContext.getString(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)) //
-                .map(result -> new IsCatchUpRunningDTO(true, LocalDate.parse(result, DateTimeFormatter.ISO_DATE))) //
-                .orElse(new IsCatchUpRunningDTO(false, null));
+        LocalDate runningCatchUpBusinessDate = jobExecutionRepository.getBusinessDateOfRunningJobByExecutionParameter(
+                LoanCOBConstant.JOB_NAME, LoanCOBConstant.LOAN_COB_CUSTOM_JOB_PARAMETER_KEY, LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME,
+                "true", LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);
+        return new IsCatchUpRunningDTO(runningCatchUpBusinessDate != null, runningCatchUpBusinessDate);
     }
 }

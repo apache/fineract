@@ -24,34 +24,23 @@ import static org.springframework.batch.core.BatchStatus.STARTED;
 import static org.springframework.batch.core.BatchStatus.STARTING;
 import static org.springframework.batch.core.BatchStatus.UNKNOWN;
 
-import com.google.gson.Gson;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
-import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class JobExecutionRepository implements InitializingBean {
+public class JobExecutionRepository {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final FineractProperties fineractProperties;
     private final DatabaseTypeResolver databaseTypeResolver;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final GoogleGsonSerializerHelper gsonFactory;
-    private Gson gson;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.gson = gsonFactory.createSimpleGson();
-    }
 
     public List<String> getStuckJobNames(NamedParameterJdbcTemplate jdbcTemplate) {
         int threshold = fineractProperties.getJob().getStuckRetryThreshold();
@@ -165,30 +154,79 @@ public class JobExecutionRepository implements InitializingBean {
                 """, Map.of("status", FAILED.name(), "jobExecutionId", stuckJobId));
     }
 
-    public List<Long> getRunningJobsIdsByExecutionParameter(String jobName, String jobCustomParamKeyName, String parameterKeyName,
-            String parameterValue) {
-        final StringBuilder sqlStatementBuilder = new StringBuilder();
-        String jsonString = gson.toJson(new JobParameterDTO(parameterKeyName, parameterValue));
-        sqlStatementBuilder.append(
-                "SELECT bje.JOB_EXECUTION_ID FROM BATCH_JOB_INSTANCE bji INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID INNER JOIN BATCH_JOB_EXECUTION_PARAMS bjep ON bje.JOB_EXECUTION_ID = bjep.JOB_EXECUTION_ID"
-                        + " WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bjep.PARAMETER_NAME = :jobCustomParamKeyName AND "
-                        + sqlGenerator.castInteger("bjep.PARAMETER_VALUE") + " IN (" + getSubQueryForCustomJobParameters()
-                        + ") AND bje.JOB_INSTANCE_ID NOT IN (SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID"
-                        + " WHERE bje.STATUS = :completedStatus AND bji.JOB_NAME = :jobName)");
-        return namedParameterJdbcTemplate.queryForList(
-                sqlStatementBuilder.toString(), Map.of("statuses", List.of(STARTED.name(), STARTING.name()), "jobName", jobName,
-                        "completedStatus", COMPLETED.name(), "jobCustomParamKeyName", jobCustomParamKeyName, "jsonString", jsonString),
-                Long.class);
-    }
-
-    private String getSubQueryForCustomJobParameters() {
-        if (databaseTypeResolver.isMySQL()) {
-            return "SELECT cjp.id FROM batch_custom_job_parameters cjp WHERE JSON_CONTAINS(cjp.parameter_json,:jsonString)";
-        } else if (databaseTypeResolver.isPostgreSQL()) {
-            return "SELECT cjp.id FROM (SELECT id,json_array_elements(parameter_json) AS json_data FROM batch_custom_job_parameters) AS cjp WHERE (cjp.json_data ::jsonb @> :jsonString ::jsonb)";
-        } else {
-            throw new IllegalStateException("Database type is not supported for json query " + databaseTypeResolver.databaseType());
+    public LocalDate getBusinessDateOfRunningJobByExecutionParameter(String jobName, String jobCustomParamKeyName, String parameterKeyName,
+            String parameterValue, String dateParameterName) {
+        try {
+            if (databaseTypeResolver.isPostgreSQL()) {
+                return namedParameterJdbcTemplate.queryForObject("""
+                        SELECT
+                                J2->>'parameterValue'
+                        FROM
+                            BATCH_JOB_INSTANCE BJI
+                                INNER JOIN BATCH_JOB_EXECUTION BJE ON BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID
+                                INNER JOIN BATCH_JOB_EXECUTION_PARAMS BJEP ON BJE.JOB_EXECUTION_ID = BJEP.JOB_EXECUTION_ID
+                                inner join batch_custom_job_parameters CJP ON cast(BJEP.parameter_value as bigint) = CJP.id
+                                AND BJEP.parameter_name = :jobCustomParamKeyName
+                                CROSS JOIN LATERAL json_array_elements(CJP.parameter_json) J
+                                CROSS JOIN LATERAL json_array_elements(CJP.parameter_json) J2
+                        WHERE
+                                    J ->> 'parameterName' = :filterParameterName
+                          AND J ->> 'parameterValue' = :filterParameterValue
+                          AND J2 ->> 'parameterName' = :dateParameterName
+                          AND BJE.STATUS IN (:statuses)
+                          AND BJI.JOB_NAME = :jobName
+                          AND BJE.JOB_INSTANCE_ID NOT IN (
+                            SELECT
+                                IBJE.JOB_INSTANCE_ID
+                            FROM
+                                BATCH_JOB_INSTANCE IBJI
+                                    INNER JOIN BATCH_JOB_EXECUTION IBJE ON IBJI.JOB_INSTANCE_ID = IBJE.JOB_INSTANCE_ID
+                            WHERE
+                                    IBJE.STATUS = :completedStatus
+                              AND IBJI.JOB_NAME = :jobName)
+                        """,
+                        Map.of("jobCustomParamKeyName", jobCustomParamKeyName, "filterParameterName", parameterKeyName,
+                                "filterParameterValue", parameterValue, "statuses", List.of(STARTED.name(), STARTING.name()),
+                                "completedStatus", COMPLETED.name(), "jobName", jobName, "dateParameterName", dateParameterName),
+                        LocalDate.class);
+            } else if (databaseTypeResolver.isMySQL()) {
+                return namedParameterJdbcTemplate.queryForObject(
+                        """
+                                SELECT
+                                     J2.parameter_value
+                                FROM
+                                    BATCH_JOB_INSTANCE BJI
+                                        INNER JOIN BATCH_JOB_EXECUTION BJE ON BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID
+                                        INNER JOIN BATCH_JOB_EXECUTION_PARAMS BJEP ON BJE.JOB_EXECUTION_ID = BJEP.JOB_EXECUTION_ID
+                                        inner join batch_custom_job_parameters CJP ON BJEP.parameter_value = CJP.id
+                                        AND BJEP.parameter_name = :jobCustomParamKeyName
+                                        CROSS JOIN json_table(CJP.parameter_json, '$[*]' COLUMNS(parameter_name VARCHAR(100) PATH "$.parameterName", parameter_value VARCHAR(100) PATH "$.parameterValue")) J
+                                        CROSS JOIN json_table(CJP.parameter_json, '$[*]' COLUMNS(parameter_name VARCHAR(100) PATH "$.parameterName", parameter_value VARCHAR(100) PATH "$.parameterValue")) J2
+                                WHERE
+                                        J.parameter_name = :filterParameterName
+                                  AND J.parameter_value = :filterParameterValue
+                                  AND J2.parameter_name = :dateParameterName
+                                  AND BJE.STATUS IN (:statuses)
+                                  AND BJI.JOB_NAME = :jobName
+                                  AND BJE.JOB_INSTANCE_ID NOT IN (
+                                    SELECT
+                                        IBJE.JOB_INSTANCE_ID
+                                    FROM
+                                        BATCH_JOB_INSTANCE IBJI
+                                            INNER JOIN BATCH_JOB_EXECUTION IBJE ON IBJI.JOB_INSTANCE_ID = IBJE.JOB_INSTANCE_ID
+                                    WHERE
+                                            IBJE.STATUS = :completedStatus
+                                      AND IBJI.JOB_NAME = :jobName);
+                                """,
+                        Map.of("jobCustomParamKeyName", jobCustomParamKeyName, "filterParameterName", parameterKeyName,
+                                "filterParameterValue", parameterValue, "dateParameterName", dateParameterName, "statuses",
+                                List.of(STARTED.name(), STARTING.name()), "jobName", jobName, "completedStatus", COMPLETED.name()),
+                        LocalDate.class);
+            } else {
+                throw new IllegalStateException("Database type is not supported for json query " + databaseTypeResolver.databaseType());
+            }
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
     }
-
 }
