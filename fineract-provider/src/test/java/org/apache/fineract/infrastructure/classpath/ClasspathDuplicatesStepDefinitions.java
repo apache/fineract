@@ -122,7 +122,7 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 || resourcePath.equals("META-INF/validation-configuration-3.0.xsd")
                 // Spring Framework knows what they are do..
                 || resourcePath.startsWith("META-INF/spring") || resourcePath.startsWith("META-INF/additional-spring")
-                || resourcePath.startsWith("META-INF/terracotta")
+                || resourcePath.startsWith("META-INF/terracotta") || resourcePath.startsWith("com/fasterxml/jackson/core/io/doubleparser")
                 // Groovy is groovy
                 || resourcePath.startsWith("META-INF/groovy")
                 // Something doesn't to be a perfectly clean in Maven Surefire:
