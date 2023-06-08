@@ -7209,14 +7209,6 @@ public class ClientLoanIntegrationTest {
             assertTrue(exception.getMessage().contains("error.msg.loan.charge.off.is.not.the.last.user.transaction"));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
-                errorLoanTransactionHelper.adjustLoanTransaction((long) loanID, loanRepaymentResponse.getResourceId(),
-                        new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("06 September 2022").locale("en")
-                                .dateFormat("dd MMMM yyyy").transactionAmount(0.0));
-            });
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.adjusted.transaction.date.cannot.be.earlier.than.charge.off.date"));
-
-            exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.makeWriteoff((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
                         .transactionDate("05 September 2022").locale("en"));
             });
@@ -7261,20 +7253,6 @@ public class ClientLoanIntegrationTest {
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.loan.is.charged.off"));
-
-            exception = assertThrows(CallFailedRuntimeException.class, () -> {
-                errorLoanTransactionHelper.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest()
-                        .dateFormat("dd MMMM yyyy").transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
-            });
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
-
-            exception = assertThrows(CallFailedRuntimeException.class, () -> {
-                errorLoanTransactionHelper.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest()
-                        .dateFormat("dd MMMM yyyy").transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
-            });
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()

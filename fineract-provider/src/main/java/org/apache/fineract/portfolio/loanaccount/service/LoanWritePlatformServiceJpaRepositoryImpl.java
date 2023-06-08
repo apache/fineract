@@ -1080,12 +1080,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new PlatformServiceUnavailableException("error.msg.loan.written.off.update.not.allowed",
                     "Loan transaction:" + transactionId + " update not allowed as loan status is written off", transactionId);
         }
-        if (loan.isChargedOff() && (transactionToAdjust.getTransactionDate().isBefore(loan.getChargedOffOnDate())
-                || transactionToAdjust.getTransactionDate().isEqual(loan.getChargedOffOnDate()))) {
-            throw new GeneralPlatformDomainRuleException("error.msg.adjusted.transaction.date.cannot.be.earlier.than.charge.off.date",
-                    "Loan transaction: " + transactionId + " adjustment is not allowed before or on the date when the loan got charged-off",
-                    transactionId);
-        }
 
         if (transactionToAdjust.hasChargebackLoanTransactionRelations()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.transaction.update.not.allowed",
@@ -1935,9 +1929,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final MonetaryCurrency currency = loan.getCurrency();
         boolean isAccountTransfer = false;
-        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
-                existingReversedTransactionIds, isAccountTransfer);
-        this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+        List<Map<String, Object>> accountingBridgeData = new ArrayList<>();
+        if (loan.isChargedOff()) {
+            accountingBridgeData = loan.deriveAccountingBridgeDataForChargeOff(currency.getCode(), existingTransactionIds,
+                    existingReversedTransactionIds, isAccountTransfer);
+        } else {
+            accountingBridgeData.add(loan.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
+                    existingReversedTransactionIds, isAccountTransfer));
+        }
+        for (Map<String, Object> accountingData : accountingBridgeData) {
+            this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingData);
+        }
+
     }
 
     @Transactional

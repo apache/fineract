@@ -166,12 +166,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final boolean isRecoveryRepayment, final String chargeRefundChargeType, boolean isAccountTransfer,
             HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone, final boolean isLoanToLoanTransfer) {
         checkClientOrGroupActive(loan);
-        if (loan.isChargedOff() && transactionDate.isBefore(loan.getChargedOffOnDate())) {
-            throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
-                    + loan.getId()
-                    + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
-                    loan.getId());
-        }
+
         LoanBusinessEvent repaymentEvent = getLoanRepaymentTypeBusinessEvent(repaymentTransactionType, isRecoveryRepayment, loan);
         businessEventNotifierService.notifyPreBusinessEvent(repaymentEvent);
 
@@ -427,10 +422,19 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final MonetaryCurrency currency = loanAccount.getCurrency();
 
-        final Map<String, Object> accountingBridgeData = loanAccount.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
-                existingReversedTransactionIds, isAccountTransfer);
-        accountingBridgeData.put("isLoanToLoanTransfer", isLoanToLoanTransfer);
-        this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+        List<Map<String, Object>> accountingBridgeData = new ArrayList<>();
+        if (loanAccount.isChargedOff()) {
+            accountingBridgeData = loanAccount.deriveAccountingBridgeDataForChargeOff(currency.getCode(), existingTransactionIds,
+                    existingReversedTransactionIds, isAccountTransfer);
+        } else {
+            accountingBridgeData.add(loanAccount.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
+                    existingReversedTransactionIds, isAccountTransfer));
+        }
+        for (Map<String, Object> accountingData : accountingBridgeData) {
+            accountingData.put("isLoanToLoanTransfer", isLoanToLoanTransfer);
+            this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingData);
+        }
+
     }
 
     private void checkClientOrGroupActive(final Loan loan) {
