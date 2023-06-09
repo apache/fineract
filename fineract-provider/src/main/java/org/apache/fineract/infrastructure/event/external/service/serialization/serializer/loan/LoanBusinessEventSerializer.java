@@ -71,6 +71,8 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
         if (data.getSummary() != null) {
             final Collection<LoanTransactionData> currentLoanTransactions = service.retrieveLoanTransactions(loanId);
             data.setSummary(LoanSummaryData.withTransactionAmountsSummary(data.getSummary(), currentLoanTransactions));
+        } else {
+            data.setSummary(LoanSummaryData.withOnlyCurrencyData(data.getCurrency()));
         }
         return mapper.map(data);
     }
