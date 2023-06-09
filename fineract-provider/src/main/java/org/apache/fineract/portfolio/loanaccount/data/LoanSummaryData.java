@@ -208,6 +208,12 @@ public class LoanSummaryData {
                 .setTotalRepaymentTransactionReversed(totalRepaymentTransactionReversed);
     }
 
+    public static LoanSummaryData withOnlyCurrencyData(CurrencyData currencyData) {
+        return new LoanSummaryData(currencyData, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null);
+    }
+
     private static BigDecimal computeTotalAmountForReversedTransactions(LoanTransactionType transactionType,
             Collection<LoanTransactionData> loanTransactions) {
         return loanTransactions.stream().filter(
