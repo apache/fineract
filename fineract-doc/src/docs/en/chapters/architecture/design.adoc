@@ -24,13 +24,13 @@ include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/useradmin
 .Create a CommandWrapper object that represents this create user command and JSON request body. Pass off responsiblity for processing to PortfolioCommandSourceWritePlatformService.logCommandSource
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/commands/service/PortfolioCommandSourceWritePlatformServiceImpl.java[lines=69..129]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/commands/service/PortfolioCommandSourceWritePlatformServiceImpl.java[lines=69..129]
 ----
 
 .Check user has permission for this action. if ok, a) parse the json request body, b) create a JsonCommand object to wrap the command details, c) use CommandProcessingService to handle command
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/commands/service/SynchronousCommandProcessingService.java[lines=84..150]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/commands/service/SynchronousCommandProcessingService.java[lines=84..150]
 ----
 
 NOTE: if a RollbackTransactionAsCommandIsNotApprovedByCheckerException occurs at this point. The original transaction will of been aborted and we only log an entry for the command in the audit table setting its status as 'Pending'.

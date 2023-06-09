@@ -22,10 +22,15 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.DeleteFinancialActivityAccountsResponse;
+import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
+import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
+import org.apache.fineract.client.models.PostFinancialActivityAccountsResponse;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
-public class FinancialActivityAccountHelper {
+public class FinancialActivityAccountHelper extends IntegrationTest {
 
     private static final String FINANCIAL_ACTIVITY_ACCOUNT_MAPPING_URL = "/fineract-provider/api/v1/financialactivityaccounts";
     private final RequestSpecification requestSpec;
@@ -65,4 +70,15 @@ public class FinancialActivityAccountHelper {
         return Utils.performServerDelete(this.requestSpec, responseSpecification, url, jsonBack);
     }
 
+    public PostFinancialActivityAccountsResponse createFinancialActivityAccount(PostFinancialActivityAccountsRequest request) {
+        return ok(fineract().financialActivyAccountMappings.createGLAccount(request));
+    }
+
+    public List<GetFinancialActivityAccountsResponse> getAllFinancialActivityAccounts() {
+        return ok(fineract().financialActivyAccountMappings.retrieveAll());
+    }
+
+    public DeleteFinancialActivityAccountsResponse deleteFinancialActivityAccount(Long financialMappingId) {
+        return ok(fineract().financialActivyAccountMappings.deleteGLAccount(financialMappingId));
+    }
 }

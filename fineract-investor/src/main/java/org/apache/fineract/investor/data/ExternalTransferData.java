@@ -26,7 +26,7 @@ public class ExternalTransferData {
 
     private Long transferId;
     private ExternalTransferOwnerData owner;
-    private ExternalTransferLoanMappingData loan;
+    private ExternalTransferLoanData loan;
     private ExternalTransferDataDetails details;
     private String transferExternalId;
     private String purchasePriceRatio;

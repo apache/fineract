@@ -30,6 +30,7 @@
     <persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
+        <class>org.apache.fineract.accounting.journalentry.domain.JournalEntry</class>
         <class>org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom</class>
         <class>org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom</class>
         <class>org.apache.fineract.infrastructure.codes.domain.Code</class>

@@ -44,6 +44,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
+import org.apache.fineract.investor.service.AccountingService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +66,8 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     private ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
     @Mock
     private ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
+    @Mock
+    private AccountingService accountingService;
     private LoanAccountOwnerTransferBusinessStep underTest;
 
     @BeforeEach
@@ -73,7 +76,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, actualDate)));
         underTest = new LoanAccountOwnerTransferBusinessStep(externalAssetOwnerTransferRepository,
-                externalAssetOwnerTransferLoanMappingRepository);
+                externalAssetOwnerTransferLoanMappingRepository, accountingService);
     }
 
     @Test

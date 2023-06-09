@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
+import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
+import org.apache.fineract.client.models.ExternalTransferData;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PostInitiateTransferRequest;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
@@ -32,18 +35,39 @@ public class ExternalAssetOwnerHelper extends IntegrationTest {
     }
 
     public PageExternalTransferData retrieveTransferByTransferExternalId(String transferExternalId) {
-        return ok(fineract().externalAssetOwners.getTransfer1(transferExternalId, null, null, 0, 100));
+        return ok(fineract().externalAssetOwners.getTransfers(transferExternalId, null, null, 0, 100));
     }
 
     public PageExternalTransferData retrieveTransferByLoanExternalId(String loanExternalId) {
-        return ok(fineract().externalAssetOwners.getTransfer1(null, null, loanExternalId, 0, 100));
+        return ok(fineract().externalAssetOwners.getTransfers(null, null, loanExternalId, 0, 100));
     }
 
-    public PageExternalTransferData retrieveTransferByLoanId(Long loanId) {
-        return ok(fineract().externalAssetOwners.getTransfer1(null, loanId, null, 0, 100));
+    public PageExternalTransferData retrieveTransfersByLoanId(Long loanId) {
+        return ok(fineract().externalAssetOwners.getTransfers(null, loanId, null, 0, 100));
     }
 
-    public PageExternalTransferData retrieveTransferByLoanId(Long loanId, int offset, int limit) {
-        return ok(fineract().externalAssetOwners.getTransfer1(null, loanId, null, offset, limit));
+    public PageExternalTransferData retrieveTransfersByLoanId(Long loanId, int offset, int limit) {
+        return ok(fineract().externalAssetOwners.getTransfers(null, loanId, null, offset, limit));
     }
+
+    public ExternalTransferData retrieveActiveTransferByLoanExternalId(String loanExternalId) {
+        return ok(fineract().externalAssetOwners.getActiveTransfer(null, null, loanExternalId));
+    }
+
+    public ExternalTransferData retrieveActiveTransferByTransferExternalId(String transferExternalId) {
+        return ok(fineract().externalAssetOwners.getActiveTransfer(transferExternalId, null, null));
+    }
+
+    public ExternalTransferData retrieveActiveTransferByLoanId(Long loanId) {
+        return ok(fineract().externalAssetOwners.getActiveTransfer(null, loanId, null));
+    }
+
+    public ExternalOwnerTransferJournalEntryData retrieveJournalEntriesOfTransfer(Long transferId) {
+        return ok(fineract().externalAssetOwners.getJournalEntriesOfTransfer(transferId, 0, 100));
+    }
+
+    public ExternalOwnerJournalEntryData retrieveJournalEntriesOfOwner(String ownerExternalId) {
+        return ok(fineract().externalAssetOwners.getJournalEntriesOfOwner(ownerExternalId, 0, 100));
+    }
+
 }

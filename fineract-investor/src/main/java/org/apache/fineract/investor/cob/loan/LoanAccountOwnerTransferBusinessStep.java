@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
@@ -33,18 +34,22 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferDetails;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
+import org.apache.fineract.investor.service.AccountingService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Conditional(InvestorModuleIsEnabledCondition.class)
 public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep {
 
     public static final LocalDate FUTURE_DATE_9999_12_31 = LocalDate.of(9999, 12, 31);
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
     private final ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
+    private final AccountingService accountingService;
 
     @Override
     public Loan execute(Loan loan) {
@@ -109,7 +114,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
         externalAssetOwnerTransferRepository.save(activeExternalAssetOwnerTransfer);
         buybackExternalAssetOwnerTransfer = externalAssetOwnerTransferRepository.save(buybackExternalAssetOwnerTransfer);
         externalAssetOwnerTransferLoanMappingRepository.deleteByLoanIdAndOwnerTransfer(loan.getId(), activeExternalAssetOwnerTransfer);
-        // TODO: create asset ownership accounting entries
+        accountingService.createJournalEntriesForBuybackAssetTransfer(loan, buybackExternalAssetOwnerTransfer);
         return buybackExternalAssetOwnerTransfer;
     }
 
@@ -121,7 +126,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
             createActiveMapping(loan.getId(), newExternalAssetOwnerTransfer);
             newExternalAssetOwnerTransfer
                     .setExternalAssetOwnerTransferDetails(createAssetOwnerTransferDetails(loan, newExternalAssetOwnerTransfer));
-            // TODO: create asset ownership accounting entries
+            accountingService.createJournalEntriesForSaleAssetTransfer(loan, newExternalAssetOwnerTransfer);
         } else {
             ExternalTransferSubStatus subStatus = ExternalTransferSubStatus.BALANCE_ZERO;
             if (loan.getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0) {

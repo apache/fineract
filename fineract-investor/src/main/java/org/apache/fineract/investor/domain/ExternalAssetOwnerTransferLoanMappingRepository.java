@@ -18,11 +18,23 @@
  */
 package org.apache.fineract.investor.domain;
 
+import java.util.Optional;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ExternalAssetOwnerTransferLoanMappingRepository extends JpaRepository<ExternalAssetOwnerTransferLoanMapping, Long>,
         JpaSpecificationExecutor<ExternalAssetOwnerTransferLoanMapping> {
 
     void deleteByLoanIdAndOwnerTransfer(Long loanId, ExternalAssetOwnerTransfer externalAssetOwnerTransfer);
+
+    Optional<ExternalAssetOwnerTransferLoanMapping> findByLoanId(Long loanId);
+
+    @Query("SELECT mapping FROM ExternalAssetOwnerTransferLoanMapping mapping WHERE mapping.ownerTransfer.externalLoanId =:externalLoanId")
+    Optional<ExternalAssetOwnerTransferLoanMapping> findByLoanExternalId(@Param("externalLoanId") ExternalId externalLoanId);
+
+    @Query("SELECT mapping FROM ExternalAssetOwnerTransferLoanMapping mapping WHERE mapping.ownerTransfer.externalId =:externalTransferId")
+    Optional<ExternalAssetOwnerTransferLoanMapping> findByTransferExternalId(@Param("externalTransferId") ExternalId externalTransferId);
 }
