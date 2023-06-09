@@ -6,7 +6,8 @@
     "helpers:pinGitHubActionDigests"
   ],
   "ignorePaths": [
-    "docs/**"
+    "docs/**",
+    "fineract-client/**"
   ],
   "labels": ["renovate"],
   "packageRules": [{
