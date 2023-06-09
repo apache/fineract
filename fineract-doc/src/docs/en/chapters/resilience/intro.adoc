@@ -80,5 +80,5 @@ For better code quality and readability we introduced https://resilience4j.readm
 .Annotation based retry
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/commands/service/PortfolioCommandSourceWritePlatformServiceImpl.java[lines=49..76]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/commands/service/PortfolioCommandSourceWritePlatformServiceImpl.java[lines=49..76]
 ----

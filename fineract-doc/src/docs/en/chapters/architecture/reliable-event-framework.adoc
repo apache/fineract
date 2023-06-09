@@ -343,7 +343,7 @@ The interface looks the following:
 .`BusinessEvent.java`
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/infrastructure/event/business/domain/BusinessEvent.java[lines=21..]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/domain/BusinessEvent.java[lines=21..]
 ----
 
 Quite simple. The `get` method should return the data you want to pass within the event instance. The `getType` method returns the name of the business event that's gonna be saved as the `type` into the database.
@@ -358,7 +358,7 @@ The serializer has a special interface, `BusinessEventSerializer`.
 .`BusinessEventSerializer.java`
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/infrastructure/event/external/service/serialization/serializer/BusinessEventSerializer.java[lines=25..]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/external/service/serialization/serializer/BusinessEventSerializer.java[lines=25..]
 ----
 
 An implementation of this interface shall be registered as a Spring bean, and it'll be picked up automatically by the framework.

@@ -31,6 +31,7 @@
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <!-- Fineract core module -->
         <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
+        <class>org.apache.fineract.accounting.journalentry.domain.JournalEntry</class>
         <class>org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom</class>
         <class>org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom</class>
         <class>org.apache.fineract.infrastructure.codes.domain.Code</class>
@@ -72,6 +73,8 @@
         <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer</class>
         <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping</class>
         <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferDetails</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMapping</class>
         <!-- Fineract loan module -->
         <class>org.apache.fineract.portfolio.collateral.domain.LoanCollateral</class>
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement</class>

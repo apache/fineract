@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.investor.service;
 
+import org.apache.fineract.accounting.journalentry.JournalEntryMapper;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferDataDetails;
@@ -28,7 +29,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferDetails;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(config = MapstructMapperConfig.class)
+@Mapper(config = MapstructMapperConfig.class, uses = JournalEntryMapper.class)
 public interface ExternalAssetOwnersTransferMapper {
 
     @Mapping(target = "transferId", source = "id")

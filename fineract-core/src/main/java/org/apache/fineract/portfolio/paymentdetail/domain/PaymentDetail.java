@@ -24,6 +24,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -33,6 +34,7 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 
 @Entity
+@Getter
 @Table(name = "m_payment_detail")
 public final class PaymentDetail extends AbstractPersistableCustom {
 
@@ -108,17 +110,5 @@ public final class PaymentDetail extends AbstractPersistableCustom {
         final PaymentDetailData paymentDetailData = new PaymentDetailData(getId(), paymentTypeData, this.accountNumber, this.checkNumber,
                 this.routingCode, this.receiptNumber, this.bankNumber);
         return paymentDetailData;
-    }
-
-    public PaymentType getPaymentType() {
-        return this.paymentType;
-    }
-
-    public String getReceiptNumber() {
-        return this.receiptNumber;
-    }
-
-    public String getRoutingCode() {
-        return routingCode;
     }
 }

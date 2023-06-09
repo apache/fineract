@@ -51,7 +51,6 @@ import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
-import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerInitiateTransferException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -70,7 +69,6 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     private static final List<ExternalTransferStatus> BUYBACK_READY_STATUSES = List.of(ExternalTransferStatus.PENDING,
             ExternalTransferStatus.ACTIVE);
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
-    private final ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
     private final ExternalAssetOwnerRepository externalAssetOwnerRepository;
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanRepository loanRepository;

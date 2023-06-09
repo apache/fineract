@@ -18,10 +18,20 @@
  */
 package org.apache.fineract.investor.service;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.accounting.journalentry.JournalEntryMapper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.investor.data.ExternalOwnerJournalEntryData;
+import org.apache.fineract.investor.data.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.investor.data.ExternalTransferData;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMapping;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMappingRepository;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,19 +45,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersReadService {
 
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
+    private final ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
+    private final ExternalAssetOwnerTransferJournalEntryMappingRepository externalAssetOwnerTransferJournalEntryMappingRepository;
+    private final ExternalAssetOwnerJournalEntryMappingRepository externalAssetOwnerJournalEntryMappingRepository;
     private final ExternalAssetOwnersTransferMapper mapper;
+    private final JournalEntryMapper journalEntryMapper;
 
     @Override
     public Page<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId, Integer offset,
             Integer limit) {
         Page<ExternalAssetOwnerTransfer> result;
-        if (offset == null) {
-            offset = 0;
-        }
-        if (limit == null) {
-            limit = 100;
-        }
-        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by("id"));
+        PageRequest pageRequest = getPageRequest(offset, limit);
         if (loanId != null) {
             result = externalAssetOwnerTransferRepository.findAllByLoanId(loanId, pageRequest);
         } else if (externalLoanId != null) {
@@ -59,6 +67,59 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
                     "At least one of the following parameters must be provided: loanId, externalLoanId, transferExternalId");
         }
         return result.map(mapper::mapTransfer);
+    }
+
+    @Override
+    public ExternalTransferData retrieveActiveTransferData(Long loanId, String externalLoanId, String transferExternalId) {
+        Optional<ExternalAssetOwnerTransferLoanMapping> result;
+        if (loanId != null) {
+            result = externalAssetOwnerTransferLoanMappingRepository.findByLoanId(loanId);
+        } else if (externalLoanId != null) {
+            result = externalAssetOwnerTransferLoanMappingRepository.findByLoanExternalId(ExternalIdFactory.produce(externalLoanId));
+        } else if (transferExternalId != null) {
+            result = externalAssetOwnerTransferLoanMappingRepository
+                    .findByTransferExternalId(ExternalIdFactory.produce(transferExternalId));
+        } else {
+            throw new IllegalArgumentException(
+                    "At least one of the following parameters must be provided: loanId, externalLoanId, transferExternalId");
+        }
+        return result.map(transferLoanMapping -> mapper.mapTransfer(transferLoanMapping.getOwnerTransfer())).orElse(null);
+    }
+
+    @Override
+    public ExternalOwnerTransferJournalEntryData retrieveJournalEntriesOfTransfer(Long transferId, Integer offset, Integer limit) {
+        PageRequest pageRequest = getPageRequest(offset, limit);
+        Page<ExternalAssetOwnerTransferJournalEntryMapping> result = externalAssetOwnerTransferJournalEntryMappingRepository
+                .findByTransferId(transferId, pageRequest);
+        ExternalOwnerTransferJournalEntryData mappedResult = new ExternalOwnerTransferJournalEntryData();
+        if (result.hasContent()) {
+            mappedResult.setJournalEntryData(result.map(entry -> journalEntryMapper.map(entry.getJournalEntry())));
+            mappedResult.setTransferData(mapper.mapTransfer(result.stream().findFirst().get().getOwnerTransfer()));
+        }
+        return mappedResult;
+    }
+
+    @Override
+    public ExternalOwnerJournalEntryData retrieveJournalEntriesOfOwner(String ownerExternalId, Integer offset, Integer limit) {
+        PageRequest pageRequest = getPageRequest(offset, limit);
+        Page<ExternalAssetOwnerJournalEntryMapping> result = externalAssetOwnerJournalEntryMappingRepository
+                .findByExternalOwnerId(ExternalIdFactory.produce(ownerExternalId), pageRequest);
+        ExternalOwnerJournalEntryData mappedResult = new ExternalOwnerJournalEntryData();
+        if (result.hasContent()) {
+            mappedResult.setJournalEntryData(result.map(entry -> journalEntryMapper.map(entry.getJournalEntry())));
+            mappedResult.setOwnerData(mapper.mapOwner(result.stream().findFirst().get().getOwner()));
+        }
+        return mappedResult;
+    }
+
+    private PageRequest getPageRequest(Integer offset, Integer limit) {
+        if (offset == null) {
+            offset = 0;
+        }
+        if (limit == null) {
+            limit = 100;
+        }
+        return PageRequest.of(offset, limit, Sort.by("id"));
     }
 
 }

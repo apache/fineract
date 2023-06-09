@@ -23,6 +23,9 @@ dependencies {
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
     // We also (normally should have) no need to ever use 'compileOnly'.
 
+    implementation(
+            project(path: ':fineract-avro-schemas')
+            )
 
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
@@ -30,8 +33,11 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-validation',
+            'org.springframework.boot:spring-boot-starter-batch',
+            'org.springframework.batch:spring-batch-integration',
             'jakarta.ws.rs:jakarta.ws.rs-api',
             'org.glassfish.jersey.media:jersey-media-multipart',
+            'org.apache.avro:avro',
 
             'com.google.guava:guava',
             'com.google.code.gson:gson',
@@ -49,6 +55,7 @@ dependencies {
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot2',
+            'org.apache.httpcomponents:httpcore',
             )
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
         exclude group: 'org.hibernate'
