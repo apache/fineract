@@ -218,8 +218,14 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
             protected void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
                 List<LoanAccountLock> loanAccountLocks = getLoanAccountLocks(loanIds, businessDate);
                 loanAccountLocks.forEach(loanAccountLock -> {
-                    loanAccountLock.setNewLockOwner(LockOwner.LOAN_INLINE_COB_PROCESSING);
-                    loanAccountLockRepository.save(loanAccountLock);
+                    try {
+                        loanAccountLock.setNewLockOwner(LockOwner.LOAN_INLINE_COB_PROCESSING);
+                        loanAccountLockRepository.saveAndFlush(loanAccountLock);
+                    } catch (Exception e) {
+                        String message = "Error updating lock on loan account. Locked loan ID: %s".formatted(loanAccountLock.getLoanId());
+                        log.error("{}", message, e);
+                        throw new LoanAccountLockCannotBeOverruledException(message, e);
+                    }
                 });
             }
         });

@@ -86,6 +86,11 @@ public class LoanLockingServiceImpl implements LoanLockingService {
     }
 
     @Override
+    public List<LoanAccountLock> findAllByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner) {
+        return loanAccountLockRepository.findAllByLoanIdInAndLockOwner(loanIds, lockOwner);
+    }
+
+    @Override
     public void applyLock(List<Long> loanIds, LockOwner lockOwner) {
         LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
         jdbcTemplate.batchUpdate(BATCH_LOAN_LOCK_INSERT, loanIds, loanIds.size(), (PreparedStatement ps, Long loanId) -> {

@@ -131,7 +131,8 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ApplyLoanLockTasklet applyLock() {
-        return new ApplyLoanLockTasklet(fineractProperties, loanLockingService, retrieveLoanIdService, customJobParameterResolver);
+        return new ApplyLoanLockTasklet(fineractProperties, loanLockingService, retrieveLoanIdService, customJobParameterResolver,
+                transactionTemplate);
     }
 
     @Bean
@@ -142,7 +143,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public LoanItemReader cobWorkerItemReader() {
-        return new LoanItemReader(loanRepository, retrieveLoanIdService, customJobParameterResolver);
+        return new LoanItemReader(loanRepository, retrieveLoanIdService, customJobParameterResolver, loanLockingService);
     }
 
     @Bean

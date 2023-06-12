@@ -55,4 +55,6 @@ public interface LoanAccountLockRepository extends JpaRepository<LoanAccountLock
             """)
     @Modifying(flushAutomatically = true)
     void removeLockByOwner();
+
+    List<LoanAccountLock> findAllByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner);
 }

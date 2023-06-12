@@ -16,23 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.exceptions;
 
-import java.util.List;
-import org.apache.fineract.cob.domain.LoanAccountLock;
-import org.apache.fineract.cob.domain.LockOwner;
+public class LoanLockCannotBeAppliedException extends Exception {
 
-public interface LoanLockingService {
-
-    void upgradeLock(List<Long> accountsToLock, LockOwner lockOwner);
-
-    void deleteByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner);
-
-    List<LoanAccountLock> findAllByLoanIdIn(List<Long> loanIds);
-
-    LoanAccountLock findByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
-
-    List<LoanAccountLock> findAllByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner);
-
-    void applyLock(List<Long> loanIds, LockOwner lockOwner);
+    public LoanLockCannotBeAppliedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
