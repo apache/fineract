@@ -20,7 +20,7 @@ package org.apache.fineract.investor.domain;
 
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -31,5 +31,5 @@ public interface ExternalAssetOwnerJournalEntryMappingRepository extends JpaRepo
 
     @Query("SELECT mapping FROM ExternalAssetOwnerJournalEntryMapping mapping WHERE mapping.owner.externalId = :ownerExternalId")
     Page<ExternalAssetOwnerJournalEntryMapping> findByExternalOwnerId(@Param("ownerExternalId") ExternalId ownerExternalId,
-            PageRequest pageRequest);
+            Pageable pageRequest);
 }

@@ -21,6 +21,7 @@ package org.apache.fineract.batch.exception;
 import com.google.gson.Gson;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -53,7 +54,8 @@ public final class ErrorHandler {
 
     private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder(true).create();
 
-    private static final LinkedHashMap<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> EXCEPTION_HANDLERS = new LinkedHashMap<>();
+    private static final Map<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> EXCEPTION_HANDLERS = Collections
+            .synchronizedMap(new LinkedHashMap<>());
     private static final Map.Entry<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> DEFAULT_ERROR_HANDLER = Map.entry(
             RuntimeException.class,
             runtimeException -> new ErrorInfo(500, 9999, "{\"Exception\": %s}".formatted(runtimeException.getMessage())));
@@ -85,6 +87,8 @@ public final class ErrorHandler {
         LinkedHashMap<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> newHandlers = new LinkedHashMap<>();
         newHandlers.put(exceptionClass, runtimeException -> handleException(runtimeException, mapper, errorCode));
         EXCEPTION_HANDLERS.forEach(newHandlers::putIfAbsent);
+        EXCEPTION_HANDLERS.clear();
+        newHandlers.forEach(EXCEPTION_HANDLERS::putIfAbsent);
     }
 
     public static void registerNewErrorHandler(final Class<? extends RuntimeException> exceptionClass,
@@ -92,6 +96,8 @@ public final class ErrorHandler {
         LinkedHashMap<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> newHandlers = new LinkedHashMap<>();
         newHandlers.put(exceptionClass, function);
         EXCEPTION_HANDLERS.forEach(newHandlers::putIfAbsent);
+        EXCEPTION_HANDLERS.clear();
+        newHandlers.forEach(EXCEPTION_HANDLERS::putIfAbsent);
     }
 
     private static ErrorInfo handleException(final RuntimeException exception, final ExceptionMapper mapper, final int errorCode) {

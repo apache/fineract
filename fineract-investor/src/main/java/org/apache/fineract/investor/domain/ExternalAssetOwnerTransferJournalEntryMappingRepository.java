@@ -19,7 +19,7 @@
 package org.apache.fineract.investor.domain;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -30,5 +30,5 @@ public interface ExternalAssetOwnerTransferJournalEntryMappingRepository
         JpaSpecificationExecutor<ExternalAssetOwnerTransferJournalEntryMapping> {
 
     @Query("SELECT mapping FROM ExternalAssetOwnerTransferJournalEntryMapping mapping WHERE mapping.ownerTransfer.id =:transferId")
-    Page<ExternalAssetOwnerTransferJournalEntryMapping> findByTransferId(@Param("transferId") Long transferId, PageRequest pageable);
+    Page<ExternalAssetOwnerTransferJournalEntryMapping> findByTransferId(@Param("transferId") Long transferId, Pageable pageable);
 }
