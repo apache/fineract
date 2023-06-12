@@ -25,6 +25,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyDat
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LoanRepaymentScheduleInstallmentRepository
         extends JpaRepository<LoanRepaymentScheduleInstallment, Long>, JpaSpecificationExecutor<LoanRepaymentScheduleInstallment> {
@@ -42,8 +43,8 @@ public interface LoanRepaymentScheduleInstallmentRepository
             lrs.loan.loanProduct.delinquencyBucket IS NOT NULL
             GROUP BY lrs.loan
             """)
-    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(Integer loanStatus, LocalDate businessDate,
-            boolean obligationsMet);
+    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(@Param("loanStatus") Integer loanStatus,
+            @Param("businessDate") LocalDate businessDate, @Param("obligationsMet") boolean obligationsMet);
 
     @Query("""
             SELECT new org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData(
@@ -59,7 +60,8 @@ public interface LoanRepaymentScheduleInstallmentRepository
             lrs.loan.id NOT IN :loanIds
             GROUP BY lrs.loan
             """)
-    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(Integer loanStatus, LocalDate businessDate,
-            boolean obligationsMet, List<Long> loanIds);
+    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(@Param("loanStatus") Integer loanStatus,
+            @Param("businessDate") LocalDate businessDate, @Param("obligationsMet") boolean obligationsMet,
+            @Param("loanIds") List<Long> loanIds);
 
 }

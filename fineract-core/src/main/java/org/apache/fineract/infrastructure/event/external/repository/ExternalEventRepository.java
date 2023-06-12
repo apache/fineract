@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ExternalEventRepository extends JpaRepository<ExternalEvent, Long> {
 
@@ -35,9 +36,10 @@ public interface ExternalEventRepository extends JpaRepository<ExternalEvent, Lo
 
     @Modifying(flushAutomatically = true)
     @Query("delete from ExternalEvent e where e.status = :status and e.businessDate <= :dateForPurgeCriteria")
-    void deleteOlderEventsWithSentStatus(ExternalEventStatus status, LocalDate dateForPurgeCriteria);
+    void deleteOlderEventsWithSentStatus(@Param("status") ExternalEventStatus status,
+            @Param("dateForPurgeCriteria") LocalDate dateForPurgeCriteria);
 
     @Modifying
     @Query("UPDATE ExternalEvent e SET e.status = org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus.SENT, e.sentAt = :sentAt WHERE e.id IN :ids")
-    void markEventsSent(List<Long> ids, OffsetDateTime sentAt);
+    void markEventsSent(@Param("ids") List<Long> ids, @Param("sentAt") OffsetDateTime sentAt);
 }
