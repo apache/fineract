@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.cob.loan;
 
+import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
+
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.exceptions.LoanLockCannotBeAppliedException;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
@@ -36,19 +39,26 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ApplyLoanLockTasklet implements Tasklet {
 
+    private static final long NUMBER_OF_RETRIES = 3;
     private final FineractProperties fineractProperties;
     private final LoanLockingService loanLockingService;
     private final RetrieveLoanIdService retrieveLoanIdService;
     private final CustomJobParameterResolver customJobParameterResolver;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
-    public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
+    public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext)
+            throws LoanLockCannotBeAppliedException {
         ExecutionContext executionContext = contribution.getStepExecution().getExecutionContext();
+        long numberOfExecutions = contribution.getStepExecution().getCommitCount();
         LoanCOBParameter loanCOBParameter = (LoanCOBParameter) executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER);
         List<Long> loanIds;
         if (Objects.isNull(loanCOBParameter)
@@ -66,14 +76,34 @@ public class ApplyLoanLockTasklet implements Tasklet {
         List<LoanAccountLock> accountLocks = new ArrayList<>();
         loanIdPartitions.forEach(loanIdPartition -> accountLocks.addAll(loanLockingService.findAllByLoanIdIn(loanIdPartition)));
 
-        List<Long> alreadyLockedByChunkProcessingAccountIds = accountLocks.stream()
-                .filter(e -> LockOwner.LOAN_COB_CHUNK_PROCESSING.equals(e.getLockOwner())).map(LoanAccountLock::getLoanId).toList();
-
         List<Long> toBeProcessedLoanIds = new ArrayList<>(loanIds);
-        toBeProcessedLoanIds.removeAll(alreadyLockedByChunkProcessingAccountIds);
+        List<Long> alreadyLockedAccountIds = accountLocks.stream().map(LoanAccountLock::getLoanId).toList();
 
-        loanLockingService.applyLock(toBeProcessedLoanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING);
+        toBeProcessedLoanIds.removeAll(alreadyLockedAccountIds);
+        try {
+            applyLocks(toBeProcessedLoanIds);
+        } catch (Exception e) {
+            if (numberOfExecutions > NUMBER_OF_RETRIES) {
+                String message = "There was an error applying lock to loan accounts.";
+                log.error("{}", message, e);
+                throw new LoanLockCannotBeAppliedException(message, e);
+            } else {
+                return RepeatStatus.CONTINUABLE;
+            }
+        }
+
         return RepeatStatus.FINISHED;
+    }
+
+    private void applyLocks(List<Long> toBeProcessedLoanIds) {
+        transactionTemplate.setPropagationBehavior(PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+            @Override
+            protected void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
+                loanLockingService.applyLock(toBeProcessedLoanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING);
+            }
+        });
     }
 
     private int getInClauseParameterSizeLimit() {

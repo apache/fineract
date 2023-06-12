@@ -37,3 +37,22 @@ Feature: COB Apply Loan Lock Step
     Examples:
       |action|
       |error|
+
+  @cob
+  Scenario Outline: ApplyLoanLockTasklet - run test: database exception not recoverable after retries
+    Given The ApplyLoanLockTasklet.execute method with action <action>
+    Then throw LoanLockCannotBeAppliedException exception ApplyLoanLockTasklet.execute method
+
+    Examples:
+      |action|
+      |db-error-not-recoverable|
+
+  @cob
+  Scenario Outline: ApplyLoanLockTasklet - run test: database exception first try
+    Given The ApplyLoanLockTasklet.execute method with action <action>
+    When ApplyLoanLockTasklet.execute method executed
+    Then ApplyLoanLockTasklet.execute result should be retry
+
+    Examples:
+      |action|
+      |db-error-first-try|
