@@ -80,7 +80,6 @@ jobs:
             sudo apt-get install ghostscript graphviz -y
 
       - name: Build & Test
-        uses: nick-fields/retry@v2
         env:
           AWS_ENDPOINT_URL: http://localhost:4566
           AWS_ACCESS_KEY_ID: localstack
@@ -88,11 +87,7 @@ jobs:
           AWS_REGION: us-east-1
           FINERACT_REPORT_EXPORT_S3_ENABLED: true
           FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
-        with:
-          timeout_minutes: 90
-          max_attempts: 3
-          retry_on: error
-          command: |
+        run: |
             ./gradlew --no-daemon --console=plain build test -x doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=postgresql
             ./gradlew --no-daemon --console=plain :twofactor-tests:test -PdbType=postgresql
             ./gradlew --no-daemon --console=plain :oauth2-tests:test -PdbType=postgresql
