@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
+import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepExecution;
@@ -34,12 +36,14 @@ public class LoanItemReader extends AbstractLoanItemReader {
 
     private final RetrieveLoanIdService retrieveLoanIdService;
     private final CustomJobParameterResolver customJobParameterResolver;
+    private final LoanLockingService loanLockingService;
 
     public LoanItemReader(LoanRepository loanRepository, RetrieveLoanIdService retrieveLoanIdService,
-            CustomJobParameterResolver customJobParameterResolver) {
+            CustomJobParameterResolver customJobParameterResolver, LoanLockingService loanLockingService) {
         super(loanRepository);
         this.retrieveLoanIdService = retrieveLoanIdService;
         this.customJobParameterResolver = customJobParameterResolver;
+        this.loanLockingService = loanLockingService;
     }
 
     @BeforeStep
@@ -56,7 +60,16 @@ public class LoanItemReader extends AbstractLoanItemReader {
             loanIds = retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter,
                     customJobParameterResolver.getCustomJobParameterById(stepExecution, LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)
                             .map(Boolean::parseBoolean).orElse(false));
+
+            List<Long> lockedByCOBChunkProcessingAccountIds = getLoanIdsLockedWithChunkProcessingLock(loanIds);
+            loanIds.retainAll(lockedByCOBChunkProcessingAccountIds);
         }
         setRemainingData(new ArrayList<>(loanIds));
+    }
+
+    private List<Long> getLoanIdsLockedWithChunkProcessingLock(List<Long> loanIds) {
+        List<LoanAccountLock> accountLocks = new ArrayList<>();
+        accountLocks.addAll(loanLockingService.findAllByLoanIdInAndLockOwner(loanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING));
+        return accountLocks.stream().map(LoanAccountLock::getLoanId).toList();
     }
 }

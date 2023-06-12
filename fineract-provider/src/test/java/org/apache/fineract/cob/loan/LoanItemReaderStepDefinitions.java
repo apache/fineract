@@ -33,8 +33,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
+import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.exceptions.LoanReadException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -52,7 +55,10 @@ public class LoanItemReaderStepDefinitions implements En {
 
     private CustomJobParameterResolver customJobParameterResolver = mock(CustomJobParameterResolver.class);
 
-    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository, retrieveLoanIdService, customJobParameterResolver);
+    private LoanLockingService lockingService = mock(LoanLockingService.class);
+
+    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository, retrieveLoanIdService, customJobParameterResolver,
+            lockingService);
 
     private Loan loan = mock(Loan.class);
 
@@ -70,7 +76,7 @@ public class LoanItemReaderStepDefinitions implements En {
             List<Long> splitAccounts = new ArrayList<>();
             if (!loanIds.isEmpty()) {
                 List<String> splitStr = Splitter.on(',').splitToList(loanIds);
-                splitAccounts = splitStr.stream().map(Long::parseLong).toList();
+                splitAccounts = splitStr.stream().map(Long::parseLong).collect(Collectors.toList());
                 minLoanId = splitAccounts.get(0);
                 maxLoanId = splitAccounts.get(splitAccounts.size() - 1);
             }
@@ -87,7 +93,16 @@ public class LoanItemReaderStepDefinitions implements En {
             businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
             businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
             ThreadLocalContextUtil.setBusinessDates(businessDates);
+            LoanAccountLock loanAccountLock = new LoanAccountLock(1L, LockOwner.LOAN_COB_CHUNK_PROCESSING, businessDate.minusDays(1));
+            LoanAccountLock loanAccountLockNegativeNumberTest = new LoanAccountLock(-1L, LockOwner.LOAN_COB_CHUNK_PROCESSING,
+                    businessDate.minusDays(1));
             lenient().when(customJobParameterResolver.getCustomJobParameterSet(any())).thenReturn(Optional.empty());
+            lenient().when(lockingService.findAllByLoanIdInAndLockOwner(List.of(1L), LockOwner.LOAN_COB_CHUNK_PROCESSING))
+                    .thenReturn(List.of(loanAccountLock));
+            lenient().when(lockingService.findAllByLoanIdInAndLockOwner(List.of(1L, 2L), LockOwner.LOAN_COB_CHUNK_PROCESSING))
+                    .thenReturn(List.of(loanAccountLock));
+            lenient().when(lockingService.findAllByLoanIdInAndLockOwner(List.of(-1L), LockOwner.LOAN_COB_CHUNK_PROCESSING))
+                    .thenReturn(List.of(loanAccountLockNegativeNumberTest));
 
             loanItemReader.beforeStep(stepExecution);
 

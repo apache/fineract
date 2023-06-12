@@ -23,4 +23,9 @@ public class LoanAccountLockCannotBeOverruledException extends RuntimeException 
     public LoanAccountLockCannotBeOverruledException(String message) {
         super(message);
     }
+
+    public LoanAccountLockCannotBeOverruledException(String message, Exception e) {
+        super(message, e);
+    }
+
 }
