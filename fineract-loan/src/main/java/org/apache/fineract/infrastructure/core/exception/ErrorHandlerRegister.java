@@ -27,7 +27,9 @@ import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedExcept
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.http.HttpStatus;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ErrorHandlerRegister {
 
     @PostConstruct
