@@ -21,10 +21,12 @@ package org.apache.fineract.investor.cob.loan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -38,15 +40,20 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountSnapshotBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
+import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.investor.service.AccountingService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,6 +73,10 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     private ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
     @Mock
     private ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
+
+    @Mock
+    private BusinessEventNotifierService businessEventNotifierService;
+
     @Mock
     private AccountingService accountingService;
     private LoanAccountOwnerTransferBusinessStep underTest;
@@ -76,7 +87,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, actualDate)));
         underTest = new LoanAccountOwnerTransferBusinessStep(externalAssetOwnerTransferRepository,
-                externalAssetOwnerTransferLoanMappingRepository, accountingService);
+                externalAssetOwnerTransferLoanMappingRepository, accountingService, businessEventNotifierService);
     }
 
     @Test
@@ -89,6 +100,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         final Loan processedLoan = underTest.execute(loanForProcessing);
         // then
         verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
+        verifyNoInteractions(businessEventNotifierService);
         assertEquals(processedLoan, loanForProcessing);
     }
 
@@ -109,6 +121,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         // then
         assertEquals("Illegal transfer found. Expected PENDING and BUYBACK, found: PENDING and ACTIVE", exception.getMessage());
         verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
+        verifyNoInteractions(businessEventNotifierService);
     }
 
     @Test
@@ -118,6 +131,15 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanForProcessing.getId()).thenReturn(1L);
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
+
+        ExternalAssetOwnerTransfer firstSaveResult = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer secondSaveResult = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer thirdSaveResult = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer fourthSaveResult = Mockito.mock(ExternalAssetOwnerTransfer.class);
+
+        when(externalAssetOwnerTransferRepository.save(any(ExternalAssetOwnerTransfer.class))).thenReturn(firstSaveResult)
+                .thenReturn(secondSaveResult).thenReturn(thirdSaveResult).thenReturn(fourthSaveResult);
+
         when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.PENDING);
         when(secondResponseItem.getStatus()).thenReturn(ExternalTransferStatus.BUYBACK);
         List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem, secondResponseItem);
@@ -163,6 +185,11 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(3).getEffectiveDateTo());
 
         assertEquals(processedLoan, loanForProcessing);
+
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(3);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, secondSaveResult);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing, fourthSaveResult);
+        verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 2, loanForProcessing);
     }
 
     @Test
@@ -193,6 +220,10 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         verify(externalAssetOwnerTransferLoanMappingRepository, times(1)).deleteByLoanIdAndOwnerTransfer(1L, secondResponseItem);
 
         assertEquals(processedLoan, loanForProcessing);
+
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, firstResponseItem);
+        verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing);
     }
 
     @Test
@@ -238,6 +269,10 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         assertEquals(1L, externalAssetOwnerTransferLoanMappingArgumentCaptor.getValue().getLoanId());
         assertEquals(newTransfer, externalAssetOwnerTransferLoanMappingArgumentCaptor.getValue().getOwnerTransfer());
         assertEquals(processedLoan, loanForProcessing);
+
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, newTransfer);
+        verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing);
     }
 
     @Test
@@ -278,6 +313,10 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateFrom());
         assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateTo());
         assertEquals(processedLoan, loanForProcessing);
+
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, newTransfer);
+        verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing);
     }
 
     @Test
@@ -318,6 +357,10 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateFrom());
         assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateTo());
         assertEquals(processedLoan, loanForProcessing);
+
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, newTransfer);
+        verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing);
     }
 
     @Test
@@ -332,5 +375,27 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         final String actualEnumName = underTest.getHumanReadableName();
         assertNotNull(actualEnumName);
         assertEquals("Execute external asset owner transfer", actualEnumName);
+    }
+
+    @NotNull
+    private ArgumentCaptor<BusinessEvent<?>> verifyBusinessEvents(int expectedBusinessEvents) {
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = ArgumentCaptor.forClass(BusinessEvent.class);
+        verify(businessEventNotifierService, times(expectedBusinessEvents)).notifyPostBusinessEvent(businessEventArgumentCaptor.capture());
+        return businessEventArgumentCaptor;
+    }
+
+    private void verifyLoanTransferBusinessEvent(ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor, int index, Loan expectedLoan,
+            ExternalAssetOwnerTransfer expectedAssetOwnerTransfer) {
+        assertTrue(businessEventArgumentCaptor.getAllValues().get(index) instanceof LoanOwnershipTransferBusinessEvent);
+        assertEquals(expectedLoan, ((LoanOwnershipTransferBusinessEvent) businessEventArgumentCaptor.getAllValues().get(index)).getLoan());
+        assertEquals(expectedAssetOwnerTransfer,
+                ((LoanOwnershipTransferBusinessEvent) businessEventArgumentCaptor.getAllValues().get(index)).get());
+    }
+
+    private void verifyLoanAccountSnapshotBusinessEvent(ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor, int index,
+            Loan expectedLoan) {
+        assertTrue(businessEventArgumentCaptor.getAllValues().get(index) instanceof LoanAccountSnapshotBusinessEvent);
+        assertEquals(expectedLoan, ((LoanAccountSnapshotBusinessEvent) businessEventArgumentCaptor.getAllValues().get(index)).get());
     }
 }

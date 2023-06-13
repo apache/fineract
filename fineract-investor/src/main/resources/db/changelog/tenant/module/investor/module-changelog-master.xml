@@ -30,4 +30,5 @@
   <include relativeToChangelogFile="true" file="parts/0006_asset_schemas.xml"/>
   <include relativeToChangelogFile="true" file="parts/0007_add_external_asset_owner_transfer_details.xml"/>
   <include relativeToChangelogFile="true" file="parts/0008_add_mappings.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0009_add_loan_ownership_transfer_events.xml"/>
 </databaseChangeLog>

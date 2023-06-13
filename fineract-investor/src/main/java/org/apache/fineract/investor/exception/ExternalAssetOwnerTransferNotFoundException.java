@@ -30,4 +30,9 @@ public class ExternalAssetOwnerTransferNotFoundException extends AbstractPlatfor
                         externalTransferStatus),
                 externalId.getValue(), externalTransferStatus);
     }
+
+    public ExternalAssetOwnerTransferNotFoundException(Long id) {
+        super("error.msg.external.asset.owner.transfer.id", String.format("External asset owner transfer with id: %s does not found", id),
+                id);
+    }
 }
