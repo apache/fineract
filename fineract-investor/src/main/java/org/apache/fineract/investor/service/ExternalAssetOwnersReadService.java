@@ -28,6 +28,8 @@ public interface ExternalAssetOwnersReadService {
     Page<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId, Integer offset,
             Integer limit);
 
+    ExternalTransferData retrieveTransferData(Long transferExternalId);
+
     ExternalTransferData retrieveActiveTransferData(Long loanId, String externalLoanId, String transferExternalId);
 
     ExternalOwnerTransferJournalEntryData retrieveJournalEntriesOfTransfer(Long transferId, Integer offset, Integer limit);

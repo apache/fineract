@@ -19,10 +19,11 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support;
 
 import org.mapstruct.Builder;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.MapperConfig;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
 
 @MapperConfig(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR, builder = @Builder(disableBuilder = true), uses = {
-        AvroDateTimeMapper.class, AvroMonthDayMapper.class, ExternalIdMapper.class })
+        AvroDateTimeMapper.class, AvroMonthDayMapper.class, ExternalIdMapper.class }, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public class AvroMapperConfig {}

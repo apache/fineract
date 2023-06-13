@@ -26,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountSnapshotBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.data.ExternalTransferSubStatus;
@@ -34,6 +36,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferDetails;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
+import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.investor.service.AccountingService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.context.annotation.Conditional;
@@ -50,6 +53,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
     private final ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
     private final AccountingService accountingService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public Loan execute(Loan loan) {
@@ -73,7 +77,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
                 throw new IllegalStateException(String.format("Illegal transfer found. Expected %s and %s, found: %s and %s",
                         ExternalTransferStatus.PENDING, ExternalTransferStatus.BUYBACK, firstTransferStatus, secondTransferStatus));
             }
-            handleSameDaySaleAndBuyback(settlementDate, transferDataList);
+            handleSameDaySaleAndBuyback(settlementDate, transferDataList, loan);
         } else if (size == 1) {
             ExternalAssetOwnerTransfer transfer = transferDataList.get(0);
             if (ExternalTransferStatus.PENDING.equals(transfer.getStatus())) {
@@ -89,7 +93,8 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
 
     private void handleSale(final Loan loan, final LocalDate settlementDate, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
         ExternalAssetOwnerTransfer newExternalAssetOwnerTransfer = sellAsset(loan, settlementDate, externalAssetOwnerTransfer);
-        // TODO: trigger asset loan transfer executed event
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanOwnershipTransferBusinessEvent(newExternalAssetOwnerTransfer, loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountSnapshotBusinessEvent(loan));
     }
 
     private void handleBuyback(final Loan loan, final LocalDate settlementDate,
@@ -102,7 +107,8 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
                 .orElseThrow();
         ExternalAssetOwnerTransfer newExternalAssetOwnerTransfer = buybackAsset(loan, settlementDate, buybackExternalAssetOwnerTransfer,
                 activeExternalAssetOwnerTransfer);
-        // TODO: trigger asset loan transfer executed event
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanOwnershipTransferBusinessEvent(newExternalAssetOwnerTransfer, loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountSnapshotBusinessEvent(loan));
     }
 
     private ExternalAssetOwnerTransfer buybackAsset(final Loan loan, final LocalDate settlementDate,
@@ -166,10 +172,13 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
         return loan.getLoanSummary().getTotalOutstanding().compareTo(BigDecimal.ZERO) > 0;
     }
 
-    private void handleSameDaySaleAndBuyback(final LocalDate settlementDate, final List<ExternalAssetOwnerTransfer> transferDataList) {
+    private void handleSameDaySaleAndBuyback(final LocalDate settlementDate, final List<ExternalAssetOwnerTransfer> transferDataList,
+            Loan loan) {
         ExternalAssetOwnerTransfer cancelledPendingTransfer = cancelTransfer(settlementDate, transferDataList.get(0));
         ExternalAssetOwnerTransfer cancelledBuybackTransfer = cancelTransfer(settlementDate, transferDataList.get(1));
-        // TODO: trigger asset loan transfer cancel events
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanOwnershipTransferBusinessEvent(cancelledPendingTransfer, loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanOwnershipTransferBusinessEvent(cancelledBuybackTransfer, loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountSnapshotBusinessEvent(loan));
     }
 
     private ExternalAssetOwnerTransfer cancelTransfer(final LocalDate settlementDate,

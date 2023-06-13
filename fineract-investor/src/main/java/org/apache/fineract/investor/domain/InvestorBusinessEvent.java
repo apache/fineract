@@ -16,15 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.investor.domain;
 
-import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.ExternalIdMapper;
-import org.mapstruct.Builder;
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.MapperConfig;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import lombok.Getter;
+import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-@MapperConfig(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR, builder = @Builder(disableBuilder = true), uses = {
-        ExternalIdMapper.class }, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
-public class MapstructMapperConfig {}
+@Getter
+public abstract class InvestorBusinessEvent extends AbstractBusinessEvent<ExternalAssetOwnerTransfer> {
+
+    private final Loan loan;
+    private static final String CATEGORY = "Investor";
+
+    public InvestorBusinessEvent(ExternalAssetOwnerTransfer value, Loan loan) {
+        super(value);
+        this.loan = loan;
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
+    }
+
+    @Override
+    public Long getAggregateRootId() {
+        return get().getId();
+    }
+}

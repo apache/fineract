@@ -33,6 +33,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntr
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
+import org.apache.fineract.investor.exception.ExternalAssetOwnerTransferNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -120,6 +121,12 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
             limit = 100;
         }
         return PageRequest.of(offset, limit, Sort.by("id"));
+    }
+
+    @Override
+    public ExternalTransferData retrieveTransferData(Long externalTransferId) {
+        return externalAssetOwnerTransferRepository.findById(externalTransferId).map(mapper::mapTransfer)
+                .orElseThrow(() -> new ExternalAssetOwnerTransferNotFoundException(externalTransferId));
     }
 
 }

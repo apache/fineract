@@ -16,15 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.event.business.domain.loan;
 
-import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.ExternalIdMapper;
-import org.mapstruct.Builder;
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.MapperConfig;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-@MapperConfig(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR, builder = @Builder(disableBuilder = true), uses = {
-        ExternalIdMapper.class }, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
-public class MapstructMapperConfig {}
+public class LoanAccountSnapshotBusinessEvent extends LoanBusinessEvent {
+
+    private static final String TYPE = "LoanAccountSnapshotBusinessEvent";
+
+    public LoanAccountSnapshotBusinessEvent(Loan value) {
+        super(value);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
+}
