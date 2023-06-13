@@ -87,7 +87,7 @@ class GpgService {
                 this.privateKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build(config.password.toCharArray()))
             }
         } else {
-            log.warn("If preparing a fineract release: could not open the public key ring.")
+            log.warn("WARN: If preparing a fineract release: could not open the public key ring.")
         }
     }
 
