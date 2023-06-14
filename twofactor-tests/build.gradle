@@ -28,9 +28,6 @@ configurations {
 
 apply from: 'dependencies.gradle'
 
-// enable when all tests are migrated
-tasks.cucumber.onlyIf {false}
-
 // Allow external drivers to be used for the tests without packaging it
 // mainly due to license incompatibilities
 configurations {
