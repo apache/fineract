@@ -18,15 +18,12 @@
  */
 package org.apache.fineract.infrastructure.campaigns.jobs.sendmessagetosmsgateway;
 
-import jakarta.annotation.PostConstruct;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,6 +49,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
@@ -59,15 +57,10 @@ import org.springframework.web.client.RestTemplate;
 public class SendMessageToSmsGatewayTasklet implements Tasklet {
 
     private final SmsMessageRepository smsMessageRepository;
-    private ExecutorService genericExecutorService;
     private final NotificationSenderService notificationSenderService;
     private final SmsConfigUtils smsConfigUtils;
+    private final ThreadPoolTaskExecutor taskExecutor;
     private final RestTemplate restTemplate = new RestTemplate();
-
-    @PostConstruct
-    public void initializeExecutorService() {
-        genericExecutorService = Executors.newSingleThreadExecutor();
-    }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -102,7 +95,7 @@ public class SendMessageToSmsGatewayTasklet implements Tasklet {
                     if (!toSaveMessages.isEmpty()) {
                         smsMessageRepository.saveAll(toSaveMessages);
                         smsMessageRepository.flush();
-                        genericExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDataCollection));
+                        taskExecutor.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDataCollection));
                     }
                     if (!toSendNotificationMessages.isEmpty()) {
                         notificationSenderService.sendNotification(toSendNotificationMessages);
@@ -135,7 +128,7 @@ public class SendMessageToSmsGatewayTasklet implements Tasklet {
 
         @Override
         public void onApplicationEvent(ContextClosedEvent event) {
-            genericExecutorService.shutdown();
+            taskExecutor.shutdown();
             log.info("Shutting down the ExecutorService");
         }
     }

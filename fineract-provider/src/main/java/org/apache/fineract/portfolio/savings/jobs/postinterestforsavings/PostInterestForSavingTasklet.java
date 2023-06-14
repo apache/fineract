@@ -27,13 +27,12 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
@@ -43,7 +42,9 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -55,15 +56,18 @@ public class PostInterestForSavingTasklet implements Tasklet {
     private final ConfigurationDomainService configurationDomainService;
     private final Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
     private final ApplicationContext applicationContext;
+    @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
+    private final ThreadPoolTaskExecutor taskExecutor;
     private final int queueSize = 1;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         final int threadPoolSize = Integer.parseInt((String) chunkContext.getStepContext().getJobParameters().get("thread-pool-size"));
+        taskExecutor.setCorePoolSize(threadPoolSize);
+        taskExecutor.setMaxPoolSize(threadPoolSize);
         final int batchSize = Integer.parseInt((String) chunkContext.getStepContext().getJobParameters().get("batch-size"));
         final int pageSize = batchSize * threadPoolSize;
         Long maxSavingsIdInList = 0L;
-        final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
         final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
 
         long start = System.currentTimeMillis();
@@ -84,16 +88,15 @@ public class PostInterestForSavingTasklet implements Tasklet {
                     log.debug("Starting Interest posting - total records - {}", totalFilteredRecords);
                     List<SavingsAccountData> queueElement = queue.element();
                     maxSavingsIdInList = queueElement.get(queueElement.size() - 1).getId();
-                    postInterest(queue.remove(), threadPoolSize, executorService, backdatedTxnsAllowedTill, pageSize, maxSavingsIdInList);
+                    postInterest(queue.remove(), threadPoolSize, backdatedTxnsAllowedTill, pageSize, maxSavingsIdInList);
                 } while (!CollectionUtils.isEmpty(queue));
             }
-            executorService.shutdownNow();
         }
         return RepeatStatus.FINISHED;
     }
 
-    private void postInterest(List<SavingsAccountData> savingsAccounts, int threadPoolSize, ExecutorService executorService,
-            final boolean backdatedTxnsAllowedTill, final int pageSize, Long maxSavingsIdInList) {
+    private void postInterest(List<SavingsAccountData> savingsAccounts, int threadPoolSize, final boolean backdatedTxnsAllowedTill,
+            final int pageSize, Long maxSavingsIdInList) {
         List<Callable<Void>> posters = new ArrayList<>();
         int fromIndex = 0;
         int size = savingsAccounts.size();
@@ -156,30 +159,27 @@ public class PostInterestForSavingTasklet implements Tasklet {
             }
         }
 
-        try {
-            List<Future<Void>> responses = executorService.invokeAll(posters);
-            Long maxId = maxSavingsIdInList;
-            if (!queue.isEmpty()) {
-                maxId = Math.max(maxSavingsIdInList, queue.element().get(queue.element().size() - 1).getId());
-            }
-
-            while (queue.size() <= queueSize) {
-                log.debug("Fetching while threads are running!..:: this is not supposed to run........");
-                savingsAccounts = Collections.synchronizedList(this.savingAccountReadPlatformService
-                        .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
-                if (savingsAccounts.isEmpty()) {
-                    break;
-                }
-                maxId = savingsAccounts.get(savingsAccounts.size() - 1).getId();
-                log.debug("Add to the Queue");
-                queue.add(savingsAccounts);
-            }
-
-            checkCompletion(responses);
-            log.debug("Queue size {}", queue.size());
-        } catch (InterruptedException e1) {
-            log.error("Interrupted while postInterest", e1);
+        List<Future<Void>> responses = new ArrayList<>();
+        posters.forEach(poster -> responses.add(taskExecutor.submit(poster)));
+        Long maxId = maxSavingsIdInList;
+        if (!queue.isEmpty()) {
+            maxId = Math.max(maxSavingsIdInList, queue.element().get(queue.element().size() - 1).getId());
         }
+
+        while (queue.size() <= queueSize) {
+            log.debug("Fetching while threads are running!..:: this is not supposed to run........");
+            savingsAccounts = Collections.synchronizedList(this.savingAccountReadPlatformService
+                    .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
+            if (savingsAccounts.isEmpty()) {
+                break;
+            }
+            maxId = savingsAccounts.get(savingsAccounts.size() - 1).getId();
+            log.debug("Add to the Queue");
+            queue.add(savingsAccounts);
+        }
+
+        checkCompletion(responses);
+        log.debug("Queue size {}", queue.size());
     }
 
     private <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {

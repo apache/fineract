@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.recalculateinterestforloan;
 
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
@@ -30,8 +31,10 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -54,6 +57,10 @@ public class RecalculateInterestForLoanConfig {
     @Autowired
     private OfficeReadPlatformService officeReadPlatformService;
 
+    @Autowired
+    @Qualifier(TaskExecutorConstant.DEFAULT_TASK_EXECUTOR_BEAN_NAME)
+    private ThreadPoolTaskExecutor taskExecutor;
+
     @Bean
     protected Step recalculateInterestForLoanStep() {
         return new StepBuilder(JobName.RECALCULATE_INTEREST_FOR_LOAN.name(), jobRepository)
@@ -69,6 +76,6 @@ public class RecalculateInterestForLoanConfig {
     @Bean
     public RecalculateInterestForLoanTasklet recalculateInterestForLoanTasklet() {
         return new RecalculateInterestForLoanTasklet(loanReadPlatformService, loanWritePlatformService, recalculateInterestPoster,
-                officeReadPlatformService);
+                officeReadPlatformService, taskExecutor);
     }
 }

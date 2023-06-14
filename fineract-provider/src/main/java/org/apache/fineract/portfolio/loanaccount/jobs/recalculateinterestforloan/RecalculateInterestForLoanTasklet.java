@@ -25,12 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
@@ -43,6 +42,8 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -52,6 +53,8 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
     private final LoanWritePlatformService loanWritePlatformService;
     private final RecalculateInterestPoster recalculateInterestPoster;
     private final OfficeReadPlatformService officeReadPlatformService;
+    @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
+    private final ThreadPoolTaskExecutor taskExecutor;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -91,8 +94,8 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
 
     private void recalculateInterest(OfficeData office, int threadPoolSize, int batchSize) {
         final int pageSize = batchSize * threadPoolSize;
-
-        final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+        taskExecutor.setCorePoolSize(threadPoolSize);
+        taskExecutor.setMaxPoolSize(threadPoolSize);
 
         Long maxLoanIdInList = 0L;
         final String officeHierarchy = office.getHierarchy() + "%";
@@ -103,16 +106,14 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
         do {
             int totalFilteredRecords = loanIds.size();
             log.debug("Starting accrual - total filtered records - {}", totalFilteredRecords);
-            recalculateInterest(loanIds, threadPoolSize, batchSize, executorService);
+            recalculateInterest(loanIds, threadPoolSize, batchSize);
             maxLoanIdInList += pageSize + 1;
             loanIds = Collections.synchronizedList(
                     this.loanReadPlatformService.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy));
         } while (!CollectionUtils.isEmpty(loanIds));
-
-        executorService.shutdownNow();
     }
 
-    private void recalculateInterest(List<Long> loanIds, int threadPoolSize, int batchSize, final ExecutorService executorService) {
+    private void recalculateInterest(List<Long> loanIds, int threadPoolSize, int batchSize) {
 
         List<Callable<Void>> posters = new ArrayList<>();
         int fromIndex = 0;
@@ -149,12 +150,9 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
             }
         }
 
-        try {
-            List<Future<Void>> responses = executorService.invokeAll(posters);
-            checkCompletion(responses);
-        } catch (InterruptedException e1) {
-            log.error("Interrupted while recalculateInterest", e1);
-        }
+        List<Future<Void>> responses = new ArrayList<>();
+        posters.forEach(poster -> responses.add(taskExecutor.submit(poster)));
+        checkCompletion(responses);
     }
 
     private <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {

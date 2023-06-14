@@ -18,21 +18,19 @@
  */
 package org.apache.fineract.infrastructure.sms.scheduler;
 
-import jakarta.annotation.PostConstruct;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignConstants;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.ConnectionFailureException;
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.gcm.service.NotificationSenderService;
@@ -40,6 +38,7 @@ import org.apache.fineract.infrastructure.sms.data.SmsMessageApiQueueResourceDat
 import org.apache.fineract.infrastructure.sms.domain.SmsMessage;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageStatusType;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.ParameterizedTypeReference;
@@ -47,6 +46,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -62,14 +62,8 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
     private final RestTemplate restTemplate = new RestTemplate();
     private final SmsConfigUtils smsConfigUtils;
     private final NotificationSenderService notificationSenderService;
-    private ExecutorService genericExecutorService;
-    private ExecutorService triggeredExecutorService;
-
-    @PostConstruct
-    public void initializeExecutorService() {
-        genericExecutorService = Executors.newSingleThreadExecutor();
-        triggeredExecutorService = Executors.newSingleThreadExecutor();
-    }
+    @Qualifier(TaskExecutorConstant.DEFAULT_TASK_EXECUTOR_BEAN_NAME)
+    private final ThreadPoolTaskExecutor taskExecutor;
 
     private void connectAndSendToIntermediateServer(Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas) {
         Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms",
@@ -114,7 +108,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     if (toSaveMessages.size() > 0) {
                         this.smsMessageRepository.saveAll(toSaveMessages);
                         this.smsMessageRepository.flush();
-                        this.triggeredExecutorService.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
+                        this.taskExecutor.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
                     }
                     if (!toSendNotificationMessages.isEmpty()) {
                         this.notificationSenderService.sendNotification(toSendNotificationMessages);
@@ -141,7 +135,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
             this.smsMessageRepository.saveAll(smsMessages);
             request.append(SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
             log.debug("Sending triggered SMS to specific provider with request - {}", request);
-            this.triggeredExecutorService.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
+            this.taskExecutor.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
         } catch (Exception e) {
             log.error("Error occured.", e);
         }
@@ -165,7 +159,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
 
         @Override
         public void onApplicationEvent(ContextClosedEvent event) {
-            genericExecutorService.shutdown();
+            taskExecutor.shutdown();
             log.info("Shutting down the ExecutorService");
         }
     }
