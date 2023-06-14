@@ -27,6 +27,7 @@ import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANC
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.SAMEDAY_TRANSFERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanOwnershipTransferDataV1;
 import org.apache.fineract.avro.loan.v1.UnpaidChargeDataV1;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferDataDetails;
 import org.apache.fineract.investor.data.ExternalTransferLoanData;
@@ -61,7 +63,7 @@ public class InvestorBusinessEventSerializerTest {
     public static final long LOAN_ID = 222L;
     public static final String ASSET_OWNER_EXTERNAL_ID = "1ad87015-8b05-49de-9ed8-e9c214fda7eb";
     public static final String LOAN_EXTERNAL_ID = "29641fe0-0ac6-409a-bb8b-24fdf08d2891";
-    public static final String TRANSFER_EXTERNAL_ID = "ac303982-46a5-4cea-9f71-67b69063a2b7";
+    public static final ExternalId TRANSFER_EXTERNAL_ID = new ExternalId("ac303982-46a5-4cea-9f71-67b69063a2b7");
 
     @Test
     public void testSerializationSellOK() {
@@ -75,24 +77,25 @@ public class InvestorBusinessEventSerializerTest {
 
     @Test
     public void testSerializationDeclinedNegativeBalance() {
-        doTest(DECLINED, BALANCE_NEGATIVE, "SALE", "DECLINED", "BALANCE NEGATIV");
+        doTest(DECLINED, BALANCE_NEGATIVE, "SALE", "DECLINED", "BALANCE_NEGATIVE");
     }
 
     @Test
     public void testSerializationDeclinedBalanceZero() {
-        doTest(DECLINED, BALANCE_ZERO, "SALE", "DECLINED", "BALANCE ZERO");
+        doTest(DECLINED, BALANCE_ZERO, "SALE", "DECLINED", "BALANCE_ZERO");
     }
 
     @Test
     public void testSerializationCancelledSameDayTransfer() {
-        doTest(CANCELLED, SAMEDAY_TRANSFERS, "SALE", "CANCELLED", "SAMEDAY TRANSFER");
+        doTest(CANCELLED, SAMEDAY_TRANSFERS, "SALE", "CANCELLED", "SAMEDAY_TRANSFERS");
     }
 
     private void doTest(ExternalTransferStatus status, ExternalTransferSubStatus subStatus, String expectedType, String expectedStatus,
             String expectedReason) {
         // given
         ExternalAssetOwnersReadService mockReadService = Mockito.mock(ExternalAssetOwnersReadService.class);
-        when(mockReadService.retrieveTransferData(123L)).thenReturn(createTransferData(status));
+        when(mockReadService.retrieveTransferData(123L)).thenReturn(createTransferData(status, subStatus));
+        when(mockReadService.retrieveFirstTransferByExternalId(any(ExternalId.class))).thenReturn(createTransferData(ACTIVE, null));
         Loan loan = Mockito.mock(Loan.class);
         when(loan.getCurrency()).thenReturn(new MonetaryCurrency("EUR", 2, 1));
         List<LoanCharge> loanCharges = createMockCharges();
@@ -138,7 +141,7 @@ public class InvestorBusinessEventSerializerTest {
         assertEquals("1.0", result.getPurchasePriceRatio());
         assertEquals(ASSET_OWNER_EXTERNAL_ID, result.getAssetOwnerExternalId());
         assertEquals(LOAN_EXTERNAL_ID, result.getLoanExternalId());
-        assertEquals(TRANSFER_EXTERNAL_ID, result.getTransferExternalId());
+        assertEquals(TRANSFER_EXTERNAL_ID.getValue(), result.getTransferExternalId());
         assertEquals(LOAN_ID, result.getLoanId());
         assertEquals(new BigDecimal("1108.00000"), result.getTotalOutstandingBalanceAmount());
         assertEquals(new BigDecimal("100.00000"), result.getOutstandingInterestPortion());
@@ -170,10 +173,11 @@ public class InvestorBusinessEventSerializerTest {
         when(mock.getStatus()).thenReturn(status);
         when(mock.getSubStatus()).thenReturn(subStatus);
         when(mock.getId()).thenReturn(123L);
+        when(mock.getExternalId()).thenReturn(new ExternalId("456"));
         return mock;
     }
 
-    private ExternalTransferData createTransferData(ExternalTransferStatus status) {
+    private ExternalTransferData createTransferData(ExternalTransferStatus status, ExternalTransferSubStatus subStatus) {
         ExternalTransferDataDetails details = new ExternalTransferDataDetails();
         details.setDetailsId(444L);
         details.setTotalOutstanding(new BigDecimal("1108.00000"));
@@ -186,13 +190,14 @@ public class InvestorBusinessEventSerializerTest {
         ExternalTransferData data = new ExternalTransferData();
         data.setOwner(new ExternalTransferOwnerData(ASSET_OWNER_EXTERNAL_ID));
         data.setStatus(status);
+        data.setSubStatus(subStatus);
         data.setTransferId(123L);
         data.setLoan(new ExternalTransferLoanData(LOAN_ID, LOAN_EXTERNAL_ID));
         data.setEffectiveFrom(LocalDate.of(2023, 6, 10));
         data.setEffectiveTo(LocalDate.of(9999, 12, 31));
         data.setSettlementDate(LocalDate.of(2023, 6, 11));
         data.setPurchasePriceRatio("1.0");
-        data.setTransferExternalId(TRANSFER_EXTERNAL_ID);
+        data.setTransferExternalId(TRANSFER_EXTERNAL_ID.getValue());
         data.setDetails(details);
         return data;
     }

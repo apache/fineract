@@ -23,15 +23,11 @@ import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.CANCELLED;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.DECLINED;
-import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_NEGATIVE;
-import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_ZERO;
-import static org.apache.fineract.investor.data.ExternalTransferSubStatus.SAMEDAY_TRANSFERS;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
@@ -42,11 +38,12 @@ import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
-import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 import org.apache.fineract.investor.domain.InvestorBusinessEvent;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -76,15 +73,21 @@ public class InvestorBusinessEventSerializer implements BusinessEventSerializer 
     public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         InvestorBusinessEvent event = (InvestorBusinessEvent) rawEvent;
         ExternalTransferData transferData = externalAssetOwnersReadService.retrieveTransferData(event.get().getId());
+        String transferType = getType(transferData.getStatus());
+        if (ExternalTransferStatus.DECLINED.equals(transferData.getStatus()) || CANCELLED.equals(transferData.getStatus())) {
+            ExternalTransferData originalTransferData = externalAssetOwnersReadService
+                    .retrieveFirstTransferByExternalId(event.get().getExternalId());
+            transferType = getType(originalTransferData.getStatus());
+        }
 
         LoanOwnershipTransferDataV1.Builder builder = LoanOwnershipTransferDataV1.newBuilder().setLoanId(transferData.getLoan().getLoanId())
                 .setLoanExternalId(transferData.getLoan().getExternalId()).setTransferExternalId(transferData.getTransferExternalId())
                 .setAssetOwnerExternalId(transferData.getOwner().getExternalId())
                 .setPurchasePriceRatio(transferData.getPurchasePriceRatio()).setCurrency(getCurrencyFromEvent(event))
                 .setSettlementDate(transferData.getSettlementDate().format(DEFAULT_DATE_FORMATTER))
-                .setSubmittedDate(transferData.getSettlementDate().format(DEFAULT_DATE_FORMATTER))
-                .setType(transferData.getStatus() == BUYBACK ? "BUYBACK" : "SALE").setTransferStatus(getStatus(event.get()))
-                .setTransferStatusReason(getTransferStatusReason(event.get()).orElse(null));
+                .setSubmittedDate(transferData.getSettlementDate().format(DEFAULT_DATE_FORMATTER)).setType(transferType)
+                .setTransferStatus(getStatus(transferData.getStatus()))
+                .setTransferStatusReason(getTransferStatusReason(transferData.getSubStatus()));
 
         if (transferData.getDetails() != null) {
             builder.setTotalOutstandingBalanceAmount(transferData.getDetails().getTotalOutstanding())
@@ -96,6 +99,11 @@ public class InvestorBusinessEventSerializer implements BusinessEventSerializer 
         }
 
         return builder.build();
+    }
+
+    @NotNull
+    private static String getType(ExternalTransferStatus transferStatus) {
+        return transferStatus == BUYBACK ? "BUYBACK" : "SALE";
     }
 
     private List<UnpaidChargeDataV1> getUnpaidChargeData(InvestorBusinessEvent event) {
@@ -117,29 +125,21 @@ public class InvestorBusinessEventSerializer implements BusinessEventSerializer 
         }
     }
 
-    private String getStatus(ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
-        ExternalTransferStatus status = externalAssetOwnerTransfer.getStatus();
+    private String getStatus(ExternalTransferStatus status) {
         if (ACTIVE.equals(status) || BUYBACK.equals(status)) {
             return "EXECUTED";
-        } else if (DECLINED.equals(status)) {
-            return "DECLINED";
-        } else if (CANCELLED.equals(status)) {
-            return "CANCELLED";
+        } else if (DECLINED.equals(status) || CANCELLED.equals(status)) {
+            return status.name();
         } else {
             return "UNKNOWN";
         }
     }
 
-    private Optional<String> getTransferStatusReason(ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
-        ExternalTransferStatus status = externalAssetOwnerTransfer.getStatus();
-        if (DECLINED.equals(status) && BALANCE_ZERO.equals(externalAssetOwnerTransfer.getSubStatus())) {
-            return Optional.of("BALANCE ZERO");
-        } else if (DECLINED.equals(status) && BALANCE_NEGATIVE.equals(externalAssetOwnerTransfer.getSubStatus())) {
-            return Optional.of("BALANCE NEGATIV");
-        } else if (CANCELLED.equals(status) && SAMEDAY_TRANSFERS.equals(externalAssetOwnerTransfer.getSubStatus())) {
-            return Optional.of("SAMEDAY TRANSFER");
+    private String getTransferStatusReason(ExternalTransferSubStatus subStatus) {
+        if (subStatus != null) {
+            return subStatus.name();
         } else {
-            return Optional.empty();
+            return null;
         }
     }
 }

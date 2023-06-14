@@ -21,6 +21,7 @@ package org.apache.fineract.investor.service;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.JournalEntryMapper;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.investor.data.ExternalOwnerJournalEntryData;
 import org.apache.fineract.investor.data.ExternalOwnerTransferJournalEntryData;
@@ -53,7 +54,7 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
     private final JournalEntryMapper journalEntryMapper;
 
     @Override
-    public Page<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String transferExternalId, Integer offset,
+    public Page<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String externalTransferId, Integer offset,
             Integer limit) {
         Page<ExternalAssetOwnerTransfer> result;
         PageRequest pageRequest = getPageRequest(offset, limit);
@@ -61,8 +62,8 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
             result = externalAssetOwnerTransferRepository.findAllByLoanId(loanId, pageRequest);
         } else if (externalLoanId != null) {
             result = externalAssetOwnerTransferRepository.findAllByExternalLoanId(ExternalIdFactory.produce(externalLoanId), pageRequest);
-        } else if (transferExternalId != null) {
-            result = externalAssetOwnerTransferRepository.findAllByExternalId(ExternalIdFactory.produce(transferExternalId), pageRequest);
+        } else if (externalTransferId != null) {
+            result = externalAssetOwnerTransferRepository.findAllByExternalId(ExternalIdFactory.produce(externalTransferId), pageRequest);
         } else {
             throw new IllegalArgumentException(
                     "At least one of the following parameters must be provided: loanId, externalLoanId, transferExternalId");
@@ -113,6 +114,18 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
         return mappedResult;
     }
 
+    @Override
+    public ExternalTransferData retrieveFirstTransferByExternalId(ExternalId externalTransferId) {
+        return externalAssetOwnerTransferRepository.findFirstByExternalIdOrderByIdAsc(externalTransferId).map(mapper::mapTransfer)
+                .orElseThrow(() -> new ExternalAssetOwnerTransferNotFoundException(externalTransferId));
+    }
+
+    @Override
+    public ExternalTransferData retrieveTransferData(Long transferId) {
+        return externalAssetOwnerTransferRepository.findById(transferId).map(mapper::mapTransfer)
+                .orElseThrow(() -> new ExternalAssetOwnerTransferNotFoundException(transferId));
+    }
+
     private PageRequest getPageRequest(Integer offset, Integer limit) {
         if (offset == null) {
             offset = 0;
@@ -121,12 +134,6 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
             limit = 100;
         }
         return PageRequest.of(offset, limit, Sort.by("id"));
-    }
-
-    @Override
-    public ExternalTransferData retrieveTransferData(Long externalTransferId) {
-        return externalAssetOwnerTransferRepository.findById(externalTransferId).map(mapper::mapTransfer)
-                .orElseThrow(() -> new ExternalAssetOwnerTransferNotFoundException(externalTransferId));
     }
 
 }

@@ -32,6 +32,7 @@ public class ExternalTransferData {
     private String purchasePriceRatio;
     private LocalDate settlementDate;
     private ExternalTransferStatus status;
+    private ExternalTransferSubStatus subStatus;
     private LocalDate effectiveFrom;
     private LocalDate effectiveTo;
 }

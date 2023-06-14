@@ -49,4 +49,6 @@ public interface ExternalAssetOwnerTransferRepository
 
     @Query("SELECT t FROM ExternalAssetOwnerTransfer t WHERE t.loanId = :loanId AND t.effectiveDateTo > :effectiveDate")
     List<ExternalAssetOwnerTransfer> findEffectiveTransfers(@Param("loanId") Long loanId, @Param("effectiveDate") LocalDate effectiveDate);
+
+    Optional<ExternalAssetOwnerTransfer> findFirstByExternalIdOrderByIdAsc(ExternalId externalTransferId);
 }
