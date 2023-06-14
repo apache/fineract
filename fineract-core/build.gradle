@@ -20,7 +20,6 @@ description = 'Fineract Core'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
-check.dependsOn('cucumber')
 
 compileJava.doLast {
     def mainSS = sourceSets.main

@@ -26,6 +26,7 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'com.google.cloud.tools.jib'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'se.thinkcode.cucumber-runner'
 
 check.dependsOn('cucumber')
 
@@ -323,6 +324,12 @@ task migrateDatabase {
             }
         }
     }
+}
+
+cucumber {
+    tags = 'not @ignore'
+    main = 'io.cucumber.core.cli.Main'
+    shorten = 'argfile'
 }
 
 tasks.jibDockerBuild.dependsOn(bootJar)

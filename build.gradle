@@ -291,7 +291,6 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'net.ltgt.errorprone'
     apply plugin: 'com.github.spotbugs'
     apply plugin: 'com.github.andygoossens.modernizer'
-    apply plugin: 'se.thinkcode.cucumber-runner'
     apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
     group = 'org.apache.fineract'
@@ -559,11 +558,7 @@ configure(project.fineractJavaProjects) {
                 'org.bouncycastle:bcprov-jdk15to18',
                 'org.awaitility:awaitility',
                 'com.google.truth:truth',
-                'com.google.truth.extensions:truth-java8-extension',
-                'io.cucumber:cucumber-core',
-                'io.cucumber:cucumber-java',
-                'io.cucumber:cucumber-java8',
-                'io.cucumber:cucumber-junit-platform-engine',
+                'com.google.truth.extensions:truth-java8-extension'
                 )
     }
 
@@ -579,12 +574,6 @@ configure(project.fineractJavaProjects) {
 
     testlogger {
         logLevel 'quiet'
-    }
-
-    cucumber {
-        tags = 'not @ignore'
-        main = 'io.cucumber.core.cli.Main'
-        shorten = 'argfile'
     }
 
     // Configuration for spotbugs plugin

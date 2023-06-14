@@ -87,7 +87,9 @@ jobs:
           FINERACT_REPORT_EXPORT_S3_ENABLED: true
           FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
         run: |
-            ./gradlew --no-daemon --console=plain build test -x doc -x :twofactor-tests:test -x :oauth2-test:test
+            ./gradlew --no-daemon --console=plain build -x cucumber -x test -x doc
+            ./gradlew --no-daemon --console=plain cucumber
+            ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test
             ./gradlew --no-daemon --console=plain :twofactor-tests:test
             ./gradlew --no-daemon --console=plain :oauth2-tests:test
 

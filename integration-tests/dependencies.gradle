@@ -28,7 +28,6 @@ dependencies {
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-avro-schemas', configuration: 'runtimeElements'),
             project(path: ':fineract-client', configuration: 'runtimeElements'),
-            'io.cucumber:cucumber-spring',
             'com.intuit.karate:karate-junit5',
             // 'com.google.code.gson:gson',
             )

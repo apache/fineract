@@ -21,8 +21,6 @@ description = 'Fineract Loan'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-check.dependsOn('cucumber')
-
 compileJava.doLast {
     def mainSS = sourceSets.main
     def source = mainSS.java.classesDirectory.get()
