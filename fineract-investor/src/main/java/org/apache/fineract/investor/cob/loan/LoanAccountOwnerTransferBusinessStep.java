@@ -28,6 +28,7 @@ import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountSnapshotBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.interoperation.util.MathUtil;
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.data.ExternalTransferSubStatus;
@@ -135,7 +136,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
             accountingService.createJournalEntriesForSaleAssetTransfer(loan, newExternalAssetOwnerTransfer);
         } else {
             ExternalTransferSubStatus subStatus = ExternalTransferSubStatus.BALANCE_ZERO;
-            if (loan.getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0) {
+            if (MathUtil.nullToDefault(loan.getTotalOverpaid(), BigDecimal.ZERO).compareTo(BigDecimal.ZERO) > 0) {
                 subStatus = ExternalTransferSubStatus.BALANCE_NEGATIVE;
             }
             newExternalAssetOwnerTransfer = createNewEntry(settlementDate, externalAssetOwnerTransfer, ExternalTransferStatus.DECLINED,
@@ -169,7 +170,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
     }
 
     private boolean isTransferable(final Loan loan) {
-        return loan.getLoanSummary().getTotalOutstanding().compareTo(BigDecimal.ZERO) > 0;
+        return MathUtil.nullToDefault(loan.getLoanSummary().getTotalOutstanding(), BigDecimal.ZERO).compareTo(BigDecimal.ZERO) > 0;
     }
 
     private void handleSameDaySaleAndBuyback(final LocalDate settlementDate, final List<ExternalAssetOwnerTransfer> transferDataList,
