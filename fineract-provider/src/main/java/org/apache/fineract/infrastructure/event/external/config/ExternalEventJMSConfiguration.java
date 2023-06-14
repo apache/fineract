@@ -23,6 +23,7 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.config.FineractProperties.FineractExternalEventsProducerJmsProperties;
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -68,11 +69,13 @@ public class ExternalEventJMSConfiguration {
         return new ActiveMQQueue(fineractProperties.getEvents().getExternal().getProducer().getJms().getEventQueueName());
     }
 
-    @Bean("externalEventJmsProducerExecutor")
+    @Bean(TaskExecutorConstant.EVENT_TASK_EXECUTOR_BEAN_NAME)
     public ThreadPoolTaskExecutor externalEventJmsProducerExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-        threadPoolTaskExecutor.setCorePoolSize(10);
-        threadPoolTaskExecutor.setMaxPoolSize(100);
+        threadPoolTaskExecutor.setCorePoolSize(
+                fineractProperties.getEvents().getExternal().getProducer().getJms().getThreadPoolTaskExecutorCorePoolSize());
+        threadPoolTaskExecutor
+                .setMaxPoolSize(fineractProperties.getEvents().getExternal().getProducer().getJms().getThreadPoolTaskExecutorMaxPoolSize());
         threadPoolTaskExecutor.setThreadNamePrefix("externalEventJms");
         return threadPoolTaskExecutor;
     }

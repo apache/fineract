@@ -46,6 +46,8 @@ public class FineractProperties {
 
     private FineractEventsProperties events;
 
+    private FineractTaskExecutor taskExecutor;
+
     private FineractContentProperties content;
 
     private FineractReportProperties report;
@@ -192,6 +194,14 @@ public class FineractProperties {
 
     @Getter
     @Setter
+    public static class FineractTaskExecutor {
+
+        private int defaultTaskExecutorCorePoolSize;
+        private int defaultTaskExecutorMaxPoolSize;
+    }
+
+    @Getter
+    @Setter
     public static class FineractExternalEventsProperties {
 
         private boolean enabled;
@@ -217,6 +227,8 @@ public class FineractProperties {
         private String brokerPassword;
         private int producerCount;
         private boolean asyncSendEnabled;
+        private int threadPoolTaskExecutorCorePoolSize;
+        private int threadPoolTaskExecutorMaxPoolSize;
 
         public boolean isBrokerPasswordProtected() {
             return StringUtils.isNotBlank(brokerUsername) || StringUtils.isNotBlank(brokerPassword);

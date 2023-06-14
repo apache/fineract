@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.async;
 
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +30,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class SpringAsyncConfig implements AsyncConfigurer {
 
-    @Bean(name = "loanCOBCatchUpThreadPoolTaskExecutor")
+    @Bean(name = TaskExecutorConstant.LOAN_COB_CATCH_UP_TASK_EXECUTOR_BEAN_NAME)
     public ThreadPoolTaskExecutor loanCOBCatchUpThreadPoolTaskExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         threadPoolTaskExecutor.setMaxPoolSize(1);

@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.messaging.jms.MessageFactory;
 import org.apache.fineract.infrastructure.core.service.HashingService;
 import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
@@ -61,7 +62,7 @@ public class JMSMultiExternalEventProducer implements ExternalEventProducer {
 
     private final MessageFactory messageFactory;
 
-    @Qualifier("externalEventJmsProducerExecutor")
+    @Qualifier(TaskExecutorConstant.EVENT_TASK_EXECUTOR_BEAN_NAME)
     private final AsyncTaskExecutor taskExecutor;
 
     private final HashingService hashingService;
