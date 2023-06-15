@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.jersey;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -46,7 +47,7 @@ public class JerseyJacksonConverterConfig {
 
         return new MappingJackson2HttpMessageConverter(new Jackson2ObjectMapperBuilder().indentOutput(true)
                 .serializers(mergedSerializers.toArray(new JsonSerializer[0]))
-                .deserializers(mergedDeserializers.toArray(new JsonDeserializer[0]))
+                .deserializers(mergedDeserializers.toArray(new JsonDeserializer[0])).serializationInclusion(JsonInclude.Include.NON_NULL)
                 .featuresToEnable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS).modulesToInstall(new ParameterNamesModule()).build());
     }
 }
