@@ -89,7 +89,9 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     @Transactional
     public CommandProcessingResult buybackLoanByLoanId(JsonCommand command) {
         final JsonElement json = fromApiJsonHelper.parse(command.json());
+        validateBuybackRequestBody(command.json());
         Long loanId = command.getLoanId();
+        validateLoan(loanId);
         LocalDate settlementDate = getSettlementDateFromJson(json);
         ExternalId externalId = getTransferExternalIdFromJson(json);
         validateSettlementDate(settlementDate);
@@ -97,6 +99,12 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = createBuybackTransfer(effectiveTransfer, settlementDate, externalId);
         externalAssetOwnerTransferRepository.saveAndFlush(externalAssetOwnerTransfer);
         return buildResponseData(externalAssetOwnerTransfer);
+    }
+
+    private void validateLoan(Long loanId) {
+        if (!loanRepository.existsById(loanId)) {
+            throw new LoanNotFoundException(loanId);
+        }
     }
 
     private void validateEffectiveTransferForSale(final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
@@ -234,6 +242,32 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         String purchasePriceRatio = fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO, json);
         baseDataValidator.reset().parameter(ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO).value(purchasePriceRatio).notBlank()
                 .notExceedingLengthOf(50);
+
+        LocalDate settlementDate = fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, json);
+        baseDataValidator.reset().parameter(ExternalTransferRequestParameters.SETTLEMENT_DATE).value(settlementDate).notNull();
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+    }
+
+    private void validateBuybackRequestBody(String apiRequestBodyAsJson) {
+        final Set<String> requestParameters = new HashSet<>(
+                Arrays.asList(ExternalTransferRequestParameters.SETTLEMENT_DATE, ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID,
+                        ExternalTransferRequestParameters.DATEFORMAT, ExternalTransferRequestParameters.LOCALE));
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, apiRequestBodyAsJson, requestParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loantransfer");
+        final JsonElement json = fromApiJsonHelper.parse(apiRequestBodyAsJson);
+
+        String transferExternalId = fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID, json);
+        baseDataValidator.reset().parameter(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID).value(transferExternalId).ignoreIfNull()
+                .notExceedingLengthOf(100);
 
         LocalDate settlementDate = fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, json);
         baseDataValidator.reset().parameter(ExternalTransferRequestParameters.SETTLEMENT_DATE).value(settlementDate).notNull();

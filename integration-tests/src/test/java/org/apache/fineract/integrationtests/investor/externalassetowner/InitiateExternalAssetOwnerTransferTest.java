@@ -146,7 +146,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             Integer loanID = createLoanForClient(clientID);
             addPenaltyForLoan(loanID, "10");
 
-            PostInitiateTransferResponse saleTransferResponse = createExternalAssetOwnerTransfer(loanID, "sale", "2020-03-02");
+            PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-02");
             validateResponse(saleTransferResponse, loanID);
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-02", "2020-03-02",
@@ -184,7 +184,7 @@ public class InitiateExternalAssetOwnerTransferTest {
                     ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
                             BigDecimal.valueOf(15767.420000), expectedDate, expectedDate));
 
-            PostInitiateTransferResponse buybackTransferResponse = createExternalAssetOwnerTransfer(loanID, "buyback", "2020-03-03");
+            PostInitiateTransferResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-03");
             validateResponse(buybackTransferResponse, loanID);
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-02", "2020-03-02",
@@ -278,10 +278,10 @@ public class InitiateExternalAssetOwnerTransferTest {
             Integer clientID = createClient();
             Integer loanID = createLoanForClient(clientID);
 
-            createExternalAssetOwnerTransfer(loanID, "sale", "2020-03-02");
+            createSaleTransfer(loanID, "2020-03-02");
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> createExternalAssetOwnerTransfer(loanID, "sale", "2020-03-02"));
+                    () -> createSaleTransfer(loanID, "2020-03-02"));
             assertTrue(exception.getMessage().contains("External asset owner transfer is already in PENDING state for this loan"));
         } finally {
             cleanUpAndRestoreBusinessDate();
@@ -302,7 +302,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             LOAN_TRANSACTION_HELPER.makeRepayment("04 March 2020", 16000.0f, loanID);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> createExternalAssetOwnerTransfer(loanID, "sale", "2020-03-02"));
+                    () -> createSaleTransfer(loanID, "2020-03-02"));
             assertTrue(exception.getMessage().contains("Loan is not in active status"));
         } finally {
             cleanUpAndRestoreBusinessDate();
@@ -318,9 +318,9 @@ public class InitiateExternalAssetOwnerTransferTest {
             Integer clientID = createClient();
             Integer loanID = createLoanForClient(clientID);
 
-            PostInitiateTransferResponse saleTransferResponse = createExternalAssetOwnerTransfer(loanID, "sale", "2020-03-02");
+            PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-02");
             validateResponse(saleTransferResponse, loanID);
-            PostInitiateTransferResponse buybackTransferResponse = createExternalAssetOwnerTransfer(loanID, "buyback", "2020-03-02");
+            PostInitiateTransferResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-02");
             validateResponse(buybackTransferResponse, loanID);
 
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
@@ -369,8 +369,8 @@ public class InitiateExternalAssetOwnerTransferTest {
             Integer clientID = createClient();
             Integer loanID = createLoanForClient(clientID);
 
-            PostInitiateTransferResponse saleTransferResponse = createExternalAssetOwnerTransfer(loanID, "sale", "2020-03-04");
-            PostInitiateTransferResponse buybackTransferResponse = createExternalAssetOwnerTransfer(loanID, "buyback", "2020-03-04");
+            PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-04");
+            PostInitiateTransferResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-04");
 
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-04", "2020-03-02",
@@ -383,13 +383,93 @@ public class InitiateExternalAssetOwnerTransferTest {
                             new BigDecimal("0.000000")));
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> createExternalAssetOwnerTransfer(loanID, "sale", "2020-03-04"));
+                    () -> createSaleTransfer(loanID, "2020-03-04"));
             assertTrue(exception.getMessage().contains("This loan cannot be sold, there is already an in progress transfer"));
 
             CallFailedRuntimeException exception2 = assertThrows(CallFailedRuntimeException.class,
-                    () -> createExternalAssetOwnerTransfer(loanID, "buyback", "2020-03-04"));
+                    () -> createBuybackTransfer(loanID, "2020-03-04"));
             assertTrue(exception2.getMessage()
                     .contains("This loan cannot be bought back, external asset owner buyback transfer is already in progress"));
+        } finally {
+            cleanUpAndRestoreBusinessDate();
+        }
+    }
+
+    @Test
+    public void buybackExceptionHandling() {
+        try {
+            GlobalConfigurationHelper.manageConfigurations(REQUEST_SPEC, RESPONSE_SPEC,
+                    GlobalConfigurationHelper.ENABLE_AUTOGENERATED_EXTERNAL_ID, true);
+            setInitialBusinessDate("2020-03-02");
+
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> createBuybackTransfer(1, null));
+            assertTrue(exception.getMessage().contains("The parameter `settlementDate` is mandatory."));
+
+            CallFailedRuntimeException exception2 = assertThrows(CallFailedRuntimeException.class,
+                    () -> createBuybackTransfer(1, "1970-01-01"));
+            assertTrue(exception2.getMessage().contains("Settlement date cannot be in the past"));
+
+            CallFailedRuntimeException exception3 = assertThrows(CallFailedRuntimeException.class, () -> {
+                Integer clientID = createClient();
+                Integer loanID = createLoanForClient(clientID);
+                createSaleTransfer(loanID, "2020-03-03");
+                createBuybackTransfer(loanID, "2020-03-02");
+            });
+            assertTrue(exception3.getMessage().contains(
+                    "This loan cannot be bought back, settlement date is earlier than effective transfer settlement date: 2020-03-03"));
+
+            CallFailedRuntimeException exception4 = assertThrows(CallFailedRuntimeException.class, () -> {
+                Integer clientID = createClient();
+                Integer loanID = createLoanForClient(clientID);
+                createBuybackTransfer(loanID, "2020-03-03");
+            });
+            assertTrue(exception4.getMessage().contains("This loan cannot be bought back, it is not owned by an external asset owner"));
+
+            CallFailedRuntimeException exception5 = assertThrows(CallFailedRuntimeException.class,
+                    () -> createBuybackTransfer(-1, "2020-03-03"));
+            assertTrue(exception5.getMessage().contains("Loan with identifier -1 does not exist"));
+        } finally {
+            cleanUpAndRestoreBusinessDate();
+        }
+    }
+
+    @Test
+    public void saleExceptionHandling() {
+        try {
+            GlobalConfigurationHelper.manageConfigurations(REQUEST_SPEC, RESPONSE_SPEC,
+                    GlobalConfigurationHelper.ENABLE_AUTOGENERATED_EXTERNAL_ID, true);
+            setInitialBusinessDate("2020-03-02");
+            Integer clientID = createClient();
+            Integer loanID = createLoanForClient(clientID);
+
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> createSaleTransfer(loanID, null));
+            assertTrue(exception.getMessage().contains("The parameter `settlementDate` is mandatory."));
+
+            CallFailedRuntimeException exception2 = assertThrows(CallFailedRuntimeException.class,
+                    () -> createSaleTransfer(loanID, "2020-03-02", UUID.randomUUID().toString(), null, "1.0"));
+            assertTrue(exception2.getMessage().contains("The parameter `ownerExternalId` is mandatory."));
+
+            CallFailedRuntimeException exception3 = assertThrows(CallFailedRuntimeException.class,
+                    () -> createSaleTransfer(loanID, "2020-03-02", null, UUID.randomUUID().toString(), null));
+            assertTrue(exception3.getMessage().contains("The parameter `purchasePriceRatio` is mandatory."));
+
+            CallFailedRuntimeException exception4 = assertThrows(CallFailedRuntimeException.class,
+                    () -> createSaleTransfer(loanID, "1970-01-01"));
+            assertTrue(exception4.getMessage().contains("Settlement date cannot be in the past"));
+
+            CallFailedRuntimeException exception5 = assertThrows(CallFailedRuntimeException.class, () -> {
+                createSaleTransfer(loanID, "2020-03-03");
+                createBuybackTransfer(loanID, "2020-03-04");
+                createSaleTransfer(loanID, "2020-03-05");
+            });
+            assertTrue(exception5.getMessage().contains("This loan cannot be sold, there is already an in progress transfer"));
+            CallFailedRuntimeException exception6 = assertThrows(CallFailedRuntimeException.class, () -> {
+                Integer loanID2 = createLoanForClient(clientID);
+                createSaleTransfer(loanID2, "2020-03-03");
+                updateBusinessDateAndExecuteCOBJob("2020-03-04");
+                createSaleTransfer(loanID2, "2020-03-05");
+            });
+            assertTrue(exception6.getMessage().contains("This loan cannot be sold, because it is owned by an external asset owner"));
         } finally {
             cleanUpAndRestoreBusinessDate();
         }
@@ -400,14 +480,26 @@ public class InitiateExternalAssetOwnerTransferTest {
         SCHEDULER_JOB_HELPER.executeAndAwaitJob("Loan COB");
     }
 
-    private PostInitiateTransferResponse createExternalAssetOwnerTransfer(Integer loanID, String command, String settlementDate) {
+    private PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate) {
         String transferExternalId = UUID.randomUUID().toString();
-        if (command.equals("sale")) {
-            ownerExternalId = UUID.randomUUID().toString();
-        }
-        PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), command,
+        ownerExternalId = UUID.randomUUID().toString();
+        return createSaleTransfer(loanID, settlementDate, transferExternalId, ownerExternalId, "1.0");
+    }
+
+    private PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
+            String ownerExternalId, String purchasePriceRatio) {
+        PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "sale",
                 new PostInitiateTransferRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
-                        .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"));
+                        .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
+        assertEquals(transferExternalId, saleResponse.getResourceExternalId());
+        return saleResponse;
+    }
+
+    private PostInitiateTransferResponse createBuybackTransfer(Integer loanID, String settlementDate) {
+        String transferExternalId = UUID.randomUUID().toString();
+        PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "buyback",
+                new PostInitiateTransferRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
+                        .transferExternalId(transferExternalId));
         assertEquals(transferExternalId, saleResponse.getResourceExternalId());
         return saleResponse;
     }
