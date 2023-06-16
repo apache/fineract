@@ -24,7 +24,6 @@ import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +81,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = createSaleTransfer(loanId, command.json(),
                 loanIdAndExternalIdAndStatus.getExternalId());
         validateSale(externalAssetOwnerTransfer);
-        externalAssetOwnerTransferRepository.save(externalAssetOwnerTransfer);
+        externalAssetOwnerTransferRepository.saveAndFlush(externalAssetOwnerTransfer);
         return buildResponseData(externalAssetOwnerTransfer);
     }
 
@@ -96,7 +95,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         validateSettlementDate(settlementDate);
         ExternalAssetOwnerTransfer effectiveTransfer = fetchAndValidateEffectiveTransferForBuyback(loanId, settlementDate);
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = createBuybackTransfer(effectiveTransfer, settlementDate, externalId);
-        externalAssetOwnerTransferRepository.save(externalAssetOwnerTransfer);
+        externalAssetOwnerTransferRepository.saveAndFlush(externalAssetOwnerTransfer);
         return buildResponseData(externalAssetOwnerTransfer);
     }
 
@@ -162,18 +161,12 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     }
 
     private CommandProcessingResult buildResponseData(ExternalAssetOwnerTransfer savedExternalAssetOwnerTransfer) {
-        Map<String, Object> changes = new HashMap<>();
-        changes.put(ExternalTransferRequestParameters.SETTLEMENT_DATE, savedExternalAssetOwnerTransfer.getSettlementDate());
-        changes.put(ExternalTransferRequestParameters.OWNER_EXTERNAL_ID,
-                savedExternalAssetOwnerTransfer.getOwner().getExternalId().getValue());
-        changes.put(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID, savedExternalAssetOwnerTransfer.getExternalId().getValue());
-        changes.put(ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO, savedExternalAssetOwnerTransfer.getPurchasePriceRatio());
         return new CommandProcessingResultBuilder().withEntityId(savedExternalAssetOwnerTransfer.getId())
                 .withEntityExternalId(savedExternalAssetOwnerTransfer.getExternalId())
                 .withSubEntityId(savedExternalAssetOwnerTransfer.getLoanId())
                 .withSubEntityExternalId(Objects.isNull(savedExternalAssetOwnerTransfer.getExternalLoanId()) ? null
                         : savedExternalAssetOwnerTransfer.getExternalLoanId())
-                .with(changes).build();
+                .build();
     }
 
     private void validateSale(ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
