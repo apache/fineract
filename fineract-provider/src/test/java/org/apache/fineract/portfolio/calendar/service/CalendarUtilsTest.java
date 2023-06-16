@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.calendar.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -134,6 +135,36 @@ public class CalendarUtilsTest {
         // then
         assertEquals(30, adjustedDateDaily.get(ChronoField.DAY_OF_MONTH));
 
+    }
+
+    @Test
+    public void testGetNextRecurringDate(){
+        // given
+        String recurringRule = "FREQ=WEEKLY;INTERVAL=1";
+        LocalDate seedDate = LocalDate.of(2023, Month.MAY, 1);
+        LocalDate startDate = LocalDate.of(2023, Month.MAY, 22);
+
+        // when
+        LocalDate nextRecurringDate = CalendarUtils.getNextRecurringDate(recurringRule, seedDate, startDate);
+
+        // then
+        assertNotNull(nextRecurringDate);
+        assertEquals(LocalDate.of(2023, Month.MAY, 29), nextRecurringDate);
+    }
+
+    @Test
+    void testGetNextRecurringDateMonthly() {
+        // given
+        String recurringRule = "FREQ=MONTHLY;INTERVAL=2";
+        LocalDate seedDate = LocalDate.of(2023, Month.MAY, 1);
+        LocalDate startDate = LocalDate.of(2023, Month.MAY, 15);
+
+        // when
+        LocalDate nextRecurringDate = CalendarUtils.getNextRecurringDate(recurringRule, seedDate, startDate);
+
+        // then
+        assertNotNull(nextRecurringDate);
+        assertEquals(LocalDate.of(2023, Month.JULY, 1), nextRecurringDate);
     }
 
 }
