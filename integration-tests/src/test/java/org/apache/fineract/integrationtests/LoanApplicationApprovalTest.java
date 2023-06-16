@@ -305,4 +305,29 @@ public class LoanApplicationApprovalTest {
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
+    /*
+     * Equal test case: Approved amount non-zero is equal to proposed amount
+     */
+    @Test
+    public void loanApplicationApprovedAmountEqualToProposedAmount() {
+
+        final String proposedAmount = "8000";
+        final String approvalAmount = "8000";
+        final String approveDate = "20 September 2012";
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        final String expectedDisbursementDate = null;
+        List<HashMap> approveTranches = null;
+        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
+                loanID, approveTranches);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+    }
+
 }

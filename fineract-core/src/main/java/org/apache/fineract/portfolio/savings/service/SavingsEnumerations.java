@@ -384,6 +384,9 @@ public final class SavingsEnumerations {
                 optionData = new EnumOptionData(SavingsPostingInterestPeriodType.ANNUAL.getValue().longValue(),
                         codePrefix + SavingsPostingInterestPeriodType.ANNUAL.getCode(), "Annually");
             break;
+            case ACTIVATIONDATE:
+                optionData = new EnumOptionData(SavingsPostingInterestPeriodType.ACTIVATIONDATE.getValue().longValue(),
+                        codePrefix + SavingsPostingInterestPeriodType.ACTIVATIONDATE.getCode(), "Activation Date");
         }
 
         return optionData;
