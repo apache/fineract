@@ -60,7 +60,7 @@ buildscript {
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
         classpath 'org.apache.commons:commons-lang3:3.12.0'
         classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.9'
-        classpath 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+        classpath 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     }
 }
 
