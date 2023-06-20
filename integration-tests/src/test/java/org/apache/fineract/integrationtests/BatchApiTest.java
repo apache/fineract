@@ -199,7 +199,7 @@ public class BatchApiTest {
 
         // Asserts that all the transactions have been successfully rolled back
         Assertions.assertEquals(1, response.size());
-        Assertions.assertEquals((long) 400, (long) response.get(0).getStatusCode(), "Verify Status code 400");
+        Assertions.assertEquals((long) 500, (long) response.get(0).getStatusCode(), "Verify Status code 500");
     }
 
     /**

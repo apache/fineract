@@ -71,12 +71,12 @@ public final class ErrorHandler {
                 runtimeException -> handleException(runtimeException, new PlatformDataIntegrityExceptionMapper(), 3001));
         EXCEPTION_HANDLERS.put(AbstractPlatformDomainRuleException.class,
                 runtimeException -> handleException(runtimeException, new PlatformDomainRuleExceptionMapper(), 9999));
-        EXCEPTION_HANDLERS.put(TransactionException.class, runtimeException -> new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 4001,
+        EXCEPTION_HANDLERS.put(TransactionException.class, runtimeException -> new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR, 4001,
                 "{\"Exception\": %s}".formatted(runtimeException.getMessage())));
         EXCEPTION_HANDLERS.put(PlatformInternalServerException.class,
                 runtimeException -> handleException(runtimeException, new PlatformInternalServerExceptionMapper(), 5001));
-        EXCEPTION_HANDLERS.put(NonTransientDataAccessException.class, runtimeException -> new ErrorInfo(HttpStatus.SC_BAD_REQUEST, 4002,
-                "{\"Exception\": %s}".formatted(runtimeException.getMessage())));
+        EXCEPTION_HANDLERS.put(NonTransientDataAccessException.class, runtimeException -> new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR,
+                4002, "{\"Exception\": %s}".formatted(runtimeException.getMessage())));
         EXCEPTION_HANDLERS.put(DEFAULT_ERROR_HANDLER.getKey(), DEFAULT_ERROR_HANDLER.getValue());
     }
 
