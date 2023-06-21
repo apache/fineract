@@ -328,7 +328,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name",
                     "Loan product with name `" + name + "` already exists", "name", name, realCause);
-        } else if (realCause.getMessage().contains("'unq_short_name'")) {
+        } else if (realCause.getMessage().contains("'unq_short_name'") || containsDuplicateShortnameErrorForPostgreSQL(realCause)
+                || containsDuplicateShortnameErrorForMySQL(realCause)) {
 
             final String shortName = command.stringValueOfParameterNamed("shortName");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.short.name",
@@ -341,6 +342,14 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         logAsErrorUnexpectedDataIntegrityException(dve);
         throw new PlatformDataIntegrityException("error.msg.product.loan.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.", realCause);
+    }
+
+    private static boolean containsDuplicateShortnameErrorForPostgreSQL(Throwable realCause) {
+        return realCause.getMessage().contains("m_product_loan_short_name_key");
+    }
+
+    private static boolean containsDuplicateShortnameErrorForMySQL(Throwable realCause) {
+        return (realCause.getMessage().contains("short_name") && realCause.getMessage().toLowerCase().contains("duplicate"));
     }
 
     private void validateInputDates(final JsonCommand command) {
