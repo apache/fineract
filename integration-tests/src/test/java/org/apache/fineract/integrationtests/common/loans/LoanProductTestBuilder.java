@@ -75,7 +75,7 @@ public class LoanProductTestBuilder {
     private String inMultiplesOf = "0";
 
     private String nameOfLoanProduct = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-    private final String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private String shortName = Utils.uniqueRandomStringGenerator("", 4);
     private String principal = "10000.00";
     private String numberOfRepayments = "5";
     private String repaymentFrequency = MONTHS;
@@ -308,6 +308,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withPrincipal(final String principal) {
         this.principal = principal;
+        return this;
+    }
+
+    public LoanProductTestBuilder withShortName(final String shortName) {
+        this.shortName = shortName;
         return this;
     }
 
