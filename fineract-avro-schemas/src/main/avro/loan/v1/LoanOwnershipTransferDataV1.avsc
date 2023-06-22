@@ -5,7 +5,7 @@
     "fields": [
         {
             "name": "loanId",
-            "type": ["long"]
+            "type": "long"
         },
         {
             "default": null,
