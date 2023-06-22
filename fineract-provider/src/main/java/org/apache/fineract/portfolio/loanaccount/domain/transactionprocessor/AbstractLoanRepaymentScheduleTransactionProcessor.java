@@ -189,7 +189,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
                                 newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
                     } else {
-                        createNewTransactionIfNecessary(loanTransaction, newLoanTransaction, currency, changedTransactionDetail);
+                        createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
                     }
                 }
 
@@ -204,11 +204,37 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             } else if (loanTransaction.isChargeback()) {
                 recalculateCreditTransaction(changedTransactionDetail, loanTransaction, currency, installments, transactionsToBeProcessed);
                 reprocessChargebackTransactionRelation(changedTransactionDetail, transactionsToBeProcessed);
+            } else if (loanTransaction.isChargeOff()) {
+                recalculateChargeOffTransaction(changedTransactionDetail, loanTransaction, currency, installments);
             }
         }
         reprocessInstallments(installments, currency);
 
         return changedTransactionDetail;
+    }
+
+    private void recalculateChargeOffTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
+            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments) {
+        final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+        newLoanTransaction.resetDerivedComponents();
+        // determine how much is outstanding total and breakdown for principal, interest and charges
+        Money principalPortion = Money.zero(currency);
+        Money interestPortion = Money.zero(currency);
+        Money feeChargesPortion = Money.zero(currency);
+        Money penaltychargesPortion = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
+            if (currentInstallment.isNotFullyPaidOff()) {
+                principalPortion = principalPortion.plus(currentInstallment.getPrincipalOutstanding(currency));
+                interestPortion = interestPortion.plus(currentInstallment.getInterestOutstanding(currency));
+                feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesOutstanding(currency));
+                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.getPenaltyChargesCharged(currency));
+            }
+        }
+
+        newLoanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
+        if (!LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
+            createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
+        }
     }
 
     private void reprocessChargebackTransactionRelation(ChangedTransactionDetail changedTransactionDetail,
@@ -260,7 +286,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         List<LoanTransaction> mergedList = getMergedTransactionList(transactionsToBeProcessed, changedTransactionDetail);
         Money overpaidAmount = calculateOverpaidAmount(loanTransaction, mergedList, installments, currency);
         processCreditTransaction(newLoanTransaction, overpaidAmount, currency, installments);
-        createNewTransactionIfNecessary(loanTransaction, newLoanTransaction, currency, changedTransactionDetail);
+        if (!LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
+            createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
+        }
     }
 
     private List<LoanTransaction> getMergedTransactionList(List<LoanTransaction> transactionList,
@@ -270,17 +298,16 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return mergedList;
     }
 
-    private void createNewTransactionIfNecessary(LoanTransaction loanTransaction, LoanTransaction newLoanTransaction,
-            MonetaryCurrency currency, ChangedTransactionDetail changedTransactionDetail) {
-        if (!LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
-            loanTransaction.reverse();
-            loanTransaction.updateExternalId(null);
-            newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
-            // Adding Replayed relation from newly created transaction to reversed transaction
-            newLoanTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(newLoanTransaction,
-                    loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
-            changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), newLoanTransaction);
-        }
+    private void createNewTransaction(LoanTransaction loanTransaction, LoanTransaction newLoanTransaction,
+            ChangedTransactionDetail changedTransactionDetail) {
+        loanTransaction.reverse();
+        loanTransaction.updateExternalId(null);
+        newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
+        // Adding Replayed relation from newly created transaction to reversed transaction
+        newLoanTransaction.getLoanTransactionRelations().add(
+                LoanTransactionRelation.linkToTransaction(newLoanTransaction, loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+        changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), newLoanTransaction);
+
     }
 
     private Money calculateOverpaidAmount(LoanTransaction loanTransaction, List<LoanTransaction> transactions,

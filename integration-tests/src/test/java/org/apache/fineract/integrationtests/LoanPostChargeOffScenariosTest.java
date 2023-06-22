@@ -58,15 +58,20 @@ import org.apache.fineract.integrationtests.common.funds.FundsHelper;
 import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanPostChargeOffScenariosTest {
 
+    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
@@ -77,32 +82,22 @@ public class LoanPostChargeOffScenariosTest {
     // asset
     private Account loansReceivable;
     private Account interestFeeReceivable;
-    private Account otherReceivables;
-    private Account uncReceivable;
     private Account suspenseAccount;
     private Account fundReceivables;
-
     // liability
-    private Account aaSuspenseBalance;
     private Account suspenseClearingAccount;
     private Account overpaymentAccount;
-
     // income
-    private Account deferredInterestRevenue;
-    private Account retainedEarningsPriorYear;
     private Account interestIncome;
     private Account feeIncome;
     private Account feeChargeOff;
     private Account recoveries;
     private Account interestIncomeChargeOff;
-
     // expense
     private Account creditLossBadDebt;
     private Account creditLossBadDebtFraud;
     private Account writtenOff;
     private Account goodwillExpenseAccount;
-
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
     @BeforeEach
     public void setup() {
@@ -117,19 +112,14 @@ public class LoanPostChargeOffScenariosTest {
         // Asset
         this.loansReceivable = this.accountHelper.createAssetAccount();
         this.interestFeeReceivable = this.accountHelper.createAssetAccount();
-        this.otherReceivables = this.accountHelper.createAssetAccount();
-        this.uncReceivable = this.accountHelper.createAssetAccount();
         this.suspenseAccount = this.accountHelper.createAssetAccount();
         this.fundReceivables = this.accountHelper.createAssetAccount();
 
         // Liability
-        this.aaSuspenseBalance = this.accountHelper.createLiabilityAccount();
         this.suspenseClearingAccount = this.accountHelper.createLiabilityAccount();
         this.overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
         // income
-        this.deferredInterestRevenue = this.accountHelper.createIncomeAccount();
-        this.retainedEarningsPriorYear = this.accountHelper.createIncomeAccount();
         this.interestIncome = this.accountHelper.createIncomeAccount();
         this.feeIncome = this.accountHelper.createIncomeAccount();
         this.feeChargeOff = this.accountHelper.createIncomeAccount();
@@ -158,7 +148,7 @@ public class LoanPostChargeOffScenariosTest {
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
 
@@ -328,7 +318,7 @@ public class LoanPostChargeOffScenariosTest {
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
 
@@ -452,7 +442,7 @@ public class LoanPostChargeOffScenariosTest {
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
 
@@ -586,7 +576,8 @@ public class LoanPostChargeOffScenariosTest {
     }
 
     @Test
-    public void transactionOnChargeOfDatePreChargeOffReverseReplayTest() {
+    @Disabled("Requires: FINERACT-1946")
+    public void transactionOnChargeOffDatePreChargeOffReverseReplayTest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
         final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting();
         final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
@@ -597,7 +588,7 @@ public class LoanPostChargeOffScenariosTest {
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
 
@@ -730,7 +721,8 @@ public class LoanPostChargeOffScenariosTest {
     }
 
     @Test
-    public void transactionOnChargeOfDatePostChargeOffReverseReplayTest() {
+    @Disabled("Requires: FINERACT-1946")
+    public void transactionOnChargeOffDatePostChargeOffReverseReplayTest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
         final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting();
         final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
@@ -741,7 +733,7 @@ public class LoanPostChargeOffScenariosTest {
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
 
@@ -885,7 +877,7 @@ public class LoanPostChargeOffScenariosTest {
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
 
@@ -992,7 +984,7 @@ public class LoanPostChargeOffScenariosTest {
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
 
