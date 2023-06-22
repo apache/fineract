@@ -47,8 +47,12 @@ public interface ExternalAssetOwnerTransferRepository
     @Query("select m.ownerTransfer.owner from ExternalAssetOwnerTransferLoanMapping m where m.loanId = :loanId")
     Optional<ExternalAssetOwner> findActiveOwnerByLoanId(@Param("loanId") Long loanId);
 
-    @Query("SELECT t FROM ExternalAssetOwnerTransfer t WHERE t.loanId = :loanId AND t.effectiveDateTo > :effectiveDate")
-    List<ExternalAssetOwnerTransfer> findEffectiveTransfers(@Param("loanId") Long loanId, @Param("effectiveDate") LocalDate effectiveDate);
+    @Query("SELECT t FROM ExternalAssetOwnerTransfer t WHERE t.loanId = :loanId AND t.effectiveDateTo > :effectiveDate order by t.id desc")
+    List<ExternalAssetOwnerTransfer> findEffectiveTransfersOrderByIdDesc(@Param("loanId") Long loanId,
+            @Param("effectiveDate") LocalDate effectiveDate);
 
     Optional<ExternalAssetOwnerTransfer> findFirstByExternalIdOrderByIdAsc(ExternalId externalTransferId);
+
+    @Query("select e.id from ExternalAssetOwnerTransfer e where e.externalId = :externalTransferId")
+    Optional<Long> findLastByExternalIdOrderByIdDesc(@Param("externalTransferId") ExternalId externalTransferId);
 }

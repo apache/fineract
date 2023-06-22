@@ -38,4 +38,6 @@ public interface ExternalAssetOwnersReadService {
     ExternalOwnerJournalEntryData retrieveJournalEntriesOfOwner(String ownerExternalId, Integer offset, Integer limit);
 
     ExternalTransferData retrieveFirstTransferByExternalId(ExternalId externalTransferId);
+
+    Long retrieveLastTransferIdByExternalId(ExternalId externalTransferId);
 }

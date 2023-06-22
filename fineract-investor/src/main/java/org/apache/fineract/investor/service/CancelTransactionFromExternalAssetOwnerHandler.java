@@ -18,15 +18,22 @@
  */
 package org.apache.fineract.investor.service;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.annotation.CommandType;
+import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.stereotype.Service;
 
-public interface ExternalAssetOwnersWriteService {
+@RequiredArgsConstructor
+@Service
+@CommandType(entity = "LOAN", action = "CANCEL")
+public class CancelTransactionFromExternalAssetOwnerHandler implements NewCommandSourceHandler {
 
-    CommandProcessingResult saleLoanByLoanId(JsonCommand command);
+    private final ExternalAssetOwnersWriteService externalAssetOwnersWriteService;
 
-    CommandProcessingResult buybackLoanByLoanId(JsonCommand command);
-
-    CommandProcessingResult cancelTransactionById(JsonCommand command);
-
+    @Override
+    public CommandProcessingResult processCommand(JsonCommand command) {
+        return externalAssetOwnersWriteService.cancelTransactionById(command);
+    }
 }

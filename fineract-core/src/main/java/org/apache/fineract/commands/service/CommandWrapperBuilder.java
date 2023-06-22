@@ -3638,4 +3638,12 @@ public class CommandWrapperBuilder {
         this.href = "/external-asset-owners/transfers/loans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder cancelTransactionByIdToExternalAssetOwner(final Long id) {
+        this.actionName = "CANCEL";
+        this.entityName = "ASSET_OWNER_TRANSACTION";
+        this.entityId = id;
+        this.href = "/external-asset-owners/transfers/" + id;
+        return this;
+    }
 }
