@@ -59,9 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
@@ -3368,7 +3366,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         List<LoanTransaction> trans = getLoanTransactions();
         for (final LoanTransaction transaction : trans) {
-            if (transaction.isNotReversed() && !(transaction.isDisbursement() || transaction.isNonMonetaryTransaction())) {
+            if (transaction.isNotReversed()
+                    && (transaction.isChargeOff() || !(transaction.isDisbursement() || transaction.isNonMonetaryTransaction()))) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -4486,20 +4485,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, boolean isAccountTransfer) {
 
         final List<Map<String, Object>> accountingBridgeData = new ArrayList<>();
-
-        // get map before charge-off
         final List<Map<String, Object>> newLoanTransactionsBeforeChargeOff = new ArrayList<>();
-        final Map<String, Object> accountingBridgeDataBeforeChargeOff = getAccountingMapForChargeOffDateCriteria(currencyCode,
-                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, newLoanTransactionsBeforeChargeOff, true);
-
-        // get map after charge-off
         final List<Map<String, Object>> newLoanTransactionsAfterChargeOff = new ArrayList<>();
-        final Map<String, Object> accountingBridgeDataAfterChargeOff = getAccountingMapForChargeOffDateCriteria(currencyCode,
-                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, newLoanTransactionsAfterChargeOff, false);
+        // get map before charge-off
+        final Map<String, Object> accountingBridgeDataBeforeChargeOff = buildAccountingMapForChargeOffDateCriteria(currencyCode,
+                isAccountTransfer, true);
+        // get map after charge-off
+        final Map<String, Object> accountingBridgeDataAfterChargeOff = buildAccountingMapForChargeOffDateCriteria(currencyCode,
+                isAccountTransfer, false);
 
-        // get map onCharge off date
-        getAccountingMapDataOnChargeOffDate(currencyCode, existingTransactionIds, existingReversedTransactionIds,
-                newLoanTransactionsBeforeChargeOff, newLoanTransactionsAfterChargeOff);
+        // split the transactions according charge-off date
+        classifyTransactionsBasedOnChargeOffDate(newLoanTransactionsBeforeChargeOff, newLoanTransactionsAfterChargeOff,
+                existingTransactionIds, existingReversedTransactionIds, currencyCode);
 
         accountingBridgeDataBeforeChargeOff.put("newLoanTransactions", newLoanTransactionsBeforeChargeOff);
         accountingBridgeData.add(accountingBridgeDataBeforeChargeOff);
@@ -4508,6 +4505,21 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         accountingBridgeData.add(accountingBridgeDataAfterChargeOff);
 
         return accountingBridgeData;
+    }
+
+    private void classifyTransactionsBasedOnChargeOffDate(List<Map<String, Object>> newLoanTransactionsBeforeChargeOff,
+            List<Map<String, Object>> newLoanTransactionsAfterChargeOff, List<Long> existingTransactionIds,
+            List<Long> existingReversedTransactionIds, String currencyCode) {
+        // Before
+        filterTransactionsByChargeOffDate(newLoanTransactionsBeforeChargeOff, currencyCode, existingTransactionIds,
+                existingReversedTransactionIds, transaction -> transaction.getTransactionDate().isBefore(getChargedOffOnDate()));
+        // On
+        filterTransactionsByChargeOffDate(newLoanTransactionsBeforeChargeOff, newLoanTransactionsAfterChargeOff, currencyCode,
+                existingTransactionIds, existingReversedTransactionIds,
+                transaction -> transaction.getTransactionDate().isEqual(getChargedOffOnDate()));
+        // After
+        filterTransactionsByChargeOffDate(newLoanTransactionsAfterChargeOff, currencyCode, existingTransactionIds,
+                existingReversedTransactionIds, transaction -> transaction.getTransactionDate().isAfter(getChargedOffOnDate()));
     }
 
     private Map<String, Object> getAccountingBridgeDataGenericAttributes(final String currencyCode, boolean isAccountTransfer) {
@@ -4525,8 +4537,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return accountingBridgeDataGenericAttributes;
     }
 
-    private Map<String, Object> getAccountingMapForChargeOffDateCriteria(final String currencyCode, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds, boolean isAccountTransfer, List<Map<String, Object>> newLoanTransactions,
+    private Map<String, Object> buildAccountingMapForChargeOffDateCriteria(final String currencyCode, boolean isAccountTransfer,
             boolean isBeforeChargeOffDate) {
         final Map<String, Object> accountingBridgeDataChargeOff = new LinkedHashMap<>(
                 getAccountingBridgeDataGenericAttributes(currencyCode, isAccountTransfer));
@@ -4537,124 +4548,41 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             accountingBridgeDataChargeOff.put("isChargeOff", isChargedOff());
             accountingBridgeDataChargeOff.put("isFraud", isFraud());
         }
-        Predicate<LoanTransaction> chargeOffDateCriteria = isBeforeChargeOffDate
-                ? transaction -> transaction.getTransactionDate().isBefore(getChargedOffOnDate())
-                : transaction -> transaction.getTransactionDate().isAfter(getChargedOffOnDate());
-        getTransactionsForAccountingBridgeData(currencyCode, existingTransactionIds, existingReversedTransactionIds, newLoanTransactions,
-                chargeOffDateCriteria);
         return accountingBridgeDataChargeOff;
     }
 
-    private void getAccountingMapDataOnChargeOffDate(String currencyCode, List<Long> existingTransactionIds,
-            List<Long> existingReversedTransactionIds, List<Map<String, Object>> newLoanTransactionsBeforeChargeOff,
-            List<Map<String, Object>> newLoanTransactionsAfterChargeOff) {
-        Predicate<LoanTransaction> isOnChargeOff = transaction -> transaction.getTransactionDate().isEqual(getChargedOffOnDate());
-        List<LoanTransaction> transactionsOnChargeOffDate = this.loanTransactions.stream().filter(isOnChargeOff)
-                .collect(Collectors.toList());
-        /**
-         *
-         * TODO: Modify logic to retrieve correct charge-off transaction once reverse replay of charge-off is
-         * implemented
-         */
-        LoanTransaction chargeOffTransaction = this.loanTransactions.stream().filter(LoanTransaction::isChargeOff).findFirst().get();
-        for (final LoanTransaction transaction : transactionsOnChargeOffDate) {
-            checkAndAddReversedTransactionOnChargeOffDate(currencyCode, transaction, existingTransactionIds, existingReversedTransactionIds,
-                    newLoanTransactionsBeforeChargeOff, newLoanTransactionsAfterChargeOff, chargeOffTransaction);
-            checkAndAddNewTransactionOnChargeOffDate(currencyCode, transaction, existingTransactionIds, newLoanTransactionsBeforeChargeOff,
-                    newLoanTransactionsAfterChargeOff, chargeOffTransaction);
-            checkAndAddChargeOffTransaction(currencyCode, transaction, existingTransactionIds, newLoanTransactionsAfterChargeOff);
-        }
-    }
-
-    private void checkAndAddReversedTransactionOnChargeOffDate(String currencyCode, LoanTransaction transaction,
-            List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds,
-            List<Map<String, Object>> newLoanTransactionsBeforeChargeOff, List<Map<String, Object>> newLoanTransactionsAfterChargeOff,
-            LoanTransaction chargeOffTransaction) {
-        if (!transaction.isChargeOff()) {
-            if (transaction.isReversed() && existingTransactionIds.contains(transaction.getId())
-                    && !existingReversedTransactionIds.contains(transaction.getId())) {
-                compareWithChargeOffIdAndAddTransactionForAccountingData(currencyCode, newLoanTransactionsBeforeChargeOff,
-                        newLoanTransactionsAfterChargeOff, transaction, chargeOffTransaction.getId());
-
-            }
-        }
-    }
-
-    private void checkAndAddReverseReplayedTransactionOnChargeOffDate(String currencyCode, LoanTransaction transaction,
-            List<Map<String, Object>> newLoanTransactionsBeforeChargeOff, List<Map<String, Object>> newLoanTransactionsAfterChargeOff,
-            LoanTransaction chargeOffTransaction) {
-        Predicate<LoanTransactionRelation> isReplayed = transactionRelation -> LoanTransactionRelationTypeEnum.REPLAYED
-                .equals(transactionRelation.getRelationType());
-        List<LoanTransactionRelation> replayedTransactionRelations = transaction.getLoanTransactionRelations().stream().filter(isReplayed)
-                .sorted(Comparator.comparing(LoanTransactionRelation::getToTransaction, Comparator.comparingLong(LoanTransaction::getId)))
-                .toList();
-        if (!replayedTransactionRelations.isEmpty()) {
-            // Transaction Id for first reversed transaction
-            Long transactionIdForReversedTransaction = replayedTransactionRelations.get(0).getToTransaction().getId();
-            if (transactionIdForReversedTransaction > chargeOffTransaction.getId()) {
-                newLoanTransactionsAfterChargeOff.add(transaction.toMapData(currencyCode));
-            } else {
-                newLoanTransactionsBeforeChargeOff.add(transaction.toMapData(currencyCode));
-            }
-        } else {
-            // new transaction
-            compareWithChargeOffIdAndAddTransactionForAccountingData(currencyCode, newLoanTransactionsBeforeChargeOff,
-                    newLoanTransactionsAfterChargeOff, transaction, chargeOffTransaction.getId());
-        }
-    }
-
-    private void checkAndAddNewTransactionOnChargeOffDate(String currencyCode, LoanTransaction transaction,
-            List<Long> existingTransactionIds, List<Map<String, Object>> newLoanTransactionsBeforeChargeOff,
-            List<Map<String, Object>> newLoanTransactionsAfterChargeOff, LoanTransaction chargeOffTransaction) {
-        if (!transaction.isChargeOff()) {
-            if (!existingTransactionIds.contains(transaction.getId())) {
-                if (!transaction.getLoanTransactionRelations().isEmpty()) {
-                    checkAndAddReverseReplayedTransactionOnChargeOffDate(currencyCode, transaction, newLoanTransactionsBeforeChargeOff,
-                            newLoanTransactionsAfterChargeOff, chargeOffTransaction);
-                } else {
-                    // new transaction
-                    compareWithChargeOffIdAndAddTransactionForAccountingData(currencyCode, newLoanTransactionsBeforeChargeOff,
-                            newLoanTransactionsAfterChargeOff, transaction, chargeOffTransaction.getId());
-                }
-            }
-        }
-    }
-
-    private void checkAndAddChargeOffTransaction(String currencyCode, LoanTransaction transaction, List<Long> existingTransactionIds,
-            List<Map<String, Object>> newLoanTransactionsAfterChargeOff) {
-        if (transaction.isChargeOff()) {
-            /**
-             *
-             * TODO: Modify logic for reverse replay of charge-off
-             */
-            if (!existingTransactionIds.contains(transaction.getId())) {
-                newLoanTransactionsAfterChargeOff.add(transaction.toMapData(currencyCode));
-            }
-        }
-    }
-
-    private void compareWithChargeOffIdAndAddTransactionForAccountingData(final String currencyCode,
-            List<Map<String, Object>> newLoanTransactionsBeforeChargeOff, List<Map<String, Object>> newLoanTransactionsAfterChargeOff,
-            LoanTransaction transaction, Long chargeOffTransactionId) {
-        if (transaction.getId() > chargeOffTransactionId) {
-            newLoanTransactionsAfterChargeOff.add(transaction.toMapData(currencyCode));
-        } else {
-            newLoanTransactionsBeforeChargeOff.add(transaction.toMapData(currencyCode));
-        }
-    }
-
-    private void getTransactionsForAccountingBridgeData(final String currencyCode, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds, final List<Map<String, Object>> newLoanTransactions,
+    private void filterTransactionsByChargeOffDate(List<Map<String, Object>> filteredTransactions, final String currencyCode,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             Predicate<LoanTransaction> chargeOffDateCriteria) {
-        Consumer<LoanTransaction> addTransactionForAccounting = transaction -> {
-            if (transaction.isReversed() && existingTransactionIds.contains(transaction.getId())
-                    && !existingReversedTransactionIds.contains(transaction.getId())) {
-                newLoanTransactions.add(transaction.toMapData(currencyCode));
-            } else if (!existingTransactionIds.contains(transaction.getId())) {
-                newLoanTransactions.add(transaction.toMapData(currencyCode));
+        filteredTransactions.addAll(this.loanTransactions.stream().filter(chargeOffDateCriteria).filter(transaction -> {
+            boolean isExistingTransaction = existingTransactionIds.contains(transaction.getId());
+            boolean isExistingReversedTransaction = existingReversedTransactionIds.contains(transaction.getId());
+
+            if (transaction.isReversed() && isExistingTransaction && !isExistingReversedTransaction) {
+                return true;
+            } else {
+                return !isExistingTransaction;
             }
-        };
-        this.loanTransactions.stream().filter(chargeOffDateCriteria).forEach(addTransactionForAccounting);
+        }).map(transaction -> transaction.toMapData(currencyCode)).toList());
+    }
+
+    private void filterTransactionsByChargeOffDate(List<Map<String, Object>> newLoanTransactionsBeforeChargeOff,
+            List<Map<String, Object>> newLoanTransactionsAfterChargeOff, String currencyCode, List<Long> existingTransactionIds,
+            List<Long> existingReversedTransactionIds, Predicate<LoanTransaction> chargeOffDateCriteria) {
+
+        LoanTransaction chargeOffTransaction = this.loanTransactions.stream().filter(LoanTransaction::isChargeOff)
+                .filter(LoanTransaction::isNotReversed).findFirst().get();
+
+        this.loanTransactions.stream().filter(chargeOffDateCriteria).forEach(transaction -> {
+            boolean isExistingTransaction = existingTransactionIds.contains(transaction.getId());
+            boolean isExistingReversedTransaction = existingReversedTransactionIds.contains(transaction.getId());
+            List<Map<String, Object>> targetList = (transaction.getId().compareTo(chargeOffTransaction.getId()) < 0)
+                    ? newLoanTransactionsBeforeChargeOff
+                    : newLoanTransactionsAfterChargeOff;
+            if ((transaction.isReversed() && isExistingTransaction && !isExistingReversedTransaction) || !isExistingTransaction) {
+                targetList.add(transaction.toMapData(currencyCode));
+            }
+        });
     }
 
     public Map<String, Object> deriveAccountingBridgeData(final String currencyCode, final List<Long> existingTransactionIds,
