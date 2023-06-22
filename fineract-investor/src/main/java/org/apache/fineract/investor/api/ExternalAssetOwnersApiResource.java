@@ -41,6 +41,7 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
@@ -101,6 +102,35 @@ public class ExternalAssetOwnersApiResource {
         return getResult(loanId, apiRequestBodyAsJson, commandParam);
     }
 
+    @POST
+    @Path("/transfers/{id}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated") })
+    public String transferRequestWithId(@PathParam("id") final Long id,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        platformUserRightsContext.isAuthenticated();
+        return getResultByTransferId(id, commandParam);
+    }
+
+    @POST
+    @Path("/transfers/external-id/{externalId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated") })
+    public String transferRequestWithId(@PathParam("externalId") final String externalId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        platformUserRightsContext.isAuthenticated();
+        Long id = externalAssetOwnersReadService.retrieveLastTransferIdByExternalId(new ExternalId(externalId));
+        return getResultByTransferId(id, commandParam);
+    }
+
     @GET
     @Path("/transfers")
     @Produces({ MediaType.APPLICATION_JSON })
@@ -158,6 +188,18 @@ public class ExternalAssetOwnersApiResource {
         platformUserRightsContext.isAuthenticated();
         return externalAssetOwnersReadService.retrieveJournalEntriesOfOwner(ownerExternalId, offset, limit);
 
+    }
+
+    private String getResultByTransferId(Long id, String command) {
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder();
+        CommandWrapper commandRequest;
+        if (CommandParameterUtil.is(command, "cancel")) {
+            commandRequest = builder.cancelTransactionByIdToExternalAssetOwner(id).build();
+        } else {
+            throw new UnrecognizedQueryParamException("command", command);
+        }
+        CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return postApiJsonSerializerService.serialize(result);
     }
 
     private String getResult(Long loanId, String apiRequestBodyAsJson, String commandParam) {

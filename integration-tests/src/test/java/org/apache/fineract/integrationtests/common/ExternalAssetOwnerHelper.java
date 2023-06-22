@@ -24,7 +24,9 @@ import org.apache.fineract.client.models.ExternalTransferData;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PostInitiateTransferRequest;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import retrofit2.Response;
 
 public class ExternalAssetOwnerHelper extends IntegrationTest {
 
@@ -32,6 +34,16 @@ public class ExternalAssetOwnerHelper extends IntegrationTest {
 
     public PostInitiateTransferResponse initiateTransferByLoanId(Long loanId, String command, PostInitiateTransferRequest request) {
         return ok(fineract().externalAssetOwners.transferRequestWithLoanId(loanId, request, command));
+    }
+
+    public void cancelTransferByTransferExternalId(String transferExternalId) {
+        ok(fineract().externalAssetOwners.transferRequestWithId1(transferExternalId, "cancel"));
+    }
+
+    public void cancelTransferByTransferExternalIdError(String transferExternalId) {
+        Response<PostInitiateTransferResponse> response = Calls
+                .executeU(fineract().externalAssetOwners.transferRequestWithId1(transferExternalId, "cancel"));
+        assertThat(response.code()).isEqualTo(403);
     }
 
     public PageExternalTransferData retrieveTransferByTransferExternalId(String transferExternalId) {

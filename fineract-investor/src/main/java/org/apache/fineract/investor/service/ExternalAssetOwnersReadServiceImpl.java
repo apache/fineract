@@ -121,6 +121,12 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
     }
 
     @Override
+    public Long retrieveLastTransferIdByExternalId(ExternalId externalTransferId) {
+        return externalAssetOwnerTransferRepository.findLastByExternalIdOrderByIdDesc(externalTransferId)
+                .orElseThrow(() -> new ExternalAssetOwnerTransferNotFoundException(externalTransferId));
+    }
+
+    @Override
     public ExternalTransferData retrieveTransferData(Long transferId) {
         return externalAssetOwnerTransferRepository.findById(transferId).map(mapper::mapTransfer)
                 .orElseThrow(() -> new ExternalAssetOwnerTransferNotFoundException(transferId));
