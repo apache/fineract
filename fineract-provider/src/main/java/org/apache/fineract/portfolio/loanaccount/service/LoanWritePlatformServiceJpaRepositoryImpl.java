@@ -2796,6 +2796,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     @Transactional
     public CommandProcessingResult undoChargeOff(JsonCommand command) {
+        this.loanEventApiJsonValidator.validateUndoChargeOff(command.json());
         final Long loanId = command.getLoanId();
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
@@ -2820,8 +2821,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoChargeOffBusinessEvent(chargedOffTransaction));
 
-        chargedOffTransaction.reverse();
+        // check if reversalExternalId is provided
+        final String reversalExternalId = command.stringValueOfParameterNamedAllowingNull(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);
+        final ExternalId reversalTxnExternalId = ExternalIdFactory.produce(reversalExternalId);
+
+        chargedOffTransaction.reverse(reversalTxnExternalId);
         chargedOffTransaction.manuallyAdjustedOrReversed();
+
         loan.liftChargeOff();
         loanTransactionRepository.saveAndFlush(chargedOffTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
