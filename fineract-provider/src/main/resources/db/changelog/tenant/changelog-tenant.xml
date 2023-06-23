@@ -129,4 +129,6 @@
     <include file="parts/0107_add_configuration_charges_accrual_date.xml" relativeToChangelogFile="true" />
     <include file="parts/0108_precondition_check_cob_loan_account_lock.xml" relativeToChangelogFile="true" />
     <include file="parts/0109_spring_batch_5_upgrade.xml" relativeToChangelogFile="true" />
+    <include file="parts/0110_trial_balance_summary_with_asset_owner.xml" relativeToChangelogFile="true" />
+    <include file="parts/0111_transaction_summary_with_asset_owner.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
