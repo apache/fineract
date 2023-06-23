@@ -181,6 +181,27 @@ public final class LoanEventApiJsonValidator {
         }
     }
 
+    public void validateUndoChargeOff(final String json) {
+        if (!StringUtils.isBlank(json)) {
+            final Set<String> transactionParameters = new HashSet<>(Arrays.asList(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME));
+            final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+            this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+
+            final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+            final String reversalExternalId = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME,
+                    element);
+            baseDataValidator.reset().parameter(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME).ignoreIfNull().value(reversalExternalId)
+                    .notExceedingLengthOf(100);
+
+            throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+        }
+    }
+
     public void validateTransaction(final String json) {
 
         if (StringUtils.isBlank(json)) {

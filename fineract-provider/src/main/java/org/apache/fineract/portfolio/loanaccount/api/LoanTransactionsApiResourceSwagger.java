@@ -261,6 +261,8 @@ final class LoanTransactionsApiResourceSwagger {
         public String note;
         @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
         public String externalId;
+        @Schema(example = "3f7791cf-bb10-11ec-b909-0242ac120012")
+        public String reversalExternalId;
         @Schema(example = "3")
         public Long paymentTypeId;
         @Schema(example = "acc123")
