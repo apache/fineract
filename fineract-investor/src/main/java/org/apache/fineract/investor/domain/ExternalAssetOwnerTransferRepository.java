@@ -53,6 +53,6 @@ public interface ExternalAssetOwnerTransferRepository
 
     Optional<ExternalAssetOwnerTransfer> findFirstByExternalIdOrderByIdAsc(ExternalId externalTransferId);
 
-    @Query("select e.id from ExternalAssetOwnerTransfer e where e.externalId = :externalTransferId")
+    @Query("select max(e.id) from ExternalAssetOwnerTransfer e where e.externalId = :externalTransferId")
     Optional<Long> findLastByExternalIdOrderByIdDesc(@Param("externalTransferId") ExternalId externalTransferId);
 }
