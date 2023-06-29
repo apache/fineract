@@ -21,13 +21,14 @@ package org.apache.fineract.cob.loan;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.cob.data.LoanCOBParameter;
+import org.apache.fineract.cob.data.LoanCOBPartition;
 import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.springframework.data.repository.query.Param;
 
 public interface RetrieveLoanIdService {
 
-    LoanCOBParameter retrieveMinAndMaxLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate, boolean isCatchUp);
+    List<LoanCOBPartition> retrieveLoanCOBPartitions(Long numberOfDays, LocalDate businessDate, boolean isCatchUp, int partitionSize);
 
     List<LoanIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDateOrNull(LocalDate businessDate, List<Long> loanIds);
 

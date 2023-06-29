@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.LoanIdAndExternalIdAndStatus;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
@@ -76,12 +75,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     String FIND_NON_CLOSED_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber and loan.loanStatus in (100,200,300,303,304)";
 
     String FIND_ALL_NON_CLOSED = "select loan.id from Loan loan where loan.loanStatus in (100,200,300,303,304)";
-
-    String FIND_MIN_AND_MAX_NON_CLOSED_LOAN_IDS_BY_LAST_CLOSED_BUSINESS_DATE = "select new org.apache.fineract.cob.data.LoanCOBParameter(min(loan.id), max(loan.id)) from Loan loan where loan.loanStatus in (100,200,300,303,304) "
-            + "and (:businessDate = loan.lastClosedBusinessDate or loan.lastClosedBusinessDate is NULL)";
-
-    String FIND_MIN_AND_MAX_NON_CLOSED_AND_NON_NULL_LOAN_IDS_BY_LAST_CLOSED_BUSINESS_DATE = "select new org.apache.fineract.cob.data.LoanCOBParameter(min(loan.id), max(loan.id)) from Loan loan where loan.loanStatus in (100,200,300,303,304) "
-            + "and :businessDate = loan.lastClosedBusinessDate";
 
     String FIND_NON_CLOSED_LOAN_THAT_BELONGS_TO_CLIENT = "select loan from Loan loan where loan.id = :loanId and loan.loanStatus = 300 and loan.client.id = :clientId";
 
@@ -210,12 +203,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query(FIND_ID_BY_EXTERNAL_ID)
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);
-
-    @Query(FIND_MIN_AND_MAX_NON_CLOSED_LOAN_IDS_BY_LAST_CLOSED_BUSINESS_DATE)
-    LoanCOBParameter findMinAndMaxNonClosedLoanIdsByLastClosedBusinessDate(@Param("businessDate") LocalDate businessDate);
-
-    @Query(FIND_MIN_AND_MAX_NON_CLOSED_AND_NON_NULL_LOAN_IDS_BY_LAST_CLOSED_BUSINESS_DATE)
-    LoanCOBParameter findMinAndMaxNonClosedLoanIdsByLastClosedBusinessDateNotNull(@Param("businessDate") LocalDate businessDate);
 
     @Query(FIND_ALL_NON_CLOSED_LOANS_BEHIND_BY_LOAN_IDS)
     List<LoanIdAndLastClosedBusinessDate> findAllNonClosedLoansBehindByLoanIds(@Param("cobBusinessDate") LocalDate cobBusinessDate,
