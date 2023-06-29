@@ -18,28 +18,53 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.data.LoanCOBParameter;
+import org.apache.fineract.cob.data.LoanCOBPartition;
 import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @RequiredArgsConstructor
 public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdService {
 
     private final LoanRepository loanRepository;
 
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     @Override
-    public LoanCOBParameter retrieveMinAndMaxLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate, boolean isCatchUp) {
+    public List<LoanCOBPartition> retrieveLoanCOBPartitions(Long numberOfDays, LocalDate businessDate, boolean isCatchUp,
+            int partitionSize) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("select min(id) as min, max(id) as max, page, count(id) as count from ");
+        sql.append("  (select floor(((row_number() over(order by id))-1) / :pageSize) as page, t.* from ");
+        sql.append("      (select id from m_loan where loan_status_id in (:statusIds) and ");
         if (isCatchUp) {
-            return loanRepository.findMinAndMaxNonClosedLoanIdsByLastClosedBusinessDateNotNull(businessDate.minusDays(numberOfDays));
+            sql.append("last_closed_business_date = :businessDate ");
         } else {
-            return loanRepository.findMinAndMaxNonClosedLoanIdsByLastClosedBusinessDate(businessDate.minusDays(numberOfDays));
+            sql.append("(last_closed_business_date = :businessDate or last_closed_business_date is null) ");
         }
+        sql.append("order by id) t) t2 ");
+        sql.append("group by page ");
+        sql.append("order by page");
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("pageSize", partitionSize);
+        parameters.addValue("statusIds", List.of(100, 200, 300, 303, 304));
+        parameters.addValue("businessDate", businessDate.minusDays(numberOfDays));
+        return namedParameterJdbcTemplate.query(sql.toString(), parameters, RetrieveAllNonClosedLoanIdServiceImpl::mapRow);
+    }
+
+    private static LoanCOBPartition mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return new LoanCOBPartition(rs.getLong("min"), rs.getLong("max"), rs.getLong("page"), rs.getLong("count"));
     }
 
     @Override

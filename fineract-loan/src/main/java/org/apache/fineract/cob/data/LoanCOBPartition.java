@@ -18,19 +18,15 @@
  */
 package org.apache.fineract.cob.data;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Data;
 
+@Data
 @AllArgsConstructor
-@Getter
-@NoArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-@EqualsAndHashCode
-public class LoanCOBParameter {
+public class LoanCOBPartition {
 
-    private Long minLoanId;
-    private Long maxLoanId;
+    private Long minId;
+    private Long maxId;
+    private Long pageNo;
+    private Long count;
 }
