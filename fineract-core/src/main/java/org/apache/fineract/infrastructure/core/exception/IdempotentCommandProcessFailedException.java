@@ -34,6 +34,10 @@ public class IdempotentCommandProcessFailedException extends AbstractIdempotentC
     }
 
     public Integer getStatusCode() {
+        // If the database inconsistent we return http 500 instead of null pointer exception
+        if (statusCode == null) {
+            return 500;
+        }
         return statusCode;
     }
 }
