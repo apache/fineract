@@ -433,6 +433,7 @@ configure(project.fineractJavaProjects) {
 
     tasks.withType(JavaCompile) {
         options.errorprone {
+            enabled = project.gradle.startParameter.taskNames.contains('build') || project.gradle.startParameter.taskNames.contains('check')
             disableWarningsInGeneratedCode = true
             excludedPaths = ".*/build/.*"
             disable(
@@ -531,7 +532,7 @@ configure(project.fineractJavaProjects) {
         }
     }
 
-    compileJava {
+    check {
         dependsOn(rat, licenseMain, licenseTest)
     }
 
