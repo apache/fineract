@@ -24,7 +24,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPoster;
+import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPosterTask;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -50,7 +50,7 @@ public class PostInterestForSavingConfig {
     @Autowired
     private ConfigurationDomainService configurationDomainService;
     @Autowired
-    private SavingsSchedularInterestPoster savingsSchedularInterestPoster;
+    private SavingsSchedularInterestPosterTask savingsSchedularInterestPosterTask;
     @Autowired
     private SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     @Autowired

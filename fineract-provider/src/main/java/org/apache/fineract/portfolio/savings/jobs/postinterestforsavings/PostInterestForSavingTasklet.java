@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPoster;
+import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPosterTask;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -138,13 +138,13 @@ public class PostInterestForSavingTasklet implements Tasklet {
 
         for (long i = 0; i < loopCount; i++) {
             List<SavingsAccountData> subList = safeSubList(savingsAccounts, fromIndex, toIndex);
-            SavingsSchedularInterestPoster savingsSchedularInterestPoster = applicationContext
-                    .getBean(SavingsSchedularInterestPoster.class);
-            savingsSchedularInterestPoster.setSavingAccounts(subList);
-            savingsSchedularInterestPoster.setBackdatedTxnsAllowedTill(backdatedTxnsAllowedTill);
-            savingsSchedularInterestPoster.setContext(ThreadLocalContextUtil.getContext());
+            SavingsSchedularInterestPosterTask savingsSchedularInterestPosterTask = applicationContext
+                    .getBean(SavingsSchedularInterestPosterTask.class);
+            savingsSchedularInterestPosterTask.setSavingAccounts(subList);
+            savingsSchedularInterestPosterTask.setBackdatedTxnsAllowedTill(backdatedTxnsAllowedTill);
+            savingsSchedularInterestPosterTask.setContext(ThreadLocalContextUtil.getContext());
 
-            posters.add(savingsSchedularInterestPoster);
+            posters.add(savingsSchedularInterestPosterTask);
 
             if (lastBatch) {
                 break;
