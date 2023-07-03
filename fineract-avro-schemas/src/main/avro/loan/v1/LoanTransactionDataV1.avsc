@@ -236,6 +236,14 @@
                     "items": "org.apache.fineract.avro.loan.v1.UnpaidChargeDataV1"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "reversedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
         }
     ]
 }
