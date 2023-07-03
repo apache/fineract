@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.service.tenant;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.util.List;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -46,6 +48,9 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
     @Override
     @Cacheable(value = "tenantsById")
     public FineractPlatformTenant loadTenantById(final String tenantIdentifier) {
+        if (isBlank(tenantIdentifier)) {
+            throw new IllegalArgumentException("tenantIdentifier cannot be blank");
+        }
         try {
             final TenantMapper rm = new TenantMapper(false);
             final String sql = "select " + rm.schema() + " where t.identifier = ?";

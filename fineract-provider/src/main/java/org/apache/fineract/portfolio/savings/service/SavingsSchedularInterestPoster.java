@@ -27,14 +27,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
-import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
@@ -47,32 +44,26 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * @author manoj
- */
-
 @Slf4j
 @RequiredArgsConstructor
 @Setter
 @Component
 @Scope("prototype")
-public class SavingsSchedularInterestPoster implements Callable<Void> {
+public class SavingsSchedularInterestPoster {
 
     private static final String SAVINGS_TRANSACTION_IDENTIFIER = "S";
 
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    private final List<SavingsAccountData> savingsAccountDataList = new ArrayList<>();
     private final JdbcTemplate jdbcTemplate;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final PlatformSecurityContext platformSecurityContext;
+
+    private final List<SavingsAccountData> savingsAccountDataList = new ArrayList<>();
     private Collection<SavingsAccountData> savingAccounts;
-    private FineractContext context;
     private boolean backdatedTxnsAllowedTill;
 
-    @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
-    public Void call() throws org.apache.fineract.infrastructure.jobs.exception.JobExecutionException {
-        ThreadLocalContextUtil.init(this.context);
+    public void postInterest() throws JobExecutionException {
 
         if (!savingAccounts.isEmpty()) {
             List<Throwable> errors = new ArrayList<>();
@@ -103,8 +94,6 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                 throw new JobExecutionException(errors);
             }
         }
-
-        return null;
     }
 
     private void batchUpdateJournalEntries(final List<SavingsAccountData> savingsAccountDataList,

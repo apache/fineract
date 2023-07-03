@@ -26,6 +26,6 @@ jobs:
       - name: Wait for stack to come up
         run: sleep 120
       - name: Check health
-        run: curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+        run: curl -f -k --retry 10 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
       - name: Check info
         run: (( $(curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))

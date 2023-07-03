@@ -18,34 +18,25 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
 import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class SchedulerTriggerListener implements TriggerListener {
 
-    private final SchedularWritePlatformService schedularService;
     private final TenantDetailsService tenantDetailsService;
-
-    private final BusinessDateReadPlatformService businessDateReadPlatformService;
+    private final SchedulerVetoer schedulerVetoer;
 
     @Override
     public String getName() {
@@ -58,27 +49,12 @@ public class SchedulerTriggerListener implements TriggerListener {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean vetoJobExecution(final Trigger trigger, final JobExecutionContext context) {
-        final String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
-        final FineractPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
+        String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
+        FineractPlatformTenant tenant = tenantDetailsService.loadTenantById(tenantIdentifier);
         ThreadLocalContextUtil.setTenant(tenant);
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
-        HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
-        ThreadLocalContextUtil.setBusinessDates(businessDates);
-        final JobKey key = trigger.getJobKey();
-        final String jobKey = key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
-        String triggerType = SchedulerServiceConstants.TRIGGER_TYPE_CRON;
-        if (context.getMergedJobDataMap().containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
-            triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
-        }
-        boolean vetoJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
-        if (vetoJob) {
-            log.warn(
-                    "vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",
-                    tenantIdentifier, jobKey, triggerType, trigger, context);
-        }
-        return vetoJob;
+        return schedulerVetoer.veto(trigger, context);
     }
 
     @Override
