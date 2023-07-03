@@ -74,7 +74,7 @@ plugins {
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.12' apply false
     id 'org.springframework.boot' version '3.1.1' apply false
     id 'net.ltgt.errorprone' version '3.1.0' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.14' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.11' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
