@@ -42,6 +42,31 @@
     "description": "EclipseLink 4.0.1 has a bug which has been fixed but haven't been released. Try 4.0.2. https://github.com/eclipse-ee4j/eclipselink/issues/1832"
   },
   {
+    "matchPackageNames": ["com.google.guava:guava"],
+    "allowedVersions": "<=32.0.0-jre",
+    "description": "Guava 31.1.1-jre has an issue that IntelliJ can't import the project anymore. Unsure why it's happening."
+  },
+  {
+    "matchPackageNames": ["io.swagger.core.v3:swagger-annotations-jakarta"],
+    "allowedVersions": "<=2.2.11",
+    "description": "2.2.14 version is not compatible with the org.openapi.generator Gradle plugin version 6.6.0"
+  },
+  {
+    "matchPackageNames": ["io.swagger.core.v3:swagger-jaxrs2-jakarta"],
+    "allowedVersions": "<=2.2.11",
+    "description": "2.2.14 version is not compatible with the org.openapi.generator Gradle plugin version 6.6.0"
+  },
+  {
+    "matchPackageNames": ["io.swagger.core.v3:swagger-core-jakarta"],
+    "allowedVersions": "<=2.2.11",
+    "description": "2.2.14 version is not compatible with the org.openapi.generator Gradle plugin version 6.6.0"
+  },
+  {
+    "matchPackageNames": ["io.swagger.core.v3.swagger-gradle-plugin"],
+    "allowedVersions": "<=2.2.11",
+    "description": "2.2.14 version is not compatible with the org.openapi.generator Gradle plugin version 6.6.0"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"

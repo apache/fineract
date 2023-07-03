@@ -51,7 +51,7 @@ dependencyManagement {
 
 
         dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.0'
-        dependency 'com.google.guava:guava:32.1.1-jre'
+        dependency 'com.google.guava:guava:32.0.0-jre'
         dependency 'com.google.code.gson:gson:2.10.1'
         dependency 'com.google.truth:truth:1.1.5'
         dependency 'com.google.truth.extensions:truth-java8-extension:1.1.5'
@@ -182,11 +182,11 @@ dependencyManagement {
             exclude 'javax.annotation:javax.annotation-api'
         }
 
-        dependency 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.14'
-        dependency ('io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.14') {
+        dependency 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.11'
+        dependency ('io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.11') {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
-        dependency ('io.swagger.core.v3:swagger-core-jakarta:2.2.14') {
+        dependency ('io.swagger.core.v3:swagger-core-jakarta:2.2.11') {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
