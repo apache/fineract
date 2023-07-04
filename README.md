@@ -307,8 +307,16 @@ INSTRUCTIONS: How to run Apache RAT (Release Audit Tool)
 
 INSTRUCTIONS: How to enable ActiveMQ
 ============
-Messaging configuration is disabled by default. If you want to enable it and register some message listeners, application needs to be started with the proper Spring profile, ie `-Dspring.profiles.active=activeMqEnabled` (or one of the other Spring ways to configure it).
+JMS based messaging is disabled by default. In `docker-compose-postgresql-activemq.yml` an example is shown where ActiveMQ is enabled. In that configuration one Spring Batch Manager instance and two Spring Batch Worker instances are created.
+Spring based events should be disabled and jms based event handling should be enabled. Furthermore, proper broker JMS URL should be configured.
 
+```
+      FINERACT_REMOTE_JOB_MESSAGE_HANDLER_JMS_ENABLED=true
+      FINERACT_REMOTE_JOB_MESSAGE_HANDLER_SPRING_EVENTS_ENABLED=false
+      FINERACT_REMOTE_JOB_MESSAGE_HANDLER_JMS_BROKER_URL=tcp://activemq:61616
+```
+
+For additional ActiveMQ related configuration please take a look to the `application.properties` where the supported configuration parameters are listed with their default values.
 
 Checkstyle and Spotless
 ============
