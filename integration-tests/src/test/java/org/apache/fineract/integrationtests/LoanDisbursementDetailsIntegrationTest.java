@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static java.lang.Double.parseDouble;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdDisbursementDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -314,6 +317,89 @@ public class LoanDisbursementDetailsIntegrationTest {
         final Double limit = 2.0;
         evaluateEqualInstallmentsForRepaymentSchedule(getLoansLoanIdResponse.getRepaymentSchedule(), limit);
         log.info("-----------MULTI DISBURSAL LOAN EQUAL INSTALLMENTS SUCCESSFULLY-------");
+    }
+
+    @Test
+    public void disburseLoanWithExceededOverAppliedAmountFails() {
+        final String operationDate = "01 January 2014";
+        final String principal = "1000";
+        final String firstDisbursedPrincipal = "900";
+        final String secondDisbursedPrincipal = "1101";
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, operationDate);
+        log.info("-----------------CLIENT CREATED WITH ID------------------- {}", clientId);
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance() //
+                .withMultiDisburse() //
+                .withDisallowExpectedDisbursements(true) //
+                .build(null);
+        log.info("Product {}", loanProductJSON);
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer loanId = applyForMultiTrancheLoanApplication(clientId.toString(), loanProductId.toString(), principal, operationDate);
+
+        log.info("-------------------LOAN CREATED WITH loanId----------------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount(operationDate, expectedDisbursementDate, principal, loanId, null);
+        log.info("-------------------MULTI DISBURSAL LOAN APPROVED SUCCESSFULLY-------");
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        this.loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount(operationDate, loanId, firstDisbursedPrincipal);
+        log.info("-------------------MULTI DISBURSAL LOAN DISBURSED SUCCESSFULLY-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount(operationDate, loanId, secondDisbursedPrincipal,
+                overAppliedAmountFailedResponseSpec());
+        log.info("-------------------MULTI DISBURSAL LOAN DISBURSEMENT FAILED-------");
+    }
+
+    @Test
+    public void disburseLoanWithExceededOverAppliedAmountSucceed() {
+        final String operationDate = "01 January 2014";
+        final String principal = "1000";
+        final String firstDisbursedPrincipal = "900";
+        final String secondDisbursedPrincipal = "1100";
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, operationDate);
+        log.info("-----------------CLIENT CREATED WITH ID------------------- {}", clientId);
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance() //
+                .withMultiDisburse() //
+                .withDisallowExpectedDisbursements(true) //
+                .build(null);
+        log.info("Product {}", loanProductJSON);
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer loanId = applyForMultiTrancheLoanApplication(clientId.toString(), loanProductId.toString(), principal, operationDate);
+
+        log.info("-------------------LOAN CREATED WITH loanId----------------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount(operationDate, expectedDisbursementDate, principal, loanId, null);
+        log.info("-------------------MULTI DISBURSAL LOAN APPROVED SUCCESSFULLY-------");
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        this.loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount(operationDate, loanId, firstDisbursedPrincipal);
+        log.info("-------------------MULTI DISBURSAL LOAN DISBURSED SUCCESSFULLY-FIRST-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount(operationDate, loanId, secondDisbursedPrincipal);
+        log.info("-------------------MULTI DISBURSAL LOAN DISBURSED SUCCESSFULLY-SECOND-------");
+
+        double disbursementPrincipalSum = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId).getDisbursementDetails()
+                .stream().map(GetLoansLoanIdDisbursementDetails::getPrincipal).mapToDouble(p -> p).sum();
+        assertEquals(parseDouble(firstDisbursedPrincipal) + parseDouble(secondDisbursedPrincipal), disbursementPrincipalSum);
     }
 
     @Test
@@ -598,5 +684,12 @@ public class LoanDisbursementDetailsIntegrationTest {
                 }
             }
         }
+    }
+
+    private ResponseSpecification overAppliedAmountFailedResponseSpec() {
+        return new ResponseSpecBuilder().expectBody("userMessageGlobalisationCode", equalTo("validation.msg.domain.rule.violation"))
+                .expectBody("errors[0].userMessageGlobalisationCode",
+                        equalTo("error.msg.loan.disbursal.amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"))
+                .expectStatusCode(403).build();
     }
 }

@@ -356,6 +356,12 @@ public class LoanTransactionHelper extends IntegrationTest {
                 getDisburseLoanAsJSON(date, transactionAmount, null, externalId), "");
     }
 
+    public Object disburseLoanWithTransactionAmount(final String date, final Integer loanID, final String transactionAmount,
+            ResponseSpecification responseSpec) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, transactionAmount, null), responseSpec);
+    }
+
     public HashMap disburseLoanWithTransactionAmount(final String date, final Integer loanID, final String transactionAmount) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, transactionAmount, null));
