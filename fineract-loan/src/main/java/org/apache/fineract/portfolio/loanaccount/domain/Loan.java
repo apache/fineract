@@ -2668,8 +2668,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (this.loanProduct().isDisallowExpectedDisbursements() && this.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
             BigDecimal maxDisbursedAmount = getOverAppliedMax();
-            if (disbursedAmount.compareTo(maxDisbursedAmount) > 0) {
-                final String errorMessage = "Loan disbursal amount can't be greater than maximum applied loan amount calculation.";
+            if (totalDisbursed.compareTo(maxDisbursedAmount) > 0) {
+                final String errorMessage = String.format(
+                        "Loan disbursal amount can't be greater than maximum applied loan amount calculation. "
+                                + "Total disbursed amount: %s  Maximum disbursal amount: %s",
+                        totalDisbursed.stripTrailingZeros().toPlainString(), maxDisbursedAmount.stripTrailingZeros().toPlainString());
                 throw new InvalidLoanStateTransitionException("disbursal",
                         "amount.can't.be.greater.than.maximum.applied.loan.amount.calculation", errorMessage, disbursedAmount,
                         maxDisbursedAmount);
