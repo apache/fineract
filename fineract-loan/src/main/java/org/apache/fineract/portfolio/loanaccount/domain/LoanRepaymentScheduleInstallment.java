@@ -410,6 +410,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money penaltyPortionOfTransaction = Money.zero(currency);
 
+        if (transactionAmountRemaining.isZero()) {
+            return penaltyPortionOfTransaction;
+        }
+
         final Money penaltyChargesDue = getPenaltyChargesOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(penaltyChargesDue)) {
             this.penaltyChargesPaid = getPenaltyChargesPaid(currency).plus(penaltyChargesDue).getAmount();
@@ -432,7 +436,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money feePortionOfTransaction = Money.zero(currency);
-
+        if (transactionAmountRemaining.isZero()) {
+            return feePortionOfTransaction;
+        }
         final Money feeChargesDue = getFeeChargesOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(feeChargesDue)) {
             this.feeChargesPaid = getFeeChargesPaid(currency).plus(feeChargesDue).getAmount();
@@ -455,7 +461,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money interestPortionOfTransaction = Money.zero(currency);
-
+        if (transactionAmountRemaining.isZero()) {
+            return interestPortionOfTransaction;
+        }
         final Money interestDue = getInterestOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
             this.interestPaid = getInterestPaid(currency).plus(interestDue).getAmount();
@@ -478,7 +486,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money principalPortionOfTransaction = Money.zero(currency);
-
+        if (transactionAmountRemaining.isZero()) {
+            return principalPortionOfTransaction;
+        }
         final Money principalDue = getPrincipalOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(principalDue)) {
             this.principalCompleted = getPrincipalCompleted(currency).plus(principalDue).getAmount();
@@ -500,7 +510,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public Money waiveInterestComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedInterestPortionOfTransaction = Money.zero(currency);
-
+        if (transactionAmountRemaining.isZero()) {
+            return waivedInterestPortionOfTransaction;
+        }
         final Money interestDue = getInterestOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
             this.interestWaived = getInterestWaived(currency).plus(interestDue).getAmount();
@@ -520,7 +532,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public Money waivePenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedPenaltyChargesPortionOfTransaction = Money.zero(currency);
-
+        if (transactionAmountRemaining.isZero()) {
+            return waivedPenaltyChargesPortionOfTransaction;
+        }
         final Money penanltiesDue = getPenaltyChargesOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(penanltiesDue)) {
             this.penaltyChargesWaived = getPenaltyChargesWaived(currency).plus(penanltiesDue).getAmount();
@@ -540,7 +554,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public Money waiveFeeChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedFeeChargesPortionOfTransaction = Money.zero(currency);
-
+        if (transactionAmountRemaining.isZero()) {
+            return waivedFeeChargesPortionOfTransaction;
+        }
         final Money feesDue = getFeeChargesOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(feesDue)) {
             this.feeChargesWaived = getFeeChargesWaived(currency).plus(feesDue).getAmount();

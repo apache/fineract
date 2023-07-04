@@ -56,15 +56,6 @@ public class DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactio
         return STRATEGY_NAME;
     }
 
-    @Override
-    protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
-            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
-
-        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
-
-        return transactionDate.isBefore(currentInstallment.getDueDate());
-    }
-
     /**
      * For early/'in advance' repayments
      */
@@ -73,8 +64,106 @@ public class DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactio
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings,
-                charges);
+        final LocalDate transactionDate = loanTransaction.getTransactionDate();
+
+        final MonetaryCurrency currency = paymentInAdvance.getCurrency();
+        Money transactionAmountRemaining = paymentInAdvance;
+        Money principalPortion = Money.zero(currency);
+        Money interestPortion = Money.zero(currency);
+        Money feeChargesPortion = Money.zero(currency);
+        Money penaltyChargesPortion = Money.zero(currency);
+
+        if (loanTransaction.isChargesWaiver()) {
+            penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(transactionDate,
+                    loanTransaction.getPenaltyChargesPortion(currency));
+            transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+
+            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate,
+                    loanTransaction.getFeeChargesPortion(currency));
+            transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+
+        } else if (loanTransaction.isInterestWaiver()) {
+            interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+
+            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+        } else if (loanTransaction.isChargePayment()) {
+            if (loanTransaction.isPenaltyPayment()) {
+                penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+            } else {
+                feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+            }
+            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+        } else {
+            boolean ignoreDueDateCheck = false;
+            boolean rerun = false;
+
+            List<LoanCharge> orderedLoanChargesByDueDate = charges.stream().filter(LoanCharge::isActive).filter(LoanCharge::isNotFullyPaid)
+                    .filter(loanCharge -> loanCharge.getEffectiveDueDate() == null
+                            || !loanCharge.getEffectiveDueDate().isAfter(transactionDate))
+                    .sorted(LoanChargeEffectiveDueDateComparator.INSTANCE).toList();
+            Money calculatedPenaltyCharge = Money.zero(currency);
+            Money calculatedFeeCharge = Money.zero(currency);
+            // Calculate the amount of due charges
+            for (LoanCharge charge : orderedLoanChargesByDueDate) {
+                if (charge.isPenaltyCharge()) {
+                    calculatedPenaltyCharge = calculatedPenaltyCharge.add(charge.getAmount(currency));
+                } else {
+                    calculatedFeeCharge = calculatedFeeCharge.add(charge.getAmount(currency));
+                }
+            }
+
+            do {
+                Money subPenaltyPortion;
+                if (!ignoreDueDateCheck) {
+                    if (calculatedPenaltyCharge.isGreaterThan(transactionAmountRemaining)) {
+                        calculatedPenaltyCharge = transactionAmountRemaining;
+                    }
+                } else {
+                    calculatedPenaltyCharge = transactionAmountRemaining;
+                }
+                subPenaltyPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, calculatedPenaltyCharge);
+                transactionAmountRemaining = transactionAmountRemaining.minus(subPenaltyPortion);
+                penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
+
+                Money subFeePortion;
+                if (!ignoreDueDateCheck) {
+                    if (calculatedFeeCharge.isGreaterThan(transactionAmountRemaining)) {
+                        calculatedFeeCharge = transactionAmountRemaining;
+                    }
+                } else {
+                    calculatedFeeCharge = transactionAmountRemaining;
+                }
+                subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, calculatedFeeCharge);
+                transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
+                feeChargesPortion = feeChargesPortion.add(subFeePortion);
+
+                Money subInterestPortion;
+                if (ignoreDueDateCheck || !transactionDate.isBefore(currentInstallment.getDueDate())) {
+                    subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
+                    transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
+                    interestPortion = interestPortion.add(subInterestPortion);
+                }
+
+                Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
+                principalPortion = principalPortion.add(subPrincipalPortion);
+                // If the transactionAmountRemaining is greater than zero, rerun the allocation without due date check
+                // to distribute the in advance portions
+                if (transactionAmountRemaining.isGreaterThanZero()) {
+                    ignoreDueDateCheck = true;
+                }
+                rerun = !rerun;
+            } while (ignoreDueDateCheck && rerun);
+            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+        }
+        if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
+                    principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
+        }
+        return transactionAmountRemaining;
     }
 
     /**
@@ -131,66 +220,22 @@ public class DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactio
             }
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         } else {
-            boolean ignoreDueDateCheck = false;
-            boolean rerun = false;
+            Money subPenaltyPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(subPenaltyPortion);
+            penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
 
-            List<LoanCharge> orderedLoanChargesByDueDate = charges.stream().filter(LoanCharge::isActive).filter(LoanCharge::isNotFullyPaid)
-                    .filter(loanCharge -> loanCharge.getEffectiveDueDate() == null
-                            || !loanCharge.getEffectiveDueDate().isAfter(transactionDate))
-                    .sorted(LoanChargeEffectiveDueDateComparator.INSTANCE).toList();
-            Money calculatedPenaltyCharge = Money.zero(currency);
-            Money calculatedFeeCharge = Money.zero(currency);
-            // Calculate the amount of due charges
-            for (LoanCharge charge : orderedLoanChargesByDueDate) {
-                if (charge.isPenaltyCharge()) {
-                    calculatedPenaltyCharge = calculatedPenaltyCharge.add(charge.getAmount(currency));
-                } else {
-                    calculatedFeeCharge = calculatedFeeCharge.add(charge.getAmount(currency));
-                }
-            }
+            Money subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
+            feeChargesPortion = feeChargesPortion.add(subFeePortion);
 
-            do {
-                Money subPenaltyPortion;
-                if (!ignoreDueDateCheck) {
-                    if (calculatedPenaltyCharge.isGreaterThan(transactionAmountRemaining)) {
-                        calculatedPenaltyCharge = transactionAmountRemaining;
-                    }
-                } else {
-                    calculatedPenaltyCharge = transactionAmountUnprocessed;
-                }
-                subPenaltyPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, calculatedPenaltyCharge);
-                transactionAmountRemaining = transactionAmountRemaining.minus(subPenaltyPortion);
-                penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
+            Money subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
+            interestPortion = interestPortion.add(subInterestPortion);
 
-                Money subFeePortion;
-                if (!ignoreDueDateCheck) {
-                    if (calculatedFeeCharge.isGreaterThan(transactionAmountRemaining)) {
-                        calculatedFeeCharge = transactionAmountRemaining;
-                    }
-                } else {
-                    calculatedFeeCharge = transactionAmountUnprocessed;
-                }
-                subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, calculatedFeeCharge);
-                transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
-                feeChargesPortion = feeChargesPortion.add(subFeePortion);
+            Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
+            principalPortion = principalPortion.add(subPrincipalPortion);
 
-                Money subInterestPortion;
-                if (ignoreDueDateCheck || !transactionDate.isBefore(currentInstallment.getDueDate())) {
-                    subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
-                    transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
-                    interestPortion = interestPortion.add(subInterestPortion);
-                }
-
-                Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
-                transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
-                principalPortion = principalPortion.add(subPrincipalPortion);
-                // If the transactionAmountRemaining is greater than zero, rerun the allocation without due date check
-                // to distribute the in advance portions
-                if (transactionAmountRemaining.isGreaterThanZero()) {
-                    ignoreDueDateCheck = true;
-                }
-                rerun = !rerun;
-            } while (ignoreDueDateCheck && rerun);
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }
         if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
