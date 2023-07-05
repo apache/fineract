@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -468,6 +469,11 @@ public final class FineractClient {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(level);
             okBuilder.addInterceptor(logging);
+            return this;
+        }
+
+        public Builder readTimeout(Duration timeout) {
+            okBuilder.readTimeout(timeout);
             return this;
         }
 
