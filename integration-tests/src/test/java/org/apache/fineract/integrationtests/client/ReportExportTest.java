@@ -19,9 +19,11 @@
 package org.apache.fineract.integrationtests.client;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
+import org.apache.fineract.client.util.FineractClient;
 import org.apache.fineract.integrationtests.CIOnly;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,11 @@ import retrofit2.Response;
  * @author Michael Vorburger.ch
  */
 public class ReportExportTest extends IntegrationTest {
+
+    @Override
+    protected void customizeFineractClient(FineractClient.Builder builder) {
+        builder.readTimeout(Duration.ofSeconds(30));
+    }
 
     @BeforeEach
     public void setup() {
