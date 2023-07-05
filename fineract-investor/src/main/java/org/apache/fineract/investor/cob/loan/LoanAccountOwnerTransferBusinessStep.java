@@ -65,7 +65,8 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
         List<ExternalAssetOwnerTransfer> transferDataList = externalAssetOwnerTransferRepository.findAll(
                 (root, query, criteriaBuilder) -> criteriaBuilder.and(criteriaBuilder.equal(root.get("loanId"), loanId),
                         criteriaBuilder.equal(root.get("settlementDate"), settlementDate),
-                        root.get("status").in(List.of(ExternalTransferStatus.PENDING, ExternalTransferStatus.BUYBACK))),
+                        root.get("status").in(List.of(ExternalTransferStatus.PENDING, ExternalTransferStatus.BUYBACK)),
+                        criteriaBuilder.greaterThanOrEqualTo(root.get("effectiveDateTo"), FUTURE_DATE_9999_12_31)),
                 Sort.by(Sort.Direction.ASC, "id"));
         int size = transferDataList.size();
 
