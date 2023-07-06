@@ -27,7 +27,10 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1855,27 +1858,20 @@ public class RecurringDepositTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -3);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = LocalDate.of(2022, 6, 20);
+        LocalDate validFromDate = todaysDate.minusMonths(3);
+        final String VALID_FROM = validFromDate.format(dateFormat);
+        LocalDate validToDate = todaysDate.minusMonths(3).plusYears(10);
+        final String VALID_TO = validToDate.format(dateFormat);
 
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.MONTH, 1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
-        final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = LocalDate.of(2022, 5, 19);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate);
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
+        String expectedFirstDepositOnDate = dateFormat.format(todaysDate);
+        final String CLOSED_ON_DATE = dateFormat.format(LocalDate.of(2022, 7, 2));
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -1914,13 +1910,11 @@ public class RecurringDepositTest {
         ArrayList<ArrayList<HashMap>> interestRateChartData = RecurringDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, recurringDepositProductId);
 
-        Calendar activationDate = Calendar.getInstance();
-        activationDate.add(Calendar.MONTH, -1);
-        activationDate.add(Calendar.DAY_OF_MONTH, -1);
-        ZonedDateTime start = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), Utils.getZoneIdOfTenant());
+        LocalDate activationDate = LocalDate.of(2022, 6, 20);
+        ZonedDateTime start = ZonedDateTime.of(activationDate.minusMonths(1).minusDays(1), LocalTime.MIN, Utils.getZoneIdOfTenant());
 
-        Calendar prematureClosureDate = Calendar.getInstance();
-        ZonedDateTime end = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), Utils.getZoneIdOfTenant());
+        LocalDate prematureClosureDate = LocalDate.of(2022, 6, 20);
+        ZonedDateTime end = ZonedDateTime.of(prematureClosureDate, LocalTime.MIN, Utils.getZoneIdOfTenant());
 
         Integer depositedPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(start.toLocalDate(), end.toLocalDate()));
 
@@ -1938,18 +1932,14 @@ public class RecurringDepositTest {
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MONTH, -1);
-        calendar.add(Calendar.DAY_OF_MONTH, -1);
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
-        Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
+        LocalDate date = LocalDate.of(2022, 6, 20);
+        Integer currentDate = date.minusMonths(1).minusDays(1).getDayOfMonth();
+        Integer daysInMonth = date.withDayOfMonth(date.getMonth().length(date.isLeapYear())).getDayOfMonth();
         daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
-        calendar.add(Calendar.DATE, daysInMonth);
-        LOG.info("{}", monthDayFormat.format(calendar.getTime()));
 
-        expectedFirstDepositOnDate = dateFormat.format(calendar.getTime());
+        expectedFirstDepositOnDate = dateFormat.format(date.plusDays(daysInMonth));
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(transactionIdForDeposit);
@@ -1991,27 +1981,18 @@ public class RecurringDepositTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -3);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = LocalDate.of(2022, 6, 20);
+        final String VALID_FROM = dateFormat.format(todaysDate.minusMonths(3));
+        final String VALID_TO = dateFormat.format(todaysDate.plusYears(10));
 
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.MONTH, 1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
-        final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = LocalDate.of(2022, 5, 19);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate);
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
+        String expectedFirstDepositOnDate = dateFormat.format(todaysDate);
+        final String CLOSED_ON_DATE = dateFormat.format(LocalDate.of(2022, 7, 2));
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -2055,13 +2036,11 @@ public class RecurringDepositTest {
         ArrayList<ArrayList<HashMap>> interestRateChartData = RecurringDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, recurringDepositProductId);
 
-        Calendar activationDate = Calendar.getInstance();
-        activationDate.add(Calendar.MONTH, -1);
-        activationDate.add(Calendar.DAY_OF_MONTH, -1);
-        ZonedDateTime start = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), Utils.getZoneIdOfTenant());
+        LocalDate activationDate = LocalDate.of(2022, 6, 20);
+        ZonedDateTime start = ZonedDateTime.of(activationDate.minusMonths(1).minusDays(1), LocalTime.MIN, Utils.getZoneIdOfTenant());
 
-        Calendar prematureClosureDate = Calendar.getInstance();
-        ZonedDateTime end = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), Utils.getZoneIdOfTenant());
+        LocalDate prematureClosureDate = LocalDate.of(2022, 6, 20);
+        ZonedDateTime end = ZonedDateTime.of(prematureClosureDate, LocalTime.MIN, Utils.getZoneIdOfTenant());
 
         Integer depositedPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(start.toLocalDate(), end.toLocalDate()));
 
@@ -2079,18 +2058,13 @@ public class RecurringDepositTest {
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MONTH, -1);
-        calendar.add(Calendar.DAY_OF_MONTH, -1);
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
-        Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
+        LocalDate date = LocalDate.of(2022, 6, 20);
+        Integer currentDate = date.minusMonths(1).minusDays(1).getDayOfMonth();
+        Integer daysInMonth = date.withDayOfMonth(date.getMonth().length(date.isLeapYear())).getDayOfMonth();
         daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
-        calendar.add(Calendar.DATE, daysInMonth);
-        LOG.info("{}", monthDayFormat.format(calendar.getTime()));
-
-        expectedFirstDepositOnDate = dateFormat.format(calendar.getTime());
+        expectedFirstDepositOnDate = dateFormat.format(date.plusDays(daysInMonth));
         Integer newTransactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(newTransactionIdForDeposit);
