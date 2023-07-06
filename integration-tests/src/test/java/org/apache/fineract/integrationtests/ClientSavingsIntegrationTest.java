@@ -2637,10 +2637,9 @@ public class ClientSavingsIntegrationTest {
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = false;
-        Integer position = 1;
+        Long position = 1L;
 
-        Integer paymentTypeIdOne = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
-                position);
+        Long paymentTypeIdOne = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
         Assertions.assertNotNull(paymentTypeIdOne);
 
         final Integer chargeIdOne = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
@@ -2661,7 +2660,7 @@ public class ClientSavingsIntegrationTest {
 
         String paymentTypeNameTwo = PaymentTypeHelper.randomNameGenerator("P_T", 5);
 
-        Integer paymentTypeIdTwo = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeNameTwo, description,
+        Long paymentTypeIdTwo = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeNameTwo, description,
                 isCashPayment, position);
         Assertions.assertNotNull(paymentTypeIdTwo);
 

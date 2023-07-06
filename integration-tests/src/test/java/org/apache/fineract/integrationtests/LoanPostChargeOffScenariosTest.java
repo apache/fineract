@@ -1125,10 +1125,10 @@ public class LoanPostChargeOffScenariosTest {
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = false;
-        Integer position = 1;
+        Long position = 1L;
 
-        Integer paymentTypeIdOne = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName, description,
-                isCashPayment, position);
+        Long paymentTypeIdOne = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName, description, isCashPayment,
+                position);
         Assertions.assertNotNull(paymentTypeIdOne);
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();

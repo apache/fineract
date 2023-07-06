@@ -51,9 +51,9 @@ public class PaymentTypeIntegrationTest {
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
-        Integer position = 1;
+        Long position = 1L;
 
-        Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
+        Long paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
         Assertions.assertNotNull(paymentTypeId);
         PaymentTypeHelper.verifyPaymentTypeCreatedOnServer(requestSpec, responseSpec, paymentTypeId);
         PaymentTypeDomain paymentTypeResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec, paymentTypeId);
@@ -66,7 +66,7 @@ public class PaymentTypeIntegrationTest {
         String newName = PaymentTypeHelper.randomNameGenerator("P_TU", 5);
         String newDescription = PaymentTypeHelper.randomNameGenerator("PTU_Desc", 15);
         Boolean isCashPaymentUpdatedValue = false;
-        Integer newPosition = 2;
+        Long newPosition = 2L;
 
         HashMap request = new HashMap();
         request.put("name", newName);
@@ -81,7 +81,7 @@ public class PaymentTypeIntegrationTest {
         Assertions.assertEquals(newPosition, paymentTypeUpdatedResponse.getPosition());
 
         // Delete
-        Integer deletedPaymentTypeId = PaymentTypeHelper.deletePaymentType(paymentTypeId, requestSpec, responseSpec);
+        Long deletedPaymentTypeId = PaymentTypeHelper.deletePaymentType(paymentTypeId, requestSpec, responseSpec);
         Assertions.assertEquals(paymentTypeId, deletedPaymentTypeId);
         ResponseSpecification responseSpecification = new ResponseSpecBuilder().expectStatusCode(404).build();
         PaymentTypeHelper.retrieveById(requestSpec, responseSpecification, paymentTypeId);

@@ -33,7 +33,7 @@ public final class PaymentTypeApiResourceSwagger {
         private GetPaymentTypesResponse() {}
 
         @Schema(example = "24")
-        public Integer id;
+        public Long id;
         @Schema(example = "PTC")
         public String name;
         @Schema(example = "Cash")
@@ -41,7 +41,7 @@ public final class PaymentTypeApiResourceSwagger {
         @Schema(example = "true")
         public Boolean isCashPayment;
         @Schema(example = "0")
-        public Integer position;
+        public Long position;
         @Schema(example = "REPAYMENT_REFUND")
         public String codeName;
         @Schema(example = "false")
@@ -54,7 +54,7 @@ public final class PaymentTypeApiResourceSwagger {
         private GetPaymentTypesPaymentTypeIdResponse() {}
 
         @Schema(example = "13")
-        public Integer id;
+        public Long id;
         @Schema(example = "cash")
         public String name;
         @Schema(example = "cash Payment")
@@ -62,7 +62,7 @@ public final class PaymentTypeApiResourceSwagger {
         @Schema(example = "true")
         public Boolean isCashPayment;
         @Schema(example = "1")
-        public Integer position;
+        public Long position;
         @Schema(example = "REPAYMENT_REFUND")
         public String codeName;
         @Schema(example = "false")
@@ -81,7 +81,7 @@ public final class PaymentTypeApiResourceSwagger {
         @Schema(example = "true")
         public Boolean isCashPayment;
         @Schema(example = "1")
-        public Integer position;
+        public Long position;
         @Schema(example = "REPAYMENT_REFUND")
         public String codeName;
         @Schema(example = "false")
@@ -94,7 +94,7 @@ public final class PaymentTypeApiResourceSwagger {
         private PostPaymentTypesResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutPaymentTypesPaymentTypeIdRequest")
@@ -109,7 +109,7 @@ public final class PaymentTypeApiResourceSwagger {
         @Schema(example = "false")
         public Boolean isCashPayment;
         @Schema(example = "3")
-        public Integer position;
+        public Long position;
         @Schema(example = "REPAYMENT_REFUND")
         public String codeName;
         @Schema(example = "false")
@@ -122,7 +122,7 @@ public final class PaymentTypeApiResourceSwagger {
         private PutPaymentTypesPaymentTypeIdResponse() {}
 
         @Schema(example = "13")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeletePaymentTypesPaymentTypeIdResponse")
@@ -131,6 +131,6 @@ public final class PaymentTypeApiResourceSwagger {
         private DeletePaymentTypesPaymentTypeIdResponse() {}
 
         @Schema(example = "13")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

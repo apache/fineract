@@ -20,14 +20,13 @@ package org.apache.fineract.integrationtests.common;
 
 public final class PaymentTypeDomain {
 
-    private Integer id;
+    private Long id;
     private String name;
     private String description;
     private Boolean isCashPayment;
-    private Integer position;
+    private Long position;
 
-    public PaymentTypeDomain(final Integer id, final String name, final String description, final Boolean isCashPayment,
-            final Integer position) {
+    public PaymentTypeDomain(final Long id, final String name, final String description, final Boolean isCashPayment, final Long position) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -36,11 +35,11 @@ public final class PaymentTypeDomain {
 
     }
 
-    public Integer getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -68,11 +67,11 @@ public final class PaymentTypeDomain {
         this.isCashPayment = isCashPayment;
     }
 
-    public Integer getPosition() {
+    public Long getPosition() {
         return this.position;
     }
 
-    public void setPosition(Integer position) {
+    public void setPosition(Long position) {
         this.position = position;
     }
 

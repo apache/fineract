@@ -89,8 +89,8 @@ public class LoanWorkbookPopulatorTest {
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
-        Integer position = 1;
-        Integer outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
+        Long position = 1L;
+        Long outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
                 position);
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 

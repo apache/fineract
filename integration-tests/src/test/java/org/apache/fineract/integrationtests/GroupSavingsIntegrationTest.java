@@ -311,9 +311,9 @@ public class GroupSavingsIntegrationTest {
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
-        Integer position = 1;
+        Long position = 1L;
 
-        Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
+        Long paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
         Assertions.assertNotNull(paymentTypeId);
 
         List<Map<String, Object>> savingsArray = new ArrayList<>();
@@ -804,7 +804,7 @@ public class GroupSavingsIntegrationTest {
         return map;
     }
 
-    private Map<String, Object> savingsArray(final Integer paymentId, final Integer savingsId, final Integer transactionAmount,
+    private Map<String, Object> savingsArray(final Long paymentId, final Integer savingsId, final Integer transactionAmount,
             final String transactionDate) {
         Map<String, Object> map = new HashMap<>();
         map.put("transactionDate", transactionDate);

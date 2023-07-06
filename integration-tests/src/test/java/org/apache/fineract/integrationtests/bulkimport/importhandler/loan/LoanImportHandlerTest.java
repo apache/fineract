@@ -162,8 +162,8 @@ public class LoanImportHandlerTest {
 
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String paymentTypeDescription = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
-        Integer outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName,
-                paymentTypeDescription, true, 1);
+        Long outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName,
+                paymentTypeDescription, true, 1L);
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
         LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
