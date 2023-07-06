@@ -186,10 +186,9 @@ public class LoanAccountOwnerTransferBusinessStepTest {
 
         assertEquals(processedLoan, loanForProcessing);
 
-        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(3);
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, secondSaveResult);
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing, fourthSaveResult);
-        verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 2, loanForProcessing);
     }
 
     @Test
@@ -245,6 +244,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ONE);
+        when(newTransfer.getStatus()).thenReturn(ExternalTransferStatus.ACTIVE);
         // when
         final Loan processedLoan = underTest.execute(loanForProcessing);
         // then
@@ -293,6 +293,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
         when(loanForProcessing.getTotalOverpaid()).thenReturn(BigDecimal.ZERO);
+        when(newTransfer.getStatus()).thenReturn(ExternalTransferStatus.DECLINED);
         // when
         final Loan processedLoan = underTest.execute(loanForProcessing);
         // then
@@ -314,9 +315,8 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateTo());
         assertEquals(processedLoan, loanForProcessing);
 
-        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(1);
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, newTransfer);
-        verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing);
     }
 
     @Test
@@ -337,6 +337,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ONE.negate());
         when(loanForProcessing.getTotalOverpaid()).thenReturn(BigDecimal.ONE.negate());
+        when(newTransfer.getStatus()).thenReturn(ExternalTransferStatus.DECLINED);
         // when
         final Loan processedLoan = underTest.execute(loanForProcessing);
         // then
@@ -358,9 +359,8 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getEffectiveDateTo());
         assertEquals(processedLoan, loanForProcessing);
 
-        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(1);
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, newTransfer);
-        verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing);
     }
 
     @Test
