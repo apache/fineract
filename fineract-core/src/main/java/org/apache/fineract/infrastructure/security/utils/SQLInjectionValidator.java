@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.utils;
 
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,23 +43,8 @@ public final class SQLInjectionValidator {
             return;
         }
         String lowerCaseSQL = sqlSearch.toLowerCase();
-        for (String ddl : DDL_COMMANDS) {
-            if (lowerCaseSQL.contains(ddl)) {
-                throw new SQLInjectionException();
-            }
-        }
-
-        for (String dml : DML_COMMANDS) {
-            if (lowerCaseSQL.contains(dml)) {
-                throw new SQLInjectionException();
-            }
-        }
-
-        for (String comments : COMMENTS) {
-            if (lowerCaseSQL.contains(comments)) {
-                throw new SQLInjectionException();
-            }
-        }
+        List<String[]> commandsList = List.of(DDL_COMMANDS, DML_COMMANDS, COMMENTS);
+        validateSQLCommands(lowerCaseSQL, commandsList, String::contains);
 
         patternMatchSqlInjection(sqlSearch, lowerCaseSQL);
     }
@@ -68,17 +54,8 @@ public final class SQLInjectionValidator {
             return;
         }
         String lowerCaseSQL = sqlSearch.toLowerCase().trim();
-        for (String ddl : DDL_COMMANDS) {
-            if (lowerCaseSQL.startsWith(ddl)) {
-                throw new SQLInjectionException();
-            }
-        }
-
-        for (String comments : COMMENTS) {
-            if (lowerCaseSQL.contains(comments)) {
-                throw new SQLInjectionException();
-            }
-        }
+        validateSQLCommand(lowerCaseSQL, DDL_COMMANDS, String::startsWith);
+        validateSQLCommand(lowerCaseSQL, COMMENTS, String::contains);
 
         // Removing the space before and after '=' operator
         // String s = " \" OR 1 = 1"; For the cases like this
@@ -91,23 +68,8 @@ public final class SQLInjectionValidator {
         }
 
         String lowerCaseSQL = sqlSearch.toLowerCase();
-        for (String ddl : DDL_COMMANDS) {
-            if (ddl.equals(lowerCaseSQL)) {
-                throw new SQLInjectionException();
-            }
-        }
-
-        for (String dml : DML_COMMANDS) {
-            if (dml.equals(lowerCaseSQL)) {
-                throw new SQLInjectionException();
-            }
-        }
-
-        for (String comment : COMMENTS) {
-            if (comment.equals(lowerCaseSQL)) {
-                throw new SQLInjectionException();
-            }
-        }
+        List<String[]> commandsList = List.of(DDL_COMMANDS, DML_COMMANDS, COMMENTS);
+        validateSQLCommands(lowerCaseSQL, commandsList, String::equals);
 
         // Removing the space before and after '=' operator
         // String s = " \" OR 1 = 1"; For the cases like this
@@ -180,4 +142,17 @@ public final class SQLInjectionValidator {
         }
     }
 
+    private static void validateSQLCommand(String lowerCaseSQL, String[] commands, SQLCommandCondition condition) {
+        for (String command : commands) {
+            if (condition.checkCondition(command, lowerCaseSQL)) {
+                throw new SQLInjectionException();
+            }
+        }
+    }
+
+    private static void validateSQLCommands(String lowerCaseSQL, List<String[]> commandsList, SQLCommandCondition condition) {
+        for (String[] commands : commandsList) {
+            validateSQLCommand(lowerCaseSQL, commands, condition);
+        }
+    }
 }
