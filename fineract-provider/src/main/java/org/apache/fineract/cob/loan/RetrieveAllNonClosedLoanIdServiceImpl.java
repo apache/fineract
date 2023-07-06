@@ -68,6 +68,11 @@ public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdServ
     }
 
     @Override
+    public List<LoanIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDate(LocalDate businessDate, List<Long> loanIds) {
+        return loanRepository.findAllNonClosedLoansBehindByLoanIds(businessDate, loanIds);
+    }
+
+    @Override
     public List<LoanIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDateOrNull(LocalDate businessDate, List<Long> loanIds) {
         return loanRepository.findAllNonClosedLoansBehindOrNullByLoanIds(businessDate, loanIds);
     }
