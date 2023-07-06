@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -55,6 +56,7 @@ public class LoanCOBFilterHelper {
     private final InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
     private final LoanRepository loanRepository;
     private final FineractProperties fineractProperties;
+    private final RetrieveLoanIdService retrieveLoanIdService;
 
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
 
@@ -128,8 +130,8 @@ public class LoanCOBFilterHelper {
     public boolean isLoanBehind(List<Long> loanIds) {
         List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
-        partitions.forEach(partition -> loanIdAndLastClosedBusinessDates.addAll(loanRepository
-                .findAllNonClosedLoansBehindByLoanIds(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition)));
+        partitions.forEach(partition -> loanIdAndLastClosedBusinessDates.addAll(retrieveLoanIdService
+                .retrieveLoanIdsBehindDate(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition)));
         return CollectionUtils.isNotEmpty(loanIdAndLastClosedBusinessDates);
     }
 
