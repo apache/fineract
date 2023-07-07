@@ -29,7 +29,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "--password=skdcnwauicn2ucnaecasdsajdnizucawencascdca" ]
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
       timeout: 10s
       retries: 10
     ports:
