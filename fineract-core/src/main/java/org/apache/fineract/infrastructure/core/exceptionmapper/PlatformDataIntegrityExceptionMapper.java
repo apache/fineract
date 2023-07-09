@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Slf4j
-public class PlatformDataIntegrityExceptionMapper implements ExceptionMapper<PlatformDataIntegrityException> {
+public class PlatformDataIntegrityExceptionMapper implements FineractExceptionMapper, ExceptionMapper<PlatformDataIntegrityException> {
 
     @Override
     public Response toResponse(final PlatformDataIntegrityException exception) {
@@ -49,5 +49,10 @@ public class PlatformDataIntegrityExceptionMapper implements ExceptionMapper<Pla
                 exception.getDefaultUserMessage(), exception.getParameterName(), exception.getDefaultUserMessageArgs());
 
         return Response.status(Status.FORBIDDEN).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public int errorCode() {
+        return 3001;
     }
 }

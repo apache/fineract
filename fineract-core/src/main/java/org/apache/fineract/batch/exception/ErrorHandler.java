@@ -18,29 +18,21 @@
  */
 package org.apache.fineract.batch.exception;
 
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+
 import com.google.gson.Gson;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.Function;
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
-import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
-import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformApiDataValidationExceptionMapper;
-import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformDataIntegrityExceptionMapper;
-import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformDomainRuleExceptionMapper;
-import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformInternalServerExceptionMapper;
-import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformResourceNotFoundExceptionMapper;
-import org.apache.fineract.infrastructure.core.exceptionmapper.UnsupportedParameterExceptionMapper;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.SetUtils;
+import org.apache.fineract.infrastructure.core.exceptionmapper.DefaultExceptionMapper;
+import org.apache.fineract.infrastructure.core.exceptionmapper.FineractExceptionMapper;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
-import org.apache.http.HttpStatus;
-import org.springframework.dao.NonTransientDataAccessException;
-import org.springframework.transaction.TransactionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 /**
  * Provides an Error Handler method that returns an object of type {@link ErrorInfo} to the CommandStrategy which raised
@@ -50,60 +42,41 @@ import org.springframework.transaction.TransactionException;
  * @author Rishabh Shukla
  * @see org.apache.fineract.batch.command.CommandStrategy
  */
+@Component
+@Slf4j
+@AllArgsConstructor
 public final class ErrorHandler {
+
+    @Autowired
+    private final ApplicationContext ctx;
+
+    @Autowired
+    private final DefaultExceptionMapper defaultExceptionMapper;
 
     private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder(true).create();
 
-    private static final Map<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> EXCEPTION_HANDLERS = Collections
-            .synchronizedMap(new LinkedHashMap<>());
-    private static final Map.Entry<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> DEFAULT_ERROR_HANDLER = Map.entry(
-            RuntimeException.class,
-            runtimeException -> new ErrorInfo(500, 9999, "{\"Exception\": %s}".formatted(runtimeException.getMessage())));
-
-    static {
-        EXCEPTION_HANDLERS.put(AbstractPlatformResourceNotFoundException.class,
-                runtimeException -> handleException(runtimeException, new PlatformResourceNotFoundExceptionMapper(), 1001));
-        EXCEPTION_HANDLERS.put(UnsupportedParameterException.class,
-                runtimeException -> handleException(runtimeException, new UnsupportedParameterExceptionMapper(), 2001));
-        EXCEPTION_HANDLERS.put(PlatformApiDataValidationException.class,
-                runtimeException -> handleException(runtimeException, new PlatformApiDataValidationExceptionMapper(), 2002));
-        EXCEPTION_HANDLERS.put(PlatformDataIntegrityException.class,
-                runtimeException -> handleException(runtimeException, new PlatformDataIntegrityExceptionMapper(), 3001));
-        EXCEPTION_HANDLERS.put(AbstractPlatformDomainRuleException.class,
-                runtimeException -> handleException(runtimeException, new PlatformDomainRuleExceptionMapper(), 9999));
-        EXCEPTION_HANDLERS.put(TransactionException.class, runtimeException -> new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR, 4001,
-                "{\"Exception\": %s}".formatted(runtimeException.getMessage())));
-        EXCEPTION_HANDLERS.put(PlatformInternalServerException.class,
-                runtimeException -> handleException(runtimeException, new PlatformInternalServerExceptionMapper(), 5001));
-        EXCEPTION_HANDLERS.put(NonTransientDataAccessException.class, runtimeException -> new ErrorInfo(HttpStatus.SC_INTERNAL_SERVER_ERROR,
-                4002, "{\"Exception\": %s}".formatted(runtimeException.getMessage())));
-        EXCEPTION_HANDLERS.put(DEFAULT_ERROR_HANDLER.getKey(), DEFAULT_ERROR_HANDLER.getValue());
+    private <T extends RuntimeException> ExceptionMapper<T> findMostSpecificExceptionHandler(T exception) {
+        Class<?> clazz = exception.getClass();
+        do {
+            Set<String> exceptionMappers = createSet(ctx.getBeanNamesForType(forClassWithGenerics(ExceptionMapper.class, clazz)));
+            Set<String> fineractErrorMappers = createSet(ctx.getBeanNamesForType(FineractExceptionMapper.class));
+            SetUtils.SetView<String> intersection = SetUtils.intersection(exceptionMappers, fineractErrorMappers);
+            if (intersection.size() > 0) {
+                // noinspection unchecked
+                return (ExceptionMapper<T>) ctx.getBean(intersection.iterator().next());
+            }
+            clazz = clazz.getSuperclass();
+        } while (!clazz.equals(Exception.class));
+        // noinspection unchecked
+        return (ExceptionMapper<T>) defaultExceptionMapper;
     }
 
-    private ErrorHandler() {}
-
-    public static void registerNewErrorHandler(final Class<? extends RuntimeException> exceptionClass, final ExceptionMapper mapper,
-            int errorCode) {
-        LinkedHashMap<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> newHandlers = new LinkedHashMap<>();
-        newHandlers.put(exceptionClass, runtimeException -> handleException(runtimeException, mapper, errorCode));
-        EXCEPTION_HANDLERS.forEach(newHandlers::putIfAbsent);
-        EXCEPTION_HANDLERS.clear();
-        newHandlers.forEach(EXCEPTION_HANDLERS::putIfAbsent);
-    }
-
-    public static void registerNewErrorHandler(final Class<? extends RuntimeException> exceptionClass,
-            Function<RuntimeException, ErrorInfo> function) {
-        LinkedHashMap<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> newHandlers = new LinkedHashMap<>();
-        newHandlers.put(exceptionClass, function);
-        EXCEPTION_HANDLERS.forEach(newHandlers::putIfAbsent);
-        EXCEPTION_HANDLERS.clear();
-        newHandlers.forEach(EXCEPTION_HANDLERS::putIfAbsent);
-    }
-
-    private static ErrorInfo handleException(final RuntimeException exception, final ExceptionMapper mapper, final int errorCode) {
-        final Response response = mapper.toResponse(exception);
-        final String errorBody = JSON_HELPER.toJson(response.getEntity());
-        return new ErrorInfo(response.getStatus(), errorCode, errorBody);
+    private <T> Set<T> createSet(T[] array) {
+        if (array == null) {
+            return Set.of();
+        } else {
+            return Set.of(array);
+        }
     }
 
     /**
@@ -112,9 +85,10 @@ public final class ErrorHandler {
      * @param exception
      * @return ErrorInfo
      */
-    public static ErrorInfo handler(final RuntimeException exception) {
-        Map.Entry<Class<? extends Exception>, Function<RuntimeException, ErrorInfo>> errorhandler = EXCEPTION_HANDLERS.entrySet().stream()
-                .filter(e -> e.getKey().isAssignableFrom(exception.getClass())).findFirst().orElse(DEFAULT_ERROR_HANDLER);
-        return errorhandler.getValue().apply(exception);
+    public ErrorInfo handle(final RuntimeException exception) {
+        ExceptionMapper<RuntimeException> exceptionMapper = findMostSpecificExceptionHandler(exception);
+        Response response = exceptionMapper.toResponse(exception);
+        return new ErrorInfo(response.getStatus(), ((FineractExceptionMapper) exceptionMapper).errorCode(),
+                JSON_HELPER.toJson(response.getEntity()));
     }
 }

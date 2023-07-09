@@ -40,7 +40,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Slf4j
-public class PlatformResourceNotFoundExceptionMapper implements ExceptionMapper<AbstractPlatformResourceNotFoundException> {
+public class PlatformResourceNotFoundExceptionMapper
+        implements FineractExceptionMapper, ExceptionMapper<AbstractPlatformResourceNotFoundException> {
 
     @Override
     public Response toResponse(final AbstractPlatformResourceNotFoundException exception) {
@@ -48,5 +49,10 @@ public class PlatformResourceNotFoundExceptionMapper implements ExceptionMapper<
         final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(),
                 exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
         return Response.status(Status.NOT_FOUND).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public int errorCode() {
+        return 1001;
     }
 }

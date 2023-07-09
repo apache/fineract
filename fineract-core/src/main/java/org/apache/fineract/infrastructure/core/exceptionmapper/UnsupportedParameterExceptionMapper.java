@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Slf4j
-public class UnsupportedParameterExceptionMapper implements ExceptionMapper<UnsupportedParameterException> {
+public class UnsupportedParameterExceptionMapper implements FineractExceptionMapper, ExceptionMapper<UnsupportedParameterException> {
 
     @Override
     public Response toResponse(final UnsupportedParameterException exception) {
@@ -61,5 +61,10 @@ public class UnsupportedParameterExceptionMapper implements ExceptionMapper<Unsu
                 .badClientRequest("validation.msg.validation.errors.exist", "Validation errors exist.", errors);
 
         return Response.status(Status.BAD_REQUEST).entity(invalidParameterError).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public int errorCode() {
+        return 2001;
     }
 }

@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Slf4j
-public class PlatformInternalServerExceptionMapper implements ExceptionMapper<PlatformInternalServerException> {
+public class PlatformInternalServerExceptionMapper implements FineractExceptionMapper, ExceptionMapper<PlatformInternalServerException> {
 
     @Override
     public Response toResponse(final PlatformInternalServerException exception) {
@@ -47,5 +47,10 @@ public class PlatformInternalServerExceptionMapper implements ExceptionMapper<Pl
         final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.serverSideError(exception.getGlobalisationMessageCode(),
                 exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
         return Response.status(Status.INTERNAL_SERVER_ERROR).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public int errorCode() {
+        return 5001;
     }
 }

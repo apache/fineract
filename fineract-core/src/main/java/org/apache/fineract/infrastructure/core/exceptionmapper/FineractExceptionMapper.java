@@ -16,21 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.batch.service;
+package org.apache.fineract.infrastructure.core.exceptionmapper;
 
-import lombok.Getter;
-import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.exception.ErrorInfo;
+public interface FineractExceptionMapper {
 
-@Getter
-public class BatchExecutionException extends RuntimeException {
-
-    private final BatchRequest request;
-    private final ErrorInfo errorInfo;
-
-    public BatchExecutionException(BatchRequest request, RuntimeException ex, ErrorInfo errorInfo) {
-        super("Error executing batch request: " + request, ex);
-        this.request = request;
-        this.errorInfo = errorInfo;
-    }
+    int errorCode();
 }

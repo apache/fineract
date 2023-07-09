@@ -40,7 +40,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Slf4j
-public class PlatformApiDataValidationExceptionMapper implements ExceptionMapper<PlatformApiDataValidationException> {
+public class PlatformApiDataValidationExceptionMapper
+        implements FineractExceptionMapper, ExceptionMapper<PlatformApiDataValidationException> {
 
     @Override
     public Response toResponse(final PlatformApiDataValidationException exception) {
@@ -49,5 +50,10 @@ public class PlatformApiDataValidationExceptionMapper implements ExceptionMapper
                 .badClientRequest(exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getErrors());
 
         return Response.status(Status.BAD_REQUEST).entity(dataValidationErrorResponse).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public int errorCode() {
+        return 2002;
     }
 }

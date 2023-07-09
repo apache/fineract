@@ -18,26 +18,31 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
-import jakarta.annotation.PostConstruct;
-import org.apache.fineract.batch.exception.ErrorHandler;
-import org.apache.fineract.batch.exception.ErrorInfo;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
-import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformDomainRuleExceptionMapper;
+import org.apache.fineract.infrastructure.core.exceptionmapper.FineractExceptionMapper;
 import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedException;
-import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
-import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.http.HttpStatus;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ErrorHandlerRegister {
+@Scope("singleton")
+@Slf4j
+public class LoanIdsHardLockedExceptionMapper implements FineractExceptionMapper, ExceptionMapper<LoanIdsHardLockedException> {
 
-    @PostConstruct
-    public void init() {
-        ErrorHandler.registerNewErrorHandler(LoanIdsHardLockedException.class, runtimeException -> new ErrorInfo(HttpStatus.SC_CONFLICT,
-                4090,
-                ApiGlobalErrorResponse.loanIsLocked(((LoanIdsHardLockedException) runtimeException).getLoanIdFromRequest()).toJson()));
-        ErrorHandler.registerNewErrorHandler(LinkedAccountRequiredException.class, new PlatformDomainRuleExceptionMapper(), 3002);
-        ErrorHandler.registerNewErrorHandler(MultiDisbursementDataRequiredException.class, new PlatformDomainRuleExceptionMapper(), 3003);
+    @Override
+    public Response toResponse(LoanIdsHardLockedException exception) {
+        return Response.status(HttpStatus.SC_CONFLICT)
+                .entity(ApiGlobalErrorResponse.loanIsLocked(exception.getLoanIdFromRequest()).toJson()).type(MediaType.APPLICATION_JSON)
+                .build();
+    }
+
+    @Override
+    public int errorCode() {
+        return 4090;
     }
 }
