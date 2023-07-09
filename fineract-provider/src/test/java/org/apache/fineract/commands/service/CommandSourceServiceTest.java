@@ -19,9 +19,11 @@
 package org.apache.fineract.commands.service;
 
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.UNDER_PROCESSING;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.time.ZoneId;
 import java.util.Optional;
+import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
@@ -45,6 +47,9 @@ public class CommandSourceServiceTest {
 
     @Mock
     private CommandSourceRepository commandSourceRepository;
+
+    @Mock
+    private ErrorHandler errorHandler;
 
     @InjectMocks
     private CommandSourceService underTest;
@@ -103,6 +108,8 @@ public class CommandSourceServiceTest {
 
     @Test
     public void testGenerateErrorException() {
+        Mockito.when(errorHandler.handle(any(CodeNotFoundException.class)))
+                .thenReturn(new ErrorInfo(404, 1001, "Code with name `foo` does not exist"));
         ErrorInfo result = underTest.generateErrorException(new CodeNotFoundException("foo"));
         Assertions.assertEquals(404, result.getStatusCode());
         Assertions.assertEquals(1001, result.getErrorCode());

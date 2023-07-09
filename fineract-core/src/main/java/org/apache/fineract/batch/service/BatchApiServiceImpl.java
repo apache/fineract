@@ -82,6 +82,7 @@ public class BatchApiServiceImpl implements BatchApiService {
     private final CommandStrategyProvider strategyProvider;
     private final ResolutionHelper resolutionHelper;
     private final PlatformTransactionManager transactionManager;
+    private final ErrorHandler errorHandler;
 
     private final List<BatchFilter> batchFilters;
 
@@ -106,7 +107,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         final List<BatchRequestNode> batchRequestNodes = this.resolutionHelper.getDependingRequests(requestList);
         if (batchRequestNodes.isEmpty()) {
             final BatchResponse response = new BatchResponse();
-            ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
+            ErrorInfo ex = errorHandler.handle(new ClientDetailsNotFoundException());
             response.setStatusCode(500);
             response.setBody(ex.getMessage());
             responseList.add(response);
@@ -156,7 +157,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                 try {
                     resolvedChildRequest = this.resolutionHelper.resoluteRequest(childNode.getRequest(), response);
                 } catch (RuntimeException ex) {
-                    throw new BatchExecutionException(childNode.getRequest(), ex);
+                    throw new BatchExecutionException(childNode.getRequest(), ex, errorHandler.handle(ex));
                 }
                 callRequestRecursive(resolvedChildRequest, childNode, responseList, uriInfo, enclosingTransaction);
 
@@ -206,7 +207,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         log.debug("Batch request: method [{}], relative url [{}]", request.getMethod(), request.getRelativeUrl());
         Either<RuntimeException, BatchRequest> preprocessorResult = runPreprocessors(request);
         if (preprocessorResult.isLeft()) {
-            throw new BatchExecutionException(request, preprocessorResult.getLeft());
+            throw new BatchExecutionException(request, preprocessorResult.getLeft(), errorHandler.handle(preprocessorResult.getLeft()));
         } else {
             request = preprocessorResult.get();
         }
@@ -231,7 +232,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         } catch (AbstractIdempotentCommandException idempotentException) {
             return handleIdempotentRequests(idempotentException, request);
         } catch (RuntimeException ex) {
-            throw new BatchExecutionException(request, ex);
+            throw new BatchExecutionException(request, ex, errorHandler.handle(ex));
         } finally {
             BatchRequestContextHolder.resetRequestAttributes();
         }
@@ -366,7 +367,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                     return Arrays.asList(errResponse);
                 } catch (RuntimeException ex) {
                     status.setRollbackOnly();
-                    ErrorInfo e = ErrorHandler.handler(ex);
+                    ErrorInfo e = errorHandler.handle(ex);
                     BatchResponse errResponse = new BatchResponse();
                     errResponse.setStatusCode(e.getStatusCode());
                     errResponse.setBody(e.getMessage());
@@ -374,7 +375,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                 }
             });
         } catch (TransactionException | NonTransientDataAccessException ex) {
-            ErrorInfo e = ErrorHandler.handler(ex);
+            ErrorInfo e = errorHandler.handle(ex);
             return createErrorResponse(responseList, e.getStatusCode());
         }
     }

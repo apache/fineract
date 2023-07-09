@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommandSourceService {
 
     private final CommandSourceRepository commandSourceRepository;
+    private final ErrorHandler errorHandler;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
     public CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
@@ -83,7 +84,7 @@ public class CommandSourceService {
 
     public ErrorInfo generateErrorException(Throwable t) {
         if (t instanceof final RuntimeException e) {
-            return ErrorHandler.handler(e);
+            return errorHandler.handle(e);
         } else {
             return new ErrorInfo(500, 9999, "{\"Exception\": " + t.toString() + "}");
         }
