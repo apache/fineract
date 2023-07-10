@@ -134,4 +134,5 @@
     <include file="parts/0112_transaction_summary_with_asset_owner_change_report_sql.xml" relativeToChangelogFile="true" />
     <include file="parts/0113_transaction_summary_with_asset_owner_report_sql_fix.xml" relativeToChangelogFile="true" />
     <include file="parts/0114_create_cob_indices.xml" relativeToChangelogFile="true" />
+    <include file="parts/0115_create_index_from_loan_transaction_id.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
