@@ -44,12 +44,15 @@ import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.GetClientTransferProposalDateResponse;
 import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
+import org.apache.fineract.client.models.GetClientsClientIdTransactionsResponse;
+import org.apache.fineract.client.models.GetClientsClientIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetObligeeData;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
 import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsClientIdResponse;
+import org.apache.fineract.client.models.PostClientsClientIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PutClientsClientIdResponse;
@@ -784,6 +787,20 @@ public class ClientHelper extends IntegrationTest {
         final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + transactionId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, "reversed");
+    }
+
+    public GetClientsClientIdTransactionsResponse getAllClientTransactionsByExternalId(final String externalId) {
+        return ok(fineract().clientTransactions.retrieveAllClientTransactions1(externalId, 0, 100));
+    }
+
+    public GetClientsClientIdTransactionsTransactionIdResponse getClientTransactionByExternalId(final String externalId,
+            final String transactionId) {
+        return ok(fineract().clientTransactions.retrieveClientTransaction1(externalId, Long.parseLong(transactionId)));
+    }
+
+    public PostClientsClientIdTransactionsTransactionIdResponse undoClientTransactionByExternalId(final String externalId,
+            final String transactionId) {
+        return ok(fineract().clientTransactions.undoClientTransaction1(externalId, Long.parseLong(transactionId), "undo"));
     }
 
     public Workbook getClientEntityWorkbook(GlobalEntityType clientsEntity, String dateFormat) throws IOException {
