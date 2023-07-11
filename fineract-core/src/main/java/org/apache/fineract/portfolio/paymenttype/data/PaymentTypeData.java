@@ -36,12 +36,12 @@ public class PaymentTypeData implements Serializable {
     private String name;
     private String description;
     private Boolean isCashPayment;
-    private Long position;
+    private Integer position;
     private String codeName;
     private Boolean isSystemDefined;
 
     public static PaymentTypeData instance(final Long id, final String name, final String description, final Boolean isCashPayment,
-            final Long position) {
+            final Integer position) {
         String codeName = null;
         Boolean isSystemDefined = false;
         return new PaymentTypeData(id, name, description, isCashPayment, position, codeName, isSystemDefined);
@@ -50,7 +50,7 @@ public class PaymentTypeData implements Serializable {
     public static PaymentTypeData instance(final Long id, final String name) {
         String description = null;
         Boolean isCashPayment = null;
-        Long position = null;
+        Integer position = null;
         String codeName = null;
         Boolean isSystemDefined = false;
         return new PaymentTypeData(id, name, description, isCashPayment, position, codeName, isSystemDefined);

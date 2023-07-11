@@ -33,7 +33,7 @@ public final class PaymentTypeApiResourceSwagger {
         private GetPaymentTypesResponse() {}
 
         @Schema(example = "24")
-        public Integer id;
+        public Long id;
         @Schema(example = "PTC")
         public String name;
         @Schema(example = "Cash")
@@ -54,7 +54,7 @@ public final class PaymentTypeApiResourceSwagger {
         private GetPaymentTypesPaymentTypeIdResponse() {}
 
         @Schema(example = "13")
-        public Integer id;
+        public Long id;
         @Schema(example = "cash")
         public String name;
         @Schema(example = "cash Payment")
@@ -94,7 +94,7 @@ public final class PaymentTypeApiResourceSwagger {
         private PostPaymentTypesResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutPaymentTypesPaymentTypeIdRequest")
@@ -122,7 +122,7 @@ public final class PaymentTypeApiResourceSwagger {
         private PutPaymentTypesPaymentTypeIdResponse() {}
 
         @Schema(example = "13")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeletePaymentTypesPaymentTypeIdResponse")
@@ -131,6 +131,6 @@ public final class PaymentTypeApiResourceSwagger {
         private DeletePaymentTypesPaymentTypeIdResponse() {}
 
         @Schema(example = "13")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -65,6 +67,7 @@ public class GroupSavingsIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private SavingsAccountHelper savingsAccountHelper;
+    private PaymentTypeHelper paymentTypeHelper;
     private static final Logger LOG = LoggerFactory.getLogger(GroupSavingsIntegrationTest.class);
 
     @BeforeEach
@@ -74,6 +77,7 @@ public class GroupSavingsIntegrationTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     @Test
@@ -313,7 +317,9 @@ public class GroupSavingsIntegrationTest {
         Boolean isCashPayment = true;
         Integer position = 1;
 
-        Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
+        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PostPaymentTypesRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeId = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeId);
 
         List<Map<String, Object>> savingsArray = new ArrayList<>();
@@ -804,7 +810,7 @@ public class GroupSavingsIntegrationTest {
         return map;
     }
 
-    private Map<String, Object> savingsArray(final Integer paymentId, final Integer savingsId, final Integer transactionAmount,
+    private Map<String, Object> savingsArray(final Long paymentId, final Integer savingsId, final Integer transactionAmount,
             final String transactionDate) {
         Map<String, Object> map = new HashMap<>();
         map.put("transactionDate", transactionDate);

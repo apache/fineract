@@ -34,9 +34,11 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import org.apache.fineract.client.models.GetPaymentTypesPaymentTypeIdResponse;
+import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeDomain;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -56,6 +58,7 @@ public class RepaymentWithPostDatedChecksTest {
     private RequestSpecification requestSpec;
     private final SimpleDateFormat dateFormatterStandard = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
     private LoanTransactionHelper loanTransactionHelper;
+    private PaymentTypeHelper paymentTypeHelper;
 
     @BeforeEach
     public void setup() {
@@ -63,6 +66,7 @@ public class RepaymentWithPostDatedChecksTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     @Test
@@ -136,10 +140,12 @@ public class RepaymentWithPostDatedChecksTest {
         Boolean isCashPayment = false;
         Integer position = 1;
 
-        Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
+        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PostPaymentTypesRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeId = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeId);
-        PaymentTypeHelper.verifyPaymentTypeCreatedOnServer(requestSpec, responseSpec, paymentTypeId);
-        PaymentTypeDomain paymentTypeResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec, paymentTypeId);
+        paymentTypeHelper.verifyPaymentTypeCreatedOnServer(paymentTypeId);
+        GetPaymentTypesPaymentTypeIdResponse paymentTypeResponse = paymentTypeHelper.retrieveById(paymentTypeId);
         Assertions.assertEquals(name, paymentTypeResponse.getName());
 
         // Repay for the installment 1 using post dated check

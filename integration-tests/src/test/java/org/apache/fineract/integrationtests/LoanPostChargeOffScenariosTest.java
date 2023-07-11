@@ -47,6 +47,8 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -79,6 +81,7 @@ public class LoanPostChargeOffScenariosTest {
     private JournalEntryHelper journalEntryHelper;
     private AccountHelper accountHelper;
     private LoanProductHelper loanProductHelper;
+    private PaymentTypeHelper paymentTypeHelper;
     // asset
     private Account loansReceivable;
     private Account interestFeeReceivable;
@@ -108,6 +111,7 @@ public class LoanPostChargeOffScenariosTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.loanProductHelper = new LoanProductHelper();
+        this.paymentTypeHelper = new PaymentTypeHelper();
 
         // Asset
         this.loansReceivable = this.accountHelper.createAssetAccount();
@@ -1127,8 +1131,9 @@ public class LoanPostChargeOffScenariosTest {
         Boolean isCashPayment = false;
         Integer position = 1;
 
-        Integer paymentTypeIdOne = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName, description,
-                isCashPayment, position);
+        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(new PostPaymentTypesRequest()
+                .name(paymentTypeName).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
