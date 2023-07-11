@@ -615,6 +615,16 @@ public class InitiateExternalAssetOwnerTransferTest {
             CallFailedRuntimeException exception5 = assertThrows(CallFailedRuntimeException.class,
                     () -> createBuybackTransfer(-1, "2020-03-03"));
             assertTrue(exception5.getMessage().contains("Loan with identifier -1 does not exist"));
+
+            String externalId = UUID.randomUUID().toString();
+            CallFailedRuntimeException exception6 = assertThrows(CallFailedRuntimeException.class, () -> {
+                Integer clientID = createClient();
+                Integer loanID = createLoanForClient(clientID);
+                createSaleTransfer(loanID, "2020-03-03", externalId, "1", "1.0");
+                createBuybackTransfer(loanID, "2020-03-02", externalId);
+            });
+            assertTrue(exception6.getMessage()
+                    .contains(String.format("Already existing an asset transfer with the provided transfer external id: %s", externalId)));
         } finally {
             cleanUpAndRestoreBusinessDate();
         }
@@ -657,6 +667,14 @@ public class InitiateExternalAssetOwnerTransferTest {
                 createSaleTransfer(loanID2, "2020-03-05");
             });
             assertTrue(exception6.getMessage().contains("This loan cannot be sold, because it is owned by an external asset owner"));
+            String externalId = UUID.randomUUID().toString();
+            CallFailedRuntimeException exception7 = assertThrows(CallFailedRuntimeException.class, () -> {
+                Integer loanID2 = createLoanForClient(clientID);
+                createSaleTransfer(loanID2, "2020-03-05", externalId, "1", "1.0");
+                createSaleTransfer(loanID2, "2020-03-05", externalId, "1", "1.0");
+            });
+            assertTrue(exception7.getMessage()
+                    .contains(String.format("Already existing an asset transfer with the provided transfer external id: %s", externalId)));
         } finally {
             cleanUpAndRestoreBusinessDate();
         }
@@ -684,6 +702,10 @@ public class InitiateExternalAssetOwnerTransferTest {
 
     private PostInitiateTransferResponse createBuybackTransfer(Integer loanID, String settlementDate) {
         String transferExternalId = UUID.randomUUID().toString();
+        return createBuybackTransfer(loanID, settlementDate, transferExternalId);
+    }
+
+    private PostInitiateTransferResponse createBuybackTransfer(Integer loanID, String settlementDate, String transferExternalId) {
         PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "buyback",
                 new PostInitiateTransferRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
                         .transferExternalId(transferExternalId));
