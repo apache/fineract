@@ -26,6 +26,8 @@ import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
+import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -47,6 +49,7 @@ public class LoanWorkbookPopulatorTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+    private PaymentTypeHelper paymentTypeHelper;
 
     @BeforeEach
     public void setup() {
@@ -54,6 +57,7 @@ public class LoanWorkbookPopulatorTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     @Test
@@ -90,8 +94,9 @@ public class LoanWorkbookPopulatorTest {
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
         Integer position = 1;
-        Integer outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
-                position);
+        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PostPaymentTypesRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long outcome_payment_creation = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
         Workbook workbook = loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");

@@ -112,10 +112,12 @@ public class LoanTransactionHelper extends IntegrationTest {
     private static final Gson GSON = new JSON().getGson();
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
+    private PaymentTypeHelper paymentTypeHelper;
 
     public LoanTransactionHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
+        this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     public GetLoanProductsProductIdResponse getLoanProduct(final Integer loanProductId) {
@@ -745,7 +747,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.adjustLoanTransaction(loanId, transactionId, request, "undo"));
     }
 
-    public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Integer paymentType) {
+    public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Long paymentType) {
         return (HashMap) performLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID),
                 getRepaymentWithPDCBodyAsJSON(date, amountToBePaid, paymentType), "");
     }
@@ -1123,7 +1125,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         return new Gson().toJson(map);
     }
 
-    private String getRepaymentWithPDCBodyAsJSON(final String transactionDate, final Float transactionAmount, final Integer paymentTypeId) {
+    private String getRepaymentWithPDCBodyAsJSON(final String transactionDate, final Float transactionAmount, final Long paymentTypeId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("paymentTypeId", paymentTypeId.toString());
@@ -1692,7 +1694,7 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public Long applyChargebackTransaction(final Integer loanId, final Long transactionId, final String amount,
             final Integer paymentTypeIdx, ResponseSpecification responseSpec) {
-        List<GetPaymentTypesResponse> paymentTypeList = PaymentTypeHelper.getSystemPaymentType(this.requestSpec, this.responseSpec);
+        List<GetPaymentTypesResponse> paymentTypeList = paymentTypeHelper.getAllPaymentTypes(false);
         assertTrue(!paymentTypeList.isEmpty());
 
         final String payload = createChargebackPayload(amount, paymentTypeList.get(paymentTypeIdx).getId());
@@ -1722,7 +1724,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         }
     }
 
-    private String createChargebackPayload(final String transactionAmount, final Integer paymentTypeId) {
+    private String createChargebackPayload(final String transactionAmount, final Long paymentTypeId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("transactionAmount", transactionAmount);
         map.put("paymentTypeId", paymentTypeId);

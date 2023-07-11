@@ -194,11 +194,11 @@ public final class ChargesHelper extends IntegrationTest {
         return chargesCreateJson;
     }
 
-    public static String paymentTypeCharge(Integer amount, final boolean enablePaymentType, final Integer paymentTypeId) {
+    public static String paymentTypeCharge(Integer amount, final boolean enablePaymentType, final Long paymentTypeId) {
         return paymentTypeChargeJSON(amount, enablePaymentType, paymentTypeId);
     }
 
-    public static String paymentTypeChargeJSON(Integer amount, final boolean enablePaymentType, final Integer paymentTypeId) {
+    public static String paymentTypeChargeJSON(Integer amount, final boolean enablePaymentType, final Long paymentTypeId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("active", ChargesHelper.ACTIVE);
         map.put("amount", amount);

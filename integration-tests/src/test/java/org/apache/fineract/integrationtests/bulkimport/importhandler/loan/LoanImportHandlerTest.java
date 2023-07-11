@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
@@ -75,6 +77,7 @@ public class LoanImportHandlerTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+    private PaymentTypeHelper paymentTypeHelper;
 
     @BeforeEach
     public void setup() {
@@ -82,6 +85,7 @@ public class LoanImportHandlerTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     @Test
@@ -162,8 +166,11 @@ public class LoanImportHandlerTest {
 
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String paymentTypeDescription = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
-        Integer outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName,
-                paymentTypeDescription, true, 1);
+
+        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PostPaymentTypesRequest().name(paymentTypeName).description(paymentTypeDescription).isCashPayment(true).position(1));
+        Long outcome_payment_creation = paymentTypesResponse.getResourceId();
+
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
         LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);

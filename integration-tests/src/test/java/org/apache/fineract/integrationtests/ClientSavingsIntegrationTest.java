@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -80,6 +82,7 @@ public class ClientSavingsIntegrationTest {
     private SavingsAccountHelper savingsAccountHelper;
     private SavingsProductHelper savingsProductHelper;
     private SchedulerJobHelper scheduleJobHelper;
+    private PaymentTypeHelper paymentTypeHelper;
 
     @BeforeEach
     public void setup() {
@@ -88,6 +91,7 @@ public class ClientSavingsIntegrationTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     @Test
@@ -2639,8 +2643,9 @@ public class ClientSavingsIntegrationTest {
         Boolean isCashPayment = false;
         Integer position = 1;
 
-        Integer paymentTypeIdOne = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
-                position);
+        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PostPaymentTypesRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 
         final Integer chargeIdOne = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
@@ -2661,8 +2666,9 @@ public class ClientSavingsIntegrationTest {
 
         String paymentTypeNameTwo = PaymentTypeHelper.randomNameGenerator("P_T", 5);
 
-        Integer paymentTypeIdTwo = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeNameTwo, description,
-                isCashPayment, position);
+        PostPaymentTypesResponse paymentTypesResponseTwo = paymentTypeHelper.createPaymentType(new PostPaymentTypesRequest()
+                .name(paymentTypeNameTwo).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeIdTwo = paymentTypesResponseTwo.getResourceId();
         Assertions.assertNotNull(paymentTypeIdTwo);
 
         final Integer chargeIdTwo = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
