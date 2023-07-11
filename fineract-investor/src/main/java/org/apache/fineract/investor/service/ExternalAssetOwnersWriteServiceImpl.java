@@ -78,10 +78,14 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     @Override
     @Transactional
     public CommandProcessingResult saleLoanByLoanId(JsonCommand command) {
+        final JsonElement json = fromApiJsonHelper.parse(command.json());
+        validateSaleRequestBody(command.json());
+        ExternalId externalId = getTransferExternalIdFromJson(json);
+        validateExternalId(externalId);
         Long loanId = command.getLoanId();
         LoanIdAndExternalIdAndStatus loanIdAndExternalIdAndStatus = fetchLoanDetails(loanId);
         validateLoanStatus(loanIdAndExternalIdAndStatus);
-        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = createSaleTransfer(loanId, command.json(),
+        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = createSaleTransfer(loanId, json,
                 loanIdAndExternalIdAndStatus.getExternalId());
         validateSale(externalAssetOwnerTransfer);
         externalAssetOwnerTransferRepository.saveAndFlush(externalAssetOwnerTransfer);
@@ -98,10 +102,20 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         LocalDate settlementDate = getSettlementDateFromJson(json);
         ExternalId externalId = getTransferExternalIdFromJson(json);
         validateSettlementDate(settlementDate);
+        validateExternalId(externalId);
         ExternalAssetOwnerTransfer effectiveTransfer = fetchAndValidateEffectiveTransferForBuyback(loanId, settlementDate);
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = createBuybackTransfer(effectiveTransfer, settlementDate, externalId);
         externalAssetOwnerTransferRepository.saveAndFlush(externalAssetOwnerTransfer);
         return buildResponseData(externalAssetOwnerTransfer);
+    }
+
+    private void validateExternalId(ExternalId externalId) {
+        boolean alreadyExists = externalAssetOwnerTransferRepository
+                .exists((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("externalId"), externalId));
+        if (alreadyExists) {
+            throw new ExternalAssetOwnerInitiateTransferException(
+                    String.format("Already existing an asset transfer with the provided transfer external id: %s", externalId.getValue()));
+        }
     }
 
     private void validateLoan(Long loanId) {
@@ -247,11 +261,9 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         }
     }
 
-    private ExternalAssetOwnerTransfer createSaleTransfer(Long loanId, String apiRequestBodyAsJson, ExternalId externalLoanId) {
+    private ExternalAssetOwnerTransfer createSaleTransfer(Long loanId, JsonElement json, ExternalId externalLoanId) {
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
         LocalDate effectiveFrom = ThreadLocalContextUtil.getBusinessDate();
-        validateSaleRequestBody(apiRequestBodyAsJson);
-        final JsonElement json = fromApiJsonHelper.parse(apiRequestBodyAsJson);
 
         ExternalAssetOwner owner = getOwner(json);
         externalAssetOwnerTransfer.setOwner(owner);
