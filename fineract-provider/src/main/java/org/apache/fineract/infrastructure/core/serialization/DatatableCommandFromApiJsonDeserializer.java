@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,15 +56,6 @@ public class DatatableCommandFromApiJsonDeserializer {
     public static final String DROP_COLUMNS = "dropColumns";
     public static final String AFTER = "after";
     public static final String NEW_CODE = "newCode";
-    public static final String M_LOAN = "m_loan";
-    public static final String M_SAVINGS_ACCOUNT = "m_savings_account";
-    public static final String M_CLIENT = "m_client";
-    public static final String M_GROUP = "m_group";
-    public static final String M_CENTER = "m_center";
-    public static final String M_OFFICE = "m_office";
-    public static final String M_SAVINGS_PRODUCT = "m_savings_product";
-    public static final String M_PRODUCT_LOAN = "m_product_loan";
-    public static final String M_SHARE_PRODUCT = "m_share_product";
     public static final String NEW_NAME = "newName";
     public static final String STRING = "string";
     public static final String NUMBER = "number";
@@ -92,8 +84,6 @@ public class DatatableCommandFromApiJsonDeserializer {
             Arrays.asList(NAME, NEW_NAME, LENGTH, MANDATORY, AFTER, CODE, NEW_CODE, UNIQUE, INDEXED));
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_DROP_COLUMNS = new HashSet<>(List.of(NAME));
     private static final Object[] SUPPORTED_COLUMN_TYPES = { STRING, NUMBER, BOOLEAN, DECIMAL, DATE, DATETIME, TEXT, DROPDOWN };
-    private static final Object[] SUPPORTED_APPTABLE_NAMES = { M_LOAN, M_SAVINGS_ACCOUNT, M_CLIENT, M_GROUP, M_CENTER, M_OFFICE,
-            M_SAVINGS_PRODUCT, M_PRODUCT_LOAN, M_SHARE_PRODUCT };
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -158,12 +148,9 @@ public class DatatableCommandFromApiJsonDeserializer {
 
         final String apptableName = this.fromApiJsonHelper.extractStringNamed(APPTABLE_NAME, element);
         baseDataValidator.reset().parameter(APPTABLE_NAME).value(apptableName).notBlank().notExceedingLengthOf(50)
-                .isOneOfTheseValues(SUPPORTED_APPTABLE_NAMES);
+                .isOneOfTheseStringValues(EntityTables.getEntitiesList());
 
-        if (M_CLIENT.equals(apptableName)) {
-            String entitySubType = this.fromApiJsonHelper.extractStringNamed(ENTITY_SUB_TYPE, element);
-            baseDataValidator.reset().parameter(ENTITY_SUB_TYPE).value(entitySubType).notBlank(); // Person or Entity
-        }
+        validateEntitySubType(baseDataValidator, element, apptableName);
         final String fkColumnName = (apptableName != null) ? apptableName.substring(2) + "_id" : "";
 
         final Boolean multiRow = this.fromApiJsonHelper.extractBooleanNamed(MULTI_ROW, element);
@@ -194,6 +181,14 @@ public class DatatableCommandFromApiJsonDeserializer {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
+    private void validateEntitySubType(final DataValidatorBuilder baseDataValidator, final JsonElement element, final String apptableName) {
+        EntityTables entityTable = EntityTables.fromName(apptableName);
+        if (entityTable != null && EntityTables.CLIENT == entityTable) {
+            String entitySubType = this.fromApiJsonHelper.extractStringNamed(ENTITY_SUB_TYPE, element);
+            baseDataValidator.reset().parameter(ENTITY_SUB_TYPE).value(entitySubType).notBlank(); // Person or Entity
+        }
+    }
+
     public void validateForUpdate(final String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -218,12 +213,9 @@ public class DatatableCommandFromApiJsonDeserializer {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final String apptableName = this.fromApiJsonHelper.extractStringNamed(APPTABLE_NAME, element);
         baseDataValidator.reset().parameter(APPTABLE_NAME).value(apptableName).ignoreIfNull().notBlank()
-                .isOneOfTheseValues(SUPPORTED_APPTABLE_NAMES);
+                .isOneOfTheseStringValues(EntityTables.getEntitiesList());
 
-        if (M_CLIENT.equals(apptableName)) {
-            String entitySubType = this.fromApiJsonHelper.extractStringNamed(ENTITY_SUB_TYPE, element);
-            baseDataValidator.reset().parameter(ENTITY_SUB_TYPE).value(entitySubType).notBlank(); // Person or Entity
-        }
+        validateEntitySubType(baseDataValidator, element, apptableName);
 
         final String fkColumnName = (apptableName != null) ? apptableName.substring(2) + "_id" : "";
 

@@ -70,6 +70,7 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeReso
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
@@ -737,7 +738,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             validateDatatableName(datatableName);
-            validateAppTable(apptableName);
+            validateAppTable(actualAppTableName);
             final boolean isConstraintApproach = this.configurationDomainService.isConstraintApproachEnabledForDatatables();
             final String fkColumnName = apptableName.substring(2) + "_id";
             final String dataTableNameAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
@@ -1714,98 +1715,102 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
          * unfortunately have to, one way or another, be able to restrict data to the users office hierarchy. Here, a
          * few key tables are done. But if additional fields are needed on other tables the same pattern applies
          */
-
         final AppUser currentUser = this.context.authenticatedUser();
+        String currentUserOfficeHierarchy = currentUser.getOffice().getHierarchy();
+        String officeHierarchyCondition = " o.hierarchy like '" + currentUserOfficeHierarchy + "%'";
         String scopedSQL = null;
         /*
          * m_loan and m_savings_account are connected to an m_office thru either an m_client or an m_group If both it
          * means it relates to an m_client that is in a group (still an m_client account)
          */
-        if (appTable.equalsIgnoreCase("m_loan")) {
-            scopedSQL = "select distinct x.* from ("
-                    + " (select o.id as officeId, l.group_id as groupId, l.client_id as clientId, null as savingsId, l.id as loanId, null as entityId from m_loan l "
-                    + " join m_client c on c.id = l.client_id " + " join m_office o on o.id = c.office_id and o.hierarchy like '"
-                    + currentUser.getOffice().getHierarchy() + "%'" + " where l.id = " + appTableId + ")" + " union all "
-                    + " (select o.id as officeId, l.group_id as groupId, l.client_id as clientId, null as savingsId, l.id as loanId, null as entityId from m_loan l "
-                    + " join m_group g on g.id = l.group_id " + " join m_office o on o.id = g.office_id and o.hierarchy like '"
-                    + currentUser.getOffice().getHierarchy() + "%'" + " where l.id = " + appTableId + ")" + " ) as x";
+        EntityTables entityTable = EntityTables.fromName(appTable);
+        switch (entityTable) {
+            case LOAN:
+                scopedSQL = "select distinct x.* from ("
+                        + " (select o.id as officeId, l.group_id as groupId, l.client_id as clientId, null as savingsId, l.id as loanId, null as entityId from m_loan l "
+                        + getClientOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "l") + " where l.id = " + appTableId + ")"
+                        + " union all "
+                        + " (select o.id as officeId, l.group_id as groupId, l.client_id as clientId, null as savingsId, l.id as loanId, null as entityId from m_loan l "
+                        + getGroupOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "l") + " where l.id = " + appTableId + ")"
+                        + " ) as x";
+            break;
+            case SAVING:
+                scopedSQL = "select distinct x.* from ("
+                        + " (select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, null as entityId from m_savings_account s "
+                        + getClientOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "s") + " where s.id = " + appTableId + ")"
+                        + " union all "
+                        + " (select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, null as entityId from m_savings_account s "
+                        + getGroupOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "s") + " where s.id = " + appTableId + ")"
+                        + " ) as x";
+            break;
+            case SAVINGS_TRANSACTION:
+                scopedSQL = "select distinct x.* from ("
+                        + " (select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, t.id as entityId from m_savings_account_transaction t"
+                        + " join m_savings_account s on t.savings_account_id = s.id "
+                        + getClientOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "s") + " where t.id = " + appTableId + ")"
+                        + " union all "
+                        + " (select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, t.id as entityId from m_savings_account_transaction t "
+                        + " join m_savings_account s on t.savings_account_id = s.id "
+                        + getGroupOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "s") + " where t.id = " + appTableId + ")"
+                        + " ) as x";
+            break;
+            case CLIENT:
+                scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, null as savingsId, null as loanId, null as entityId from m_client c "
+                        + getOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "c") + " where c.id = " + appTableId;
+            break;
+            case GROUP:
+                scopedSQL = "select o.id as officeId, g.id as groupId, null as clientId, null as savingsId, null as loanId, null as entityId from m_group g "
+                        + getOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "g") + " where g.id = " + appTableId;
+            break;
+            case OFFICE:
+                scopedSQL = "select o.id as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, null as entityId from m_office o "
+                        + " where " + officeHierarchyCondition + " and o.id = " + appTableId;
+            break;
+            case PRODUCT_LOAN:
+            case SAVINGS_PRODUCT:
+            case SHARE_PRODUCT:
+                scopedSQL = "select null as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, p.id as entityId from "
+                        + appTable + " as p WHERE p.id = " + appTableId;
+            break;
+            default:
+                throw new PlatformDataIntegrityException("error.msg.invalid.dataScopeCriteria",
+                        "Application Table: " + appTable + " not catered for in data Scoping");
         }
-        if (appTable.equalsIgnoreCase("m_savings_account")) {
-            scopedSQL = "select distinct x.* from ("
-                    + " (select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, null as entityId from m_savings_account s "
-                    + " join m_client c on c.id = s.client_id " + " join m_office o on o.id = c.office_id and o.hierarchy like '"
-                    + currentUser.getOffice().getHierarchy() + "%'" + " where s.id = " + appTableId + ")" + " union all "
-                    + " (select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, null as entityId from m_savings_account s "
-                    + " join m_group g on g.id = s.group_id " + " join m_office o on o.id = g.office_id and o.hierarchy like '"
-                    + currentUser.getOffice().getHierarchy() + "%'" + " where s.id = " + appTableId + ")" + " ) as x";
-        }
-        if (appTable.equalsIgnoreCase("m_client")) {
-            scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, null as savingsId, null as loanId, null as entityId from m_client c "
-                    + " join m_office o on o.id = c.office_id and o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'"
-                    + " where c.id = " + appTableId;
-        }
-        if (appTable.equalsIgnoreCase("m_group") || appTable.equalsIgnoreCase("m_center")) {
-            scopedSQL = "select o.id as officeId, g.id as groupId, null as clientId, null as savingsId, null as loanId, null as entityId from m_group g "
-                    + " join m_office o on o.id = g.office_id and o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'"
-                    + " where g.id = " + appTableId;
-        }
-        if (appTable.equalsIgnoreCase("m_office")) {
-            scopedSQL = "select o.id as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, null as entityId from m_office o "
-                    + " where o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'" + " and o.id = " + appTableId;
-        }
-
-        if (appTable.equalsIgnoreCase("m_product_loan") || appTable.equalsIgnoreCase("m_savings_product")
-                || appTable.equalsIgnoreCase("m_share_product")) {
-            scopedSQL = "select null as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, p.id as entityId from "
-                    + appTable + " as p WHERE p.id = " + appTableId;
-        }
-
-        if (scopedSQL == null) {
-            throw new PlatformDataIntegrityException("error.msg.invalid.dataScopeCriteria",
-                    "Application Table: " + appTable + " not catered for in data Scoping");
-        }
-
         return scopedSQL;
 
     }
 
+    private String getClientOfficeJoinCondition(String currentUserOfficeHierarchy, Long appTableId, String appTableAlias) {
+        StringBuilder clientOfficeJoinBuilder = new StringBuilder();
+        clientOfficeJoinBuilder.append(" join m_client c on c.id = ").append(appTableAlias).append(".client_id ")
+                .append(getOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "c"));
+        return clientOfficeJoinBuilder.toString();
+    }
+
+    private String getGroupOfficeJoinCondition(String currentUserOfficeHierarchy, Long appTableId, String appTableAlias) {
+        StringBuilder clientOfficeJoinBuilder = new StringBuilder();
+        clientOfficeJoinBuilder.append(" join m_group g on g.id = ").append(appTableAlias).append(".client_id ")
+                .append(getOfficeJoinCondition(currentUserOfficeHierarchy, appTableId, "g"));
+        return clientOfficeJoinBuilder.toString();
+    }
+
+    private String getOfficeJoinCondition(String currentUserOfficeHierarchy, Long appTableId, String joiningTableAlias) {
+        StringBuilder officeJoinBuilder = new StringBuilder();
+        officeJoinBuilder.append(" join m_office o on o.id = ").append(joiningTableAlias).append(".office_id and ")
+                .append(" o.hierarchy like '").append(currentUserOfficeHierarchy).append("%' ");
+        return officeJoinBuilder.toString();
+    }
+
     private void validateAppTable(final String appTable) {
-
-        if (appTable.equalsIgnoreCase("m_loan")) {
-            return;
+        if (EntityTables.fromName(appTable) == null) {
+            throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Application Table: " + appTable,
+                    "name", appTable);
         }
-        if (appTable.equalsIgnoreCase("m_savings_account")) {
-            return;
-        }
-        if (appTable.equalsIgnoreCase("m_client")) {
-            return;
-        }
-        if (appTable.equalsIgnoreCase("m_group")) {
-            return;
-        }
-        if (appTable.equalsIgnoreCase("m_center")) {
-            return;
-        }
-        if (appTable.equalsIgnoreCase("m_office")) {
-            return;
-        }
-        if (appTable.equalsIgnoreCase("m_product_loan")) {
-            return;
-        }
-        if (appTable.equalsIgnoreCase("m_savings_product")) {
-            return;
-        }
-        if (appTable.equalsIgnoreCase("m_share_product")) {
-            return;
-        }
-
-        throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Application Table: " + appTable, "name",
-                appTable);
     }
 
     private String mapToActualAppTable(final String appTable) {
-        if (appTable.equalsIgnoreCase("m_center")) {
-            return "m_group";
+        if ("m_center".equalsIgnoreCase(appTable)) {
+            return EntityTables.GROUP.getName();
         }
         return appTable;
     }

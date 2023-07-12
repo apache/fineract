@@ -105,10 +105,11 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                     throw new EntityDatatableCheckAlreadyExistsException(entity, status, datatableName);
                 }
             } else {
-                if (entity.equals("m_loan")) {
+                EntityTables entityTable = EntityTables.fromName(entity);
+                if (EntityTables.LOAN == entityTable) {
                     // if invalid loan product id, throws exception
                     this.loanProductReadPlatformService.retrieveLoanProduct(productId);
-                } else if (entity.equals("m_savings_account")) {
+                } else if (EntityTables.SAVING == entityTable) {
                     // if invalid savings product id, throws exception
                     this.savingsProductReadPlatformService.retrieveOne(productId);
                 } else {

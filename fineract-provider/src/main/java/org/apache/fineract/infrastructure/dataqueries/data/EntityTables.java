@@ -36,7 +36,12 @@ public enum EntityTables {
                                     ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.APPROVE.getCode(),
                                             StatusEnum.ACTIVATE.getCode(), StatusEnum.WITHDRAWN.getCode(), StatusEnum.REJECTED.getCode(),
                                             StatusEnum.CLOSE.getCode()),
-                                    "savings_account_id");
+                                    "savings_account_id"), SAVINGS_TRANSACTION("m_savings_account_transaction", ImmutableList.of(),
+                                            "savings_account_transcation_id"), OFFICE("m_office", ImmutableList.of(),
+                                                    "office_id"), PRODUCT_LOAN("m_product_loan", ImmutableList.of(),
+                                                            "product_loan_id"), SAVINGS_PRODUCT("m_savings_product", ImmutableList.of(),
+                                                                    "savings_product_id"), SHARE_PRODUCT("m_share_product",
+                                                                            ImmutableList.of(), "share_product_id");
 
     private static final Map<String, EntityTables> lookup = new HashMap<String, EntityTables>();
 
@@ -75,6 +80,10 @@ public enum EntityTables {
             return lookup.get(name).getCodes();
         }
         return ImmutableList.of();
+    }
+
+    public static EntityTables fromName(String name) {
+        return name == null ? null : lookup.get(name.toLowerCase());
     }
 
     public ImmutableList<Integer> getCodes() {
