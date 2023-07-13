@@ -76,6 +76,7 @@ public class LoanProductTestBuilder {
 
     private String nameOfLoanProduct = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
     private String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private String externalId = null;
     private String principal = "10000.00";
     private String numberOfRepayments = "5";
     private String repaymentFrequency = MONTHS;
@@ -160,6 +161,7 @@ public class LoanProductTestBuilder {
         }
         map.put("name", this.nameOfLoanProduct);
         map.put("shortName", this.shortName);
+        map.put("externalId", this.externalId);
         map.put("currencyCode", this.currencyCode);
         map.put("locale", LOCALE);
         map.put("dateFormat", "dd MMMM yyyy");
@@ -279,6 +281,11 @@ public class LoanProductTestBuilder {
         }
 
         return map;
+    }
+
+    public LoanProductTestBuilder withExternalId(String externalId) {
+        this.externalId = externalId;
+        return this;
     }
 
     public LoanProductTestBuilder withInstallmentAmountInMultiplesOf(String installmentAmountInMultiplesOf) {

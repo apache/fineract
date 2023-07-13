@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.domain;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -33,4 +34,6 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>,
     Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
 
     List<LoanProduct> findByDelinquencyBucketNotNull();
+
+    LoanProduct findByExternalId(ExternalId externalId);
 }

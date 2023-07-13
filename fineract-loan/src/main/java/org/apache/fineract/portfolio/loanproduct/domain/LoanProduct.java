@@ -48,6 +48,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -130,7 +132,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     private LocalDate closeDate;
 
     @Column(name = "external_id", length = 100, unique = true)
-    private String externalId;
+    private ExternalId externalId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<LoanProductBorrowerCycleVariations> borrowerCycleVariations = new HashSet<>();
@@ -290,7 +292,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
         final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
-        final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+        final ExternalId externalId = ExternalIdFactory.produce(command.stringValueOfParameterNamedAllowingNull("externalId"));
 
         final boolean useBorrowerCycle = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME);
@@ -593,7 +595,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance, final List<Charge> charges, final AccountingRuleType accountingRuleType,
-            final boolean includeInBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final String externalId,
+            final boolean includeInBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final ExternalId externalId,
             final boolean useBorrowerCycle, final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations,
             final boolean multiDisburseLoan, final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance,
             final Integer graceOnArrearsAgeing, final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType,
@@ -964,8 +966,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         }
 
         final String externalIdTypeParamName = "externalId";
-        if (command.isChangeInStringParameterNamed(externalIdTypeParamName, this.externalId)) {
-            final String newValue = command.stringValueOfParameterNamed(externalIdTypeParamName);
+        if (command.isChangeInExternalIdParameterNamed(externalIdTypeParamName, this.externalId)) {
+            final ExternalId newValue = ExternalIdFactory.produce(command.stringValueOfParameterNamed(externalIdTypeParamName));
             actualChanges.put(accountingTypeParamName, newValue);
             this.externalId = newValue;
         }
@@ -1315,7 +1317,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         return this.name;
     }
 
-    public String getExternalId() {
+    public ExternalId getExternalId() {
         return this.externalId;
     }
 

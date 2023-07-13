@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
@@ -638,6 +639,16 @@ public final class JsonCommand {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
             final String workingValue = passwordValueOfParameterNamed(parameterName, platformPasswordEncoder, saltValue);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
+    public boolean isChangeInExternalIdParameterNamed(final String parameterName, final ExternalId externalId) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final String workingValue = stringValueOfParameterNamed(parameterName);
+            String existingValue = externalId.getValue();
             isChanged = differenceExists(existingValue, workingValue);
         }
         return isChanged;
