@@ -116,6 +116,13 @@ public class Sender {
         return endpoint;
     }
 
+    public static String sanitize(String message) {
+        if (message == null) {
+            return null;
+        }
+        return message.replace("\n", "\\n").replace("\r", "\\r");
+    }
+
     /**
      * Set the underlying URLConnection's connect timeout (in milliseconds). A timeout value of 0 specifies an infinite
      * timeout.
@@ -270,7 +277,7 @@ public class Sender {
                     String error = jsonResponse.get(JSON_ERROR).getAsString();
                     resultBuilder.errorCode(error);
                 } else {
-                    LOG.log(Level.WARNING, "Expected " + JSON_MESSAGE_ID + " or " + JSON_ERROR + " found: " + responseBody);
+                    LOG.log(Level.WARNING, "Expected " + JSON_MESSAGE_ID + " or " + JSON_ERROR + " found: " + sanitize(responseBody));
                     return null;
                 }
             } else if (jsonResponse.has(JSON_SUCCESS) && jsonResponse.has(JSON_FAILURE)) {
@@ -288,7 +295,7 @@ public class Sender {
                 }
                 resultBuilder.success(success).failure(failure).failedRegistrationIds(failedIds);
             } else {
-                LOG.warning("Unrecognized response: " + responseBody);
+                LOG.warning("Unrecognized response: " + sanitize(responseBody));
                 throw newIoException(responseBody, new Exception("Unrecognized response."));
             }
             return resultBuilder.build();
@@ -496,7 +503,7 @@ public class Sender {
         if (status != 200) {
             try {
                 responseBody = getAndClose(conn.getErrorStream());
-                LOG.finest("JSON error response: " + responseBody);
+                LOG.finest("JSON error response: " + sanitize(responseBody));
             } catch (IOException e) {
                 // ignore the exception since it will thrown an
                 // InvalidRequestException
@@ -568,7 +575,7 @@ public class Sender {
         // log exception, as IOException constructor that takes a message and
         // cause
         // is only available on Java 6
-        String msg = "Error parsing JSON response (" + responseBody + ")";
+        String msg = "Error parsing JSON response (" + sanitize(responseBody) + ")";
         LOG.log(Level.WARNING, msg, e);
         return new IOException(msg + ":" + e);
     }
