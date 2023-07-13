@@ -24,8 +24,10 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -42,19 +44,21 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVa
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductGuaranteeData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductInterestRecalculationData;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.service.RateReadService;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -64,20 +68,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
-
-    @Autowired
-    public LoanProductReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final ChargeReadPlatformService chargeReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService,
-            final DelinquencyReadPlatformService delinquencyReadPlatformService, final DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.context = context;
-        this.chargeReadPlatformService = chargeReadPlatformService;
-        this.jdbcTemplate = jdbcTemplate;
-        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-        this.rateReadService = rateReadService;
-        this.sqlGenerator = sqlGenerator;
-        this.delinquencyReadPlatformService = delinquencyReadPlatformService;
-    }
+    private final LoanProductRepository loanProductRepository;
 
     @Override
     public LoanProductData retrieveLoanProduct(final Long loanProductId) {
@@ -97,6 +88,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);
         }
+    }
+
+    @Override
+    public LoanProduct retrieveLoanProductByExternalId(final ExternalId externalId) {
+        return loanProductRepository.findByExternalId(externalId);
     }
 
     @Override

@@ -41,6 +41,8 @@ final class LoanProductsApiResourceSwagger {
 
         @Schema(example = "LP Accrual Accounting")
         public String name;
+        @Schema(example = "2075e308-d4a8-44d9-8203-f5a947b8c2f4")
+        public String externalId;
         @Schema(example = "LPAA")
         public String shortName;
         @Schema(example = "non-interest bearing product")

@@ -19,8 +19,10 @@
 package org.apache.fineract.portfolio.loanproduct.service;
 
 import java.util.Collection;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 public interface LoanProductReadPlatformService {
 
@@ -33,6 +35,8 @@ public interface LoanProductReadPlatformService {
     Collection<LoanProductData> retrieveAllLoanProductsForLookup(boolean activeOnly);
 
     LoanProductData retrieveLoanProduct(Long productId);
+
+    LoanProduct retrieveLoanProductByExternalId(ExternalId externalId);
 
     LoanProductData retrieveNewLoanProductDetails();
 

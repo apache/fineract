@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanproduct.exception;
 
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -28,6 +29,10 @@ public class LoanProductNotFoundException extends AbstractPlatformResourceNotFou
 
     public LoanProductNotFoundException(final Long id) {
         super("error.msg.loanproduct.id.invalid", "Loan product with identifier " + id + " does not exist", id);
+    }
+
+    public LoanProductNotFoundException(final ExternalId externalId) {
+        super("error.msg.loanproduct.id.invalid", "Loan product with identifier " + externalId + " does not exist", externalId);
     }
 
     public LoanProductNotFoundException(Long id, EmptyResultDataAccessException e) {
