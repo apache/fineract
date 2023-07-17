@@ -584,7 +584,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     public void recalculateAccruals(Loan loan, boolean isInterestCalculationHappened) {
         LocalDate accruedTill = loan.getAccruedTill();
         if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !isInterestCalculationHappened || accruedTill == null || loan.isNpa()
-                || !loan.getStatus().isActive()) {
+                || !loan.getStatus().isActive() || loan.isChargedOff()) {
             return;
         }
 
@@ -889,7 +889,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()
                 // to avoid collision with processIncomeAccrualTransactionOnLoanClosure()
                 && !(loan.getLoanInterestRecalculationDetails() != null
-                        && loan.getLoanInterestRecalculationDetails().isCompoundingToBePostedAsTransaction())) {
+                        && loan.getLoanInterestRecalculationDetails().isCompoundingToBePostedAsTransaction())
+                && !loan.isNpa() && !loan.isChargedOff()) {
 
             MonetaryCurrency currency = loan.getCurrency();
             Money interestPortion = Money.zero(currency);

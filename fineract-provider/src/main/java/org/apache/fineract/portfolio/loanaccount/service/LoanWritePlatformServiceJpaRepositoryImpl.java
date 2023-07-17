@@ -2749,10 +2749,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.cannot.be.a.future.date", errorMessage,
                     transactionDate);
         }
-        if (loan.isInterestBearing()) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.is.interest.bearing",
-                    "Loan: " + loanId + " Charge-off is not allowed. Loan Account is interest bearing", loanId);
-        }
+
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargeOffPreBusinessEvent(loan));
 
         if (command.hasParameter(LoanApiConstants.chargeOffReasonIdParamName)) {

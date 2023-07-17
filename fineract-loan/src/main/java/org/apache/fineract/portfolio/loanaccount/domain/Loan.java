@@ -3475,7 +3475,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private void processIncomeAccrualTransactionOnLoanClosure() {
         if (this.loanInterestRecalculationDetails != null && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()
-                && this.getStatus().isClosedObligationsMet()) {
+                && this.getStatus().isClosedObligationsMet() && !isNpa() && !isChargedOff()) {
 
             ExternalId externalId = ExternalId.empty();
             boolean isExternalIdAutoGenerationEnabled = TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled();
@@ -5747,7 +5747,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private LoanScheduleDTO getRecalculatedSchedule(final ScheduleGeneratorDTO generatorDTO) {
 
-        if (!this.repaymentScheduleDetail().isInterestRecalculationEnabled() || isNpa) {
+        if (!this.repaymentScheduleDetail().isInterestRecalculationEnabled() || isNpa || isChargedOff()) {
             return null;
         }
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
