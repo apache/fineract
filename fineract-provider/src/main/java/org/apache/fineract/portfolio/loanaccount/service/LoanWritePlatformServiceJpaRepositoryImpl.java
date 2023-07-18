@@ -1148,7 +1148,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (paymentDetail != null) {
                 this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
             }
-            this.loanTransactionRepository.saveAndFlush(newTransactionDetail);
+            loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransactionDetail);
         }
 
         /***
@@ -1294,7 +1294,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 LoanTransactionRelationTypeEnum.CHARGEBACK);
         this.loanTransactionRelationRepository.save(loanTransactionRelation);
 
-        newTransaction = this.loanTransactionRepository.saveAndFlush(newTransaction);
+        newTransaction = loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
 
         loan.handleChargebackTransaction(newTransaction, defaultLoanLifecycleStateMachine);
 
@@ -1383,7 +1383,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final ChangedTransactionDetail changedTransactionDetail = loan.waiveInterest(waiveInterestTransaction,
                 defaultLoanLifecycleStateMachine, existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO);
 
-        this.loanTransactionRepository.saveAndFlush(waiveInterestTransaction);
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(waiveInterestTransaction);
 
         /***
          * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
@@ -1475,7 +1475,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final ChangedTransactionDetail changedTransactionDetail = loan.closeAsWrittenOff(command, defaultLoanLifecycleStateMachine, changes,
                 existingTransactionIds, existingReversedTransactionIds, currentUser, scheduleGeneratorDTO);
         LoanTransaction writeOff = changedTransactionDetail.getNewTransactionMappings().remove(0L);
-        this.loanTransactionRepository.saveAndFlush(writeOff);
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(writeOff);
         for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
             this.loanTransactionRepository.save(mapEntry.getValue());
             this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
@@ -1543,7 +1543,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO);
         final LoanTransaction possibleClosingTransaction = changedTransactionDetail.getNewTransactionMappings().remove(0L);
         if (possibleClosingTransaction != null) {
-            this.loanTransactionRepository.saveAndFlush(possibleClosingTransaction);
+            loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(possibleClosingTransaction);
         }
         for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
             this.loanTransactionRepository.save(mapEntry.getValue());
@@ -1734,7 +1734,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine;
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_INITIATE_TRANSFER, loan);
 
-        this.loanTransactionRepository.saveAndFlush(newTransferTransaction);
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransferTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -1764,7 +1764,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.reassignLoanOfficer(loanOfficer, transferDate);
         }
 
-        this.loanTransactionRepository.saveAndFlush(newTransferAcceptanceTransaction);
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransferAcceptanceTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -1790,7 +1790,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine;
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAW_TRANSFER, loan);
 
-        this.loanTransactionRepository.saveAndFlush(newTransferAcceptanceTransaction);
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransferAcceptanceTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -2769,7 +2769,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
 
         LoanTransaction chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
-        loanTransactionRepository.saveAndFlush(chargeOffTransaction);
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(chargeOffTransaction);
         loan.addLoanTransaction(chargeOffTransaction);
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
@@ -2829,7 +2829,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         chargedOffTransaction.manuallyAdjustedOrReversed();
 
         loan.liftChargeOff();
-        loanTransactionRepository.saveAndFlush(chargedOffTransaction);
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(chargedOffTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoChargeOffBusinessEvent(chargedOffTransaction));

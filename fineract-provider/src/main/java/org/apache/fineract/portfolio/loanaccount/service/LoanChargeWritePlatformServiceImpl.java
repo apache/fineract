@@ -509,7 +509,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 existingTransactionIds, existingReversedTransactionIds, loanInstallmentNumber, scheduleGeneratorDTO, accruedCharge,
                 externalId);
 
-        this.loanTransactionRepository.saveAndFlush(waiveTransaction);
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(waiveTransaction);
         this.loanRepositoryWrapper.save(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -1017,7 +1017,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
          **/
         if (loan.getStatus().isActive() && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
             final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
-            this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
+            loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(applyLoanChargeTransaction);
         }
         return loanCharge.getDueLocalDate() == null || DateUtils.getBusinessLocalDate().isAfter(loanCharge.getDueLocalDate());
     }
