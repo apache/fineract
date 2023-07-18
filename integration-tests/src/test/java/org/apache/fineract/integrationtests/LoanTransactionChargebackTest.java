@@ -293,6 +293,8 @@ public class LoanTransactionChargebackTest {
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             assertNotNull(getLoansLoanIdResponse);
             loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
+            assertNotNull(getLoansLoanIdResponse.getTimeline());
+            assertEquals(todaysDate, getLoansLoanIdResponse.getTimeline().getActualMaturityDate());
 
             reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
 
@@ -307,6 +309,10 @@ public class LoanTransactionChargebackTest {
             loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.active");
 
             loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("500.00"));
+
+            assertNotNull(getLoansLoanIdResponse.getTimeline());
+            assertEquals(getLoansLoanIdResponse.getTimeline().getExpectedMaturityDate(),
+                    getLoansLoanIdResponse.getTimeline().getActualMaturityDate());
 
             // N+1 Scenario
             loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
@@ -397,6 +403,11 @@ public class LoanTransactionChargebackTest {
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.active");
 
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("100.00"));
+
+        assertNotNull(getLoansLoanIdResponse.getTimeline());
+        assertEquals(getLoansLoanIdResponse.getTimeline().getExpectedMaturityDate(),
+                getLoansLoanIdResponse.getTimeline().getActualMaturityDate());
+
         GetJournalEntriesTransactionIdResponse journalEntries = journalEntryHelper
                 .getJournalEntries("L" + chargebackTransactionId.toString());
         assertEquals(3L, journalEntries.getTotalFilteredRecords());
