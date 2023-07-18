@@ -7124,7 +7124,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void handleMaturityDateActivate() {
-        if (this.expectedMaturityDate != null && this.actualMaturityDate == null) {
+        if (this.expectedMaturityDate != null && !this.expectedMaturityDate.equals(this.actualMaturityDate)) {
             this.actualMaturityDate = this.expectedMaturityDate;
         }
     }
