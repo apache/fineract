@@ -1108,7 +1108,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "en_GB")
         public String locale;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "1000.00")
         public BigDecimal principal;
         @Schema(example = "12")
@@ -1242,7 +1242,7 @@ final class LoansApiResourceSwagger {
         @Schema
         public String submittedOnDate;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "5000")
         public Long principal;
         @Schema(example = "10")
