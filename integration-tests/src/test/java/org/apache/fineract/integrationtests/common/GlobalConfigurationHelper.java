@@ -119,9 +119,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 50 global configurations.
-        Assertions.assertEquals(51, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(51, actualGlobalConfigurations.size());
+        Assertions.assertEquals(52, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(52, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -565,6 +564,15 @@ public class GlobalConfigurationHelper {
         accrualForChargeDate.put("trapDoor", false);
         accrualForChargeDate.put("string_value", "due-date");
         defaults.add(accrualForChargeDate);
+
+        HashMap<String, Object> assetExternalizationOfNonActiveLoans = new HashMap<>();
+        assetExternalizationOfNonActiveLoans.put("id", 57);
+        assetExternalizationOfNonActiveLoans.put("name", "asset-externalization-of-non-active-loans");
+        assetExternalizationOfNonActiveLoans.put("value", 0);
+        assetExternalizationOfNonActiveLoans.put("enabled", true);
+        assetExternalizationOfNonActiveLoans.put("trapDoor", false);
+        assetExternalizationOfNonActiveLoans.put("string_value", "due-date");
+        defaults.add(assetExternalizationOfNonActiveLoans);
 
         return defaults;
     }
