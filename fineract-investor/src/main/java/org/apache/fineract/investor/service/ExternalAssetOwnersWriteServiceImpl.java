@@ -18,6 +18,11 @@
  */
 package org.apache.fineract.investor.service;
 
+import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING;
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.ACTIVE;
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.TRANSFER_IN_PROGRESS;
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.TRANSFER_ON_HOLD;
+
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -45,7 +50,6 @@ import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.investor.data.ExternalTransferRequestParameters;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.data.ExternalTransferSubStatus;
@@ -65,15 +69,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersWriteService {
 
     private static final LocalDate FUTURE_DATE_9999_12_31 = LocalDate.of(9999, 12, 31);
-    private static final List<LoanStatus> NON_CLOSED_LOAN_STATUSES = List.of(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED,
-            LoanStatus.ACTIVE, LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD);
+    private static final List<LoanStatus> ACTIVE_LOAN_STATUSES = List.of(ACTIVE, TRANSFER_IN_PROGRESS, TRANSFER_ON_HOLD);
     private static final List<ExternalTransferStatus> BUYBACK_READY_STATUSES = List.of(ExternalTransferStatus.PENDING,
             ExternalTransferStatus.ACTIVE);
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
     private final ExternalAssetOwnerRepository externalAssetOwnerRepository;
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanRepository loanRepository;
-    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     @Transactional
@@ -141,7 +143,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         if (effectiveTransfers.size() == 2) {
             throw new ExternalAssetOwnerInitiateTransferException("This loan cannot be sold, there is already an in progress transfer");
         } else if (effectiveTransfers.size() == 1) {
-            if (ExternalTransferStatus.PENDING.equals(effectiveTransfers.get(0).getStatus())) {
+            if (PENDING.equals(effectiveTransfers.get(0).getStatus())) {
                 throw new ExternalAssetOwnerInitiateTransferException(
                         "External asset owner transfer is already in PENDING state for this loan");
             } else if (ExternalTransferStatus.ACTIVE.equals(effectiveTransfers.get(0).getStatus())) {
@@ -190,8 +192,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         } else if (!Objects.equals(effective.get(0).getId(), selectedTransfer.getId())) {
             throw new ExternalAssetOwnerInitiateTransferException(
                     String.format("This loan cannot be cancelled, selected transfer is not the latest"));
-        } else if (selectedTransfer.getStatus() != ExternalTransferStatus.PENDING
-                && selectedTransfer.getStatus() != ExternalTransferStatus.BUYBACK) {
+        } else if (selectedTransfer.getStatus() != PENDING && selectedTransfer.getStatus() != ExternalTransferStatus.BUYBACK) {
             throw new ExternalAssetOwnerInitiateTransferException(
                     "This loan cannot be cancelled, the selected transfer status is not pending or buyback");
         }
@@ -256,7 +257,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     }
 
     private void validateLoanStatus(LoanIdAndExternalIdAndStatus entity) {
-        if (!NON_CLOSED_LOAN_STATUSES.contains(LoanStatus.fromInt(entity.getLoanStatus()))) {
+        if (!ACTIVE_LOAN_STATUSES.contains(LoanStatus.fromInt(entity.getLoanStatus()))) {
             throw new ExternalAssetOwnerInitiateTransferException("Loan is not in active status");
         }
     }
@@ -268,7 +269,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         ExternalAssetOwner owner = getOwner(json);
         externalAssetOwnerTransfer.setOwner(owner);
         externalAssetOwnerTransfer.setExternalId(getTransferExternalIdFromJson(json));
-        externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.PENDING);
+        externalAssetOwnerTransfer.setStatus(PENDING);
         externalAssetOwnerTransfer.setPurchasePriceRatio(getPurchasePriceRatioFromJson(json));
         externalAssetOwnerTransfer.setSettlementDate(getSettlementDateFromJson(json));
         externalAssetOwnerTransfer.setEffectiveDateFrom(effectiveFrom);
