@@ -19,7 +19,11 @@
 package org.apache.fineract.infrastructure.core.domain;
 
 import java.io.Serializable;
+import lombok.Builder;
+import lombok.extern.jackson.Jacksonized;
 
+@Jacksonized
+@Builder
 public class FineractPlatformTenant implements Serializable {
 
     private final Long id;

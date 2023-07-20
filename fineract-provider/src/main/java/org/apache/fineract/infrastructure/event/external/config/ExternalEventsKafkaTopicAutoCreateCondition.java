@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.producer;
+package org.apache.fineract.infrastructure.event.external.config;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-public interface ExternalEventProducer {
+public class ExternalEventsKafkaTopicAutoCreateCondition extends AllNestedConditions {
 
-    /**
-     * Sends the created ExternalEvents
-     *
-     * @param partitions
-     *            is a Map<Long, List<byte[]>> partitions, the key here the id of the aggregated root. The value is list
-     *            of external events belong to the same key, serialized into byte array
-     * @throws AcknowledgementTimeoutException
-     */
-    void sendEvents(Map<Long, List<byte[]>> partitions) throws AcknowledgementTimeoutException;
+    public ExternalEventsKafkaTopicAutoCreateCondition() {
+        super(ConfigurationPhase.PARSE_CONFIGURATION);
+    }
+
+    @ConditionalOnProperty(value = "fineract.events.external.producer.kafka.enabled", havingValue = "true")
+    static class ExternalEventsKafkaCondition {}
+
+    @ConditionalOnProperty(value = "fineract.events.external.producer.kafka.topic.auto-create", havingValue = "true")
+    static class TopicAutoCreateCondition {}
+
 }

@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.springbatch.messagehandler;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.spring;
 
 import org.apache.fineract.infrastructure.springbatch.InputChannelInterceptor;
-import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.SpringEventWorkerCondition;
+import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.spring.SpringEventWorkerCondition;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.event.core.MessagingEvent;
 import org.springframework.integration.event.inbound.ApplicationEventListeningMessageProducer;
 import org.springframework.integration.handler.LoggingHandler;
@@ -44,7 +43,7 @@ public class SpringEventWorkerConfig {
 
     @Bean
     public IntegrationFlow inboundFlow() {
-        return IntegrationFlows.from(eventListener()) //
+        return IntegrationFlow.from(eventListener()) //
                 .log(LoggingHandler.Level.DEBUG) //
                 .channel(inboundRequests) //
                 .intercept(inputInterceptor) //

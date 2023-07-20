@@ -22,10 +22,14 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashMap;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 
 @AllArgsConstructor
+@Jacksonized
+@Builder
 @Getter
 public class FineractContext implements Serializable {
 

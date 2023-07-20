@@ -19,9 +19,13 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -161,6 +165,7 @@ public class FineractProperties {
 
         private FineractRemoteJobMessageHandlerSpringEventsProperties springEvents;
         private FineractRemoteJobMessageHandlerJmsProperties jms;
+        private FineractRemoteJobMessageHandlerKafkaProperties kafka;
     }
 
     @Getter
@@ -182,6 +187,73 @@ public class FineractProperties {
 
         public boolean isBrokerPasswordProtected() {
             return StringUtils.isNotBlank(brokerUsername) || StringUtils.isNotBlank(brokerPassword);
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class FineractRemoteJobMessageHandlerKafkaProperties {
+
+        private boolean enabled;
+        private String bootstrapServers;
+        private KafkaTopicProperties topic;
+        private KafkaConsumerProperties consumer;
+        private KafkaProperties producer;
+        private KafkaProperties admin;
+    }
+
+    @Getter
+    @Setter
+    public static class KafkaTopicProperties {
+
+        private boolean autoCreate;
+        private String name;
+        private int replicas;
+        private int partitions;
+    }
+
+    @Getter
+    @Setter
+    public static class KafkaConsumerProperties extends KafkaProperties {
+
+        private String groupId;
+    }
+
+    @Getter
+    @Setter
+    @Slf4j
+    public static class KafkaProperties {
+
+        private String extraPropertiesKeyValueSeparator;
+        private String extraPropertiesSeparator;
+        private String extraProperties;
+
+        public Map<String, String> getExtraPropertiesMap() {
+            Map<String, String> map = new HashMap<>();
+            if (StringUtils.isNotEmpty(getExtraProperties()) && validateSeparators()) {
+                String[] lines = StringUtils.split(getExtraProperties(), extraPropertiesSeparator);
+                Arrays.stream(lines).forEach(line -> {
+                    String[] keyAndValue = StringUtils.split(line, extraPropertiesKeyValueSeparator);
+                    if (keyAndValue.length == 2) {
+                        map.put(keyAndValue[0], keyAndValue[1]);
+                    } else {
+                        log.warn("Invalid property: {}", line);
+                    }
+
+                });
+            }
+            return map;
+        }
+
+        private boolean validateSeparators() {
+            boolean valid = (StringUtils.isNotEmpty(extraPropertiesSeparator) && extraPropertiesSeparator.length() == 1
+                    && StringUtils.isNotEmpty(extraPropertiesKeyValueSeparator) && extraPropertiesKeyValueSeparator.length() == 1
+                    && !extraPropertiesSeparator.equals(extraPropertiesKeyValueSeparator));
+            if (!valid) {
+                log.warn("Invalid KafkaProperties configuration, lineSeparator '{}' and keyValueSeparator '{}'", extraPropertiesSeparator,
+                        extraPropertiesKeyValueSeparator);
+            }
+            return valid;
         }
     }
 
@@ -213,6 +285,7 @@ public class FineractProperties {
     public static class FineractExternalEventsProducerProperties {
 
         private FineractExternalEventsProducerJmsProperties jms;
+        private FineractExternalEventsProducerKafkaProperties kafka;
     }
 
     @Getter
@@ -233,6 +306,18 @@ public class FineractProperties {
         public boolean isBrokerPasswordProtected() {
             return StringUtils.isNotBlank(brokerUsername) || StringUtils.isNotBlank(brokerPassword);
         }
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExternalEventsProducerKafkaProperties {
+
+        private boolean enabled;
+        private String bootstrapServers;
+        private KafkaTopicProperties topic;
+        private KafkaProperties producer;
+        private KafkaProperties admin;
+        private int timeoutInSeconds;
     }
 
     @Getter

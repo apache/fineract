@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.springbatch.messagehandler;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.jms;
 
 import jakarta.jms.JMSException;
 import jakarta.jms.MessageListener;
@@ -24,7 +24,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.springbatch.ContextualMessage;
 import org.apache.fineract.infrastructure.springbatch.InputChannelInterceptor;
-import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.JmsWorkerCondition;
+import org.apache.fineract.infrastructure.springbatch.messagehandler.StepExecutionRequestHandler;
+import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.jms.JmsWorkerCondition;
 import org.springframework.batch.integration.partition.StepExecutionRequest;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Conditional;

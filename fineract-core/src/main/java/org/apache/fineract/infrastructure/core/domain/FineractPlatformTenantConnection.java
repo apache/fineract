@@ -21,13 +21,19 @@ package org.apache.fineract.infrastructure.core.domain;
 import java.io.Serializable;
 import java.sql.Connection;
 import javax.sql.DataSource;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * Holds Tenant's DB server connection connection details.
  */
 @Getter
+@Builder
+@AllArgsConstructor
+@Jacksonized
 public class FineractPlatformTenantConnection implements Serializable {
 
     private final Long connectionId;

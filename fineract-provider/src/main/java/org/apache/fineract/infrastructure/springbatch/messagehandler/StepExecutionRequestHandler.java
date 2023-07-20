@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.springbatch.messagehandler;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.JmsWorkerCondition;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobInterruptedException;
 import org.springframework.batch.core.Step;
@@ -28,13 +27,13 @@ import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.StepLocator;
 import org.springframework.batch.integration.partition.StepExecutionRequest;
-import org.springframework.context.annotation.Conditional;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Conditional(JmsWorkerCondition.class)
+@ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
 public class StepExecutionRequestHandler {
 
     private final JobRepository jobRepository;

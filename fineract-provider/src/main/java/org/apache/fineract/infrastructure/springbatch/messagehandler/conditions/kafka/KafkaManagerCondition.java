@@ -16,20 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.springbatch.messagehandler.conditions;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.kafka;
 
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-public class SpringEventWorkerCondition extends AllNestedConditions {
+public class KafkaManagerCondition extends AllNestedConditions {
 
-    public SpringEventWorkerCondition() {
+    public KafkaManagerCondition() {
         super(ConfigurationPhase.PARSE_CONFIGURATION);
     }
 
-    @ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
-    static class WorkerCondition {}
+    @ConditionalOnProperty(value = "fineract.mode.batch-manager-enabled", havingValue = "true")
+    static class ManagerCondition {}
 
-    @ConditionalOnProperty(value = "fineract.remote-job-message-handler.spring-events.enabled", havingValue = "true")
-    static class SpringEventCondition {}
+    @ConditionalOnProperty(value = "fineract.remote-job-message-handler.kafka.enabled", havingValue = "true")
+    static class KafkaCondition {}
 }
