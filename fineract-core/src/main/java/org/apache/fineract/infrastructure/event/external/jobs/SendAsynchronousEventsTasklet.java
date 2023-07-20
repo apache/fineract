@@ -76,7 +76,8 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     }
 
     private boolean isDownstreamChannelEnabled() {
-        return fineractProperties.getEvents().getExternal().getProducer().getJms().isEnabled();
+        return fineractProperties.getEvents().getExternal().getProducer().getJms().isEnabled()
+                || fineractProperties.getEvents().getExternal().getProducer().getKafka().isEnabled();
     }
 
     private List<ExternalEventView> getQueuedEventsBatch() {

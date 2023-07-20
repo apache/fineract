@@ -37,9 +37,12 @@ public class InputChannelInterceptor implements ExecutorChannelInterceptor {
     }
 
     public Message<StepExecutionRequest> beforeHandleMessage(Message<?> message) {
-        ContextualMessage castedMessage = (ContextualMessage) message.getPayload();
-        ThreadLocalContextUtil.init(castedMessage.getContext());
+        return new GenericMessage<>(beforeHandleMessage((ContextualMessage) message.getPayload()));
+    }
+
+    public StepExecutionRequest beforeHandleMessage(ContextualMessage contextualMessage) {
+        ThreadLocalContextUtil.init(contextualMessage.getContext());
         ThreadLocalContextUtil.setActionContext(ActionContext.COB);
-        return new GenericMessage<>(castedMessage.getStepExecutionRequest());
+        return contextualMessage.getStepExecutionRequest();
     }
 }

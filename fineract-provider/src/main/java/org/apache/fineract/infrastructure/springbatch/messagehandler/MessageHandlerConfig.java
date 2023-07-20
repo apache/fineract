@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.producer;
+package org.apache.fineract.infrastructure.springbatch.messagehandler;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import org.springframework.batch.core.step.StepLocator;
+import org.springframework.batch.integration.partition.BeanFactoryStepLocator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-public interface ExternalEventProducer {
+@Configuration
+@ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
+public class MessageHandlerConfig {
 
-    /**
-     * Sends the created ExternalEvents
-     *
-     * @param partitions
-     *            is a Map<Long, List<byte[]>> partitions, the key here the id of the aggregated root. The value is list
-     *            of external events belong to the same key, serialized into byte array
-     * @throws AcknowledgementTimeoutException
-     */
-    void sendEvents(Map<Long, List<byte[]>> partitions) throws AcknowledgementTimeoutException;
+    @Bean
+    public StepLocator stepLocator() {
+        return new BeanFactoryStepLocator();
+    }
+
 }

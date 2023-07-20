@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.springbatch.messagehandler;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.jms;
 
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Session;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.JmsWorkerCondition;
-import org.springframework.batch.core.step.StepLocator;
-import org.springframework.batch.integration.partition.BeanFactoryStepLocator;
+import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.jms.JmsWorkerCondition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -63,8 +61,4 @@ public class JmsWorkerConfig {
         return factory.createListenerContainer(endpoint);
     }
 
-    @Bean
-    public StepLocator stepLocator() {
-        return new BeanFactoryStepLocator();
-    }
 }

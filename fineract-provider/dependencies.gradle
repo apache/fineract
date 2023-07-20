@@ -43,6 +43,8 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-integration',
             'org.springframework.integration:spring-integration-event',
             'org.springframework.integration:spring-integration-jms',
+            'org.springframework.integration:spring-integration-kafka',
+            'org.springframework.kafka:spring-kafka',
 
             'org.apache.avro:avro',
             'jakarta.ws.rs:jakarta.ws.rs-api',
@@ -90,6 +92,10 @@ dependencies {
 
             'io.github.resilience4j:resilience4j-spring-boot2',
             )
+
+    implementation ('software.amazon.msk:aws-msk-iam-auth:1.1.7') {
+        exclude group: 'commons-logging'
+    }
 
     implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.11'
 

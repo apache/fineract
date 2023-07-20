@@ -16,21 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.producer;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.kafka;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-public interface ExternalEventProducer {
+public class KafkaWorkerCondition extends AllNestedConditions {
 
-    /**
-     * Sends the created ExternalEvents
-     *
-     * @param partitions
-     *            is a Map<Long, List<byte[]>> partitions, the key here the id of the aggregated root. The value is list
-     *            of external events belong to the same key, serialized into byte array
-     * @throws AcknowledgementTimeoutException
-     */
-    void sendEvents(Map<Long, List<byte[]>> partitions) throws AcknowledgementTimeoutException;
+    public KafkaWorkerCondition() {
+        super(ConfigurationPhase.PARSE_CONFIGURATION);
+    }
+
+    @ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
+    static class WorkerCondition {}
+
+    @ConditionalOnProperty(value = "fineract.remote-job-message-handler.kafka.enabled", havingValue = "true")
+    static class KafkaCondition {}
 }

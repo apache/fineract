@@ -16,38 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.springbatch.messagehandler;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.jms;
 
+import jakarta.jms.ConnectionFactory;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.springbatch.OutputChannelInterceptor;
-import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.SpringEventManagerCondition;
+import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.jms.JmsManagerCondition;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
-import org.springframework.integration.event.outbound.ApplicationEventPublishingMessageHandler;
 import org.springframework.integration.handler.LoggingHandler;
+import org.springframework.integration.jms.dsl.Jms;
 
 @Configuration
 @EnableBatchIntegration
-@Conditional(SpringEventManagerCondition.class)
-public class SpringEventManagerConfig {
+@Conditional(JmsManagerCondition.class)
+@Import(value = { JmsBrokerConfiguration.class })
+public class JmsManagerConfig {
 
     @Autowired
     private DirectChannel outboundRequests;
     @Autowired
     private OutputChannelInterceptor outputInterceptor;
+    @Autowired
+    private FineractProperties fineractProperties;
 
     @Bean
-    public IntegrationFlow outboundFlow() {
-        ApplicationEventPublishingMessageHandler handler = new ApplicationEventPublishingMessageHandler();
-        return IntegrationFlows.from(outboundRequests) //
+    public IntegrationFlow outboundFlow(ConnectionFactory connectionFactory) {
+        return IntegrationFlow.from(outboundRequests) //
                 .intercept(outputInterceptor) //
                 .log(LoggingHandler.Level.DEBUG) //
-                .handle(handler) //
-                .get(); //
+                .handle(Jms.outboundAdapter(connectionFactory)
+                        .destination(fineractProperties.getRemoteJobMessageHandler().getJms().getRequestQueueName()))
+                .get();
     }
 }

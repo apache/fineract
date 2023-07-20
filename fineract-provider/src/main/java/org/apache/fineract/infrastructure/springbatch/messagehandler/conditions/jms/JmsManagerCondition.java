@@ -16,19 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.springbatch.messagehandler.conditions;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.jms;
 
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-public class JmsWorkerCondition extends AllNestedConditions {
+public class JmsManagerCondition extends AllNestedConditions {
 
-    public JmsWorkerCondition() {
+    public JmsManagerCondition() {
         super(ConfigurationPhase.PARSE_CONFIGURATION);
     }
 
-    @ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
-    static class WorkerCondition {}
+    @ConditionalOnProperty(value = "fineract.mode.batch-manager-enabled", havingValue = "true")
+    static class ManagerCondition {}
 
     @ConditionalOnProperty(value = "fineract.remote-job-message-handler.jms.enabled", havingValue = "true")
     static class JmsCondition {}

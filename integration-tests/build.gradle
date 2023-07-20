@@ -90,9 +90,11 @@ cargoRunLocal.dependsOn ':fineract-war:war'
 cargoStartLocal.dependsOn ':fineract-war:war'
 cargoStartLocal.mustRunAfter 'testClasses'
 
-test {
-    dependsOn(cargoStartLocal)
-    finalizedBy cargoStopLocal
+if (!project.hasProperty('cargoDisabled')) {
+    test {
+        dependsOn(cargoStartLocal)
+        finalizedBy cargoStopLocal
+    }
 }
 
 // NOTE: Gradle suggested these dependencies
