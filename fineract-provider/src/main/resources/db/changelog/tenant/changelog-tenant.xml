@@ -137,4 +137,5 @@
     <include file="parts/0115_create_index_from_loan_transaction_id.xml" relativeToChangelogFile="true" />
     <include file="parts/0116_add_configuration_asset_externalization_of_non_active_loans.xml" relativeToChangelogFile="true" />
     <include file="parts/0117_set_datetime_precision.xml" relativeToChangelogFile="true" />
+    <include file="parts/0118_add_submitted_on_date_to_savings_transaction.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

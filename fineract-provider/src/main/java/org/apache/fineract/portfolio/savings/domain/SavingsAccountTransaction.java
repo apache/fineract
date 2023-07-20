@@ -105,6 +105,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
+    @Column(name = "submitted_on_date", nullable = false)
+    private LocalDate submittedOnDate;
+
     @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
@@ -345,6 +348,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         this.reversed = isReversed;
         this.paymentDetail = paymentDetail;
         this.createdDate = createdDate;
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
         this.appUser = appUser;
         this.isManualTransaction = isManualTransaction;
         this.lienTransaction = lienTransaction;
@@ -365,6 +369,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         this.balanceNumberOfDays = balanceNumberOfDays;
         this.overdraftAmount = overdraftAmount;
         this.createdDate = createdDate;
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
         this.isManualTransaction = isManualTransaction;
         this.releaseIdOfHoldAmountTransaction = releaseIdOfHoldAmountTransaction;
     }
