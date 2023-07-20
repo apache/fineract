@@ -451,7 +451,8 @@ configure(project.fineractJavaProjects) {
                     "DirectInvocationOnMock",
                     "CanIgnoreReturnValueSuggester",
                     "SameNameButDifferent", // Until errorprone recognizes Lombok
-                    "MultiVariableDeclaration" // Until errorprone recognizes Lombok
+                    "MultiVariableDeclaration", // Until errorprone recognizes Lombok
+                    "UnnecessaryDefaultInEnumSwitch" // FINERACT-1911
                     )
             error(
                     "DefaultCharset",
@@ -514,7 +515,6 @@ configure(project.fineractJavaProjects) {
                     "EqualsGetClass",
                     "EqualsUnsafeCast",
                     "DoubleBraceInitialization",
-                    "UnnecessaryDefaultInEnumSwitch",
                     "UnusedNestedClass",
                     "UnusedMethod",
                     "ModifiedButNotUsed",
