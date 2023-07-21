@@ -237,6 +237,19 @@ public final class ChargesHelper extends IntegrationTest {
         return chargesCreateJson;
     }
 
+    public static String getLoanSpecificInstallmentFeeJSON() {
+        final HashMap<String, Object> map = populateDefaultsForLoan();
+        map.put("chargeTimeType", CHARGE_INSTALLMENT_FEE);
+        map.put("chargePaymentMode", CHARGE_PAYMENT_MODE_REGULAR);
+        map.put("penalty", false);
+        map.put("amount", "1.500000");
+        map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
+
+        String chargesCreateJson = new Gson().toJson(map);
+        LOG.info("{}", chargesCreateJson);
+        return chargesCreateJson;
+    }
+
     public static String getLoanSpecifiedDueDateWithAccountTransferJSON(final Integer chargeCalculationType, final String amount,
             boolean penalty) {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
@@ -249,6 +262,16 @@ public final class ChargesHelper extends IntegrationTest {
 
     public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount, boolean penalty) {
         return getLoanInstallmentJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
+    }
+
+    public static String getLoanOverdueInstallmentJSON(final String amount) {
+        final HashMap<String, Object> map = populateDefaultsForLoan();
+        map.put("chargeId", CHARGE_OVERDUE_INSTALLMENT_FEE);
+        map.put("amount", amount);
+
+        String chargesCreateJson = new Gson().toJson(map);
+        LOG.info("{}", chargesCreateJson);
+        return chargesCreateJson;
     }
 
     public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,

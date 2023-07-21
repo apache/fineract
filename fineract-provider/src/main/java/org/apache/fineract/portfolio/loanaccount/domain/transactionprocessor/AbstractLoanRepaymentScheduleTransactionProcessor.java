@@ -209,7 +209,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
         }
         reprocessInstallments(installments, currency);
-
         return changedTransactionDetail;
     }
 

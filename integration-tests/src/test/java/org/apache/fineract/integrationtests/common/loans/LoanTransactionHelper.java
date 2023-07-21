@@ -1206,6 +1206,17 @@ public class LoanTransactionHelper extends IntegrationTest {
         return json;
     }
 
+    public static String getSpecifiedInstallmentChargesForLoanAsJSON(final String chargeId, final String amount) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en_GB");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("amount", amount);
+        map.put("chargeId", chargeId);
+        String json = new Gson().toJson(map);
+        log.info("{}", json);
+        return json;
+    }
+
     public static String getDisbursementChargesForLoanAsJSON(final String chargeId) {
         return getDisbursementChargesForLoanAsJSON(chargeId, "100");
     }

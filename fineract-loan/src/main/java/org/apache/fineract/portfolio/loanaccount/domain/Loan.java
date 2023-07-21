@@ -1081,7 +1081,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 transactionDate = loanCharge.getDueLocalDate();
             }
         } else if (loanCharge.isInstalmentFee()) {
-            transactionDate = loanCharge.getInstallmentLoanCharge(loanInstallmentNumber).getRepaymentInstallment().getDueDate();
+            LocalDate repaymentDueDate = loanCharge.getInstallmentLoanCharge(loanInstallmentNumber).getRepaymentInstallment().getDueDate();
+            if (repaymentDueDate.isAfter(DateUtils.getBusinessLocalDate())) {
+                transactionDate = DateUtils.getBusinessLocalDate();
+            } else {
+                transactionDate = repaymentDueDate;
+            }
         }
 
         scheduleGeneratorDTO.setRecalculateFrom(transactionDate);
