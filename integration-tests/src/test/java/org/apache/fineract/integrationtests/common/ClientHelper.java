@@ -638,6 +638,18 @@ public class ClientHelper extends IntegrationTest {
         return json;
     }
 
+    public static String getPayChargeJSONWithExternalId(final String date, String amount, String externalId) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en_GB");
+        map.put("dateFormat", Utils.DATE_FORMAT);
+        map.put("transactionDate", date);
+        map.put("amount", amount);
+        map.put("externalId", externalId);
+        String json = GSON.toJson(map);
+        log.info("{}", json);
+        return json;
+    }
+
     public static String getWaiveChargeJSON(final String amount, String clientChargeId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
@@ -752,6 +764,15 @@ public class ClientHelper extends IntegrationTest {
         return response.get("transactionId") != null ? response.get("transactionId").toString() : null;
     }
 
+    public static String payChargesForClientsTransactionExternalId(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer clientId, final Integer clientChargeId, final String json) {
+        log.info("--------------------------------- PAY CHARGES FOR CLIENT --------------------------------");
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=paycharge&"
+                + Utils.TENANT_IDENTIFIER;
+        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
+        return response.get("subResourceExternalId") != null ? response.get("subResourceExternalId").toString() : null;
+    }
+
     public static String waiveChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final Integer clientChargeId, final String json) {
         log.info("--------------------------------- WAIVE CHARGES FOR CLIENT --------------------------------");
@@ -795,12 +816,22 @@ public class ClientHelper extends IntegrationTest {
 
     public GetClientsClientIdTransactionsTransactionIdResponse getClientTransactionByExternalId(final String externalId,
             final String transactionId) {
-        return ok(fineract().clientTransactions.retrieveClientTransaction1(externalId, Long.parseLong(transactionId)));
+        return ok(fineract().clientTransactions.retrieveClientTransaction2(externalId, Long.parseLong(transactionId)));
+    }
+
+    public GetClientsClientIdTransactionsTransactionIdResponse getClientTransactionByTransactionExternalId(final Long clientId,
+            final String transactionExternalId) {
+        return ok(fineract().clientTransactions.retrieveClientTransaction1(clientId, transactionExternalId));
     }
 
     public PostClientsClientIdTransactionsTransactionIdResponse undoClientTransactionByExternalId(final String externalId,
             final String transactionId) {
-        return ok(fineract().clientTransactions.undoClientTransaction1(externalId, Long.parseLong(transactionId), "undo"));
+        return ok(fineract().clientTransactions.undoClientTransaction2(externalId, Long.parseLong(transactionId), "undo"));
+    }
+
+    public PostClientsClientIdTransactionsTransactionIdResponse undoClientTransactionByTransactionExternalId(final Long clientId,
+            final String transactionExternalId) {
+        return ok(fineract().clientTransactions.undoClientTransaction1(clientId, transactionExternalId, "undo"));
     }
 
     public Workbook getClientEntityWorkbook(GlobalEntityType clientsEntity, String dateFormat) throws IOException {

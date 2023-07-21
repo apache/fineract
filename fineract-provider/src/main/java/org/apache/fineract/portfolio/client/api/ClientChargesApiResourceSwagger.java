@@ -162,6 +162,8 @@ final class ClientChargesApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "01 September 2015")
         public String transactionDate;
+        @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
+        public String externalId;
     }
 
     @Schema(description = "PostClientsClientIdChargesChargeIdResponse")

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.exception;
 
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -28,6 +29,10 @@ public class ClientNotFoundException extends AbstractPlatformResourceNotFoundExc
 
     public ClientNotFoundException(final Long id) {
         super("error.msg.client.id.invalid", "Client with identifier " + id + " does not exist", id);
+    }
+
+    public ClientNotFoundException(final ExternalId externalId) {
+        super("error.msg.client.id.invalid", "Client with identifier " + externalId + " does not exist", externalId);
     }
 
     public ClientNotFoundException() {

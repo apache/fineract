@@ -39,6 +39,7 @@ import java.util.Set;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -81,7 +82,7 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     private boolean reversed;
 
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
-    private String externalId;
+    private ExternalId externalId;
 
     /*
      * Deprecated since common Auditable fields were introduced. Columns and data left untouched to help migration.
@@ -98,9 +99,8 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     protected ClientTransaction() {}
 
     public static ClientTransaction payCharge(final Client client, final Office office, PaymentDetail paymentDetail,
-            final LocalDate transactionDate, final Money amount, final String currencyCode) {
+            final LocalDate transactionDate, final Money amount, final String currencyCode, final ExternalId externalId) {
         final boolean isReversed = false;
-        final String externalId = null;
         return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.PAY_CHARGE.getValue(), transactionDate, amount,
                 isReversed, externalId, currencyCode);
     }
@@ -108,14 +108,14 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     public static ClientTransaction waiver(final Client client, final Office office, final LocalDate transactionDate, final Money amount,
             final String currencyCode) {
         final boolean isReversed = false;
-        final String externalId = null;
+        final ExternalId externalId = ExternalId.empty();
         final PaymentDetail paymentDetail = null;
         return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.WAIVE_CHARGE.getValue(), transactionDate, amount,
                 isReversed, externalId, currencyCode);
     }
 
     public ClientTransaction(Client client, Office office, PaymentDetail paymentDetail, Integer typeOf, LocalDate transactionDate,
-            Money amount, boolean reversed, String externalId, String currencyCode) {
+            Money amount, boolean reversed, ExternalId externalId, String currencyCode) {
 
         this.client = client;
         this.office = office;
@@ -227,6 +227,10 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LocalDate getSubmittedOnDate() {
         return this.submittedOnDate;
+    }
+
+    public ExternalId getExternalId() {
+        return this.externalId;
     }
 
 }

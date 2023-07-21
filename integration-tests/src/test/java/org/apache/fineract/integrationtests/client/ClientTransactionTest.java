@@ -26,6 +26,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetClientsClientIdTransactionsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdTransactionsTransactionIdResponse;
@@ -68,6 +69,7 @@ public class ClientTransactionTest {
         final Integer clientChargeId1 = ClientHelper.addChargesForClient(requestSpec, responseSpec, clientId.intValue(),
                 ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
         Assertions.assertNotNull(clientChargeId1);
+        String transactionExternalId = UUID.randomUUID().toString();
         final String clientChargePaidTransactionId1 = ClientHelper.payChargesForClients(requestSpec, responseSpec, clientId.intValue(),
                 clientChargeId1, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "10"));
         assertNotNull(clientChargePaidTransactionId1);
@@ -75,9 +77,10 @@ public class ClientTransactionTest {
         final Integer clientChargeId2 = ClientHelper.addChargesForClient(requestSpec, responseSpec, clientId.intValue(),
                 ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
         Assertions.assertNotNull(clientChargeId2);
-        final String clientChargePaidTransactionId2 = ClientHelper.payChargesForClients(requestSpec, responseSpec, clientId.intValue(),
-                clientChargeId2, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "10"));
-        assertNotNull(clientChargePaidTransactionId2);
+        final String clientChargePaidTransactionExternalId = ClientHelper.payChargesForClientsTransactionExternalId(requestSpec,
+                responseSpec, clientId.intValue(), clientChargeId2,
+                ClientHelper.getPayChargeJSONWithExternalId("25 AUGUST 2015", "12", transactionExternalId));
+        assertNotNull(clientChargePaidTransactionExternalId);
 
         GetClientsClientIdTransactionsResponse allClientTransactionsByExternalId = clientHelper
                 .getAllClientTransactionsByExternalId(clientExternalId);
@@ -87,8 +90,17 @@ public class ClientTransactionTest {
                 .getClientTransactionByExternalId(clientExternalId, clientChargePaidTransactionId1);
         assertEquals(Integer.parseInt(clientChargePaidTransactionId1), clientTransactionByExternalId.getId());
 
+        GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByTransactionExternalId = clientHelper
+                .getClientTransactionByTransactionExternalId(clientId, clientChargePaidTransactionExternalId);
+        assertNotNull(clientTransactionByTransactionExternalId);
+        assertEquals(BigDecimal.valueOf(12), clientTransactionByTransactionExternalId.getAmount().stripTrailingZeros());
+
         PostClientsClientIdTransactionsTransactionIdResponse undoTransactionResponse = clientHelper
-                .undoClientTransactionByExternalId(clientExternalId, clientChargePaidTransactionId2);
+                .undoClientTransactionByExternalId(clientExternalId, clientChargePaidTransactionId1);
         assertNotNull(undoTransactionResponse.getResourceId());
+
+        PostClientsClientIdTransactionsTransactionIdResponse undoTransactionResponse2 = clientHelper
+                .undoClientTransactionByTransactionExternalId(clientId, clientChargePaidTransactionExternalId);
+        assertNotNull(undoTransactionResponse2.getResourceId());
     }
 }
