@@ -60,18 +60,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: localstack
           AWS_REGION: us-east-1
         run: |
-          echo "Update python pyopenssl"
-          pip install --upgrade pyopenssl
-          echo "Install localstack"
-          pip install localstack awscli-local[ver1] # install LocalStack cli and awslocal
-          docker pull localstack/localstack         # Make sure to pull the latest version of the image
-          localstack start -d                       # Start LocalStack in the background
-
-          echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
-          localstack wait -t 30                     # to become ready before timing out
-          echo "Startup complete"
-          echo "Create fineract S3 bucket"
-          awslocal s3api create-bucket --bucket fineract-reports
+          docker run -d --name localstack -p 4566:4566 -p 4510-4559:4510-4559 localstack/localstack:2.1
+          sleep 10
+          docker exec localstack awslocal s3api create-bucket --bucket fineract-reports
           echo "LocalStack initialization complete"
       - name: Install additional software
         run: |
