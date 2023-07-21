@@ -35,9 +35,11 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
@@ -136,6 +138,8 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
             final LocalDate transactionDate = command.localDateValueOfParameterNamed(ClientApiConstants.transactionDateParamName);
             final BigDecimal amountPaid = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
+            final ExternalId transactionExternalId = ExternalIdFactory
+                    .produce(command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.externalIdParamName));
             final Money chargePaid = Money.of(clientCharge.getCurrency(), amountPaid);
 
             // Validate business rules for payment
@@ -149,7 +153,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
             ClientTransaction clientTransaction = ClientTransaction.payCharge(client, client.getOffice(), paymentDetail, transactionDate,
-                    chargePaid, clientCharge.getCurrency().getCode());
+                    chargePaid, clientCharge.getCurrency().getCode(), transactionExternalId);
             this.clientTransactionRepository.saveAndFlush(clientTransaction);
 
             // update charge paid by associations
@@ -162,6 +166,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             return new CommandProcessingResultBuilder() //
                     .withTransactionId(clientTransaction.getId().toString())//
                     .withEntityId(clientCharge.getId()) //
+                    .withSubEntityId(clientTransaction.getId()).withSubEntityExternalId(clientTransaction.getExternalId())
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

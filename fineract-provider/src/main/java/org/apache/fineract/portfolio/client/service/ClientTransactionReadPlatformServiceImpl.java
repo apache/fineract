@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -33,6 +34,8 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
+import org.apache.fineract.portfolio.client.domain.ClientTransaction;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionType;
 import org.apache.fineract.portfolio.client.exception.ClientTransactionNotFoundException;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
@@ -50,6 +53,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final ClientTransactionMapper clientTransactionMapper = new ClientTransactionMapper();
     private final PaginationHelper paginationHelper;
+    private final ClientTransactionRepository clientTransactionRepository;
 
     private static final class ClientTransactionMapper implements RowMapper<ClientTransactionData> {
 
@@ -173,6 +177,11 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientTransactionNotFoundException(clientId, transactionId, e);
         }
+    }
+
+    @Override
+    public ClientTransaction retrieveTransactionByExternalId(ExternalId transactionExternalId) {
+        return clientTransactionRepository.findByExternalId(transactionExternalId);
     }
 
 }
