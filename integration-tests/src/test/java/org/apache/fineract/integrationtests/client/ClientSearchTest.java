@@ -74,6 +74,32 @@ public class ClientSearchTest {
     }
 
     @Test
+    public void testClientSearchWorks_WhenNoExternalIdForClients() {
+        // given
+        String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
+        PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
+        request1.setExternalId(null);
+        request1.setLastname(lastname);
+        clientHelper.createClient(request1);
+
+        PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
+        request2.setExternalId(null);
+        request2.setLastname(lastname);
+        clientHelper.createClient(request2);
+
+        PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
+        request3.setExternalId(null);
+        request3.setLastname(lastname);
+        clientHelper.createClient(request3);
+        // when
+        PageClientSearchData result = clientHelper.searchClients(lastname, 0, 1);
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getNumberOfElements()).isEqualTo(1);
+        assertThat(result.getTotalPages()).isEqualTo(3);
+    }
+
+    @Test
     public void testClientSearchWorks_WithLastnameTextOnDefaultOrdering() {
         // given
         String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
