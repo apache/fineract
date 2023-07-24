@@ -42,6 +42,8 @@ public class ExternalIdJsonConverter implements JsonConverter<ExternalId> {
     public void convertToJson(ExternalId value, JsonGenerator generator) throws IOException {
         if (value != null && !value.isEmpty()) {
             generator.writeString(value.getValue());
+        } else {
+            generator.writeNull();
         }
     }
 
