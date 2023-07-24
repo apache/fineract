@@ -30,4 +30,5 @@
      <include file="parts/0007_x_extend_tenant_ro_passwords.xml" relativeToChangelogFile="true"/>
      <include file="parts/0008_encrypt_existing_ro_tenant_passwords.xml" relativeToChangelogFile="true"/>
      <include file="parts/0009_set_and_encrypt_ro_if_not_exists.xml" relativeToChangelogFile="true"/>
+     <include file="parts/0010_set_datetime_precision.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

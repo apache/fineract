@@ -32,4 +32,5 @@
   <include relativeToChangelogFile="true" file="parts/0008_add_mappings.xml"/>
   <include relativeToChangelogFile="true" file="parts/0009_add_loan_ownership_transfer_events.xml"/>
   <include relativeToChangelogFile="true" file="parts/0010_external_transafer_status_external_transfer_id_constraints.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0011_set_datetime_precision.xml"/>
 </databaseChangeLog>

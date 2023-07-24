@@ -64,7 +64,7 @@ public class LoanAccountLock {
     public LoanAccountLock(Long loanId, LockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {
         this.loanId = loanId;
         this.lockOwner = lockOwner;
-        this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenant();
+        this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
         this.lockPlacedOnCobBusinessDate = lockPlacedOnCobBusinessDate;
     }
 
@@ -75,6 +75,6 @@ public class LoanAccountLock {
 
     public void setNewLockOwner(LockOwner newLockOwner) {
         this.lockOwner = newLockOwner;
-        this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenant();
+        this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
     }
 }

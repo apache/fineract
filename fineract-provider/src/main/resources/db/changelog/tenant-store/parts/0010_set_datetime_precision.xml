@@ -21,8 +21,9 @@
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
-    <changeSet author="fineract" id="1" context="mysql">
-        <addUniqueConstraint tableName="m_external_asset_owner_transfer" columnNames="status, external_id" constraintName="external_transfer_status_external_id"/>
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1" context="tenant_store_db">
+        <modifyDataType tableName="tenants" columnName="created_date" newDataType="datetime(6)"/>
+        <modifyDataType tableName="tenants" columnName="lastmodified_date" newDataType="datetime(6)"/>
     </changeSet>
 </databaseChangeLog>

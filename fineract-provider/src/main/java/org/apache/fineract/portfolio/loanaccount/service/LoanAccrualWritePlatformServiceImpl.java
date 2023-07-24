@@ -271,7 +271,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
                 externalIdFactory.create().getValue(), LoanTransactionType.ACCRUAL.getValue(), accruedTill, amount, interestPortion,
                 feePortion, penaltyPortion, DateUtils.getBusinessLocalDate(), user.getId(), user.getId(),
-                DateUtils.getOffsetDateTimeOfTenant(), DateUtils.getOffsetDateTimeOfTenant());
+                DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
         final Long transactionId = this.jdbcTemplate.queryForObject("SELECT " + sqlGenerator.lastInsertId(), Long.class); // NOSONAR
 
         Map<LoanChargeData, BigDecimal> applicableCharges = scheduleAccrualData.getApplicableCharges();
@@ -291,7 +291,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                 scheduleAccrualData.getRepaymentScheduleId());
 
         String updateLoan = "UPDATE m_loan  SET accrued_till=?, last_modified_by=?, last_modified_on_utc=?  WHERE  id=?";
-        this.jdbcTemplate.update(updateLoan, accruedTill, user.getId(), DateUtils.getOffsetDateTimeOfTenant(),
+        this.jdbcTemplate.update(updateLoan, accruedTill, user.getId(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(),
                 scheduleAccrualData.getLoanId());
 
         Optional<LoanTransaction> loanAccrualTransaction = loanTransactionRepository.findByIdAndLoanId(transactionId,

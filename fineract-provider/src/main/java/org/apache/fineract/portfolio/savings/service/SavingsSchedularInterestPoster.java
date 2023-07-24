@@ -120,8 +120,8 @@ public class SavingsSchedularInterestPoster {
                                     savingsAccountTransactionData.getId(), null, false, null, false,
                                     savingsAccountTransactionData.getTransactionDate(), JournalEntryType.CREDIT.getValue().longValue(),
                                     savingsAccountTransactionData.getAmount(), null, JournalEntryType.CREDIT.getValue().longValue(),
-                                    savingsAccountData.getId(), DateUtils.getOffsetDateTimeOfTenant(),
-                                    DateUtils.getOffsetDateTimeOfTenant(), false, BigDecimal.ZERO, BigDecimal.ZERO, null,
+                                    savingsAccountData.getId(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(),
+                                    DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(), false, BigDecimal.ZERO, BigDecimal.ZERO, null,
                                     savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                                     DateUtils.getBusinessLocalDate() });
 
@@ -131,8 +131,8 @@ public class SavingsSchedularInterestPoster {
                                     savingsAccountTransactionData.getId(), null, false, null, false,
                                     savingsAccountTransactionData.getTransactionDate(), JournalEntryType.DEBIT.getValue().longValue(),
                                     savingsAccountTransactionData.getAmount(), null, JournalEntryType.DEBIT.getValue().longValue(),
-                                    savingsAccountData.getId(), DateUtils.getOffsetDateTimeOfTenant(),
-                                    DateUtils.getOffsetDateTimeOfTenant(), false, BigDecimal.ZERO, BigDecimal.ZERO, null,
+                                    savingsAccountData.getId(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(),
+                                    DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(), false, BigDecimal.ZERO, BigDecimal.ZERO, null,
                                     savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                                     DateUtils.getBusinessLocalDate() });
                         }

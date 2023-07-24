@@ -67,7 +67,7 @@ public class LoanLockingServiceImpl implements LoanLockingService {
                     UPDATE m_loan_account_locks SET version= version + 1, lock_owner = ?, lock_placed_on = ? WHERE loan_id = ?
                 """, accountsToLock, getInClauseParameterSizeLimit(), (ps, id) -> {
             ps.setString(1, lockOwner.name());
-            ps.setObject(2, DateUtils.getOffsetDateTimeOfTenant());
+            ps.setObject(2, DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
             ps.setLong(3, id);
         });
     }
@@ -97,7 +97,7 @@ public class LoanLockingServiceImpl implements LoanLockingService {
             ps.setLong(1, loanId);
             ps.setLong(2, 1);
             ps.setString(3, lockOwner.name());
-            ps.setObject(4, DateUtils.getOffsetDateTimeOfTenant());
+            ps.setObject(4, DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
             ps.setObject(5, cobBusinessDate);
         });
     }
