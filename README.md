@@ -305,8 +305,18 @@ INSTRUCTIONS: How to run Apache RAT (Release Audit Tool)
 2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
 
-INSTRUCTIONS: How to enable ActiveMQ
+INSTRUCTIONS: How to enable External Message Broker (ActiveMQ or Apache Kafka)
 ============
+
+There are two use-cases where external message broker is needed:
+ - External Business Events / Reliable Event Framework
+ - Executing Partitioned Spring Batch Jobs
+
+External Events are business events, e.g.: `ClientCreated`, which might be important for third party systems. Apache Fineract supports ActiveMQ (or other JMS compliant brokers) and Apache Kafka endpoints for sending out Business Events. By default, they are not emitted.
+
+In case of a large deployment with millions of accounts, the Close of Business Day Spring Batch job may run several hours. In order to speed up this task, remote partitioning of the job is supported. The Manager node partitions (breaks up) the COB job into smaller pieces (sub tasks) which then can be executed on multiple Worker nodes in parallel. The worker nodes are notified either by ActiveMQ or Kafka regarding their new sub tasks.
+### Active MQ
+
 JMS based messaging is disabled by default. In `docker-compose-postgresql-activemq.yml` an example is shown where ActiveMQ is enabled. In that configuration one Spring Batch Manager instance and two Spring Batch Worker instances are created.
 Spring based events should be disabled and jms based event handling should be enabled. Furthermore, proper broker JMS URL should be configured.
 
@@ -317,6 +327,15 @@ Spring based events should be disabled and jms based event handling should be en
 ```
 
 For additional ActiveMQ related configuration please take a look to the `application.properties` where the supported configuration parameters are listed with their default values.
+
+### Kafka
+
+Kafka support also disabled by default. In `docker-compose-postgresql-kafka.yml` an example is shown where self-hosted Kafka is enabled for both External Events and Spring Batch Remote Job execution.
+
+During the development Fineract was tested with PLAINTEXT Kafka brokers without authentication and with AWS MSK using IAM authentication. The extra [jar file](https://github.com/aws/aws-msk-iam-auth/releases) required for IAM authentication is already added to the classpath.
+An example MSK setup can be found in `docker-compose-postgresql-kafka-msk.yml`.
+
+The full list of supported Kafka related properties are documented here: https://fineract.apache.org/docs/current/
 
 Checkstyle and Spotless
 ============

@@ -1,0 +1,158 @@
+= Kafka Properties
+
+.Kafka related properties for Remote Spring Batch Jobs
+|===
+|Name |Env Variable |Default Value |Description
+
+|fineract.remote-job-message-handler.kafka.enabled
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ENABLED
+|false
+|Enables or disables Kafka for remote job execution. If Kafka is enabled then JMS shall be disabled.
+
+|fineract.remote-job-message-handler.kafka.topic.auto-create
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_AUTO_CREATE
+|true
+|Enables topic auto creation. In case the auto creation of the topic is disabled please make sure that the replica and the partition count is properly configured.
+
+|fineract.remote-job-message-handler.kafka.topic.name
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_NAME
+|job-topic
+|Name of the topic where partitioned tasks are sent to
+
+|fineract.remote-job-message-handler.kafka.topic.replicas
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_REPLICAS
+|1
+|Number of the replicas
+
+|fineract.remote-job-message-handler.kafka.topic.partitions
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_PARTITIONS
+|10
+|Number of partitions
+
+|fineract.remote-job-message-handler.kafka.bootstrap-servers
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_BOOTSTRAP_SERVERS
+|localhost:9092
+|Comma separated list of bootstrap servers
+
+|fineract.remote-job-message-handler.kafka.consumer.group-id
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_CONSUMER_GROUPID
+|fineract-consumer-group-id
+|Group ID of the Consumer
+
+|fineract.remote-job-message-handler.kafka.consumer.extra-properties-key-value-separator
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_CONSUMER_EXTRA_PROPERTIES_SEPARATOR
+|=
+|Defines key and value separator for consumer,e.g.: key=value
+
+|fineract.remote-job-message-handler.kafka.consumer.extra-properties-separator
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_CONSUMER_EXTRA_PROPERTIES_SEPARATOR
+|\|
+|Defines item separator for consumer, e.g.: key1=value1\|key2=value2
+
+|fineract.remote-job-message-handler.kafka.consumer.extra-properties
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_CONSUMER_EXTRA_PROPERTIES
+|
+|#holds list of key value pairs using the above defined separators for consumer:  key1=value1\|key2=value2\|...\|keyn=valuen
+
+|fineract.remote-job-message-handler.kafka.producer.extra-properties-key-value-separator
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_PRODUCER_EXTRA_PROPERTIES_KEY_VALUE_SEPARATOR
+|=
+|Defines key and value separator for producer,e.g.: key=value
+
+|fineract.remote-job-message-handler.kafka.producer.extra-properties-separator
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_PRODUCER_EXTRA_PROPERTIES_SEPARATOR
+|\|
+|Defines item separator for producer, e.g.: key1=value1\|key2=value2
+
+|fineract.remote-job-message-handler.kafka.producer.extra-properties
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_PRODUCER_EXTRA_PROPERTIES
+|
+|#holds list of key value pairs using the above defined separators for producer:  key1=value1\|key2=value2\|...\|keyn=valuen
+
+|fineract.remote-job-message-handler.kafka.admin.extra-properties-key-value-separator
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ADMIN_EXTRA_PROPERTIES_KEY_VALUE_SEPARATOR
+|=
+|Defines key and value separator for admin,e.g.: key=value
+
+|fineract.remote-job-message-handler.kafka.admin.extra-properties-separator
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ADMIN_EXTRA_PROPERTIES_SEPARATOR
+|\|
+|Defines item separator for admin, e.g.: key1=value1\|key2=value2
+
+|fineract.remote-job-message-handler.kafka.admin.extra-properties
+|FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ADMIN_EXTRA_PROPERTIES
+|
+|#holds list of key value pairs using the above defined separators for admin:  key1=value1\|key2=value2\|...\|keyn=valuen
+
+|===
+
+.Kafka related Properties for External Events
+|===
+|Name |Env Variable |Default Value |Description
+
+|fineract.events.external.producer.kafka.enabled
+|FINERACT_EXTERNAL_EVENTS_KAFKA_ENABLED
+|false
+|Enables disables Kafka for External Events. If Kafka is enabled then JMS shall be disabled.
+
+|fineract.events.external.producer.kafka.timeout-in-seconds
+|FINERACT_EXTERNAL_EVENTS_KAFKA_TIMEOUT_IN_SECONDS
+|10
+|Timeout for Kafka confirming the messages written in the topic
+
+|fineract.events.external.producer.kafka.topic.auto-create
+|FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_AUTO_CREATE
+|true
+|Enables topic auto creation. In case the auto creation of the topic is disabled please make sure that the replica and the partition count is properly configured.
+
+|fineract.events.external.producer.kafka.topic.name
+|FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_NAME
+|external-events
+|Name of the topic where external events are sent to
+
+|fineract.events.external.producer.kafka.topic.replicas
+|FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_REPLICAS
+|1
+|Number of the replicas
+
+|fineract.events.external.producer.kafka.topic.partitions
+|FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_PARTITIONS
+|10
+|Number of partitions
+
+|fineract.events.external.producer.kafka.bootstrap-servers
+|FINERACT_EXTERNAL_EVENTS_KAFKA_BOOTSTRAP_SERVERS
+|localhost:9092
+|Comma separated list of Kafka bootstrap servers
+
+|fineract.events.external.producer.kafka.producer.extra-properties-separator
+|FINERACT_EXTERNAL_EVENTS_KAFKA_PRODUCER_EXTRA_PROPERTIES_SEPARATOR
+|\|
+|Defines item separator for producer,e.g.: key=value
+
+|fineract.events.external.producer.kafka.producer.extra-properties-key-value-separator
+|FINERACT_EXTERNAL_EVENTS_KAFKA_PRODUCER_EXTRA_PROPERTIES_KEY_VALUE_SEPARATOR
+|=
+|Defines key and value separator for producer client
+
+|fineract.events.external.producer.kafka.producer.extra-properties
+|FINERACT_EXTERNAL_EVENTS_KAFKA_PRODUCER_EXTRA_PROPERTIES
+|linger.ms=10\|batch.size=16384
+|Defines the extra properties for external event producer clients. Optimization for sending out large volume of messages. Increases Batch buffer size and batching time window.
+
+|fineract.events.external.producer.kafka.admin.extra-properties-separator
+|FINERACT_EXTERNAL_EVENTS_KAFKA_ADMIN_EXTRA_PROPERTIES_SEPARATOR
+|\|
+|Defines item separator for admin client.
+
+|fineract.events.external.producer.kafka.admin.extra-properties-key-value-separator
+|FINERACT_EXTERNAL_EVENTS_KAFKA_ADMIN_EXTRA_PROPERTIES_KEY_VALUE_SEPARATOR
+|=
+|Defines key and value separator for admin client
+
+|fineract.events.external.producer.kafka.admin.extra-properties
+|FINERACT_EXTERNAL_EVENTS_KAFKA_ADMIN_EXTRA_PROPERTIES
+|
+|Defines the extra properties for external event admin clients
+
+|===

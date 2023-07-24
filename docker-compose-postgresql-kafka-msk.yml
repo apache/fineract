@@ -1,0 +1,182 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# You can replace and test a more recent version of docker compose
+version: '3.7'
+services:
+  # Backend service
+  fineractpostgresql:
+    image: postgres:15.3
+    volumes:
+      - ./fineract-db/docker/postgresql:/docker-entrypoint-initdb.d/:Z,ro
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      FINERACT_DB_USER: postgres
+      FINERACT_DB_PASS: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      FINERACT_TENANTS_DB_NAME: fineract_tenants
+      FINERACT_TENANT_DEFAULT_DB_NAME: fineract_default
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "5432:5432"
+  fineract-manager:
+    image: fineract:latest
+    volumes:
+      - ./fineract-provider/build/data:/data
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - 8443:8443
+    depends_on:
+      fineractpostgresql:
+        condition: service_healthy
+    environment:
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+      - FINERACT_NODE_ID=1
+      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.postgresql.Driver
+      - FINERACT_HIKARI_JDBC_URL=jdbc:postgresql://fineractpostgresql:5432/fineract_tenants
+      - FINERACT_HIKARI_USERNAME=postgres
+      - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_HIKARI_MINIMUM_IDLE=3
+      - FINERACT_HIKARI_MAXIMUM_POOL_SIZE=10
+      - FINERACT_HIKARI_IDLE_TIMEOUT=60000
+      - FINERACT_HIKARI_CONNECTION_TIMEOUT=20000
+      - FINERACT_HIKARI_TEST_QUERY=SELECT 1
+      - FINERACT_HIKARI_AUTO_COMMIT=true
+      - FINERACT_SERVER_SSL_ENABLED=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE=250
+      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT=2048
+      - FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE=true
+      - FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION=true
+      - FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS=false
+      - FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES=true
+      - FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION=true
+      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractpostgresql
+      - FINERACT_DEFAULT_TENANTDB_PORT=5432
+      - FINERACT_DEFAULT_TENANTDB_UID=postgres
+      - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
+      - FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata
+      - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
+      - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
+      - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
+      - JAVA_TOOL_OPTIONS="-Xmx1G"
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_JMS_ENABLED=false
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_SPRING_EVENTS_ENABLED=false
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ENABLED=true
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_BOOTSTRAP_SERVERS=b-3-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198,b-2-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198,b-1-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ADMIN_EXTRA_PROPERTIES=security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_PRODUCER_EXTRA_PROPERTIES=security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_CONSUMER_EXTRA_PROPERTIES=security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_NAME=job-topic
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_REPLICAS=2
+      - FINERACT_MODE_BATCH_MANAGER_ENABLED=true
+      - FINERACT_MODE_BATCH_WORKER_ENABLED=false
+      - LOAN_COB_CHUNK_SIZE=10
+      - LOAN_COB_PARTITION_SIZE=10
+      - FINERACT_EXTERNAL_EVENTS_ENABLED=true
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_ENABLED=true
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_BOOTSTRAP_SERVERS=b-3-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198,b-2-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198,b-1-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_ADMIN_EXTRA_PROPERTIES=security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_PRODUCER_EXTRA_PROPERTIES:linger.ms=10|batch.size=16384|security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_NAME=external-events
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_REPLICAS=2
+      - SPRING_PROFILES_ACTIVE=test,diagnostics
+  fineract-worker:
+    image: fineract:latest
+    volumes:
+      - ./fineract-provider/build/data:/data
+    deploy:
+      mode: replicated
+      replicas: 2
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "8444-8445:8443"
+    depends_on:
+      fineractpostgresql:
+        condition: service_healthy
+    environment:
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+      - FINERACT_NODE_ID=1
+      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.postgresql.Driver
+      - FINERACT_HIKARI_JDBC_URL=jdbc:postgresql://fineractpostgresql:5432/fineract_tenants
+      - FINERACT_HIKARI_USERNAME=postgres
+      - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_HIKARI_MINIMUM_IDLE=3
+      - FINERACT_HIKARI_MAXIMUM_POOL_SIZE=10
+      - FINERACT_HIKARI_IDLE_TIMEOUT=60000
+      - FINERACT_HIKARI_CONNECTION_TIMEOUT=20000
+      - FINERACT_HIKARI_TEST_QUERY=SELECT 1
+      - FINERACT_HIKARI_AUTO_COMMIT=true
+      - FINERACT_SERVER_SSL_ENABLED=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE=250
+      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT=2048
+      - FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE=true
+      - FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION=true
+      - FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS=false
+      - FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES=true
+      - FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION=true
+      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractpostgresql
+      - FINERACT_DEFAULT_TENANTDB_PORT=5432
+      - FINERACT_DEFAULT_TENANTDB_UID=postgres
+      - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
+      - FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata
+      - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
+      - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
+      - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
+      - JAVA_TOOL_OPTIONS="-Xmx1G"
+      - FINERACT_MODE_BATCH_MANAGER_ENABLED=false
+      - FINERACT_MODE_BATCH_WORKER_ENABLED=true
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_JMS_ENABLED=false
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_SPRING_EVENTS_ENABLED=false
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ENABLED=true
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_BOOTSTRAP_SERVERS=b-3-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198,b-2-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198,b-1-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ADMIN_EXTRA_PROPERTIES=security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_PRODUCER_EXTRA_PROPERTIES=security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_CONSUMER_EXTRA_PROPERTIES=security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_NAME=job-topic
+      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_REPLICAS=2
+      - FINERACT_EXTERNAL_EVENTS_ENABLED=true
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_ENABLED=true
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_BOOTSTRAP_SERVERS=b-3-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198,b-2-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198,b-1-public.democluster1.am2oyx.c4.kafka.eu-central-1.amazonaws.com:9198
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_ADMIN_EXTRA_PROPERTIES=security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_PRODUCER_EXTRA_PROPERTIES:linger.ms=10|batch.size=16384|security.protocol=SASL_SSL|sasl.mechanism=AWS_MSK_IAM|sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;|sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_NAME=external-events
+      - FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_REPLICAS=2
+      - SPRING_PROFILES_ACTIVE=test,diagnostics
