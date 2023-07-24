@@ -68,6 +68,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
 import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
@@ -788,6 +790,10 @@ public class LoanTransactionHelper extends IntegrationTest {
         final String ADD_CHARGES_URL = LOAN_ACCOUNT_URL + "/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPost(requestSpec, responseSpecParam, ADD_CHARGES_URL, request, "");
         return (Integer) response.get("resourceId");
+    }
+
+    public PostLoansLoanIdChargesResponse addChargesForLoan(final Long loanId, PostLoansLoanIdChargesRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge(loanId, request, null));
     }
 
     public PostLoansLoanIdChargesResponse addChargeForLoan(final Integer loanId, final String payload,
@@ -1752,8 +1758,16 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loans.getDelinquencyTagHistory1(loanExternalId));
     }
 
+    public PostLoansResponse applyLoan(PostLoansRequest request) {
+        return ok(fineract().loans.calculateLoanScheduleOrSubmitLoanApplication(request, null));
+    }
+
     public PostLoansLoanIdResponse approveLoan(String loanExternalId, PostLoansLoanIdRequest request) {
         return ok(fineract().loans.stateTransitions1(loanExternalId, request, "approve"));
+    }
+
+    public PostLoansLoanIdResponse approveLoan(Long loanId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions(loanId, request, "approve"));
     }
 
     public PostLoansLoanIdResponse rejectLoan(String loanExternalId, PostLoansLoanIdRequest request) {

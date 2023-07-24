@@ -345,7 +345,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
 
-    @OrderBy(value = "dateOf, id")
+    @OrderBy(value = "dateOf, createdDate, id")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanTransaction> loanTransactions = new ArrayList<>();
 

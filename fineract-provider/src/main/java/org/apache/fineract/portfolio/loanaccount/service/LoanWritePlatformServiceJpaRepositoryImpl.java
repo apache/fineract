@@ -493,8 +493,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 AppUser user = context.authenticatedUser();
                 jdbcTemplate.update(transactionSql, loanId, loan.getOfficeId(), externalIdFactory.create().getValue(),
                         LoanTransactionType.ACCRUAL.getValue(), actualDisbursementDate, loanCharge.amount(), loanCharge.amount(),
-                        DateUtils.getBusinessLocalDate(), user.getId(), user.getId(), DateUtils.getOffsetDateTimeOfTenant(),
-                        DateUtils.getOffsetDateTimeOfTenant());
+                        DateUtils.getBusinessLocalDate(), user.getId(), user.getId(),
+                        DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
             }
         }
 

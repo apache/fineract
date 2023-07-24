@@ -841,7 +841,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public OffsetDateTime getCreatedDateTime() {
-        return (this.getCreatedDate().isPresent() ? this.getCreatedDate().get() : DateUtils.getOffsetDateTimeOfTenant());
+        return (this.getCreatedDate().isPresent() ? this.getCreatedDate().get() : DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
     }
 
     public boolean isLastTransaction(final LoanTransaction loanTransaction) {

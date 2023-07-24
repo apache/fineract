@@ -280,7 +280,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
              * TODO Vishwas: Remove references to "Contra" from the codebase
              ***/
             final String sql = "select " + rm.loanPaymentsSchema() + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) "
-                    + " and (tr.is_reversed=false or tr.manually_adjusted_or_reversed = true)  order by tr.transaction_date ASC,id ";
+                    + " and (tr.is_reversed=false or tr.manually_adjusted_or_reversed = true)  order by tr.transaction_date, tr.created_on_utc, tr.id ";
             Collection<LoanTransactionData> loanTransactionData = this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
             // TODO: would worth to rework in the future. It is not nice to fetch relations one by one... might worth to
             // give a try to get rid of native queries
@@ -2140,7 +2140,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final LoanTransactionDerivedComponentMapper rm = new LoanTransactionDerivedComponentMapper(sqlGenerator);
 
             final String sql = "select " + rm.schema()
-                    + " where tr.loan_id = ? and tr.transaction_type_enum = ? and tr.is_reversed=false order by tr.transaction_date ASC,id ";
+                    + " where tr.loan_id = ? and tr.transaction_type_enum = ? and tr.is_reversed=false order by tr.transaction_date, tr.created_on_utc, tr.id ";
             return this.jdbcTemplate.query(sql, rm, loanId, LoanTransactionType.WAIVE_INTEREST.getValue()); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;

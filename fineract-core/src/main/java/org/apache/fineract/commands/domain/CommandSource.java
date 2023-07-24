@@ -143,7 +143,7 @@ public class CommandSource extends AbstractPersistableCustom {
         this.subResourceId = subResourceId;
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
-        this.madeOnDate = DateUtils.getOffsetDateTimeOfTenant();
+        this.madeOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
         this.status = status;
         this.idempotencyKey = idempotencyKey;
     }
@@ -170,13 +170,13 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public void markAsChecked(final AppUser checker) {
         this.checker = checker;
-        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenant();
+        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
         this.status = CommandProcessingResultType.PROCESSED.getValue();
     }
 
     public void markAsRejected(final AppUser checker) {
         this.checker = checker;
-        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenant();
+        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
         this.status = CommandProcessingResultType.REJECTED.getValue();
     }
 
