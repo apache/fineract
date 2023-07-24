@@ -13,4 +13,6 @@ include::properties-authentication.adoc[leveloffset=+1]
 
 include::properties-tomcat.adoc[leveloffset=+1]
 
+include::properties-kafka.adoc[leveloffset=+1]
+
 // include::properties-cache.adoc[leveloffset=+1]

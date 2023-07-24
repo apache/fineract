@@ -97,6 +97,7 @@ Also, please note that the partitioned job execution is multitenant meaning that
 For remote partitioning, the following message channels are supported by Fineract:
 
 * Any JMS compatible message channels (ActiveMQ, Amazon MQ, etc)
+* Apache Kafka
 
 ==== Fault-tolerance scenarios
 
