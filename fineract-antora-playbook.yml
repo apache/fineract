@@ -1,0 +1,14 @@
+site:
+  title: Fineract Docs
+  url: https://fineract.apache.org
+  start_page: modules::index.adoc
+content:
+  sources:
+  - url: https://github.com/apache/fineract.git
+    #branches: [develop]
+    start_path: fineract-doc
+ui:
+  bundle:
+    url: ui-bundle.zip
+    snapshot: true
+    

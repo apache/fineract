@@ -1,0 +1,68 @@
+== Take Your First Steps
+
+=== Understand the basics
+Not sure what a pull request is, or how to submit one? Take a look at GitHub's excellent help documentation first.
+
+=== Search Issues first; create an issue if necessary
+
+Is there already an issue that addresses your concern? Do a bit of searching in our https://issues.apache.org/jira/projects/FINERACT/issues/FINERACT-1221?filter=allopenissues[issue tracker] to see if you can find something similar. If you do not find something similar, please create a new issue before submitting a pull request unless the change is truly trivial -- for example: typo fixes, removing compiler warnings, etc.
+
+=== Discuss non-trivial contribution ideas with the community
+If you're considering anything more than correcting a typo or fixing a minor bug, please discuss it on the mailing list before submitting a pull request. We're happy to provide guidance, but please spend an hour or two researching the subject on your own.
+
+== Create a Branch
+=== Branch from develop
+Develop currently represents work toward Apache Fineract 1.0.0. Please submit all pull requests there, even bug fixes and minor improvements.
+
+[source]
+----
+git checkout develop
+----
+
+=== Use short branch names
+Branches used when submitting pull requests should preferably be named according to issues prefixed FINERACT followed by a dash and the issue number, e.g. 'FINERACT-1234'. This is important, because branch names show up in the merge commits that result from accepting pull requests and should be as expressive and concise as possible.
+
+[source]
+----
+git checkout -b [topic]
+----
+
+=== Pull in changes
+Keep up to date
+
+There will be development changes to both repositories almost every day for the foreseeable future so its important to keep your fork of the software up to date with the latest changes.
+
+To pull in upstream changes from repository you forked:
+
+[source]
+----
+git checkout develop
+git fetch upstream
+git merge upstream/develop
+----
+
+WARNING: You should not have any local changes on your develop branch, if you do, use rebase!
+
+
+Once you have pulled all latest changes and your build was successful, push the just merged changes to the develop branch on your fork.
+
+[source]
+----
+git push origin develop
+----
+=== Rebasing your work
+After you pulled all changes from upstream you need to rebase your topic branch with the latest code.
+
+[source]
+----
+git checkout [topic]
+git rebase develop
+----
+
+If you are ready push your topic branch to your GitHub account:
+[source]
+----
+git push origin [topic]
+----
+
+Now thats your changes have been pushed to your github account, follow the steps and guidelines found xref:submitting-a-pull-request.adoc[here] to submit your pull request from your git account to fineract.

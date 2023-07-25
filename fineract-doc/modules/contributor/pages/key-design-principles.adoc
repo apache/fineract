@@ -1,0 +1,80 @@
+== Introduction
+Apache Fineract (simply “Fineract”) is built around a multitenant, service oriented, and tiered architecture, and can be deployed in a SaaS (Software as a Service) model or on-premises.
+
+All design decisions should follow these principles:
+
+* Keep it simple, stupid.
+* Make it for a reason. It's not art.
+* Make it to last.
+* Make it sustainable. Downtime is key to productivity.
+* Enable others. I'm expendable.
+
+The foundation forms a robust but flexible data model which is ready-made for extensions and customizations. An API provides access to all basic functions grouped in modules.
+
+Because Fineract needs to be accessible to users at remote locations, a browser-based solution was essential.
+
+Java was selected as a suitable high level language allowing the rapid customization of code required for each individual circumstance yet has a large number of powerful libraries available.
+
+== Fineract Financial Service Engine
+
+Fineract Financial Service Engine (simply “the Engine”) is a scalable and extensible framework written in Java, and licensed under the Apache License, version 2.0.
+
+The main design principle of the Engine is CQRS ( Command Query Responsibility Segregation ), a pattern that separates commands and queries into different models and services. This approach has multiple benefits: 1) State changes (commands) are persisted, providing an audit of all changes, 2) fine grained control and extension of state changes, and 3) scalability based on consumer behavior and real system load.
+
+Based on a tiered architecture the Engine provides multiple layers to separate concerns and allow reusability.
+
+== API Layer
+The API Layer is built entirely as a RESTful Webservice, using JSON to transmit data, and utilizes standard HTTP Methods for interactions.
+
+The main components of this layer are:
+
+* Resources
+** Every module is exposed via an URI (Unique
+Resource Identifier).
+* Access Control
+** Early exit if a consumer lacks authorization for a queried Resource.
+* Data marshalling
+** Any data transmitted to and from the API is de-/serialized using JSON.
+
+The API is exposed via HTTPS to encrypt all data and secure the communication. OAuth2 is used for authorization.
+
+Stateless by nature the API Layer can be scaled based on the actual load and even used in high availability scenarios.
+
+== Service Layer
+
+The Service Layer provides module specific business logic and rules, and role based access control. Transaction awareness and data validity is encapsulated, and extension points are available to enhance built-in workflows.
+
+Cross concerns like Security or Transactions are part of the core framework and provided via AOP (Aspect Oriented Programming).
+The Service Layer has horizontal and vertical layers.
+
+Services, command, and event handlers form horizontal layers; functional modules form vertical layers.
+
+== Data Layer
+The Data Layer provides module specific access to data stores. Data integrity is reached by using the ACID principal and well defined data relations. Write and read operations are encapsulated in different repositories to define a clean responsibility separation. 
+
+The Data Layer uses two cache strategies to cache data efficiently; database and 2nd level caching.
+
+Database caching stores records on the database level and is useful for reporting, batch jobs, and low level SQL queries.
+2nd Level caching stores data objects on the application level and keeps database turnarounds on a very low level allowing fast in-memory access of frequent data.
+
+== Architecture
+
+The Engine’s architecture was designed with a focus on modern, scalable and extensible technologies ready to run in the cloud. All components where selected based on their maturity, proven reliability and cost efficiency.
+
+It is our goal to provide a software that is deployable with effectively no cost that can grow with the customer need over time using well known best practices and support from a wide range of communities.
+
+The basic Fineract architecture is as follows:
+
+[cols="3,^1,^1", options="header"]
+|===
+| Resource | Component | Comment 
+| Application Framework	| Spring Framework 5.x | 
+| Application Server | Tomcat v9.x | Embedded Tomcat for development environments 
+| Database | MySQL 5.7 | Embedded MariaDB for development environments
+| Operating System	 | Linux, Windows, Mac OS | 
+| Persistence Framework	 | OpenJPA 3.x | 
+| Persistence Framework	 | Java >=11 | 
+| Test Framework	 | JUnit 5.x 
+Mockito 3.x
+REST-assured 4.x | 
+|===

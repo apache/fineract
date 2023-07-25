@@ -1,0 +1,94 @@
+== What is this project about? 
+At Apache Fineract, our mission is to build, maintain and enhance a cloud-ready core banking system for robust, scalable, and secure operations of financial institutions.  We believe in financial services for everyone, including the unbanked and underbanked.
+
+The domain of fineract includes accounts, held by customers, with transactions made to those accounts. The types of accounts include credit accounts (e.g. loans to customers) and debit accounts (current accounts and savings accounts), and for credit accounts there are different kinds of interest rate schemes or shared profit schemes.  There is other functionality that supports use cases for teller operations, basic treasury management, accounting, portfolio management, authentication, account opening (including KYC), and similar topics that are common to a retail banking operation.  
+
+Initially aimed at Microfinance Institutions (MFIs), Savings Cooperatives, and Credit Unions, the fineract solution is not limited to those specific institutions.  A number of finTech innovators have used fineract as their backend solution for offering "Direct Banking" or "Neo-Banking" solutions as well as for "Agent Management" in some contexts. The backend account transaction system is a common requirement in many systems in financial services. 
+
+Fineract was donated by Mifos.org, a US based charity with a financial inclusion mission which had developed the fully featured MifosX and released as open source in 2010 (which was generation 2 of the Mifos software). While many members of the PMC trace their involvement to the project to financial inclusion, the intent of the project is to attract a range of innovators involved in offering account services to consumers everywhere. Financial services should be available to all. 
+
+Open source allows for the project to build the needed building blocks that all kinds of financial institutions can use but we anticipate an ecosystem of providers taking this code and building solutions on top of it.  We encourage that and fully expect those builders to send their development priorities and in-house dev teams to the project.  We require that virtuous cycle. 
+
+We imagine a world where financial services are offered by a wide range of providers using commodity open source software utilizing the most modern approaches.  
+
+== Who is using fineract?
+
+(For clarity, those using the mifos.org released solutions, prior to incubation at apache foundation, are not counted in this project.) Fineract is used by many small to medium sized financial institutions in dozens of countries.  Larger institutions are considering the use of fineract side-by-side with their existing core banking solution (CBS). The side-by-side strategy allows for innovative offerings to be done without the licensing costs usually associated with commercial CBS. Fineract has also been adopted by finTechs to be the backend transaction account engine, and is being used in testing-lab environments to assist with system integrations. 
+
+With proper hosting and front end dev, Fineract is suitable to Credit Unions, Microfinance Institutions, Agent Banking solutions, Savings Associations, Building Societies, Cooperatives, small Commercial Banks, NeoBanks, and Direct Banking solutions.  Our vision is that these institutions may download and use directly, but perhaps more likely, to hire a provider or integrator to provide the complete solution to them. Our users are thus both the institutions where fineract is in place and the system integrators and vendors where fineract is a significant part of their offering. 
+
+Check out our  powered-by Fineract page. 
+
+== Is this Mifos? 
+The Mifos Initiative, a 501c3 US Charity, contributed the code that forms the basis of fineract (this was developed by a community of mifos developers over several years), and the Mifos Initiative remains involved with a number of front end implementations (project wrapper in apache parlance) and other systems that run "on top of" fineract, including a payment hub and API management.  Many of the developers are on both listservs. However, if you are looking for information on the latest mifos release, please proceed to: https://mifos.org/take-action/get-mifos/#download.  Please understand that devs at fineract may not respond to questions about mifos code.  
+
+== Is there a front end? Where are the reports? 
+Fineract just contains the back-end platform and APIs. Front end development is intentionally left out of the fineract1.x project to encourage the use of software integrators to develop their own front end solutions.  Mifos has a number of open source front end User Interfaces (UIs) projects for reference that sit on top of fineract1.x including MifosX Community app (AngularJS project), reporting through Pentaho and there are also client and staff-facing mobile apps.  Note that demo servers running Fineract will often be packaged with the open source front end of Mifos (see openmf.github.org) and that front end may not  include all of the most recent features developed in fineract.   Fineract-CN does have a web front end UI under development, intended as a demo. 
+
+== What is the difference between Fineract and Fineract-CN? 
+Fineract 1.x is a mature platform with open APIs, while Fineract CN is a cloud native, microservice architecture also supporting open banking APIs. 
+
+Fineract1.x is a completely different code project from fineract-CN.  In terms of github repositories, fineract1.x is contained in one repo, while fineract-CN is held in dozens of separate github repos - one for each microservice.  In Fineract1.x the packages encapsulate the different functional blocks - e.g. accounts vs transactions, while in Fineract-CN these are separate microservices. 
+
+Fineract1.x, prior to its donation to Apache was called mifosX, and by-design consists of a "headless" solution.  That is, fineract1.x is all about the APIs.  Front end applications can be developed separately and connected to fineract1.x  (For clarity, Mifos at https://github.com/openmf has a number of front ends to illustrate available functionality; these are not maintained by fineract, and devs on fineract will not respond to issues related to the front ends there.) 
+
+Fineract CN operates on the principle that financial services are an innovative space and so each fineract microservice encapsulates a domain that can be combined with other microservices to create new platform offerings. Fineract CN microservices can be combined to create new software platforms for digital financial service providers. Fineract CN is still in its early days, but preliminary tests have shown that a simple single-instance laptop deployment of Fineract CN can process over 1000 transactions/second. Fineract CN also includes a fully Apache-licensed backoffice UI. 
+
+== Do I have to get the code to use the solution? 
+If all you want is to use the solution, or to demo it, we recommend you use one of the available builds rather than setting up a development environment yourself.  The builds, found at http://fineract.apache.org/ (Downloads) are provided for convenience and should not be used in a production environment without fully working out details of operations (e.g. data backup) and security.  Also, Mifos volunteers continue to post builds for specific hosting solutions at https://en.wikipedia.org/wiki/Mifos_X  (e.g. Azure and AWS).  
+
+== What is the process for getting the code and setting up a development environment? 
+Please see Contributor's Zone, essentially you need to get your environment ready, then download from the github source and use one of the common IDEs.  
+
+In general we ask that you take the time to read the instructions and familiarize yourself with the listserv before posting questions about building the solution.  You can search the listserv archives at https://lists.apache.org/list.html?fineract.apache.org .  If you find something missing from the instructions, we welcome contributions of that sort as well.  Note that the listserv search is timebound, so that for example this search gets 24 months: https://lists.apache.org/list.html?dev@fineract.apache.org:lte=24M:pentaho (see lte=24M) and search term is "pentaho". 
+
+== How do I get up to speed on development tasks? 
+Please see Contributor's Zone 
+
+There are two issue trackers.
+
+fineract1.x  at https://issues.apache.org/jira/projects/FINERACT/summary 
+fineract-CN at https://issues.apache.org/jira/projects/FINCN/issues/FINCN-26?filter=allopenissues 
+A good thing to do is to review an open ticket, especially one with back and forth between devs on the listserv or one that is scheduled for an upcoming release. It is also useful to review existing pull requests (PRs). Pull Requests (PRs) are found here → https://github.com/apache/fineract/pulls 
+
+== What is our Consensus approach?  
+Every open source project has to adopt some way to come to agreement on new features, new code enhancements, new project directions and fineract now uses a lazy consensus approach.  In this approach, the changes and issues are raised and people are given time to reject or discuss the changes, and we rely on contributors to fully vett changes in an appropriate way and have their code reviewed.  
+
+This is documented at Committer's Zone and Changing Processes .  Please note that we expect discussion on the listserv to be the primary mode of communication.  "If it didn't happen on the list, it didn't happen." 
+
+== I'm new to Open Source, what is this all about? 
+Welcome.  You may want to first read something about how open source projects function (like this) and in particular how the Apache Foundation works. https://www.apache.org/foundation/how-it-works.html.  If you are interested in contributing to the project, a good way to get started is to subscribe to the listserv, review the functional specs on this wiki, browse the issue tickets, and start to play around with a build of the software.  Open source can be a great way to find your community, contribute and get feedback, and put your work into public view.  This is true for both code and the variety of other content needed.  
+
+== Where do I find .... 
+We get a lot of questions about where to find documentation or the answer to a specific thing.  We do appreciate when people take the time to try to find the answer before asking.  Once you have new content to propose, a ticket or an improvement to documentation, we encourage you to get involved on that. Not all contributions are code, take, for example, this FAQ.  
+
+== Where do I get the Pentaho Reports? 
+Fineract does not ship Pentaho reports or the related libraries, due to compliance issues with Apache licence.  Please head over to the Mifos community who maintains distributions of Fineract that include pentaho.  
+
+== How do I set this up on my machine? 
+First, are you a developer?  If you are not, then you may not want to run fineract on your local machine.  Instead you may want to find one of the demo environments already established or make use of one of the existing cloud deployments.  Also, fineract does not come with a native front end UX.  The UX is part of the distributions that are provided by third parties, including the aforementioned Mifos Community. 
+
+If you are a developer, then please see how to set up sections on the wiki. 
+
+Fineract1.x Fineract User Zone 
+
+FneractCN  FINERACT CN (DEPRECATED)
+
+== How do I get something changed in the code?  How do I get a feature added? 
+The project is always interested in ideas about features. That said, we notice some people expect that a feature requested is automatically developed and incorporated. That is not the case. If you have code to suggest, first discuss on the list, add an issue to the issue tracker, and then find someone to help you contribute that feature.  You are still not guaranteed that your feature will make it in, because it must also be accepted by the community. 
+
+== I have a great idea for a collaboration tool for the community, how do I make that happen?
+We know there are lots of great collaboration tools.  To keep things consistent across Apache, there is a philosophy of using current tools rather than cutting edge, while acknowledging there's always something new and cool. We use email listservs for their backwards compatibility, searchability, and simplicity. This wiki has hooks to the issue tracker (JIRA) and github commit entries hook to the same JIRA tickets for all Pull Requests (PRs).  A good flow is:  
+
+email discourse >> wiki entry |or| issue (JIRA)
+
+development sprint >> Pull Request >> email list for review and confirmation 
+
+== I represent a Company and want to contribute, how do I do that? 
+As stated on  http://www.apache.org/foundation/how-it-works.html, "companies and individuals can donate resources and be assured that those resources will be used for the public benefit".  If you have developers working at your company, you may encourage them to work on the project, but note that "All of the ASF including the board, the other officers, the committers, and the members, are participating as individuals."  and further "the ASF does not allow corporations to participate directly in Apache project management or other governance activities at the ASF; only individuals." http://community.apache.org/projectIndependence.html
+
+== I found a security flaw, where do I report that? 
+Security is a mandatory feature in Apache projects. Please report your bug to security AT fineract.apache.org. 
+
+== How do I raise a difficult or sensitive topic? 
+In general, you are invited to discuss problems you see with the Fineract project openly, on the dev@fineract.apache.org list.  In some limited cases, please send an email to private @ fineract.apache.org.  Addressing problems early and openly will keep most problems from becoming too large to handle. A good rule of thumb is to compose and then wait overnight before firing off that flame.  
