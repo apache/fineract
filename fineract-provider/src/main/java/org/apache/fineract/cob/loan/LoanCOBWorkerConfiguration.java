@@ -34,6 +34,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.SimpleStepBuilder;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.integration.channel.QueueChannel;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -86,7 +90,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public Flow flow() {
-        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep(null)).next(applyLockStep(null)).next(loanBusinessStep(null))
+        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep(null)).next(applyLockStep(null)).next(loanBusinessStep(null, null))
                 .next(resetContextStep(null)).build();
     }
 
@@ -98,13 +102,42 @@ public class LoanCOBWorkerConfiguration {
     }
 
     @Bean
+    public TaskExecutor cobTaskExecutor() {
+        if (propertyService.getThreadPoolMaxPoolSize(LoanCOBConstant.JOB_NAME) == 1) {
+            return new SyncTaskExecutor();
+        }
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setThreadNamePrefix("COB-Thread-");
+        taskExecutor.setThreadGroupName("COB-Thread");
+        taskExecutor.setCorePoolSize(propertyService.getThreadPoolCorePoolSize(JobName.LOAN_COB.name()));
+        taskExecutor.setMaxPoolSize(propertyService.getThreadPoolMaxPoolSize(JobName.LOAN_COB.name()));
+        taskExecutor.setQueueCapacity(propertyService.getThreadPoolQueueCapacity(JobName.LOAN_COB.name()));
+        taskExecutor.setAllowCoreThreadTimeOut(true);
+        taskExecutor.setTaskDecorator(new ContextAwareTaskDecorator());
+        return taskExecutor;
+    }
+
+    @Bean
     @StepScope
-    public Step loanBusinessStep(@Value("#{stepExecutionContext['partition']}") String partitionName) {
-        return new StepBuilder("Loan Business - Step:" + partitionName, jobRepository)
-                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name()), transactionManager).reader(cobWorkerItemReader())
-                .processor(cobWorkerItemProcessor()).writer(cobWorkerItemWriter()).faultTolerant().retry(Exception.class)
-                .retryLimit(propertyService.getRetryLimit(LoanCOBConstant.JOB_NAME)).skip(Exception.class)
-                .skipLimit(propertyService.getChunkSize(JobName.LOAN_COB.name()) + 1).listener(loanItemListener()).build();
+    public Step loanBusinessStep(@Value("#{stepExecutionContext['partition']}") String partitionName, TaskExecutor cobTaskExecutor) {
+        SimpleStepBuilder<Loan, Loan> stepBuilder = new StepBuilder("Loan Business - Step:" + partitionName, jobRepository)
+                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name()), transactionManager) //
+                .reader(cobWorkerItemReader()) //
+                .processor(cobWorkerItemProcessor()) //
+                .writer(cobWorkerItemWriter()) //
+                .faultTolerant() //
+                .retry(Exception.class) //
+                .retryLimit(propertyService.getRetryLimit(LoanCOBConstant.JOB_NAME)) //
+                .skip(Exception.class) //
+                .skipLimit(propertyService.getChunkSize(LoanCOBConstant.JOB_NAME) + 1) //
+                .listener(loanItemListener()) //
+                .transactionManager(transactionManager);
+
+        if (propertyService.getThreadPoolMaxPoolSize(LoanCOBConstant.JOB_NAME) > 1) {
+            stepBuilder.taskExecutor(cobTaskExecutor);
+        }
+
+        return stepBuilder.build();
     }
 
     @Bean

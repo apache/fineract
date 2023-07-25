@@ -155,8 +155,11 @@ public class FineractProperties {
         private String jobName;
         private Integer chunkSize;
         private Integer partitionSize;
-        private Integer threadCount;
+        private Integer threadPoolCorePoolSize;
+        private Integer threadPoolMaxPoolSize;
+        private Integer threadPoolQueueCapacity;
         private Integer retryLimit;
+
     }
 
     @Getter

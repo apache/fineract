@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -40,21 +40,19 @@ public abstract class AbstractLoanItemReader implements ItemReader<Loan> {
     protected final LoanRepository loanRepository;
 
     @Setter(AccessLevel.PROTECTED)
-    private List<Long> remainingData;
-    private Long loanId;
+    private LinkedBlockingQueue<Long> remainingData;
 
     @Override
     public Loan read() throws Exception {
-        try {
-            if (remainingData.size() > 0) {
-                loanId = remainingData.remove(0);
+        final Long loanId = remainingData.poll();
+        if (loanId != null) {
+            try {
                 return loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
+            } catch (Exception e) {
+                throw new LoanReadException(loanId, e);
             }
-        } catch (Exception e) {
-            throw new LoanReadException(loanId, e);
         }
         return null;
-
     }
 
     @AfterStep

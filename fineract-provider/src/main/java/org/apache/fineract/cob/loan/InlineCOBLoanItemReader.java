@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepExecution;
@@ -37,6 +37,6 @@ public class InlineCOBLoanItemReader extends AbstractLoanItemReader {
     public void beforeStep(@NotNull StepExecution stepExecution) {
         ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
         List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER);
-        setRemainingData(new ArrayList<>(loanIds));
+        setRemainingData(new LinkedBlockingQueue<>(loanIds));
     }
 }
