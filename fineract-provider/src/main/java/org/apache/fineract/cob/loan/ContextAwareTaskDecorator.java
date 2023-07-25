@@ -16,19 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.springbatch;
+package org.apache.fineract.cob.loan;
 
-public interface PropertyService {
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.core.task.TaskDecorator;
 
-    Integer getPartitionSize(String jobName);
+public class ContextAwareTaskDecorator implements TaskDecorator {
 
-    Integer getChunkSize(String jobName);
+    @Override
+    public Runnable decorate(@NotNull Runnable runnable) {
+        final FineractContext context = ThreadLocalContextUtil.getContext();
+        return () -> {
+            ThreadLocalContextUtil.init(context);
+            runnable.run();
+        };
+    }
 
-    Integer getRetryLimit(String jobName);
-
-    Integer getThreadPoolCorePoolSize(String jobName);
-
-    Integer getThreadPoolMaxPoolSize(String jobName);
-
-    Integer getThreadPoolQueueCapacity(String jobName);
 }

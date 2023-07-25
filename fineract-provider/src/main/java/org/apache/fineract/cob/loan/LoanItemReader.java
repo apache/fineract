@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
@@ -64,7 +65,7 @@ public class LoanItemReader extends AbstractLoanItemReader {
             List<Long> lockedByCOBChunkProcessingAccountIds = getLoanIdsLockedWithChunkProcessingLock(loanIds);
             loanIds.retainAll(lockedByCOBChunkProcessingAccountIds);
         }
-        setRemainingData(new ArrayList<>(loanIds));
+        setRemainingData(new LinkedBlockingQueue<>(loanIds));
     }
 
     private List<Long> getLoanIdsLockedWithChunkProcessingLock(List<Long> loanIds) {

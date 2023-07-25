@@ -36,7 +36,7 @@ public class FineractPartitionJobConfigValidationCondition implements Condition 
                 "fineract.partitioned-job", FineractProperties.FineractPartitionedJob.class);
         if (partitionedJobProperties != null) {
             List<FineractProperties.PartitionedJobProperty> invalidConfigs = partitionedJobProperties.getPartitionedJobProperties().stream()
-                    .filter(isAnyConfigBelowOne().or(FineractPartitionJobConfigValidationCondition::isPartitionRatioInvalid)).toList();
+                    .filter(isAnyConfigBelowOne().or(FineractPartitionJobConfigValidationCondition::invalidMaxPoolSize)).toList();
             if (!invalidConfigs.isEmpty()) {
                 for (FineractProperties.PartitionedJobProperty invalidConfig : invalidConfigs) {
                     log.error(
@@ -52,10 +52,11 @@ public class FineractPartitionJobConfigValidationCondition implements Condition 
 
     private static Predicate<FineractProperties.PartitionedJobProperty> isAnyConfigBelowOne() {
         return partitionedJobProperty -> !(partitionedJobProperty.getPartitionSize() > 0 && partitionedJobProperty.getChunkSize() > 0
-                && partitionedJobProperty.getThreadCount() > 0);
+                && partitionedJobProperty.getThreadPoolCorePoolSize() > 0 && partitionedJobProperty.getThreadPoolMaxPoolSize() > 0
+                && partitionedJobProperty.getThreadPoolQueueCapacity() > 0);
     }
 
-    private static boolean isPartitionRatioInvalid(FineractProperties.PartitionedJobProperty partitionedJobProperty) {
-        return partitionedJobProperty.getPartitionSize() < partitionedJobProperty.getThreadCount() * partitionedJobProperty.getChunkSize();
+    private static boolean invalidMaxPoolSize(FineractProperties.PartitionedJobProperty partitionedJobProperty) {
+        return partitionedJobProperty.getThreadPoolMaxPoolSize() < partitionedJobProperty.getThreadPoolCorePoolSize();
     }
 }

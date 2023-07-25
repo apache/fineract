@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.springbatch;
 
 import java.util.List;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.stereotype.Service;
@@ -31,34 +32,41 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     public Integer getPartitionSize(String jobName) {
-        List<FineractProperties.PartitionedJobProperty> jobProperties = fineractProperties.getPartitionedJob()
-                .getPartitionedJobProperties();
-        return jobProperties.stream() //
-                .filter(jobProperty -> jobName.equals(jobProperty.getJobName())) //
-                .findFirst() //
-                .map(FineractProperties.PartitionedJobProperty::getPartitionSize) //
-                .orElse(1);
+        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getPartitionSize);
     }
 
     @Override
     public Integer getChunkSize(String jobName) {
-        List<FineractProperties.PartitionedJobProperty> jobProperties = fineractProperties.getPartitionedJob()
-                .getPartitionedJobProperties();
-        return jobProperties.stream() //
-                .filter(jobProperty -> jobName.equals(jobProperty.getJobName())) //
-                .findFirst() //
-                .map(FineractProperties.PartitionedJobProperty::getChunkSize) //
-                .orElse(1);
+        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getChunkSize);
     }
 
     @Override
     public Integer getRetryLimit(String jobName) {
+        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getRetryLimit);
+    }
+
+    @Override
+    public Integer getThreadPoolCorePoolSize(String jobName) {
+        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getThreadPoolCorePoolSize);
+    }
+
+    @Override
+    public Integer getThreadPoolMaxPoolSize(String jobName) {
+        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getThreadPoolMaxPoolSize);
+    }
+
+    @Override
+    public Integer getThreadPoolQueueCapacity(String jobName) {
+        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getThreadPoolQueueCapacity);
+    }
+
+    private Integer getProperty(String jobName, Function<? super FineractProperties.PartitionedJobProperty, Integer> function) {
         List<FineractProperties.PartitionedJobProperty> jobProperties = fineractProperties.getPartitionedJob()
                 .getPartitionedJobProperties();
         return jobProperties.stream() //
                 .filter(jobProperty -> jobName.equals(jobProperty.getJobName())) //
                 .findFirst() //
-                .map(FineractProperties.PartitionedJobProperty::getRetryLimit) //
+                .map(function) //
                 .orElse(1);
     }
 }
