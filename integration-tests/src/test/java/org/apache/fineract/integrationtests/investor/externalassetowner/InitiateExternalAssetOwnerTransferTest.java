@@ -25,6 +25,7 @@ import static org.apache.fineract.client.models.ExternalTransferData.StatusEnum.
 import static org.apache.fineract.client.models.ExternalTransferData.StatusEnum.PENDING;
 import static org.apache.fineract.client.models.ExternalTransferData.SubStatusEnum.BALANCE_ZERO;
 import static org.apache.fineract.client.models.ExternalTransferData.SubStatusEnum.SAMEDAY_TRANSFERS;
+import static org.apache.fineract.client.models.ExternalTransferData.SubStatusEnum.UNSOLD;
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -575,8 +576,8 @@ public class InitiateExternalAssetOwnerTransferTest {
                     ExpectedExternalTransferData.expected(BUYBACK, buybackTransferResponse.getResourceExternalId(), "2020-03-06",
                             "2020-03-02", "2020-03-02"),
                     ExpectedExternalTransferData.expected(CANCELLED, buybackTransferResponse.getResourceExternalId(), "2020-03-06",
-                            "2020-03-02", "2020-03-02", BALANCE_ZERO),
-                    ExpectedExternalTransferData.expected(CANCELLED, saleTransferResponse.getResourceExternalId(), "2020-03-04",
+                            "2020-03-02", "2020-03-02", UNSOLD),
+                    ExpectedExternalTransferData.expected(DECLINED, saleTransferResponse.getResourceExternalId(), "2020-03-04",
                             "2020-03-02", "2020-03-02", BALANCE_ZERO));
         } finally {
             cleanUpAndRestoreBusinessDate();
