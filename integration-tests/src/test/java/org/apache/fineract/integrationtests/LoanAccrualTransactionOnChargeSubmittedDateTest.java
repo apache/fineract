@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -32,14 +33,18 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -48,7 +53,9 @@ import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAcc
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -61,17 +68,22 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
     private PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
     private AccountHelper accountHelper;
+    private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
+    private InlineLoanCOBHelper inlineLoanCOBHelper;
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
+        this.inlineLoanCOBHelper = new InlineLoanCOBHelper(this.requestSpec, this.responseSpec);
     }
 
     @Test
@@ -591,6 +603,136 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
         }
     }
 
+    @Test
+    public void loanAccrualTransaction_ChargeSubmittedDate_AdjustRepaymentScheduleSnoozeFeeDueDateNewFeeAddTest() {
+        try {
+
+            // Accounts oof periodic accrual
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+            // Set business date
+            LocalDate currentDate = LocalDate.of(2023, 05, 19);
+
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+
+            // Loan ExternalId
+            String loanExternalIdStr = UUID.randomUUID().toString();
+
+            // Client and Loan account creation
+
+            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductMultipleRepayments(
+                    loanTransactionHelper, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+            assertNotNull(getLoanProductsProductResponse);
+
+            final Integer loanId = createLoanAccountAndDisburse(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr);
+
+            // set business date as date when fee charge is added/submitted
+
+            LocalDate chargeSubmittedDate = LocalDate.of(2023, 06, 12);
+
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, chargeSubmittedDate);
+
+            LocalDate chargeDueDate = LocalDate.of(2023, 07, 18);
+            final String feeChargeDueDate = dateFormatter.format(chargeDueDate);
+
+            // Add Fee
+            Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeDueDate, "10"));
+
+            assertNotNull(feeLoanChargeId);
+
+            // adjust loan schedule
+            final String requestJSON = new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("18 June 2023")
+                    .updateAdjustedDueDate("18 July 2023").updateSubmittedOnDate("19 May 2023").updateGraceOnPrincipal(null)
+                    .updateGraceOnInterest(null).updateExtraTerms(null).build(loanId.toString());
+            final HashMap<String, String> map = new HashMap<>();
+            map.put("locale", "en");
+            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("approvedOnDate", "19 May 2023");
+            final String aproveRequestJSON = new Gson().toJson(map);
+
+            Integer loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId, aproveRequestJSON);
+
+            // run cob
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE,
+                    chargeSubmittedDate.plusDays(1));
+
+            // run inline cob for loan
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+
+            // verify accrual transaction created for charges create date
+            checkAccrualTransaction(chargeSubmittedDate, 0.0f, 10.0f, 0.0f, loanId);
+
+            // update business date
+            currentDate = LocalDate.of(2023, 07, 18);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
+
+            // make repayment
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("18 July 2023").locale("en")
+                            .transactionAmount(1010.0));
+
+            // update business date
+            currentDate = LocalDate.of(2023, 07, 19);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
+
+            // reverse repayment
+            loanTransactionHelper.reverseRepayment(loanId, repaymentTransaction_1.getResourceId().intValue(), "19 July 2023");
+
+            // Add Charge Penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+
+            LocalDate targetDate = LocalDate.of(2023, 07, 19);
+            final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+
+            assertNotNull(penalty1LoanChargeId);
+
+            // update business date
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate.plusDays(1));
+
+            // run inline cob for loan
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+
+            // verify accrual transaction created for charges create date
+            checkAccrualTransaction(currentDate, 0.0f, 0.0f, 10.0f, loanId);
+
+            // verify loan repayment schedules
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+            assertNotNull(periods);
+
+            verifyPeriodDates(periods);
+
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+        }
+    }
+
+    private void verifyPeriodDates(List<GetLoansLoanIdRepaymentPeriod> periods) {
+        assertEquals(3, periods.size());
+        assertEquals(LocalDate.of(2023, 05, 19), periods.get(1).getFromDate());
+        assertEquals(LocalDate.of(2023, 07, 18), periods.get(1).getDueDate());
+        assertEquals(LocalDate.of(2023, 07, 18), periods.get(2).getFromDate());
+        assertEquals(LocalDate.of(2023, 07, 19), periods.get(2).getDueDate());
+    }
+
     private void checkAccrualTransactionsForMultipleRepaymentSchedulesChargeDueDate(LocalDate transactionDate, Integer loanId) {
         ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
                 this.responseSpec, loanId);
@@ -700,6 +842,21 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
         final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
         loanTransactionHelper.approveLoan("03 March 2023", "1000", loanId, null);
         loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 March 2023", loanId, "1000");
+        return loanId;
+    }
+
+    private Integer createLoanAccountAndDisburse(final Integer clientID, final Long loanProductID, final String externalId) {
+
+        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
+                .withLoanTermFrequencyAsDays().withNumberOfRepayments("1").withRepaymentEveryAfter("30").withRepaymentFrequencyTypeAsDays()
+                .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("19 May 2023")
+                .withSubmittedOnDate("19 May 2023").withLoanType("individual").withExternalId(externalId)
+                .build(clientID.toString(), loanProductID.toString(), null);
+
+        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
+        loanTransactionHelper.approveLoan("19 May 2023", "1000", loanId, null);
+        loanTransactionHelper.disburseLoanWithNetDisbursalAmount("19 May 2023", loanId, "1000");
         return loanId;
     }
 

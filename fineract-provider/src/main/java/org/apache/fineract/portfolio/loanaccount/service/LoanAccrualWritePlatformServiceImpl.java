@@ -385,10 +385,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         LocalDate scheduleEndDate = accrualData.getDueDateAsLocaldate();
         for (LoanChargeData loanCharge : chargesData) {
             BigDecimal chargeAmount = BigDecimal.ZERO;
-            if (((accrualData.getInstallmentNumber() == 1 && loanCharge.getSubmittedOnDate().isEqual(startDate))
-                    || loanCharge.getSubmittedOnDate().isBefore(startDate) || loanCharge.getSubmittedOnDate().isEqual(startDate)
-                    || loanCharge.getSubmittedOnDate().isAfter(startDate)) && !loanCharge.getSubmittedOnDate().isAfter(endDate)
-                    && !loanCharge.getDueDate().isBefore(startDate) && !loanCharge.getDueDate().isAfter(scheduleEndDate)) {
+            if (((accrualData.getInstallmentNumber() == 1 && loanCharge.getSubmittedOnDate().isEqual(startDate)
+                    && loanCharge.getDueDate().isEqual(startDate)) || loanCharge.getDueDate().isAfter(startDate))
+                    && !loanCharge.getSubmittedOnDate().isAfter(endDate) && !loanCharge.getDueDate().isAfter(scheduleEndDate)) {
                 chargeAmount = loanCharge.getAmount();
                 if (loanCharge.getAmountUnrecognized() != null) {
                     chargeAmount = chargeAmount.subtract(loanCharge.getAmountUnrecognized());
