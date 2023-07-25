@@ -2058,7 +2058,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         sqlBuilder.append(" left join  m_floating_rates bfr on  bfr.is_base_lending_rate = true");
         sqlBuilder.append(" left join  m_floating_rates_periods bfrp on  bfr.id = bfrp.floating_rates_id and bfrp.created_date >= ?");
         sqlBuilder.append(" WHERE ml.loan_status_id = ? ");
-        sqlBuilder.append(" and ml.is_npa = false and loan.is_charged_off = false and dd.is_reversed = false ");
+        sqlBuilder.append(" and ml.is_npa = false and ml.is_charged_off = false and dd.is_reversed = false ");
         sqlBuilder.append(" and ((");
         sqlBuilder.append("ml.interest_recalculation_enabled = true ");
         sqlBuilder.append(" and (ml.interest_recalcualated_on is null or ml.interest_recalcualated_on <> ?)");
@@ -2106,7 +2106,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         sqlBuilder.append(" left join  m_floating_rates bfr on  bfr.is_base_lending_rate = true");
         sqlBuilder.append(" left join  m_floating_rates_periods bfrp on  bfr.id = bfrp.floating_rates_id and bfrp.created_date >= ?");
         sqlBuilder.append(" WHERE ml.loan_status_id = ? ");
-        sqlBuilder.append(" and ml.is_npa = false and loan.is_charged_off = false and dd.is_reversed = false ");
+        sqlBuilder.append(" and ml.is_npa = false and ml.is_charged_off = false and dd.is_reversed = false ");
         sqlBuilder.append(" and ((");
         sqlBuilder.append("ml.interest_recalculation_enabled = true ");
         sqlBuilder.append(" and (ml.interest_recalcualated_on is null or ml.interest_recalcualated_on <> ? )");
