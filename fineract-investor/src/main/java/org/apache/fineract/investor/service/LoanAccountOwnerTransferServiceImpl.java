@@ -26,6 +26,7 @@ import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_NEGATIVE;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_ZERO;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.SAMEDAY_TRANSFERS;
+import static org.apache.fineract.investor.data.ExternalTransferSubStatus.UNSOLD;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -67,39 +68,36 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
 
         if (transferDataList.size() == 2) {
             ExternalTransferSubStatus subStatus;
+            ExternalAssetOwnerTransfer pendingSaleTransfer = transferDataList.get(0);
+            ExternalAssetOwnerTransfer pendingBuybackTransfer = transferDataList.get(1);
             if (isSameDayTransfers(transferDataList)) {
                 subStatus = SAMEDAY_TRANSFERS;
+                cancelTransfer(loan, pendingSaleTransfer, subStatus);
+                cancelTransfer(loan, pendingBuybackTransfer, subStatus);
             } else {
-                subStatus = isBiggerThanZero(loan.getTotalOverpaid()) ? BALANCE_NEGATIVE : BALANCE_ZERO;
+                declineTransfer(loan, pendingSaleTransfer);
+                cancelTransfer(loan, pendingBuybackTransfer, UNSOLD);
             }
-            cancelPendingSaleAndBuybackTransfer(loan, transferDataList, subStatus);
         } else if (transferDataList.size() == 1) {
             ExternalAssetOwnerTransfer transfer = transferDataList.get(0);
             if (PENDING.equals(transfer.getStatus())) {
-                declinePendingSaleTransfer(loan, transfer);
+                declineTransfer(loan, transfer);
             } else if (BUYBACK.equals(transfer.getStatus())) {
                 executePendingBuybackTransfer(loan, transfer);
             }
         }
     }
 
-    private void cancelPendingSaleAndBuybackTransfer(Loan loan, List<ExternalAssetOwnerTransfer> transferDataList,
-            ExternalTransferSubStatus subStatus) {
-        ExternalAssetOwnerTransfer pendingSaleTransfer = transferDataList.get(0);
-        updatePendingTransfer(pendingSaleTransfer);
-        ExternalAssetOwnerTransfer cancelledSaleTransfer = createCancelledTransfer(pendingSaleTransfer, subStatus);
+    private void cancelTransfer(Loan loan, ExternalAssetOwnerTransfer pendingTransfer, ExternalTransferSubStatus subStatus) {
+        updatePendingTransfer(pendingTransfer);
+        ExternalAssetOwnerTransfer cancelledTransfer = createCancelledTransfer(pendingTransfer, subStatus);
 
-        ExternalAssetOwnerTransfer pendingBuybackTransfer = transferDataList.get(1);
-        updatePendingTransfer(pendingBuybackTransfer);
-        ExternalAssetOwnerTransfer cancelledBuybackTransfer = createCancelledTransfer(pendingBuybackTransfer, subStatus);
-
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanOwnershipTransferBusinessEvent(cancelledSaleTransfer, loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanOwnershipTransferBusinessEvent(cancelledBuybackTransfer, loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanOwnershipTransferBusinessEvent(cancelledTransfer, loan));
     }
 
-    private void declinePendingSaleTransfer(Loan loan, ExternalAssetOwnerTransfer pendingSaleTransfer) {
-        ExternalAssetOwnerTransfer declinedSaleTransfer = createDeclinedTransfer(pendingSaleTransfer, loan);
-        updatePendingTransfer(pendingSaleTransfer);
+    private void declineTransfer(Loan loan, ExternalAssetOwnerTransfer pendingTransfer) {
+        ExternalAssetOwnerTransfer declinedSaleTransfer = createDeclinedTransfer(pendingTransfer, loan);
+        updatePendingTransfer(pendingTransfer);
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanOwnershipTransferBusinessEvent(declinedSaleTransfer, loan));
     }
