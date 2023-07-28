@@ -16,12 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import static org.slf4j.LoggerFactory.*
+
 plugins {
     id 'io.spring.dependency-management' version '1.1.0'
     id 'groovy'
     id 'java-gradle-plugin'
     id 'groovy-gradle-plugin'
 }
+
+//Suppress errors related to invalid org.eclipse.* maven poms versions.
+def loggerFactory = getILoggerFactory()
+def noOpMethod = getILoggerFactory().getClass().getDeclaredMethod("addNoOpLogger", String.class)
+noOpMethod.setAccessible(true)
+noOpMethod.invoke(loggerFactory, "io.spring.gradle.dependencymanagement.internal.maven.EffectiveModelBuilder")
 
 apply from: "${projectDir}/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
