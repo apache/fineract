@@ -16,23 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.data;
+package org.apache.fineract.investor.domain.search;
 
-import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.PagedRequest;
+import org.apache.fineract.investor.service.search.domain.ExternalAssetOwnerSearchRequest;
+import org.springframework.data.domain.Page;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ExternalTransferDataDetails {
+public interface SearchingExternalAssetOwnerRepository {
 
-    private Long detailsId;
-    private BigDecimal totalOutstanding;
-    private BigDecimal totalPrincipalOutstanding;
-    private BigDecimal totalInterestOutstanding;
-    private BigDecimal totalFeeChargesOutstanding;
-    private BigDecimal totalPenaltyChargesOutstanding;
-    private BigDecimal totalOverpaid;
+    Page<SearchedExternalAssetOwner> searchInvestorData(PagedRequest<ExternalAssetOwnerSearchRequest> searchRequest);
+
 }

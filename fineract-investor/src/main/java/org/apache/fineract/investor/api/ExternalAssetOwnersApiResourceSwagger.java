@@ -28,59 +28,59 @@ final class ExternalAssetOwnersApiResourceSwagger {
 
     private ExternalAssetOwnersApiResourceSwagger() {}
 
+    static final class GetExternalTransferPageItems {
+
+        private GetExternalTransferPageItems() {}
+
+        static final class GetExternalTransferOwner {
+
+            private GetExternalTransferOwner() {}
+
+            @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
+            public String externalId;
+        }
+
+        static final class GetExternalTransferLoan {
+
+            private GetExternalTransferLoan() {}
+
+            @Schema(example = "1")
+            public Long loanId;
+
+            @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
+            public String externalId;
+        }
+
+        @Schema(example = "1")
+        public Long transferId;
+
+        public GetExternalTransferOwner owner;
+
+        public GetExternalTransferLoan loan;
+
+        @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
+        public String transferExternalId;
+
+        @Schema(example = "1")
+        public String purchasePriceRatio;
+
+        @Schema(example = "[2023, 5, 23]")
+        public LocalDate settlementDate;
+
+        @Schema(example = "PENDING")
+        public ExternalTransferStatus status;
+
+        @Schema(example = "[2023, 5, 1]")
+        public LocalDate effectiveFrom;
+
+        @Schema(example = "[2023, 5, 23]")
+        public LocalDate effectiveTo;
+    }
+
     @Schema(description = "ExternalTransferResponse")
     public static final class GetExternalTransferResponse {
 
         private GetExternalTransferResponse() {}
-
-        static final class GetExternalTransferPageItems {
-
-            private GetExternalTransferPageItems() {}
-
-            static final class GetExternalTransferOwner {
-
-                private GetExternalTransferOwner() {}
-
-                @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
-                public String externalId;
-            }
-
-            static final class GetExternalTransferLoan {
-
-                private GetExternalTransferLoan() {}
-
-                @Schema(example = "1")
-                public Long loanId;
-
-                @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
-                public String externalId;
-            }
-
-            @Schema(example = "1")
-            public Long transferId;
-
-            public GetExternalTransferOwner owner;
-
-            public GetExternalTransferLoan loan;
-
-            @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
-            public String transferExternalId;
-
-            @Schema(example = "1")
-            public String purchasePriceRatio;
-
-            @Schema(example = "[2023, 5, 23]")
-            public LocalDate settlementDate;
-
-            @Schema(example = "PENDING")
-            public ExternalTransferStatus status;
-
-            @Schema(example = "[2023, 5, 1]")
-            public LocalDate effectiveFrom;
-
-            @Schema(example = "[2023, 5, 23]")
-            public LocalDate effectiveTo;
-        }
 
         @Schema(example = "20")
         public Integer totalFilteredRecords;
@@ -152,4 +152,5 @@ final class ExternalAssetOwnersApiResourceSwagger {
             public String purchasePriceRatio;
         }
     }
+
 }

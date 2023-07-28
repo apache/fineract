@@ -45,13 +45,16 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
+import org.apache.fineract.infrastructure.core.service.PagedRequest;
 import org.apache.fineract.infrastructure.security.service.PlatformUserRightsContext;
+import org.apache.fineract.investor.api.search.ExternalAssetOwnersSearchApiDelegate;
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
 import org.apache.fineract.investor.data.ExternalOwnerJournalEntryData;
 import org.apache.fineract.investor.data.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferResponseData;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
+import org.apache.fineract.investor.service.search.domain.ExternalAssetOwnerSearchRequest;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformServiceCommon;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.data.domain.Page;
@@ -69,6 +72,7 @@ public class ExternalAssetOwnersApiResource {
     private final DefaultToApiJsonSerializer<ExternalTransferResponseData> postApiJsonSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final LoanReadPlatformServiceCommon loanReadPlatformService;
+    private final ExternalAssetOwnersSearchApiDelegate delegate;
 
     @POST
     @Path("/transfers/loans/{loanId}")
@@ -187,6 +191,17 @@ public class ExternalAssetOwnersApiResource {
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit, @Context final UriInfo uriInfo) {
         platformUserRightsContext.isAuthenticated();
         return externalAssetOwnersReadService.retrieveJournalEntriesOfOwner(ownerExternalId, offset, limit);
+
+    }
+
+    @POST
+    @Path("/search")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Search External Asset Owner Transfers by text or date ranges to settlement or effective dates")
+    public Page<ExternalTransferData> searchInvestorData(@Parameter PagedRequest<ExternalAssetOwnerSearchRequest> request) {
+        platformUserRightsContext.isAuthenticated();
+        return delegate.searchInvestorData(request);
 
     }
 

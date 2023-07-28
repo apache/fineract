@@ -491,6 +491,10 @@ public final class Utils {
         return new Gson().toJson(map);
     }
 
+    public static String convertToJson(Object o) {
+        return gson.toJson(o);
+    }
+
     public static LocalDate getDateAsLocalDate(String dateAsString) {
         return LocalDate.parse(dateAsString, dateFormatter);
     }
