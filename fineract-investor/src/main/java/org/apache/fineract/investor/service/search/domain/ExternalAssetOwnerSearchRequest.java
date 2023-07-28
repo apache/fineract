@@ -16,23 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.data;
+package org.apache.fineract.investor.service.search.domain;
 
-import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
+import java.time.LocalDate;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ExternalTransferDataDetails {
+public class ExternalAssetOwnerSearchRequest {
 
-    private Long detailsId;
-    private BigDecimal totalOutstanding;
-    private BigDecimal totalPrincipalOutstanding;
-    private BigDecimal totalInterestOutstanding;
-    private BigDecimal totalFeeChargesOutstanding;
-    private BigDecimal totalPenaltyChargesOutstanding;
-    private BigDecimal totalOverpaid;
+    private String text;
+    private LocalDate submittedFromDate;
+    private LocalDate submittedToDate;
+    private LocalDate effectiveFromDate;
+    private LocalDate effectiveToDate;
 }

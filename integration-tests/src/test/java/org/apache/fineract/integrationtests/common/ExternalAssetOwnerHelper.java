@@ -18,14 +18,24 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.fineract.accounting.common.AccountingConstants;
+import org.apache.fineract.client.models.ExternalAssetOwnerSearchRequest;
 import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
 import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.client.models.ExternalTransferData;
+import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PageExternalTransferData;
+import org.apache.fineract.client.models.PagedRequestExternalAssetOwnerSearchRequest;
+import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.client.models.PostInitiateTransferRequest;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import retrofit2.Response;
 
 public class ExternalAssetOwnerHelper extends IntegrationTest {
@@ -80,6 +90,38 @@ public class ExternalAssetOwnerHelper extends IntegrationTest {
 
     public ExternalOwnerJournalEntryData retrieveJournalEntriesOfOwner(String ownerExternalId) {
         return ok(fineract().externalAssetOwners.getJournalEntriesOfOwner(ownerExternalId, 0, 100));
+    }
+
+    public PageExternalTransferData searchExternalAssetOwnerTransfer(PagedRequestExternalAssetOwnerSearchRequest request) {
+        return ok(fineract().externalAssetOwners.searchInvestorData(request));
+    }
+
+    public PagedRequestExternalAssetOwnerSearchRequest buildExternalAssetOwnerSearchRequest(String text, String attribute,
+            LocalDate fromDate, LocalDate toDate, Integer page, Integer size) {
+        final Integer DEFAULT_PAGE_SIZE = 50;
+        PagedRequestExternalAssetOwnerSearchRequest pagedRequest = new PagedRequestExternalAssetOwnerSearchRequest();
+        ExternalAssetOwnerSearchRequest searchRequest = new ExternalAssetOwnerSearchRequest();
+        searchRequest.text(text);
+        if (attribute.equals("effective")) {
+            searchRequest.setEffectiveFromDate(fromDate);
+            searchRequest.setEffectiveToDate(toDate);
+        } else if (attribute.equals("settlement")) {
+            searchRequest.setSubmittedFromDate(fromDate);
+            searchRequest.setSubmittedToDate(toDate);
+        }
+        pagedRequest.setRequest(searchRequest);
+        pagedRequest.setSorts(new ArrayList<>());
+        pagedRequest.setPage(page != null ? page : 0);
+        pagedRequest.setSize(size != null ? size : DEFAULT_PAGE_SIZE);
+        return pagedRequest;
+    }
+
+    public void setProperFinancialActivity(FinancialActivityAccountHelper financialActivityAccountHelper, Account transferAccount) {
+        List<GetFinancialActivityAccountsResponse> financialMappings = financialActivityAccountHelper.getAllFinancialActivityAccounts();
+        financialMappings.forEach(mapping -> financialActivityAccountHelper.deleteFinancialActivityAccount(mapping.getId()));
+        financialActivityAccountHelper.createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
+                .financialActivityId((long) AccountingConstants.FinancialActivity.ASSET_TRANSFER.getValue())
+                .glAccountId((long) transferAccount.getAccountID()));
     }
 
 }
