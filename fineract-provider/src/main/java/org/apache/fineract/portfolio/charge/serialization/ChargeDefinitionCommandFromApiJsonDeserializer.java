@@ -80,7 +80,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             CURRENCY_OPTIONS, CHARGE_APPLIES_TO, CHARGE_TIME_TYPE, CHARGE_CALCULATION_TYPE, CHARGE_CALCULATION_TYPE_OPTIONS, PENALTY,
             ACTIVE, CHARGE_PAYMENT_MODE, FEE_ON_MONTH_DAY, FEE_INTERVAL, MONTH_DAY_FORMAT, MIN_CAP, MAX_CAP, FEE_FREQUENCY,
             ENABLE_FREE_WITHDRAWAL_CHARGE, FREE_WITHDRAWAL_FREQUENCY, RESTART_COUNT_FREQUENCY, COUNT_FREQUENCY_TYPE, PAYMENT_TYPE_ID,
-            ENABLE_PAYMENT_TYPE, ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
+            ENABLE_PAYMENT_TYPE, ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName,
+            ChargesApiConstants.recognizedAsAccrualIncomeParamName));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -93,9 +94,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-
-        }.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -216,6 +215,11 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
             }
 
+            final Boolean recognizedAsAccrualIncome = this.fromApiJsonHelper
+                    .extractBooleanNamed(ChargesApiConstants.recognizedAsAccrualIncomeParamName, element);
+            baseDataValidator.reset().parameter(ChargesApiConstants.recognizedAsAccrualIncomeParamName).value(recognizedAsAccrualIncome)
+                    .notNull();
+
         } else if (appliesTo.isClientCharge()) {
             // client applicable validation
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CHARGE_TIME_TYPE, element);
@@ -298,9 +302,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-
-        }.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -429,14 +431,17 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ACTIVE, element);
             baseDataValidator.reset().parameter(ACTIVE).value(active).notNull();
         }
+
         if (this.fromApiJsonHelper.parameterExists(MIN_CAP, element)) {
             final BigDecimal minCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(MIN_CAP, element.getAsJsonObject());
             baseDataValidator.reset().parameter(MIN_CAP).value(minCap).notNull().positiveAmount();
         }
+
         if (this.fromApiJsonHelper.parameterExists(MAX_CAP, element)) {
             final BigDecimal maxCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(MAX_CAP, element.getAsJsonObject());
             baseDataValidator.reset().parameter(MAX_CAP).value(maxCap).notNull().positiveAmount();
         }
+
         if (this.fromApiJsonHelper.parameterExists(FEE_FREQUENCY, element)) {
             final Integer feeFrequency = this.fromApiJsonHelper.extractIntegerNamed(FEE_FREQUENCY, element, Locale.getDefault());
             baseDataValidator.reset().parameter(FEE_FREQUENCY).value(feeFrequency).inMinMaxRange(0, 3);
@@ -451,6 +456,13 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists(ChargesApiConstants.taxGroupIdParamName, element)) {
             final Long taxGroupId = this.fromApiJsonHelper.extractLongNamed(ChargesApiConstants.taxGroupIdParamName, element);
             baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).value(taxGroupId).notNull().longGreaterThanZero();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ChargesApiConstants.recognizedAsAccrualIncomeParamName, element)) {
+            final Boolean recognizedAsAccrualIncome = this.fromApiJsonHelper
+                    .extractBooleanNamed(ChargesApiConstants.recognizedAsAccrualIncomeParamName, element);
+            baseDataValidator.reset().parameter(ChargesApiConstants.recognizedAsAccrualIncomeParamName).value(recognizedAsAccrualIncome)
+                    .notNull();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

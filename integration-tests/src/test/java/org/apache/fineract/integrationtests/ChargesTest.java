@@ -25,6 +25,9 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.GetChargesResponse;
+import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.PutChargesChargeIdRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.junit.jupiter.api.Assertions;
@@ -321,4 +324,30 @@ public class ChargesTest {
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, overdraftFeeChargeId);
         Assertions.assertEquals(overdraftFeeChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
     }
+
+    @Test
+    public void testChargesForSavingsWithAccrual() {
+
+        boolean recognizedAsAccrualIncome = true;
+        final PostChargesResponse savingsChargePostResponse = ChargesHelper.createCharge(requestSpec, responseSpec,
+                ChargesHelper.getSavingsSpecifiedDueDateJSON(recognizedAsAccrualIncome));
+        Assertions.assertNotNull(savingsChargePostResponse);
+        final Integer savingsChargeId = savingsChargePostResponse.getResourceId().intValue();
+
+        GetChargesResponse savingsChargeGetResponse = ChargesHelper.getCharge(requestSpec, responseSpec, savingsChargeId);
+        Assertions.assertNotNull(savingsChargeGetResponse);
+        Assertions.assertTrue(savingsChargeGetResponse.getRecognizedAsAccrualIncome());
+
+        recognizedAsAccrualIncome = false;
+        final PutChargesChargeIdRequest savingsChargePutResponse = ChargesHelper.updateCharge(requestSpec, responseSpec, savingsChargeId,
+                ChargesHelper.getModifyChargeJSON(recognizedAsAccrualIncome));
+        Assertions.assertNotNull(savingsChargePutResponse);
+        savingsChargeGetResponse = ChargesHelper.getCharge(requestSpec, responseSpec, savingsChargeId);
+        Assertions.assertNotNull(savingsChargeGetResponse);
+        Assertions.assertFalse(savingsChargeGetResponse.getRecognizedAsAccrualIncome());
+
+        final Integer chargeIdAfterDeletion = ChargesHelper.deleteCharge(responseSpec, requestSpec, savingsChargeId);
+        Assertions.assertEquals(savingsChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
+    }
+
 }

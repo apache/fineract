@@ -141,4 +141,5 @@
     <include file="parts/0119_add_loan_product_down_payment_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0120_transaction_summary_with_asset_owner_report_typo_fix.xml" relativeToChangelogFile="true" />
     <include file="parts/0121_transaction_summary_with_asset_owner_report_typo_fix_2.xml" relativeToChangelogFile="true" />
+    <include file="parts/0122_add_charge_flag_to_recognize_as_accrual.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

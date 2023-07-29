@@ -134,6 +134,9 @@ public class Charge extends AbstractPersistableCustom {
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
+    @Column(name = "is_recognized_as_accrual_income", nullable = false)
+    private boolean recognizedAsAccrualIncome;
+
     public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup,
             final PaymentType paymentType) {
 
@@ -157,6 +160,12 @@ public class Charge extends AbstractPersistableCustom {
         final BigDecimal maxCap = command.bigDecimalValueOfParameterNamed("maxCap");
         final Integer feeFrequency = command.integerValueOfParameterNamed("feeFrequency");
 
+        boolean recognizedAsAccrualIncomeParamName = false;
+        if (chargeAppliesTo.isSavingsCharge()) {
+            recognizedAsAccrualIncomeParamName = command
+                    .booleanPrimitiveValueOfParameterNamed(ChargesApiConstants.recognizedAsAccrualIncomeParamName);
+        }
+
         boolean enableFreeWithdrawalCharge = false;
         enableFreeWithdrawalCharge = command.booleanPrimitiveValueOfParameterNamed("enableFreeWithdrawalCharge");
 
@@ -176,7 +185,8 @@ public class Charge extends AbstractPersistableCustom {
 
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
                 feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, enableFreeWithdrawalCharge, freeWithdrawalFrequency,
-                restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType);
+                restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType,
+                recognizedAsAccrualIncomeParamName);
     }
 
     protected Charge() {}
@@ -186,7 +196,8 @@ public class Charge extends AbstractPersistableCustom {
             final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval, final BigDecimal minCap,
             final BigDecimal maxCap, final Integer feeFrequency, final boolean enableFreeWithdrawalCharge,
             final Integer freeWithdrawalFrequency, final Integer restartFrequency, final PeriodFrequencyType restartFrequencyEnum,
-            final GLAccount account, final TaxGroup taxGroup, final boolean enablePaymentType, final PaymentType paymentType) {
+            final GLAccount account, final TaxGroup taxGroup, final boolean enablePaymentType, final PaymentType paymentType,
+            final boolean recognizedAsAccrualIncome) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -209,6 +220,7 @@ public class Charge extends AbstractPersistableCustom {
         this.feeInterval = feeInterval;
         this.feeFrequency = feeFrequency;
 
+        this.recognizedAsAccrualIncome = false;
         if (isSavingsCharge()) {
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the write service
@@ -245,6 +257,8 @@ public class Charge extends AbstractPersistableCustom {
                     this.paymentType = paymentType;
                 }
             }
+
+            this.recognizedAsAccrualIncome = recognizedAsAccrualIncome;
 
         } else if (isLoanCharge()) {
 
@@ -302,6 +316,10 @@ public class Charge extends AbstractPersistableCustom {
 
     public boolean isDeleted() {
         return this.deleted;
+    }
+
+    public boolean isRecognizedAsAccrualIncome() {
+        return recognizedAsAccrualIncome;
     }
 
     public boolean isLoanCharge() {
@@ -591,6 +609,13 @@ public class Charge extends AbstractPersistableCustom {
             this.penalty = newValue;
         }
 
+        final String recognizedAsAccrualIncomeParamName = "recognizedAsAccrualIncome";
+        if (command.isChangeInBooleanParameterNamed(recognizedAsAccrualIncomeParamName, this.recognizedAsAccrualIncome)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(recognizedAsAccrualIncomeParamName);
+            actualChanges.put(recognizedAsAccrualIncomeParamName, newValue);
+            this.recognizedAsAccrualIncome = newValue;
+        }
+
         final String activeParamName = "active";
         if (command.isChangeInBooleanParameterNamed(activeParamName, this.active)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(activeParamName);
@@ -676,11 +701,16 @@ public class Charge extends AbstractPersistableCustom {
             paymentTypeData = PaymentTypeData.instance(paymentType.getId(), paymentType.getName());
         }
 
+        boolean recognizedAsAccrualIncome = false;
+        if (isSavingsCharge()) {
+            recognizedAsAccrualIncome = isRecognizedAsAccrualIncome();
+        }
+
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
                 chargePaymentMode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.enableFreeWithdrawal,
                 this.freeWithdrawalFrequency, this.restartFrequency, this.restartFrequencyEnum, this.enablePaymentType, paymentTypeData,
-                this.minCap, this.maxCap, feeFrequencyType, accountData, taxGroupData);
+                this.minCap, this.maxCap, feeFrequencyType, accountData, taxGroupData, recognizedAsAccrualIncome);
     }
 
     public Integer getChargePaymentMode() {
@@ -772,12 +802,14 @@ public class Charge extends AbstractPersistableCustom {
                 && Objects.equals(feeOnMonth, other.feeOnMonth) && penalty == other.penalty && active == other.active
                 && deleted == other.deleted && Objects.equals(minCap, other.minCap) && Objects.equals(maxCap, other.maxCap)
                 && Objects.equals(feeFrequency, other.feeFrequency) && Objects.equals(account, other.account)
-                && Objects.equals(taxGroup, other.taxGroup);
+                && Objects.equals(taxGroup, other.taxGroup) && (recognizedAsAccrualIncome == other.recognizedAsAccrualIncome);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, chargePaymentMode, feeOnDay,
-                feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
+                feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup,
+                recognizedAsAccrualIncome);
     }
+
 }

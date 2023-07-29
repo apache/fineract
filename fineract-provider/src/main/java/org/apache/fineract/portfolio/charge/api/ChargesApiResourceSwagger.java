@@ -110,6 +110,8 @@ final class ChargesApiResourceSwagger {
         public GetChargesAppliesToResponse chargeAppliesTo;
         public GetChargesCalculationTypeResponse chargeCalculationType;
         public GetChargesPaymentModeResponse chargePaymentMode;
+        @Schema(example = "false")
+        public boolean recognizedAsAccrualIncome;
     }
 
     @Schema(description = "PostChargesRequest")

@@ -23,8 +23,10 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.PostChargesRequest;
 import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.PutChargesChargeIdRequest;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -90,9 +92,14 @@ public final class ChargesHelper extends IntegrationTest {
     private static final Gson GSON = new JSON().getGson();
 
     public static String getSavingsSpecifiedDueDateJSON() {
+        return getSavingsSpecifiedDueDateJSON(false);
+    }
+
+    public static String getSavingsSpecifiedDueDateJSON(boolean recognizedAsAccrualIncome) {
         final HashMap<String, Object> map = populateDefaultsForSavings();
         map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
         map.put("feeInterval", 2);
+        map.put("recognizedAsAccrualIncome", recognizedAsAccrualIncome);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
         return chargesCreateJson;
@@ -113,6 +120,7 @@ public final class ChargesHelper extends IntegrationTest {
     public static String getSavingsJSON(String amount, String currencyCode, ChargeTimeType timeType) {
         final HashMap<String, Object> map = populateDefaultsForSavings(amount.toString(), currencyCode);
         map.put("chargeTimeType", timeType.getValue());
+        map.put("recognizedAsAccrualIncome", false);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
         return chargesCreateJson;
@@ -122,6 +130,7 @@ public final class ChargesHelper extends IntegrationTest {
         final HashMap<String, Object> map = populateDefaultsForSavings();
         map.put("feeOnMonthDay", ChargesHelper.FEE_ON_MONTH_DAY);
         map.put("chargeTimeType", CHARGE_ANNUAL_FEE);
+        map.put("recognizedAsAccrualIncome", false);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
         return chargesCreateJson;
@@ -132,6 +141,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("feeOnMonthDay", ChargesHelper.FEE_ON_MONTH_DAY);
         map.put("chargeTimeType", CHARGE_MONTHLY_FEE);
         map.put("feeInterval", 2);
+        map.put("recognizedAsAccrualIncome", false);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
         return chargesCreateJson;
@@ -141,6 +151,7 @@ public final class ChargesHelper extends IntegrationTest {
         final HashMap<String, Object> map = populateDefaultsForSavings();
         map.put("chargeTimeType", WEEKLY_FEE);
         map.put("feeInterval", 1);
+        map.put("recognizedAsAccrualIncome", false);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
         return chargesCreateJson;
@@ -149,6 +160,7 @@ public final class ChargesHelper extends IntegrationTest {
     public static String getSavingsOverdraftFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForSavings();
         map.put("chargeTimeType", CHARGE_OVERDRAFT_FEE);
+        map.put("recognizedAsAccrualIncome", false);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
         return chargesCreateJson;
@@ -167,6 +179,7 @@ public final class ChargesHelper extends IntegrationTest {
         map.put("currencyCode", currencyCode);
         map.put("locale", CommonConstants.LOCALE);
         map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
+        map.put("recognizedAsAccrualIncome", false);
         map.put("name", Utils.uniqueRandomStringGenerator("Charge_Savings_", 6));
         return map;
     }
@@ -414,6 +427,14 @@ public final class ChargesHelper extends IntegrationTest {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, request, "resourceId");
     }
 
+    public static PostChargesResponse createCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String payload) {
+        LOG.info("{}", payload);
+        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, payload);
+        LOG.info("{}", response);
+        return GSON.fromJson(response, PostChargesResponse.class);
+    }
+
     public static PostChargesResponse createLoanCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String payload) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, payload, null);
@@ -429,10 +450,27 @@ public final class ChargesHelper extends IntegrationTest {
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
+    public static GetChargesResponse getCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer chargeId) {
+        final String response = Utils.performServerGet(requestSpec, responseSpec,
+                CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER);
+        LOG.info("{}", response);
+        return GSON.fromJson(response, GetChargesResponse.class);
+    }
+
     public static HashMap getChargeChanges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer chargeId) {
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
                 CommonConstants.RESPONSE_CHANGES);
+    }
+
+    public static PutChargesChargeIdRequest updateCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer chargeId, final String payload) {
+        LOG.info("{}", payload);
+        final String response = Utils.performServerPut(requestSpec, responseSpec,
+                CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, payload);
+        LOG.info("{}", response);
+        return GSON.fromJson(response, PutChargesChargeIdRequest.class);
     }
 
     public static HashMap updateCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -448,9 +486,14 @@ public final class ChargesHelper extends IntegrationTest {
     }
 
     public static String getModifyChargeJSON() {
+        return getModifyChargeJSON(false);
+    }
+
+    public static String getModifyChargeJSON(boolean recognizedAsAccrualIncome) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
         map.put("amount", 200.0);
+        map.put("recognizedAsAccrualIncome", recognizedAsAccrualIncome);
         String json = new Gson().toJson(map);
         LOG.info("{}", json);
         return json;
