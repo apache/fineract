@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -47,38 +49,21 @@ import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implements RecurringDepositProductWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositProductWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final RecurringDepositProductRepository recurringDepositProductRepository;
     private final DepositProductDataValidator fromApiJsonDataValidator;
     private final DepositProductAssembler depositProductAssembler;
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
     private final InterestRateChartAssembler chartAssembler;
-
-    @Autowired
-    public RecurringDepositProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final RecurringDepositProductRepository recurringDepositProductRepository,
-            final DepositProductDataValidator fromApiJsonDataValidator, final DepositProductAssembler depositProductAssembler,
-            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            final InterestRateChartAssembler chartAssembler) {
-        this.context = context;
-        this.recurringDepositProductRepository = recurringDepositProductRepository;
-        this.fromApiJsonDataValidator = fromApiJsonDataValidator;
-        this.depositProductAssembler = depositProductAssembler;
-
-        this.accountMappingWritePlatformService = accountMappingWritePlatformService;
-        this.chartAssembler = chartAssembler;
-    }
 
     @Transactional
     @Override
@@ -206,6 +191,6 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        LOG.error("Error occured.", dae);
+        log.error("Error occured.", dae);
     }
 }

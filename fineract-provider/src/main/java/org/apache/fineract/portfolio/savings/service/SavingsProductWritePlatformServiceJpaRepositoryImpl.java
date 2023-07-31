@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -48,37 +50,21 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProductAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements SavingsProductWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsProductWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final SavingsProductRepository savingProductRepository;
     private final SavingsProductDataValidator fromApiJsonDataValidator;
     private final SavingsProductAssembler savingsProductAssembler;
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
-
-    @Autowired
-    public SavingsProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingsProductRepository savingProductRepository, final SavingsProductDataValidator fromApiJsonDataValidator,
-            final SavingsProductAssembler savingsProductAssembler,
-            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            final FineractEntityAccessUtil fineractEntityAccessUtil) {
-        this.context = context;
-        this.savingProductRepository = savingProductRepository;
-        this.fromApiJsonDataValidator = fromApiJsonDataValidator;
-        this.savingsProductAssembler = savingsProductAssembler;
-        this.accountMappingWritePlatformService = accountMappingWritePlatformService;
-        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-    }
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
@@ -103,7 +89,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        LOG.error("Error occured.", dae);
+        log.error("Error occured.", dae);
     }
 
     @Transactional

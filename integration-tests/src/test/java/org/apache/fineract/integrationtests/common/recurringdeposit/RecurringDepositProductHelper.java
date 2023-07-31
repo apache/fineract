@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ public class RecurringDepositProductHelper {
     private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositProductHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
+    private static final Gson GSON = new JSON().getGson();
 
     public RecurringDepositProductHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -239,6 +242,14 @@ public class RecurringDepositProductHelper {
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
                 RECURRING_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER, "");
         return response;
+    }
+
+    public static GetRecurringDepositProductsProductIdResponse getRecurringDepositProductById(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer productId) {
+        LOG.info("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
+        final String GET_RD_PRODUCT_BY_ID_URL = RECURRING_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, GET_RD_PRODUCT_BY_ID_URL);
+        return GSON.fromJson(response, GetRecurringDepositProductsProductIdResponse.class);
     }
 
     public static HashMap retrieveRecurringDepositProductById(final RequestSpecification requestSpec,

@@ -48,6 +48,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     private final boolean escheat;
     private final boolean amountHold;
     private final boolean amountRelease;
+    private final boolean accrual;
 
     public SavingsAccountTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -55,6 +56,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
         this.value = value;
         this.deposit = Long.valueOf(SavingsAccountTransactionType.DEPOSIT.getValue()).equals(this.id);
         this.dividendPayout = Long.valueOf(SavingsAccountTransactionType.DIVIDEND_PAYOUT.getValue()).equals(this.id);
+        this.accrual = Long.valueOf(SavingsAccountTransactionType.ACCRUAL.getValue()).equals(this.id);
         this.withdrawal = Long.valueOf(SavingsAccountTransactionType.WITHDRAWAL.getValue()).equals(this.id);
         this.interestPosting = Long.valueOf(SavingsAccountTransactionType.INTEREST_POSTING.getValue()).equals(this.id);
         this.feeDeduction = Long.valueOf(SavingsAccountTransactionType.ANNUAL_FEE.getValue()).equals(this.id)

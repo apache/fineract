@@ -38,8 +38,9 @@ public enum SavingsAccountTransactionType {
     WITHDRAWAL_FEE(4, "savingsAccountTransactionType.withdrawalFee", TransactionEntryType.DEBIT), //
     ANNUAL_FEE(5, "savingsAccountTransactionType.annualFee", TransactionEntryType.DEBIT), //
     WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharge"), //
-    PAY_CHARGE(7, "savingsAccountTransactionType.payCharge", TransactionEntryType.DEBIT), //
-    DIVIDEND_PAYOUT(8, "savingsAccountTransactionType.dividendPayout", TransactionEntryType.CREDIT), //
+    PAY_CHARGE(7, "savingsAccountTransactionType.payCharge"), //
+    DIVIDEND_PAYOUT(8, "savingsAccountTransactionType.dividendPayout"), //
+    ACCRUAL(10, "savingsAccountTransactionType.accrual"), //
     INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer"), //
     WITHDRAW_TRANSFER(14, "savingsAccountTransactionType.withdrawTransfer"), //
@@ -94,9 +95,33 @@ public enum SavingsAccountTransactionType {
         return entryType != null && entryType.isDebit();
     }
 
-    public static SavingsAccountTransactionType fromInt(final Integer value) {
-        SavingsAccountTransactionType transactionType = BY_ID.get(value);
-        return transactionType == null ? INVALID : transactionType;
+    public static SavingsAccountTransactionType fromInt(final Integer transactionType) {
+
+        if (transactionType == null) {
+            return SavingsAccountTransactionType.INVALID;
+        }
+        return switch (transactionType) {
+            case 1 -> SavingsAccountTransactionType.DEPOSIT;
+            case 2 -> SavingsAccountTransactionType.WITHDRAWAL;
+            case 3 -> SavingsAccountTransactionType.INTEREST_POSTING;
+            case 4 -> SavingsAccountTransactionType.WITHDRAWAL_FEE;
+            case 5 -> SavingsAccountTransactionType.ANNUAL_FEE;
+            case 6 -> SavingsAccountTransactionType.WAIVE_CHARGES;
+            case 7 -> SavingsAccountTransactionType.PAY_CHARGE;
+            case 8 -> SavingsAccountTransactionType.DIVIDEND_PAYOUT;
+            case 10 -> SavingsAccountTransactionType.ACCRUAL;
+            case 12 -> SavingsAccountTransactionType.INITIATE_TRANSFER;
+            case 13 -> SavingsAccountTransactionType.APPROVE_TRANSFER;
+            case 14 -> SavingsAccountTransactionType.WITHDRAW_TRANSFER;
+            case 15 -> SavingsAccountTransactionType.REJECT_TRANSFER;
+            case 16 -> SavingsAccountTransactionType.WRITTEN_OFF;
+            case 17 -> SavingsAccountTransactionType.OVERDRAFT_INTEREST;
+            case 18 -> SavingsAccountTransactionType.WITHHOLD_TAX;
+            case 19 -> SavingsAccountTransactionType.ESCHEAT;
+            case 20 -> SavingsAccountTransactionType.AMOUNT_HOLD;
+            case 21 -> SavingsAccountTransactionType.AMOUNT_RELEASE;
+            default -> SavingsAccountTransactionType.INVALID;
+        };
     }
 
     public boolean isDeposit() {
@@ -109,6 +134,10 @@ public enum SavingsAccountTransactionType {
 
     public boolean isInterestPosting() {
         return this == INTEREST_POSTING;
+    }
+
+    public boolean isAccrual() {
+        return this.equals(SavingsAccountTransactionType.ACCRUAL);
     }
 
     public boolean isOverDraftInterestPosting() {
