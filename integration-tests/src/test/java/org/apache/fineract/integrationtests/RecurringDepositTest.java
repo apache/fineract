@@ -704,32 +704,18 @@ public class RecurringDepositTest {
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
         final Account liabilityAccountForTax = this.accountHelper.createLiabilityAccount();
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        LocalDate minus20MonthFromTodaysDate = todaysDate.minusMonths(20);
+        final String VALID_FROM = Utils.dateFormatter.format(minus20MonthFromTodaysDate);
+        LocalDate todaysDatePlus10Years = todaysDate.plusYears(10);
+        final String VALID_TO = Utils.dateFormatter.format(todaysDatePlus10Years);
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -20);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
-
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -20);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
-
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
-        todaysDate.add(Calendar.DATE, numberOfDaysLeft);
-        final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
-        Calendar closedOn = Calendar.getInstance();
-        closedOn.add(Calendar.MONTH, -6);
-        final String CLOSED_ON_DATE = dateFormat.format(closedOn.getTime());
+        final String SUBMITTED_ON_DATE = Utils.dateFormatter.format(minus20MonthFromTodaysDate);
+        final String APPROVED_ON_DATE = SUBMITTED_ON_DATE;
+        final String ACTIVATION_DATE = SUBMITTED_ON_DATE;
+        final String expectedFirstDepositOnDate = SUBMITTED_ON_DATE;
+        LocalDate closedOnDate = minus20MonthFromTodaysDate.plusMonths(14);
+        final String CLOSED_ON_DATE = Utils.dateFormatter.format(closedOnDate);
 
         /***
          * Create client for applying Deposit and Savings accounts
@@ -806,19 +792,17 @@ public class RecurringDepositTest {
         /***
          * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -20);
-
+        LocalDate startDate = minus20MonthFromTodaysDate;
         for (int i = 0; i < 14; i++) {
             Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                    depositAmount, dateFormat.format(todaysDate.getTime()));
+                    depositAmount, Utils.dateFormatter.format(startDate));
             Assertions.assertNotNull(depositTransactionId);
 
-            this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, dateFormat.format(todaysDate.getTime()),
+            this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, Utils.dateFormatter.format(startDate),
                     new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT));
-            this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, dateFormat.format(todaysDate.getTime()),
+            this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, Utils.dateFormatter.format(startDate),
                     new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT));
-            todaysDate.add(Calendar.MONTH, 1);
+            startDate = startDate.plusMonths(1);
         }
 
         /***
