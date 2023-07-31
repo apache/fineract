@@ -135,7 +135,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
-    private Set<PostDatedChecks> postDatedChecks;
+    private Set<PostDatedChecks> postDatedChecks = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "installment")
     private Set<LoanInstallmentCharge> installmentCharges = new HashSet<>();
