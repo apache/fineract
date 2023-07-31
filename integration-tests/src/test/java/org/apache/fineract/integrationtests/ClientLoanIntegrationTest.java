@@ -6802,7 +6802,8 @@ public class ClientLoanIntegrationTest {
             final PostClientsRequest newClient = createRandomClientWithDate("01 January 2023");
             final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(newClient);
             LOG.info("-----------------------------------NEW LOAN PRODUCT-----------------------------------------");
-            PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
+            PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct(
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY);
             final PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
             LOG.info("-----------------------------------CREATE CHARGES-----------------------------------------");
             PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(new PostChargesRequest().penalty(true).amount(10.0)
@@ -6860,6 +6861,337 @@ public class ClientLoanIntegrationTest {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
             GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", false);
         }
+    }
+
+    @Test
+    public void testLoanTransactionOrderAndRepaymentAllocationWithSameDayChargeBeforeRepayment() {
+        try {
+            List<String> dueDateRelatedRepaymentStrategies = Arrays.asList(
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+            for (String repaymentStrategyCode : dueDateRelatedRepaymentStrategies) {
+                GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
+                GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("01 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-----------------------------------NEW CLIENT-----------------------------------------");
+                final PostClientsRequest newClient = createRandomClientWithDate("01 January 2023");
+                final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(newClient);
+                LOG.info("-----------------------------------NEW LOAN PRODUCT-----------------------------------------");
+                PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct(
+                        repaymentStrategyCode);
+                final PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
+                LOG.info("-----------------------------------CREATE CHARGES-----------------------------------------");
+                PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(
+                        new PostChargesRequest().penalty(true).amount(10.0).chargeCalculationType(ChargeCalculationType.FLAT.getValue())
+                                .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
+                                .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
+                                .name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))
+                                .chargeAppliesTo(1).locale("en").active(true));
+                LOG.info("-----------------------------------SUBMIT LOAN-----------------------------------------");
+                final PostLoansResponse loanApplicationResult = applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(
+                        clientResponse.getResourceId(), loanProductResponse.getResourceId(), "01 January 2023",
+                        LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+                LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+                PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
+                                .approvedOnDate("01 January 2023").locale("en"));
+                LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
+                String loanDisbursementUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdResponse disbursedLoanResult = LOAN_TRANSACTION_HELPER.disburseLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                                .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en").externalId(loanDisbursementUUID));
+                Long loanId = disbursedLoanResult.getResourceId();
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("07 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-------------------------------ADD CHARGES-------------------------------------------");
+                PostLoansLoanIdChargesResponse penaltyLoanChargeResult = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
+                        new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN)
+                                .locale("en").amount(10.0).dueDate("10 January 2023"));
+                LOG.info("-------------------------------DO A PARTIAL REPAYMENT-------------------------------------------");
+                String firstRepaymentUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdTransactionsResponse firstRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
+                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023")
+                                .locale("en").transactionAmount(9.0).externalId(firstRepaymentUUID));
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, firstRepaymentResult.getResourceExternalId(), 9.0, 0.0, 0.0, 0.0, 9.0, 0.0);
+            }
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
+            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", false);
+        }
+    }
+
+    @Test
+    public void testLoanTransactionOrderAndRepaymentAllocationWithSameDayChargeAfterRepayment() {
+        try {
+            List<String> dueDateRelatedRepaymentStrategies = Arrays.asList(
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+            for (String repaymentStrategyCode : dueDateRelatedRepaymentStrategies) {
+                GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
+                GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("01 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-----------------------------------NEW CLIENT-----------------------------------------");
+                final PostClientsRequest newClient = createRandomClientWithDate("01 January 2023");
+                final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(newClient);
+                LOG.info("-----------------------------------NEW LOAN PRODUCT-----------------------------------------");
+                PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct(
+                        repaymentStrategyCode);
+                final PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
+                LOG.info("-----------------------------------CREATE CHARGES-----------------------------------------");
+                PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(
+                        new PostChargesRequest().penalty(false).amount(10.0).chargeCalculationType(ChargeCalculationType.FLAT.getValue())
+                                .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
+                                .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
+                                .name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))
+                                .chargeAppliesTo(1).locale("en").active(true));
+                LOG.info("-----------------------------------SUBMIT LOAN-----------------------------------------");
+                final PostLoansResponse loanApplicationResult = applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(
+                        clientResponse.getResourceId(), loanProductResponse.getResourceId(), "01 January 2023",
+                        LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+                LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+                PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
+                                .approvedOnDate("01 January 2023").locale("en"));
+                LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
+                String loanDisbursementUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdResponse disbursedLoanResult = LOAN_TRANSACTION_HELPER.disburseLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                                .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en").externalId(loanDisbursementUUID));
+                Long loanId = disbursedLoanResult.getResourceId();
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("07 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-------------------------------DO A PARTIAL REPAYMENT-------------------------------------------");
+                String firstRepaymentUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdTransactionsResponse firstRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
+                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023")
+                                .locale("en").transactionAmount(9.0).externalId(firstRepaymentUUID));
+                LOG.info("-------------------------------ADD CHARGES-------------------------------------------");
+                PostLoansLoanIdChargesResponse penaltyLoanChargeResult = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
+                        new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN)
+                                .locale("en").amount(10.0).dueDate("10 January 2023"));
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, firstRepaymentResult.getResourceExternalId(), 9.0, 9.0, 0.0, 0.0, 0.0, 0.0);
+            }
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
+            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", false);
+        }
+    }
+
+    @Test
+    public void testLoanTransactionOrderAndRepaymentAllocationWithSameDayChargeBeforeRepaymentOnInstallmentDueDate() {
+        try {
+            List<String> dueDateRelatedRepaymentStrategies = Arrays.asList(
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+            for (String repaymentStrategyCode : dueDateRelatedRepaymentStrategies) {
+                LOG.info("-----------------------------------REPAYMENT SCEDULE CODE : {}-----------------------------------------",
+                        repaymentStrategyCode);
+                GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
+                GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("01 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-----------------------------------NEW CLIENT-----------------------------------------");
+                final PostClientsRequest newClient = createRandomClientWithDate("01 January 2023");
+                final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(newClient);
+                LOG.info("-----------------------------------NEW LOAN PRODUCT-----------------------------------------");
+                PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct(
+                        repaymentStrategyCode);
+                final PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
+                LOG.info("-----------------------------------CREATE CHARGES-----------------------------------------");
+                PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(
+                        new PostChargesRequest().penalty(true).amount(10.0).chargeCalculationType(ChargeCalculationType.FLAT.getValue())
+                                .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
+                                .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
+                                .name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))
+                                .chargeAppliesTo(1).locale("en").active(true));
+                LOG.info("-----------------------------------SUBMIT LOAN-----------------------------------------");
+                final PostLoansResponse loanApplicationResult = applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(
+                        clientResponse.getResourceId(), loanProductResponse.getResourceId(), "01 January 2023",
+                        LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+                LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+                PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
+                                .approvedOnDate("01 January 2023").locale("en"));
+                LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
+                String loanDisbursementUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdResponse disbursedLoanResult = LOAN_TRANSACTION_HELPER.disburseLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                                .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en").externalId(loanDisbursementUUID));
+                Long loanId = disbursedLoanResult.getResourceId();
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("31 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-------------------------------ADD CHARGES-------------------------------------------");
+                PostLoansLoanIdChargesResponse penaltyLoanChargeResult = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
+                        new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN)
+                                .locale("en").amount(10.0).dueDate("31 January 2023"));
+                LOG.info("-------------------------------DO A PARTIAL REPAYMENT-------------------------------------------");
+                String firstRepaymentUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdTransactionsResponse firstRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
+                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("31 January 2023")
+                                .locale("en").transactionAmount(9.0).externalId(firstRepaymentUUID));
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, firstRepaymentResult.getResourceExternalId(), 9.0, 0.0, 0.0, 0.0, 9.0, 0.0);
+            }
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
+            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", false);
+        }
+    }
+
+    @Test
+    public void testLoanTransactionOrderAndRepaymentAllocationWithSameDayChargeAfterRepaymentOnInstallmentDueDate() {
+        try {
+            List<String> dueDateRelatedRepaymentStrategies = Arrays.asList(
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+            for (String repaymentStrategyCode : dueDateRelatedRepaymentStrategies) {
+                LOG.info("-----------------------------------REPAYMENT SCEDULE CODE : {}-----------------------------------------",
+                        repaymentStrategyCode);
+                GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
+                GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("01 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-----------------------------------NEW CLIENT-----------------------------------------");
+                final PostClientsRequest newClient = createRandomClientWithDate("01 January 2023");
+                final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(newClient);
+                LOG.info("-----------------------------------NEW LOAN PRODUCT-----------------------------------------");
+                PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct(
+                        repaymentStrategyCode);
+                final PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
+                LOG.info("-----------------------------------CREATE CHARGES-----------------------------------------");
+                PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(
+                        new PostChargesRequest().penalty(true).amount(10.0).chargeCalculationType(ChargeCalculationType.FLAT.getValue())
+                                .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
+                                .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
+                                .name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))
+                                .chargeAppliesTo(1).locale("en").active(true));
+                LOG.info("-----------------------------------SUBMIT LOAN-----------------------------------------");
+                final PostLoansResponse loanApplicationResult = applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(
+                        clientResponse.getResourceId(), loanProductResponse.getResourceId(), "01 January 2023",
+                        LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+                LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+                PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
+                                .approvedOnDate("01 January 2023").locale("en"));
+                LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
+                String loanDisbursementUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdResponse disbursedLoanResult = LOAN_TRANSACTION_HELPER.disburseLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                                .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en").externalId(loanDisbursementUUID));
+                Long loanId = disbursedLoanResult.getResourceId();
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("31 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-------------------------------DO A PARTIAL REPAYMENT-------------------------------------------");
+                String firstRepaymentUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdTransactionsResponse firstRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
+                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("31 January 2023")
+                                .locale("en").transactionAmount(9.0).externalId(firstRepaymentUUID));
+                LOG.info("-------------------------------ADD CHARGES-------------------------------------------");
+                PostLoansLoanIdChargesResponse penaltyLoanChargeResult = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
+                        new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN)
+                                .locale("en").amount(10.0).dueDate("31 January 2023"));
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, firstRepaymentResult.getResourceExternalId(), 9.0, 9.0, 0.0, 0.0, 0.0, 0.0);
+            }
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
+            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", false);
+        }
+    }
+
+    @Test
+    public void testLoanTransactionOrderAndRepaymentAllocationMultipleActions() {
+        try {
+            List<String> dueDateRelatedRepaymentStrategies = Arrays.asList(
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+            for (String repaymentStrategyCode : dueDateRelatedRepaymentStrategies) {
+                GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
+                GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("01 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-----------------------------------NEW CLIENT-----------------------------------------");
+                final PostClientsRequest newClient = createRandomClientWithDate("01 January 2023");
+                final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(newClient);
+                LOG.info("-----------------------------------NEW LOAN PRODUCT-----------------------------------------");
+                PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct(
+                        repaymentStrategyCode);
+                final PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
+                LOG.info("-----------------------------------CREATE CHARGES-----------------------------------------");
+                PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(
+                        new PostChargesRequest().penalty(false).amount(10.0).chargeCalculationType(ChargeCalculationType.FLAT.getValue())
+                                .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
+                                .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
+                                .name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))
+                                .chargeAppliesTo(1).locale("en").active(true));
+                LOG.info("-----------------------------------SUBMIT LOAN-----------------------------------------");
+                final PostLoansResponse loanApplicationResult = applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(
+                        clientResponse.getResourceId(), loanProductResponse.getResourceId(), "01 January 2023",
+                        LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
+                LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+                PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
+                                .approvedOnDate("01 January 2023").locale("en"));
+                LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
+                String loanDisbursementUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdResponse disbursedLoanResult = LOAN_TRANSACTION_HELPER.disburseLoan(loanApplicationResult.getResourceId(),
+                        new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                                .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en").externalId(loanDisbursementUUID));
+                Long loanId = disbursedLoanResult.getResourceId();
+                BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                        .date("07 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                LOG.info("-------------------------------DO A PARTIAL REPAYMENT-------------------------------------------");
+                String firstRepaymentUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdTransactionsResponse firstRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
+                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023")
+                                .locale("en").transactionAmount(9.0).externalId(firstRepaymentUUID));
+                LOG.info("-------------------------------ADD CHARGES-------------------------------------------");
+                PostLoansLoanIdChargesResponse penaltyLoanChargeResult = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
+                        new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN)
+                                .locale("en").amount(10.0).dueDate("07 January 2023"));
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, firstRepaymentResult.getResourceExternalId(), 9.0, 9.0, 0.0, 0.0, 0.0, 0.0);
+                LOG.info("-------------------------------DO A PARTIAL REPAYMENT-------------------------------------------");
+                String secondRepaymentUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdTransactionsResponse secondRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
+                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("06 January 2023")
+                                .locale("en").transactionAmount(9.0).externalId(secondRepaymentUUID));
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, secondRepaymentResult.getResourceExternalId(), 9.0, 9.0, 0.0, 0.0, 0.0, 0.0);
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, firstRepaymentResult.getResourceExternalId(), 9.0, 9.0, 0.0, 0.0, 0.0, 0.0);
+                LOG.info("-------------------------------DO A PARTIAL REPAYMENT-------------------------------------------");
+                String thirdRepaymentUUID = UUID.randomUUID().toString();
+                PostLoansLoanIdTransactionsResponse thirdRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
+                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023")
+                                .locale("en").transactionAmount(9.0).externalId(thirdRepaymentUUID));
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, thirdRepaymentResult.getResourceExternalId(), 9.0, 0.0, 0.0, 9.0, 0.0, 0.0);
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, secondRepaymentResult.getResourceExternalId(), 9.0, 9.0, 0.0, 0.0, 0.0, 0.0);
+                LOG.info("-------------------------------CHECK LOAN TRANSACTION ALLOCATION-------------------------------------------");
+                checkLoanTransactionAllocation(loanId, firstRepaymentResult.getResourceExternalId(), 9.0, 9.0, 0.0, 0.0, 0.0, 0.0);
+            }
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
+            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", false);
+        }
+    }
+
+    private void checkLoanTransactionAllocation(Long loanId, String transactionExternalId, double amount, double principalPortion,
+            double interestPortion, double feePortion, double penaltyPortion, double overpaymentPortion) {
+        GetLoansLoanIdTransactionsTransactionIdResponse transactionDetails = LOAN_TRANSACTION_HELPER.getLoanTransactionDetails(loanId,
+                transactionExternalId);
+        assertEquals(amount, transactionDetails.getAmount());
+        assertEquals(principalPortion, transactionDetails.getPrincipalPortion());
+        assertEquals(interestPortion, transactionDetails.getInterestPortion());
+        assertEquals(feePortion, transactionDetails.getFeeChargesPortion());
+        assertEquals(penaltyPortion, transactionDetails.getPenaltyChargesPortion());
+        assertEquals(overpaymentPortion, transactionDetails.getOverpaymentPortion());
     }
 
     private void checkLoanTransactionOrder(Long loanId, String... transactionUUIDs) {
@@ -8023,7 +8355,7 @@ public class ClientLoanIntegrationTest {
                 .principal(BigDecimal.valueOf(1000.0)).loanType("individual"));
     }
 
-    private PostLoanProductsRequest createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() {
+    private PostLoanProductsRequest createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct(String repaymentStrategyCode) {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
                 .shortName(Utils.uniqueRandomStringGenerator("", 4))//
                 .description("Loan Product Description")//
@@ -8050,8 +8382,7 @@ public class ClientLoanIntegrationTest {
                 .interestType(0)//
                 .isEqualAmortization(false)//
                 .interestCalculationPeriodType(1)//
-                .transactionProcessingStrategyCode(
-                        LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)//
+                .transactionProcessingStrategyCode(repaymentStrategyCode)//
                 .daysInYearType(1)//
                 .daysInMonthType(1)//
                 .canDefineInstallmentAmount(true)//
