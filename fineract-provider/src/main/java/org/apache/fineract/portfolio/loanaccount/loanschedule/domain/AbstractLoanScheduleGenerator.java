@@ -2098,7 +2098,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         for (LoanTransaction loanTransaction : transactions) {
             if (loanTransaction.isPaymentTransaction()) {
                 recalculationDetails.add(new RecalculationDetail(loanTransaction.getTransactionDate(),
-                        LoanTransaction.copyTransactionPropertiesForReprocessing(loanTransaction)));
+                        LoanTransaction.copyTransactionProperties(loanTransaction)));
             }
         }
         final boolean applyInterestRecalculation = loanApplicationTerms.isInterestRecalculationEnabled();
