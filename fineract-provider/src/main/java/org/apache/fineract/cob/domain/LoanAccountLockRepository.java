@@ -25,7 +25,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-public interface LoanAccountLockRepository extends JpaRepository<LoanAccountLock, Long>, JpaSpecificationExecutor<LoanAccountLock> {
+public interface LoanAccountLockRepository
+        extends CustomLoanAccountLockRepository, JpaRepository<LoanAccountLock, Long>, JpaSpecificationExecutor<LoanAccountLock> {
 
     Optional<LoanAccountLock> findByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
 
@@ -34,20 +35,6 @@ public interface LoanAccountLockRepository extends JpaRepository<LoanAccountLock
     List<LoanAccountLock> findAllByLoanIdIn(List<Long> loanIds);
 
     boolean existsByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
-
-    @Query(value = """
-                                                 update m_loan set last_closed_business_date = (select lck.lock_placed_on_cob_business_date - 1
-                                                 from m_loan_account_locks lck
-                                                 where lck.loan_id = id
-                                                   and lck.lock_placed_on_cob_business_date is not null
-                                                   and lck.error is not null
-                                                   and lck.lock_owner in ('LOAN_COB_CHUNK_PROCESSING','LOAN_INLINE_COB_PROCESSING'))
-            where last_closed_business_date is null and exists  (select lck.loan_id
-                          from m_loan_account_locks lck  where lck.loan_id = id
-                            and lck.lock_placed_on_cob_business_date is not null and lck.error is not null
-                            and lck.lock_owner in ('LOAN_COB_CHUNK_PROCESSING','LOAN_INLINE_COB_PROCESSING'))""", nativeQuery = true)
-    @Modifying(flushAutomatically = true)
-    void updateLoanFromAccountLocks();
 
     @Query("""
             delete from LoanAccountLock lck where lck.lockPlacedOnCobBusinessDate is not null and lck.error is not null and
