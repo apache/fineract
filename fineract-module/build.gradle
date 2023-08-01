@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.apache.fineract'
+
+repositories {
+    mavenCentral()
+    //    flatDir {
+    //        dirs 'fineract-core/build/libs', 'fineract-provider/build/libs'
+    //    }
+}
+
+dependencies {
+    implementation (
+            'io.swagger.core.v3:swagger-annotations-jakarta:2.2.15',
+            'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0',
+            'org.springframework:spring-context-support:6.0.11',
+            'jakarta.persistence:jakarta.persistence-api:3.1.0',
+            'org.apache.commons:commons-lang3:3.13.0',
+            'org.springframework.data:spring-data-jpa:3.1.2',
+            'com.google.code.gson:gson:2.10.1',
+            'org.springframework.boot:spring-boot-starter-security:3.1.1',
+            'org.springframework.boot:spring-boot-autoconfigure:3.1.1',
+            'org.mapstruct:mapstruct:1.5.5.Final',
+            project(':fineract-core'),
+            project(':fineract-provider'),
+            project(':fineract-loan')
+            )
+    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.2') {
+        exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
+    }
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+}
+
+rat {
+    failOnError = false
+}
+
+test {
+    useJUnitPlatform()
+}
