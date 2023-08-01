@@ -5741,7 +5741,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final List<LoanTransaction> copyTransactions = new ArrayList<>();
         if (!allNonContraTransactionsPostDisbursement.isEmpty()) {
             for (LoanTransaction loanTransaction : allNonContraTransactionsPostDisbursement) {
-                copyTransactions.add(LoanTransaction.copyTransactionPropertiesForReprocessing(loanTransaction));
+                copyTransactions.add(LoanTransaction.copyTransactionProperties(loanTransaction));
             }
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), copyTransactions, getCurrency(),
                     getRepaymentScheduleInstallments(), getActiveCharges());
