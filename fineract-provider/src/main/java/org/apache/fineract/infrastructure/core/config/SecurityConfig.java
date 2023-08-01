@@ -24,6 +24,7 @@ import static org.springframework.security.authorization.AuthorityAuthorizationM
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
+import java.util.Objects;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.service.CommandSourceService;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
@@ -107,7 +108,7 @@ public class SecurityConfig {
     @Autowired
     private FineractRequestContextHolder fineractRequestContextHolder;
 
-    @Autowired
+    @Autowired(required = false)
     private LoanCOBFilterHelper loanCOBFilterHelper;
     @Autowired
     private PlatformSecurityContext context;
@@ -136,9 +137,13 @@ public class SecurityConfig {
                 .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class) //
                 .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class) //
                 .addFilterAfter(responseCorsFilter(), CorrelationHeaderFilter.class) //
-                .addFilterAfter(fineractInstanceModeApiFilter(), ResponseCorsFilter.class) //
-                .addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
-                .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
+                .addFilterAfter(fineractInstanceModeApiFilter(), ResponseCorsFilter.class); //
+        if (!Objects.isNull(loanCOBFilterHelper)) {
+            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
+                    .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
+        } else {
+            http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class); //
+        }
 
         if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
             http.addFilterAfter(twoFactorAuthenticationFilter(), ResponseCorsFilter.class);

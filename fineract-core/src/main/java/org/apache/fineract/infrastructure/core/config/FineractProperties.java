@@ -380,6 +380,7 @@ public class FineractProperties {
     public static class FineractJobProperties {
 
         private int stuckRetryThreshold;
+        private boolean loanCobEnabled;
     }
 
     @Getter
