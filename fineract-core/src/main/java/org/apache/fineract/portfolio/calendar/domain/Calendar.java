@@ -153,10 +153,7 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
 
     public static Calendar fromJson(final JsonCommand command) {
 
-        // final Long entityId = command.getSupportedEntityId();
-        // final Integer entityTypeId =
-        // CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase()).getValue();
-        LocalTime meetingtime = null;
+        LocalTime meetingtime;
         final String title = command.stringValueOfParameterNamed(CalendarSupportedParameters.TITLE.getValue());
         final String description = command.stringValueOfParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue());
         final String location = command.stringValueOfParameterNamed(CalendarSupportedParameters.LOCATION.getValue());
@@ -304,10 +301,6 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
             final String newMeetingType = CalendarType.fromInt(newValue).name();
 
             throw new CalendarParameterUpdateNotSupportedException("meeting.type", defaultUserMessage, newMeetingType, oldMeeingType);
-            /*
-             * final Integer newValue = command.integerValueSansLocaleOfParameterNamed(typeParamName);
-             * actualChanges.put(typeParamName, newValue); this.typeId = newValue;
-             */
         }
 
         final String repeatingParamName = CalendarSupportedParameters.REPEATING.getValue();
@@ -401,11 +394,9 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
             final Integer interval, final Integer repeatsOnDay, final Integer repeatsOnNthDay) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
-        if (calendarStartDate != null && this.startDate != null) {
-            if (!calendarStartDate.equals(this.getStartDateLocalDate())) {
-                actualChanges.put("startDate", calendarStartDate);
-                this.startDate = calendarStartDate;
-            }
+        if (calendarStartDate != null && this.startDate != null && !calendarStartDate.equals(this.getStartDateLocalDate())) {
+            actualChanges.put("startDate", calendarStartDate);
+            this.startDate = calendarStartDate;
         }
 
         final String newRecurrence = Calendar.constructRecurrence(frequencyType, interval, repeatsOnDay, repeatsOnNthDay);
@@ -488,46 +479,21 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null) {
-            if (getStartDateLocalDate().isBefore(compareDate) || getStartDateLocalDate().equals(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return this.startDate != null && compareDate != null
+                && (getStartDateLocalDate().isBefore(compareDate) || getStartDateLocalDate().equals(compareDate));
     }
 
     public boolean isStartDateAfter(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null && getStartDateLocalDate().isAfter(compareDate)) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isStartDateAfterOrEqual(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null) {
-            if (getStartDateLocalDate().isAfter(compareDate) || getStartDateLocalDate().isEqual(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return this.startDate != null && compareDate != null && getStartDateLocalDate().isAfter(compareDate);
     }
 
     public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
-        if (this.endDate != null && compareDate != null) {
-            if (getEndDateLocalDate().isAfter(compareDate) || getEndDateLocalDate().isEqual(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return this.endDate != null && compareDate != null
+                && (getEndDateLocalDate().isAfter(compareDate) || getEndDateLocalDate().isEqual(compareDate));
     }
 
     public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
-        if (isStartDateBeforeOrEqual(compareDate)) {
-            if (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return isStartDateBeforeOrEqual(compareDate) && (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate));
     }
 
     private static String constructRecurrence(final JsonCommand command, final Calendar calendar) {

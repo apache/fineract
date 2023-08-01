@@ -95,7 +95,7 @@ public enum DepositAccountType {
 
     public String resourceName() {
 
-        String resourceName = "INVALID";
+        String resourceName;
 
         switch (this) {
             case FIXED_DEPOSIT:

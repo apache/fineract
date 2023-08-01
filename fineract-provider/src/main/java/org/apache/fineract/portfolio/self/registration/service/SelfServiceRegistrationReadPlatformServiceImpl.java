@@ -41,11 +41,8 @@ public class SelfServiceRegistrationReadPlatformServiceImpl implements SelfServi
             sql = sql + " and mobile_no = ?";
             params = new Object[] { accountNumber, firstName, lastName, mobileNumber };
         }
-        Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class, params);
-        if (count == 0) {
-            return false;
-        }
-        return true;
+        int count = this.jdbcTemplate.queryForObject(sql, Integer.class, params);
+        return count != 0;
     }
 
 }

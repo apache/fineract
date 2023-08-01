@@ -218,10 +218,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     public boolean isUsernameExist(String username) {
         String sql = "select count(*) from m_appuser where username = ?";
         Object[] params = new Object[] { username };
-        Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class, params);
-        if (count == 0) {
-            return false;
-        }
-        return true;
+        int count = this.jdbcTemplate.queryForObject(sql, Integer.class, params);
+        return count != 0;
     }
 }

@@ -1867,7 +1867,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private void validateDatatable(final String datatable) {
         final String sql = "SELECT COUNT(application_table_name) FROM x_registered_table WHERE registered_table_name = ?";
-        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, datatable);
+        final int count = jdbcTemplate.queryForObject(sql, Integer.class, datatable);
         if (count == 0) {
             throw new DatatableNotFoundException(datatable);
         }
@@ -2278,7 +2278,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         builder.append(" JOIN m_entity_datatable_check edc ON edc.x_registered_table_name = xrt.registered_table_name");
         builder.append(" WHERE edc.x_registered_table_name = '" + datatableName + "'");
         final Long count = this.jdbcTemplate.queryForObject(builder.toString(), Long.class);
-        return count > 0 ? true : false;
+        return count > 0;
     }
 
 }

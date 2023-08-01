@@ -167,7 +167,7 @@ public class SavingsAccountSummaryData implements Serializable {
             this.totalDeposits = wrapper.calculateTotalDeposits(currency, savingsAccountTransactions);
             this.totalWithdrawals = wrapper.calculateTotalWithdrawals(currency, savingsAccountTransactions);
             final HashMap<String, Money> map = updateRunningBalanceAndPivotDate(true, savingsAccountTransactions, interestTotal,
-                    overdraftInterestTotal, withHoldTaxTotal, currency);
+                    overdraftInterestTotal, withHoldTaxTotal);
             interestTotal = map.get("interestTotal");
             withHoldTaxTotal = map.get("withHoldTax");
             overdraftInterestTotal = map.get("overdraftInterestTotal");
@@ -200,7 +200,7 @@ public class SavingsAccountSummaryData implements Serializable {
     @SuppressWarnings("unchecked")
     private HashMap<String, Money> updateRunningBalanceAndPivotDate(final boolean backdatedTxnsAllowedTill,
             final List<SavingsAccountTransactionData> savingsAccountTransactions, Money interestTotal, Money overdraftInterestTotal,
-            Money withHoldTaxTotal, CurrencyData currency) {
+            Money withHoldTaxTotal) {
         boolean isUpdated = false;
         HashMap<String, Money> map = new HashMap<>();
         for (int i = savingsAccountTransactions.size() - 1; i >= 0; i--) {
@@ -257,7 +257,7 @@ public class SavingsAccountSummaryData implements Serializable {
         this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
 
         // boolean isUpdated = false;
-        updateRunningBalanceAndPivotDate(false, transactions, null, null, null, currency);
+        updateRunningBalanceAndPivotDate(false, transactions, null, null, null);
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)

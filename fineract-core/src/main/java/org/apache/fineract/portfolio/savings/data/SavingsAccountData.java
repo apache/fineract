@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -229,14 +228,10 @@ public final class SavingsAccountData implements Serializable {
         this.savingsAmountOnHold = null;
     }
 
-    public static final Comparator<SavingsAccountData> ClientNameComparator = new Comparator<SavingsAccountData>() {
-
-        @Override
-        public int compare(SavingsAccountData savings1, SavingsAccountData savings2) {
-            String clientOfSavings1 = savings1.getClientName().toUpperCase(Locale.ENGLISH);
-            String clientOfSavings2 = savings2.getClientName().toUpperCase(Locale.ENGLISH);
-            return clientOfSavings1.compareTo(clientOfSavings2);
-        }
+    public static final Comparator<SavingsAccountData> ClientNameComparator = (savings1, savings2) -> {
+        String clientOfSavings1 = savings1.getClientName().toUpperCase(Locale.ENGLISH);
+        String clientOfSavings2 = savings2.getClientName().toUpperCase(Locale.ENGLISH);
+        return clientOfSavings1.compareTo(clientOfSavings2);
     };
 
     public void setNewSavingsAccountTransactionData(final SavingsAccountTransactionData savingsAccountTransactionData) {
@@ -395,7 +390,7 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public List<SavingsAccountTransactionData> getSavingsAccountTransactionsWithPivotConfig() {
-        return this.transactions.stream().collect(Collectors.toList());
+        return this.transactions.stream().toList();
     }
 
     public Boolean isAccrualBasedAccountingEnabledOnSavingsProduct() {

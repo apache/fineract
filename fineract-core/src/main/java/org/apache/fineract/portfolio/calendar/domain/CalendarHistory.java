@@ -104,30 +104,17 @@ public class CalendarHistory extends AbstractPersistableCustom {
     }
 
     public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
-        if (this.endDate != null && compareDate != null) {
-            if (getEndDateLocalDate().isAfter(compareDate) || getEndDateLocalDate().isEqual(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return this.endDate != null && compareDate != null
+                && (getEndDateLocalDate().isAfter(compareDate) || getEndDateLocalDate().isEqual(compareDate));
     }
 
     public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null) {
-            if (getStartDateLocalDate().isBefore(compareDate) || getStartDateLocalDate().equals(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return this.startDate != null && compareDate != null
+                && (getStartDateLocalDate().isBefore(compareDate) || getStartDateLocalDate().equals(compareDate));
     }
 
     public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
-        if (isStartDateBeforeOrEqual(compareDate)) {
-            if (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return isStartDateBeforeOrEqual(compareDate) && (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate));
     }
 
     public void updateEndDate(LocalDate historyCalEndDate) {

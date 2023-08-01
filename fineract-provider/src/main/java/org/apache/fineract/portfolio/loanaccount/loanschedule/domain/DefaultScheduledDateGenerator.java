@@ -202,7 +202,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
         while (WorkingDaysUtil.isNonWorkingDay(holidayDetailDTO.getWorkingDays(), adjustedDateDetailsDTO.getChangedScheduleDate())) {
             final RepaymentRescheduleType repaymentRescheduleType = WorkingDaysUtil
-                    .getRepaymentRescheduleType(holidayDetailDTO.getWorkingDays(), adjustedDateDetailsDTO.getChangedScheduleDate());
+                    .getRepaymentRescheduleType(holidayDetailDTO.getWorkingDays());
 
             if (repaymentRescheduleType.isMoveToNextRepaymentDay()) {
                 while (WorkingDaysUtil.isNonWorkingDay(holidayDetailDTO.getWorkingDays(),

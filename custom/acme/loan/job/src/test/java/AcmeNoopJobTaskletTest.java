@@ -17,7 +17,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.batch.repeat.RepeatStatus.FINISHED;
 
 import com.acme.fineract.loan.job.AcmeNoopJobTasklet;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ public class AcmeNoopJobTaskletTest {
     @Test
     public void testJobExecution() throws Exception {
         resultStatus = underTest.execute(stepContribution, chunkContext);
-        assertEquals(resultStatus, RepeatStatus.FINISHED);
+        assertEquals(FINISHED, resultStatus);
     }
 
 }
