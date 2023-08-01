@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 public class FineractClientTechnicalTest {
 
     @Test
-    @Disabled // TODO remove Ignore once https://issues.apache.org/jira/browse/FINERACT-1221 is fixed
+    @Disabled("remove Ignore once https://issues.apache.org/jira/browse/FINERACT-1221 is fixed")
     void testInvalidOperations() {
         FineractClient.Builder builder = FineractClient.builder().baseURL("http://test/").tenant("default").basicAuth("mifos", "password");
         builder.getRetrofitBuilder().validateEagerly(true); // see FINERACT-1221

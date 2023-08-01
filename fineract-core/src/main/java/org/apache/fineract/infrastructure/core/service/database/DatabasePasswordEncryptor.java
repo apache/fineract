@@ -34,8 +34,6 @@ public class DatabasePasswordEncryptor implements PasswordEncryptor {
 
     public static final String DEFAULT_ENCRYPTION = "AES/CBC/PKCS5Padding";
 
-    public static final String DEFAULT_MASTER_PASSWORD = "fineract";
-
     private final FineractProperties fineractProperties;
 
     @SuppressWarnings("checkstyle:regexpsinglelinejava")
@@ -54,7 +52,8 @@ public class DatabasePasswordEncryptor implements PasswordEncryptor {
     @Override
     public String encrypt(String plainPassword) {
         String masterPassword = Optional.ofNullable(fineractProperties.getTenant())
-                .map(FineractProperties.FineractTenantProperties::getMasterPassword).orElse(DEFAULT_MASTER_PASSWORD);
+                .map(FineractProperties.FineractTenantProperties::getMasterPassword)
+                .orElse(fineractProperties.getDatabase().getDefaultMasterPassword());
         String encryption = Optional.ofNullable(fineractProperties.getTenant())
                 .map(FineractProperties.FineractTenantProperties::getEncryption).orElse(DEFAULT_ENCRYPTION);
         return EncryptionUtil.encryptToBase64(encryption, masterPassword, plainPassword);
@@ -63,7 +62,8 @@ public class DatabasePasswordEncryptor implements PasswordEncryptor {
     @Override
     public String decrypt(String encryptedPassword) {
         String masterPassword = Optional.ofNullable(fineractProperties.getTenant())
-                .map(FineractProperties.FineractTenantProperties::getMasterPassword).orElse(DEFAULT_MASTER_PASSWORD);
+                .map(FineractProperties.FineractTenantProperties::getMasterPassword)
+                .orElse(fineractProperties.getDatabase().getDefaultMasterPassword());
         String encryption = Optional.ofNullable(fineractProperties.getTenant())
                 .map(FineractProperties.FineractTenantProperties::getEncryption).orElse(DEFAULT_ENCRYPTION);
         return EncryptionUtil.decryptFromBase64(encryption, masterPassword, encryptedPassword);
@@ -73,7 +73,7 @@ public class DatabasePasswordEncryptor implements PasswordEncryptor {
         String masterPassword = Optional.ofNullable(fineractProperties) //
                 .map(FineractProperties::getTenant) //
                 .map(FineractProperties.FineractTenantProperties::getMasterPassword) //
-                .orElse(DEFAULT_MASTER_PASSWORD);
+                .orElse(fineractProperties.getDatabase().getDefaultMasterPassword());
         return BCrypt.hashpw(masterPassword.getBytes(StandardCharsets.UTF_8), BCrypt.gensalt());
     }
 
@@ -81,7 +81,7 @@ public class DatabasePasswordEncryptor implements PasswordEncryptor {
         String masterPassword = Optional.ofNullable(fineractProperties) //
                 .map(FineractProperties::getTenant) //
                 .map(FineractProperties.FineractTenantProperties::getMasterPassword) //
-                .orElse(DEFAULT_MASTER_PASSWORD);
+                .orElse(fineractProperties.getDatabase().getDefaultMasterPassword());
         return BCrypt.checkpw(masterPassword, hashed);
     }
 }

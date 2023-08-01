@@ -61,6 +61,7 @@ public class FineractProperties {
     private FineractTemplateProperties template;
     private FineractJpaProperties jpa;
 
+    private FineractDatabaseProperties database;
     private FineractQueryProperties query;
     private FineractApiProperties api;
     private FineractSecurityProperties security;
@@ -396,6 +397,13 @@ public class FineractProperties {
     public static class FineractJpaProperties {
 
         private boolean statementLoggingEnabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractDatabaseProperties {
+
+        private String defaultMasterPassword;
     }
 
     @Getter

@@ -133,7 +133,7 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
     @Cacheable(value = "tfConfig", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()+'|smsProvider'")
     public Integer getSMSProviderId() {
         Integer value = getIntegerConfig(TwoFactorConfigurationConstants.SMS_PROVIDER_ID, null);
-        if (value < 1) {
+        if (value == null || value < 1) {
             return null;
         }
         return value;

@@ -34,8 +34,8 @@ public class AmazonS3ConfigCondition extends PropertiesCondition {
     }
 
     private boolean isAwsCredentialValid() {
-        try {
-            DefaultCredentialsProvider.create().resolveCredentials();
+        try (var defaultCredentialsProvider = DefaultCredentialsProvider.create()) {
+            defaultCredentialsProvider.resolveCredentials();
             DefaultAwsRegionProviderChain.builder().build().getRegion();
             return true;
         } catch (Exception e) {

@@ -19,6 +19,7 @@
 package org.apache.fineract.client.util;
 
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -27,6 +28,7 @@ import retrofit2.Response;
  *
  * @author Michael Vorburger.ch
  */
+@Slf4j
 public class CallFailedRuntimeException extends RuntimeException {
 
     private final Call<?> call;
@@ -46,17 +48,17 @@ public class CallFailedRuntimeException extends RuntimeException {
 
     private static String message(Call<?> call, Response<?> response) {
         StringBuilder sb = new StringBuilder("HTTP failed: " + call.request() + "; " + response);
-        if (response.message() != null && !response.message().isEmpty()) {
-            sb.append("; message: " + response.message());
+        if (null != response.message() && !response.message().isEmpty()) {
+            sb.append("; message: ").append(response.message());
         }
         String errorBody;
         try {
-            errorBody = response.errorBody().string();
+            errorBody = response.errorBody() != null ? response.errorBody().string() : null;
             if (errorBody != null) {
-                sb.append("; errorBody: " + errorBody);
+                sb.append("; errorBody: ").append(errorBody);
             }
         } catch (IOException e) {
-            // Ignore.
+            log.error("Exception during creating the {} message:", CallFailedRuntimeException.class.getSimpleName(), e);
         }
         return sb.toString();
     }

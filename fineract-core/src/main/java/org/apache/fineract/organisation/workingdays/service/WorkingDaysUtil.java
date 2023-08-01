@@ -71,8 +71,7 @@ public final class WorkingDaysUtil {
         adjustedDateDetailsDTO.setChangedScheduleDate(changedScheduleDate);
     }
 
-    public static RepaymentRescheduleType getRepaymentRescheduleType(final WorkingDays workingDays, final LocalDate date) {
-        RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
-        return rescheduleType;
+    public static RepaymentRescheduleType getRepaymentRescheduleType(final WorkingDays workingDays) {
+        return RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
     }
 }

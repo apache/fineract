@@ -23,6 +23,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.internal.bind.util.ISO8601Utils;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import io.gsonfire.GsonFireBuilder;
 import java.io.IOException;
@@ -35,10 +36,12 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Objects;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import org.apache.fineract.client.models.ExternalId;
 import org.apache.fineract.client.util.adapter.ExternalIdAdapter;
+import org.jetbrains.annotations.NotNull;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -212,22 +215,25 @@ public class JSON {
         @Override
         public Date read(JsonReader in) throws IOException {
             try {
-                switch (in.peek()) {
-                    case NULL:
-                        in.nextNull();
-                        return null;
-                    default:
-                        String date = in.nextString();
-                        try {
-                            if (dateFormat != null) {
-                                return dateFormat.parse(date);
-                            }
-                            return ISO8601Utils.parse(date, new ParsePosition(0));
-                        } catch (ParseException e) {
-                            throw new JsonParseException(e);
-                        }
+                if (Objects.requireNonNull(in.peek()) == JsonToken.NULL) {
+                    in.nextNull();
+                    return null;
                 }
+                String date = in.nextString();
+                return parseDate(date);
             } catch (IllegalArgumentException e) {
+                throw new JsonParseException(e);
+            }
+        }
+
+        @NotNull
+        private Date parseDate(String date) {
+            try {
+                if (null != dateFormat) {
+                    return dateFormat.parse(date);
+                }
+                return ISO8601Utils.parse(date, new ParsePosition(0));
+            } catch (ParseException e) {
                 throw new JsonParseException(e);
             }
         }

@@ -265,10 +265,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 + " ci.entity_type_enum = ?";
         try {
             int calendarInstaneId = this.jdbcTemplate.queryForObject(query, Integer.class, entityId, calendarId, entityTypeId);
-            if (calendarInstaneId > 0) {
-                return true;
-            }
-            return false;
+            return calendarInstaneId > 0;
         } catch (final EmptyResultDataAccessException e) {
             return false;
         }
