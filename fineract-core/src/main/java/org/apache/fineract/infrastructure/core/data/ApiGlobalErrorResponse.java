@@ -177,6 +177,17 @@ public class ApiGlobalErrorResponse {
         return globalErrorResponse;
     }
 
+    public static ApiGlobalErrorResponse jobIsDisabled(final String globalisationMessageCode, final String defaultUserMessage) {
+
+        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
+        globalErrorResponse.setHttpStatusCode(Status.FORBIDDEN.toString());
+        globalErrorResponse.setDeveloperMessage(defaultUserMessage);
+        globalErrorResponse.setUserMessageGlobalisationCode(globalisationMessageCode);
+        globalErrorResponse.setDefaultUserMessage(defaultUserMessage);
+
+        return globalErrorResponse;
+    }
+
     public static ApiGlobalErrorResponse badClientRequest(final String globalisationMessageCode, final String defaultUserMessage) {
         return badClientRequest(globalisationMessageCode, defaultUserMessage, Collections.emptyList());
     }

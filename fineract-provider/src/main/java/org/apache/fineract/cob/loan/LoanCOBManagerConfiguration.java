@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
+import org.apache.fineract.cob.conditions.LoanCOBManagerCondition;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -37,16 +38,16 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.batch.integration.partition.RemotePartitioningManagerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableBatchIntegration
-@ConditionalOnProperty(value = "fineract.mode.batch-manager-enabled", havingValue = "true")
+@Conditional(LoanCOBManagerCondition.class)
 public class LoanCOBManagerConfiguration {
 
     @Autowired

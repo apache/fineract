@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.data.IsCatchUpRunningDTO;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.data.OldestCOBProcessedLoanDTO;
@@ -34,10 +35,12 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
 import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Conditional(LoanCOBEnabledCondition.class)
 public class LoanCOBCatchUpServiceImpl implements LoanCOBCatchUpService {
 
     private final AsyncLoanCOBExecutorService asyncLoanCOBExecutorService;

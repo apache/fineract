@@ -24,8 +24,10 @@ import io.github.resilience4j.core.functions.Either;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -33,6 +35,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 @RequiredArgsConstructor
+@Conditional(LoanCOBEnabledCondition.class)
 public class LoanCOBBatchPreprocessor implements BatchRequestPreprocessor {
 
     private final LoanCOBFilterHelper helper;

@@ -21,6 +21,7 @@ package org.apache.fineract.cob.loan;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.common.ResetContextTasklet;
+import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.InlineCOBLoanItemListener;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
@@ -38,12 +39,14 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 @EnableBatchIntegration
+@Conditional(LoanCOBEnabledCondition.class)
 public class LoanInlineCOBConfig {
 
     @Autowired
