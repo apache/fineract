@@ -214,6 +214,15 @@ public class InteropHelper {
         return response;
     }
 
+    public String postTransactionRequest(String requestCode, InteropTransactionRole role, String request) {
+        String url = buildUrl(REQUESTS_URL);
+        LOG.debug("Calling Interoperable POST Request: {}, body: {}", url, request);
+
+        String response = Utils.performServerPost(requestSpec, responseSpec, url, request, null);
+        LOG.debug("Response Interoperable POST Request: {}", response);
+        return response;
+    }
+
     private String buildTransactionRequestJson(String requestCode, InteropTransactionRole role) {
         HashMap<String, Object> map = new HashMap<>();
         map.put(InteropUtil.PARAM_TRANSACTION_CODE, transactionCode);

@@ -720,10 +720,6 @@ public class DepositAccountDataValidator {
 
                     final JsonObject savingsChargeElement = array.get(i).getAsJsonObject();
 
-                    // final Long id =
-                    // this.fromApiJsonHelper.extractLongNamed(idParamName,
-                    // savingsChargeElement);
-
                     final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
                     baseDataValidator.reset().parameter(chargeIdParamName).value(chargeId).longGreaterThanZero();
 

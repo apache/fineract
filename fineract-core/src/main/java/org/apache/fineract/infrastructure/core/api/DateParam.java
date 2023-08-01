@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.journalentry.api;
+package org.apache.fineract.infrastructure.core.api;
 
 import jakarta.ws.rs.WebApplicationException;
 import java.time.LocalDate;
 import java.util.Locale;
+import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 
 /**
  * Class for parsing dates sent as query parameters
- *
- * TODO: Vishwas Should move this class to a more generic package
  */
 public class DateParam {
 
@@ -36,7 +35,7 @@ public class DateParam {
         this.dateAsString = dateStr;
     }
 
-    public LocalDate getDate(final String parameterName, final String dateFormat, final String localeAsString) {
+    public LocalDate getDate(final String parameterName, final DateFormat dateFormat, final String localeAsString) {
         final Locale locale = JsonParserHelper.localeFromString(localeAsString);
         return JsonParserHelper.convertFrom(this.dateAsString, parameterName, dateFormat, locale);
     }
