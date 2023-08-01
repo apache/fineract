@@ -20,5 +20,5 @@ package org.apache.fineract.infrastructure.security.utils;
 
 public interface SQLCommandCondition {
 
-    boolean checkCondition(String command, String sql);
+    boolean checkCondition(String sql, String command);
 }
