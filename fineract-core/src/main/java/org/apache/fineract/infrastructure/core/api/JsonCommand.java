@@ -418,10 +418,6 @@ public final class JsonCommand {
         return this.fromApiJsonHelper.extractLocalTimeNamed(parameterName, this.parsedCommand);
     }
 
-    public LocalDateTime localDateTimeValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractLocalDateTimeNamed(parameterName, this.parsedCommand);
-    }
-
     public MonthDay extractMonthDayNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractMonthDayNamed(parameterName, this.parsedCommand);
     }

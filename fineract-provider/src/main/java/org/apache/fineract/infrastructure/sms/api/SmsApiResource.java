@@ -34,12 +34,14 @@ import jakarta.ws.rs.core.UriInfo;
 import java.time.LocalDate;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.accounting.journalentry.api.DateParam;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -93,11 +95,13 @@ public class SmsApiResource {
     public String retrieveAllSmsByStatus(@PathParam("campaignId") final Long campaignId, @Context final UriInfo uriInfo,
             @QueryParam("status") final Long status, @QueryParam("fromDate") final DateParam fromDateParam,
             @QueryParam("toDate") final DateParam toDateParam, @QueryParam("locale") final String locale,
-            @QueryParam("dateFormat") final String dateFormat, @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("dateFormat") final String rawDateFormat, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
         final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+
+        final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
 
         LocalDate fromDate = null;
         if (fromDateParam != null) {
