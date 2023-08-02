@@ -159,7 +159,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS,
             LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE,
             LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
-            LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT));
+            LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT,
+            LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -744,7 +745,36 @@ public final class LoanProductDataValidator {
         baseDataValidator.reset().parameter(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT).value(overDueDaysForRepaymentEvent)
                 .integerZeroOrGreater();
 
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_DOWN_PAYMENT, element)) {
+            final Boolean enableDownPayment = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_DOWN_PAYMENT).value(enableDownPayment).ignoreIfNull()
+                    .validateForBooleanValue();
+            validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateDownPaymentPercentage(Boolean enableDownPayment, DataValidatorBuilder baseDataValidator, JsonElement element) {
+        if (enableDownPayment) {
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, element)) {
+                BigDecimal disbursedAmountPercentageDownPayment = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT)
+                        .value(disbursedAmountPercentageDownPayment).notLessThanMin(BigDecimal.ONE)
+                        .notGreaterThanMax(BigDecimal.valueOf(100)).scaleNotGreaterThan(6);
+            } else {
+                baseDataValidator.reset().parameter(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT).failWithCode(
+                        "required.for.enable.down.payment.true",
+                        "Disbursed amount percentage for down-payment is required if enable down-payment is true");
+            }
+        } else {
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, element)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT).failWithCode(
+                        "supported.only.for.enable.down.payment.true",
+                        "Disbursed amount percentage for down-payment is supported only if enable down-payment is true");
+            }
+        }
     }
 
     private void validateVariableInstallmentSettings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
@@ -1621,6 +1651,12 @@ public final class LoanProductDataValidator {
         baseDataValidator.reset().parameter(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT).value(overDueDaysForRepaymentEvent)
                 .integerZeroOrGreater();
 
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_DOWN_PAYMENT, element)) {
+            final Boolean enableDownPayment = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_DOWN_PAYMENT).value(enableDownPayment).ignoreIfNull()
+                    .validateForBooleanValue();
+            validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
+        }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
