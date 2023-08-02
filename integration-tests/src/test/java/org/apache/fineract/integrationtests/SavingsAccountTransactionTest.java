@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -28,10 +29,8 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -46,14 +45,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unused", "unchecked" })
-public class SavingsInterestPostingIntegrationTest {
+@SuppressWarnings({ "rawtypes" })
+public class SavingsAccountTransactionTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsInterestPostingIntegrationTest.class);
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    public static final String DEFAULT_DATE_FORMAT = "dd MMM yyyy";
+    final String startDateString = "03 June 2023";
+    final String depositDateString = "05 June 2023";
+    final String withdrawDateString = "10 June 2023";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -71,40 +71,60 @@ public class SavingsInterestPostingIntegrationTest {
     }
 
     @Test
-    public void testSavingsDailyInterestPosting() {
+    public void verifySavingsTransactionSubmittedOnDateAndTransactionDate() throws JsonProcessingException {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, true);
+            enableBusinessDate(requestSpec, responseSpec, true);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, today);
-            // client activation, savings activation and 1st transaction date
-            final String startDate = "01 November 2021";
-            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+
+            LocalDate depositDate = Utils.getDateAsLocalDate(depositDateString);
+            LocalDate withdrawDate = Utils.getDateAsLocalDate(withdrawDateString);
+
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDateString);
             Assertions.assertNotNull(clientID);
 
-            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDateString);
+            Assertions.assertNotNull(savingsId);
 
-            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
-
-            /***
-             * Perform Post interest transaction and verify the posted transaction date
-             */
-            this.savingsAccountHelper.postInterestForSavings(savingsId);
-            HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
-            ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
-            HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
-            for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-                LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
-            }
-            assertEquals("0.274", interestPostingTransaction.get("amount").toString(), "Equality check for interest posted amount");
-            assertEquals("[2021, 11, 2]", interestPostingTransaction.get("date").toString(), "Date check for Interest Posting transaction");
-            List<Integer> submittedOnDateStringList = (List<Integer>) interestPostingTransaction.get("submittedOnDate");
-            LocalDate submittedOnDate = submittedOnDateStringList.stream().collect(
-                    Collectors.collectingAndThen(Collectors.toList(), list -> LocalDate.of(list.get(0), list.get(1), list.get(2))));
-            assertTrue(submittedOnDate.compareTo(today) == 0, "Submitted On Date check for Interest Posting transaction");
+            performSavingsTransaction(savingsId, "100", depositDate, true);
+            performSavingsTransaction(savingsId, "50", withdrawDate, false);
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, false);
+            enableBusinessDate(requestSpec, responseSpec, false);
         }
 
+    }
+
+    private void enableBusinessDate(RequestSpecification requestSpec, ResponseSpecification responseSpec, boolean enable) {
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, enable);
+    }
+
+    private void performSavingsTransaction(Integer savingsId, String amount, LocalDate transactionDate, boolean isDeposit) {
+        String transactionType = isDeposit ? "Deposit" : "Withdrawal";
+        Integer transactionId = isDeposit
+                ? (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, amount, depositDateString,
+                        CommonConstants.RESPONSE_RESOURCE_ID)
+                : (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, amount, withdrawDateString,
+                        CommonConstants.RESPONSE_RESOURCE_ID);
+
+        Assertions.assertNotNull(transactionId);
+
+        HashMap transaction = savingsAccountHelper.getSavingsTransaction(savingsId, transactionId);
+        Assertions.assertNotNull(transaction);
+
+        assertEquals(transactionId, (Integer) transaction.get("id"), "Check Savings " + transactionType + " Transaction");
+        LocalDate transactionDateFromResponse = extractLocalDate(transaction, "date");
+        assertTrue(transactionDate.compareTo(transactionDateFromResponse) == 0,
+                "Transaction Date check for Savings " + transactionType + " Transaction");
+        LocalDate submittedOnDate = extractLocalDate(transaction, "submittedOnDate");
+        assertTrue(LocalDate.now(ZoneId.systemDefault()).compareTo(submittedOnDate) == 0,
+                "Submitted On Date check for Savings " + transactionType + " Transaction");
+    }
+
+    private LocalDate extractLocalDate(HashMap transactionMap, String fieldName) {
+        List<Integer> dateStringList = (List<Integer>) transactionMap.get(fieldName);
+        LocalDate extractedDate = dateStringList.stream()
+                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> LocalDate.of(list.get(0), list.get(1), list.get(2))));
+        return extractedDate;
     }
 
     private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {

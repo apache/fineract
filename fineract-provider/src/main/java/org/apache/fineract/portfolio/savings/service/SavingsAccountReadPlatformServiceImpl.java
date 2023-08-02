@@ -351,7 +351,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.accounting_type as accountingType, ");
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
-            sqlBuilder.append("tr.created_date as createdDate,tr.cumulative_balance_derived as cumulativeBalance,");
+            sqlBuilder.append("tr.submitted_on_date as transSubmittedOnDate,tr.cumulative_balance_derived as cumulativeBalance,");
             sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
             sqlBuilder.append("tr.balance_end_date_derived as balanceEndDate, tr.overdraft_amount_derived as overdraftAmount,");
             sqlBuilder.append("tr.is_manual as manualTransaction,tr.office_id as officeId, ");
@@ -600,7 +600,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
                     final LocalDate balanceEndDate = JdbcSupport.getLocalDate(rs, "balanceEndDate");
-                    final LocalDate transSubmittedOnDate = JdbcSupport.getLocalDate(rs, "createdDate");
+                    final LocalDate transSubmittedOnDate = JdbcSupport.getLocalDate(rs, "transSubmittedOnDate");
                     final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
                     final BigDecimal overdraftAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "overdraftAmount");
                     final BigDecimal outstandingChargeAmount = null;
@@ -1324,7 +1324,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
             sqlBuilder.append(" tr.release_id_of_hold_amount as releaseTransactionId,");
             sqlBuilder.append(" tr.reason_for_block as reasonForBlock,");
-            sqlBuilder.append("tr.created_date as submittedOnDate,");
+            sqlBuilder.append(" tr.submitted_on_date as submittedOnDate,");
             sqlBuilder.append(" au.username as submittedByUsername, ");
             sqlBuilder.append(" nt.note as transactionNote, ");
             sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
