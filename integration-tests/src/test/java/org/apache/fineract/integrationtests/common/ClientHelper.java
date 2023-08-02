@@ -46,6 +46,7 @@ import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsClientIdTransactionsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.GetLoanAccountLockResponse;
 import org.apache.fineract.client.models.GetObligeeData;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
@@ -870,5 +871,9 @@ public class ClientHelper extends IntegrationTest {
                 .firstname(Utils.randomStringGenerator("Client_FirstName_", 5)).lastname(Utils.randomStringGenerator("Client_LastName_", 5))
                 .externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
                 .activationDate(DEFAULT_DATE);
+    }
+
+    public GetLoanAccountLockResponse retrieveLockedAccounts(int page, int limit) {
+        return ok(fineract().loanAccountLockApi.retrieveLockedAccounts(page, limit));
     }
 }

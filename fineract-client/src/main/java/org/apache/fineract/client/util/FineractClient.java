@@ -82,6 +82,7 @@ import org.apache.fineract.client.services.InterestRateChartApi;
 import org.apache.fineract.client.services.InterestRateSlabAKAInterestBandsApi;
 import org.apache.fineract.client.services.JournalEntriesApi;
 import org.apache.fineract.client.services.ListReportMailingJobHistoryApi;
+import org.apache.fineract.client.services.LoanAccountLockApi;
 import org.apache.fineract.client.services.LoanChargesApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
 import org.apache.fineract.client.services.LoanCollateralApi;
@@ -290,11 +291,13 @@ public final class FineractClient {
     public final WorkingDaysApi workingDays;
 
     public final ExternalAssetOwnersApi externalAssetOwners;
+    public final LoanAccountLockApi loanAccountLockApi;
 
     private FineractClient(OkHttpClient okHttpClient, Retrofit retrofit) {
         this.okHttpClient = okHttpClient;
         this.retrofit = retrofit;
 
+        loanAccountLockApi = retrofit.create(LoanAccountLockApi.class);
         externalAssetOwners = retrofit.create(ExternalAssetOwnersApi.class);
         glClosures = retrofit.create(AccountingClosureApi.class);
         accountingRules = retrofit.create(AccountingRulesApi.class);
