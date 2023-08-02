@@ -155,6 +155,10 @@ final class LoanProductsApiResourceSwagger {
         public Integer dueDaysForRepaymentEvent;
         @Schema(example = "3")
         public Integer overDueDaysForRepaymentEvent;
+        @Schema(example = "false")
+        public Boolean enableDownPayment;
+        @Schema(example = "5.5")
+        public BigDecimal disbursedAmountPercentageForDownPayment;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -1203,6 +1207,10 @@ final class LoanProductsApiResourceSwagger {
         public Integer overDueDaysForRepaymentEvent;
         @Schema(example = "3")
         public Integer inArrearsTolerance;
+        @Schema(example = "false")
+        public Boolean enableDownPayment;
+        @Schema(example = "5.5")
+        public BigDecimal disbursedAmountPercentageForDownPayment;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1324,6 +1332,10 @@ final class LoanProductsApiResourceSwagger {
         public Integer dueDaysForRepaymentEvent;
         @Schema(example = "3")
         public Integer overDueDaysForRepaymentEvent;
+        @Schema(example = "false")
+        public Boolean enableDownPayment;
+        @Schema(example = "5.5")
+        public BigDecimal disbursedAmountPercentageForDownPayment;
 
         // Interest Recalculation
         @Schema(example = "false")

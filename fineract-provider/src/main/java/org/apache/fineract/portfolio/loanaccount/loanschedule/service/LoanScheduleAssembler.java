@@ -449,6 +449,13 @@ public class LoanScheduleAssembler {
                 .isInterestToBeRecoveredFirstWhenGreaterThanEMI();
         final boolean isPrincipalCompoundingDisabledForOverdueLoans = this.configurationDomainService
                 .isPrincipalCompoundingDisabledForOverdueLoans();
+
+        final boolean isDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableDownPayment();
+        BigDecimal disbursedAmountPercentageForDownPayment = null;
+        if (isDownPaymentEnabled) {
+            disbursedAmountPercentageForDownPayment = loanProduct.getLoanProductRelatedDetail()
+                    .getDisbursedAmountPercentageForDownPayment();
+        }
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -461,7 +468,8 @@ public class LoanScheduleAssembler {
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
                 allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
-                fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans);
+                fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled,
+                disbursedAmountPercentageForDownPayment);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

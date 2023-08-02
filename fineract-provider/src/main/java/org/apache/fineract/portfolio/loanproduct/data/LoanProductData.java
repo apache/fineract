@@ -193,6 +193,9 @@ public class LoanProductData implements Serializable {
     private final Integer dueDaysForRepaymentEvent;
     private final Integer overDueDaysForRepaymentEvent;
 
+    private final boolean enableDownPayment;
+    private final BigDecimal disbursedAmountPercentageForDownPayment;
+
     /**
      * Used when returning lookup information about loan product for dropdowns.
      */
@@ -281,6 +284,8 @@ public class LoanProductData implements Serializable {
         final DelinquencyBucketData delinquencyBucket = null;
         final Integer dueDaysForRepaymentEvent = null;
         final Integer overDueDaysForRepaymentEvent = null;
+        final boolean enableDownPayment = false;
+        final BigDecimal disbursedAmountPercentageDownPayment = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -299,7 +304,7 @@ public class LoanProductData implements Serializable {
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
-                overDueDaysForRepaymentEvent);
+                overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment);
 
     }
 
@@ -389,6 +394,8 @@ public class LoanProductData implements Serializable {
         final DelinquencyBucketData delinquencyBucket = null;
         final Integer dueDaysForRepaymentEvent = null;
         final Integer overDueDaysForRepaymentEvent = null;
+        final boolean enableDownPayment = false;
+        final BigDecimal disbursedAmountPercentageDownPayment = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -407,7 +414,7 @@ public class LoanProductData implements Serializable {
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
-                overDueDaysForRepaymentEvent);
+                overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment);
 
     }
 
@@ -504,6 +511,8 @@ public class LoanProductData implements Serializable {
         final DelinquencyBucketData delinquencyBucket = null;
         final Integer dueDaysForRepaymentEvent = null;
         final Integer overDueDaysForRepaymentEvent = null;
+        final boolean enableDownPayment = false;
+        final BigDecimal disbursedAmountPercentageDownPayment = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -522,7 +531,7 @@ public class LoanProductData implements Serializable {
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
-                overDueDaysForRepaymentEvent);
+                overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment);
 
     }
 
@@ -613,6 +622,8 @@ public class LoanProductData implements Serializable {
         final DelinquencyBucketData delinquencyBucket = null;
         final Integer dueDaysForRepaymentEvent = null;
         final Integer overDueDaysForRepaymentEvent = null;
+        final boolean enableDownPayment = false;
+        final BigDecimal disbursedAmountPercentageDownPayment = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -631,7 +642,7 @@ public class LoanProductData implements Serializable {
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
-                overDueDaysForRepaymentEvent);
+                overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment);
 
     }
 
@@ -678,7 +689,8 @@ public class LoanProductData implements Serializable {
             Collection<RateData> rateOptions, Collection<RateData> rates, final boolean isRatesEnabled,
             final BigDecimal fixedPrincipalPercentagePerInstallment, final Collection<DelinquencyBucketData> delinquencyBucketOptions,
             final DelinquencyBucketData delinquencyBucket, final Integer dueDaysForRepaymentEvent,
-            final Integer overDueDaysForRepaymentEvent) {
+            final Integer overDueDaysForRepaymentEvent, final boolean enableDownPayment,
+            final BigDecimal disbursedAmountPercentageForDownPayment) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -796,6 +808,8 @@ public class LoanProductData implements Serializable {
         this.delinquencyBucket = delinquencyBucket;
         this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
+        this.enableDownPayment = enableDownPayment;
+        this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -947,6 +961,8 @@ public class LoanProductData implements Serializable {
         this.delinquencyBucket = productData.delinquencyBucket;
         this.dueDaysForRepaymentEvent = productData.dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = productData.overDueDaysForRepaymentEvent;
+        this.enableDownPayment = productData.enableDownPayment;
+        this.disbursedAmountPercentageForDownPayment = productData.disbursedAmountPercentageForDownPayment;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

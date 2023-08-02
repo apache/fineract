@@ -132,6 +132,11 @@ public class LoanTransactionHelper extends IntegrationTest {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON, "resourceId");
     }
 
+    public Object getLoanProductError(final String loanProductJSON, final String jsonAttributeToGetBack) {
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON,
+                jsonAttributeToGetBack);
+    }
+
     public Integer getLoanId(final String loanApplicationJSON) {
         return this.getLoanId(loanApplicationJSON, this.requestSpec, this.responseSpec);
     }

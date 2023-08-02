@@ -143,6 +143,8 @@ public class LoanProductTestBuilder {
     private Integer delinquencyBucketId;
     private Integer dueDaysForRepaymentEvent = null;
     private Integer overDueDaysForRepaymentEvent = null;
+    private boolean enableDownPayment = false;
+    private String disbursedAmountPercentageForDownPayment = null;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = build(chargeId, null);
@@ -278,6 +280,10 @@ public class LoanProductTestBuilder {
         }
         if (this.overDueDaysForRepaymentEvent != null) {
             map.put("overDueDaysForRepaymentEvent", this.overDueDaysForRepaymentEvent);
+        }
+        map.put("enableDownPayment", enableDownPayment);
+        if (this.disbursedAmountPercentageForDownPayment != null) {
+            map.put("disbursedAmountPercentageForDownPayment", disbursedAmountPercentageForDownPayment);
         }
 
         return map;
@@ -687,6 +693,13 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withOverDueDaysForRepaymentEvent(final Integer overDueDaysForRepaymentEvent) {
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
+        return this;
+    }
+
+    public LoanProductTestBuilder withEnableDownPayment(final Boolean enableDownPayment,
+            final String disbursedAmountPercentageForDownPayment) {
+        this.enableDownPayment = enableDownPayment;
+        this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
         return this;
     }
 

@@ -1141,6 +1141,21 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public DataValidatorBuilder scaleNotGreaterThan(Integer scale) {
+        final BigDecimal value = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
+        if (value.scale() > scale.intValue()) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                    .append(this.parameter).append(".scale.is.greater.than.").append(scale);
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter).append("` value ")
+                    .append(value).append(" decimal place must not be more than ").append(scale).append(" places");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), this.parameter, value, scale);
+            this.dataValidationErrors.add(error);
+            return this;
+        }
+        return this;
+    }
+
     /**
      * Throws Exception if validation errors.
      *
