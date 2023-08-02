@@ -19,15 +19,22 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -142,29 +149,41 @@ public class SavingsInterestPostingJobIntegrationTest {
 
     @Test
     public void testSavingsDailyInterestPostingJob() {
-        // client activation, savings activation and 1st transaction date
-        final String startDate = "10 April 2022";
-        final String jobName = "Post Interest For Savings";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, true);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, today);
+            // client activation, savings activation and 1st transaction date
+            final String startDate = "10 April 2022";
+            final String jobName = "Post Interest For Savings";
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            Assertions.assertNotNull(clientID);
 
-        final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
-        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        /***
-         * Runs Post interest posting job and verify the new account created with accounting configuration set as none
-         * is picked up by job
-         */
-        this.scheduleJobHelper.executeAndAwaitJob(jobName);
-        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-        HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 3);
-        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-            LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+            /***
+             * Runs Post interest posting job and verify the new account created with accounting configuration set as
+             * none is picked up by job
+             */
+            this.scheduleJobHelper.executeAndAwaitJob(jobName);
+            Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+            ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+            HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 3);
+            for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
+                LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+            }
+            assertEquals("2.7405", interestPostingTransaction.get("amount").toString(), "Equality check for interest posted amount");
+            assertEquals("[2022, 4, 12]", interestPostingTransaction.get("date").toString(), "Date check for Interest Posting transaction");
+            List<Integer> submittedOnDateStringList = (List<Integer>) interestPostingTransaction.get("submittedOnDate");
+            LocalDate submittedOnDate = submittedOnDateStringList.stream().collect(
+                    Collectors.collectingAndThen(Collectors.toList(), list -> LocalDate.of(list.get(0), list.get(1), list.get(2))));
+            assertTrue(submittedOnDate.compareTo(today) == 0, "Submitted On Date check for Interest Posting transaction");
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, false);
         }
-        assertEquals("2.7405", interestPostingTransaction.get("amount").toString(), "Equality check for interest posted amount");
-        assertEquals("[2022, 4, 12]", interestPostingTransaction.get("date").toString(), "Date check for Interest Posting transaction");
+
     }
 
     @Test
