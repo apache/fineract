@@ -19,7 +19,6 @@
 package org.apache.fineract.cob.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -64,15 +63,14 @@ public class LoanAccountLockApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List locked loan accounts", description = "Returns the locked loan IDs")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LoanAccountLockApiResourceSwagger.GetLoanAccountLockResponse.class)))) })
-    public String retrieveLockedAccounts(@Context final UriInfo uriInfo, @QueryParam("page") String page,
-            @QueryParam("limit") String limit) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanAccountLockApiResourceSwagger.GetLoanAccountLockResponse.class))) })
+    public String retrieveLockedAccounts(@Context final UriInfo uriInfo, @QueryParam("page") Integer page,
+            @QueryParam("limit") Integer limit) {
 
-        List<LoanAccountLock> lockedLoanAccounts = loanAccountLockService.getLockedLoanAccountByPage(Integer.parseInt(page),
-                Integer.parseInt(limit));
+        List<LoanAccountLock> lockedLoanAccounts = loanAccountLockService.getLockedLoanAccountByPage(page, limit);
         LoanAccountLockResponseDTO response = new LoanAccountLockResponseDTO();
-        response.setPage(Integer.parseInt(page));
-        response.setLimit(Integer.parseInt(limit));
+        response.setPage(page);
+        response.setLimit(limit);
         response.setContent(lockedLoanAccounts);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
