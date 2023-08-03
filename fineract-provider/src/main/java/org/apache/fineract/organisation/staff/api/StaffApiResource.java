@@ -57,6 +57,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -143,7 +144,8 @@ public class StaffApiResource {
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         StaffData staff = readPlatformService.retrieveStaff(staffId);
         if (settings.isTemplate()) {
-            final Collection<OfficeData> allowedOffices = officeReadPlatformService.retrieveAllOfficesForDropdown();
+            final SearchParameters searchParameters = SearchParameters.forOffices("name", "ASC");
+            final Collection<OfficeData> allowedOffices = officeReadPlatformService.retrieveAllOffices(false, searchParameters);
             staff = StaffData.templateData(staff, allowedOffices);
         }
         return toApiJsonSerializer.serialize(settings, staff, RESPONSE_DATA_PARAMETERS);
