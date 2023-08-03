@@ -100,4 +100,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
         return Long.valueOf(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue()).equals(this.id);
     }
 
+    public SavingsAccountTransactionType getTransactionTypeEnum() {
+        return SavingsAccountTransactionType.fromInt(id.intValue());
+    }
 }

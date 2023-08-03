@@ -101,7 +101,7 @@ public class InteropTransactionData extends CommandProcessingResult {
         SavingsAccount savingsAccount = transaction.getSavingsAccount();
 
         String transactionId = transaction.getId().toString();
-        SavingsAccountTransactionType transactionType = SavingsAccountTransactionType.fromInt(transaction.getTypeOf());
+        SavingsAccountTransactionType transactionType = transaction.getTransactionType();
         BigDecimal amount = transaction.getAmount();
 
         BigDecimal chargeAmount = null;

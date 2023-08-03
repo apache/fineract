@@ -418,23 +418,23 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public boolean isDeposit() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isDeposit();
+        return getTransactionType().isDeposit();
     }
 
     public boolean isDepositAndNotReversed() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isDeposit() && isNotReversed();
+        return getTransactionType().isDeposit() && isNotReversed();
     }
 
     public boolean isDividendPayout() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isDividendPayout();
+        return getTransactionType().isDividendPayout();
     }
 
     public boolean isDividendPayoutAndNotReversed() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isDividendPayout() && isNotReversed();
+        return getTransactionType().isDividendPayout() && isNotReversed();
     }
 
     public boolean isWithdrawal() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawal();
+        return getTransactionType().isWithdrawal();
     }
 
     public boolean isPostInterestCalculationRequired() {
@@ -442,20 +442,19 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public boolean isInterestPostingAndNotReversed() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting() && isNotReversed();
+        return getTransactionType().isInterestPosting() && isNotReversed();
     }
 
     public boolean isInterestPosting() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting()
-                || SavingsAccountTransactionType.fromInt(this.typeOf).isOverDraftInterestPosting();
+        return getTransactionType().isInterestPosting() || getTransactionType().isOverDraftInterestPosting();
     }
 
     public boolean isWithdrawalFeeAndNotReversed() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee() && isNotReversed();
+        return getTransactionType().isWithdrawalFee() && isNotReversed();
     }
 
     public boolean isWithdrawalFee() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee();
+        return getTransactionType().isWithdrawalFee();
     }
 
     public boolean isAnnualFeeAndNotReversed() {
@@ -463,7 +462,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public boolean isAnnualFee() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isAnnualFee();
+        return getTransactionType().isAnnualFee();
     }
 
     public boolean isNotReversed() {
@@ -475,19 +474,19 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public boolean isTransferInitiation() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isTransferInitiation();
+        return getTransactionType().isTransferInitiation();
     }
 
     public boolean isTransferApproval() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isTransferApproval();
+        return getTransactionType().isTransferApproval();
     }
 
     public boolean isTransferRejection() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isTransferRejection();
+        return getTransactionType().isTransferRejection();
     }
 
     public boolean isTransferWithdrawal() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isTransferWithdrawal();
+        return getTransactionType().isTransferWithdrawal();
     }
 
     public boolean isTransferRelatedTransaction() {
@@ -722,49 +721,56 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public boolean isCredit() {
-        return isDeposit() || isInterestPostingAndNotReversed() || isDividendPayoutAndNotReversed();
+        return isCreditType() && !isReversed() && !isReversalTransaction();
+    }
+
+    public boolean isCreditType() {
+        return getTransactionType().isCredit();
     }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isPayCharge()
-                || isOverdraftInterestAndNotReversed() || isWithHoldTaxAndNotReversed();
+        return isDebitType() && !isReversed() && !isReversalTransaction();
+    }
+
+    public boolean isDebitType() {
+        return getTransactionType().isDebit();
     }
 
     public boolean isWithHoldTaxAndNotReversed() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isWithHoldTax() && isNotReversed();
+        return getTransactionType().isWithHoldTax() && isNotReversed();
     }
 
     public boolean isOverdraftInterestAndNotReversed() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isIncomeFromInterest() && isNotReversed();
+        return getTransactionType().isIncomeFromInterest() && isNotReversed();
     }
 
     public boolean isPayCharge() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isPayCharge();
+        return getTransactionType().isPayCharge();
     }
 
     public boolean isChargeTransaction() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isChargeTransaction();
+        return getTransactionType().isChargeTransaction();
     }
 
     public boolean isChargeTransactionAndNotReversed() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isChargeTransaction() && isNotReversed();
+        return getTransactionType().isChargeTransaction() && isNotReversed();
     }
 
     public boolean isWaiveCharge() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isWaiveCharge();
+        return getTransactionType().isWaiveCharge();
     }
 
     public boolean isAmountOnHold() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isAmountOnHold();
+        return getTransactionType().isAmountOnHold();
     }
 
     public boolean isAmountRelease() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isAmountRelease();
+        return getTransactionType().isAmountRelease();
     }
 
     private boolean canOverriteSavingAccountRules() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
-        return (isChargeTransaction() && chargePaidBy != null) ? chargePaidBy.canOverriteSavingAccountRules() : false;
+        return isChargeTransaction() && chargePaidBy != null && chargePaidBy.canOverriteSavingAccountRules();
     }
 
     public boolean canProcessBalanceCheck() {
@@ -773,12 +779,12 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public boolean isFeeCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
-        return (isPayCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
+        return isPayCharge() && chargePaidBy != null && chargePaidBy.isFeeCharge();
     }
 
     public boolean isPenaltyCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
-        return (isPayCharge() && chargePaidBy != null) ? chargePaidBy.isPenaltyCharge() : false;
+        return isPayCharge() && chargePaidBy != null && chargePaidBy.isPenaltyCharge();
     }
 
     public boolean isFeeChargeAndNotReversed() {
@@ -791,12 +797,12 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public boolean isWaiveFeeCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
-        return (isWaiveCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
+        return isWaiveCharge() && chargePaidBy != null && chargePaidBy.isFeeCharge();
     }
 
     public boolean isWaivePenaltyCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
-        return (isWaiveCharge() && chargePaidBy != null) ? chargePaidBy.isPenaltyCharge() : false;
+        return isWaiveCharge() && chargePaidBy != null && chargePaidBy.isPenaltyCharge();
     }
 
     public boolean isWaiveFeeChargeAndNotReversed() {
@@ -827,18 +833,8 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public boolean isPaymentForCurrentCharge(final SavingsAccountCharge savingsAccountCharge) {
-
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
-        final boolean isChargePaidForCurrentCharge;
-        if (chargePaidBy == null) {
-            isChargePaidForCurrentCharge = false;
-        } else if (chargePaidBy.getSavingsAccountCharge().equals(savingsAccountCharge)) {
-            isChargePaidForCurrentCharge = true;
-        } else {
-            isChargePaidForCurrentCharge = false;
-        }
-
-        return isChargePaidForCurrentCharge;
+        return chargePaidBy != null && chargePaidBy.getSavingsAccountCharge().equals(savingsAccountCharge);
     }
 
     public BigDecimal getAmount() {
@@ -859,6 +855,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public Integer getTypeOf() {
         return this.typeOf;
+    }
+
+    public SavingsAccountTransactionType getTransactionType() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf);
     }
 
     public SavingsAccount getSavingsAccount() {

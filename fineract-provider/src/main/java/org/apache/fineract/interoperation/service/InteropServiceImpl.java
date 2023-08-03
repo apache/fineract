@@ -233,7 +233,7 @@ public class InteropServiceImpl implements InteropService {
         SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
 
         Predicate<SavingsAccountTransaction> transFilter = t -> {
-            SavingsAccountTransactionType transactionType = SavingsAccountTransactionType.fromInt(t.getTypeOf());
+            SavingsAccountTransactionType transactionType = t.getTransactionType();
             if (debit != transactionType.isDebit() && credit != transactionType.isCredit()) {
                 return false;
             }

@@ -405,7 +405,6 @@ public class RecurringDepositAccount extends SavingsAccount {
             if (transaction.isReversed()) {
                 transaction.zeroBalanceFields();
             } else {
-
                 Money transactionAmount = Money.zero(this.currency);
                 if (transaction.isCredit()) {
                     transactionAmount = transactionAmount.plus(transaction.getAmount(this.currency));

@@ -28,7 +28,6 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 
 /**
@@ -106,7 +105,6 @@ public final class SavingsAccountSummary {
         this.totalOverdraftInterestDerived = wrapper.calculateTotalOverdraftInterest(currency, transactions);
         this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
 
-        // boolean isUpdated = false;
         updateRunningBalanceAndPivotDate(false, transactions, null, null, null, currency);
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
@@ -122,7 +120,7 @@ public final class SavingsAccountSummary {
                 return;
             }
             Money transactionAmount = Money.of(currency, transaction.getAmount());
-            switch (SavingsAccountTransactionType.fromInt(transaction.getTypeOf())) {
+            switch (transaction.getTransactionType()) {
                 case DEPOSIT:
                     if (transaction.isDepositAndNotReversed() || transaction.isDividendPayoutAndNotReversed()) {
                         this.totalDeposits = Money.of(currency, this.totalDeposits).plus(transactionAmount).getAmount();
@@ -185,7 +183,7 @@ public final class SavingsAccountSummary {
                 break;
             }
         } else {
-            // boolean isUpdated = false;
+            // INTEREST_POSTING
             Money interestTotal = Money.zero(currency);
             Money withHoldTaxTotal = Money.zero(currency);
             Money overdraftInterestTotal = Money.zero(currency);
