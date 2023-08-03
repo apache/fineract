@@ -434,7 +434,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 }
 
                 runningBalance = runningBalance.plus(transactionAmount);
-                if (!transaction.getRunningBalance(transactionAmount.getCurrency()).isEqualTo(transactionAmount)) {
+                if (!transaction.getRunningBalance(transactionAmount.getCurrency()).isEqualTo(runningBalance)) {
                     transaction.updateRunningBalance(runningBalance);
                 }
                 // transaction.updateRunningBalance(runningBalance);

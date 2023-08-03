@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.TransactionEntryType;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -55,6 +56,8 @@ public final class SavingsAccountTransactionData implements Serializable {
 
     private Long id;
     private final SavingsAccountTransactionEnumData transactionType;
+    private final TransactionEntryType entryType;
+
     private final Long accountId;
     private final String accountNo;
     private final LocalDate date;
@@ -144,9 +147,12 @@ public final class SavingsAccountTransactionData implements Serializable {
         return this.transactionType.isIncomeFromInterest() && isNotReversed();
     }
 
+    public boolean isCredit() {
+        return transactionType.getTransactionTypeEnum().isCredit() && isNotReversed() && !isReversalTransaction();
+    }
+
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isPayCharge()
-                || isOverdraftInterestAndNotReversed() || isWithHoldTaxAndNotReversed();
+        return transactionType.getTransactionTypeEnum().isDebit() && isNotReversed() && !isReversalTransaction();
     }
 
     public boolean isWithdrawalFeeAndNotReversed() {
@@ -286,10 +292,6 @@ public final class SavingsAccountTransactionData implements Serializable {
         return this.transactionType.isAmountRelease();
     }
 
-    public boolean isCredit() {
-        return isDeposit() || isInterestPostingAndNotReversed() || isDividendPayoutAndNotReversed();
-    }
-
     public boolean isDeposit() {
         return this.transactionType.isDeposit();
     }
@@ -308,6 +310,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.savingsAccountId = savingsId;
         this.paymentDetailData = paymentDetailData;
         this.transactionType = savingsAccountTransactionType;
+        this.entryType = transactionType == null ? null : transactionType.getTransactionTypeEnum().getEntryType();
         this.transactionDate = transactionDate;
         this.submittedOnDate = createdDate;
         this.amount = amount;
@@ -509,6 +512,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             final Boolean lienTransaction) {
         this.id = null;
         this.transactionType = transactionType;
+        this.entryType = transactionType == null ? null : transactionType.getTransactionTypeEnum().getEntryType();
         this.accountId = null;
         this.accountNo = null;
         this.date = transactionDate;
@@ -550,6 +554,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             final Boolean lienTransaction) {
         this.id = null;
         this.transactionType = transactionType;
+        this.entryType = transactionType == null ? null : transactionType.getTransactionTypeEnum().getEntryType();
         this.accountId = null;
         this.accountNo = null;
         this.date = null;
@@ -638,6 +643,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.id = id;
         this.transactionDate = date;
         this.transactionType = transactionType;
+        this.entryType = transactionType == null ? null : transactionType.getTransactionTypeEnum().getEntryType();
         this.paymentDetailData = paymentDetailData;
         this.accountId = savingsId;
         this.accountNo = savingsAccountNo;
@@ -744,6 +750,12 @@ public final class SavingsAccountTransactionData implements Serializable {
             final String reasonForBlock) {
         this.id = id;
         this.transactionType = transactionType;
+        TransactionEntryType entryType = null;
+        if (transactionType != null) {
+            entryType = transactionType.getTransactionTypeEnum().getEntryType();
+            entryType = Boolean.TRUE.equals(isReversal) ? entryType.getReversal() : entryType;
+        }
+        this.entryType = entryType;
         this.paymentDetailData = paymentDetailData;
         this.accountId = savingsId;
         this.accountNo = savingsAccountNo;
@@ -800,5 +812,9 @@ public final class SavingsAccountTransactionData implements Serializable {
 
     public boolean isIsManualTransaction() {
         return isManualTransaction;
+    }
+
+    public TransactionEntryType getEntryType() {
+        return entryType;
     }
 }
