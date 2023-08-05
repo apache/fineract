@@ -23,7 +23,14 @@ import java.util.Set;
 
 public final class SearchConstants {
 
+    public static final String API_PARAM_RESULTCOLUMNS = "resultColumns";
+    public static final String API_PARAM_COLUMN_FILTERS = "columnFilters";
     public static final String API_PARAM_COLUMN = "column";
+    public static final String API_PARAM_FILTERS = "filters";
+    public static final String API_PARAM_OPERATOR = "operator";
+    public static final String API_PARAM_VALUES = "values";
+    public static final String API_PARAM_TABLE = "table";
+    public static final String API_PARAM_QUERY = "query";
 
     private SearchConstants() {}
 

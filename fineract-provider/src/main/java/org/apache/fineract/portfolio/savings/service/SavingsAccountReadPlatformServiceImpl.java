@@ -1313,52 +1313,54 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
      * return this.jdbcTemplate.query(sql, this.annualFeeMapper, new Object[] {}); }
      */
 
-    private static final class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
+    public static final class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
 
-        private final String schemaSql;
+        private static final String SELECT = buildSelect();
+        private static final String FROM = buildFrom();
+        private static final String SCHEMA = SELECT + FROM;
 
-        SavingsAccountTransactionsMapper() {
+        public SavingsAccountTransactionsMapper() {}
 
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
-            sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
-            sqlBuilder.append(" tr.release_id_of_hold_amount as releaseTransactionId,");
-            sqlBuilder.append(" tr.reason_for_block as reasonForBlock,");
-            sqlBuilder.append("tr.submitted_on_date as submittedOnDate,");
-            sqlBuilder.append(" au.username as submittedByUsername, ");
-            sqlBuilder.append(" nt.note as transactionNote, ");
-            sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
-            sqlBuilder.append(
-                    "tr.is_reversal as isReversal, tr.original_transaction_id as originalTransactionId, tr.is_lien_transaction as lienTransaction, ");
-            sqlBuilder.append("fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed,");
-            sqlBuilder.append("fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount,");
-            sqlBuilder.append("fromtran.description as fromTransferDescription,");
-            sqlBuilder.append("totran.id as toTransferId, totran.is_reversed as toTransferReversed,");
-            sqlBuilder.append("totran.transaction_date as toTransferDate, totran.amount as toTransferAmount,");
-            sqlBuilder.append("totran.description as toTransferDescription,");
-            sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo,");
-            sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
-            sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, ");
-            sqlBuilder.append(
-                    "sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
-            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
-            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
-            sqlBuilder.append("pt.value as paymentTypeName, ");
-            sqlBuilder.append("tr.is_manual as postInterestAsOn ");
-            sqlBuilder.append("from m_savings_account sa ");
-            sqlBuilder.append("join m_savings_account_transaction tr on tr.savings_account_id = sa.id ");
-            sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
-            sqlBuilder.append("left join m_account_transfer_transaction fromtran on fromtran.from_savings_transaction_id = tr.id ");
-            sqlBuilder.append("left join m_account_transfer_transaction totran on totran.to_savings_transaction_id = tr.id ");
-            sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id ");
-            sqlBuilder.append("left join m_payment_type pt on pd.payment_type_id = pt.id ");
-            sqlBuilder.append(" left join m_appuser au on au.id=tr.appuser_id ");
-            sqlBuilder.append(" left join m_note nt ON nt.savings_account_transaction_id=tr.id ");
-            this.schemaSql = sqlBuilder.toString();
+        private static String buildSelect() {
+            return "tr.id as transactionId, tr.transaction_type_enum as transactionType, "
+                    + "tr.transaction_date as transactionDate, tr.amount as transactionAmount, "
+                    + "tr.release_id_of_hold_amount as releaseTransactionId, tr.reason_for_block as reasonForBlock, "
+                    + "tr.submitted_on_date as submittedOnDate, au.username as submittedByUsername, nt.note as transactionNote, "
+                    + "tr.running_balance_derived as runningBalance, tr.is_reversed as reversed, "
+                    + "tr.is_reversal as isReversal, tr.original_transaction_id as originalTransactionId, tr.is_lien_transaction as lienTransaction, "
+                    + "fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed, "
+                    + "fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount, "
+                    + "fromtran.description as fromTransferDescription, "
+                    + "totran.id as toTransferId, totran.is_reversed as toTransferReversed, "
+                    + "totran.transaction_date as toTransferDate, totran.amount as toTransferAmount, "
+                    + "totran.description as toTransferDescription, sa.id as savingsId, sa.account_no as accountNo, "
+                    + "pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
+                    + "pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
+                    + "sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, "
+                    + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, "
+                    + "curr.display_symbol as currencyDisplaySymbol, pt.value as paymentTypeName, " + "tr.is_manual as postInterestAsOn ";
+        }
+
+        private static String buildFrom() {
+            return " FROM m_savings_account_transaction tr join m_savings_account sa on tr.savings_account_id = sa.id "
+                    + "join m_currency curr on curr.code = sa.currency_code "
+                    + "left join m_account_transfer_transaction fromtran on fromtran.from_savings_transaction_id = tr.id "
+                    + "left join m_account_transfer_transaction totran on totran.to_savings_transaction_id = tr.id "
+                    + "left join m_payment_detail pd on tr.payment_detail_id = pd.id "
+                    + "left join m_payment_type pt on pd.payment_type_id = pt.id left join m_appuser au on au.id=tr.appuser_id "
+                    + "left join m_note nt ON nt.savings_account_transaction_id=tr.id ";
         }
 
         public String schema() {
-            return this.schemaSql;
+            return SCHEMA;
+        }
+
+        public String select() {
+            return SELECT;
+        }
+
+        public String from() {
+            return FROM;
         }
 
         @Override

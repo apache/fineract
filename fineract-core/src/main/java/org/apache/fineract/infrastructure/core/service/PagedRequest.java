@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.Data;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 @Data
@@ -44,7 +43,7 @@ public class PagedRequest<T> {
         return Optional.ofNullable(request);
     }
 
-    public Pageable toPageable() {
+    public PageRequest toPageable() {
         if (isEmpty(sorts)) {
             return PageRequest.of(page, size);
         } else {
@@ -57,16 +56,11 @@ public class PagedRequest<T> {
     @SuppressWarnings({ "unused" })
     private static class SortOrder {
 
-        private Direction direction;
+        private Sort.Direction direction;
         private String property;
 
-        private enum Direction {
-            ASC, DESC;
-        }
-
         private Sort.Order toOrder() {
-            Sort.Direction d = Sort.Direction.fromString(direction.name());
-            return new Sort.Order(d, property);
+            return new Sort.Order(direction, property);
         }
     }
 }

@@ -16,14 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.savings.domain.search;
+package org.apache.fineract.infrastructure.dataqueries.data;
 
-import java.util.Map;
+import java.io.Serializable;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+/**
+ * Immutable data object representing datatable data.
+ */
 @Data
-public class BaseQueryParametersMapResult {
+@NoArgsConstructor
+public final class ColumnFilter implements Serializable {
 
-    private final String baseQueryString;
-    private final Map<String, Object> parametersMap;
+    private String columnName;
+
+    private String columnValue;
+
+    private String columnOperation;
+
 }

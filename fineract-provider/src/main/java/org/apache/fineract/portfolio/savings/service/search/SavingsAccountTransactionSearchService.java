@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.portfolio.savings.service.search;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.PagedRequest;
+import jakarta.validation.constraints.NotNull;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
-import org.apache.fineract.portfolio.savings.domain.search.SavingsTransactionSearch;
+import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
+import org.springframework.data.domain.Page;
 
 public interface SavingsAccountTransactionSearchService {
 
-    Page<SavingsAccountTransactionData> searchTransactions(Long savingsId, PagedRequest<SavingsTransactionSearch> searchRequest);
-
+    Page<SavingsAccountTransactionData> searchTransactions(@NotNull Long savingsId, @NotNull TransactionSearchRequest searchParameters);
 }

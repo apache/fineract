@@ -37,7 +37,6 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -75,7 +74,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @Test
     public void testSqlInjectionCaughtQueryDataTable() {
         mockDatatableValidation();
-        assertThrows(SQLInjectionException.class, () -> {
+        assertThrows(PlatformApiDataValidationException.class, () -> {
             underTest.queryDataTable("table", "cf1", "vf1", "' or 1=1");
         });
     }
@@ -83,7 +82,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @Test
     public void testSqlInjectionCaughtQueryDataTable2() {
         mockDatatableValidation();
-        assertThrows(SQLInjectionException.class, () -> {
+        assertThrows(PlatformApiDataValidationException.class, () -> {
             underTest.queryDataTable("table", "cf1", "vf1", "1; DROP TABLE m_loan; SELECT");
         });
     }

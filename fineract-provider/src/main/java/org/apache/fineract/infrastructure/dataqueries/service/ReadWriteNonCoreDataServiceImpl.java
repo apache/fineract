@@ -210,8 +210,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             throw new PlatformApiDataValidationException(errors);
         }
 
-        DatabaseType dialect = databaseTypeResolver.databaseType();
-        Object columnValue = SearchUtil.parseAndValidateJdbcColumnValue(columnName, columnValueString, columnHeaders, dialect);
+        Object columnValue = SearchUtil.parseAndValidateJdbcColumnValue(columnName, columnValueString, columnHeaders, false, sqlGenerator);
         String sql = sqlGenerator.buildSelect(selectColumns, null, false) + " " + sqlGenerator.buildFrom(datatable, null, false) + " WHERE "
                 + EQ.formatPlaceholder(sqlGenerator, columnName, null);
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, columnValue);
@@ -1812,7 +1811,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String queryParamColumnUnderscored;
         String columnHeaderUnderscored;
         boolean notFound;
-        DatabaseType dialect = databaseTypeResolver.databaseType();
 
         final Map<String, Object> affectedColumns = new HashMap<>();
         final Set<String> keys = queryParams.keySet();
@@ -1833,7 +1831,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         if (queryParamColumnUnderscored.equalsIgnoreCase(columnHeaderUnderscored)) {
                             pValue = queryParams.get(key);
                             validatedValue = SearchUtil.parseAndValidateColumnValue(columnHeader, pValue, dateFormat,
-                                    clientApplicationLocale, dialect);
+                                    clientApplicationLocale, true, sqlGenerator);
                             affectedColumns.put(columnHeader.getColumnName(), validatedValue);
                             notFound = false;
                         }

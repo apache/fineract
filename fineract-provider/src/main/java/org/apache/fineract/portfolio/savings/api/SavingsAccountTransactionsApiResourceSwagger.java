@@ -185,8 +185,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Long totalFilteredRecords;
-        public Set<GetSavingsAccountTransactionsPageItem> pageItems;
+        public Long total;
+        public Set<GetSavingsAccountTransactionsPageItem> content;
     }
 
     @Schema(description = "PostSavingsAccountTransactionsRequest")
