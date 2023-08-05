@@ -41,11 +41,14 @@ public class DatabaseSpecificSQLGenerator {
         this.databaseTypeResolver = databaseTypeResolver;
     }
 
+    public DatabaseType getDialect() {
+        return databaseTypeResolver.databaseType();
+    }
+
     public String escape(String arg) {
-        DatabaseType dialect = databaseTypeResolver.databaseType();
-        if (dialect.isMySql()) {
+        if (databaseTypeResolver.isMySQL()) {
             return format("`%s`", arg);
-        } else if (dialect.isPostgres()) {
+        } else if (databaseTypeResolver.isPostgreSQL()) {
             return format("\"%s\"", arg);
         }
         return arg;

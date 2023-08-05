@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.dataqueries.service;
 
 import com.google.gson.JsonObject;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -31,8 +32,6 @@ public interface ReadWriteNonCoreDataService {
     List<DatatableData> retrieveDatatableNames(String appTable);
 
     DatatableData retrieveDatatable(String datatable);
-
-    List<JsonObject> queryDataTable(String datatable, String columnFilter, String valueFilter, String resultColumns);
 
     @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
     void registerDatatable(JsonCommand command);
@@ -73,4 +72,7 @@ public interface ReadWriteNonCoreDataService {
     String getDataTableName(String Url);
 
     Long countDatatableEntries(String datatableName, Long appTableId, String foreignKeyColumn);
+
+    List<JsonObject> queryDataTable(@NotNull String datatable, @NotNull String columnName, String columnValue,
+            @NotNull String resultColumns);
 }

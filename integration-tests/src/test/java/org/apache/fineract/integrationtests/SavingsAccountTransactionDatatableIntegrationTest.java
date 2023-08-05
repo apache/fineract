@@ -56,10 +56,8 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
 
     private static final String SAVINGS_TRANSACTION_APP_TABLE_NAME = EntityTables.SAVINGS_TRANSACTION.getName();
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String DEFAULT_DATE_FORMAT = "dd MMM yyyy";
     final String startDate = "01 Jun 2023";
     final String firstDepositDate = "05 Jun 2023";
-    final String secondDepositDate = "09 Jun 2023";
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private DatatableHelper datatableHelper;
@@ -136,7 +134,7 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
         assertNotNull(columnHeaderData);
 
         // two columns with 1 primary key and 2 audit columns created
-        assertEquals(columnHeaderData.size(), 6);
+        assertEquals(6, columnHeaderData.size());
 
         // deleting the datatable
         String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);

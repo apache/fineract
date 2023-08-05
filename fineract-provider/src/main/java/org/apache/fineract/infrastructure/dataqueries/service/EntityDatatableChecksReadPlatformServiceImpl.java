@@ -30,6 +30,8 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
+import org.apache.fineract.infrastructure.core.service.database.SqlOperator;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableCheckStatusData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableChecksData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -172,11 +174,12 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         return this.jdbcTemplate.query(sql, this.registerDataTableMapper); // NOSONAR
     }
 
-    protected static final class RegisterDataTableMapper implements RowMapper<DatatableChecksData> {
+    protected final class RegisterDataTableMapper implements RowMapper<DatatableChecksData> {
+
+        public static final String SELECT_FROM = " t.application_table_name as entity, t.registered_table_name as tableName FROM x_registered_table t WHERE ";
 
         @Override
         public DatatableChecksData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
             final String entity = rs.getString("entity");
             final String tableName = rs.getString("tableName");
 
@@ -184,8 +187,8 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         }
 
         public String schema() {
-            return " t.application_table_name as entity, t.registered_table_name as tableName " + " from x_registered_table t "
-                    + " where application_table_name IN( 'm_client','m_group','m_savings_account','m_loan')";
+            String[] values = EntityTables.getFiltered(EntityTables::hasCheck).stream().map(EntityTables::getName).toArray(String[]::new);
+            return SELECT_FROM + SqlOperator.IN.formatSql(sqlGenerator, JdbcJavaType.VARCHAR, "application_table_name", null, values);
         }
     }
 

@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
+import static org.apache.fineract.integrationtests.common.Utils.DEFAULT_TENANT;
+import static org.apache.fineract.integrationtests.common.Utils.TENANT_PARAM_NAME;
+
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
@@ -36,9 +39,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.client.models.PagedRequestSavingsTransactionSearch;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -48,7 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes" })
-public class SavingsAccountHelper {
+public class SavingsAccountHelper extends IntegrationTest {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -650,12 +653,11 @@ public class SavingsAccountHelper {
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
     }
 
-    public SavingsAccountTransactionsSearchResponse searchTransactions(Integer savingsId,
-            PagedRequestSavingsTransactionSearch searchReqeust) {
-        final String SAVINGS_TRANSACTIONS_SEARCH_URL = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search" + "?"
-                + Utils.TENANT_IDENTIFIER;
-        String jsonBodyToSend = GSON.toJson(searchReqeust);
-        String response = Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_TRANSACTIONS_SEARCH_URL, jsonBodyToSend);
+    public SavingsAccountTransactionsSearchResponse searchSavingsTransactions(Integer savingsId, Map<String, Object> queryParams) {
+        final String url = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search";
+        queryParams.put(TENANT_PARAM_NAME, DEFAULT_TENANT);
+        requestSpec.queryParams(queryParams);
+        String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url);
         return GSON.fromJson(response, SavingsAccountTransactionsSearchResponse.class);
     }
 
