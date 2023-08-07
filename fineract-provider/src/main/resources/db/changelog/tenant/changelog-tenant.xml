@@ -140,4 +140,5 @@
     <include file="parts/0118_add_submitted_on_date_to_savings_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0119_add_loan_product_down_payment_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0120_transaction_summary_with_asset_owner_report_typo_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0121_transaction_summary_with_asset_owner_report_typo_fix_2.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
