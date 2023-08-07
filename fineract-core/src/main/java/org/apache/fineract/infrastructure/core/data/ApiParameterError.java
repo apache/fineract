@@ -69,16 +69,12 @@ public final class ApiParameterError {
 
     public static ApiParameterError parameterError(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final Object... defaultUserMessageArgs) {
-        final ApiParameterError error = new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs,
-                parameterName, null);
-        return error;
+        return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, parameterName, null);
     }
 
     public static ApiParameterError parameterErrorWithValue(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final String value, final Object... defaultUserMessageArgs) {
-        final ApiParameterError error = new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs,
-                parameterName, value);
-        return error;
+        return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, parameterName, value);
     }
 
     private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage, final Object[] defaultUserMessageArgs,

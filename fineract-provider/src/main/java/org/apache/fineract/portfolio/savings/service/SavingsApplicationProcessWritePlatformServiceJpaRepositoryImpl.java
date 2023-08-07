@@ -257,11 +257,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final Long savingsId = account.getId();
             if (command.parameterExists(SavingsApiConstants.datatables)) {
                 this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
-                        EntityTables.SAVING.getName(), savingsId, account.productId(),
+                        EntityTables.SAVINGS.getName(), savingsId, account.productId(),
                         command.arrayOfParameterNamed(SavingsApiConstants.datatables));
             }
-            this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
-                    StatusEnum.CREATE.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(), account.productId());
+            this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
+                    StatusEnum.CREATE.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(),
+                    account.productId());
 
             businessEventNotifierService.notifyPostBusinessEvent(new SavingsCreateBusinessEvent(account));
 
@@ -475,8 +476,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(savingsAccount);
 
-        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
-                StatusEnum.APPROVE.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(),
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
+                StatusEnum.APPROVE.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(),
                 savingsAccount.productId());
 
         final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command, DateUtils.getBusinessLocalDate());
@@ -598,8 +599,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(savingsAccount);
 
-        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
-                StatusEnum.REJECTED.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(),
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
+                StatusEnum.REJECTED.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(),
                 savingsAccount.productId());
 
         final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command, DateUtils.getBusinessLocalDate());
@@ -635,8 +636,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(savingsAccount);
 
-        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
-                StatusEnum.WITHDRAWN.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(),
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
+                StatusEnum.WITHDRAWN.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(),
                 savingsAccount.productId());
 
         final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command,

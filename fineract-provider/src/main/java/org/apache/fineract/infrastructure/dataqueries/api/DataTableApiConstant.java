@@ -37,9 +37,6 @@ public final class DataTableApiConstant {
     public static final String CREATEDAT_FIELD_NAME = "created_at";
     public static final String UPDATEDAT_FIELD_NAME = "updated_at";
 
-    // Field Types
-    public static final String DATETIME_FIELD_TYPE = "DateTime";
-
     // associationParameters
     public static final String allAssociateParamName = "all";
     public static final String repaymentScheduleAssociateParamName = "repaymentSchedule";
@@ -55,4 +52,38 @@ public final class DataTableApiConstant {
     public static final String meetingAssociateParamName = "meeting";
     public static final String emiAmountVariationsAssociateParamName = "emiAmountVariations";
     public static final String collectionAssociateParamName = "collection";
+
+    public static final String TABLE_COLUMN_CODE_MAPPINGS = "x_table_column_code_mappings";
+    public static final String TABLE_REGISTERED_TABLE = "x_registered_table";
+    public static final String TABLE_FIELD_ID = "id";
+
+    public static final String API_PARAM_COLUMNS = "columns";
+    public static final String API_PARAM_CHANGECOLUMNS = "changeColumns";
+    public static final String API_PARAM_ADDCOLUMNS = "addColumns";
+    public static final String API_PARAM_DROPCOLUMNS = "dropColumns";
+    public static final String API_PARAM_DATATABLE_NAME = "datatableName";
+    public static final String API_PARAM_APPTABLE_NAME = "apptableName";
+    public static final String API_PARAM_SUBTYPE = "entitySubType";
+    public static final String API_PARAM_MULTIROW = "multiRow";
+
+    public static final String API_FIELD_NAME = "name";
+    public static final String API_FIELD_NEWNAME = "newName";
+    public static final String API_FIELD_TYPE = "type";
+    public static final String API_FIELD_LENGTH = "length";
+    public static final String API_FIELD_MANDATORY = "mandatory";
+    public static final String API_FIELD_UNIQUE = "unique";
+    public static final String API_FIELD_INDEXED = "indexed";
+    public static final String API_FIELD_AFTER = "after";
+    public static final String API_FIELD_CODE = "code";
+    public static final String API_FIELD_NEWCODE = "newCode";
+
+    public static final String API_FIELD_TYPE_STRING = "string";
+    public static final String API_FIELD_TYPE_NUMBER = "number";
+    public static final String API_FIELD_TYPE_BOOLEAN = "boolean";
+    public static final String API_FIELD_TYPE_DECIMAL = "decimal";
+    public static final String API_FIELD_TYPE_DATE = "date";
+    public static final String API_FIELD_TYPE_DATETIME = "datetime";
+    public static final String API_FIELD_TYPE_TIMESTAMP = "timestamp";
+    public static final String API_FIELD_TYPE_TEXT = "text";
+    public static final String API_FIELD_TYPE_DROPDOWN = "dropdown";
 }

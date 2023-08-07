@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.interoperation.util;
+package org.apache.fineract.infrastructure.core.service;
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -29,6 +29,10 @@ public final class MathUtil {
 
     private MathUtil() {
 
+    }
+
+    public static <E extends Number> E nullToDefault(E value, E def) {
+        return value == null ? def : value;
     }
 
     public static Long nullToZero(Long value) {
@@ -326,6 +330,10 @@ public final class MathUtil {
     /** @return BigDecimal null safe negate */
     public static BigDecimal negate(BigDecimal amount, MathContext mc) {
         return isEmpty(amount) ? amount : amount.negate(mc);
+    }
+
+    public static String formatToSql(BigDecimal amount) {
+        return amount == null ? null : amount.toPlainString();
     }
 
     // ----------------- Money -----------------

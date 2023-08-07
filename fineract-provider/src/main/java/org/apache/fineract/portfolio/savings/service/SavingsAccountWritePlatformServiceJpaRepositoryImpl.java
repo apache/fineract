@@ -207,8 +207,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final Map<String, Object> changes = account.activate(user, command, DateUtils.getBusinessLocalDate());
 
-        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
-                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(), account.productId());
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
+                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), account.productId());
 
         if (!changes.isEmpty()) {
             final Locale locale = command.extractLocale();
@@ -924,8 +924,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             throw new SavingsAccountClosingNotAllowedException("linked", defaultUserMessage, savingsId);
         }
 
-        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
-                StatusEnum.CLOSE.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(), account.productId());
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
+                StatusEnum.CLOSE.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), account.productId());
 
         final boolean isWithdrawBalance = command.booleanPrimitiveValueOfParameterNamed(withdrawBalanceParamName);
 
@@ -1517,9 +1517,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
 
-        /***
-         * Only recurring fees are allowed to inactivate
-         */
+        // Only recurring fees are allowed to inactivate
         if (!savingsAccountCharge.isRecurringFee()) {
             baseDataValidator.reset().parameter(null).value(savingsAccountCharge.getId())
                     .failWithCodeNoParameterAddedToErrorCode("charge.inactivation.allowed.only.for.recurring.charges");
@@ -1547,9 +1545,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                             chargePayments.add(transaction);
                         }
                     }
-                    /***
-                     * Reverse the excess payments of charge transactions
-                     */
+                    // Reverse the excess payments of charge transactions
                     SavingsAccountTransaction lastChargePayment = getLastChargePayment(chargePayments);
                     this.undoTransaction(savingsAccountCharge.savingsAccount().getId(), lastChargePayment.getId(), false);
                     updatedCharge = account.getUpdatedChargeDetails(savingsAccountCharge);

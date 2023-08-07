@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.search;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SearchConstants {
+public final class SearchConstants {
+
+    public static final String API_PARAM_COLUMN = "column";
+
+    private SearchConstants() {}
 
     public enum SearchResponseParameters {
 

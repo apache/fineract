@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.dataqueries.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 
 /**
  * A {@link RuntimeException} thrown when datatable resources are not found.
@@ -31,5 +32,13 @@ public class DatatableNotFoundException extends AbstractPlatformResourceNotFound
 
     public DatatableNotFoundException(final String datatable) {
         super("error.msg.datatable.not.found", "Datatable not found.", datatable);
+    }
+
+    public DatatableNotFoundException(final EntityTables entityTable, final Long id) {
+        this(entityTable.getName(), id);
+    }
+
+    public DatatableNotFoundException(final EntityTables entityTable) {
+        this(entityTable.getName());
     }
 }

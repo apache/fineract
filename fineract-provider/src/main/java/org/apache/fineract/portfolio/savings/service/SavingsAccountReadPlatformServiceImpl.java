@@ -1230,7 +1230,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         }
 
         final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
-                .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.SAVING.getName(), productId);
+                .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.SAVINGS.getName(), productId);
         template.setDatatables(datatableTemplates);
 
         return template;
@@ -1324,7 +1324,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
             sqlBuilder.append(" tr.release_id_of_hold_amount as releaseTransactionId,");
             sqlBuilder.append(" tr.reason_for_block as reasonForBlock,");
-            sqlBuilder.append(" tr.submitted_on_date as submittedOnDate,");
+            sqlBuilder.append("tr.submitted_on_date as submittedOnDate,");
             sqlBuilder.append(" au.username as submittedByUsername, ");
             sqlBuilder.append(" nt.note as transactionNote, ");
             sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
