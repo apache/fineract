@@ -175,7 +175,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                      * For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties)
                      * has changed.<br>
                      **/
-                    final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionPropertiesForReprocessing(loanTransaction);
+                    final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
 
                     // Reset derived component of new loan transaction and
                     // re-process transaction
@@ -214,7 +214,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     private void recalculateChargeOffTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
             MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments) {
-        final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionPropertiesForReprocessing(loanTransaction);
+        final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
         newLoanTransaction.resetDerivedComponents();
         // determine how much is outstanding total and breakdown for principal, interest and charges
         Money principalPortion = Money.zero(currency);
@@ -280,7 +280,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         if (loanTransaction.getId() == null) {
             return;
         }
-        final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionPropertiesForReprocessing(loanTransaction);
+        final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
 
         List<LoanTransaction> mergedList = getMergedTransactionList(transactionsToBeProcessed, changedTransactionDetail);
         Money overpaidAmount = calculateOverpaidAmount(loanTransaction, mergedList, installments, currency);

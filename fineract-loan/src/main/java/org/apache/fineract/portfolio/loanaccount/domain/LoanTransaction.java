@@ -269,13 +269,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return new LoanTransaction(null, office, LoanTransactionType.REFUND, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
-    public static LoanTransaction copyTransactionPropertiesForReprocessing(final LoanTransaction loanTransaction) {
-        LoanTransaction loanTransactionCopy = new LoanTransaction(loanTransaction.loan, loanTransaction.office, loanTransaction.typeOf,
-                loanTransaction.dateOf, loanTransaction.amount, loanTransaction.principalPortion, loanTransaction.interestPortion,
+    public static LoanTransaction copyTransactionProperties(final LoanTransaction loanTransaction) {
+        return new LoanTransaction(loanTransaction.loan, loanTransaction.office, loanTransaction.typeOf, loanTransaction.dateOf,
+                loanTransaction.amount, loanTransaction.principalPortion, loanTransaction.interestPortion,
                 loanTransaction.feeChargesPortion, loanTransaction.penaltyChargesPortion, loanTransaction.overPaymentPortion,
                 loanTransaction.reversed, loanTransaction.paymentDetail, loanTransaction.externalId);
-        loanTransactionCopy.setCreatedDate(loanTransaction.getCreatedDateTime());
-        return loanTransactionCopy;
     }
 
     public static LoanTransaction accrueLoanCharge(final Loan loan, final Office office, final Money amount, final LocalDate applyDate,
