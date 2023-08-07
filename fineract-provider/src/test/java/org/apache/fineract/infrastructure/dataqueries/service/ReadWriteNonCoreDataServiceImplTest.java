@@ -22,8 +22,10 @@ import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonObject;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
@@ -71,6 +74,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
     @Test
     public void testSqlInjectionCaughtQueryDataTable() {
+        mockDatatableValidation();
         assertThrows(SQLInjectionException.class, () -> {
             underTest.queryDataTable("table", "cf1", "vf1", "' or 1=1");
         });
@@ -78,6 +82,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
     @Test
     public void testSqlInjectionCaughtQueryDataTable2() {
+        mockDatatableValidation();
         assertThrows(SQLInjectionException.class, () -> {
             underTest.queryDataTable("table", "cf1", "vf1", "1; DROP TABLE m_loan; SELECT");
         });
@@ -87,18 +92,24 @@ public class ReadWriteNonCoreDataServiceImplTest {
     public void testQueryDataTableSuccess() {
         mockDatatableValidation();
         SqlRowSet sqlRS = Mockito.mock(SqlRowSet.class);
-        when(jdbcTemplate.queryForRowSet(eq("select rc1,rc2 from table where cf1 = ?"), any(Object.class))).thenReturn(sqlRS);
+        when(jdbcTemplate.queryForRowSet(eq("SELECT \"rc1\", \"rc2\" FROM \"table\" WHERE \"cf1\" = ?"), any(Object.class)))
+                .thenReturn(sqlRS);
         when(sqlRS.next()).thenReturn(true).thenReturn(false);
         when(sqlRS.getObject(anyString())).thenReturn("value1").thenReturn("value2");
-        when(sqlGenerator.escape(anyString())).thenReturn("rc1").thenReturn("rc2").thenReturn("table").thenReturn("cf1");
+        when(sqlGenerator.buildSelect(anyCollection(), nullable(String.class), eq(false))).thenReturn("SELECT \"rc1\", \"rc2\"");
+        when(sqlGenerator.buildFrom(anyString(), nullable(String.class), eq(false))).thenReturn("FROM \"table\"");
+        when(sqlGenerator.escape(anyString())).thenReturn("\"cf1\"");
+        when(sqlGenerator.alias(anyString(), nullable(String.class))).thenReturn("\"cf1\"");
         when(databaseTypeResolver.isPostgreSQL()).thenReturn(true);
+        when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.POSTGRESQL);
+        DatabaseType dialect = databaseTypeResolver.databaseType();
 
         ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, emptyList(), null, false,
-                false);
+                false, dialect);
         ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, emptyList(), null, false,
-                false);
+                false, dialect);
         ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, emptyList(), null, false,
-                false);
+                false, dialect);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
         List<JsonObject> results = underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2");
@@ -125,12 +136,14 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @MethodSource("provideParameters")
     public void testQueryDataTableInvalidParameterError(String columnType, String errorMessage) {
         mockDatatableValidation();
+        when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.POSTGRESQL);
+        DatabaseType dialect = databaseTypeResolver.databaseType();
         ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", columnType, 10L, false, false, emptyList(), null, false,
-                false);
+                false, dialect);
         ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, emptyList(), null, false,
-                false);
+                false, dialect);
         ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, emptyList(), null, false,
-                false);
+                false, dialect);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
         PlatformApiDataValidationException thrown = assertThrows(PlatformApiDataValidationException.class,

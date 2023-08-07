@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
+import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 
 /**
  * Immutable data object representing a resultset column.
@@ -29,9 +32,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 public final class ResultsetColumnHeaderData implements Serializable {
 
     private final String columnName;
-    private String columnType;
+    private JdbcJavaType columnType;
     private final Long columnLength;
-    private final String columnDisplayType;
+    private final DisplayType columnDisplayType;
     private final boolean isColumnNullable;
     private final boolean isColumnPrimaryKey;
     private final boolean isColumnUnique;
@@ -40,8 +43,7 @@ public final class ResultsetColumnHeaderData implements Serializable {
     private final List<ResultsetColumnValueData> columnValues;
     private final String columnCode;
 
-    public static ResultsetColumnHeaderData basic(final String columnName, final String columnType) {
-
+    public static ResultsetColumnHeaderData basic(final String columnName, final String columnType, DatabaseType dialect) {
         final Long columnLength = null;
         final boolean columnNullable = false;
         final boolean columnIsPrimaryKey = false;
@@ -50,21 +52,20 @@ public final class ResultsetColumnHeaderData implements Serializable {
         final boolean columnIsUnique = false;
         final boolean columnIsIndexed = false;
         return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues,
-                columnCode, columnIsUnique, columnIsIndexed);
+                columnCode, columnIsUnique, columnIsIndexed, dialect);
     }
 
     public static ResultsetColumnHeaderData detailed(final String columnName, final String columnType, final Long columnLength,
             final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues,
-            final String columnCode, final boolean columnIsUnique, final boolean columnIsIndexed) {
+            final String columnCode, final boolean columnIsUnique, final boolean columnIsIndexed, DatabaseType dialect) {
         return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues,
-                columnCode, columnIsUnique, columnIsIndexed);
+                columnCode, columnIsUnique, columnIsIndexed, dialect);
     }
 
-    private ResultsetColumnHeaderData(final String columnName, final String columnType, final Long columnLength,
-            final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues,
-            final String columnCode, final boolean columnIsUnique, final boolean columnIsIndexed) {
+    private ResultsetColumnHeaderData(final String columnName, String columnType, final Long columnLength, final boolean columnNullable,
+            final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues, final String columnCode,
+            final boolean columnIsUnique, final boolean columnIsIndexed, DatabaseType dialect) {
         this.columnName = columnName;
-        this.columnType = columnType;
         this.columnLength = columnLength;
         this.isColumnNullable = columnNullable;
         this.isColumnPrimaryKey = columnIsPrimaryKey;
@@ -74,179 +75,20 @@ public final class ResultsetColumnHeaderData implements Serializable {
         this.isColumnIndexed = columnIsIndexed;
 
         // Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
-        adjustColumnTypes();
+        this.columnType = JdbcJavaType.getByTypeName(dialect, adjustColumnType(columnType));
 
-        String displayType = null;
-        if (this.columnCode == null) {
-            if (isString()) {
-                displayType = "STRING";
-            } else if (isAnyInteger()) {
-                if (isInteger()) {
-                    this.columnType = this.columnType.toUpperCase();
-                }
-                displayType = "INTEGER";
-            } else if (isDate()) {
-                displayType = "DATE";
-            } else if (isDateTime()) {
-                displayType = "DATETIME";
-            } else if (isDecimal()) {
-                displayType = "DECIMAL";
-            } else if (isAnyText()) {
-                displayType = "TEXT";
-            } else if (isBit() || isBoolean()) {
-                displayType = "BOOLEAN";
-            } else {
-                throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type",
-                        "Invalid Lookup Type:" + this.columnType + " - Column Name: " + this.columnName);
-            }
-
-        } else {
-            if (isInt() || isInteger()) {
-                displayType = "CODELOOKUP";
-            } else if (isVarchar()) {
-                displayType = "CODEVALUE";
-            } else {
-                throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type",
-                        "Invalid Lookup Type:" + this.columnType + " - Column Name: " + this.columnName);
-            }
-        }
-
-        this.columnDisplayType = displayType;
-    }
-
-    private void adjustColumnTypes() {
-        switch (this.columnType) {
-            case "NEWDECIMAL":
-                this.columnType = "DECIMAL";
-            break;
-            case "CLOB":
-            case "ENUM":
-            case "SET":
-                this.columnType = "varchar";
-            break;
-            case "LONGLONG":
-                this.columnType = "bigint";
-            break;
-            case "SHORT":
-                this.columnType = "smallint";
-            break;
-            case "TINY":
-                this.columnType = "tinyint";
-            break;
-            case "INT24":
-                this.columnType = "int";
-            break;
-            default:
-            break;
-        }
-    }
-
-    public boolean isNamed(final String columnName) {
-        return this.columnName.equalsIgnoreCase(columnName);
-    }
-
-    private boolean isAnyText() {
-        return isText() || isTinyText() || isMediumText() || isLongText();
-    }
-
-    private boolean isText() {
-        return "text".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isTinyText() {
-        return "tinytext".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isMediumText() {
-        return "mediumtext".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isLongText() {
-        return "longtext".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isDecimal() {
-        return "decimal".equalsIgnoreCase(this.columnType) || "NEWDECIMAL".equalsIgnoreCase(this.columnType)
-                || "numeric".equalsIgnoreCase(this.columnType);
-        // Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
-    }
-
-    private boolean isDate() {
-        return "date".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isDateTime() {
-        return "datetime".equalsIgnoreCase(this.columnType) || "timestamp".equalsIgnoreCase(this.columnType)
-                || "timestamp without time zone".equalsIgnoreCase(this.columnType) || "timestamptz".equalsIgnoreCase(this.columnType)
-                || "timestamp with time zone".equalsIgnoreCase(this.columnType);
-    }
-
-    public boolean isString() {
-        return isVarchar() || isChar();
-    }
-
-    private boolean isChar() {
-        return "char".equalsIgnoreCase(this.columnType) || "CHARACTER VARYING".equalsIgnoreCase(this.columnType)
-                || "bpchar".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isVarchar() {
-        return "varchar".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isAnyInteger() {
-        return isInt() || isInteger() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt() || isLong() || isSerial();
-    }
-
-    private boolean isSerial() {
-        return "SERIAL".equalsIgnoreCase(this.columnType) || "SERIAL4".equalsIgnoreCase(this.columnType)
-                || "SERIAL8".equalsIgnoreCase(this.columnType) || "SMALLSERIAL".equalsIgnoreCase(this.columnType)
-                || "BIGSERIAL".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isInt() {
-        return "int".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isInteger() {
-        return "integer".equalsIgnoreCase(this.columnType) || "int2".equalsIgnoreCase(this.columnType)
-                || "int4".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isSmallInt() {
-        return "smallint".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isTinyInt() {
-        return "tinyint".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isMediumInt() {
-        return "mediumint".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isBigInt() {
-        return "bigint".equalsIgnoreCase(this.columnType) || "int8".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isLong() {
-        return "LONG".equalsIgnoreCase(this.columnType) || "LONGLONG".equalsIgnoreCase(this.columnType);
-        // Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
-    }
-
-    private boolean isBit() {
-        return "bit".equalsIgnoreCase(this.columnType);
-    }
-
-    private boolean isBoolean() {
-        return "boolean".equalsIgnoreCase(this.columnType) || "bool".equalsIgnoreCase(this.columnType);
+        this.columnDisplayType = calcDisplayType();
     }
 
     public String getColumnName() {
         return this.columnName;
     }
 
-    public String getColumnType() {
+    public boolean isNamed(final String columnName) {
+        return this.columnName.equalsIgnoreCase(columnName);
+    }
+
+    public JdbcJavaType getColumnType() {
         return this.columnType;
     }
 
@@ -270,76 +112,8 @@ public final class ResultsetColumnHeaderData implements Serializable {
         return isColumnIndexed;
     }
 
-    public String getColumnDisplayType() {
+    public DisplayType getColumnDisplayType() {
         return this.columnDisplayType;
-    }
-
-    public boolean isDateDisplayType() {
-        return "DATE".equalsIgnoreCase(this.columnDisplayType);
-    }
-
-    public boolean isDateTimeDisplayType() {
-        return "DATETIME".equalsIgnoreCase(this.columnDisplayType);
-    }
-
-    public boolean isIntegerDisplayType() {
-        return "INTEGER".equalsIgnoreCase(this.columnDisplayType);
-    }
-
-    public boolean isDecimalDisplayType() {
-        return "DECIMAL".equalsIgnoreCase(this.columnDisplayType);
-    }
-
-    public boolean isBooleanDisplayType() {
-        return "BOOLEAN".equalsIgnoreCase(this.columnDisplayType);
-    }
-
-    public boolean isCodeValueDisplayType() {
-        return "CODEVALUE".equalsIgnoreCase(this.columnDisplayType);
-    }
-
-    public boolean isCodeLookupDisplayType() {
-        return "CODELOOKUP".equalsIgnoreCase(this.columnDisplayType);
-    }
-
-    public boolean isMandatory() {
-        return !isOptional();
-    }
-
-    public boolean isOptional() {
-        return this.isColumnNullable;
-    }
-
-    public boolean hasColumnValues() {
-        return !this.columnValues.isEmpty();
-    }
-
-    public boolean isColumnValueAllowed(final String match) {
-        boolean allowed = false;
-        for (final ResultsetColumnValueData allowedValue : this.columnValues) {
-            if (allowedValue.matches(match)) {
-                allowed = true;
-            }
-        }
-        return allowed;
-    }
-
-    public boolean isColumnValueNotAllowed(final String match) {
-        return !isColumnValueAllowed(match);
-    }
-
-    public boolean isColumnCodeNotAllowed(final Integer match) {
-        return !isColumnCodeAllowed(match);
-    }
-
-    public boolean isColumnCodeAllowed(final Integer match) {
-        boolean allowed = false;
-        for (final ResultsetColumnValueData allowedValue : this.columnValues) {
-            if (allowedValue.codeMatches(match)) {
-                allowed = true;
-            }
-        }
-        return allowed;
     }
 
     public String getColumnCode() {
@@ -348,5 +122,157 @@ public final class ResultsetColumnHeaderData implements Serializable {
 
     public List<ResultsetColumnValueData> getColumnValues() {
         return this.columnValues;
+    }
+
+    public boolean isDateDisplayType() {
+        return columnDisplayType == DisplayType.DATE;
+    }
+
+    public boolean isDateTimeDisplayType() {
+        return columnDisplayType == DisplayType.DATETIME;
+    }
+
+    public boolean isTimeDisplayType() {
+        return columnDisplayType == DisplayType.TIME;
+    }
+
+    public boolean isIntegerDisplayType() {
+        return columnDisplayType == DisplayType.INTEGER;
+    }
+
+    public boolean isDecimalDisplayType() {
+        return columnDisplayType == DisplayType.DECIMAL;
+    }
+
+    public boolean isStringDisplayType() {
+        return columnDisplayType == DisplayType.STRING;
+    }
+
+    public boolean isTextDisplayType() {
+        return columnDisplayType == DisplayType.TEXT;
+    }
+
+    public boolean isBooleanDisplayType() {
+        return columnDisplayType == DisplayType.BOOLEAN;
+    }
+
+    public boolean isCodeValueDisplayType() {
+        return columnDisplayType == DisplayType.CODEVALUE;
+    }
+
+    public boolean isCodeLookupDisplayType() {
+        return columnDisplayType == DisplayType.CODELOOKUP;
+    }
+
+    public boolean isMandatory() {
+        return !this.isColumnNullable;
+    }
+
+    public boolean hasColumnValues() {
+        return columnValues != null && !columnValues.isEmpty();
+    }
+
+    public boolean isColumnValueAllowed(final String match) {
+        for (final ResultsetColumnValueData allowedValue : this.columnValues) {
+            if (allowedValue.matches(match)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isColumnCodeAllowed(final Integer match) {
+        for (final ResultsetColumnValueData allowedValue : this.columnValues) {
+            if (allowedValue.codeMatches(match)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasPrecision(@NotNull DatabaseType dialect) {
+        return columnType.hasPrecision(dialect);
+    }
+
+    // --- Calculation ---
+
+    private String adjustColumnType(String type) {
+        type = type.toUpperCase();
+        switch (type) {
+            case "CLOB":
+            case "ENUM":
+            case "SET":
+                return "VARCHAR";
+            case "NEWDECIMAL":
+                return "DECIMAL";
+            case "LONGLONG":
+                return "BIGINT";
+            case "SHORT":
+                return "SMALLINT";
+            case "TINY":
+                return "TINYINT";
+            case "INT24":
+                return "INT";
+            default:
+                return type;
+        }
+    }
+
+    @NotNull
+    private DisplayType calcDisplayType() {
+        DisplayType displayType = null;
+        if (this.columnCode == null) {
+            displayType = calcColumnDisplayType(columnType);
+        } else {
+            if (columnType.isIntegerType()) {
+                displayType = DisplayType.CODELOOKUP;
+            } else if (columnType.isVarcharType()) {
+                displayType = DisplayType.CODEVALUE;
+            }
+
+        }
+        if (displayType == null) {
+            throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type",
+                    "Invalid Lookup Type:" + this.columnType + " - Column Name: " + this.columnName);
+        }
+        return displayType;
+    }
+
+    public static DisplayType calcColumnDisplayType(JdbcJavaType columnType) {
+        if (columnType.isTextType()) {
+            return DisplayType.TEXT;
+        }
+        if (columnType.isStringType()) {
+            return DisplayType.STRING;
+        }
+        if (columnType.isAnyIntegerType()) {
+            return DisplayType.INTEGER;
+        }
+        if (columnType.isAnyFloatType()) {
+            return DisplayType.FLOAT;
+        }
+        if (columnType.isDecimalType()) { // Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
+            return DisplayType.DECIMAL;
+        }
+        if (columnType.isDateType()) {
+            return DisplayType.DATE;
+        }
+        if (columnType.isDateTimeType()) {
+            return DisplayType.DATETIME;
+        }
+        if (columnType.isTimeType()) {
+            return DisplayType.TIME;
+        }
+        if (columnType.isBooleanType()) {
+            return DisplayType.BOOLEAN;
+        }
+        if (columnType.isBinaryType()) {
+            return DisplayType.BINARY;
+        }
+        return null;
+    }
+
+    public enum DisplayType {
+        TEXT, STRING, INTEGER, FLOAT, DECIMAL, DATE, TIME, DATETIME, BOOLEAN, BINARY, CODELOOKUP, CODEVALUE,;
     }
 }

@@ -21,10 +21,15 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 import java.util.List;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 
 public interface GenericDataService {
 
     GenericResultsetData fillGenericResultSet(String sql);
+
+    List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(String tableName);
+
+    List<ResultsetRowData> fillResultsetRowData(String sql, List<ResultsetColumnHeaderData> columnHeaders);
 
     String generateJsonFromGenericResultsetData(GenericResultsetData grs);
 
@@ -32,9 +37,7 @@ public interface GenericDataService {
 
     String wrapSQL(String sql);
 
-    List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(String datatable);
+    boolean isExplicitlyUnique(String tableName, String columnName);
 
-    boolean isExplicitlyUnique(String datatable, String columnName);
-
-    boolean isExplicitlyIndexed(String datatable, String columnName);
+    boolean isExplicitlyIndexed(String tableName, String columnName);
 }

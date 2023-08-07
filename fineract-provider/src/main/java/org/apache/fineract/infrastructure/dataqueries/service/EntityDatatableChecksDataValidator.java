@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_DATATABLE_NAME;
+
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -41,7 +43,6 @@ import org.springframework.stereotype.Component;
 public final class EntityDatatableChecksDataValidator {
 
     public static final String ENTITY = "entity";
-    public static final String DATATABLE_NAME = "datatableName";
     public static final String STATUS = "status";
     public static final String SYSTEM_DEFINED = "systemDefined";
     public static final String PRODUCT_ID = "productId";
@@ -50,7 +51,7 @@ public final class EntityDatatableChecksDataValidator {
      * The parameters supported for this command.
      */
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList(ENTITY, DATATABLE_NAME, STATUS, SYSTEM_DEFINED, PRODUCT_ID));
+            Arrays.asList(ENTITY, API_PARAM_DATATABLE_NAME, STATUS, SYSTEM_DEFINED, PRODUCT_ID));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -74,15 +75,15 @@ public final class EntityDatatableChecksDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final String entity = this.fromApiJsonHelper.extractStringNamed(ENTITY, element);
-        baseDataValidator.reset().parameter(ENTITY).value(entity).notBlank().isOneOfTheseStringValues(EntityTables.getEntitiesList());
+        baseDataValidator.reset().parameter(ENTITY).value(entity).notBlank().isOneOfTheseStringValues(EntityTables.getEntityNames());
 
         final Integer status = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(STATUS, element);
-        final Object[] entityTablesStatuses = EntityTables.getStatus(entity).toArray();
+        final Object[] entityTablesStatuses = EntityTables.getCheckStatusCodes(entity).toArray();
 
         baseDataValidator.reset().parameter(STATUS).value(status).isOneOfTheseValues(entityTablesStatuses);
 
-        final String datatableName = this.fromApiJsonHelper.extractStringNamed(DATATABLE_NAME, element);
-        baseDataValidator.reset().parameter(DATATABLE_NAME).value(datatableName).notBlank();
+        final String datatableName = this.fromApiJsonHelper.extractStringNamed(API_PARAM_DATATABLE_NAME, element);
+        baseDataValidator.reset().parameter(API_PARAM_DATATABLE_NAME).value(datatableName).notBlank();
 
         if (this.fromApiJsonHelper.parameterExists(SYSTEM_DEFINED, element)) {
             final String systemDefined = this.fromApiJsonHelper.extractStringNamed(SYSTEM_DEFINED, element);

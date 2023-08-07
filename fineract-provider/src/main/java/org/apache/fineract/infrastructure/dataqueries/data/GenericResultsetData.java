@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 
 /**
  * Immutable data object for generic resultset data.
@@ -41,16 +42,13 @@ public final class GenericResultsetData {
         return this.data;
     }
 
-    public String getColTypeOfColumnNamed(final String columnName) {
-
-        String colType = null;
+    public JdbcJavaType getColTypeOfColumnNamed(final String columnName) {
         for (final ResultsetColumnHeaderData columnHeader : this.columnHeaders) {
             if (columnHeader.isNamed(columnName)) {
-                colType = columnHeader.getColumnType();
+                return columnHeader.getColumnType();
             }
         }
-
-        return colType;
+        return null;
     }
 
     public boolean hasNoEntries() {
