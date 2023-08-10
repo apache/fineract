@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="fineract" id="1002-1">
+        <createTable tableName="m_loan_product_payment_allocation_rule">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="loan_product_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="m_loan_product_payment_allocation_rule_fk" referencedTableName="m_product_loan" referencedColumnNames="id"/>
+            </column>
+            <column name="transaction_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="allocation_types" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="future_installment_allocation_rule" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="m_loan_payment_allocation_rule">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="loan_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="m_loan_payment_allocation_rule_fk" referencedTableName="m_loan" referencedColumnNames="id"/>
+            </column>
+            <column name="transaction_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="allocation_types" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="future_installment_allocation_rule" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fineract" id="1002-2" context="mysql">
+        <addColumn tableName="m_loan_product_payment_allocation_rule">
+            <column name="created_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="m_loan_payment_allocation_rule">
+            <column name="created_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="1002-2" context="postgresql">
+        <addColumn tableName="m_loan_product_payment_allocation_rule">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="m_loan_payment_allocation_rule">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="1002-3">
+        <addUniqueConstraint tableName="m_loan_product_payment_allocation_rule" columnNames="loan_product_id,transaction_type" constraintName="uq_m_loan_product_payment_allocation_rule"/>
+        <addUniqueConstraint tableName="m_loan_payment_allocation_rule" columnNames="loan_id,transaction_type" constraintName="uq_m_loan_payment_allocation_rule"/>
+    </changeSet>
+    <changeSet author="fineract" id="1002-4">
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_product_payment_allocation_rule"
+                                 constraintName="FK_loan_product_payment_allocation_rule_created_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_product_payment_allocation_rule"
+                                 constraintName="FK_loan_product_payment_allocation_rule_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_payment_allocation_rule"
+                                 constraintName="FK_loan_payment_allocation_rule_created_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_payment_allocation_rule"
+                                 constraintName="FK_loan_payment_allocation_rule_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
+    <changeSet id="fineract" author="1002-5">
+        <createIndex tableName="m_loan_product_payment_allocation_rule" indexName="IND_loan_product_payment_allocation_rule_loan_product_id">
+            <column name="loan_product_id"/>
+        </createIndex>
+        <createIndex tableName="m_loan_payment_allocation_rule" indexName="IND_loan_payment_allocation_rule_loan_id">
+            <column name="loan_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

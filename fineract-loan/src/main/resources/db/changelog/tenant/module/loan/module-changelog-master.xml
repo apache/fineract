@@ -24,4 +24,5 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
   <!-- Sequence is starting from 1000 to make it easier to move existing liquibase changesets here -->
   <include relativeToChangelogFile="true" file="parts/1001_add_audit_fields_to_loan_charge.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1002_add_payment_allocation_rule.xml"/>
 </databaseChangeLog>

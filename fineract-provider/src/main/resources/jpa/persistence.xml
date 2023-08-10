@@ -106,6 +106,14 @@
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductInterestRecalculationDetails</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductVariableInstallmentConfig</class>
         <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.DueType</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationType</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
