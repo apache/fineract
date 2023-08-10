@@ -388,6 +388,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         final boolean enableDownPayment = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT);
         final BigDecimal disbursedAmountPercentageDownPayment = command
                 .bigDecimalValueOfParameterNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT);
+        final boolean enableAutoRepaymentForDownPayment = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT);
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
@@ -405,7 +407,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
-                overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment);
+                overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment);
 
     }
 
@@ -617,7 +619,8 @@ public class LoanProduct extends AbstractPersistableCustom {
             final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
             final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent,
-            final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment) {
+            final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
+            final boolean enableAutoRepaymentForDownPayment) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
         this.name = name.trim();
@@ -650,7 +653,8 @@ public class LoanProduct extends AbstractPersistableCustom {
                 considerPartialPeriodInterest, repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
-                isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment);
+                isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
+                enableAutoRepaymentForDownPayment);
 
         this.loanProductRelatedDetail.validateRepaymentPeriodWithGraceSettings();
 
@@ -1233,6 +1237,13 @@ public class LoanProduct extends AbstractPersistableCustom {
             BigDecimal newValue = command.bigDecimalValueOfParameterNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT);
             actualChanges.put(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, newValue);
             this.loanProductRelatedDetail.updateDisbursedAmountPercentageForDownPayment(newValue);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT,
+                this.loanProductRelatedDetail.isEnableAutoRepaymentForDownPayment())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT);
+            actualChanges.put(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, newValue);
+            this.loanProductRelatedDetail.updateEnableAutoRepaymentForDownPayment(newValue);
         }
 
         return actualChanges;

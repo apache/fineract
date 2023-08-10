@@ -160,7 +160,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE,
             LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
             LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT,
-            LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT));
+            LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
+            LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -750,9 +751,28 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_DOWN_PAYMENT).value(enableDownPayment).ignoreIfNull()
                     .validateForBooleanValue();
             validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
+            validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateAutoRepaymentForDownPayment(Boolean enableDownPayment, DataValidatorBuilder baseDataValidator,
+            JsonElement element) {
+        if (enableDownPayment) {
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, element)) {
+                final Boolean enableAutoRepaymentForDownPayment = this.fromApiJsonHelper
+                        .extractBooleanNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT)
+                        .value(enableAutoRepaymentForDownPayment).ignoreIfNull().validateForBooleanValue();
+            }
+        } else {
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, element)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT).failWithCode(
+                        "supported.only.for.enable.down.payment.true",
+                        "Auto repayment for down-payment is supported only if enable down-payment is true");
+            }
+        }
     }
 
     private void validateDownPaymentPercentage(Boolean enableDownPayment, DataValidatorBuilder baseDataValidator, JsonElement element) {
@@ -1656,6 +1676,7 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_DOWN_PAYMENT).value(enableDownPayment).ignoreIfNull()
                     .validateForBooleanValue();
             validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
+            validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

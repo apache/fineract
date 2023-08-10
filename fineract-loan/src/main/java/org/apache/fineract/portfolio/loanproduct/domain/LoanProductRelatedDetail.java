@@ -135,6 +135,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "disbursed_amount_percentage_for_down_payment", scale = 6, precision = 9)
     private BigDecimal disbursedAmountPercentageForDownPayment;
 
+    @Column(name = "enable_auto_repayment_for_down_payment", nullable = false)
+    private boolean enableAutoRepaymentForDownPayment;
+
     public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -144,14 +147,15 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
-            final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment) {
+            final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
+            final boolean enableAutoRepaymentForDownPayment) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment);
+                isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment);
     }
 
     protected LoanProductRelatedDetail() {
@@ -167,7 +171,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
-            final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment) {
+            final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
+            final boolean enableAutoRepaymentForDownPayment) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -196,6 +201,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.isEqualAmortization = isEqualAmortization;
         this.enableDownPayment = enableDownPayment;
         this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
+        this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -700,5 +706,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public void updateDisbursedAmountPercentageForDownPayment(BigDecimal disbursedAmountPercentageForDownPayment) {
         this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
+    }
+
+    public Boolean isEnableAutoRepaymentForDownPayment() {
+        return enableAutoRepaymentForDownPayment;
+    }
+
+    public void updateEnableAutoRepaymentForDownPayment(boolean enableAutoRepaymentForDownPayment) {
+        this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;
     }
 }

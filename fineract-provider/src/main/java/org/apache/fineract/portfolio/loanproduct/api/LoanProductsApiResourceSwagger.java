@@ -159,6 +159,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableDownPayment;
         @Schema(example = "5.5")
         public BigDecimal disbursedAmountPercentageForDownPayment;
+        @Schema(example = "false")
+        public Boolean enableAutoRepaymentForDownPayment;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -1211,6 +1213,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableDownPayment;
         @Schema(example = "5.5")
         public BigDecimal disbursedAmountPercentageForDownPayment;
+        @Schema(example = "false")
+        public Boolean enableAutoRepaymentForDownPayment;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1336,6 +1340,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableDownPayment;
         @Schema(example = "5.5")
         public BigDecimal disbursedAmountPercentageForDownPayment;
+        @Schema(example = "false")
+        public Boolean enableAutoRepaymentForDownPayment;
 
         // Interest Recalculation
         @Schema(example = "false")
