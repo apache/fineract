@@ -424,4 +424,14 @@ public final class MathUtil {
     public static Money min(Money first, Money second, Money third, boolean notNull) {
         return min(min(first, second, notNull), third, notNull);
     }
+
+    public static BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage, final int precision) {
+        BigDecimal percentageOf = BigDecimal.ZERO;
+        if (isGreaterThanZero(value)) {
+            final MathContext mc = new MathContext(precision, MoneyHelper.getRoundingMode());
+            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100L), mc);
+            percentageOf = value.multiply(multiplicand, mc);
+        }
+        return percentageOf;
+    }
 }

@@ -2954,6 +2954,42 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     }
 
+    public void handleDownPayment(final BigDecimal disbursedAmount, final JsonCommand command,
+            final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+        if (isAutoRepaymentForDownPaymentEnabled()) {
+            LocalDate disbursedOn = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
+            BigDecimal disbursedAmountPercentageForDownPayment = this.loanRepaymentScheduleDetail
+                    .getDisbursedAmountPercentageForDownPayment();
+            ExternalId externalId = ExternalId.empty();
+            if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+                externalId = ExternalId.generate();
+            }
+            Money downPaymentMoney = Money.of(getCurrency(),
+                    MathUtil.percentageOf(disbursedAmount, disbursedAmountPercentageForDownPayment, 9));
+            LoanTransaction downPaymentTransaction = LoanTransaction.downPayment(getOffice(), downPaymentMoney, null, disbursedOn,
+                    externalId);
+            /*
+             * Currently mapping down payment transaction as repayment transaction to loan repayment schedule for
+             * consistency. Need to replace below logic for creating new installment for down payment and mapping.
+             */
+
+            LoanEvent event = LoanEvent.LOAN_REPAYMENT_OR_WAIVER;
+            validateRepaymentTypeAccountStatus(downPaymentTransaction, event);
+            HolidayDetailDTO holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
+            validateRepaymentDateIsOnHoliday(downPaymentTransaction.getTransactionDate(), holidayDetailDTO.isAllowTransactionsOnHoliday(),
+                    holidayDetailDTO.getHolidays());
+            validateRepaymentDateIsOnNonWorkingDay(downPaymentTransaction.getTransactionDate(), holidayDetailDTO.getWorkingDays(),
+                    holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
+
+            handleRepaymentOrRecoveryOrWaiverTransaction(downPaymentTransaction, loanLifecycleStateMachine, null, scheduleGeneratorDTO);
+        }
+    }
+
+    private boolean isAutoRepaymentForDownPaymentEnabled() {
+        return this.loanRepaymentScheduleDetail.isEnableDownPayment()
+                && this.loanRepaymentScheduleDetail.isEnableAutoRepaymentForDownPayment();
+    }
+
     public LoanTransaction handlePayDisbursementTransaction(final Long chargeId, final LoanTransaction chargesPayment,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(findExistingTransactionIds());
@@ -3132,7 +3168,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private void validateRepaymentTypeAccountStatus(LoanTransaction repaymentTransaction, LoanEvent event) {
         if (repaymentTransaction.isGoodwillCredit() || repaymentTransaction.isMerchantIssuedRefund()
-                || repaymentTransaction.isPayoutRefund() || repaymentTransaction.isChargeRefund() || repaymentTransaction.isRepayment()) {
+                || repaymentTransaction.isPayoutRefund() || repaymentTransaction.isChargeRefund() || repaymentTransaction.isRepayment()
+                || repaymentTransaction.isDownPayment()) {
 
             if (!(isOpen() || isClosedObligationsMet() || isOverPaid())) {
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

@@ -145,6 +145,7 @@ public class LoanProductTestBuilder {
     private Integer overDueDaysForRepaymentEvent = null;
     private boolean enableDownPayment = false;
     private String disbursedAmountPercentageForDownPayment = null;
+    private boolean enableAutoRepaymentForDownPayment = false;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = build(chargeId, null);
@@ -284,6 +285,9 @@ public class LoanProductTestBuilder {
         map.put("enableDownPayment", enableDownPayment);
         if (this.disbursedAmountPercentageForDownPayment != null) {
             map.put("disbursedAmountPercentageForDownPayment", disbursedAmountPercentageForDownPayment);
+        }
+        if (enableAutoRepaymentForDownPayment) {
+            map.put("enableAutoRepaymentForDownPayment", enableAutoRepaymentForDownPayment);
         }
 
         return map;
@@ -697,9 +701,10 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withEnableDownPayment(final Boolean enableDownPayment,
-            final String disbursedAmountPercentageForDownPayment) {
+            final String disbursedAmountPercentageForDownPayment, final Boolean enableAutoRepaymentForDownPayment) {
         this.enableDownPayment = enableDownPayment;
         this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
+        this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;
         return this;
     }
 

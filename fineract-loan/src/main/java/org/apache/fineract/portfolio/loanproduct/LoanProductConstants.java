@@ -150,5 +150,6 @@ public interface LoanProductConstants {
     // down-payment related
     String ENABLE_DOWN_PAYMENT = "enableDownPayment";
     String DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT = "disbursedAmountPercentageForDownPayment";
+    String ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT = "enableAutoRepaymentForDownPayment";
 
 }

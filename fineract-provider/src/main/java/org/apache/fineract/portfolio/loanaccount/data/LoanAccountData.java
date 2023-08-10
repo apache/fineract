@@ -258,6 +258,7 @@ public class LoanAccountData {
 
     private Boolean enableDownPayment;
     private BigDecimal disbursedAmountPercentageForDownPayment;
+    private Boolean enableAutoRepaymentForDownPayment;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -660,7 +661,7 @@ public class LoanAccountData {
             final BigDecimal topupAmount, final boolean isEqualAmortization, final BigDecimal fixedPrincipalPercentagePerInstallment,
             final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud,
             LocalDate lastClosedBusinessDate, LocalDate overpaidOnDate, final boolean chargedOff, final boolean enableDownPayment,
-            final BigDecimal disbursedAmountPercentageForDownPayment) {
+            final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -701,8 +702,8 @@ public class LoanAccountData {
                 .setFixedPrincipalPercentagePerInstallment(fixedPrincipalPercentagePerInstallment).setDelinquent(delinquent)
                 .setDelinquencyRange(delinquencyRange).setDisallowExpectedDisbursements(disallowExpectedDisbursements).setFraud(fraud)
                 .setLastClosedBusinessDate(lastClosedBusinessDate).setOverpaidOnDate(overpaidOnDate).setChargedOff(chargedOff)
-                .setEnableDownPayment(enableDownPayment)
-                .setDisbursedAmountPercentageForDownPayment(disbursedAmountPercentageForDownPayment);
+                .setEnableDownPayment(enableDownPayment).setDisbursedAmountPercentageForDownPayment(disbursedAmountPercentageForDownPayment)
+                .setEnableAutoRepaymentForDownPayment(enableAutoRepaymentForDownPayment);
     }
 
     /*
@@ -788,7 +789,8 @@ public class LoanAccountData {
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
                 .setFraud(acc.fraud).setLastClosedBusinessDate(acc.getLastClosedBusinessDate()).setOverpaidOnDate(acc.overpaidOnDate)
                 .setChargedOff(acc.chargedOff).setEnableDownPayment(acc.enableDownPayment)
-                .setDisbursedAmountPercentageForDownPayment(acc.disbursedAmountPercentageForDownPayment);
+                .setDisbursedAmountPercentageForDownPayment(acc.disbursedAmountPercentageForDownPayment)
+                .setEnableAutoRepaymentForDownPayment(acc.enableAutoRepaymentForDownPayment);
     }
 
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final Collection<LoanProductData> productOptions,

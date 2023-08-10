@@ -437,7 +437,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 disbursementTransaction.updateLoan(loan);
                 loan.addLoanTransaction(disbursementTransaction);
             }
-
             if (loan.getRepaymentScheduleInstallments().isEmpty()) {
                 /*
                  * If no schedule, generate one (applicable to non-tranche multi-disbursal loans)
@@ -454,8 +453,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             } else {
                 changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, null);
             }
-
             loan.adjustNetDisbursalAmount(amountToDisburse.getAmount());
+            loan.handleDownPayment(amountToDisburse.getAmount(), command, scheduleGeneratorDTO);
         }
         if (!changes.isEmpty()) {
             if (changedTransactionDetail != null) {
