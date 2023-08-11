@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
@@ -33,6 +34,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 
+@Slf4j
 public class LoanItemReader extends AbstractLoanItemReader {
 
     private final RetrieveLoanIdService retrieveLoanIdService;
@@ -61,9 +63,10 @@ public class LoanItemReader extends AbstractLoanItemReader {
             loanIds = retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter,
                     customJobParameterResolver.getCustomJobParameterById(stepExecution, LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)
                             .map(Boolean::parseBoolean).orElse(false));
-
-            List<Long> lockedByCOBChunkProcessingAccountIds = getLoanIdsLockedWithChunkProcessingLock(loanIds);
-            loanIds.retainAll(lockedByCOBChunkProcessingAccountIds);
+            if (loanIds.size() > 0) {
+                List<Long> lockedByCOBChunkProcessingAccountIds = getLoanIdsLockedWithChunkProcessingLock(loanIds);
+                loanIds.retainAll(lockedByCOBChunkProcessingAccountIds);
+            }
         }
         setRemainingData(new LinkedBlockingQueue<>(loanIds));
     }
