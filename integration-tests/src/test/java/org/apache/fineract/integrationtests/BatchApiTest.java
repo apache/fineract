@@ -2110,6 +2110,52 @@ public class BatchApiTest {
     }
 
     /**
+     * Test when datatable entry was not found by the query API, and the update fails
+     */
+    @Test
+    public void shouldNotFindAnyDatatableEntryByQueryAPIAndFailsToUpdateItsColumn() {
+        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
+
+        // creating datatable with m_loan association
+        final Map<String, Object> columnMap = new HashMap<>();
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+
+        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
+        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
+        columnMap.put("datatableName", datatableName);
+        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
+        columnMap.put("entitySubType", "PERSON");
+        columnMap.put("multiRow", false);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 15, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 15, null);
+        columnMap.put("columns", datatableColumnsList);
+        final String datatableRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
+
+        this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+
+        final BatchRequest queryDatatableEntriesRequest = BatchHelper.queryDatatableEntries(datatableName, columnName1, "columnValue1",
+                "loan_id");
+        final BatchRequest updateDatatableEntry = BatchHelper.updateDatatableEntry(datatableName, "$.[0].loan_id", columnName2,
+                "columnValue2");
+
+        final List<BatchRequest> batchRequestsToQueryAndUpdateDatatableEntries = Arrays.asList(queryDatatableEntriesRequest,
+                updateDatatableEntry);
+        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+
+        final List<BatchResponse> responseOfQueryAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
+                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+
+        LOG.info("Batch Response : {}", new Gson().toJson(responseOfQueryAndUpdateDatatableBatch));
+
+        final BatchResponse batchQueryAndUpdateResponse = responseOfQueryAndUpdateDatatableBatch.get(0);
+
+        Assertions.assertEquals(2L, batchQueryAndUpdateResponse.getRequestId());
+        Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, batchQueryAndUpdateResponse.getStatusCode(),
+                "Verify Status Code 400 for update datatable entry");
+    }
+
+    /**
      * Test for finding datatable entry by the query API and update its value
      */
     @Test

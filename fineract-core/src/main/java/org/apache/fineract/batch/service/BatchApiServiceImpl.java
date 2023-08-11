@@ -160,7 +160,6 @@ public class BatchApiServiceImpl implements BatchApiService {
                     throw new BatchExecutionException(childNode.getRequest(), ex, errorHandler.handle(ex));
                 }
                 callRequestRecursive(resolvedChildRequest, childNode, responseList, uriInfo, enclosingTransaction);
-
             });
         } else {
             responseList.addAll(parentRequestFailedRecursive(request, requestNode));
