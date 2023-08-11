@@ -102,6 +102,27 @@ class LoanItemReaderTest {
     }
 
     @Test
+    public void testLoanItemReadNoOpenLoansFound() throws Exception {
+        // given
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "test", "test", "UTC", null));
+        LoanItemReader loanItemReader = new LoanItemReader(loanRepository, retrieveLoanIdService, customJobParameterResolver,
+                loanLockingService);
+        when(stepExecution.getExecutionContext()).thenReturn(executionContext);
+        LoanCOBParameter loanCOBParameter = new LoanCOBParameter(1L, 5L);
+        when(executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER)).thenReturn(loanCOBParameter);
+        when(retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter, false))
+                .thenReturn(new ArrayList<>(List.of()));
+
+        // when + then
+        loanItemReader.beforeStep(stepExecution);
+        Loan myLoan = loanItemReader.read();
+        Assertions.assertNull(myLoan);
+
+        Mockito.verifyNoMoreInteractions(loanRepository);
+        Mockito.verifyNoInteractions(loanLockingService);
+    }
+
+    @Test
     public void testLoanItemReaderMultiThreadRead() throws Exception {
         // given
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "test", "test", "UTC", null));
