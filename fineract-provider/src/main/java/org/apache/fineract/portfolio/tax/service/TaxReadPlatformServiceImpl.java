@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -33,12 +34,10 @@ import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxComponentHistoryData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     private static final TaxComponentMapper TAX_COMPONENT_MAPPER = new TaxComponentMapper();
@@ -48,13 +47,6 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
-
-    @Autowired
-    public TaxReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
-    }
 
     @Override
     public Collection<TaxComponentData> retrieveAllTaxComponents() {
