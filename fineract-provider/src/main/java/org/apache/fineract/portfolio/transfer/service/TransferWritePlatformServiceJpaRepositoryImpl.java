@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -62,11 +63,9 @@ import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransfe
 import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransferApprovalOrOnHoldException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException.TransferNotSupportedReason;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWritePlatformService {
 
     private final ClientRepositoryWrapper clientRepositoryWrapper;
@@ -82,31 +81,6 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     private final StaffRepositoryWrapper staffRepositoryWrapper;
     private final ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper;
     private final PlatformSecurityContext context;
-
-    @Autowired
-    public TransferWritePlatformServiceJpaRepositoryImpl(final ClientRepositoryWrapper clientRepositoryWrapper,
-            final OfficeRepositoryWrapper officeRepository, final CalendarInstanceRepository calendarInstanceRepository,
-            final LoanWritePlatformService loanWritePlatformService, final GroupRepositoryWrapper groupRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final TransfersDataValidator transfersDataValidator,
-            final NoteWritePlatformService noteWritePlatformService, final StaffRepositoryWrapper staffRepositoryWrapper,
-            final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper, final PlatformSecurityContext context) {
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.officeRepository = officeRepository;
-        this.calendarInstanceRepository = calendarInstanceRepository;
-        this.loanWritePlatformService = loanWritePlatformService;
-        this.groupRepository = groupRepository;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.transfersDataValidator = transfersDataValidator;
-        this.noteWritePlatformService = noteWritePlatformService;
-        this.staffRepositoryWrapper = staffRepositoryWrapper;
-        this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
-        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-        this.clientTransferDetailsRepositoryWrapper = clientTransferDetailsRepositoryWrapper;
-        this.context = context;
-
-    }
 
     @Override
     @Transactional
