@@ -218,8 +218,8 @@ public final class LoanScheduleParams {
         final Collection<RecalculationDetail> recalculationDetails = null;
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = null;
         final LocalDate scheduleTillDate = null;
-        final boolean applyInterestRecalculation = false;
         final Money unCompoundedAmount = Money.zero(currency);
+        final boolean applyInterestRecalculation = false;
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,

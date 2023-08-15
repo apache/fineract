@@ -91,6 +91,11 @@ public final class LoanSchedulePeriodData {
                 totalInstallmentAmountForPeriod);
     }
 
+    public static LoanSchedulePeriodData downPaymentOnlyPeriod(final Integer periodNumber, final LocalDate periodDate,
+            final BigDecimal principalDue, final BigDecimal principalOutstanding) {
+        return new LoanSchedulePeriodData(periodNumber, periodDate, periodDate, principalDue, principalOutstanding);
+    }
+
     public static LoanSchedulePeriodData repaymentPeriodWithPayments(@SuppressWarnings("unused") final Long loanId,
             final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate, final LocalDate obligationsMetOnDate,
             final boolean complete, final BigDecimal principalOriginalDue, final BigDecimal principalPaid,
@@ -256,6 +261,61 @@ public final class LoanSchedulePeriodData {
         this.totalOutstandingForPeriod = totalDueForPeriod;
         this.totalActualCostOfLoanForPeriod = interestDueOnPrincipalOutstanding.add(feeChargesDueForPeriod);
         this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
+
+        if (dueDate.isBefore(DateUtils.getBusinessLocalDate())) {
+            this.totalOverdue = this.totalOutstandingForPeriod;
+        } else {
+            this.totalOverdue = null;
+        }
+        this.totalCredits = BigDecimal.ZERO;
+    }
+
+    // TODO refactor the class to builder pattern
+    private LoanSchedulePeriodData(Integer periodNumber, LocalDate fromDate, LocalDate dueDate, BigDecimal principalDue,
+            BigDecimal principalOutstanding) {
+        this.period = periodNumber;
+        this.fromDate = fromDate;
+        this.dueDate = dueDate;
+        this.obligationsMetOnDate = null;
+        this.complete = null;
+        this.daysInPeriod = 1;
+        this.principalDisbursed = null;
+        this.principalOriginalDue = principalDue;
+        this.principalDue = principalOriginalDue;
+        this.principalPaid = null;
+        this.principalWrittenOff = null;
+        this.principalOutstanding = principalOriginalDue;
+        this.principalLoanBalanceOutstanding = principalOutstanding;
+
+        this.interestOriginalDue = null;
+        this.interestDue = null;
+        this.interestPaid = null;
+        this.interestWaived = null;
+        this.interestWrittenOff = null;
+        this.interestOutstanding = null;
+
+        this.feeChargesDue = null;
+        this.feeChargesPaid = null;
+        this.feeChargesWaived = null;
+        this.feeChargesWrittenOff = null;
+        this.feeChargesOutstanding = null;
+
+        this.penaltyChargesDue = null;
+        this.penaltyChargesPaid = null;
+        this.penaltyChargesWaived = null;
+        this.penaltyChargesWrittenOff = null;
+        this.penaltyChargesOutstanding = null;
+
+        this.totalOriginalDueForPeriod = principalDue;
+        this.totalDueForPeriod = principalDue;
+        this.totalPaidForPeriod = BigDecimal.ZERO;
+        this.totalPaidInAdvanceForPeriod = null;
+        this.totalPaidLateForPeriod = null;
+        this.totalWaivedForPeriod = null;
+        this.totalWrittenOffForPeriod = null;
+        this.totalOutstandingForPeriod = totalDueForPeriod;
+        this.totalActualCostOfLoanForPeriod = null;
+        this.totalInstallmentAmountForPeriod = totalDueForPeriod;
 
         if (dueDate.isBefore(DateUtils.getBusinessLocalDate())) {
             this.totalOverdue = this.totalOutstandingForPeriod;

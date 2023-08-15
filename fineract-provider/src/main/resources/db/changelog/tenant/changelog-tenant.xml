@@ -142,4 +142,5 @@
     <include file="parts/0120_transaction_summary_with_asset_owner_report_typo_fix.xml" relativeToChangelogFile="true" />
     <include file="parts/0121_transaction_summary_with_asset_owner_report_typo_fix_2.xml" relativeToChangelogFile="true" />
     <include file="parts/0122_add_batch_job_execution_params_index.xml" relativeToChangelogFile="true" />
+    <include file="parts/0123_add_is_down_payment_to_repayment_schedule.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

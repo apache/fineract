@@ -211,6 +211,9 @@ public class LoanTransactionChargebackTest {
             final Long transactionId = loanIdTransactionsResponse.getResourceId();
             reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("666.67"));
 
+            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            assertNotNull(getLoansLoanIdResponse);
+
             final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, amount.toString(),
                     0, responseSpec);
             reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("666.67"));
