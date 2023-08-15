@@ -1264,13 +1264,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         this.repaymentScheduleInstallments.clear();
         for (final LoanScheduleModelPeriod scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
 
-            if (scheduledLoanInstallment.isRepaymentPeriod()) {
+            if (scheduledLoanInstallment.isRepaymentPeriod() || scheduledLoanInstallment.isDownPaymentPeriod()) {
                 final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(this,
                         scheduledLoanInstallment.periodNumber(), scheduledLoanInstallment.periodFromDate(),
                         scheduledLoanInstallment.periodDueDate(), scheduledLoanInstallment.principalDue(),
                         scheduledLoanInstallment.interestDue(), scheduledLoanInstallment.feeChargesDue(),
                         scheduledLoanInstallment.penaltyChargesDue(), scheduledLoanInstallment.isRecalculatedInterestComponent(),
-                        scheduledLoanInstallment.getLoanCompoundingDetails());
+                        scheduledLoanInstallment.getLoanCompoundingDetails(), scheduledLoanInstallment.rescheduleInterestPortion(),
+                        scheduledLoanInstallment.isDownPaymentPeriod());
                 addLoanRepaymentScheduleInstallment(installment);
             }
         }
@@ -2477,7 +2478,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public ChangedTransactionDetail disburse(final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO, final PaymentDetail paymentDetail) {
+            final ScheduleGeneratorDTO scheduleGeneratorDTO, final PaymentDetail paymentDetail, boolean downPaymentEnabled) {
 
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
 
@@ -2495,7 +2496,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         validateDisbursementDateIsOnHoliday(holidayDetailDTO.isAllowTransactionsOnHoliday(), holidayDetailDTO.getHolidays());
 
         regenerateRepaymentScheduleWithInterestRecalculationIfNeeded(this.repaymentScheduleDetail().isInterestRecalculationEnabled(),
-                isDisbursementMissed(), scheduleGeneratorDTO);
+                isDisbursementMissed(), scheduleGeneratorDTO, downPaymentEnabled);
 
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
@@ -2527,14 +2528,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private void regenerateRepaymentScheduleWithInterestRecalculationIfNeeded(boolean interestRecalculationEnabledParam,
-            boolean disbursementMissedParam, ScheduleGeneratorDTO scheduleGeneratorDTO) {
+            boolean disbursementMissedParam, ScheduleGeneratorDTO scheduleGeneratorDTO, final boolean downPaymentEnabled) {
 
         LocalDate firstInstallmentDueDate = fetchRepaymentScheduleInstallment(1).getDueDate();
-        if (interestRecalculationEnabledParam
-                && (firstInstallmentDueDate.isBefore(DateUtils.getBusinessLocalDate()) || disbursementMissedParam)) {
+        if ((interestRecalculationEnabledParam
+                && (firstInstallmentDueDate.isBefore(DateUtils.getBusinessLocalDate()) || disbursementMissedParam))) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO);
+        } else if (downPaymentEnabled) {
+            LoanScheduleDTO loanSchedule = getRecalculatedSchedule(scheduleGeneratorDTO);
+            updateLoanSchedule(loanSchedule.getInstallments());
         }
-
     }
 
     private List<LoanDisbursementDetails> getDisbursedLoanDisbursementDetails() {
@@ -2965,7 +2968,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 externalId = ExternalId.generate();
             }
             Money downPaymentMoney = Money.of(getCurrency(),
-                    MathUtil.percentageOf(disbursedAmount, disbursedAmountPercentageForDownPayment, 9));
+                    MathUtil.percentageOf(disbursedAmount, disbursedAmountPercentageForDownPayment, 19));
             LoanTransaction downPaymentTransaction = LoanTransaction.downPayment(getOffice(), downPaymentMoney, null, disbursedOn,
                     externalId);
             /*
@@ -5553,7 +5556,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void regenerateRepaymentScheduleWithInterestRecalculation(final ScheduleGeneratorDTO generatorDTO) {
-
         LocalDate lastTransactionDate = getLastUserTransactionDate();
         final LoanScheduleDTO loanSchedule = getRecalculatedSchedule(generatorDTO);
         if (loanSchedule == null) {
@@ -5788,15 +5790,15 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private LoanScheduleDTO getRecalculatedSchedule(final ScheduleGeneratorDTO generatorDTO) {
-
-        if (!this.repaymentScheduleDetail().isInterestRecalculationEnabled() || isNpa || isChargedOff()) {
+        if (!this.repaymentScheduleDetail().isEnableDownPayment()
+                && (!this.repaymentScheduleDetail().isInterestRecalculationEnabled() || isNpa || isChargedOff())) {
             return null;
         }
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
         final LoanScheduleGenerator loanScheduleGenerator = generatorDTO.getLoanScheduleFactory().create(interestMethod);
 
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-        final MathContext mc = new MathContext(8, roundingMode);
+        final MathContext mc = new MathContext(19, roundingMode);
 
         final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(generatorDTO);
 

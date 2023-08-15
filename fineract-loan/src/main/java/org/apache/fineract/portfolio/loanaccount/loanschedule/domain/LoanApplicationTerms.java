@@ -1737,4 +1737,12 @@ public final class LoanApplicationTerms {
     public void setNewScheduledDueDateStart(LocalDate newScheduledDueDateStart) {
         this.newScheduledDueDateStart = newScheduledDueDateStart;
     }
+
+    public boolean isDownPaymentEnabled() {
+        return isDownPaymentEnabled;
+    }
+
+    public BigDecimal getDisbursedAmountPercentageForDownPayment() {
+        return disbursedAmountPercentageForDownPayment;
+    }
 }

@@ -31,6 +31,8 @@ public interface LoanScheduleModelPeriod {
 
     boolean isRepaymentPeriod();
 
+    boolean isDownPaymentPeriod();
+
     Integer periodNumber();
 
     LocalDate periodFromDate();

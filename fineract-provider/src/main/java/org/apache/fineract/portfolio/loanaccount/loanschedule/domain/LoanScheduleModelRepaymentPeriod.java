@@ -81,6 +81,11 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     }
 
     @Override
+    public boolean isDownPaymentPeriod() {
+        return false;
+    }
+
+    @Override
     public Integer periodNumber() {
         return this.periodNumber;
     }
