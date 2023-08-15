@@ -86,7 +86,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr);
+        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1");
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -132,7 +132,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr);
+        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1");
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -179,7 +179,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr);
+        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1");
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -225,7 +225,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr);
+        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1");
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -276,7 +276,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr);
+        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1");
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -304,6 +304,67 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
         assertEquals(expectedRepaymentAmount, loanDetails.getSummary().getTotalOutstanding());
     }
 
+    @Test
+    public void loanRepaymentScheduleWithMultiDisbursementProductOneDisbursementAndThreeRepaymentsAndDownPayment() {
+        String loanExternalIdStr = UUID.randomUUID().toString();
+
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+                delinquencyBucketId);
+
+        Boolean enableDownPayment = true;
+        BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
+        Boolean enableAutoRepaymentForDownPayment = true;
+
+        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
+                "25", enableAutoRepaymentForDownPayment, true);
+
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        assertNotNull(getLoanProductsProductResponse);
+        assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
+        assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
+                .compareTo(disbursedAmountPercentageForDownPayment));
+        assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
+
+        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "4");
+
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+
+        assertNotNull(loanDetails);
+        assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
+        assertEquals(0, loanDetails.getDisbursedAmountPercentageForDownPayment().compareTo(disbursedAmountPercentageForDownPayment));
+        assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+        Double expectedDownPaymentAmount = 250.00;
+        LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
+        Double expectedRepaymentAmount = 250.00;
+        LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, 10, 3);
+        Double outstandingBalanceOnFirstRepayment = 500.00;
+        LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, 11, 3);
+        Double outstandingBalanceOnSecondRepayment = 250.00;
+        LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, 12, 3);
+        Double outstandingBalanceOnThirdRepayment = 0.00;
+
+        assertTrue(periods.stream() //
+                .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalDueForPeriod()) //
+                        && expectedDownPaymentDueDate.equals(period.getDueDate())));
+        assertTrue(periods.stream()
+                .anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+                        && expectedFirstRepaymentDueDate.equals(period.getDueDate())
+                        && outstandingBalanceOnFirstRepayment.equals(period.getPrincipalLoanBalanceOutstanding())));
+        assertTrue(periods.stream()
+                .anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+                        && expectedSecondRepaymentDueDate.equals(period.getDueDate())
+                        && outstandingBalanceOnSecondRepayment.equals(period.getPrincipalLoanBalanceOutstanding())));
+        assertTrue(periods.stream()
+                .anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+                        && expectedThirdRepaymentDueDate.equals(period.getDueDate())
+                        && outstandingBalanceOnThirdRepayment.equals(period.getPrincipalLoanBalanceOutstanding())));
+    }
+
     private Integer createLoanProductWithDownPaymentConfiguration(final LoanTransactionHelper loanTransactionHelper,
             final Integer delinquencyBucketId, Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment,
             Boolean enableAutoRepaymentForDownPayment, boolean multiDisbursement) {
@@ -325,10 +386,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
         return loanProductId;
     }
 
-    private Integer createApproveAndDisburseLoanAccount(final Integer clientID, final Long loanProductID, final String externalId) {
+    private Integer createApproveAndDisburseLoanAccount(final Integer clientID, final Long loanProductID, final String externalId,
+            final String numberOfRepayments) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
+        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency(numberOfRepayments)
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments).withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
@@ -336,14 +398,15 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
 
         final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
         loanTransactionHelper.approveLoan("02 September 2022", "1000", loanId, null);
-        loanTransactionHelper.disburseLoanWithTransactionAmount("03 September 2022", loanId, "1000");
+        HashMap hashMap = loanTransactionHelper.disburseLoanWithTransactionAmount("03 September 2022", loanId, "1000");
         return loanId;
     }
 
-    private Integer createApproveAndDisburseTwiceLoanAccount(final Integer clientID, final Long loanProductID, final String externalId) {
+    private Integer createApproveAndDisburseTwiceLoanAccount(final Integer clientID, final Long loanProductID, final String externalId,
+            final String numberOfRepayments) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments).withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("04 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
