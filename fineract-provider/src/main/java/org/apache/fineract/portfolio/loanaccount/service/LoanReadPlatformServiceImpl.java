@@ -31,11 +31,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -1191,6 +1193,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             totalOutstanding = totalOutstanding.plus(disbursementPeriod.getFeeChargesDue()).minus(disbursementPeriod.getFeeChargesPaid());
 
             Integer loanTermInDays = 0;
+            Set<Long> disbursementPeriodIds = new HashSet<>();
             while (rs.next()) {
 
                 final Long loanId = rs.getLong("loanId");
@@ -1203,7 +1206,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 BigDecimal principal = BigDecimal.ZERO;
                 if (!isAdditional) {
                     for (final DisbursementData data : disbursementData) {
-                        if (fromDate.equals(this.disbursement.disbursementDate()) && data.disbursementDate().equals(fromDate)) {
+                        if (fromDate.equals(this.disbursement.disbursementDate()) && data.disbursementDate().equals(fromDate)
+                                && !disbursementPeriodIds.contains(data.getId())) {
                             principal = principal.add(data.getPrincipal());
                             LoanSchedulePeriodData periodData = null;
                             if (data.getChargeAmount() == null) {
@@ -1216,6 +1220,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                             }
                             periods.add(periodData);
                             this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.getPrincipal());
+                            disbursementPeriodIds.add(data.getId());
                         } else if (data.isDueForDisbursement(fromDate, dueDate)) {
                             if (!excludePastUndisbursed || data.isDisbursed()
                                     || !data.disbursementDate().isBefore(DateUtils.getBusinessLocalDate())) {
