@@ -80,6 +80,7 @@ public class LoanTransactionsApiResource {
 
     public static final String CHARGE_OFF_COMMAND_VALUE = "charge-off";
     public static final String UNDO_CHARGE_OFF_COMMAND_VALUE = "undo-charge-off";
+    public static final String DOWN_PAYMENT = "downPayment";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
@@ -108,7 +109,7 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
             + "loans/1/transactions/template?command=foreclosure" + "\n"
             + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)" + "\n"
-            + "loans/1/transactions/template?command=charge-off" + "\n")
+            + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(@PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
@@ -137,7 +138,7 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
             + "loans/1/transactions/template?command=foreclosure" + "\n"
             + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)" + "\n"
-            + "loans/1/transactions/template?command=charge-off" + "\n")
+            + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(
@@ -235,7 +236,8 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions?command=refundByCash" + " | Make a Refund of an Active Loan by Cash | \n"
             + "loans/1/transactions?command=foreclosure" + " | Foreclosure of an Active Loan | \n"
             + "loans/1/transactions?command=creditBalanceRefund" + " | Credit Balance Refund" + " |  \n"
-            + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=charge-off" + " | Charge-off Loan" + " |  \n")
+            + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=charge-off" + " | Charge-off Loan" + " |  \n"
+            + "loans/1/transactions?command=downPayment" + " | Down Payment" + " |  \n")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsResponse.class))) })
@@ -269,6 +271,7 @@ public class LoanTransactionsApiResource {
             + " | Foreclosure of an Active Loan | \n"
             + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=creditBalanceRefund" + " | Credit Balance Refund"
             + " |  \n" + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=charge-off" + " | Charge-off Loan"
+            + " |  \n" + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?command=downPayment" + " | Down Payment"
             + " |  \n")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     @ApiResponses({
@@ -472,6 +475,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.chargeOff(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, UNDO_CHARGE_OFF_COMMAND_VALUE)) {
             commandRequest = builder.undoChargeOff(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, DOWN_PAYMENT)) {
+            commandRequest = builder.downPayment(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {
@@ -547,6 +552,8 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveCreditBalanceRefundTemplate(resolvedLoanId);
         } else if (CommandParameterUtil.is(commandParam, CHARGE_OFF_COMMAND_VALUE)) {
             transactionData = this.loanReadPlatformService.retrieveLoanChargeOffTemplate(resolvedLoanId);
+        } else if (CommandParameterUtil.is(commandParam, DOWN_PAYMENT)) {
+            transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(resolvedLoanId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
