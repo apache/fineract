@@ -20,11 +20,16 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-  <!-- Sequence is starting from 1000 to make it easier to move existing liquibase changesets here -->
-  <include relativeToChangelogFile="true" file="parts/1001_add_audit_fields_to_loan_charge.xml"/>
-  <include relativeToChangelogFile="true" file="parts/1002_add_payment_allocation_rule.xml"/>
-  <include relativeToChangelogFile="true" file="parts/1003_add_loan_product_auto_repayment_down_payment_configuration.xml"/>
-  <include relativeToChangelogFile="true" file="parts/1004_add_external_event_configuration_for_down_payment_transaction_event.xml"/>
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1">
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="LoanTransactionDownPaymentPreBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="LoanTransactionDownPaymentPostBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

@@ -480,6 +480,16 @@ public class ExternalEventConfigurationHelper {
         loanAccountSnapshotBusinessEvent.put("enabled", false);
         defaults.add(loanAccountSnapshotBusinessEvent);
 
+        Map<String, Object> loanTransactionDownPaymentPreBusinessEvent = new HashMap<>();
+        loanTransactionDownPaymentPreBusinessEvent.put("type", "LoanTransactionDownPaymentPreBusinessEvent");
+        loanTransactionDownPaymentPreBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionDownPaymentPreBusinessEvent);
+
+        Map<String, Object> loanTransactionDownPaymentPostBusinessEvent = new HashMap<>();
+        loanTransactionDownPaymentPostBusinessEvent.put("type", "LoanTransactionDownPaymentPostBusinessEvent");
+        loanTransactionDownPaymentPostBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionDownPaymentPostBusinessEvent);
+
         return defaults;
 
     }

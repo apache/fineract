@@ -3646,4 +3646,12 @@ public class CommandWrapperBuilder {
         this.href = "/external-asset-owners/transfers/" + id;
         return this;
     }
+
+    public CommandWrapperBuilder downPayment(final Long loanId) {
+        this.actionName = "DOWNPAYMENT";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=downPayment";
+        return this;
+    }
 }

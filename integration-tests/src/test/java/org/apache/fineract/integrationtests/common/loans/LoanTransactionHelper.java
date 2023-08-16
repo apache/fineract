@@ -1897,4 +1897,12 @@ public class LoanTransactionHelper extends IntegrationTest {
     public PutLoanProductsProductIdResponse updateLoanProduct(Long id, PutLoanProductsProductIdRequest requestModifyLoan) {
         return ok(fineract().loanProducts.updateLoanProduct(id, requestModifyLoan));
     }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanDownPayment(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "downPayment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanDownPayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "downPayment"));
+    }
 }
