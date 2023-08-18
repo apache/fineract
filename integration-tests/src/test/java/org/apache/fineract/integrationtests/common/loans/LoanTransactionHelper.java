@@ -46,6 +46,7 @@ import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdRespons
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
@@ -128,11 +129,17 @@ public class LoanTransactionHelper extends IntegrationTest {
         return GSON.fromJson(response, GetLoanProductsProductIdResponse.class);
     }
 
+    public GetLoanProductsResponse[] listAllLoanProducts() {
+        final String GET_LOANPRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_LOANPRODUCT_URL);
+        return GSON.fromJson(response, GetLoanProductsResponse[].class);
+    }
+
     public Integer getLoanProductId(final String loanProductJSON) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON, "resourceId");
     }
 
-    public Object getLoanProductError(final String loanProductJSON, final String jsonAttributeToGetBack) {
+    public <T> T getLoanProductError(final String loanProductJSON, final String jsonAttributeToGetBack) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON,
                 jsonAttributeToGetBack);
     }

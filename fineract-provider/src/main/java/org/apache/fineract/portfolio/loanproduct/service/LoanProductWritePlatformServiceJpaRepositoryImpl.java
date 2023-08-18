@@ -50,7 +50,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTra
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsJsonParser;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductCannotBeModifiedDueToNonClosedLoansException;
@@ -85,6 +87,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final BusinessEventNotifierService businessEventNotifierService;
     private final DelinquencyBucketRepository delinquencyBucketRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
+    private final AdvancedPaymentAllocationsJsonParser advancedPaymentJsonParser;
+    private final LoanProductPaymentAllocationRuleMerger loanProductPaymentAllocationRuleMerger = new LoanProductPaymentAllocationRuleMerger();
 
     @Transactional
     @Override
@@ -104,14 +108,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
             final List<Charge> charges = assembleListOfProductCharges(command, currencyCode);
             final List<Rate> rates = assembleListOfProductRates(command);
-
+            final List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = advancedPaymentJsonParser
+                    .assembleLoanProductPaymentAllocationRules(command, loanTransactionProcessingStrategyCode);
             FloatingRate floatingRate = null;
             if (command.parameterExists("floatingRatesId")) {
                 floatingRate = this.floatingRateRepository
                         .findOneWithNotFoundDetection(command.longValueOfParameterNamed("floatingRatesId"));
             }
             final LoanProduct loanProduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategyCode, charges, command,
-                    this.aprCalculator, floatingRate, rates);
+                    this.aprCalculator, floatingRate, rates, loanProductPaymentAllocationRules);
             loanProduct.updateLoanProductInRelatedClasses();
             loanProduct.setTransactionProcessingStrategyName(
                     loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(loanTransactionProcessingStrategyCode).getName());
@@ -209,6 +214,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 final boolean updated = product.update(productCharges);
                 if (!updated) {
                     changes.remove("charges");
+                }
+            }
+
+            if (changes.containsKey("paymentAllocation")) {
+                final List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = advancedPaymentJsonParser
+                        .assembleLoanProductPaymentAllocationRules(command, product.getTransactionProcessingStrategyCode());
+                loanProductPaymentAllocationRules.forEach(lppar -> lppar.setLoanProduct(product));
+                final boolean updated = loanProductPaymentAllocationRuleMerger.updateProductPaymentAllocationRules(product,
+                        loanProductPaymentAllocationRules);
+                if (!updated) {
+                    changes.remove("paymentAllocation");
                 }
             }
 

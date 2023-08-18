@@ -113,6 +113,7 @@ final class LoanProductsApiResourceSwagger {
         public Integer interestCalculationPeriodType;
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
+        public List<AdvancedPaymentData> paymentAllocation;
         @Schema(example = "false")
         public Boolean isLinkedToFloatingInterestRates;
         @Schema(example = "false")
@@ -1180,6 +1181,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "Mifos style")
         public String transactionProcessingStrategyName;
         @Schema(example = "[]")
+        public List<AdvancedPaymentData> paymentAllocation;
+        @Schema(example = "[]")
         public List<Integer> charges;
         public Set<GetLoanProductsPrincipalVariationsForBorrowerCycle> productsPrincipalVariationsForBorrowerCycle;
         @Schema(example = "[]")
@@ -1294,6 +1297,7 @@ final class LoanProductsApiResourceSwagger {
         public Integer interestCalculationPeriodType;
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
+        public List<AdvancedPaymentData> paymentAllocation;
         @Schema(example = "false")
         public Boolean isLinkedToFloatingInterestRates;
         @Schema(example = "false")
@@ -1483,6 +1487,26 @@ final class LoanProductsApiResourceSwagger {
             public boolean active;
         }
 
+    }
+
+    public static final class AdvancedPaymentData {
+
+        @Schema(example = "DEFAULT")
+        public String transactionType;
+        @Schema(example = "[]")
+        public List<PaymentAllocationOrder> paymentAllocationOrder;
+
+        @Schema(example = "NEXT_INSTALLMENT")
+        public String futureInstallmentAllocationRule;
+    }
+
+    public static class PaymentAllocationOrder {
+
+        @Schema(example = "DUE_PAST_PENALTY")
+        public String paymentAllocationRule;
+
+        @Schema(example = "1")
+        public Integer order;
     }
 
     @Schema(description = "PutLoanProductsProductIdResponse")

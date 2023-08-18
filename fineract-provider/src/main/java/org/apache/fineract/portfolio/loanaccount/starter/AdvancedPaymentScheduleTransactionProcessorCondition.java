@@ -16,24 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.portfolio.loanaccount.starter;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-import java.util.List;
-import org.apache.fineract.infrastructure.core.data.GenericEnumListConverter;
+import org.apache.fineract.infrastructure.core.condition.PropertiesCondition;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 
-@Converter(autoApply = true)
-public class AllocationTypeListConverter extends GenericEnumListConverter<PaymentAllocationType>
-        implements AttributeConverter<List<PaymentAllocationType>, String> {
+public class AdvancedPaymentScheduleTransactionProcessorCondition extends PropertiesCondition {
 
     @Override
-    public boolean isUnique() {
-        return true;
+    protected boolean matches(FineractProperties properties) {
+        return properties.getLoan().getTransactionProcessor().getAdvancedPaymentStrategy().isEnabled();
     }
-
-    public AllocationTypeListConverter() {
-        super(PaymentAllocationType.class);
-    }
-
 }

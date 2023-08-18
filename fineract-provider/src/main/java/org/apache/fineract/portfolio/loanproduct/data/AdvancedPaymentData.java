@@ -16,24 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.portfolio.loanproduct.data;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import java.io.Serializable;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.data.GenericEnumListConverter;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@Converter(autoApply = true)
-public class AllocationTypeListConverter extends GenericEnumListConverter<PaymentAllocationType>
-        implements AttributeConverter<List<PaymentAllocationType>, String> {
+@Getter
+@AllArgsConstructor
+public class AdvancedPaymentData implements Serializable {
 
-    @Override
-    public boolean isUnique() {
-        return true;
+    private final String transactionType;
+    private final String futureInstallmentAllocationRule;
+    private final List<PaymentAllocationOrder> paymentAllocationOrder;
+
+    @Getter
+    @AllArgsConstructor
+    public static class PaymentAllocationOrder implements Serializable {
+
+        private final String paymentAllocationRule;
+        private final Integer order;
     }
-
-    public AllocationTypeListConverter() {
-        super(PaymentAllocationType.class);
-    }
-
 }

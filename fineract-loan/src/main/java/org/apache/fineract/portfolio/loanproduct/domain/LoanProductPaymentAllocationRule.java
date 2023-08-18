@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.domain;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -39,7 +39,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Getter
 @Setter
 @Entity
-@Table(name = "m_loan_product_payment_allocation", uniqueConstraints = {
+@Table(name = "m_loan_product_payment_allocation_rule", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "loan_product_id", "transaction_type" }, name = "uq_m_loan_product_payment_allocation_rule") })
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -53,7 +53,7 @@ public class LoanProductPaymentAllocationRule extends AbstractAuditableWithUTCDa
     @Enumerated(EnumType.STRING)
     private PaymentAllocationTransactionType transactionType;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @Convert(converter = AllocationTypeListConverter.class)
     @Column(name = "allocation_types", nullable = false)
     private List<PaymentAllocationType> allocationTypes;
 

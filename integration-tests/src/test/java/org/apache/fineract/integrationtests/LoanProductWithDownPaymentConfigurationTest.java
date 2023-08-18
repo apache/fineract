@@ -140,7 +140,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "0", false)
                 .build(null, delinquencyBucketId);
 
-        ArrayList<HashMap> loanProductErrorData = (ArrayList<HashMap>) validationErrorHelper
+        ArrayList<HashMap<String, Object>> loanProductErrorData = validationErrorHelper
                 .getLoanProductError(Utils.convertToJson(loanProductMap), CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.is.less.than.min",
@@ -150,7 +150,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
         final HashMap<String, Object> loanProductMap_1 = new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "101", false)
                 .build(null, delinquencyBucketId);
 
-        loanProductErrorData = (ArrayList<HashMap>) validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_1),
+        loanProductErrorData = validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_1),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.is.greater.than.max",
@@ -160,7 +160,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
         final HashMap<String, Object> loanProductMap_2 = new LoanProductTestBuilder()
                 .withEnableDownPayment(enableDownPayment, "12.55555555", false).build(null, delinquencyBucketId);
 
-        loanProductErrorData = (ArrayList<HashMap>) validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_2),
+        loanProductErrorData = validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_2),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.scale.is.greater.than.6",
@@ -170,7 +170,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
         final HashMap<String, Object> loanProductMap_3 = new LoanProductTestBuilder().withEnableDownPayment(false, "12.5", false)
                 .build(null, delinquencyBucketId);
 
-        loanProductErrorData = (ArrayList<HashMap>) validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_3),
+        loanProductErrorData = validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_3),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.supported.only.for.enable.down.payment.true",
@@ -180,7 +180,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
         final HashMap<String, Object> loanProductMap_4 = new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, null, false)
                 .build(null, delinquencyBucketId);
 
-        loanProductErrorData = (ArrayList<HashMap>) validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_4),
+        loanProductErrorData = validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_4),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.required.for.enable.down.payment.true",
@@ -190,7 +190,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
         final HashMap<String, Object> loanProductMap_5 = new LoanProductTestBuilder().withEnableDownPayment(false, null, true).build(null,
                 delinquencyBucketId);
 
-        loanProductErrorData = (ArrayList<HashMap>) validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_5),
+        loanProductErrorData = validationErrorHelper.getLoanProductError(Utils.convertToJson(loanProductMap_5),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.enableAutoRepaymentForDownPayment.supported.only.for.enable.down.payment.true",
