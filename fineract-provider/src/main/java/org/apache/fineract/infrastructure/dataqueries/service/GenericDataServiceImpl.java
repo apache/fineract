@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 import static java.lang.String.format;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.DATE;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.DATETIME;
+import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.TIMESTAMP;
 import static org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData.DisplayType.CODELOOKUP;
 import static org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData.DisplayType.DECIMAL;
 import static org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData.DisplayType.INTEGER;
@@ -152,7 +153,7 @@ public class GenericDataServiceImpl implements GenericDataService {
                 if (colType == DATE) {
                     Date tmpDate = (Date) rs.getObject(columnName);
                     columnValues.add(tmpDate == null ? null : tmpDate.toLocalDate());
-                } else if (colType == DATETIME) {
+                } else if (colType == DATETIME || colType == TIMESTAMP) {
                     Object tmpDate = rs.getObject(columnName);
                     columnValues.add(
                             tmpDate == null ? null : (tmpDate instanceof Timestamp ? ((Timestamp) tmpDate).toLocalDateTime() : tmpDate));

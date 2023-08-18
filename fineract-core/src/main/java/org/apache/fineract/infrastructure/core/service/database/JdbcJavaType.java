@@ -57,7 +57,7 @@ public enum JdbcJavaType {
     DOUBLE(JavaType.DOUBLE, new DialectType(JDBCType.DOUBLE, null, true, true, "DOUBLE PRECISION", "REAL"),
             new DialectType(JDBCType.DOUBLE, "DOUBLE PRECISION", "FLOAT8")), //
     NUMERIC(JavaType.BIGDECIMAL, new DialectType(JDBCType.NUMERIC, true, true), new DialectType(JDBCType.NUMERIC, true, true)), //
-    DECIMAL(JavaType.BIGDECIMAL, new DialectType(JDBCType.DECIMAL, "DECIMAL", true, true, "DEC", "FIXED"),
+    DECIMAL(JavaType.BIGDECIMAL, new DialectType(JDBCType.DECIMAL, null, true, true, "DEC", "FIXED"),
             new DialectType(JDBCType.DECIMAL, true, true)), //
     SERIAL(JavaType.INT, new DialectType(JDBCType.INTEGER, "{type} AUTO_INCREMENT", true, false),
             new DialectType(JDBCType.INTEGER, "SERIAL", "SERIAL4")), //
@@ -79,8 +79,9 @@ public enum JdbcJavaType {
     TIME(JavaType.LOCAL_TIME, new DialectType(JDBCType.TIME), new DialectType(JDBCType.TIME, null, "TIME WITHOUT TIME ZONE")), //
     TIME_WITH_TIMEZONE(JavaType.OFFSET_TIME, new DialectType(JDBCType.TIME_WITH_TIMEZONE, "TIME"),
             new DialectType(JDBCType.TIME_WITH_TIMEZONE, null, "TIME WITH TIME ZONE")), //
-    DATETIME(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP, "DATETIME", "TIMESTAMP"),
+    TIMESTAMP(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP),
             new DialectType(JDBCType.TIMESTAMP, null, "TIMESTAMP WITHOUT TIME ZONE")), //
+    DATETIME(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP, "DATETIME"), new DialectType(JDBCType.TIMESTAMP)), //
     TIMESTAMP_WITH_TIMEZONE(JavaType.OFFSET_DATETIME, new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, null, "DATETIME"),
             new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, null, "TIMESTAMP WITH TIME ZONE", "TIMESTAMPTZ")), //
     INTERVAL(JavaType.TIME, new DialectType(JDBCType.TIME), new DialectType(JDBCType.TIME, "INTERVAL")), //

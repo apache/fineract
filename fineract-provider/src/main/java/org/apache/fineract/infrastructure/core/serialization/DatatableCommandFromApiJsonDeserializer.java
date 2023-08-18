@@ -24,6 +24,7 @@ import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaT
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.DECIMAL;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.INTEGER;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.TEXT;
+import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.TIMESTAMP;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.VARCHAR;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_AFTER;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_CODE;
@@ -332,7 +333,8 @@ public class DatatableCommandFromApiJsonDeserializer {
             case API_FIELD_TYPE_BOOLEAN -> BOOLEAN;
             case API_FIELD_TYPE_DECIMAL -> DECIMAL;
             case API_FIELD_TYPE_DATE -> DATE;
-            case API_FIELD_TYPE_DATETIME, API_FIELD_TYPE_TIMESTAMP -> DATETIME;
+            case API_FIELD_TYPE_DATETIME -> DATETIME;
+            case API_FIELD_TYPE_TIMESTAMP -> TIMESTAMP;
             case API_FIELD_TYPE_TEXT -> TEXT;
             default -> throw new PlatformDataIntegrityException("error.msg.datatable.column.type.invalid",
                     "Column type " + apiType + " is not supported.");
