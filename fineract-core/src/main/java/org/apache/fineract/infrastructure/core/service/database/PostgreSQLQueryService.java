@@ -54,8 +54,10 @@ public class PostgreSQLQueryService implements DatabaseQueryService {
     @Override
     public SqlRowSet getTableColumns(DataSource dataSource, String tableName) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        String sql = "SELECT attname AS COLUMN_NAME, not attnotnull AS IS_NULLABLE, atttypid::regtype  AS DATATYPE, attlen AS CHARACTER_MAXIMUM_LENGTH, attnum = 1 AS COLUMN_KEY FROM pg_attribute WHERE attrelid = '\""
-                + tableName + "\"'::regclass AND attnum > 0 AND NOT attisdropped ORDER BY attnum";
+        String sql = "SELECT column_name, is_nullable, data_type,"
+                + " coalesce(character_maximum_length, numeric_precision, datetime_precision) AS max_length, ordinal_position = 1 AS column_key"
+                + " FROM information_schema.columns WHERE table_catalog = current_catalog AND table_schema = current_schema AND table_name = '"
+                + tableName + "' ORDER BY ordinal_position";
         final SqlRowSet columnDefinitions = jdbcTemplate.queryForRowSet(sql); // NOSONAR
         if (columnDefinitions.next()) {
             return columnDefinitions;

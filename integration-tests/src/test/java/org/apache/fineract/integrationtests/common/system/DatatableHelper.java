@@ -231,11 +231,12 @@ public class DatatableHelper extends IntegrationTest {
 
     public static List<HashMap<String, Object>> addDatatableColumns(List<HashMap<String, Object>> datatableColumnsList, String columnName,
             String columnType, boolean isMandatory, Integer length, String codeName) {
-
         final HashMap<String, Object> datatableColumnMap = new HashMap<>();
 
         datatableColumnMap.put("name", columnName);
-        datatableColumnMap.put("type", columnType);
+        if (columnType != null) {
+            datatableColumnMap.put("type", columnType);
+        }
         datatableColumnMap.put("mandatory", isMandatory);
         if (length != null) {
             datatableColumnMap.put("length", length);
