@@ -37,14 +37,17 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
 import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
 import org.apache.fineract.client.models.PutDataTablesResponse;
+import org.apache.fineract.client.models.ResultsetColumnHeaderData;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -311,7 +314,6 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
     @Test
     public void validateCreateReadDeleteDatatableWithCaseSensitive() throws ParseException {
-
         // creating datatable for client entity
         final HashMap<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
@@ -546,7 +548,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         final boolean genericResultSet = true;
 
         HashMap<String, Object> columnMap = new HashMap<>();
-        List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+        ArrayList<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
         columnMap.put("datatableName", datatableName);
         columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
         columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
@@ -562,10 +564,10 @@ public class DatatableIntegrationTest extends IntegrationTest {
         DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
 
         // Insert first values
-        final String value = Utils.randomStringGenerator("Q", 8);
+        final String randomString = Utils.randomStringGenerator("Q", 8);
         HashMap<String, Object> datatableEntryMap = new HashMap<>();
         datatableEntryMap.put("itsANumber", randomNumber);
-        datatableEntryMap.put("itsAString", value);
+        datatableEntryMap.put("itsAString", randomString);
 
         datatableEntryMap.put("locale", "en");
         datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
@@ -578,12 +580,14 @@ public class DatatableIntegrationTest extends IntegrationTest {
         // Read the Datatable entry generated with genericResultSet in true (default)
         HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, clientId, genericResultSet, null, "");
         assertNotNull(items);
-        assertEquals(1, ((List) items.get("data")).size());
-        LOG.info("Record created at {}", ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(3));
-        LOG.info("Record updated at {}", ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(4));
+        List data = (List) items.get("data");
+        assertEquals(1, data.size());
+        List records = (List) ((Map) data.get(0)).get("row");
+        LOG.info("Record created at {}", records.get(3));
+        LOG.info("Record updated at {}", records.get(4));
 
-        assertEquals(clientId, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(0));
-        assertEquals(value, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(2));
+        assertEquals(clientId, records.get(0));
+        assertEquals(randomString, records.get(2));
 
         // Update DataTable
         columnMap = new HashMap<>();
@@ -600,7 +604,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         // Update DataTable Entry after Update DataTable schema
         datatableEntryMap = new HashMap<>();
-        final String textValue = Utils.randomStringGenerator(value, 120);
+        final String textValue = Utils.randomStringGenerator(randomString, 120);
         datatableEntryMap.put("itsAText", textValue);
         datatableEntryMap.put("locale", "en");
         datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
@@ -615,13 +619,41 @@ public class DatatableIntegrationTest extends IntegrationTest {
         // Read the Datatable entry generated with genericResultSet in true (default)
         items = this.datatableHelper.readDatatableEntry(datatableName, clientId, genericResultSet, null, "");
         assertNotNull(items);
-        assertEquals(1, ((List) items.get("data")).size());
-        LOG.info("Record created at {}", ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(3));
-        LOG.info("Record updated at {}", ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(4));
+        data = (List) items.get("data");
+        assertEquals(1, data.size());
 
-        assertEquals(clientId, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(0));
-        assertEquals(value, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(2));
-        assertEquals(textValue, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(5));
+        records = (List) ((Map) data.get(0)).get("row");
+        LOG.info("Record created at {}", records.get(3));
+        LOG.info("Record updated at {}", records.get(4));
+
+        assertEquals(clientId, records.get(0));
+        assertEquals(randomString, records.get(2));
+        assertEquals(textValue, records.get(5));
+
+        Integer resourceId = this.datatableHelper.deleteDatatableEntries(datatableName, clientId, "resourceId");
+        assertEquals(clientId, resourceId, "ERROR IN DELETING THE DATATABLE ENTRIES");
+
+        // Update - update, delete DataTable columns
+        columnMap = new HashMap<>();
+        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+        columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
+        List<Map<String, Object>> dropColumnsList = Collections.singletonList(Collections.singletonMap("name", "itsANumber"));
+        columnMap.put("dropColumns", dropColumnsList);
+        ArrayList<HashMap<String, Object>> changeColumnsList = new ArrayList<>();
+        DatatableHelper.addDatatableColumns(changeColumnsList, "itsAString", null, false, 100, null);
+        columnMap.put("changeColumns", changeColumnsList);
+        datatabelRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("map to update : {}", datatabelRequestJsonString);
+        datatableUpdateResponse = this.datatableHelper.updateDatatable(datatableName, datatabelRequestJsonString);
+        assertNotNull(datatableUpdateResponse);
+        assertEquals(datatableName, datatableUpdateResponse.getResourceIdentifier());
+
+        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
+        List<ResultsetColumnHeaderData> columnHeaders = dataTable.getColumnHeaderData();
+        assertEquals(5, columnHeaders.size());
+        ResultsetColumnHeaderData stringColumn = columnHeaders.get(1);
+        assertEquals("itsAString", stringColumn.getColumnName());
+        assertEquals(100, stringColumn.getColumnLength());
     }
 
     @Test

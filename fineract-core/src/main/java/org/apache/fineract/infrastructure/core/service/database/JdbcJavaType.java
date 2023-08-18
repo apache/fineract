@@ -78,12 +78,12 @@ public enum JdbcJavaType {
     // seconds field, but by default, there is no explicit bound on precision
     TIME(JavaType.LOCAL_TIME, new DialectType(JDBCType.TIME), new DialectType(JDBCType.TIME, null, "TIME WITHOUT TIME ZONE")), //
     TIME_WITH_TIMEZONE(JavaType.OFFSET_TIME, new DialectType(JDBCType.TIME_WITH_TIMEZONE, "TIME"),
-            new DialectType(JDBCType.TIME_WITH_TIMEZONE, null, "TIME WITH TIME ZONE")), //
+            new DialectType(JDBCType.TIME_WITH_TIMEZONE, "TIME WITH TIME ZONE")), //
     TIMESTAMP(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP),
             new DialectType(JDBCType.TIMESTAMP, null, "TIMESTAMP WITHOUT TIME ZONE")), //
     DATETIME(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP, "DATETIME"), new DialectType(JDBCType.TIMESTAMP)), //
-    TIMESTAMP_WITH_TIMEZONE(JavaType.OFFSET_DATETIME, new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, null, "DATETIME"),
-            new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, null, "TIMESTAMP WITH TIME ZONE", "TIMESTAMPTZ")), //
+    TIMESTAMP_WITH_TIMEZONE(JavaType.OFFSET_DATETIME, new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, "DATETIME"),
+            new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, "TIMESTAMP WITH TIME ZONE", "TIMESTAMPTZ")), //
     INTERVAL(JavaType.TIME, new DialectType(JDBCType.TIME), new DialectType(JDBCType.TIME, "INTERVAL")), //
     BINARY(JavaType.BINARY, new DialectType(JDBCType.BINARY, true), new DialectType(JDBCType.BINARY, "BYTEA")), //
     VARBINARY(JavaType.BINARY, new DialectType(JDBCType.VARBINARY, true), new DialectType(JDBCType.VARBINARY, "BYTEA")), //
