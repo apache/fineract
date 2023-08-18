@@ -30,7 +30,7 @@ public abstract class GenericEnumListConverter<E extends Enum<E>> implements Att
 
     private final Class<E> clazz;
 
-    protected boolean isUnique() {
+    public boolean isUnique() {
         return false;
     }
 
