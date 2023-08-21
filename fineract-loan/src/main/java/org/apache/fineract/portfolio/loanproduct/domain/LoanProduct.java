@@ -213,6 +213,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "overdue_days_for_repayment_event")
     private Integer overDueDaysForRepaymentEvent;
 
+    @Column(name = "repayment_start_date_type_enum", nullable = false)
+    private RepaymentStartDateType repaymentStartDateType;
+
     public static LoanProduct assembleFromJson(final Fund fund, final String loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates, List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules) {
@@ -394,6 +397,9 @@ public class LoanProduct extends AbstractPersistableCustom {
         final boolean enableAutoRepaymentForDownPayment = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT);
 
+        final RepaymentStartDateType repaymentStartDateType = RepaymentStartDateType
+                .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE));
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules, name, shortName, description,
                 currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod,
                 interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
@@ -411,7 +417,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment,
                 disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
                 dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment,
-                enableAutoRepaymentForDownPayment);
+                enableAutoRepaymentForDownPayment, repaymentStartDateType);
 
     }
 
@@ -625,7 +631,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
             final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
-            final boolean enableAutoRepaymentForDownPayment) {
+            final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -719,6 +725,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
         this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
+        this.repaymentStartDateType = repaymentStartDateType;
 
         validateLoanProductPreSave();
     }
@@ -1281,6 +1288,12 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.loanProductRelatedDetail.updateEnableAutoRepaymentForDownPayment(newValue);
         }
 
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE,
+                this.repaymentStartDateType.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE);
+            actualChanges.put(LoanProductConstants.REPAYMENT_START_DATE_TYPE, newValue);
+            this.repaymentStartDateType = RepaymentStartDateType.fromInt(newValue);
+        }
         return actualChanges;
     }
 
@@ -1674,6 +1687,10 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public Integer getOverDueDaysForRepaymentEvent() {
         return this.overDueDaysForRepaymentEvent;
+    }
+
+    public RepaymentStartDateType getRepaymentStartDateType() {
+        return this.repaymentStartDateType == null ? RepaymentStartDateType.INVALID : this.repaymentStartDateType;
     }
 
 }

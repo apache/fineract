@@ -162,7 +162,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
             LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT,
             LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
-            LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT));
+            LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -753,6 +753,13 @@ public final class LoanProductDataValidator {
                     .validateForBooleanValue();
             validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
             validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element)) {
+            final Integer repaymentStartDateType = this.fromApiJsonHelper
+                    .extractIntegerNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(LoanProductConstants.REPAYMENT_START_DATE_TYPE).value(repaymentStartDateType).notNull()
+                    .isOneOfTheseValues(1, 2);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -1679,6 +1686,15 @@ public final class LoanProductDataValidator {
             validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
             validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
         }
+
+        Integer repaymentStartDateType = loanProduct.getRepaymentStartDateType().getValue();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element)) {
+            repaymentStartDateType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element,
+                    Locale.getDefault());
+        }
+        baseDataValidator.reset().parameter(LoanProductConstants.REPAYMENT_START_DATE_TYPE).value(repaymentStartDateType).notNull()
+                .isOneOfTheseValues(1, 2);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

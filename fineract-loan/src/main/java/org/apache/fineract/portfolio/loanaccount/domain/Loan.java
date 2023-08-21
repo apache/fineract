@@ -139,6 +139,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.rate.domain.Rate;
@@ -5853,6 +5854,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         RecalculationFrequencyType compoundingFrequencyType = null;
         LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         CalendarHistoryDataWrapper calendarHistoryDataWrapper;
+        RepaymentStartDateType repaymentStartDateType = this.getLoanProduct().getRepaymentStartDateType();
         boolean allowCompoundingOnEod = false;
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             restCalendarInstance = scheduleGeneratorDTO.getCalendarInstanceForInterestRecalculation();
@@ -5886,7 +5888,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 calendarHistoryDataWrapper, scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(),
                 holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
                 scheduleGeneratorDTO.isInterestToBeRecoveredFirstWhenGreaterThanEMI(), this.fixedPrincipalPercentagePerInstallment,
-                scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans());
+                scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans(), repaymentStartDateType, getSubmittedOnDate());
     }
 
     public BigDecimal constructLoanTermVariations(FloatingRateDTO floatingRateDTO, BigDecimal annualNominalInterestRate,
@@ -6153,6 +6155,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         InterestRecalculationCompoundingMethod compoundingMethod = null;
         RecalculationFrequencyType compoundingFrequencyType = null;
         LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
+        RepaymentStartDateType repaymentStartDateType = loanProduct.getRepaymentStartDateType();
         boolean allowCompoundingOnEod = false;
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             recalculationFrequencyType = this.loanInterestRecalculationDetails.getRestFrequencyType();
@@ -6173,7 +6176,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, false,
-                false, this.fixedPrincipalPercentagePerInstallment, false);
+                false, this.fixedPrincipalPercentagePerInstallment, false, repaymentStartDateType, getSubmittedOnDate());
     }
 
     /**

@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,11 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
 
-        LocalDate lastRepaymentDate = loanApplicationTerms.getExpectedDisbursementDate();
+        RepaymentStartDateType repaymentStartDateType = loanApplicationTerms.getRepaymentStartDateType();
+
+        LocalDate lastRepaymentDate = RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType)
+                ? loanApplicationTerms.getExpectedDisbursementDate()
+                : loanApplicationTerms.getSubmittedOnDate();
         boolean isFirstRepayment = true;
         for (int repaymentPeriod = 1; repaymentPeriod <= numberOfRepayments; repaymentPeriod++) {
             lastRepaymentDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment);
@@ -125,8 +130,6 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
      * @param adjustedDateDetailsDTO
      * @param loanApplicationTerms
      * @param holidayDetailDTO
-     * @param nextRepaymentPeriodDueDate
-     * @param rescheduleType
      * @param isFirstRepayment
      * @return
      */
