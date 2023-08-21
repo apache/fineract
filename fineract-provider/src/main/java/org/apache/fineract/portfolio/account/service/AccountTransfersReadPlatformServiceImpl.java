@@ -45,14 +45,11 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.exception.AccountTransferNotFoundException;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
 public class AccountTransfersReadPlatformServiceImpl implements AccountTransfersReadPlatformService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -67,7 +64,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     // pagination
     private final PaginationHelper paginationHelper;
 
-    @Autowired
     public AccountTransfersReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService, final ColumnValidator columnValidator,

@@ -44,11 +44,9 @@ import org.apache.fineract.portfolio.account.exception.StandingInstructionNotFou
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class StandingInstructionWritePlatformServiceImpl implements StandingInstructionWritePlatformService {
 

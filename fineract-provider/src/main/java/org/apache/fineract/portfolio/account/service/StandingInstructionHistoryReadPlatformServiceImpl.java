@@ -40,12 +40,9 @@ import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData;
 import org.apache.fineract.portfolio.client.data.ClientData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 public class StandingInstructionHistoryReadPlatformServiceImpl implements StandingInstructionHistoryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -58,7 +55,6 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
     // pagination
     private final PaginationHelper paginationHelper;
 
-    @Autowired
     public StandingInstructionHistoryReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.jdbcTemplate = jdbcTemplate;
