@@ -162,6 +162,8 @@ final class LoanProductsApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
+        @Schema(example = "1")
+        public Integer repaymentStartDateType;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -419,6 +421,18 @@ final class LoanProductsApiResourceSwagger {
             public String description;
         }
 
+        static final class GetLoanProductsRepaymentStartDateType {
+
+            private GetLoanProductsRepaymentStartDateType() {}
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "repaymentStartDateType.disbursementDate")
+            public String code;
+            @Schema(example = "Disbursement Date")
+            public String description;
+        }
+
         static final class GetLoanProductsInterestRecalculationData {
 
             private GetLoanProductsInterestRecalculationData() {}
@@ -562,6 +576,7 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanProductsResponse.GetLoanProductsAccountingRule accountingRule;
         @Schema(example = "0")
         public Integer principalThresholdForLastInstalment;
+        public GetLoanProductsResponse.GetLoanProductsRepaymentStartDateType repaymentStartDateType;
     }
 
     @Schema(description = "GetLoanProductsTemplateResponse")
@@ -1015,6 +1030,7 @@ final class LoanProductsApiResourceSwagger {
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsInterestRecalculationCompoundingType> interestRecalculationCompoundingTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsRescheduleStrategyType> rescheduleStrategyTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsInterestRecalculationCompoundingFrequencyType> interestRecalculationFrequencyTypeOptions;
+        public Set<GetLoanProductsResponse.GetLoanProductsRepaymentStartDateType> repaymentStartDateTypeOptions;
     }
 
     @Schema(description = "GetLoanProductsProductIdResponse")
@@ -1031,6 +1047,18 @@ final class LoanProductsApiResourceSwagger {
             @Schema(example = "interestRateFrequency.periodFrequencyType.months")
             public String code;
             @Schema(example = "Per month")
+            public String description;
+        }
+
+        static final class GetLoanProductsRepaymentStartDateType {
+
+            private GetLoanProductsRepaymentStartDateType() {}
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "repaymentStartDateType.disbursementDate")
+            public String code;
+            @Schema(example = "Disbursement Date")
             public String description;
         }
 
@@ -1218,6 +1246,7 @@ final class LoanProductsApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
+        public GetLoanProductsRepaymentStartDateType repaymentStartDateType;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1346,6 +1375,8 @@ final class LoanProductsApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
+        @Schema(example = "1")
+        public Integer repaymentStartDateType;
 
         // Interest Recalculation
         @Schema(example = "false")

@@ -149,6 +149,7 @@ public class LoanProductTestBuilder {
     private boolean enableDownPayment = false;
     private String disbursedAmountPercentageForDownPayment = null;
     private boolean enableAutoRepaymentForDownPayment = false;
+    private Integer repaymentStartDateType = null;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -297,6 +298,10 @@ public class LoanProductTestBuilder {
         }
         if (enableAutoRepaymentForDownPayment) {
             map.put("enableAutoRepaymentForDownPayment", enableAutoRepaymentForDownPayment);
+        }
+
+        if (this.repaymentStartDateType != null) {
+            map.put("repaymentStartDateType", repaymentStartDateType);
         }
 
         return map;
@@ -720,6 +725,11 @@ public class LoanProductTestBuilder {
     public LoanProductTestBuilder addAdvancedPaymentAllocation(AdvancedPaymentData... advancedPaymentData) {
         this.transactionProcessingStrategyCode = "advanced-payment-allocation-strategy";
         this.advancedPaymentAllocations = new ArrayList<>(Arrays.stream(advancedPaymentData).toList());
+        return this;
+    }
+
+    public LoanProductTestBuilder withRepaymentStartDateType(final Integer repaymentStartDateType) {
+        this.repaymentStartDateType = repaymentStartDateType;
         return this;
     }
 

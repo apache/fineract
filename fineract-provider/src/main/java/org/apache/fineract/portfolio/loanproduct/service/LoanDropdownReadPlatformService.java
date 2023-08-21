@@ -57,4 +57,5 @@ public interface LoanDropdownReadPlatformService {
 
     List<EnumOptionData> retrievePreCloseInterestCalculationStrategyOptions();
 
+    List<EnumOptionData> retrieveRepaymentStartDateTypeOptions();
 }
