@@ -27,4 +27,9 @@
             <column name="loan_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="fineract" id="1" context="postgresql">
+        <createIndex tableName="m_external_asset_owner_transfer" indexName="external_asset_owner_transfer_loan_id">
+            <column name="loan_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
