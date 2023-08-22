@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -65,6 +66,7 @@ import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.http.HttpStatus;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -2148,11 +2150,17 @@ public class BatchApiTest {
 
         LOG.info("Batch Response : {}", new Gson().toJson(responseOfQueryAndUpdateDatatableBatch));
 
-        final BatchResponse batchQueryAndUpdateResponse = responseOfQueryAndUpdateDatatableBatch.get(0);
+        final BatchResponse queryResponse = responseOfQueryAndUpdateDatatableBatch.get(0);
 
-        Assertions.assertEquals(2L, batchQueryAndUpdateResponse.getRequestId());
-        Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, batchQueryAndUpdateResponse.getStatusCode(),
+        Assertions.assertEquals(1L, queryResponse.getRequestId());
+        Assertions.assertEquals(HttpStatus.SC_OK, queryResponse.getStatusCode(), "Verify Status Code 200 for query datatable entry");
+
+        final BatchResponse updateResponse = responseOfQueryAndUpdateDatatableBatch.get(1);
+
+        Assertions.assertEquals(2L, updateResponse.getRequestId());
+        Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, updateResponse.getStatusCode(),
                 "Verify Status Code 400 for update datatable entry");
+        MatcherAssert.assertThat(updateResponse.getBody(), containsString("No results for path"));
     }
 
     /**

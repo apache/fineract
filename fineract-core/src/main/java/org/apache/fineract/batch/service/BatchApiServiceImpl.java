@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.batch.service;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 import com.google.gson.Gson;
+import com.jayway.jsonpath.JsonPathException;
 import io.github.resilience4j.core.functions.Either;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -156,6 +159,12 @@ public class BatchApiServiceImpl implements BatchApiService {
                 BatchRequest resolvedChildRequest;
                 try {
                     resolvedChildRequest = this.resolutionHelper.resoluteRequest(childNode.getRequest(), response);
+                } catch (JsonPathException jsonPathException) {
+                    BatchResponse childResponse = new BatchResponse().setRequestId(childNode.getRequest().getRequestId())
+                            .setHeaders(childNode.getRequest().getHeaders()).setStatusCode(BAD_REQUEST.value())
+                            .setBody(jsonPathException.getMessage());
+                    responseList.add(childResponse);
+                    return;
                 } catch (RuntimeException ex) {
                     throw new BatchExecutionException(childNode.getRequest(), ex, errorHandler.handle(ex));
                 }
