@@ -28,4 +28,5 @@
   <include relativeToChangelogFile="true" file="parts/1003_add_loan_product_auto_repayment_down_payment_configuration.xml"/>
   <include relativeToChangelogFile="true" file="parts/1004_add_external_event_configuration_for_down_payment_transaction_event.xml"/>
   <include relativeToChangelogFile="true" file="parts/1005_add_loan_product_repayment_start_date_configuration.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1006_add_downpayment_transaction_enum_permissions.xml"/>
 </databaseChangeLog>
