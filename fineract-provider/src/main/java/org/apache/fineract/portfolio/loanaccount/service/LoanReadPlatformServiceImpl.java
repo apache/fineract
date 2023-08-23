@@ -1221,7 +1221,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                             periods.add(periodData);
                             this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.getPrincipal());
                             disbursementPeriodIds.add(data.getId());
-                        } else if (data.isDueForDisbursement(fromDate, dueDate)) {
+                        } else if (data.isDueForDisbursement(fromDate, dueDate) && !disbursementPeriodIds.contains(data.getId())) {
                             if (!excludePastUndisbursed || data.isDisbursed()
                                     || !data.disbursementDate().isBefore(DateUtils.getBusinessLocalDate())) {
                                 principal = principal.add(data.getPrincipal());
@@ -1235,7 +1235,23 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                                 }
                                 periods.add(periodData);
                                 this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.getPrincipal());
+                                disbursementPeriodIds.add(data.getId());
                             }
+                        } else if (fromDate.equals(dueDate) && data.disbursementDate().equals(fromDate)
+                                && !disbursementPeriodIds.contains(data.getId())) {
+                            principal = principal.add(data.getPrincipal());
+                            LoanSchedulePeriodData periodData = null;
+                            if (data.getChargeAmount() == null) {
+                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(),
+                                        disbursementChargeAmount, data.isDisbursed());
+                            } else {
+                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(),
+                                        disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount),
+                                        data.isDisbursed());
+                            }
+                            periods.add(periodData);
+                            this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.getPrincipal());
+                            disbursementPeriodIds.add(data.getId());
                         }
                     }
                 }
