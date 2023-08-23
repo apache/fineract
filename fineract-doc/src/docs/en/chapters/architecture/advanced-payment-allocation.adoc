@@ -1,0 +1,144 @@
+= Introducing Advanced payment allocation - WIP*
+
+Since the first repayment strategy got introduced, many followed, but there was one thing common in them:
+
+* They were hard coding the allocation rules for each transaction type.
+
+By introducing the "Advanced payment allocation" the idea was to have a repayment strategy which was:
+
+* supporting dynamic configuration of the allocation rules for transaction types
+* supporting configuration of more fine-grained allocation rules for future installments
+* supporting reprocessing of transactions and charges in chronological order
+
+== Glossary
+
+[cols="1,1"]
+|===
+
+|*WIP
+| Work in progress
+
+|*Advanced payment allocation
+| Ability to configure allocation rules dynamically for transactions
+
+|*Payment allocation
+|Rule that defines which outstanding balance to be paid of first on which installment
+
+|*Re-amortization
+| Transaction amount to be divided into equal portions by the number of future installments and those installments to be paid by these portions.
+|===
+
+== Capabilities
+
+* Payment allocation should be configurable for transactions:
+** Repayment
+** Goodwill credit
+** Payout refund
+** Merchant refund
+** Charge adjustments
+** Down payment (WIP)
+
+* Can be configured for Loan products
+** Payment allocation rule changes on the loan product will affect only the newly created Loan accounts.
+
+* Chronological reprocess order
+** Transactions (including disbursements) and charges are (re)processed and allocated in chronological order
+
+* Support re-amortization between future installments
+** Transaction amount to be divided into equal portions (based on the number of future installments) and to repay each future installment by the calculated portion.
+*** It's not hard coded, but usually the principal portion needs to be allocated first, but if there are still unprocessed amounts, the rest of the outstanding balances are to be allocated based on the rest of the rules
+
+* Main allocation rules (installment level)
+** Past Due Installment(s):
+*** Oldest first
+** Due Installment(s):
+*** Normal installment takes priority over Down-payment installment (if applicable)
+** Future Installment(s):
+*** Available allocation orders:
+**** Next installment first
+**** Last installment first
+**** Re-amortization*
+* Secondary allocation rules
+** Penalty
+** Fee
+** Interest
+** Principal
+
+== Configuration
+
+Advanced repayment allocation rules can be configured for the Loan product if "Advanced payment allocation" got selected as repayment strategy.
+
+There will be a (always required) “DEFAULT” transaction type configuration which acts as fallback ruleset, if the there are no configured rules for a specific transaction type.
+
+=== New repayment strategy
+* Name: Advanced payment allocation
+* Code: advanced-payment-allocation-strategy
+* Order: 8
+
+=== Allocation rules
+* Past due penalty
+* Past due fee
+* Past due principal
+* Past due interest
+* Due penalty
+* Due fee
+* Due principal
+* Due interest
+* In advance penalty
+* In advance fee
+* In advance principal
+* In advance interest
+
+==== Future installment allocation rules:
+* Next installment
+* Last installment
+* Re-amortization
+
+=== Example Request
+```
+{
+    ...
+    "paymentAllocation": [
+        {
+            "transactionType": "DEFAULT",
+            "paymentAllocationOrder": [
+                {
+                    "paymentAllocationRule": "DUE_PAST_PENALTY",
+                    "order": 1
+                },
+                {
+                    "paymentAllocationRule": "DUE_PAST_FEE",
+                    "order": 2
+                },
+                {
+                    "paymentAllocationRule": "DUE_PAST_INTEREST",
+                    "order": 3
+                },
+                ...
+                {
+                    "paymentAllocationRule": "IN_ADVANCE_INTEREST",
+                    "order": 14
+                }
+            ],
+            "futureInstallmentAllocationRule": "NEXT_INSTALLMENT"
+        }
+    ],
+    ...
+}
+```
+
+The above request configures the "DEFAULT" allocation rules:
+
+* First the already due penalties to be paid
+* Second the already due fees to be paid
+* Last the future interests to be paid
+
+Also for future installments set the allocation rules as
+
+* First future installment by due date to be paid first
+
+=== High level design
+
+Flow of advanced payment allocation processing
+
+image::{imagesdir}/payment_allocation_flow.png[]
