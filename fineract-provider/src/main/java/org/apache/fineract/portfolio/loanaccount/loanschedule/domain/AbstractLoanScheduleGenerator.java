@@ -284,6 +284,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // backup for pre-close transaction
             updateCompoundingDetails(scheduleParams, periodStartDateApplicableForInterest);
 
+            if (loanApplicationTerms.isMultiDisburseLoan() && loanApplicationTerms.isDownPaymentEnabled()) {
+                long numberOfDownPaymentPeriods = periods.stream() //
+                        .filter(LoanScheduleModelPeriod::isDownPaymentPeriod).count();
+                Long notApplicableForInstallmentRecalculationDownPaymentPeriods = numberOfDownPaymentPeriods - 1;
+                // Only the first down payment installment counts for the number of repayments
+                scheduleParams.setPeriodNumber(
+                        scheduleParams.getPeriodNumber() - notApplicableForInstallmentRecalculationDownPaymentPeriods.intValue());
+            }
+
             // 5 determine principal,interest of repayment period
             PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                     this.paymentPeriodsInOneYearCalculator, currentPeriodParams.getInterestCalculationGraceOnRepaymentPeriodFraction(),
