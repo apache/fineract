@@ -39,10 +39,8 @@ import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
 @RequiredArgsConstructor
 public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformService {
 
