@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -79,7 +80,7 @@ public class OfficeImportHandler implements ImportHandler {
         Long parentId = ImportHandlerUtils.readAsLong(OfficeConstants.PARENT_OFFICE_ID_COL, row);
         LocalDate openedDate = ImportHandlerUtils.readAsDate(OfficeConstants.OPENED_ON_COL, row);
         String externalId = ImportHandlerUtils.readAsString(OfficeConstants.EXTERNAL_ID_COL, row);
-        OfficeData office = OfficeData.importInstance(officeName, parentId, openedDate, externalId);
+        OfficeData office = OfficeData.importInstance(officeName, parentId, openedDate, ExternalIdFactory.produce(externalId));
         office.setImportFields(row.getRowNum(), locale, dateFormat);
         return office;
     }

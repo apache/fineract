@@ -32,15 +32,22 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.apache.fineract.organisation.office.exception.RootOfficeParentCannotBeUpdated;
 
 @Entity
 @Table(name = "m_office", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name_org"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "externalid_org") })
+@Getter
+@Setter
 public class Office extends AbstractPersistableCustom implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY)
@@ -60,10 +67,10 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     @Column(name = "opening_date", nullable = false)
     private LocalDate openingDate;
 
-    @Column(name = "external_id", length = 100)
-    private String externalId;
+    @Column(name = "external_id", length = 100, unique = true)
+    private ExternalId externalId;
 
-    public static Office headOffice(final String name, final LocalDate openingDate, final String externalId) {
+    public static Office headOffice(final String name, final LocalDate openingDate, final ExternalId externalId) {
         return new Office(null, name, openingDate, externalId);
     }
 
@@ -72,7 +79,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
         final String name = command.stringValueOfParameterNamed("name");
         final LocalDate openingDate = command.localDateValueOfParameterNamed("openingDate");
         final String externalId = command.stringValueOfParameterNamed("externalId");
-        return new Office(parentOffice, name, openingDate, externalId);
+        return new Office(parentOffice, name, openingDate, ExternalIdFactory.produce(externalId));
     }
 
     protected Office() {
@@ -82,7 +89,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
         this.externalId = null;
     }
 
-    private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
+    private Office(final Office parent, final String name, final LocalDate openingDate, final ExternalId externalId) {
         this.parent = parent;
         this.openingDate = openingDate;
         if (parent != null) {
@@ -94,11 +101,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
         } else {
             this.name = null;
         }
-        if (StringUtils.isNotBlank(externalId)) {
-            this.externalId = externalId.trim();
-        } else {
-            this.externalId = null;
-        }
+        this.externalId = externalId;
     }
 
     private void addChild(final Office office) {
@@ -141,10 +144,11 @@ public class Office extends AbstractPersistableCustom implements Serializable {
         }
 
         final String externalIdParamName = "externalId";
-        if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
+        if (command.isChangeInStringParameterNamed(externalIdParamName,
+                Optional.ofNullable(this.externalId).map(ExternalId::getValue).orElse(null))) {
             final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
             actualChanges.put(externalIdParamName, newValue);
-            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+            this.externalId = ExternalIdFactory.produce(StringUtils.defaultIfEmpty(newValue, null));
         }
 
         return actualChanges;
@@ -191,18 +195,6 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     private String hierarchyOf(final Long id) {
         return this.hierarchy + id.toString() + ".";
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getHierarchy() {
-        return this.hierarchy;
-    }
-
-    public Office getParent() {
-        return this.parent;
     }
 
     public boolean hasParentOf(final Office office) {

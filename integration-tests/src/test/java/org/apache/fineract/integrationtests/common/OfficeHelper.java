@@ -30,13 +30,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.PutOfficesOfficeIdRequest;
+import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import retrofit2.Response;
 
-public class OfficeHelper {
+public class OfficeHelper extends IntegrationTest {
 
     public static final long HEAD_OFFICE_ID = 1L; // The ID is hardcoded in the initial Liquibase migration script
 
@@ -69,6 +73,12 @@ public class OfficeHelper {
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    public Integer createOfficeWithExternalId(String externalId, final String openingDate) {
+        String json = getAsJSON(externalId, openingDate);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+    }
+
     public Integer updateOffice(int id, String name, String openingDate) {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("name", name);
@@ -82,13 +92,28 @@ public class OfficeHelper {
                 new Gson().toJson(map), "resourceId");
     }
 
+    public Response<PutOfficesOfficeIdResponse> updateOfficeUsingExternalId(String externalId, String name, String openingDate)
+            throws IOException {
+        return fineract().offices
+                .updateOfficeWithExternalId(externalId,
+                        new PutOfficesOfficeIdRequest().name(name).openingDate(openingDate).dateFormat("dd MMMM yyyy").locale("en"))
+                .execute();
+    }
+
     public static String getAsJSON(final String openingDate) {
+        return getAsJSON(null, openingDate);
+    }
+
+    public static String getAsJSON(String externalId, final String openingDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("parentId", "1");
         map.put("name", Utils.uniqueRandomStringGenerator("Office_", 4));
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("openingDate", openingDate);
+        if (externalId != null) {
+            map.put("externalId", externalId);
+        }
         LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
