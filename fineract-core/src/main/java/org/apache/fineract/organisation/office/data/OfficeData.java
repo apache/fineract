@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
 /**
  * Immutable data object for office data.
@@ -33,7 +34,7 @@ public class OfficeData implements Serializable {
     private final Long id;
     private final String name;
     private final String nameDecorated;
-    private final String externalId;
+    private final ExternalId externalId;
     private final LocalDate openingDate;
     private final String hierarchy;
     private final Long parentId;
@@ -45,7 +46,8 @@ public class OfficeData implements Serializable {
     private String locale;
     private String dateFormat;
 
-    public static OfficeData importInstance(final String name, final Long parentId, final LocalDate openingDate, final String externalId) {
+    public static OfficeData importInstance(final String name, final Long parentId, final LocalDate openingDate,
+            final ExternalId externalId) {
         return new OfficeData(null, name, null, externalId, openingDate, null, parentId, null, null);
     }
 
@@ -72,8 +74,9 @@ public class OfficeData implements Serializable {
                 office.parentId, office.parentName, allowedParents);
     }
 
-    public OfficeData(final Long id, final String name, final String nameDecorated, final String externalId, final LocalDate openingDate,
-            final String hierarchy, final Long parentId, final String parentName, final Collection<OfficeData> allowedParents) {
+    public OfficeData(final Long id, final String name, final String nameDecorated, final ExternalId externalId,
+            final LocalDate openingDate, final String hierarchy, final Long parentId, final String parentName,
+            final Collection<OfficeData> allowedParents) {
         this.id = id;
         this.name = name;
         this.nameDecorated = nameDecorated;

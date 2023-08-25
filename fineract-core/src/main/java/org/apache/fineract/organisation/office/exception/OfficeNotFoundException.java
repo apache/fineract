@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.office.exception;
 
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -32,5 +33,9 @@ public class OfficeNotFoundException extends AbstractPlatformResourceNotFoundExc
 
     public OfficeNotFoundException(Long id, EmptyResultDataAccessException e) {
         super("error.msg.office.id.invalid", "Office with identifier " + id + " does not exist", id, e);
+    }
+
+    public OfficeNotFoundException(ExternalId externalId) {
+        super("error.msg.office.external.id.invalid", "Office with external identifier " + externalId + " does not exist", externalId);
     }
 }

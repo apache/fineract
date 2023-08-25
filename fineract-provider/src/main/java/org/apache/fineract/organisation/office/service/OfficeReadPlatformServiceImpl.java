@@ -24,8 +24,11 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -34,9 +37,10 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.data.OfficeTransactionData;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.mapper.OfficeDataMapper;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,6 +48,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -51,18 +56,10 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     private final PlatformSecurityContext context;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ColumnValidator columnValidator;
-    private static final String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)";
 
-    @Autowired
-    public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final CurrencyReadPlatformService currencyReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.context = context;
-        this.currencyReadPlatformService = currencyReadPlatformService;
-        this.columnValidator = columnValidator;
-        this.jdbcTemplate = jdbcTemplate;
-        this.sqlGenerator = sqlGenerator;
-    }
+    private final OfficeRepository officeRepository;
+    private final OfficeDataMapper officeDataMapper;
+    private static final String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)";
 
     private static final class OfficeMapper implements RowMapper<OfficeData> {
 
@@ -84,7 +81,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             final Long parentId = JdbcSupport.getLong(rs, "parentId");
             final String parentName = rs.getString("parentName");
 
-            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null);
+            return new OfficeData(id, name, nameDecorated, ExternalIdFactory.produce(externalId), openingDate, hierarchy, parentId,
+                    parentName, null);
         }
     }
 
@@ -208,6 +206,13 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         } catch (final EmptyResultDataAccessException e) {
             throw new OfficeNotFoundException(officeId, e);
         }
+    }
+
+    @Override
+    public OfficeData retrieveOfficeWithExternalId(ExternalId externalId) {
+        this.context.authenticatedUser();
+        return officeRepository.findByExternalId(externalId).map(officeDataMapper::toOfficeData)
+                .orElseThrow(() -> new OfficeNotFoundException(externalId));
     }
 
     @Override

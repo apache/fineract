@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.office.api;
 
+import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -57,6 +58,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -79,6 +82,7 @@ public class OfficesApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "OFFICE";
 
+    private final OfficeSwaggerMapper officeSwaggerMapper;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<OfficeData> toApiJsonSerializer;
@@ -86,6 +90,8 @@ public class OfficesApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+
+    private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -174,6 +180,24 @@ public class OfficesApiResource {
                 .build();
         final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return toApiJsonSerializer.serialize(result);
+    }
+
+    @PUT
+    @Path("/external-id/{externalId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update Office", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdRequest.class)))
+    public OfficesApiResourceSwagger.PutOfficesOfficeIdResponse updateOfficeWithExternalId(
+            @Parameter(description = "externalId") @PathParam("externalId") final String externalId,
+            final OfficesApiResourceSwagger.PutOfficesOfficeIdRequest apiRequestBody) {
+        OfficeData office = readPlatformService.retrieveOfficeWithExternalId(ExternalIdFactory.produce(externalId));
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updateOffice(office.getId()) //
+                .withJson(gson.toJson(apiRequestBody)) //
+                .build();
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return officeSwaggerMapper.toPutOfficesOfficeIdResponse(result);
     }
 
     @GET
