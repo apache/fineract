@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -36,21 +37,12 @@ import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatf
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividendPayOutDetails;
 import org.apache.fineract.portfolio.shareproducts.exception.ShareAccountsNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
+@RequiredArgsConstructor
 public class ShareProductDividendAssembler {
 
     private final ShareProductReadPlatformService shareProductReadPlatformService;
     private final ShareAccountReadPlatformService shareAccountReadPlatformService;
-
-    @Autowired
-    public ShareProductDividendAssembler(final ShareProductReadPlatformService shareProductReadPlatformService,
-            final ShareAccountReadPlatformService shareAccountReadPlatformService) {
-        this.shareProductReadPlatformService = shareProductReadPlatformService;
-        this.shareAccountReadPlatformService = shareAccountReadPlatformService;
-    }
 
     public ShareProductDividendPayOutDetails calculateDividends(final Long productId, final BigDecimal amount,
             final LocalDate dividendPeriodStartDate, final LocalDate dividendPeriodEndDate) {
