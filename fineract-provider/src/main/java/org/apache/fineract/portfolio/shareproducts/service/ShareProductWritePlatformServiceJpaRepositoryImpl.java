@@ -43,9 +43,7 @@ import org.apache.fineract.portfolio.shareproducts.exception.DividentProcessingE
 import org.apache.fineract.portfolio.shareproducts.serialization.ShareProductDataSerializer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
 @RequiredArgsConstructor
 public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareProductWritePlatformService {

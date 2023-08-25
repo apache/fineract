@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -36,27 +37,16 @@ import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData
 import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductDividendPayOutData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class ShareProductDividendReadPlatformServiceImpl implements ShareProductDividendReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final ColumnValidator columnValidator;
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-
-    @Autowired
-    public ShareProductDividendReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
-        this.sqlGenerator = sqlGenerator;
-    }
 
     @Override
     public Page<ShareProductDividendPayOutData> retriveAll(final Long productId, final Integer status,
