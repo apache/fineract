@@ -19,28 +19,20 @@
 package org.apache.fineract.portfolio.shareaccounts.service;
 
 import com.google.gson.JsonElement;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.accounts.service.AccountsCommandsService;
 import org.apache.fineract.portfolio.shareaccounts.serialization.ShareAccountDataSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service(value = "SHAREACCOUNT_COMMANDSERVICE")
+@RequiredArgsConstructor
 public class ShareAccountCommandsServiceImpl implements AccountsCommandsService {
 
     private final FromJsonHelper fromApiJsonHelper;
 
     private final ShareAccountDataSerializer shareAccountDataSerializer;
-
-    @Autowired
-    public ShareAccountCommandsServiceImpl(final FromJsonHelper fromApiJsonHelper,
-            final ShareAccountDataSerializer shareAccountDataSerializer) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.shareAccountDataSerializer = shareAccountDataSerializer;
-    }
 
     @Override
     public Object handleCommand(Long accountId, String command, String jsonBody) {

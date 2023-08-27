@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
@@ -53,12 +54,10 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountTransactio
 import org.apache.fineract.portfolio.shareaccounts.serialization.ShareAccountDataSerializer;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareAccountWritePlatformService {
 
     private final ShareAccountDataSerializer accountDataSerializer;
@@ -76,22 +75,6 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     private final NoteRepository noteRepository;
 
     private final BusinessEventNotifierService businessEventNotifierService;
-
-    @Autowired
-    public ShareAccountWritePlatformServiceJpaRepositoryImpl(final ShareAccountDataSerializer accountDataSerializer,
-            final ShareAccountRepositoryWrapper shareAccountRepository, final ShareProductRepositoryWrapper shareProductRepository,
-            final AccountNumberGenerator accountNumberGenerator, final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService, final NoteRepository noteRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
-        this.accountDataSerializer = accountDataSerializer;
-        this.shareAccountRepository = shareAccountRepository;
-        this.shareProductRepository = shareProductRepository;
-        this.accountNumberGenerator = accountNumberGenerator;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.noteRepository = noteRepository;
-        this.businessEventNotifierService = businessEventNotifierService;
-    }
 
     @Override
     public CommandProcessingResult createShareAccount(JsonCommand jsonCommand) {

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
@@ -26,24 +27,14 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendDetails;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendRepository;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendStatusType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 public class ShareAccountSchedularServiceImpl implements ShareAccountSchedularService {
 
     private final ShareAccountDividendRepository shareAccountDividendRepository;
     private final SavingsAccountDomainService savingsAccountDomainService;
     private final SavingsAccountAssembler savingsAccountAssembler;
-
-    @Autowired
-    public ShareAccountSchedularServiceImpl(final ShareAccountDividendRepository shareAccountDividendRepository,
-            final SavingsAccountDomainService savingsAccountDomainService, final SavingsAccountAssembler savingsAccountAssembler) {
-        this.shareAccountDividendRepository = shareAccountDividendRepository;
-        this.savingsAccountDomainService = savingsAccountDomainService;
-        this.savingsAccountAssembler = savingsAccountAssembler;
-    }
 
     @Override
     @Transactional
