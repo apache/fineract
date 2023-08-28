@@ -2972,10 +2972,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     MathUtil.percentageOf(disbursedAmount, disbursedAmountPercentageForDownPayment, 19));
             LoanTransaction downPaymentTransaction = LoanTransaction.downPayment(getOffice(), downPaymentMoney, null, disbursedOn,
                     externalId);
-            /*
-             * Currently mapping down payment transaction as repayment transaction to loan repayment schedule for
-             * consistency. Need to replace below logic for creating new installment for down payment and mapping.
-             */
 
             LoanEvent event = LoanEvent.LOAN_REPAYMENT_OR_WAIVER;
             validateRepaymentTypeAccountStatus(downPaymentTransaction, event);
