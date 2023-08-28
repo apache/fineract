@@ -932,4 +932,8 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return this.loanTransactionToRepaymentScheduleMappings;
     }
 
+    public boolean isDownPayment() {
+        return isDownPayment;
+    }
+
 }
