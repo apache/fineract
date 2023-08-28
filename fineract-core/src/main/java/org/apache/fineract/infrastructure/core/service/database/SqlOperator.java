@@ -47,7 +47,7 @@ public enum SqlOperator {
         }
 
         @Override
-        public String formatPlaceholderImpl(String definition, String placeholder) {
+        public String formatPlaceholderImpl(String definition, int paramCount, String placeholder) {
             return format("%s %s CONCAT('%%', %s, '%%')", definition, getSymbol(), placeholder);
         }
     },
@@ -60,7 +60,7 @@ public enum SqlOperator {
         }
 
         @Override
-        public String formatPlaceholderImpl(String definition, String placeholder) {
+        public String formatPlaceholderImpl(String definition, int paramCount, String placeholder) {
             return format("%s %s CONCAT('%%', %s, '%%')", definition, getSymbol(), placeholder);
         }
     },
@@ -74,7 +74,7 @@ public enum SqlOperator {
         }
 
         @Override
-        public String formatPlaceholderImpl(String definition, String placeholder) {
+        public String formatPlaceholderImpl(String definition, int paramCount, String placeholder) {
             return format("%s %s %s AND %s", definition, getSymbol(), placeholder, placeholder);
         }
     },
@@ -88,7 +88,7 @@ public enum SqlOperator {
         }
 
         @Override
-        public String formatPlaceholderImpl(String definition, String placeholder) {
+        public String formatPlaceholderImpl(String definition, int paramCount, String placeholder) {
             return format("%s %s %s AND %s", definition, getSymbol(), placeholder, placeholder);
         }
     },
@@ -102,8 +102,13 @@ public enum SqlOperator {
         }
 
         @Override
-        public boolean isPlaceholderSupported() {
-            return false;
+        protected String formatPlaceholderImpl(String definition, int paramCount, String placeholder) {
+            return format("%s %s (%s)", definition, getSymbol(), placeholder + (", " + placeholder).repeat(paramCount - 1));
+        }
+
+        @Override
+        protected String formatNamedParamImpl(String definition, int paramCount, String namedParam) {
+            return format("%s %s (%s)", definition, getSymbol(), namedParam);
         }
     },
     NIN("NOT IN", -1) { //
@@ -116,8 +121,13 @@ public enum SqlOperator {
         }
 
         @Override
-        public boolean isPlaceholderSupported() {
-            return false;
+        protected String formatPlaceholderImpl(String definition, int paramCount, String placeholder) {
+            return format("%s %s (%s)", definition, getSymbol(), placeholder + (", " + placeholder).repeat(paramCount - 1));
+        }
+
+        @Override
+        protected String formatNamedParamImpl(String definition, int paramCount, String namedParam) {
+            return format("%s %s (%s)", definition, getSymbol(), namedParam);
         }
     },
     NULL("IS NULL", 0), //
@@ -160,38 +170,45 @@ public enum SqlOperator {
                 : format("%s %s %s", definition, symbol, sqlGenerator.formatValue(columnType, values[0]));
     }
 
-    public boolean isPlaceholderSupported() {
-        return true;
-    }
-
-    public String formatPlaceholder(@NotNull DatabaseSpecificSQLGenerator sqlGenerator, String definition, String alias) {
-        return formatPlaceholder(sqlGenerator, definition, alias, "?");
-    }
-
-    public String formatPlaceholder(@NotNull DatabaseSpecificSQLGenerator sqlGenerator, String definition, String alias,
-            String placeholder) {
-        return formatPlaceholderImpl(sqlGenerator.alias(sqlGenerator.escape(definition), alias), placeholder);
-    }
-
-    protected String formatPlaceholderImpl(String definition, String placeholder) {
-        if (!isPlaceholderSupported()) {
-            throw new UnsupportedOperationException("Placeholder is not supported for this operator");
+    public String formatNamedParam(@NotNull DatabaseSpecificSQLGenerator sqlGenerator, String definition, int paramCount, String alias) {
+        validateParamCount(paramCount);
+        if (paramCount > 1) {
+            throw new PlatformServiceUnavailableException("error.msg.database.operator.named.invalid",
+                    "Named parameter is not allowed on " + this);
         }
+        return formatNamedParamImpl(sqlGenerator.alias(sqlGenerator.escape(definition), alias), paramCount, ":" + definition);
+    }
+
+    protected String formatNamedParamImpl(String definition, int paramCount, String namedParam) {
+        return formatPlaceholderImpl(definition, paramCount, namedParam);
+    }
+
+    public String formatPlaceholder(@NotNull DatabaseSpecificSQLGenerator sqlGenerator, String definition, int paramCount, String alias) {
+        return formatPlaceholder(sqlGenerator, definition, paramCount, alias, "?");
+    }
+
+    public String formatPlaceholder(@NotNull DatabaseSpecificSQLGenerator sqlGenerator, String definition, int paramCount, String alias,
+            String placeholder) {
+        validateParamCount(paramCount);
+        return formatPlaceholderImpl(sqlGenerator.alias(sqlGenerator.escape(definition), alias), paramCount, placeholder);
+    }
+
+    protected String formatPlaceholderImpl(String definition, int paramCount, String placeholder) {
         return paramCount == 0 ? format("%s %s", definition, symbol) : format("%s %s %s", definition, symbol, placeholder);
     }
 
     public void validateValues(String... values) {
-        if (values == null ? paramCount != 0 : (paramCount < 0 ? values.length < -paramCount : values.length != paramCount)) {
-            throw new PlatformServiceUnavailableException("error.msg.database.operator.invalid",
-                    "Number of parameters " + Arrays.toString(values) + " must be " + Math.abs(paramCount) + " on " + this);
-        }
+        validateParamCount(values == null ? 0 : values.length);
     }
 
     public void validateValues(List<?> values) {
-        int size = values == null ? 0 : values.size();
-        if (paramCount < 0 ? size < -paramCount : size != paramCount) {
+        validateParamCount(values == null ? 0 : values.size());
+    }
+
+    public void validateParamCount(int paramCount) {
+        if (this.paramCount < 0 ? paramCount < -this.paramCount : paramCount != this.paramCount) {
             throw new PlatformServiceUnavailableException("error.msg.database.operator.invalid",
-                    "Number of parameters " + size + " must be " + Math.abs(paramCount) + " on " + this);
+                    "Number of parameters " + paramCount + " must be " + Math.abs(this.paramCount) + " on " + this);
         }
     }
 

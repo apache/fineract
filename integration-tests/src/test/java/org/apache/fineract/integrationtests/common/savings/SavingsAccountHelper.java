@@ -23,6 +23,7 @@ import static org.apache.fineract.integrationtests.common.Utils.TENANT_PARAM_NAM
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -659,6 +661,11 @@ public class SavingsAccountHelper extends IntegrationTest {
         requestSpec.queryParams(queryParams);
         String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url);
         return GSON.fromJson(response, SavingsAccountTransactionsSearchResponse.class);
+    }
+
+    public Map<String, Object> querySavingsTransactions(Integer savingsId, PagedLocalRequestAdvancedQueryRequest request) {
+        String response = ok(fineract().savingsTransactions.advancedQuery1(savingsId.longValue(), request));
+        return JsonPath.from(response).get("");
     }
 
     public List<HashMap> getSavingsTransactions(final Integer savingsID) {
