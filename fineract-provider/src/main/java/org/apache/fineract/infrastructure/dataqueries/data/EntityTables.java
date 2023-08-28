@@ -56,15 +56,20 @@ public enum EntityTables {
     private static final Map<String, EntityTables> BY_ENTITY_NAME = Arrays.stream(VALUES)
             .collect(Collectors.toMap(EntityTables::getName, e -> e));
 
+    @NotNull
     private final String name;
+    @NotNull
     private final String apptableName;
 
+    @NotNull
     private final String foreignKeyColumnNameOnDatatable;
+    @NotNull
     private final String refColumn; // referenced column name on apptable
 
     private final ImmutableList<StatusEnum> checkStatuses;
 
-    EntityTables(String name, String apptableName, String foreignKeyColumnNameOnDatatable, String refColumn, StatusEnum... statuses) {
+    EntityTables(@NotNull String name, @NotNull String apptableName, @NotNull String foreignKeyColumnNameOnDatatable,
+            @NotNull String refColumn, StatusEnum... statuses) {
         this.name = name;
         this.apptableName = apptableName;
         this.foreignKeyColumnNameOnDatatable = foreignKeyColumnNameOnDatatable;
@@ -72,22 +77,26 @@ public enum EntityTables {
         this.checkStatuses = statuses == null ? ImmutableList.of() : ImmutableList.copyOf(statuses);
     }
 
-    EntityTables(String name, String foreignKeyColumnNameOnDatatable, String refColumn, StatusEnum... statuses) {
+    EntityTables(@NotNull String name, @NotNull String foreignKeyColumnNameOnDatatable, @NotNull String refColumn, StatusEnum... statuses) {
         this(name, name, foreignKeyColumnNameOnDatatable, refColumn, statuses);
     }
 
+    @NotNull
     public String getName() {
         return name;
     }
 
+    @NotNull
     public String getApptableName() {
         return apptableName;
     }
 
+    @NotNull
     public String getForeignKeyColumnNameOnDatatable() {
         return this.foreignKeyColumnNameOnDatatable;
     }
 
+    @NotNull
     public String getRefColumn() {
         return refColumn;
     }

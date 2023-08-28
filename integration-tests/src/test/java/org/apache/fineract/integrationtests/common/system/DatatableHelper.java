@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
@@ -31,8 +32,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.fineract.client.models.GetDataTablesResponse;
+import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryData;
 import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
@@ -294,4 +297,8 @@ public class DatatableHelper extends IntegrationTest {
         return GSON.fromJson(response, PutDataTablesResponse.class);
     }
 
+    public Map<String, Object> queryDatatable(String dataTableName, PagedLocalRequestAdvancedQueryData request) {
+        String response = ok(fineract().dataTables.advancedQuery(dataTableName, request));
+        return JsonPath.from(response).get("");
+    }
 }

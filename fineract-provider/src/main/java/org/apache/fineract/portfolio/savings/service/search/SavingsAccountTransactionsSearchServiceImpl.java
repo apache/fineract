@@ -20,27 +20,33 @@ package org.apache.fineract.portfolio.savings.service.search;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
+import com.google.gson.JsonObject;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.SqlOperator;
+import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
+import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataServiceImpl;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
+import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
 import org.apache.fineract.portfolio.search.data.ColumnFilterData;
+import org.apache.fineract.portfolio.search.data.TableQueryData;
 import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +55,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +67,8 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final ReadWriteNonCoreDataServiceImpl datatableService;
+    private final DataTableValidator dataTableValidator;
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -68,19 +77,15 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
         context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         String apptable = EntityTables.SAVINGS_TRANSACTION.getApptableName();
-        Map<String, ResultsetColumnHeaderData> columnHeaders = SearchUtil
+        Map<String, ResultsetColumnHeaderData> headersByName = SearchUtil
                 .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(apptable));
 
         PageRequest pageable = searchParameters.getPageable();
         PageRequest sortPageable;
         if (pageable.getSort().isSorted()) {
-            List<ApiParameterError> errors = new ArrayList<>();
             List<Sort.Order> orders = pageable.getSort().toList();
             sortPageable = pageable.withSort(Sort.by(orders.stream()
-                    .map(e -> e.withProperty(SearchUtil.validateToJdbcColumn(e.getProperty(), columnHeaders, errors, false))).toList()));
-            if (!errors.isEmpty()) {
-                throw new PlatformApiDataValidationException(errors);
-            }
+                    .map(e -> e.withProperty(SearchUtil.validateToJdbcColumnName(e.getProperty(), headersByName, false))).toList()));
         } else {
             pageable = pageable.withSort(Sort.Direction.DESC, "transaction_date", "created_date", "id");
             sortPageable = pageable;
@@ -102,9 +107,9 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
         }
 
         String alias = "tr";
-        StringBuilder where = new StringBuilder(" WHERE ");
+        StringBuilder where = new StringBuilder();
         ArrayList<Object> params = new ArrayList<>();
-        SearchUtil.buildQueryCondition(columnFilters, where, params, alias, columnHeaders, false, false, sqlGenerator);
+        SearchUtil.buildQueryCondition(columnFilters, where, params, alias, headersByName, null, null, null, false, sqlGenerator);
 
         SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper tm = new SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper();
         Object[] args = params.toArray();
@@ -170,5 +175,114 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
             }
         }
         return false;
+    }
+
+    @Override
+    public Page<JsonObject> queryAdvanced(@NotNull Long savingsId, @NotNull PagedLocalRequest<AdvancedQueryRequest> pagedRequest) {
+        context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_RESOURCE_NAME);
+        String apptable = EntityTables.SAVINGS_TRANSACTION.getApptableName();
+
+        AdvancedQueryRequest queryRequest = pagedRequest.getRequest().orElseThrow();
+        dataTableValidator.validateTableSearch(queryRequest);
+
+        List<ResultsetColumnHeaderData> columnHeaders = genericDataService.fillResultsetColumnHeaders(apptable);
+        Map<String, ResultsetColumnHeaderData> headersByName = SearchUtil.mapHeadersToName(columnHeaders);
+        String pkColumn = SearchUtil.getFiltered(columnHeaders, ResultsetColumnHeaderData::getIsColumnPrimaryKey).getColumnName();
+
+        AdvancedQueryData baseQuery = queryRequest.getBaseQuery();
+        List<TableQueryData> datatableQueries = queryRequest.getDatatableQueries();
+
+        List<ColumnFilterData> columnFilters;
+        List<String> resultColumns;
+        List<String> selectColumns;
+        if (baseQuery == null) {
+            columnFilters = new ArrayList<>();
+            resultColumns = new ArrayList<>();
+            selectColumns = new ArrayList<>();
+        } else {
+            columnFilters = baseQuery.getNonNullFilters();
+            columnFilters.forEach(e -> e.setColumn(SearchUtil.validateToJdbcColumnName(e.getColumn(), headersByName, false)));
+            resultColumns = baseQuery.getNonNullResultColumns();
+            selectColumns = new ArrayList<>(SearchUtil.validateToJdbcColumnNames(resultColumns, headersByName, true));
+        }
+        columnFilters.add(0, ColumnFilterData.eq("savings_account_id", savingsId.toString()));
+        if (resultColumns.isEmpty() && !queryRequest.hasResultColumn()) {
+            resultColumns.add(pkColumn);
+            selectColumns.add(pkColumn);
+        }
+        PageRequest pageable = pagedRequest.toPageable();
+        PageRequest sortPageable;
+        if (pageable.getSort().isSorted()) {
+            List<Sort.Order> orders = pageable.getSort().toList();
+            sortPageable = pageable.withSort(Sort.by(orders.stream()
+                    .map(e -> e.withProperty(SearchUtil.validateToJdbcColumnName(e.getProperty(), headersByName, false))).toList()));
+        } else {
+            pageable = pageable.withSort(Sort.Direction.DESC, pkColumn);
+            sortPageable = pageable;
+        }
+
+        String alias = "main";
+        String dateFormat = pagedRequest.getDateFormat();
+        String dateTimeFormat = pagedRequest.getDateTimeFormat();
+        Locale locale = pagedRequest.getLocaleObject();
+        StringBuilder select = new StringBuilder(sqlGenerator.buildSelect(selectColumns, alias, false));
+        StringBuilder from = new StringBuilder(" ").append(sqlGenerator.buildFrom(apptable, alias, false));
+        StringBuilder where = new StringBuilder();
+        ArrayList<Object> params = new ArrayList<>();
+        SearchUtil.buildQueryCondition(columnFilters, where, params, alias, headersByName, dateFormat, dateTimeFormat, locale, false,
+                sqlGenerator);
+
+        if (datatableQueries != null) {
+            StringBuilder dataSelect = new StringBuilder();
+            StringBuilder dataFrom = new StringBuilder();
+            StringBuilder dataWhere = new StringBuilder();
+            ArrayList<Object> dataParams = new ArrayList<>();
+            for (int i = 0; i < datatableQueries.size(); i++) {
+                TableQueryData tableQuery = datatableQueries.get(i);
+                boolean added = datatableService.buildDataQueryEmbedded(EntityTables.SAVINGS_TRANSACTION, tableQuery.getTable(),
+                        tableQuery.getQuery(), selectColumns, dataSelect, dataFrom, dataWhere, dataParams, alias, ("d" + i), dateFormat,
+                        dateTimeFormat, locale);
+                if (added) {
+                    if (!dataSelect.isEmpty()) {
+                        select.append(select.isEmpty() ? "SELECT " : ", ").append(dataSelect);
+                    }
+                    if (!dataFrom.isEmpty()) {
+                        from.append(" ").append(dataFrom);
+                    }
+                    if (!dataWhere.isEmpty()) {
+                        where.append(where.isEmpty() ? " WHERE " : " AND ").append(dataWhere);
+                    }
+                    params.addAll(dataParams);
+                    dataSelect.setLength(0);
+                    dataFrom.setLength(0);
+                    dataWhere.setLength(0);
+                    dataParams.clear();
+                }
+                resultColumns.addAll(tableQuery.getQuery().getNonNullResultColumns());
+            }
+        }
+
+        List<JsonObject> results = new ArrayList<>();
+        Object[] args = params.toArray();
+
+        // Execute the count Query
+        String countQuery = "SELECT COUNT(*)" + from + where;
+        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args);
+        if (totalElements == null || totalElements == 0) {
+            return PageableExecutionUtils.getPage(results, pageable, () -> 0);
+        }
+
+        StringBuilder query = new StringBuilder().append(select).append(from).append(where);
+        query.append(" ").append(sqlGenerator.buildOrderBy(sortPageable.getSort().toList(), null, false));
+        if (pageable.isPaged()) {
+            query.append(" ").append(sqlGenerator.limit(pageable.getPageSize(), (int) pageable.getOffset()));
+        }
+
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(query.toString(), args);
+
+        while (rowSet.next()) {
+            SearchUtil.extractJsonResult(rowSet, selectColumns, resultColumns, results);
+        }
+        return PageableExecutionUtils.getPage(results, pageable, () -> totalElements);
     }
 }

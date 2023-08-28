@@ -30,14 +30,14 @@ public enum JdbcJavaType {
 
         @Override
         public Object toJdbcValueImpl(@NotNull DatabaseType dialect, Object value) {
-            return Boolean.TRUE.equals(value) ? 1 : 0;
+            return value == null ? null : (Boolean.TRUE.equals(value) ? 1 : 0);
         }
     },
     BOOLEAN(JavaType.BOOLEAN, new DialectType(JDBCType.BIT), new DialectType(JDBCType.BOOLEAN, null, "BOOL")) { //
 
         @Override
         public Object toJdbcValueImpl(@NotNull DatabaseType dialect, Object value) {
-            return dialect.isMySql() ? (Boolean.TRUE.equals(value) ? 1 : 0) : super.toJdbcValueImpl(dialect, value);
+            return (value != null && dialect.isMySql()) ? (Boolean.TRUE.equals(value) ? 1 : 0) : super.toJdbcValueImpl(dialect, value);
         }
     },
     SMALLINT(JavaType.SHORT, new DialectType(JDBCType.SMALLINT, true), new DialectType(JDBCType.SMALLINT, null, "INT2")), //

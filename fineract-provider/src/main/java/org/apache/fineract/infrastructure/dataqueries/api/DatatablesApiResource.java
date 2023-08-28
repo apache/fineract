@@ -52,11 +52,14 @@ import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/datatables")
@@ -222,6 +225,19 @@ public class DatatablesApiResource {
         final List<JsonObject> result = this.readWriteNonCoreDataService.queryDataTable(datatable, columnFilter, valueFilter,
                 resultColumns);
 
+        return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
+    }
+
+    @POST
+    @Path("{datatable}/query")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Query Data Table values", description = "Query values from a registered data table.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class))) })
+    public String advancedQuery(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
+            PagedLocalRequest<AdvancedQueryData> queryRequest, @Context final UriInfo uriInfo) {
+        final Page<JsonObject> result = this.readWriteNonCoreDataService.queryDataTableAdvanced(datatable, queryRequest);
         return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
     }
 

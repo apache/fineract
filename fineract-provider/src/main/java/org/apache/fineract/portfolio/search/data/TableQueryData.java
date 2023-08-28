@@ -16,19 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.savings.service.search;
+package org.apache.fineract.portfolio.search.data;
 
-import com.google.gson.JsonObject;
-import jakarta.validation.constraints.NotNull;
-import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
-import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
-import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
-import org.springframework.data.domain.Page;
+import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface SavingsAccountTransactionSearchService {
+/**
+ * Immutable data object representing datatable data.
+ */
+@Data
+@NoArgsConstructor
+public final class TableQueryData implements Serializable {
 
-    Page<SavingsAccountTransactionData> searchTransactions(@NotNull Long savingsId, @NotNull TransactionSearchRequest searchParameters);
+    private String table;
 
-    Page<JsonObject> queryAdvanced(@NotNull Long savingsId, @NotNull PagedLocalRequest<AdvancedQueryRequest> pagedRequest);
+    private AdvancedQueryData query;
+
+    public boolean hasFilter() {
+        return query != null && query.hasFilter();
+    }
+
+    public boolean hasResultColumn() {
+        return query != null && query.hasResultColumn();
+    }
 }

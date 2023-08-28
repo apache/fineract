@@ -16,19 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.savings.service.search;
+package org.apache.fineract.infrastructure.core.service;
 
-import com.google.gson.JsonObject;
-import jakarta.validation.constraints.NotNull;
-import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
-import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
-import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
-import org.springframework.data.domain.Page;
+import java.util.Locale;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 
-public interface SavingsAccountTransactionSearchService {
+@Getter
+@Setter
+@RequiredArgsConstructor
+public class PagedLocalRequest<T> extends PagedRequest<T> {
 
-    Page<SavingsAccountTransactionData> searchTransactions(@NotNull Long savingsId, @NotNull TransactionSearchRequest searchParameters);
+    private String dateFormat;
 
-    Page<JsonObject> queryAdvanced(@NotNull Long savingsId, @NotNull PagedLocalRequest<AdvancedQueryRequest> pagedRequest);
+    private String dateTimeFormat;
+
+    private String locale;
+
+    public Locale getLocaleObject() {
+        return locale == null ? null : JsonParserHelper.localeFromString(locale);
+    }
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -39,12 +40,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -52,6 +55,7 @@ import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamE
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
+import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
@@ -60,6 +64,7 @@ import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.search.SavingsAccountTransactionSearchService;
+import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
 import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.Page;
@@ -157,6 +162,19 @@ public class SavingsAccountTransactionsApiResource {
                 .pageable(offset, limit, orderBy, sortOrder);
         Page<SavingsAccountTransactionData> transactionsData = transactionsSearchService.searchTransactions(savingsId, searchParameters);
         return toApiJsonSerializer.serialize(transactionsData);
+    }
+
+    @POST
+    @Path("query")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Advanced search Savings Account Transactions")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class))) })
+    public String advancedQuery(@PathParam("savingsId") @Parameter(description = "savingsId") final Long savingsId,
+            PagedLocalRequest<AdvancedQueryRequest> queryRequest, @Context final UriInfo uriInfo) {
+        final Page<JsonObject> result = transactionsSearchService.queryAdvanced(savingsId, queryRequest);
+        return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
     }
 
     @POST

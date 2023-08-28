@@ -83,6 +83,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavaila
 import org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
@@ -101,11 +102,17 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
+import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
+import org.apache.fineract.portfolio.search.data.ColumnFilterData;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -199,20 +206,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     public List<JsonObject> queryDataTable(@NotNull String datatable, @NotNull String columnName, String columnValueString,
             @NotNull String resultColumnsString) {
         datatable = validateDatatableRegistered(datatable);
-        Map<String, ResultsetColumnHeaderData> columnHeaders = SearchUtil
+        Map<String, ResultsetColumnHeaderData> headersByName = SearchUtil
                 .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(datatable));
 
-        List<ApiParameterError> errors = new ArrayList<>();
-        columnName = SearchUtil.validateToJdbcColumn(columnName, columnHeaders, errors, false);
         List<String> resultColumns = asList(resultColumnsString.split(","));
-        List<String> selectColumns = SearchUtil.validateToJdbcColumns(resultColumns, columnHeaders, errors, false);
-        if (!errors.isEmpty()) {
-            throw new PlatformApiDataValidationException(errors);
-        }
+        List<String> selectColumns = SearchUtil.validateToJdbcColumnNames(resultColumns, headersByName, false);
+        ResultsetColumnHeaderData column = SearchUtil.validateToJdbcColumn(columnName, headersByName, false);
 
-        Object columnValue = SearchUtil.parseAndValidateJdbcColumnValue(columnName, columnValueString, columnHeaders, false, sqlGenerator);
+        Object columnValue = SearchUtil.parseJdbcColumnValue(column, columnValueString, null, null, null, false, sqlGenerator);
         String sql = sqlGenerator.buildSelect(selectColumns, null, false) + " " + sqlGenerator.buildFrom(datatable, null, false) + " WHERE "
-                + EQ.formatPlaceholder(sqlGenerator, columnName, null);
+                + EQ.formatPlaceholder(sqlGenerator, column.getColumnName(), 1, null);
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, columnValue);
 
         List<JsonObject> results = new ArrayList<>();
@@ -220,6 +223,110 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             SearchUtil.extractJsonResult(rowSet, selectColumns, resultColumns, results);
         }
         return results;
+    }
+
+    @Override
+    public Page<JsonObject> queryDataTableAdvanced(@NotNull String datatable, @NotNull PagedLocalRequest<AdvancedQueryData> pagedRequest) {
+        datatable = validateDatatableRegistered(datatable);
+        context.authenticatedUser().validateHasDatatableReadPermission(datatable);
+
+        AdvancedQueryData request = pagedRequest.getRequest().orElseThrow();
+        dataTableValidator.validateTableSearch(request);
+
+        Map<String, ResultsetColumnHeaderData> headersByName = SearchUtil
+                .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(datatable));
+        String pkColumn = SearchUtil.getFiltered(headersByName.values(), ResultsetColumnHeaderData::getIsColumnPrimaryKey).getColumnName();
+
+        List<ColumnFilterData> columnFilters = request.getNonNullFilters();
+        columnFilters.forEach(e -> e.setColumn(SearchUtil.validateToJdbcColumnName(e.getColumn(), headersByName, false)));
+
+        List<String> resultColumns = request.getNonNullResultColumns();
+        List<String> selectColumns;
+        if (resultColumns.isEmpty()) {
+            resultColumns.add(pkColumn);
+            selectColumns = new ArrayList<>();
+            selectColumns.add(pkColumn);
+        } else {
+            selectColumns = SearchUtil.validateToJdbcColumnNames(resultColumns, headersByName, false);
+        }
+        PageRequest pageable = pagedRequest.toPageable();
+        PageRequest sortPageable;
+        if (pageable.getSort().isSorted()) {
+            List<Sort.Order> orders = pageable.getSort().toList();
+            sortPageable = pageable.withSort(Sort.by(orders.stream()
+                    .map(e -> e.withProperty(SearchUtil.validateToJdbcColumnName(e.getProperty(), headersByName, false))).toList()));
+        } else {
+            pageable = pageable.withSort(Sort.Direction.DESC, pkColumn);
+            sortPageable = pageable;
+        }
+
+        String dateFormat = pagedRequest.getDateFormat();
+        String dateTimeFormat = pagedRequest.getDateTimeFormat();
+        Locale locale = pagedRequest.getLocaleObject();
+
+        String select = sqlGenerator.buildSelect(selectColumns, null, false);
+        String from = " " + sqlGenerator.buildFrom(datatable, null, false);
+        StringBuilder where = new StringBuilder();
+        ArrayList<Object> params = new ArrayList<>();
+        SearchUtil.buildQueryCondition(columnFilters, where, params, null, headersByName, dateFormat, dateTimeFormat, locale, false,
+                sqlGenerator);
+
+        List<JsonObject> results = new ArrayList<>();
+        Object[] args = params.toArray();
+
+        // Execute the count Query
+        String countQuery = "SELECT COUNT(*)" + from + where;
+        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args);
+        if (totalElements == null || totalElements == 0) {
+            return PageableExecutionUtils.getPage(results, pageable, () -> 0);
+        }
+
+        StringBuilder query = new StringBuilder().append(select).append(from).append(where);
+        query.append(" ").append(sqlGenerator.buildOrderBy(sortPageable.getSort().toList(), null, false));
+        if (pageable.isPaged()) {
+            query.append(" ").append(sqlGenerator.limit(pageable.getPageSize(), (int) pageable.getOffset()));
+        }
+
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(query.toString(), args);
+
+        while (rowSet.next()) {
+            SearchUtil.extractJsonResult(rowSet, selectColumns, resultColumns, results);
+        }
+        return PageableExecutionUtils.getPage(results, pageable, () -> totalElements);
+    }
+
+    @Override
+    public boolean buildDataQueryEmbedded(@NotNull EntityTables entityTable, @NotNull String datatable, @NotNull AdvancedQueryData request,
+            @NotNull List<String> selectColumns, @NotNull StringBuilder select, @NotNull StringBuilder from, @NotNull StringBuilder where,
+            @NotNull List<Object> params, String mainAlias, String alias, String dateFormat, String dateTimeFormat, Locale locale) {
+        List<String> resultColumns = request.getResultColumns();
+        List<ColumnFilterData> columnFilters = request.getColumnFilters();
+        if ((resultColumns == null || resultColumns.isEmpty()) && (columnFilters == null || columnFilters.isEmpty())) {
+            return false;
+        }
+
+        datatable = validateDatatableRegistered(datatable);
+        context.authenticatedUser().validateHasDatatableReadPermission(datatable);
+
+        Map<String, ResultsetColumnHeaderData> headersByName = SearchUtil
+                .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(datatable));
+
+        List<String> thisSelectColumns = SearchUtil.validateToJdbcColumnNames(resultColumns, headersByName, true);
+        if (columnFilters != null) {
+            columnFilters.forEach(e -> e.setColumn(SearchUtil.validateToJdbcColumnName(e.getColumn(), headersByName, false)));
+        }
+
+        select.append(sqlGenerator.buildSelect(thisSelectColumns, alias, true));
+        selectColumns.addAll(thisSelectColumns);
+
+        String joinType = "LEFT";
+        if (SearchUtil.buildQueryCondition(columnFilters, where, params, alias, headersByName, dateFormat, dateTimeFormat, locale, true,
+                sqlGenerator)) {
+            joinType = null; // INNER
+        }
+        from.append(sqlGenerator.buildJoin(datatable, alias, entityTable.getForeignKeyColumnNameOnDatatable(), mainAlias,
+                entityTable.getRefColumn(), joinType));
+        return true;
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
@@ -1830,7 +1937,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         columnHeaderUnderscored = this.genericDataService.replace(columnHeader.getColumnName(), space, underscore);
                         if (queryParamColumnUnderscored.equalsIgnoreCase(columnHeaderUnderscored)) {
                             pValue = queryParams.get(key);
-                            validatedValue = SearchUtil.parseAndValidateColumnValue(columnHeader, pValue, dateFormat,
+                            validatedValue = SearchUtil.parseColumnValue(columnHeader, pValue, dateFormat, dateFormat,
                                     clientApplicationLocale, true, sqlGenerator);
                             affectedColumns.put(columnHeader.getColumnName(), validatedValue);
                             notFound = false;
@@ -1890,7 +1997,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 + " JOIN m_entity_datatable_check edc ON edc.x_registered_table_name = xrt.registered_table_name"
                 + " WHERE edc.x_registered_table_name = '" + datatableName + "'";
         final Long count = this.jdbcTemplate.queryForObject(sql, Long.class);
-        return count > 0;
+        return count != null && count > 0;
     }
 
     // --- DbUtils ---
@@ -1940,8 +2047,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private boolean isRegisteredDataTable(final String datatable) {
         final String sql = "SELECT COUNT(application_table_name) FROM " + TABLE_REGISTERED_TABLE + " WHERE registered_table_name = ?";
-        final int count = jdbcTemplate.queryForObject(sql, Integer.class, datatable);
-        return count > 0;
+        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, datatable);
+        return count != null && count > 0;
     }
 
     private void validateDataTableExists(final String datatableName) {
