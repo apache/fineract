@@ -367,6 +367,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             periods.add(installment);
 
+            if (loanApplicationTerms.isMultiDisburseLoan() && loanApplicationTerms.isDownPaymentEnabled()) {
+                createDownPaymentInstallmentForOverlappingInstallments(loanApplicationTerms, scheduleParams, periods, scheduledDueDate);
+            }
+
             // Updates principal paid map with efective date for reducing
             // the amount from outstanding balance(interest calculation)
             updateAmountsWithEffectiveDate(loanApplicationTerms, holidayDetailDTO, scheduleParams, scheduledDueDate, currentPeriodParams,
@@ -425,6 +429,29 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 scheduleParams.getTotalCumulativeInterest().getAmount(), scheduleParams.getTotalFeeChargesCharged().getAmount(),
                 scheduleParams.getTotalPenaltyChargesCharged().getAmount(), scheduleParams.getTotalRepaymentExpected().getAmount(),
                 totalOutstanding);
+    }
+
+    private void createDownPaymentInstallmentForOverlappingInstallments(LoanApplicationTerms loanApplicationTerms,
+            LoanScheduleParams scheduleParams, Collection<LoanScheduleModelPeriod> periods, LocalDate scheduledDueDate) {
+        for (Map.Entry<LocalDate, Money> disburseDetail : scheduleParams.getDisburseDetailMap().entrySet()) {
+            if (disburseDetail.getKey().isAfter(scheduleParams.getPeriodStartDate()) && disburseDetail.getKey().isEqual(scheduledDueDate)) {
+                scheduleParams.incrementPeriodNumber();
+                scheduleParams.incrementInstalmentNumber();
+
+                BigDecimal downPaymentAmount = MathUtil.percentageOf(disburseDetail.getValue().getAmount(),
+                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19);
+                Money downPayment = Money.of(loanApplicationTerms.getCurrency(), downPaymentAmount);
+                LoanScheduleModelDownPaymentPeriod installment = LoanScheduleModelDownPaymentPeriod.downPayment(
+                        scheduleParams.getInstalmentNumber(), disburseDetail.getKey(), downPayment, scheduleParams.getOutstandingBalance());
+
+                addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), installment);
+                periods.add(installment);
+                scheduleParams.reduceOutstandingBalance(downPayment);
+                scheduleParams.addTotalCumulativePrincipal(downPayment);
+                scheduleParams.addTotalRepaymentExpected(downPayment);
+
+            }
+        }
     }
 
     private void updateCompoundingDetails(final Collection<LoanScheduleModelPeriod> periods, final LoanScheduleParams params,
@@ -998,8 +1025,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 periods.add(disbursementPeriod);
 
                 if (loanApplicationTerms.isDownPaymentEnabled()) {
-                    createDownPaymentPeriod(loanApplicationTerms, scheduleParams, periods, disburseDetail.getKey(),
-                            disburseDetail.getValue().getAmount());
+                    if (!disburseDetail.getKey().isEqual(scheduledDueDate)) {
+                        createDownPaymentPeriod(loanApplicationTerms, scheduleParams, periods, disburseDetail.getKey(),
+                                disburseDetail.getValue().getAmount());
+                    }
                 }
 
                 // updates actual outstanding balance with new
@@ -2348,11 +2377,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 .disbursement(disburseDetail.getKey(), disburseDetail.getValue(), chargesDueAtTimeOfDisbursement);
                         periods.add(disbursementPeriod);
                         if (loanApplicationTerms.isDownPaymentEnabled()) {
-                            loanScheduleParams = LoanScheduleParams.createLoanScheduleParams(currency,
-                                    Money.of(currency, chargesDueAtTimeOfDisbursement), loanApplicationTerms.getExpectedDisbursementDate(),
-                                    getPrincipalToBeScheduled(loanApplicationTerms));
-                            createDownPaymentPeriod(loanApplicationTerms, loanScheduleParams, periods, disburseDetail.getKey(),
-                                    disbursementPeriod.principalDue());
+                            if (!disburseDetail.getKey().isEqual(installment.getDueDate())) {
+                                loanScheduleParams = LoanScheduleParams.createLoanScheduleParams(currency,
+                                        Money.of(currency, chargesDueAtTimeOfDisbursement),
+                                        loanApplicationTerms.getExpectedDisbursementDate(),
+                                        getPrincipalToBeScheduled(loanApplicationTerms));
+                                createDownPaymentPeriod(loanApplicationTerms, loanScheduleParams, periods, disburseDetail.getKey(),
+                                        disbursementPeriod.principalDue());
+                            }
                         }
                         // updates actual outstanding balance with new
                         // disbursement detail
@@ -2369,6 +2401,22 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 outstandingBalance = outstandingBalance.minus(installment.getPrincipal(currency));
                 final LoanScheduleModelPeriod loanScheduleModelPeriod = createLoanScheduleModelPeriod(installment, outstandingBalance);
                 periods.add(loanScheduleModelPeriod);
+
+                // downpayment installment for overlapping case
+
+                if (loanApplicationTerms.isMultiDisburseLoan() && loanApplicationTerms.isDownPaymentEnabled()) {
+                    for (Map.Entry<LocalDate, Money> disburseDetail : disburseDetailMap.entrySet()) {
+                        if (disburseDetail.getKey().isAfter(installment.getFromDate())
+                                && disburseDetail.getKey().isEqual(installment.getDueDate())) {
+                            loanScheduleParams = LoanScheduleParams.createLoanScheduleParams(currency,
+                                    Money.of(currency, chargesDueAtTimeOfDisbursement), loanApplicationTerms.getExpectedDisbursementDate(),
+                                    getPrincipalToBeScheduled(loanApplicationTerms));
+                            createDownPaymentPeriod(loanApplicationTerms, loanScheduleParams, periods, disburseDetail.getKey(),
+                                    disburseDetail.getValue().getAmount());
+                        }
+                    }
+                }
+
                 totalCumulativePrincipal = totalCumulativePrincipal.plus(installment.getPrincipal(currency));
                 totalCumulativeInterest = totalCumulativeInterest.plus(installment.getInterestCharged(currency));
                 totalFeeChargesCharged = totalFeeChargesCharged.plus(installment.getFeeChargesCharged(currency));
