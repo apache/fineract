@@ -272,5 +272,4 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
         throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
-
 }

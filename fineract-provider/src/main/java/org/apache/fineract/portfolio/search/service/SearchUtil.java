@@ -86,8 +86,7 @@ public final class SearchUtil {
             @NotNull List<String> resultColumns, @NotNull List<JsonObject> results) {
         JsonObject json = new JsonObject();
         for (int i = 0; i < selectColumns.size(); i++) {
-            String sCol = selectColumns.get(i).replaceAll("\"", "");
-            Object rowValue = rowSet.getObject(sCol);
+            Object rowValue = rowSet.getObject(selectColumns.get(i));
             if (rowValue != null) {
                 String rCol = resultColumns.get(i);
                 if (rowValue instanceof Character) {

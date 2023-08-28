@@ -248,4 +248,19 @@ public class DatabaseSpecificSQLGenerator {
         return orderBy + orders.stream().map(e -> String.join(" ", alias(escape(e.getProperty()), alias), e.getDirection().name()))
                 .collect(Collectors.joining(", "));
     }
+
+    public String buildInsert(@NotNull String definition, Collection<String> fields) {
+        if (fields == null || fields.isEmpty()) {
+            return "";
+        }
+        return "INSERT INTO " + escape(definition) + '(' + fields.stream().map(this::escape).collect(Collectors.joining(", "))
+                + ") VALUES (?" + ", ?".repeat(fields.size() - 1) + ')';
+    }
+
+    public String buildUpdate(@NotNull String definition, Collection<String> fields) {
+        if (fields == null || fields.isEmpty()) {
+            return "";
+        }
+        return "UPDATE " + escape(definition) + " SET " + fields.stream().map(e -> escape(e) + " = ?").collect(Collectors.joining(", "));
+    }
 }

@@ -333,7 +333,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         }
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -434,7 +434,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         LOG.info("query result : {}", queryResult);
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -662,7 +662,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         assertEquals(randomString, records.get(2));
         assertEquals(textValue, records.get(5));
 
-        Integer resourceId = this.datatableHelper.deleteDatatableEntries(datatableName, clientId, "resourceId");
+        Integer resourceId = (Integer) this.datatableHelper.deleteDatatableEntries(datatableName, clientId, "resourceId");
         assertEquals(clientId, resourceId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // Update - update, delete DataTable columns
@@ -915,7 +915,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         assertEquals(datatableEntryMap.get("itsAText"), datatableEntryResponseNoGenericResult.get(0).get("itsAText"));
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, loanID, "loanId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(datatableName, loanID, "loanId");
         assertEquals(loanID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable

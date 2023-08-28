@@ -359,8 +359,8 @@ public class DatatableAdvancedQueryTest {
 
     private void deleteDatatable(String datatable, Integer... apptableIds) {
         for (Integer apptableId : apptableIds) {
-            Integer deletedId = this.datatableHelper.deleteDatatableEntries(datatable, apptableId, "resourceId");
-            assertEquals(apptableId, deletedId, "ERROR IN DELETING THE DATATABLE ENTRY");
+            String deletedId = (String) this.datatableHelper.deleteDatatableEntries(datatable, apptableId, "transactionId");
+            assertEquals(apptableId, Integer.valueOf(deletedId), "ERROR IN DELETING THE DATATABLE ENTRY");
         }
         String deletedDatatable = this.datatableHelper.deleteDatatable(datatable);
         assertEquals(datatable, deletedDatatable, "ERROR IN DELETING THE DATATABLE");

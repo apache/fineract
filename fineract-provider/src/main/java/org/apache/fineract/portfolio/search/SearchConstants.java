@@ -31,6 +31,9 @@ public final class SearchConstants {
     public static final String API_PARAM_VALUES = "values";
     public static final String API_PARAM_TABLE = "table";
     public static final String API_PARAM_QUERY = "query";
+    public static final String API_PARAM_DATE_FORMAT = "dateFormat";
+    public static final String API_PARAM_DATETIME_FORMAT = "dateTimeFormat";
+    public static final String API_PARAM_LOCALE = "locale";
 
     private SearchConstants() {}
 

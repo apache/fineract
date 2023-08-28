@@ -155,7 +155,7 @@ public class DatatableHelper extends IntegrationTest {
                 DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER, "resourceIdentifier");
     }
 
-    public Integer deleteDatatableEntries(final String datatableName, final Integer apptableId, String jsonAttributeToGetBack) {
+    public Object deleteDatatableEntries(final String datatableName, final Integer apptableId, String jsonAttributeToGetBack) {
         final String deleteEntryUrl = DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=true" + "&"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, deleteEntryUrl, jsonAttributeToGetBack);

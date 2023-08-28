@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -76,6 +77,14 @@ public final class DateUtils {
 
     public static LocalDateTime getLocalDateTimeOfSystem() {
         return LocalDateTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public static LocalDateTime getAuditLocalDateTime() {
+        return LocalDateTime.now(ZoneId.of("UTC"));
+    }
+
+    public static OffsetDateTime getAuditOffsetDateTime() {
+        return OffsetDateTime.now(ZoneOffset.UTC);
     }
 
     public static boolean isDateInTheFuture(final LocalDate localDate) {
