@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.integrationtests.datatable;
 
+import static org.apache.fineract.integrationtests.common.system.DatatableHelper.addDatatableColumn;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -127,7 +129,6 @@ public class DatatableIntegrationTest extends IntegrationTest {
         final HashMap<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
         columnMap.put("datatableName", Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase());
-        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", false);
         String itsABoolean = "itsaboolean";
@@ -141,27 +142,55 @@ public class DatatableIntegrationTest extends IntegrationTest {
         String tst_tst_tst_cd_itsADropdown = tst_tst_tst + "_cd_itsadropdown";
         String dateFormat = "dateFormat";
 
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsABoolean, "Boolean", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsADate, "Date", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsADatetime, "Datetime", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsADecimal, "Decimal", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsADropdown, "Dropdown", false, null, tst_tst_tst);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsANumber, "Number", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsAString, "String", true, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsAText, "Text", true, null, null);
+        addDatatableColumn(datatableColumnsList, itsABoolean, "Boolean", false, null, null);
+        addDatatableColumn(datatableColumnsList, itsADate, "Date", true, null, null);
+        addDatatableColumn(datatableColumnsList, itsADatetime, "Datetime", true, null, null);
+        addDatatableColumn(datatableColumnsList, itsADecimal, "Decimal", true, null, null);
+        addDatatableColumn(datatableColumnsList, itsADropdown, "Dropdown", false, null, tst_tst_tst);
+        addDatatableColumn(datatableColumnsList, itsANumber, "Number", true, null, null);
+        addDatatableColumn(datatableColumnsList, itsAString, "String", true, 10, null);
         columnMap.put("columns", datatableColumnsList);
+
+        // try to create datatable without apptable
+        columnMap.put("apptableName", null);
+        String errorRequestJsonString = new Gson().toJson(columnMap);
+        ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
+        this.datatableHelper = new DatatableHelper(this.requestSpec, responseSpecError400);
+        HashMap<String, Object> errorResponse = this.datatableHelper.createDatatable(errorRequestJsonString, "");
+        assertEquals("validation.msg.validation.errors.exist", ((Map) errorResponse).get("userMessageGlobalisationCode"));
+        List errors = (List) ((Map) errorResponse).get("errors");
+        assertEquals(2, errors.size());
+        assertEquals("validation.msg.datatable.apptableName.cannot.be.blank", ((Map) errors.get(0)).get("userMessageGlobalisationCode"));
+        assertEquals("validation.msg.datatable.apptableName.is.not.one.of.expected.enumerations",
+                ((Map) errors.get(1)).get("userMessageGlobalisationCode"));
+        // set valid apptable name
+        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+
+        // try to create datatable with invalid column type
+        HashMap<String, Object> textColumn = addDatatableColumn(datatableColumnsList, itsAText, "Invalid", true, null, null);
+        errorRequestJsonString = new Gson().toJson(columnMap);
+        errorResponse = this.datatableHelper.createDatatable(errorRequestJsonString, "");
+        assertEquals("validation.msg.validation.errors.exist", ((Map) errorResponse).get("userMessageGlobalisationCode"));
+        errors = (List) ((Map) errorResponse).get("errors");
+        assertEquals(1, errors.size());
+        Map error = (Map) errors.get(0);
+        assertEquals("validation.msg.datatable.type.is.not.one.of.expected.enumerations", error.get("userMessageGlobalisationCode"));
+        assertTrue(((String) error.get("defaultUserMessage")).contains("string, number, boolean, decimal, date, datetime, text, dropdown"));
+        // set valid type
+        textColumn.put("type", "Text");
+
         String datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map : {}", datatabelRequestJsonString);
+        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
 
         HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
         String datatableName = (String) datatableResponse.get("resourceIdentifier");
         DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
 
         // try to create with the same name
-        ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
         this.datatableHelper = new DatatableHelper(this.requestSpec, responseSpecError400);
-        HashMap<String, Object> response = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
-        assertEquals("validation.msg.validation.errors.exist", ((Map) response).get("userMessageGlobalisationCode"));
+        errorResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
+        assertEquals("validation.msg.validation.errors.exist", ((Map) errorResponse).get("userMessageGlobalisationCode"));
         this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
 
         // creating client with datatables
@@ -304,7 +333,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         }
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -326,9 +355,9 @@ public class DatatableIntegrationTest extends IntegrationTest {
         String itsAString = "itsAString";
         String dateFormat = "dateFormat";
 
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsADate, "Date", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsADecimal, "Decimal", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsAString, "String", true, 10, null);
+        addDatatableColumn(datatableColumnsList, itsADate, "Date", true, null, null);
+        addDatatableColumn(datatableColumnsList, itsADecimal, "Decimal", true, null, null);
+        addDatatableColumn(datatableColumnsList, itsAString, "String", true, 10, null);
         columnMap.put("columns", datatableColumnsList);
         String datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map : {}", datatabelRequestJsonString);
@@ -405,7 +434,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         LOG.info("query result : {}", queryResult);
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -425,14 +454,14 @@ public class DatatableIntegrationTest extends IntegrationTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "");
         columnMap.put("multiRow", true);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADate", "Date", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADatetime", "Datetime", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADecimal", "Decimal", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADropdown", "Dropdown", false, null, "TST_TST_TST");
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsANumber", "Number", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAString", "String", false, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAText", "Text", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADate", "Date", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADatetime", "Datetime", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADecimal", "Decimal", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADropdown", "Dropdown", false, null, "TST_TST_TST");
+        addDatatableColumn(datatableColumnsList, "itsANumber", "Number", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsAString", "String", false, 10, null);
+        addDatatableColumn(datatableColumnsList, "itsAText", "Text", false, null, null);
         columnMap.put("columns", datatableColumnsList);
         String datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map : {}", datatabelRequestJsonString);
@@ -556,8 +585,8 @@ public class DatatableIntegrationTest extends IntegrationTest {
         columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
         columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
         columnMap.put("multiRow", false);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsANumber", "Number", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAString", "String", false, 10, null);
+        addDatatableColumn(datatableColumnsList, "itsANumber", "Number", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsAString", "String", false, 10, null);
         columnMap.put("columns", datatableColumnsList);
         String datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map : {}", datatabelRequestJsonString);
@@ -597,7 +626,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
         columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
         datatableColumnsList = new ArrayList<>();
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAText", "Text", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsAText", "Text", false, null, null);
         columnMap.put("addColumns", datatableColumnsList);
         datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map to update : {}", datatabelRequestJsonString);
@@ -633,7 +662,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         assertEquals(randomString, records.get(2));
         assertEquals(textValue, records.get(5));
 
-        Integer resourceId = this.datatableHelper.deleteDatatableEntries(datatableName, clientId, "resourceId");
+        Integer resourceId = (Integer) this.datatableHelper.deleteDatatableEntries(datatableName, clientId, "resourceId");
         assertEquals(clientId, resourceId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // Update - update, delete DataTable columns
@@ -643,7 +672,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         List<Map<String, Object>> dropColumnsList = Collections.singletonList(Collections.singletonMap("name", "itsANumber"));
         columnMap.put("dropColumns", dropColumnsList);
         ArrayList<HashMap<String, Object>> changeColumnsList = new ArrayList<>();
-        DatatableHelper.addDatatableColumns(changeColumnsList, "itsAString", null, false, 100, null);
+        addDatatableColumn(changeColumnsList, "itsAString", null, false, 100, null);
         columnMap.put("changeColumns", changeColumnsList);
         datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map to update : {}", datatabelRequestJsonString);
@@ -689,14 +718,14 @@ public class DatatableIntegrationTest extends IntegrationTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "");
         columnMap.put("multiRow", true);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADate", "Date", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADatetime", "Datetime", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADecimal", "Decimal", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADropdown", "Dropdown", false, null, tst_tst_tst);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsANumber", "Number", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAString", "String", false, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAText", "Text", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADate", "Date", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADatetime", "Datetime", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADecimal", "Decimal", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADropdown", "Dropdown", false, null, tst_tst_tst);
+        addDatatableColumn(datatableColumnsList, "itsANumber", "Number", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsAString", "String", false, 10, null);
+        addDatatableColumn(datatableColumnsList, "itsAText", "Text", false, null, null);
         columnMap.put("columns", datatableColumnsList);
         String datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map : {}", datatabelRequestJsonString);
@@ -886,7 +915,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         assertEquals(datatableEntryMap.get("itsAText"), datatableEntryResponseNoGenericResult.get(0).get("itsAText"));
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, loanID, "loanId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(datatableName, loanID, "loanId");
         assertEquals(loanID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable

@@ -178,7 +178,8 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
 
         assertNotNull(response);
 
-        String datatableId = response.getResourceIdentifier();
+        String createdName = response.getResourceIdentifier();
+        assertEquals(datatableName, createdName);
 
         // add entries
         final HashMap<String, Object> datatableEntryMap = new HashMap<>();
@@ -190,13 +191,14 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
 
         final boolean genericResultSet = true;
 
-        HashMap<String, Object> datatableEntryResponseFirst = this.datatableHelper.createDatatableEntry(datatableId, transactionId,
+        HashMap<String, Object> datatableEntryResponseFirst = this.datatableHelper.createDatatableEntry(datatableName, transactionId,
                 genericResultSet, datatabelEntryRequestJsonString);
 
-        assertNotNull(datatableEntryResponseFirst.get("resourceId"));
+        Integer datatableId = (Integer) datatableEntryResponseFirst.get("resourceId");
+        assertNotNull(datatableId);
 
         // Read the Datatable entry generated with genericResultSet
-        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableId, transactionId, genericResultSet, null, "");
+        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, transactionId, genericResultSet, null, "");
         assertNotNull(items);
         assertEquals(1, ((List) items.get("data")).size());
 
@@ -206,13 +208,14 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
         datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
         datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         HashMap<String, Object> updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, transactionId,
-                false, datatabelEntryRequestJsonString);
+                datatableId, false, datatabelEntryRequestJsonString);
 
-        assertEquals(transactionId, updatedDatatableEntryResponse.get("resourceId"));
+        assertEquals(transactionId, Integer.valueOf((String) updatedDatatableEntryResponse.get("transactionId")));
+        assertEquals(datatableId, updatedDatatableEntryResponse.get("resourceId"));
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, transactionId, "resourceId");
-        assertEquals(transactionId, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
+        String deletedTransactionId = (String) this.datatableHelper.deleteDatatableEntries(datatableName, transactionId, "transactionId");
+        assertEquals(transactionId, Integer.valueOf(deletedTransactionId), "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
         String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);

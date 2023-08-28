@@ -1405,8 +1405,8 @@ public class BatchApiTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", true);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
         columnMap.put("columns", datatableColumnsList);
         final String datatableRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
@@ -2063,8 +2063,8 @@ public class BatchApiTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", false);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
         columnMap.put("columns", datatableColumnsList);
         final String datatableRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
@@ -2128,8 +2128,8 @@ public class BatchApiTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", false);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 15, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 15, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 15, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 15, null);
         columnMap.put("columns", datatableColumnsList);
         final String datatableRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
@@ -2182,8 +2182,8 @@ public class BatchApiTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", true);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
         columnMap.put("columns", datatableColumnsList);
         final String datatableRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("CreateDataTable map : {}", datatableRequestJsonString);

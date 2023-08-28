@@ -174,7 +174,7 @@ public class SurveyApiResource {
             @PathParam("fulfilledId") final Long fulfilledId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteDatatable(surveyName, clientId, fulfilledId) //
+                .deleteDatatableEntry(surveyName, clientId, fulfilledId) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
