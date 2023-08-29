@@ -567,7 +567,7 @@ public class EntityDatatableChecksIntegrationTest {
                 .toLowerCase();
 
         String itsAString = "itsastring";
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsAString, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, itsAString, "String", true, 10, null);
 
         // Person Subtype
         columnMap.put("datatableName", datatableNamePerson);
