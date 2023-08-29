@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,4 +176,7 @@ public class SavingsAccountRepositoryWrapper {
         }
     }
 
+    public Long findIdByExternalId(final ExternalId externalId) {
+        return this.repository.findIdByExternalId(externalId);
+    }
 }

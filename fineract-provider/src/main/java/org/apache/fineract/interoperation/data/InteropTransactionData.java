@@ -143,7 +143,7 @@ public class InteropTransactionData extends CommandProcessingResult {
             sb.append(SavingsEnumerations.transactionType(transactionType).getValue());
         }
 
-        return new InteropTransactionData(savingsAccount.getId(), savingsAccount.getExternalId(), transactionId, transactionType, amount,
-                chargeAmount, currency, runningBalance, bookingDateTime, valueDateTime, sb.toString());
+        return new InteropTransactionData(savingsAccount.getId(), savingsAccount.getExternalId().getValue(), transactionId, transactionType,
+                amount, chargeAmount, currency, runningBalance, bookingDateTime, valueDateTime, sb.toString());
     }
 }

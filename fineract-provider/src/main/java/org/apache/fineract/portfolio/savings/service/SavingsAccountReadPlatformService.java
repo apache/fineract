@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.service;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -68,4 +69,6 @@ public interface SavingsAccountReadPlatformService {
             Long maxSavingsId);
 
     List<SavingsAccountTransactionData> retrieveAllTransactionData(List<String> refNo);
+
+    Long retrieveAccountIdByExternalId(ExternalId externalId);
 }

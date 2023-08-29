@@ -111,9 +111,9 @@ public class InteropAccountData extends CommandProcessingResult {
         SavingsProduct product = account.savingsProduct();
         SavingsAccountSubStatusEnum subStatus = SavingsAccountSubStatusEnum.fromInt(account.getSubStatus());
 
-        return new InteropAccountData(account.getExternalId(), product.getId().toString(), product.getName(), product.getShortName(),
-                account.getCurrency().getCode(), account.getAccountBalance(), account.getWithdrawableBalance(), account.getStatus(),
-                subStatus, account.getAccountType(), account.depositAccountType(), account.getActivationLocalDate(),
+        return new InteropAccountData(account.getExternalId().getValue(), product.getId().toString(), product.getName(),
+                product.getShortName(), account.getCurrency().getCode(), account.getAccountBalance(), account.getWithdrawableBalance(),
+                account.getStatus(), subStatus, account.getAccountType(), account.depositAccountType(), account.getActivationLocalDate(),
                 calcStatusUpdateOn(account), account.getWithdrawnOnDate(), account.retrieveLastTransactionDate(), ids,
                 account.getClient().getId());
     }

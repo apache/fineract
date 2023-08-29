@@ -230,6 +230,8 @@ final class SavingsAccountsApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "01 March 2011")
         public String submittedOnDate;
+        @Schema(example = "123")
+        public String externalId;
     }
 
     @Schema(description = "PostSavingsAccountsResponse")

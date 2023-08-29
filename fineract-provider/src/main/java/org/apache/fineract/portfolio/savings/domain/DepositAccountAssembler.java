@@ -70,6 +70,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
@@ -119,6 +120,8 @@ public class DepositAccountAssembler {
     private final DepositProductAssembler depositProductAssembler;
     private final PaymentDetailAssembler paymentDetailAssembler;
 
+    private final ExternalIdFactory externalIdFactory;
+
     @Autowired
     public DepositAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
             final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
@@ -128,7 +131,7 @@ public class DepositAccountAssembler {
             final DepositProductAssembler depositProductAssembler,
             final RecurringDepositProductRepository recurringDepositProductRepository,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final PlatformSecurityContext context,
-            final PaymentDetailAssembler paymentDetailAssembler) {
+            final PaymentDetailAssembler paymentDetailAssembler, ExternalIdFactory externalIdFactory) {
 
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
@@ -143,6 +146,7 @@ public class DepositAccountAssembler {
         this.savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
         this.context = context;
         this.paymentDetailAssembler = paymentDetailAssembler;
+        this.externalIdFactory = externalIdFactory;
     }
 
     /**
@@ -323,10 +327,10 @@ public class DepositAccountAssembler {
                     prodTermAndPreClosure);
 
             FixedDepositAccount fdAccount = FixedDepositAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer,
-                    accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
-                    interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges,
-                    accountTermAndPreClosure, accountChart, withHoldTax);
+                    accountNo, externalIdFactory.create(externalId), accountType, submittedOnDate, submittedBy, interestRate,
+                    interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
+                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer,
+                    charges, accountTermAndPreClosure, accountChart, withHoldTax);
             accountTermAndPreClosure.updateAccountReference(fdAccount);
             fdAccount.validateDomainRules();
             account = fdAccount;
@@ -341,7 +345,7 @@ public class DepositAccountAssembler {
                     prodRecurringDetail.recurringDetail());
 
             RecurringDepositAccount rdAccount = RecurringDepositAccount.createNewApplicationForSubmittal(client, group, product,
-                    fieldOfficer, accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate,
+                    fieldOfficer, accountNo, externalIdFactory.create(externalId), accountType, submittedOnDate, submittedBy, interestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer,
                     charges, accountTermAndPreClosure, accountRecurringDetail, accountChart, withHoldTax);
