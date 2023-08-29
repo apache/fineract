@@ -188,14 +188,14 @@ public class DatatableHelper extends IntegrationTest {
             map.put("entitySubType", "");
         }
         map.put("multiRow", multiRow);
-        addDatatableColumns(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
-        addDatatableColumns(datatableColumnsList, "itsADate", "Date", true, null, null);
-        addDatatableColumns(datatableColumnsList, "itsADatetime", "Datetime", true, null, null);
-        addDatatableColumns(datatableColumnsList, "itsADecimal", "Decimal", true, null, null);
-        addDatatableColumns(datatableColumnsList, "itsADropdown", "Dropdown", false, null, codeName);
-        addDatatableColumns(datatableColumnsList, "itsANumber", "Number", true, null, null);
-        addDatatableColumns(datatableColumnsList, "itsAString", "String", true, 10, null);
-        addDatatableColumns(datatableColumnsList, "itsAText", "Text", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADate", "Date", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADatetime", "Datetime", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADecimal", "Decimal", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADropdown", "Dropdown", false, null, codeName);
+        addDatatableColumn(datatableColumnsList, "itsANumber", "Number", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsAString", "String", true, 10, null);
+        addDatatableColumn(datatableColumnsList, "itsAText", "Text", true, null, null);
         map.put("columns", datatableColumnsList);
         String requestJsonString = new Gson().toJson(map);
         LOG.info("map : {}", requestJsonString);
@@ -209,10 +209,10 @@ public class DatatableHelper extends IntegrationTest {
         map.put("apptableName", apptableName);
         map.put("entitySubType", "PERSON");
         map.put("multiRow", multiRow);
-        addDatatableColumns(datatableColumnsList, "Spouse Name", "String", true, 25, null);
-        addDatatableColumns(datatableColumnsList, "Number of Dependents", "Number", true, null, null);
-        addDatatableColumns(datatableColumnsList, "Time of Visit", "DateTime", false, null, null);
-        addDatatableColumns(datatableColumnsList, "Date of Approval", "Date", false, null, null);
+        addDatatableColumn(datatableColumnsList, "Spouse Name", "String", true, 25, null);
+        addDatatableColumn(datatableColumnsList, "Number of Dependents", "Number", true, null, null);
+        addDatatableColumn(datatableColumnsList, "Time of Visit", "DateTime", false, null, null);
+        addDatatableColumn(datatableColumnsList, "Date of Approval", "Date", false, null, null);
         map.put("columns", datatableColumnsList);
         String requestJsonString = new Gson().toJson(map);
         LOG.info("map : {}", requestJsonString);
@@ -232,7 +232,7 @@ public class DatatableHelper extends IntegrationTest {
         return requestJsonString;
     }
 
-    public static List<HashMap<String, Object>> addDatatableColumns(List<HashMap<String, Object>> datatableColumnsList, String columnName,
+    public static HashMap<String, Object> addDatatableColumn(List<HashMap<String, Object>> datatableColumnsList, String columnName,
             String columnType, boolean isMandatory, Integer length, String codeName) {
         final HashMap<String, Object> datatableColumnMap = new HashMap<>();
 
@@ -249,10 +249,10 @@ public class DatatableHelper extends IntegrationTest {
         }
 
         datatableColumnsList.add(datatableColumnMap);
-        return datatableColumnsList;
+        return datatableColumnMap;
     }
 
-    public static List<HashMap<String, Object>> addDatatableColumnsWithUniqueAndIndex(List<HashMap<String, Object>> datatableColumnsList,
+    public static List<HashMap<String, Object>> addDatatableColumnWithUniqueAndIndex(List<HashMap<String, Object>> datatableColumnsList,
             String columnName, String columnType, boolean isMandatory, Integer length, String codeName, boolean isUnique,
             boolean isIndexed) {
 

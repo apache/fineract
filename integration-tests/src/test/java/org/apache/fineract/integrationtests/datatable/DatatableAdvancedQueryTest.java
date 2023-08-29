@@ -315,13 +315,13 @@ public class DatatableAdvancedQueryTest {
         request.put(API_PARAM_MULTIROW, multiRow);
 
         final List<HashMap<String, Object>> datatableColumns = new ArrayList<>();
-        DatatableHelper.addDatatableColumnsWithUniqueAndIndex(datatableColumns, COLUMN_STRING, API_FIELD_TYPE_STRING, true, 50, null,
+        DatatableHelper.addDatatableColumnWithUniqueAndIndex(datatableColumns, COLUMN_STRING, API_FIELD_TYPE_STRING, true, 50, null,
                 !multiRow, true);
-        DatatableHelper.addDatatableColumns(datatableColumns, COLUMN_TEXT, API_FIELD_TYPE_TEXT, false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumns, COLUMN_DATE, API_FIELD_TYPE_DATE, true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumns, COLUMN_BOOLEAN, API_FIELD_TYPE_BOOLEAN, false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumns, COLUMN_INTEGER, API_FIELD_TYPE_NUMBER, false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumns, COLUMN_DECIMAL, API_FIELD_TYPE_DECIMAL, false, null, null);
+        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_TEXT, API_FIELD_TYPE_TEXT, false, null, null);
+        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_DATE, API_FIELD_TYPE_DATE, true, null, null);
+        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_BOOLEAN, API_FIELD_TYPE_BOOLEAN, false, null, null);
+        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_INTEGER, API_FIELD_TYPE_NUMBER, false, null, null);
+        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_DECIMAL, API_FIELD_TYPE_DECIMAL, false, null, null);
         request.put(API_PARAM_COLUMNS, datatableColumns);
 
         String requestJson = new Gson().toJson(request);

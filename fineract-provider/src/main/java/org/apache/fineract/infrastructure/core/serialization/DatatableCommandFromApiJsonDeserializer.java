@@ -132,7 +132,7 @@ public class DatatableCommandFromApiJsonDeserializer {
         EntityTables entityTable = EntityTables.fromEntityName(apptableName);
         validateEntitySubType(baseDataValidator, element, entityTable);
 
-        final String fkColumnName = entityTable.getForeignKeyColumnNameOnDatatable();
+        final String fkColumnName = entityTable == null ? null : entityTable.getForeignKeyColumnNameOnDatatable();
 
         final Boolean multiRow = this.fromApiJsonHelper.extractBooleanNamed(API_PARAM_MULTIROW, element);
         baseDataValidator.reset().parameter(API_PARAM_MULTIROW).value(multiRow).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
@@ -303,16 +303,17 @@ public class DatatableCommandFromApiJsonDeserializer {
         if (type == null) {
             return;
         }
-        final Integer length = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(API_FIELD_LENGTH, column);
-        JdbcJavaType jdbcType = mapApiTypeToJdbcType(type);
-        validator = validator.reset().parameter(API_FIELD_LENGTH).value(length);
-        if (jdbcType.hasPrecision(databaseTypeResolver.databaseType())) {
-            if (jdbcType.isStringType() && length == null) {
-                validator.failWithCode("must.be.provided.when.type.is.String");
-            }
-            validator.ignoreIfNull().positiveAmount();
-        } // else, the precision is ignored
-
+        JdbcJavaType jdbcType = mapApiTypeToJdbcType(type, false);
+        if (jdbcType != null) {
+            final Integer length = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(API_FIELD_LENGTH, column);
+            validator = validator.reset().parameter(API_FIELD_LENGTH).value(length);
+            if (jdbcType.hasPrecision(databaseTypeResolver.databaseType())) {
+                if (jdbcType.isStringType() && length == null) {
+                    validator.failWithCode("must.be.provided.when.type.is.String");
+                }
+                validator.ignoreIfNull().positiveAmount();
+            } // else, the precision is ignored
+        }
         final String code = this.fromApiJsonHelper.extractStringNamed(API_FIELD_CODE, column);
         if (type.equalsIgnoreCase(API_FIELD_TYPE_DROPDOWN)) {
             if (code != null) {
@@ -325,20 +326,38 @@ public class DatatableCommandFromApiJsonDeserializer {
         }
     }
 
+    private static JdbcJavaType mapApiTypeToJdbcType(@NotNull String apiType, boolean fail) {
+        switch (apiType.toLowerCase()) {
+            case API_FIELD_TYPE_STRING:
+                return VARCHAR;
+            case API_FIELD_TYPE_NUMBER, API_FIELD_TYPE_DROPDOWN:
+                return INTEGER;
+            case API_FIELD_TYPE_BOOLEAN:
+                return BOOLEAN;
+            case API_FIELD_TYPE_DECIMAL:
+                return DECIMAL;
+            case API_FIELD_TYPE_DATE:
+                return DATE;
+            case API_FIELD_TYPE_DATETIME:
+                return DATETIME;
+            case API_FIELD_TYPE_TIMESTAMP:
+                return TIMESTAMP;
+            case API_FIELD_TYPE_TEXT:
+                return TEXT;
+            default: {
+                if (fail) {
+                    throw new PlatformDataIntegrityException("error.msg.datatable.column.type.invalid",
+                            "Column type " + apiType + " is not supported.");
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
+
     @NotNull
     public static JdbcJavaType mapApiTypeToJdbcType(@NotNull String apiType) {
-        return switch (apiType.toLowerCase()) {
-            case API_FIELD_TYPE_STRING -> VARCHAR;
-            case API_FIELD_TYPE_NUMBER, API_FIELD_TYPE_DROPDOWN -> INTEGER;
-            case API_FIELD_TYPE_BOOLEAN -> BOOLEAN;
-            case API_FIELD_TYPE_DECIMAL -> DECIMAL;
-            case API_FIELD_TYPE_DATE -> DATE;
-            case API_FIELD_TYPE_DATETIME -> DATETIME;
-            case API_FIELD_TYPE_TIMESTAMP -> TIMESTAMP;
-            case API_FIELD_TYPE_TEXT -> TEXT;
-            default -> throw new PlatformDataIntegrityException("error.msg.datatable.column.type.invalid",
-                    "Column type " + apiType + " is not supported.");
-        };
+        return mapApiTypeToJdbcType(apiType, true);
     }
 
     private void validateEntitySubType(final DataValidatorBuilder baseDataValidator, final JsonElement element,
