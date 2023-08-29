@@ -48,8 +48,8 @@ class LoanProductPaymentAllocationRuleMergerTest {
 
         // then
         Assertions.assertTrue(result);
-        Assertions.assertEquals(1, loanProduct.getLoanProductPaymentAllocationRules().size());
-        Assertions.assertEquals(rule1, loanProduct.getLoanProductPaymentAllocationRules().get(0));
+        Assertions.assertEquals(1, loanProduct.getPaymentAllocationRules().size());
+        Assertions.assertEquals(rule1, loanProduct.getPaymentAllocationRules().get(0));
     }
 
     @Test
@@ -61,15 +61,15 @@ class LoanProductPaymentAllocationRuleMergerTest {
         LoanProductPaymentAllocationRule rule1 = createRule(DEFAULT, LAST_INSTALLMENT, List.of(DUE_INTEREST));
         LoanProductPaymentAllocationRule rule2 = createRule(DEFAULT, LAST_INSTALLMENT, List.of(PAST_DUE_FEE));
 
-        loanProduct.getLoanProductPaymentAllocationRules().add(rule1);
+        loanProduct.getPaymentAllocationRules().add(rule1);
 
         // when
         boolean result = underTest.updateProductPaymentAllocationRules(loanProduct, List.of(rule2));
 
         // then
         Assertions.assertTrue(result);
-        Assertions.assertEquals(1, loanProduct.getLoanProductPaymentAllocationRules().size());
-        Assertions.assertEquals(PAST_DUE_FEE, loanProduct.getLoanProductPaymentAllocationRules().get(0).getAllocationTypes().get(0));
+        Assertions.assertEquals(1, loanProduct.getPaymentAllocationRules().size());
+        Assertions.assertEquals(PAST_DUE_FEE, loanProduct.getPaymentAllocationRules().get(0).getAllocationTypes().get(0));
     }
 
     @Test
@@ -81,16 +81,16 @@ class LoanProductPaymentAllocationRuleMergerTest {
         LoanProductPaymentAllocationRule rule1 = createRule(DEFAULT, LAST_INSTALLMENT, List.of(DUE_INTEREST));
         LoanProductPaymentAllocationRule rule2 = createRule(REPAYMENT, LAST_INSTALLMENT, List.of(PAST_DUE_FEE));
 
-        loanProduct.getLoanProductPaymentAllocationRules().addAll(List.of(rule1, rule2));
+        loanProduct.getPaymentAllocationRules().addAll(List.of(rule1, rule2));
 
         // when
         boolean result = underTest.updateProductPaymentAllocationRules(loanProduct, List.of(rule2, rule1));
 
         // then
         Assertions.assertFalse(result);
-        Assertions.assertEquals(2, loanProduct.getLoanProductPaymentAllocationRules().size());
-        Assertions.assertEquals(rule1, loanProduct.getLoanProductPaymentAllocationRules().get(0));
-        Assertions.assertEquals(rule2, loanProduct.getLoanProductPaymentAllocationRules().get(1));
+        Assertions.assertEquals(2, loanProduct.getPaymentAllocationRules().size());
+        Assertions.assertEquals(rule1, loanProduct.getPaymentAllocationRules().get(0));
+        Assertions.assertEquals(rule2, loanProduct.getPaymentAllocationRules().get(1));
     }
 
     @Test
@@ -99,14 +99,14 @@ class LoanProductPaymentAllocationRuleMergerTest {
         LoanProductPaymentAllocationRuleMerger underTest = new LoanProductPaymentAllocationRuleMerger();
         LoanProduct loanProduct = new LoanProduct();
         LoanProductPaymentAllocationRule rule1 = createRule(DEFAULT, LAST_INSTALLMENT, List.of(DUE_INTEREST));
-        loanProduct.getLoanProductPaymentAllocationRules().add(rule1);
+        loanProduct.getPaymentAllocationRules().add(rule1);
 
         // when
         boolean result = underTest.updateProductPaymentAllocationRules(loanProduct, List.of());
 
         // then
         Assertions.assertTrue(result);
-        Assertions.assertEquals(0, loanProduct.getLoanProductPaymentAllocationRules().size());
+        Assertions.assertEquals(0, loanProduct.getPaymentAllocationRules().size());
     }
 
     @Test
@@ -115,7 +115,7 @@ class LoanProductPaymentAllocationRuleMergerTest {
         LoanProductPaymentAllocationRuleMerger underTest = new LoanProductPaymentAllocationRuleMerger();
         LoanProduct loanProduct = new LoanProduct();
         LoanProductPaymentAllocationRule rule1 = createRule(DEFAULT, LAST_INSTALLMENT, List.of(DUE_INTEREST));
-        loanProduct.getLoanProductPaymentAllocationRules().add(rule1);
+        loanProduct.getPaymentAllocationRules().add(rule1);
         LoanProductPaymentAllocationRule rule2 = createRule(REPAYMENT, LAST_INSTALLMENT, List.of(DUE_INTEREST));
 
         // when
@@ -123,9 +123,9 @@ class LoanProductPaymentAllocationRuleMergerTest {
 
         // then
         Assertions.assertTrue(result);
-        Assertions.assertEquals(2, loanProduct.getLoanProductPaymentAllocationRules().size());
-        Assertions.assertEquals(rule1, loanProduct.getLoanProductPaymentAllocationRules().get(0));
-        Assertions.assertEquals(rule2, loanProduct.getLoanProductPaymentAllocationRules().get(1));
+        Assertions.assertEquals(2, loanProduct.getPaymentAllocationRules().size());
+        Assertions.assertEquals(rule1, loanProduct.getPaymentAllocationRules().get(0));
+        Assertions.assertEquals(rule2, loanProduct.getPaymentAllocationRules().get(1));
     }
 
     public LoanProductPaymentAllocationRule createRule(PaymentAllocationTransactionType transactionType,

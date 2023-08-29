@@ -19,11 +19,10 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -35,6 +34,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -42,13 +42,13 @@ import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 @Getter
 @Setter
 @Entity
-@Table(name = "m_loan_payment_allocation", uniqueConstraints = {
+@Table(name = "m_loan_payment_allocation_rule", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "loan_id", "transaction_type" }, name = "uq_m_loan_payment_allocation_rule") })
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LoanPaymentAllocationRule extends AbstractAuditableWithUTCDateTimeCustom {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 
@@ -56,7 +56,7 @@ public class LoanPaymentAllocationRule extends AbstractAuditableWithUTCDateTimeC
     @Enumerated(EnumType.STRING)
     private PaymentAllocationTransactionType transactionType;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @Convert(converter = AllocationTypeListConverter.class)
     @Column(name = "allocation_types", nullable = false)
     private List<PaymentAllocationType> allocationTypes;
 

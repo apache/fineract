@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
@@ -1911,5 +1912,9 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public PostLoansLoanIdTransactionsResponse makeLoanDownPayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "downPayment"));
+    }
+
+    public List<AdvancedPaymentData> getAdvancedPaymentAllocationRules(final Integer loanId) {
+        return ok(fineract().legacy.getAdvancedPaymentAllocationRulesOfLoan(loanId.longValue()));
     }
 }
