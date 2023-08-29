@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import jakarta.persistence.LockModeType;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -65,5 +66,8 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
 
     Page<SavingsAccount> findByStatus(Integer status, Pageable pageable);
 
-    SavingsAccount findByExternalId(String externalId);
+    SavingsAccount findByExternalId(ExternalId externalId);
+
+    @Query("SELECT sa.id FROM SavingsAccount sa WHERE sa.externalId = :externalId")
+    Long findIdByExternalId(@Param("externalId") ExternalId externalId);
 }
