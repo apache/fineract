@@ -119,7 +119,7 @@ public class DateValidationTest {
         HashMap<String, Object> error = errors.get(0);
         assertNotNull(error);
         assertEquals(
-                "The parameter `expectedDisbursementDate` is invalid based on the dateFormat: `dd MMMM uuuu` and locale: `en_GB` provided:",
+                "The parameter `expectedDisbursementDate` is invalid based on the dateFormat: `dd MMMM yyyy` and locale: `en_GB` provided:",
                 error.get("developerMessage"));
     }
 
@@ -134,7 +134,7 @@ public class DateValidationTest {
         assertNotNull(errors);
         Map<String, Object> error = errors.get(0);
         assertNotNull(error);
-        assertEquals("The parameter `expiration` is invalid based on the dateFormat: `dd MMMM uuuu HH:mm:ss` and locale: `en` provided:",
+        assertEquals("The parameter `expiration` is invalid based on the dateFormat: `dd MMMM yyyy HH:mm:ss` and locale: `en` provided:",
                 error.get("developerMessage"));
     }
 

@@ -473,11 +473,12 @@ public class JsonParserHelper {
                 parametersPassedInCommand.add(parameterName);
 
                 try {
-                    timeFormat = timeFormat.replace("y", "u");
+                    String strictResolveCompatibleTimeFormat = timeFormat.replace("y", "u");
                     final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                     timeValueAsString = primitive.getAsString();
                     DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                            .appendPattern(timeFormat).toFormatter(clientApplicationLocale).withResolverStyle(ResolverStyle.STRICT);
+                            .appendPattern(strictResolveCompatibleTimeFormat).toFormatter(clientApplicationLocale)
+                            .withResolverStyle(ResolverStyle.STRICT);
                     if (StringUtils.isNotBlank(timeValueAsString)) {
                         value = LocalDateTime.parse(timeValueAsString, timeFormatter);
                     }
@@ -540,9 +541,9 @@ public class JsonParserHelper {
         LocalDateTime eventLocalDateTime = null;
         if (StringUtils.isNotBlank(dateTimeAsString)) {
             try {
-                dateTimeFormat = dateTimeFormat.replace("y", "u");
+                String strictResolveCompatibleDateTimeFormat = dateTimeFormat.replace("y", "u");
                 DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                        .appendPattern(dateTimeFormat).optionalStart().appendPattern(" HH:mm:ss").optionalEnd()
+                        .appendPattern(strictResolveCompatibleDateTimeFormat).optionalStart().appendPattern(" HH:mm:ss").optionalEnd()
                         .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
                         .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter(clientApplicationLocale)
                         .withResolverStyle(ResolverStyle.STRICT);
