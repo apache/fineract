@@ -372,9 +372,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     loanTransactionMapped = true;
                     break;
 
-                    // If already exists an additional installment just update
+                    // If already exists an additional installment just update the due date and
                     // principal from the Loan chargeback / CBR transaction
                 } else if (currentInstallment.isAdditional()) {
+                    if (transactionDate.isAfter(currentInstallment.getDueDate())) {
+                        currentInstallment.updateDueDate(transactionDate);
+                    }
+
                     currentInstallment.updateCredits(transactionDate, transactionAmount);
                     if (repaidAmount.isGreaterThanZero()) {
                         currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);

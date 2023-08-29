@@ -143,7 +143,8 @@ public class LoanTransactionReverseReplayTest {
     /**
      * 1 create a loan account - approve and disburse // 2. make repayment (fully paid) // 3. add the charge greater
      * than the maturity date // 4. make 2nd payment with excess amount - the loan will move to overpaid state. // 5. Do
-     * a CBR transaction // 6. reverse the 2nd payment // 7. check the repayment schedule due date. //
+     * a CBR transaction // 6. reverse the 2nd payment // 7. check the repayment schedule due date. 8. add chargeback
+     * for 1st repayment 9. check the repayment schedule due date //
      */
     @Test
     public void loanTransactionReverseReplayWithAdditionalInstallmentAndChargesScheduleDueDateTest() {
@@ -167,8 +168,9 @@ public class LoanTransactionReverseReplayTest {
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
 
             // make repayment
+            String loanTransactionExternalIdStr = UUID.randomUUID().toString();
             loanTransactionHelper.makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN)
-                    .transactionDate("03 October 2022").locale("en").transactionAmount(1000.0));
+                    .transactionDate("03 October 2022").locale("en").transactionAmount(1000.0).externalId(loanTransactionExternalIdStr));
 
             LocalDate targetDate = LocalDate.of(2022, 10, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
@@ -201,6 +203,16 @@ public class LoanTransactionReverseReplayTest {
             loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             lastPeriodIndex = loansLoanIdResponse.getRepaymentSchedule().getPeriods().size() - 1;
             assertEquals(LocalDate.of(2022, 10, 10),
+                    loansLoanIdResponse.getRepaymentSchedule().getPeriods().get(lastPeriodIndex).getDueDate());
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("11 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+            loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, loanTransactionExternalIdStr,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0).paymentTypeId(1L));
+
+            loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
+            lastPeriodIndex = loansLoanIdResponse.getRepaymentSchedule().getPeriods().size() - 1;
+            assertEquals(LocalDate.of(2022, 10, 11),
                     loansLoanIdResponse.getRepaymentSchedule().getPeriods().get(lastPeriodIndex).getDueDate());
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
