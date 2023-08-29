@@ -43,6 +43,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanproduct.data.AdvancedPaymentData;
+import org.apache.fineract.portfolio.loanproduct.mapper.AdvancedPaymentDataMapper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -59,6 +61,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     private final ToApiJsonSerializer<Map> toApiJsonSerializerForMap;
     private final ToApiJsonSerializer<List> toApiJsonSerializerForList;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final AdvancedPaymentDataMapper advancedPaymentDataMapper;
 
     @Override
     public void afterPropertiesSet() {
@@ -125,5 +128,21 @@ public class InternalLoanInformationApiResource implements InitializingBean {
         final List<Long> loanIds = loanRepositoryWrapper.findLoanIdsByStatusId(statusId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerForList.serialize(settings, loanIds);
+    }
+
+    @GET
+    @Path("{loanId}/advanced-payment-allocation-rules")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public List<AdvancedPaymentData> getAdvancedPaymentAllocationRulesOfLoan(@Context final UriInfo uriInfo,
+            @PathParam("loanId") Long loanId) {
+        log.warn("------------------------------------------------------------");
+        log.warn("                                                            ");
+        log.warn("Fetching advanced payment allocation rules by loanId {}", loanId);
+        log.warn("                                                            ");
+        log.warn("------------------------------------------------------------");
+
+        final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        return advancedPaymentDataMapper.mapLoanPaymentAllocationRule(loan.getPaymentAllocationRules());
     }
 }

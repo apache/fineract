@@ -37,9 +37,8 @@ public class LoanProductPaymentAllocationRuleMerger {
             return false;
         }
         boolean updated = false;
-        Map<PaymentAllocationTransactionType, LoanProductPaymentAllocationRule> originalItems = loanProduct
-                .getLoanProductPaymentAllocationRules().stream()
-                .collect(Collectors.toMap(LoanProductPaymentAllocationRule::getTransactionType, Function.identity()));
+        Map<PaymentAllocationTransactionType, LoanProductPaymentAllocationRule> originalItems = loanProduct.getPaymentAllocationRules()
+                .stream().collect(Collectors.toMap(LoanProductPaymentAllocationRule::getTransactionType, Function.identity()));
         Map<PaymentAllocationTransactionType, LoanProductPaymentAllocationRule> newItems = newLoanProductPaymentAllocationRules.stream()
                 .collect(Collectors.toMap(LoanProductPaymentAllocationRule::getTransactionType, Function.identity()));
 
@@ -50,7 +49,7 @@ public class LoanProductPaymentAllocationRuleMerger {
         if (existing.size() > 0) {
             updated = true;
             existing.forEach(type -> {
-                loanProduct.getLoanProductPaymentAllocationRules().remove(originalItems.get(type));
+                loanProduct.getPaymentAllocationRules().remove(originalItems.get(type));
             });
         }
 
@@ -61,7 +60,7 @@ public class LoanProductPaymentAllocationRuleMerger {
         if (newSet.size() > 0) {
             updated = true;
             newSet.forEach(type -> {
-                loanProduct.getLoanProductPaymentAllocationRules().add(newItems.get(type));
+                loanProduct.getPaymentAllocationRules().add(newItems.get(type));
             });
         }
 

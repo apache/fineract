@@ -91,7 +91,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     private String transactionProcessingStrategyName;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = new ArrayList<>();
+    private List<LoanProductPaymentAllocationRule> paymentAllocationRules = new ArrayList<>();
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
@@ -600,7 +600,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     }
 
     public LoanProduct(final Fund fund, final String transactionProcessingStrategyCode,
-            final List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules, final String name, final String shortName,
+            final List<LoanProductPaymentAllocationRule> paymentAllocationRules, final String name, final String shortName,
             final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
@@ -635,9 +635,9 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
-        this.loanProductPaymentAllocationRules = loanProductPaymentAllocationRules;
-        if (this.loanProductPaymentAllocationRules != null) {
-            for (LoanProductPaymentAllocationRule loanProductPaymentAllocationRule : this.loanProductPaymentAllocationRules) {
+        this.paymentAllocationRules = paymentAllocationRules;
+        if (this.paymentAllocationRules != null) {
+            for (LoanProductPaymentAllocationRule loanProductPaymentAllocationRule : this.paymentAllocationRules) {
                 loanProductPaymentAllocationRule.setLoanProduct(this);
             }
         }
@@ -731,7 +731,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     }
 
     public void validateLoanProductPreSave() {
-        if (this.loanProductPaymentAllocationRules != null && loanProductPaymentAllocationRules.size() > 0
+        if (this.paymentAllocationRules != null && paymentAllocationRules.size() > 0
                 && !transactionProcessingStrategyCode.equals("advanced-payment-allocation-strategy")) {
             throw new LoanProductGeneralRuleException(
                     "payment_allocation.must.not.be.provided.when.allocation.strategy.is.not.advanced-payment-strategy",
@@ -867,8 +867,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         return this.charges;
     }
 
-    public List<LoanProductPaymentAllocationRule> getLoanProductPaymentAllocationRules() {
-        return this.loanProductPaymentAllocationRules;
+    public List<LoanProductPaymentAllocationRule> getPaymentAllocationRules() {
+        return this.paymentAllocationRules;
     }
 
     public void update(final LoanProductConfigurableAttributes loanConfigurableAttributes) {
