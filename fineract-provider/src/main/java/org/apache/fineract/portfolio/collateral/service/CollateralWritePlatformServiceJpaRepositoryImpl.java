@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.collateral.service;
 
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -41,37 +43,20 @@ import org.apache.fineract.portfolio.collateral.exception.CollateralNotFoundExce
 import org.apache.fineract.portfolio.collateral.serialization.CollateralCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class CollateralWritePlatformServiceJpaRepositoryImpl implements CollateralWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CollateralWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanCollateralRepository collateralRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final CollateralCommandFromApiJsonDeserializer collateralCommandFromApiJsonDeserializer;
-
-    @Autowired
-    public CollateralWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final LoanCollateralRepository collateralRepository,
-            final CodeValueRepositoryWrapper codeValueRepository,
-            final CollateralCommandFromApiJsonDeserializer collateralCommandFromApiJsonDeserializer) {
-        this.context = context;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.collateralRepository = collateralRepository;
-        this.codeValueRepository = codeValueRepository;
-        this.collateralCommandFromApiJsonDeserializer = collateralCommandFromApiJsonDeserializer;
-    }
 
     @Transactional
     @Override
@@ -179,7 +164,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
     }
 
     private void handleCollateralDataIntegrityViolation(final NonTransientDataAccessException dve) {
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.collateral.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
