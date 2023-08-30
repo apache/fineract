@@ -63,15 +63,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return getCode().equalsIgnoreCase(s) || getName().equalsIgnoreCase(s);
     }
 
-    /**
-     * Provides support for passing all {@link LoanTransaction}'s so it will completely re-process the entire loan
-     * schedule. This is required in cases where the {@link LoanTransaction} being processed is in the past and falls
-     * before existing transactions or and adjustment is made to an existing in which case the entire loan schedule
-     * needs to be re-processed.
-     */
-
     @Override
-    public ChangedTransactionDetail handleTransaction(final LocalDate disbursementDate,
+    public ChangedTransactionDetail reprocessLoanTranactions(final LocalDate disbursementDate,
             final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
 
@@ -155,20 +148,15 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         for (final LoanTransaction loanTransaction : transactionsToBeProcessed) {
             // TODO: analyze and remove this
             if (!loanTransaction.getTypeOf().equals(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN)) {
-                final Comparator<LoanRepaymentScheduleInstallment> byDate = new Comparator<LoanRepaymentScheduleInstallment>() {
-
-                    @Override
-                    public int compare(LoanRepaymentScheduleInstallment ord1, LoanRepaymentScheduleInstallment ord2) {
-                        return ord1.getDueDate().compareTo(ord2.getDueDate());
-                    }
-                };
-                Collections.sort(installments, byDate);
+                final Comparator<LoanRepaymentScheduleInstallment> byDate = Comparator
+                        .comparing(LoanRepaymentScheduleInstallment::getDueDate);
+                installments.sort(byDate);
             }
 
             if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
-                    handleTransaction(loanTransaction, currency, installments, charges);
+                    processLatestTransaction(loanTransaction, currency, installments, charges, null);
                     loanTransaction.adjustInterestComponent(currency);
                 } else {
                     /**
@@ -179,7 +167,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                     // Reset derived component of new loan transaction and
                     // re-process transaction
-                    handleTransaction(newLoanTransaction, currency, installments, charges);
+                    processLatestTransaction(newLoanTransaction, currency, installments, charges, null);
                     newLoanTransaction.adjustInterestComponent(currency);
                     /**
                      * Check if the transaction amounts have changed. If so, reverse the original transaction and update
@@ -210,6 +198,134 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
         reprocessInstallments(installments, currency);
         return changedTransactionDetail;
+    }
+
+    @Override
+    public void processLatestTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
+            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, Money overpaidAmount) {
+        switch (loanTransaction.getTypeOf()) {
+            case WRITEOFF -> handleWriteOff(loanTransaction, currency, installments);
+            case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, currency, installments, charges);
+            case CHARGEBACK -> handleChargeback(loanTransaction, currency, overpaidAmount, installments);
+            default -> {
+                Money transactionAmountUnprocessed = handleTransactionAndCharges(loanTransaction, currency, installments, charges, null,
+                        false);
+                if (transactionAmountUnprocessed.isGreaterThanZero()) {
+                    if (loanTransaction.isWaiver()) {
+                        loanTransaction.updateComponentsAndTotal(transactionAmountUnprocessed.zero(), transactionAmountUnprocessed.zero(),
+                                transactionAmountUnprocessed.zero(), transactionAmountUnprocessed.zero());
+                    } else {
+                        onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
+                        loanTransaction.updateOverPayments(transactionAmountUnprocessed);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public Money handleRepaymentSchedule(final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
+            final List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> loanCharges) {
+        Money unProcessed = Money.zero(currency);
+        for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
+            if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
+                loanTransaction.resetDerivedComponents();
+            }
+            if (loanTransaction.isInterestWaiver()) {
+                processTransaction(loanTransaction, currency, installments, loanCharges, null);
+            } else {
+                unProcessed = processTransaction(loanTransaction, currency, installments, loanCharges, null);
+            }
+        }
+        return unProcessed;
+    }
+
+    @Override
+    public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
+        return false;
+    }
+
+    // abstract interface
+
+    /**
+     * For early/'in advance' repayments.
+     *
+     * @param transactionMappings
+     *            TODO
+     * @param charges
+     */
+    protected abstract Money handleTransactionThatIsPaymentInAdvanceOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+            List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money paymentInAdvance,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
+
+    /**
+     * For normal on-time repayments.
+     *
+     * @param transactionMappings
+     *            TODO
+     * @param charges
+     */
+    protected abstract Money handleTransactionThatIsOnTimePaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
+
+    /**
+     * For late repayments, how should components of installment be paid off
+     *
+     * @param transactionMappings
+     *            TODO
+     * @param charges
+     */
+    protected abstract Money handleTransactionThatIsALateRepaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+            List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
+
+    /**
+     * Invoked when a transaction results in an over-payment of the full loan.
+     *
+     * transaction amount is greater than the total expected principal and interest of the loan.
+     */
+    @SuppressWarnings("unused")
+    protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
+        // empty implementation by default.
+    }
+
+    /**
+     * Invoked when a there is a refund of an active loan or undo of an active loan
+     *
+     * Undoes principal, interest, fees and charges of this transaction based on the repayment strategy
+     *
+     * @param transactionMappings
+     *            TODO
+     *
+     */
+    protected abstract Money handleRefundTransactionPaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
+
+    /**
+     * This method is responsible for checking if the current transaction is 'an advance/early payment' based on the
+     * details passed through.
+     *
+     * Default implementation is check transaction date is before installment due date.
+     */
+    protected boolean isTransactionInAdvanceOfInstallment(final int installmentIndex,
+            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
+        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(installmentIndex);
+        return transactionDate.isBefore(currentInstallment.getDueDate());
+    }
+
+    /**
+     * This method is responsible for checking if the current transaction is 'an advance/early payment' based on the
+     * details passed through.
+     *
+     * Default implementation simply processes transactions as 'Late' if the transaction date is after the installment
+     * due date.
+     */
+    protected boolean isTransactionALateRepaymentOnInstallment(final int installmentIndex,
+            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
+        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(installmentIndex);
+        return transactionDate.isAfter(currentInstallment.getDueDate());
     }
 
     private void recalculateChargeOffTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
@@ -422,42 +538,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
     }
 
-    /**
-     * Provides support for processing the latest transaction (which should be latest transaction) against the loan
-     * schedule.
-     */
-    @Override
-    public void handleTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
-
-        final Money amountToProcess = null;
-        final boolean isChargeAmount = false;
-        handleTransaction(loanTransaction, currency, installments, charges, amountToProcess, isChargeAmount);
-
-    }
-
-    private void handleTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final Money chargeAmountToProcess,
-            final boolean isFeeCharge) {
-
-        Money transactionAmountUnprocessed = handleTransactionAndCharges(loanTransaction, currency, installments, charges,
-                chargeAmountToProcess, isFeeCharge);
-
-        if (transactionAmountUnprocessed.isGreaterThanZero()) {
-            if (loanTransaction.isWaiver()) {
-                loanTransaction.updateComponentsAndTotal(transactionAmountUnprocessed.zero(), transactionAmountUnprocessed.zero(),
-                        transactionAmountUnprocessed.zero(), transactionAmountUnprocessed.zero());
-            } else {
-                onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
-                loanTransaction.updateOverPayments(transactionAmountUnprocessed);
-            }
-        }
-    }
-
     private Money handleTransactionAndCharges(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final Money chargeAmountToProcess,
             final boolean isFeeCharge) {
-        // to.
         if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
             loanTransaction.resetDerivedComponents();
         }
@@ -505,20 +588,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             if (transactionAmountUnprocessed.isGreaterThanZero()) {
                 if (currentInstallment.isNotFullyPaidOff()) {
-
-                    // is this transaction early/late/on-time with respect to
-                    // the
-                    // current installment?
                     if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate)) {
                         transactionAmountUnprocessed = handleTransactionThatIsPaymentInAdvanceOfInstallment(currentInstallment,
                                 installments, loanTransaction, transactionAmountUnprocessed, transactionMappings, charges);
                     } else if (isTransactionALateRepaymentOnInstallment(installmentIndex, installments, transactionDate)) {
-                        // does this result in a late payment of existing
-                        // installment?
                         transactionAmountUnprocessed = handleTransactionThatIsALateRepaymentOfInstallment(currentInstallment, installments,
                                 loanTransaction, transactionAmountUnprocessed, transactionMappings, charges);
                     } else {
-                        // standard transaction
                         transactionAmountUnprocessed = handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment,
                                 loanTransaction, transactionAmountUnprocessed, transactionMappings, charges);
                     }
@@ -611,8 +687,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return earliestUnpaidCharge;
     }
 
-    @Override
-    public void handleWriteOff(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
+    private void handleWriteOff(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
@@ -637,121 +712,16 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
     }
 
-    // abstract interface
-    /**
-     * This method is responsible for checking if the current transaction is 'an advance/early payment' based on the
-     * details passed through.
-     *
-     * Default implementation simply processes transactions as 'Late' if the transaction date is after the installment
-     * due date.
-     */
-    protected boolean isTransactionALateRepaymentOnInstallment(final int installmentIndex,
-            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
-
-        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(installmentIndex);
-
-        return transactionDate.isAfter(currentInstallment.getDueDate());
-    }
-
-    /**
-     * For late repayments, how should components of installment be paid off
-     *
-     * @param transactionMappings
-     *            TODO
-     * @param charges
-     */
-    protected abstract Money handleTransactionThatIsALateRepaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
-            List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
-
-    /**
-     * This method is responsible for checking if the current transaction is 'an advance/early payment' based on the
-     * details passed through.
-     *
-     * Default implementation is check transaction date is before installment due date.
-     */
-    protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
-            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
-
-        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
-
-        return transactionDate.isBefore(currentInstallment.getDueDate());
-    }
-
-    /**
-     * For early/'in advance' repayments.
-     *
-     * @param transactionMappings
-     *            TODO
-     * @param charges
-     */
-    protected abstract Money handleTransactionThatIsPaymentInAdvanceOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
-            List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money paymentInAdvance,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
-
-    /**
-     * For normal on-time repayments.
-     *
-     * @param transactionMappings
-     *            TODO
-     * @param charges
-     */
-    protected abstract Money handleTransactionThatIsOnTimePaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
-            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
-
-    /**
-     * Invoked when a transaction results in an over-payment of the full loan.
-     *
-     * transaction amount is greater than the total expected principal and interest of the loan.
-     */
-    @SuppressWarnings("unused")
-    protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
-        // empty implementation by default.
-    }
-
-    @Override
-    public Money handleRepaymentSchedule(final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> loanCharges) {
-        Money unProcessed = Money.zero(currency);
-        for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
-            Money amountToProcess = null;
-            if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
-                loanTransaction.resetDerivedComponents();
-            }
-            if (loanTransaction.isInterestWaiver()) {
-                processTransaction(loanTransaction, currency, installments, loanCharges, amountToProcess);
-            } else {
-                unProcessed = processTransaction(loanTransaction, currency, installments, loanCharges, amountToProcess);
-            }
-        }
-        return unProcessed;
-    }
-
-    @Override
-    public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
-        return false;
-    }
-
-    @Override
-    public void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
+    private void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
             List<LoanRepaymentScheduleInstallment> installments) {
         processCreditTransaction(loanTransaction, overpaidAmount, currency, installments);
     }
 
-    @Override
-    public void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
+    private void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
-        // TODO Auto-generated method stub
         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
-        final Comparator<LoanRepaymentScheduleInstallment> byDate = new Comparator<LoanRepaymentScheduleInstallment>() {
-
-            @Override
-            public int compare(LoanRepaymentScheduleInstallment ord1, LoanRepaymentScheduleInstallment ord2) {
-                return ord1.getDueDate().compareTo(ord2.getDueDate());
-            }
-        };
-        Collections.sort(installments, Collections.reverseOrder(byDate));
+        final Comparator<LoanRepaymentScheduleInstallment> byDate = Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate);
+        installments.sort(Collections.reverseOrder(byDate));
         Money transactionAmountUnprocessed = loanTransaction.getAmount(currency);
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
@@ -785,19 +755,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
     }
-
-    /**
-     * Invoked when a there is a refund of an active loan or undo of an active loan
-     *
-     * Undoes principal, interest, fees and charges of this transaction based on the repayment strategy
-     *
-     * @param transactionMappings
-     *            TODO
-     *
-     */
-    protected abstract Money handleRefundTransactionPaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
-            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
 
     private void undoChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,
             final Integer installmentNumber) {
@@ -853,91 +810,4 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         return latestPaidCharge;
     }
-
-    @Override
-    public void processTransactionsFromDerivedFields(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
-        for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
-            if (!loanTransaction.isAccrualTransaction()) {
-                processTransactionFromDerivedFields(loanTransaction, currency, installments, charges);
-            }
-        }
-    }
-
-    private void processTransactionFromDerivedFields(final LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
-        Money principal = loanTransaction.getPrincipalPortion(currency);
-        Money interest = loanTransaction.getInterestPortion(currency);
-        if (loanTransaction.isInterestWaiver()) {
-            interest = loanTransaction.getAmount(currency);
-        }
-        Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
-        Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
-        final LocalDate transactionDate = loanTransaction.getTransactionDate();
-        if (principal.isGreaterThanZero() || interest.isGreaterThanZero() || feeCharges.isGreaterThanZero()
-                || penaltyCharges.isGreaterThanZero()) {
-            for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
-                if (currentInstallment.isNotFullyPaidOff()) {
-                    if (penaltyCharges.isGreaterThanZero()) {
-                        Money penaltyChargesPortion = Money.zero(currency);
-                        if (loanTransaction.isWaiver()) {
-                            penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(transactionDate, penaltyCharges);
-                        } else {
-                            penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, penaltyCharges);
-                        }
-                        penaltyCharges = penaltyCharges.minus(penaltyChargesPortion);
-                    }
-
-                    if (feeCharges.isGreaterThanZero()) {
-                        Money feeChargesPortion = Money.zero(currency);
-                        if (loanTransaction.isWaiver()) {
-                            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate, feeCharges);
-                        } else {
-                            feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, feeCharges);
-                        }
-                        feeCharges = feeCharges.minus(feeChargesPortion);
-                    }
-
-                    if (interest.isGreaterThanZero()) {
-                        Money interestPortion = Money.zero(currency);
-                        if (loanTransaction.isWaiver()) {
-                            interestPortion = currentInstallment.waiveInterestComponent(transactionDate, interest);
-                        } else {
-                            interestPortion = currentInstallment.payInterestComponent(transactionDate, interest);
-                        }
-                        interest = interest.minus(interestPortion);
-                    }
-
-                    if (principal.isGreaterThanZero()) {
-                        Money principalPortion = currentInstallment.payPrincipalComponent(transactionDate, principal);
-                        principal = principal.minus(principalPortion);
-                    }
-                }
-                if (!(principal.isGreaterThanZero() || interest.isGreaterThanZero() || feeCharges.isGreaterThanZero()
-                        || penaltyCharges.isGreaterThanZero())) {
-                    break;
-                }
-            }
-        }
-
-        final Set<LoanCharge> loanFees = extractFeeCharges(charges);
-        final Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
-        Integer installmentNumber = null;
-        if (loanTransaction.isChargePayment() && installments.size() == 1) {
-            installmentNumber = installments.get(0).getInstallmentNumber();
-        }
-
-        if (loanTransaction.isNotWaiver()) {
-            feeCharges = loanTransaction.getFeeChargesPortion(currency);
-            penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
-            if (feeCharges.isGreaterThanZero()) {
-                updateChargesPaidAmountBy(loanTransaction, feeCharges, loanFees, installmentNumber);
-            }
-
-            if (penaltyCharges.isGreaterThanZero()) {
-                updateChargesPaidAmountBy(loanTransaction, penaltyCharges, loanPenalties, installmentNumber);
-            }
-        }
-    }
-
 }

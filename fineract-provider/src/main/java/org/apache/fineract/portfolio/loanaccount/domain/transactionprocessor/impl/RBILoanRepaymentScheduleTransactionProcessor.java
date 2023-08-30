@@ -60,19 +60,6 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     }
 
     /**
-     * For creocore, early is defined as any date before the installment due date
-     */
-    @SuppressWarnings("unused")
-    @Override
-    protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
-            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
-
-        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
-
-        return transactionDate.isBefore(currentInstallment.getDueDate());
-    }
-
-    /**
      * For early/'in advance' repayments, pays off principal component only.
      */
     @SuppressWarnings("unused")
@@ -257,12 +244,6 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                     principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
         return transactionAmountRemaining;
-    }
-
-    @SuppressWarnings("unused")
-    @Override
-    protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
-        // dont do anything for with loan over-payment
     }
 
     @Override

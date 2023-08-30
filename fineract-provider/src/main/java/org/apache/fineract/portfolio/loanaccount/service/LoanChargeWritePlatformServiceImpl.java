@@ -809,8 +809,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, loan);
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.handleTransaction(loanChargeAdjustmentTransaction, loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanChargeAdjustmentTransaction, loan.getCurrency(),
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), loan.getTotalOverpaidAsMoney());
 
         loan.addLoanTransaction(loanChargeAdjustmentTransaction);
         loan.updateLoanSummaryAndStatus();

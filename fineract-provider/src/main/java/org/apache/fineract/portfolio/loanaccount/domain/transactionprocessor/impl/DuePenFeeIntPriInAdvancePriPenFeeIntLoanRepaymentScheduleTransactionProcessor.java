@@ -246,11 +246,6 @@ public class DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactio
     }
 
     @Override
-    protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
-        // TODO - KW - dont do anything with loan over-payment for now
-    }
-
-    @Override
     protected Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
