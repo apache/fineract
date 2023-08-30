@@ -36,14 +36,21 @@ public interface LoanRepaymentScheduleTransactionProcessor {
 
     boolean accept(String s);
 
-    void handleTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges);
+    /**
+     * Provides support for processing the latest transaction (which should be latest transaction) against the loan
+     * schedule.
+     */
+    void processLatestTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, Money overpaidAmount);
 
-    ChangedTransactionDetail handleTransaction(LocalDate disbursementDate, List<LoanTransaction> repaymentsOrWaivers,
+    /**
+     * Provides support for passing all {@link LoanTransaction}'s so it will completely re-process the entire loan
+     * schedule. This is required in cases where the {@link LoanTransaction} being processed is in the past and falls
+     * before existing transactions or and adjustment is made to an existing in which case the entire loan schedule
+     * needs to be re-processed.
+     */
+    ChangedTransactionDetail reprocessLoanTranactions(LocalDate disbursementDate, List<LoanTransaction> repaymentsOrWaivers,
             MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges);
-
-    void handleWriteOff(LoanTransaction loanTransaction, MonetaryCurrency loanCurrency,
-            List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
 
     Money handleRepaymentSchedule(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> loanCharges);
@@ -52,14 +59,4 @@ public interface LoanRepaymentScheduleTransactionProcessor {
      * Used in interest recalculation to introduce new interest only installment.
      */
     boolean isInterestFirstRepaymentScheduleTransactionProcessor();
-
-    void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges);
-
-    void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
-            List<LoanRepaymentScheduleInstallment> installments);
-
-    void processTransactionsFromDerivedFields(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges);
-
 }
