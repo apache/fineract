@@ -92,6 +92,10 @@ public class OfficeHelper extends IntegrationTest {
                 new Gson().toJson(map), "resourceId");
     }
 
+    public Response<GetOfficesResponse> retrieveOfficeByExternalId(String externalId) throws IOException {
+        return fineract().offices.retrieveOfficeByExternalId(externalId).execute();
+    }
+
     public Response<PutOfficesOfficeIdResponse> updateOfficeUsingExternalId(String externalId, String name, String openingDate)
             throws IOException {
         return fineract().offices

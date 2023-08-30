@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.organisation.office.data.OfficeData;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MapstructMapperConfig.class)
@@ -35,4 +36,6 @@ public interface OfficeSwaggerMapper {
         Optional.ofNullable(changes).map(c -> c.get("name")).ifPresent(c -> response.name = String.valueOf(c));
         return response;
     }
+
+    OfficesApiResourceSwagger.GetOfficesResponse toGetOfficesResponse(OfficeData officeData);
 }

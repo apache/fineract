@@ -164,6 +164,25 @@ public class OfficesApiResource {
         return toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);
     }
 
+    @GET
+    @Path("/external-id/{externalId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve an Office using external id", description = "Example Requests:\n" + "\n" + "offices/external-id/asd123\n"
+            + "\n" + "\n" + "offices/external-id/asd123?template=true\n" + "\n" + "\n"
+            + "offices/external-id/asd123?fields=id,name,parentName")
+    public OfficesApiResourceSwagger.GetOfficesResponse retrieveOfficeByExternalId(
+            @PathParam("externalId") @Parameter(description = "externalId") final String externalId, @Context final UriInfo uriInfo) {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        OfficeData office = readPlatformService.retrieveOfficeWithExternalId(ExternalIdFactory.produce(externalId));
+        if (settings.isTemplate()) {
+            final Collection<OfficeData> allowedParents = readPlatformService.retrieveAllowedParents(office.getId());
+            office = OfficeData.appendedTemplate(office, allowedParents);
+        }
+        return officeSwaggerMapper.toGetOfficesResponse(office);
+    }
+
     @PUT
     @Path("{officeId}")
     @Consumes({ MediaType.APPLICATION_JSON })

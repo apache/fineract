@@ -34,10 +34,6 @@ final class OfficesApiResourceSwagger {
     @Schema(description = "GetOfficesResponse")
     public static final class GetOfficesResponse {
 
-        private GetOfficesResponse() {
-
-        }
-
         @Schema(example = "1")
         public Long id;
         @Schema(example = "Head Office")
@@ -50,10 +46,12 @@ final class OfficesApiResourceSwagger {
         public LocalDate openingDate;
         @Schema(example = ".")
         public String hierarchy;
-        // @Schema(example = "")
-        // public Long parentId;
-        // @Schema(example = "")
-        // public String parentName;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "en")
+        public String locale;
+
+        public Collection<GetOfficesResponse> allowedParents;
     }
 
     @Schema(description = "GetOfficesTemplateResponse")
