@@ -68,16 +68,13 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.stereotype.Service;
 
-@Service
 public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -95,7 +92,6 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
-    @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context,
             final NamedParameterJdbcTemplate namedParameterJdbcTemplate, final CenterReadPlatformService centerReadPlatformService,
             final GroupReadPlatformService groupReadPlatformService,
