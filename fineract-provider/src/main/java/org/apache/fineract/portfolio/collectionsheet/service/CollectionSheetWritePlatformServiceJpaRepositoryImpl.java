@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -41,10 +42,8 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements CollectionSheetWritePlatformService {
 
     private final LoanWritePlatformService loanWritePlatformService;
@@ -56,25 +55,6 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     private final DepositAccountWritePlatformService accountWritePlatformService;
     private final PaymentDetailAssembler paymentDetailAssembler;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-
-    @Autowired
-    public CollectionSheetWritePlatformServiceJpaRepositoryImpl(final LoanWritePlatformService loanWritePlatformService,
-            final CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer bulkRepaymentCommandFromApiJsonDeserializer,
-            final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer,
-            final CollectionSheetTransactionDataValidator transactionDataValidator,
-            final MeetingWritePlatformService meetingWritePlatformService, final DepositAccountAssembler accountAssembler,
-            final DepositAccountWritePlatformService accountWritePlatformService, final PaymentDetailAssembler paymentDetailAssembler,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
-        this.loanWritePlatformService = loanWritePlatformService;
-        this.bulkRepaymentCommandFromApiJsonDeserializer = bulkRepaymentCommandFromApiJsonDeserializer;
-        this.bulkDisbursalCommandFromApiJsonDeserializer = bulkDisbursalCommandFromApiJsonDeserializer;
-        this.transactionDataValidator = transactionDataValidator;
-        this.meetingWritePlatformService = meetingWritePlatformService;
-        this.accountAssembler = accountAssembler;
-        this.accountWritePlatformService = accountWritePlatformService;
-        this.paymentDetailAssembler = paymentDetailAssembler;
-        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
-    }
 
     @Override
     public CommandProcessingResult updateCollectionSheet(final JsonCommand command) {
