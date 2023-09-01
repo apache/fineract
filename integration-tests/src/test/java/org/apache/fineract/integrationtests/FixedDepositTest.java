@@ -114,8 +114,6 @@ public class FixedDepositTest {
     // and then to compare the exact results
     public static final Float THRESHOLD = 1.0f;
 
-    private TimeZone systemTimeZone;
-
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
@@ -125,8 +123,7 @@ public class FixedDepositTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
-
-        this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
+        TimeZone.setDefault(TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE));
     }
 
     /***
