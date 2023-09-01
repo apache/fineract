@@ -38,6 +38,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -123,6 +124,7 @@ public class RecurringDepositTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
+        TimeZone.setDefault(TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE));
     }
 
     /***
