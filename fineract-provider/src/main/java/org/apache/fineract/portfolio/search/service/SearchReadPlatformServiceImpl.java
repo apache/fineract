@@ -47,9 +47,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class SearchReadPlatformServiceImpl implements SearchReadPlatformService {
 
