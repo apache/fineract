@@ -100,6 +100,12 @@ gradle clean bootRun'''
 ext['groovy.version'] = '4.0.6'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.json".toString()
 
+def pentahoReportDir = System.properties['user.home'] + System.properties['file.separator'] + '.mifosx' + System.properties['file.separator'] + 'pentahoReports'
+copy {
+    from "fineract-provider/pentahoReports"
+    into pentahoReportDir
+}
+
 allprojects  {
     group = 'org.apache.fineract'
 
@@ -259,7 +265,16 @@ allprojects  {
             ".mailmap",
             '**/images/diag-*.svg',
             '**/*.avsc',
-            "**/generated/**/*MapperImpl.java"
+            "**/generated/**/*MapperImpl.java",
+	    // Pentaho reports
+            '**/*.prpt',
+            '**/*.properties',
+            '**/*.PROPERTIES',
+            '**/images/diag-*.svg',
+            '**/io/fiter/**',
+            '**/*.properties',
+            '**/*.js',
+            '**/target/**'	
         ]
     }
 }

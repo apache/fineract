@@ -91,6 +91,9 @@ dependencies {
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot2',
+		fileTree('thirdparty') {
+                include '*.jar' },
+            'org.openjdk.nashorn:nashorn-core'
             )
 
     implementation ('software.amazon.msk:aws-msk-iam-auth:1.1.7') {

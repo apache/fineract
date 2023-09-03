@@ -247,5 +247,22 @@ dependencyManagement {
         dependency 'org.apache.commons:commons-math3:3.6.1'
 
         dependency 'org.mockito:mockito-inline:5.2.0'
+
+	//Pentaho
+            dependency 'org.pentaho.reporting.engine:classic-core:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.engine:classic-extensions:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.engine:classic-extensions-scripting:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.engine:wizard-core:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.designer:wizard-xul:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libbase:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libdocbundle:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libfonts:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libformat:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libformula:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libloader:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:librepository:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libserializer:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libsparkline:9.2.0.0-SNAPSHOT'
+            dependency 'org.pentaho.reporting.library:libxml:9.2.0.0-SNAPSHOT'
     }
 }
