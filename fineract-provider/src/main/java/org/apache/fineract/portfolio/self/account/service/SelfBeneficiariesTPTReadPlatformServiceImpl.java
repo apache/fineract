@@ -28,12 +28,9 @@ import org.apache.fineract.portfolio.account.service.AccountTransferEnumerations
 import org.apache.fineract.portfolio.self.account.data.SelfAccountTemplateData;
 import org.apache.fineract.portfolio.self.account.data.SelfBeneficiariesTPTData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBeneficiariesTPTReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -41,7 +38,6 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
     private final BeneficiaryMapper mapper;
     private final AccountTemplateMapper accountTemplateMapper;
 
-    @Autowired
     public SelfBeneficiariesTPTReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;

@@ -26,6 +26,8 @@ import static org.apache.fineract.portfolio.self.account.api.SelfBeneficiariesTP
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -42,34 +44,18 @@ import org.apache.fineract.portfolio.self.account.domain.SelfBeneficiariesTPTRep
 import org.apache.fineract.portfolio.self.account.exception.InvalidAccountInformationException;
 import org.apache.fineract.portfolio.self.account.exception.InvalidBeneficiaryException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
+@Slf4j
 public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBeneficiariesTPTWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SelfBeneficiariesTPTWritePlatformServiceImpl.class);
     private final PlatformSecurityContext context;
     private final SelfBeneficiariesTPTRepository repository;
     private final SelfBeneficiariesTPTDataValidator validator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final SavingsAccountRepositoryWrapper savingRepositoryWrapper;
-
-    @Autowired
-    public SelfBeneficiariesTPTWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final SelfBeneficiariesTPTRepository repository, final SelfBeneficiariesTPTDataValidator validator,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final SavingsAccountRepositoryWrapper savingRepositoryWrapper) {
-        this.context = context;
-        this.repository = repository;
-        this.validator = validator;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.savingRepositoryWrapper = savingRepositoryWrapper;
-
-    }
 
     @Transactional
     @Override
@@ -178,7 +164,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBenefic
                     "Beneficiary with name `" + name + "` already exists", NAME_PARAM_NAME, name);
         }
 
-        LOG.error("Error occured.", dae);
+        log.error("Error occured.", dae);
         throw new PlatformDataIntegrityException("error.msg.beneficiary.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
