@@ -21,22 +21,16 @@ package org.apache.fineract.portfolio.self.account.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.self.account.data.SelfAccountTemplateData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class SelfAccountTransferReadServiceImpl implements SelfAccountTransferReadService {
 
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public SelfAccountTransferReadServiceImpl(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Collection<SelfAccountTemplateData> retrieveSelfAccountTemplateData(AppUser user) {
