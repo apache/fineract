@@ -38,7 +38,11 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -788,6 +792,68 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
         assertEquals(expectedThirdRepaymentDueDate, thirdRepaymentPeriod.getDueDate());
         assertEquals(outstandingBalanceOnThirdRepayment, thirdRepaymentPeriod.getPrincipalLoanBalanceOutstanding());
         assertEquals(expectedRepaymentInterest, thirdRepaymentPeriod.getInterestDue());
+    }
+
+    @Test
+    public void testDelinquencyRangeOnDownPaymentInstallment() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            String loanExternalIdStr = UUID.randomUUID().toString();
+
+            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+                    delinquencyBucketId);
+
+            Boolean enableDownPayment = true;
+            BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
+            Boolean enableAutoRepaymentForDownPayment = false;
+
+            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+
+            Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId,
+                    enableDownPayment, "25", enableAutoRepaymentForDownPayment, false);
+
+            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+            assertNotNull(getLoanProductsProductResponse);
+            assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
+            assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
+                    .compareTo(disbursedAmountPercentageForDownPayment));
+            assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
+
+            final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
+
+            LocalDate businessDate = LocalDate.of(2022, 9, 5);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+            final String jobName = "Loan COB";
+            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+            schedulerJobHelper.executeAndAwaitJob(jobName);
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+
+            assertNotNull(loanDetails);
+            assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
+            assertEquals(0, loanDetails.getDisbursedAmountPercentageForDownPayment().compareTo(disbursedAmountPercentageForDownPayment));
+            assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
+
+            List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+            Double expectedDownPaymentAmount = 250.00;
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
+            Double expectedRepaymentAmount = 750.00;
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
+
+            assertTrue(periods.stream() //
+                    .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalDueForPeriod()) //
+                            && expectedDownPaymentDueDate.equals(period.getDueDate())));
+            assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+                    && expectedRepaymentDueDate.equals(period.getDueDate())));
+            assertNotNull(loanDetails.getDelinquencyRange());
+            assertEquals(2, loanDetails.getDelinquent().getDelinquentDays());
+        } finally {
+            final LocalDate todaysDate = Utils.getLocalDateOfTenant();
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
     }
 
     private Integer createLoanProductWithDownPaymentConfiguration(final LoanTransactionHelper loanTransactionHelper,
