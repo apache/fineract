@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.s3;
 
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class LocalstackS3ClientCustomizer implements S3ClientCustomizer {
     @Override
     public void customize(S3ClientBuilder builder) {
         String env = environment.getProperty("AWS_ENDPOINT_URL", "");
-        if (StringUtil.isNotBlank(env)) {
+        if (StringUtils.isNotBlank(env)) {
             builder.endpointOverride(URI.create(env)).forcePathStyle(true);
         }
     }
