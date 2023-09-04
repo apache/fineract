@@ -30,6 +30,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
@@ -96,11 +97,13 @@ public class LoanInlineCOBConfig {
                 .build();
     }
 
+    @JobScope
     @Bean
     public InlineCOBLoanItemReader inlineCobWorkerItemReader() {
         return new InlineCOBLoanItemReader(loanRepository);
     }
 
+    @JobScope
     @Bean
     public InlineCOBLoanItemProcessor inlineCobWorkerItemProcessor() {
         return new InlineCOBLoanItemProcessor(cobBusinessStepService);
