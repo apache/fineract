@@ -89,7 +89,7 @@ public class DatatableAdvancedQueryTest {
 
     private static final String SAVINGS_TRANSACTION_APP_TABLE_NAME = EntityTables.SAVINGS_TRANSACTION.getName();
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String SAVINGS_DATE_FORMAT = "dd MMM yyyy";
+    public static final String SAVINGS_DATE_FORMAT = Utils.DATE_FORMAT;
 
     private static final String COLUMN_STRING = "aString";
     private static final String COLUMN_TEXT = "aText";
