@@ -225,8 +225,8 @@ bootRun {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
-	implementation 'org.apache.poi:poi:5.2.3'
-        implementation 'org.apache.poi:poi-ooxml:5.2.3'
+	implementation 'org.apache.poi:poi:4.1.2'
+        implementation 'org.apache.poi:poi-ooxml:4.1.2'
         implementation 'org.apache.poi:poi-ooxml-schemas:4.1.2'
         implementation("org.openjdk.nashorn:nashorn-core:15.2")
         implementation 'org.codehaus.groovy:groovy-jsr223:3.0.10'
