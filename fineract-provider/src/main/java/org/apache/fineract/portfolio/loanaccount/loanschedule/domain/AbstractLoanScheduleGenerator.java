@@ -2808,7 +2808,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 loanRepaymentScheduleTransactionProcessor, onDate, calculateTill);
         List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsPostDisbursementExcludeAccruals();
 
-        loanRepaymentScheduleTransactionProcessor.reprocessLoanTranactions(loanApplicationTerms.getExpectedDisbursementDate(),
+        loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loanApplicationTerms.getExpectedDisbursementDate(),
                 loanTransactions, currency, loanScheduleDTO.getInstallments(), loan.getActiveCharges());
         Money feeCharges = Money.zero(currency);
         Money penaltyCharges = Money.zero(currency);

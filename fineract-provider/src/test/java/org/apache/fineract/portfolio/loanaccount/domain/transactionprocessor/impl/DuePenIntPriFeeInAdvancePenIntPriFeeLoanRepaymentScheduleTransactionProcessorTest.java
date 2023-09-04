@@ -405,13 +405,13 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
 
         LoanCharge loanCharge1 = Mockito.mock(LoanCharge.class);
         Mockito.when(loanCharge1.isActive()).thenReturn(true);
-        Mockito.when(loanCharge1.isNotFullyPaid()).thenReturn(true);
+        Mockito.when(loanCharge1.isChargePending()).thenReturn(true);
         Mockito.when(loanCharge1.getEffectiveDueDate()).thenReturn(transactionDate);
         Mockito.when(loanCharge1.isPenaltyCharge()).thenReturn(true);
         Mockito.when(loanCharge1.getAmount(refEq(MONETARY_CURRENCY))).thenReturn(two);
         LoanCharge loanCharge2 = Mockito.mock(LoanCharge.class);
         Mockito.when(loanCharge2.isActive()).thenReturn(true);
-        Mockito.when(loanCharge2.isNotFullyPaid()).thenReturn(true);
+        Mockito.when(loanCharge2.isChargePending()).thenReturn(true);
         Mockito.when(loanCharge2.getEffectiveDueDate()).thenReturn(transactionDate.plusDays(1));
 
         Mockito.when(charges.stream()).thenReturn(Stream.of(loanCharge1, loanCharge2));
@@ -445,13 +445,13 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
 
         LoanCharge loanCharge1 = Mockito.mock(LoanCharge.class);
         Mockito.when(loanCharge1.isActive()).thenReturn(true);
-        Mockito.when(loanCharge1.isNotFullyPaid()).thenReturn(true);
+        Mockito.when(loanCharge1.isChargePending()).thenReturn(true);
         Mockito.when(loanCharge1.getEffectiveDueDate()).thenReturn(transactionDate);
         Mockito.when(loanCharge1.isPenaltyCharge()).thenReturn(true);
         Mockito.when(loanCharge1.getAmount(refEq(MONETARY_CURRENCY))).thenReturn(two);
         LoanCharge loanCharge2 = Mockito.mock(LoanCharge.class);
         Mockito.when(loanCharge2.isActive()).thenReturn(true);
-        Mockito.when(loanCharge2.isNotFullyPaid()).thenReturn(true);
+        Mockito.when(loanCharge2.isChargePending()).thenReturn(true);
         Mockito.when(loanCharge2.isPenaltyCharge()).thenReturn(false);
         Mockito.when(loanCharge2.getEffectiveDueDate()).thenReturn(transactionDate.minusDays(1));
         Mockito.when(loanCharge2.getAmount(refEq(MONETARY_CURRENCY))).thenReturn(one);
@@ -485,13 +485,13 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
 
         LoanCharge loanCharge1 = Mockito.mock(LoanCharge.class);
         Mockito.when(loanCharge1.isActive()).thenReturn(true);
-        Mockito.when(loanCharge1.isNotFullyPaid()).thenReturn(true);
+        Mockito.when(loanCharge1.isChargePending()).thenReturn(true);
         Mockito.when(loanCharge1.getEffectiveDueDate()).thenReturn(transactionDate);
         Mockito.when(loanCharge1.isPenaltyCharge()).thenReturn(true);
         Mockito.when(loanCharge1.getAmount(refEq(MONETARY_CURRENCY))).thenReturn(eleven);
         LoanCharge loanCharge2 = Mockito.mock(LoanCharge.class);
         Mockito.when(loanCharge2.isActive()).thenReturn(true);
-        Mockito.when(loanCharge2.isNotFullyPaid()).thenReturn(true);
+        Mockito.when(loanCharge2.isChargePending()).thenReturn(true);
         Mockito.when(loanCharge2.isPenaltyCharge()).thenReturn(false);
         Mockito.when(loanCharge2.getEffectiveDueDate()).thenReturn(transactionDate.minusDays(1));
         Mockito.when(loanCharge2.getAmount(refEq(MONETARY_CURRENCY))).thenReturn(eleven);

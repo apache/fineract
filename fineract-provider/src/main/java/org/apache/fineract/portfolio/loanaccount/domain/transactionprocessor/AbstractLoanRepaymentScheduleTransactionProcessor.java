@@ -64,7 +64,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     @Override
-    public ChangedTransactionDetail reprocessLoanTranactions(final LocalDate disbursementDate,
+    public ChangedTransactionDetail reprocessLoanTransactions(final LocalDate disbursementDate,
             final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
 
@@ -382,7 +382,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
     }
 
-    private void reprocessInstallments(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency) {
+    protected void reprocessInstallments(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency) {
         LoanRepaymentScheduleInstallment lastInstallment = installments.get(installments.size() - 1);
         if (lastInstallment.isAdditional() && lastInstallment.getDue(currency).isZero()) {
             installments.remove(lastInstallment);
@@ -413,7 +413,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return mergedList;
     }
 
-    private void createNewTransaction(LoanTransaction loanTransaction, LoanTransaction newLoanTransaction,
+    protected void createNewTransaction(LoanTransaction loanTransaction, LoanTransaction newLoanTransaction,
             ChangedTransactionDetail changedTransactionDetail) {
         loanTransaction.reverse();
         loanTransaction.updateExternalId(null);
@@ -538,7 +538,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
     }
 
-    private Money handleTransactionAndCharges(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
+    protected Money handleTransactionAndCharges(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final Money chargeAmountToProcess,
             final boolean isFeeCharge) {
         if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
@@ -574,7 +574,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return transactionAmountUnprocessed;
     }
 
-    private Money processTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
+    protected Money processTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, Money amountToProcess) {
         int installmentIndex = 0;
 
@@ -607,7 +607,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return transactionAmountUnprocessed;
     }
 
-    private Set<LoanCharge> extractFeeCharges(final Set<LoanCharge> loanCharges) {
+    protected Set<LoanCharge> extractFeeCharges(final Set<LoanCharge> loanCharges) {
         final Set<LoanCharge> feeCharges = new HashSet<>();
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isFeeCharge()) {
@@ -617,7 +617,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return feeCharges;
     }
 
-    private Set<LoanCharge> extractPenaltyCharges(final Set<LoanCharge> loanCharges) {
+    protected Set<LoanCharge> extractPenaltyCharges(final Set<LoanCharge> loanCharges) {
         final Set<LoanCharge> penaltyCharges = new HashSet<>();
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isPenaltyCharge()) {
@@ -627,7 +627,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return penaltyCharges;
     }
 
-    private void updateChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,
+    protected void updateChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,
             final Integer installmentNumber) {
 
         Money amountRemaining = feeCharges;
@@ -661,7 +661,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     }
 
-    private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges, final MonetaryCurrency currency) {
+    protected LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges, final MonetaryCurrency currency) {
         LoanCharge earliestUnpaidCharge = null;
         LoanCharge installemntCharge = null;
         LoanInstallmentCharge chargePerInstallment = null;
@@ -687,7 +687,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return earliestUnpaidCharge;
     }
 
-    private void handleWriteOff(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
+    protected void handleWriteOff(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
@@ -712,12 +712,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
     }
 
-    private void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
+    protected void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
             List<LoanRepaymentScheduleInstallment> installments) {
         processCreditTransaction(loanTransaction, overpaidAmount, currency, installments);
     }
 
-    private void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
+    protected void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
         final Comparator<LoanRepaymentScheduleInstallment> byDate = Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate);
