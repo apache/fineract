@@ -27,7 +27,15 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 public enum PaymentAllocationTransactionType {
 
     DEFAULT(null), //
-    REPAYMENT(LoanTransactionType.REPAYMENT); //
+    REPAYMENT(LoanTransactionType.REPAYMENT), //
+    DOWN_PAYMENT(LoanTransactionType.DOWN_PAYMENT), //
+    MERCHANT_ISSUED_REFUND(LoanTransactionType.MERCHANT_ISSUED_REFUND), //
+    PAYOUT_REFUND(LoanTransactionType.PAYOUT_REFUND), //
+    GOODWILL_CREDIT(LoanTransactionType.GOODWILL_CREDIT), //
+    CHARGE_REFUND(LoanTransactionType.CHARGE_REFUND), //
+    CHARGE_ADJUSTMENT(LoanTransactionType.CHARGE_ADJUSTMENT), //
+    WAIVE_INTEREST(LoanTransactionType.WAIVE_INTEREST),//
+    ; //
 
     private final LoanTransactionType loanTransactionType;
 }

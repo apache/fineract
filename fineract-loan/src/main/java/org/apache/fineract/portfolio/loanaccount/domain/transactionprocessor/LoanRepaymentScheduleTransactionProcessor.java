@@ -49,7 +49,7 @@ public interface LoanRepaymentScheduleTransactionProcessor {
      * before existing transactions or and adjustment is made to an existing in which case the entire loan schedule
      * needs to be re-processed.
      */
-    ChangedTransactionDetail reprocessLoanTranactions(LocalDate disbursementDate, List<LoanTransaction> repaymentsOrWaivers,
+    ChangedTransactionDetail reprocessLoanTransactions(LocalDate disbursementDate, List<LoanTransaction> repaymentsOrWaivers,
             MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges);
 
     Money handleRepaymentSchedule(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,

@@ -25,6 +25,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,8 @@ public class DefaultExceptionMapper implements FineractExceptionMapper, Exceptio
 
     @Override
     public Response toResponse(RuntimeException runtimeException) {
-        return Response.status(SC_INTERNAL_SERVER_ERROR).entity(Map.of("Exception", runtimeException.getMessage()))
+        return Response.status(SC_INTERNAL_SERVER_ERROR)
+                .entity(Map.of("Exception", ObjectUtils.defaultIfNull(runtimeException.getMessage(), "No error message available")))
                 .type(MediaType.APPLICATION_JSON).build();
     }
 }

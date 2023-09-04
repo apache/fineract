@@ -433,6 +433,14 @@ public final class MathUtil {
         return min(min(first, second, notNull), third, notNull);
     }
 
+    /**
+     * Calculate percentage of a value
+     *
+     * @param value
+     * @param percentage
+     * @param precision
+     * @return
+     */
     public static BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage, final int precision) {
         BigDecimal percentageOf = BigDecimal.ZERO;
         if (isGreaterThanZero(value)) {
