@@ -155,14 +155,14 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
                         || (paramName.equals("userhierarchy") || paramName.equals("username")
                                 || (paramName.equals("password") || paramName.equals("userid")))
                         || (StringUtils.isBlank(pValue) && (paramName.equals("startDate") || paramName.equals("endDate"))))) {
-                    LOGGER.info("paramName:" + paramName);
+                    LOGGER.info("paramName:{}", paramName);
                     if (StringUtils.isBlank(pValue)) {
                         throw new PlatformDataIntegrityException("error.msg.reporting.error",
                                 "Pentaho Parameter: " + paramName + " - not Provided");
                     }
 
                     final Class<?> clazz = paramDefEntry.getValueType();
-                    LOGGER.info("addParametersToReport(" + paramName + " : " + pValue + " : " + clazz.getCanonicalName() + ")");
+                    LOGGER.info("addParametersToReport({} : {} : {})", paramName, pValue, clazz.getCanonicalName() );
                     if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Integer")) {
                         rptParamValues.put(paramName, Integer.parseInt(pValue));
                     } else if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Long")) {
