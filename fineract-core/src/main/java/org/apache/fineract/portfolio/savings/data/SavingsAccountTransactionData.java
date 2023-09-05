@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -68,7 +67,7 @@ public final class SavingsAccountTransactionData implements Serializable {
     private BigDecimal runningBalance;
     private boolean reversed;
     private final AccountTransferData transfer;
-    private LocalDate submittedOnDate;
+    private final LocalDate submittedOnDate;
     private final boolean interestedPostedAsOn;
     private final String submittedByUsername;
     private final String note;
@@ -78,10 +77,10 @@ public final class SavingsAccountTransactionData implements Serializable {
     private final Boolean lienTransaction;
     private final Long releaseTransactionId;
     private final String reasonForBlock;
-    private Set<SavingsAccountChargesPaidByData> chargesPaidByData = new HashSet<>();
+    private final Set<SavingsAccountChargesPaidByData> chargesPaidByData = new HashSet<>();
 
     // templates
-    final Collection<PaymentTypeData> paymentTypeOptions;
+    private final Collection<PaymentTypeData> paymentTypeOptions;
 
     // import fields
     private transient Integer rowIndex;
@@ -96,45 +95,217 @@ public final class SavingsAccountTransactionData implements Serializable {
     private String routingCode;
     private String receiptNumber;
     private String bankNumber;
+
     private BigDecimal cumulativeBalance;
     private LocalDate balanceEndDate;
-    private transient List<TaxDetailsData> taxDetails = new ArrayList<>();
+    private final transient List<TaxDetailsData> taxDetails = new ArrayList<>();
     private Integer balanceNumberOfDays;
     private BigDecimal overdraftAmount;
     private transient Long modifiedId;
     private transient String refNo;
 
+    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate transactionDate,
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
+            final boolean reversed, final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,
+            final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final String submittedByUsername, final String note,
+            final Boolean isReversal, final Long originalTransactionId, boolean isManualTransaction, final Boolean lienTransaction,
+            final Long releaseTransactionId, final String reasonForBlock) {
+        this.id = id;
+        this.transactionType = transactionType;
+        TransactionEntryType entryType = null;
+        if (transactionType != null) {
+            entryType = transactionType.getEntryType();
+            entryType = entryType != null && Boolean.TRUE.equals(isReversal) ? entryType.getReversal() : entryType;
+        }
+        this.entryType = entryType;
+
+        // duplicated fields
+        this.accountId = savingsId;
+        this.accountNo = savingsAccountNo;
+        this.date = transactionDate;
+        this.amount = amount;
+
+        this.paymentDetailData = paymentDetailData;
+        this.currency = currency;
+        this.outstandingChargeAmount = outstandingChargeAmount;
+        this.runningBalance = runningBalance;
+        this.reversed = reversed;
+        this.transfer = transfer;
+        this.paymentTypeOptions = paymentTypeOptions;
+        this.submittedOnDate = submittedOnDate;
+
+        this.interestedPostedAsOn = interestedPostedAsOn;
+        this.submittedByUsername = submittedByUsername;
+        this.note = note;
+        this.isManualTransaction = isManualTransaction;
+        this.isReversal = isReversal;
+        this.originalTransactionId = originalTransactionId;
+        this.lienTransaction = lienTransaction;
+        this.releaseTransactionId = releaseTransactionId;
+        this.reasonForBlock = reasonForBlock;
+    }
+
+    private static SavingsAccountTransactionData createData(final Long id, final SavingsAccountTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final Long accountId, final String accountNo, final LocalDate date,
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
+            final boolean reversed, final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,
+            final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final String submittedByUsername, final String note,
+            final Boolean lienTransaction) {
+        return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, accountId, accountNo, date, currency, amount,
+                outstandingChargeAmount, runningBalance, reversed, transfer, paymentTypeOptions, submittedOnDate, interestedPostedAsOn,
+                submittedByUsername, note, null, null, false, lienTransaction, null, null);
+    }
+
+    public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
+            final boolean reversed, final AccountTransferData transfer, final LocalDate submittedOnDate, final boolean interestedPostedAsOn,
+            final String submittedByUsername, final String note, final Boolean isReversal, final Long originalTransactionId,
+            final Boolean lienTransaction, final Long releaseTransactionId, final String reasonForBlock) {
+        return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
+                amount, outstandingChargeAmount, runningBalance, reversed, transfer, null, submittedOnDate, interestedPostedAsOn,
+                submittedByUsername, note, isReversal, originalTransactionId, false, lienTransaction, releaseTransactionId, reasonForBlock);
+    }
+
+    public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
+            final boolean reversed, final AccountTransferData transfer, final boolean interestedPostedAsOn,
+            final String submittedByUsername, final String note, final LocalDate submittedOnDate) {
+        return createData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency, amount,
+                outstandingChargeAmount, runningBalance, reversed, transfer, null, submittedOnDate, interestedPostedAsOn,
+                submittedByUsername, note, false);
+    }
+
+    public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
+            final boolean reversed, final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final BigDecimal cumulativeBalance,
+            final LocalDate balanceEndDate) {
+        SavingsAccountTransactionData data = createData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
+                amount, outstandingChargeAmount, runningBalance, reversed, null, null, submittedOnDate, interestedPostedAsOn, null, null,
+                false);
+        data.transactionDate = date;
+        data.cumulativeBalance = cumulativeBalance;
+        data.balanceEndDate = balanceEndDate;
+        return data;
+    }
+
+    public static SavingsAccountTransactionData create(final Long id) {
+        return createData(id, null, null, null, null, null, null, null, null, null, false, null, null, null, false, null, null, false);
+    }
+
+    public static SavingsAccountTransactionData withWithDrawalTransactionDetails(
+            final SavingsAccountTransactionData savingsAccountTransactionData) {
+        final LocalDate currentDate = DateUtils.getBusinessLocalDate();
+        final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations
+                .transactionType(SavingsAccountTransactionType.WITHDRAWAL.getValue());
+        return createData(savingsAccountTransactionData.getId(), transactionType, savingsAccountTransactionData.getPaymentDetailData(),
+                savingsAccountTransactionData.getAccountId(), savingsAccountTransactionData.getAccountNo(), currentDate,
+                savingsAccountTransactionData.getCurrency(), savingsAccountTransactionData.getAmount(),
+                savingsAccountTransactionData.getOutstandingChargeAmount(), savingsAccountTransactionData.getRunningBalance(),
+                savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getTransfer(),
+                savingsAccountTransactionData.getPaymentTypeOptions(), savingsAccountTransactionData.getSubmittedOnDate(),
+                savingsAccountTransactionData.isInterestedPostedAsOn(), savingsAccountTransactionData.getSubmittedByUsername(),
+                savingsAccountTransactionData.getNote(), savingsAccountTransactionData.getLienTransaction());
+    }
+
+    public static SavingsAccountTransactionData template(final Long savingsId, final String savingsAccountNo,
+            final LocalDate defaultLocalDate, final CurrencyData currency) {
+        return createData(null, null, null, savingsId, savingsAccountNo, defaultLocalDate, currency, null, null, null, false, null, null,
+                defaultLocalDate, false, null, null, false);
+    }
+
+    public static SavingsAccountTransactionData templateOnTop(final SavingsAccountTransactionData savingsAccountTransactionData,
+            final Collection<PaymentTypeData> paymentTypeOptions) {
+        return createData(savingsAccountTransactionData.getId(), savingsAccountTransactionData.getTransactionType(),
+                savingsAccountTransactionData.getPaymentDetailData(), savingsAccountTransactionData.getAccountId(),
+                savingsAccountTransactionData.getAccountNo(), savingsAccountTransactionData.getDate(),
+                savingsAccountTransactionData.getCurrency(), savingsAccountTransactionData.getAmount(),
+                savingsAccountTransactionData.getOutstandingChargeAmount(), savingsAccountTransactionData.getRunningBalance(),
+                savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getTransfer(), paymentTypeOptions,
+                savingsAccountTransactionData.getSubmittedOnDate(), savingsAccountTransactionData.isInterestedPostedAsOn(),
+                savingsAccountTransactionData.getSubmittedByUsername(), savingsAccountTransactionData.getNote(),
+                savingsAccountTransactionData.getLienTransaction());
+    }
+
+    private static SavingsAccountTransactionData createImport(final SavingsAccountTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final Long savingsAccountId, final String accountNumber,
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final boolean reversed, final LocalDate submittedOnDate,
+            boolean isManualTransaction, final Boolean lienTransaction) {
+        SavingsAccountTransactionData data = new SavingsAccountTransactionData(null, transactionType, paymentDetailData, savingsAccountId,
+                accountNumber, transactionDate, null, transactionAmount, null, null, reversed, null, null, submittedOnDate, false, null,
+                null, null, null, isManualTransaction, lienTransaction, null, null);
+        // duplicated import fields
+        data.savingsAccountId = savingsAccountId;
+        data.accountNumber = accountNumber;
+        data.transactionDate = transactionDate;
+        data.transactionAmount = transactionAmount;
+        return data;
+    }
+
+    public static SavingsAccountTransactionData copyTransaction(SavingsAccountTransactionData accountTransaction) {
+        return createImport(accountTransaction.getTransactionType(), accountTransaction.getPaymentDetailData(),
+                accountTransaction.getSavingsAccountId(), null, accountTransaction.getTransactionDate(), accountTransaction.getAmount(),
+                accountTransaction.isReversed(), accountTransaction.getSubmittedOnDate(), accountTransaction.isManualTransaction(),
+                accountTransaction.getLienTransaction());
+    }
+
     public static SavingsAccountTransactionData importInstance(BigDecimal transactionAmount, LocalDate transactionDate, Long paymentTypeId,
             String accountNumber, String checkNumber, String routingCode, String receiptNumber, String bankNumber, Long savingsAccountId,
             SavingsAccountTransactionEnumData transactionType, Integer rowIndex, String locale, String dateFormat) {
-        return new SavingsAccountTransactionData(transactionAmount, transactionDate, paymentTypeId, accountNumber, checkNumber, routingCode,
-                receiptNumber, bankNumber, savingsAccountId, transactionType, rowIndex, locale, dateFormat, false);
+        SavingsAccountTransactionData data = createImport(transactionType, null, savingsAccountId, accountNumber, transactionDate,
+                transactionAmount, false, transactionDate, false, false);
+        data.rowIndex = rowIndex;
+        data.paymentTypeId = paymentTypeId;
+        data.checkNumber = checkNumber;
+        data.routingCode = routingCode;
+        data.receiptNumber = receiptNumber;
+        data.bankNumber = bankNumber;
+        data.locale = locale;
+        data.dateFormat = dateFormat;
+        return data;
+    }
+
+    private static SavingsAccountTransactionData createImport(SavingsAccountTransactionEnumData transactionType, Long savingsAccountId,
+            LocalDate transactionDate, BigDecimal transactionAmount, final LocalDate submittedOnDate, boolean isManualTransaction) {
+        // import transaction
+        return createImport(transactionType, null, savingsAccountId, null, transactionDate, transactionAmount, false, submittedOnDate,
+                isManualTransaction, false);
     }
 
     public static SavingsAccountTransactionData interestPosting(final SavingsAccountData savingsAccount, final LocalDate date,
             final Money amount, final boolean isManualTransaction) {
-        final boolean isReversed = false;
-        final Boolean lienTransaction = false;
         final LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
         final SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.INTEREST_POSTING;
-        SavingsAccountTransactionEnumData savingsAccountTransactionEnumData = new SavingsAccountTransactionEnumData(
+        SavingsAccountTransactionEnumData transactionType = new SavingsAccountTransactionEnumData(
                 savingsAccountTransactionType.getValue().longValue(), savingsAccountTransactionType.getCode(),
                 savingsAccountTransactionType.getValue().toString());
-        return new SavingsAccountTransactionData(amount.getAmount(), date, savingsAccount.getId(), savingsAccountTransactionEnumData,
-                isReversed, null, isManualTransaction, lienTransaction, submittedOnDate);
+        return createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(), submittedOnDate, isManualTransaction);
     }
 
     public static SavingsAccountTransactionData overdraftInterest(final SavingsAccountData savingsAccount, final LocalDate date,
             final Money amount, final boolean isManualTransaction) {
-        final boolean isReversed = false;
-        final Boolean lienTransaction = false;
         final LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
         final SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.OVERDRAFT_INTEREST;
-        SavingsAccountTransactionEnumData savingsAccountTransactionEnumData = new SavingsAccountTransactionEnumData(
+        SavingsAccountTransactionEnumData transactionType = new SavingsAccountTransactionEnumData(
                 savingsAccountTransactionType.getValue().longValue(), savingsAccountTransactionType.getCode(),
                 savingsAccountTransactionType.getValue().toString());
-        return new SavingsAccountTransactionData(amount.getAmount(), date, savingsAccount.getId(), savingsAccountTransactionEnumData,
-                isReversed, null, isManualTransaction, lienTransaction, submittedOnDate);
+        return createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(), submittedOnDate, isManualTransaction);
+    }
+
+    public static SavingsAccountTransactionData withHoldTax(final SavingsAccountData savingsAccount, final LocalDate date,
+            final Money amount, final Map<TaxComponentData, BigDecimal> taxDetails) {
+        final LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
+        SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.WITHHOLD_TAX;
+        SavingsAccountTransactionEnumData transactionType = new SavingsAccountTransactionEnumData(
+                savingsAccountTransactionType.getValue().longValue(), savingsAccountTransactionType.getCode(),
+                savingsAccountTransactionType.getValue().toString());
+        SavingsAccountTransactionData accountTransaction = createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(),
+                submittedOnDate, false);
+        accountTransaction.addTaxDetails(taxDetails);
+        return accountTransaction;
     }
 
     public boolean isInterestPostingAndNotReversed() {
@@ -150,15 +321,15 @@ public final class SavingsAccountTransactionData implements Serializable {
     }
 
     public boolean isCredit() {
-        return transactionType.getTransactionTypeEnum().isCredit() && isNotReversed() && !isReversalTransaction();
+        return transactionType.isCredit() && isNotReversed() && !isReversalTransaction();
     }
 
     public boolean isDebit() {
-        return transactionType.getTransactionTypeEnum().isDebit() && isNotReversed() && !isReversalTransaction();
+        return transactionType.isDebit() && isNotReversed() && !isReversalTransaction();
     }
 
     public boolean isWithdrawalFeeAndNotReversed() {
-        return this.transactionType.isFeeDeduction() && isNotReversed();
+        return transactionType.isFeeDeduction() && isNotReversed();
     }
 
     public boolean isPayCharge() {
@@ -298,55 +469,6 @@ public final class SavingsAccountTransactionData implements Serializable {
         return this.transactionType.isDeposit();
     }
 
-    public static SavingsAccountTransactionData copyTransaction(SavingsAccountTransactionData accountTransaction) {
-        return new SavingsAccountTransactionData(accountTransaction.getSavingsAccountId(), null, accountTransaction.getPaymentDetailData(),
-                accountTransaction.getTransactionType(), accountTransaction.getTransactionDate(), accountTransaction.getSubmittedOnDate(),
-                accountTransaction.getAmount(), accountTransaction.isReversed(), null, accountTransaction.isManualTransaction(),
-                accountTransaction.lienTransaction);
-    }
-
-    private SavingsAccountTransactionData(final Long savingsId, final Long officeId, final PaymentDetailData paymentDetailData,
-            final SavingsAccountTransactionEnumData savingsAccountTransactionType, final LocalDate transactionDate,
-            final LocalDate submittedOnDate, final BigDecimal amount, final boolean isReversed, final Long userId,
-            final boolean isManualTransaction, final Boolean lienTransaction) {
-        this.savingsAccountId = savingsId;
-        this.paymentDetailData = paymentDetailData;
-        this.transactionType = savingsAccountTransactionType;
-        this.entryType = transactionType == null ? null : transactionType.getTransactionTypeEnum().getEntryType();
-        this.transactionDate = transactionDate;
-        this.submittedOnDate = submittedOnDate;
-        this.amount = amount;
-        this.isManualTransaction = isManualTransaction;
-        this.lienTransaction = lienTransaction;
-        this.id = null;
-        this.accountId = null;
-        this.accountNo = null;
-        this.date = null;
-        this.currency = null;
-        this.outstandingChargeAmount = null;
-        this.runningBalance = null;
-        this.reversed = isReversed;
-        this.transfer = null;
-        this.interestedPostedAsOn = false;
-        this.rowIndex = null;
-        this.dateFormat = null;
-        this.locale = null;
-        this.transactionAmount = null;
-        this.paymentTypeId = null;
-        this.accountNumber = null;
-        this.checkNumber = null;
-        this.routingCode = null;
-        this.receiptNumber = null;
-        this.bankNumber = null;
-        this.paymentTypeOptions = null;
-        this.submittedByUsername = null;
-        this.note = null;
-        this.isReversal = null;
-        this.originalTransactionId = null;
-        this.releaseTransactionId = null;
-        this.reasonForBlock = null;
-    }
-
     public boolean isChargeTransaction() {
         return this.transactionType.isChargeTransaction();
     }
@@ -432,27 +554,11 @@ public final class SavingsAccountTransactionData implements Serializable {
         return Money.of(currency, this.amount);
     }
 
-    public static SavingsAccountTransactionData withHoldTax(final SavingsAccountData savingsAccount, final LocalDate date,
-            final Money amount, final Map<TaxComponentData, BigDecimal> taxDetails) {
-        final boolean isReversed = false;
-        final boolean isManualTransaction = false;
-        final Boolean lienTransaction = false;
-        final LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
-        SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.WITHHOLD_TAX;
-        SavingsAccountTransactionEnumData transactionType = new SavingsAccountTransactionEnumData(
-                savingsAccountTransactionType.getValue().longValue(), savingsAccountTransactionType.getCode(),
-                savingsAccountTransactionType.getValue().toString());
-        SavingsAccountTransactionData accountTransaction = new SavingsAccountTransactionData(amount.getAmount(), date,
-                savingsAccount.getId(), transactionType, isReversed, null, isManualTransaction, lienTransaction, submittedOnDate);
-        updateTaxDetails(taxDetails, accountTransaction);
-        return accountTransaction;
-    }
-
-    public static void updateTaxDetails(final Map<TaxComponentData, BigDecimal> taxDetails,
-            final SavingsAccountTransactionData accountTransaction) {
+    public void addTaxDetails(final Map<TaxComponentData, BigDecimal> taxDetails) {
         if (taxDetails != null) {
+            List<TaxDetailsData> thisTaxDetails = getTaxDetails();
             for (Map.Entry<TaxComponentData, BigDecimal> mapEntry : taxDetails.entrySet()) {
-                accountTransaction.getTaxDetails().add(new TaxDetailsData(mapEntry.getKey(), mapEntry.getValue()));
+                thisTaxDetails.add(new TaxDetailsData(mapEntry.getKey(), mapEntry.getValue()));
             }
         }
     }
@@ -510,89 +616,6 @@ public final class SavingsAccountTransactionData implements Serializable {
         return thisTransactionData;
     }
 
-    private SavingsAccountTransactionData(BigDecimal transactionAmount, LocalDate transactionDate, Long savingsAccountId,
-            SavingsAccountTransactionEnumData transactionType, boolean isReversed, String locale, boolean isManualTransaction,
-            final Boolean lienTransaction, final LocalDate submittedOnDate) {
-        this.id = null;
-        this.transactionType = transactionType;
-        this.entryType = transactionType == null ? null : transactionType.getTransactionTypeEnum().getEntryType();
-        this.accountId = null;
-        this.accountNo = null;
-        this.date = transactionDate;
-        this.currency = null;
-        this.paymentDetailData = null;
-        this.amount = transactionAmount;
-        this.outstandingChargeAmount = null;
-        this.runningBalance = null;
-        this.reversed = isReversed;
-        this.transfer = null;
-        this.submittedOnDate = submittedOnDate;
-        this.interestedPostedAsOn = false;
-        this.rowIndex = null;
-        this.savingsAccountId = savingsAccountId;
-        this.dateFormat = null;
-        this.locale = locale;
-        this.transactionDate = transactionDate;
-        this.transactionAmount = transactionAmount;
-        this.paymentTypeId = null;
-        this.accountNumber = null;
-        this.checkNumber = null;
-        this.routingCode = null;
-        this.receiptNumber = null;
-        this.bankNumber = null;
-        this.paymentTypeOptions = null;
-        this.submittedByUsername = null;
-        this.note = null;
-        this.isManualTransaction = isManualTransaction;
-        this.isReversal = null;
-        this.originalTransactionId = null;
-        this.lienTransaction = lienTransaction;
-        this.releaseTransactionId = null;
-        this.reasonForBlock = null;
-    }
-
-    private SavingsAccountTransactionData(BigDecimal transactionAmount, LocalDate transactionDate, Long paymentTypeId, String accountNumber,
-            String checkNumber, String routingCode, String receiptNumber, String bankNumber, Long savingsAccountId,
-            SavingsAccountTransactionEnumData transactionType, Integer rowIndex, String locale, String dateFormat,
-            final Boolean lienTransaction) {
-        this.id = null;
-        this.transactionType = transactionType;
-        this.entryType = transactionType == null ? null : transactionType.getTransactionTypeEnum().getEntryType();
-        this.accountId = null;
-        this.accountNo = null;
-        this.date = null;
-        this.currency = null;
-        this.paymentDetailData = null;
-        this.amount = null;
-        this.outstandingChargeAmount = null;
-        this.runningBalance = null;
-        this.reversed = false;
-        this.transfer = null;
-        this.submittedOnDate = null;
-        this.interestedPostedAsOn = false;
-        this.rowIndex = rowIndex;
-        this.savingsAccountId = savingsAccountId;
-        this.dateFormat = dateFormat;
-        this.locale = locale;
-        this.transactionDate = transactionDate;
-        this.transactionAmount = transactionAmount;
-        this.paymentTypeId = paymentTypeId;
-        this.accountNumber = accountNumber;
-        this.checkNumber = checkNumber;
-        this.routingCode = routingCode;
-        this.receiptNumber = receiptNumber;
-        this.bankNumber = bankNumber;
-        this.paymentTypeOptions = null;
-        this.submittedByUsername = null;
-        this.note = null;
-        this.isManualTransaction = false;
-        this.isReversal = null;
-        this.originalTransactionId = null;
-        this.lienTransaction = lienTransaction;
-        this.releaseTransactionId = null;
-        this.reasonForBlock = null;
-    }
-
     public boolean isWithdrawal() {
         return this.transactionType.isWithdrawal();
     }
@@ -612,195 +635,6 @@ public final class SavingsAccountTransactionData implements Serializable {
     public boolean spansAnyPortionOf(final LocalDateInterval periodInterval) {
         final LocalDateInterval balanceInterval = LocalDateInterval.create(getTransactionDate(), getEndOfBalanceLocalDate());
         return balanceInterval.containsPortionOf(periodInterval);
-    }
-
-    public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
-            final boolean reversed, final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final BigDecimal cumulativeBalance,
-            final LocalDate balanceEndDate) {
-        final Collection<PaymentTypeData> paymentTypeOptions = null;
-        return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
-                amount, outstandingChargeAmount, runningBalance, reversed, submittedOnDate, paymentTypeOptions, interestedPostedAsOn,
-                cumulativeBalance, balanceEndDate, false);
-    }
-
-    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
-            final boolean reversed, final LocalDate submittedOnDate, final Collection<PaymentTypeData> paymentTypeOptions,
-            final boolean interestedPostedAsOn, final BigDecimal cumulativeBalance, final LocalDate balanceEndDate,
-            final Boolean lienTransaction) {
-
-        this(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency, amount, outstandingChargeAmount,
-                runningBalance, reversed, paymentTypeOptions, submittedOnDate, interestedPostedAsOn, cumulativeBalance, balanceEndDate,
-                lienTransaction);
-    }
-
-    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
-            final boolean reversed, final Collection<PaymentTypeData> paymentTypeOptions, final LocalDate submittedOnDate,
-            final boolean interestedPostedAsOn, final BigDecimal cumulativeBalance, final LocalDate balanceEndDate,
-            final Boolean lienTransaction) {
-        this.id = id;
-        this.transactionDate = date;
-        this.transactionType = transactionType;
-        this.entryType = transactionType == null ? null : transactionType.getTransactionTypeEnum().getEntryType();
-        this.paymentDetailData = paymentDetailData;
-        this.accountId = savingsId;
-        this.accountNo = savingsAccountNo;
-        this.date = date;
-        this.currency = currency;
-        this.amount = amount;
-        this.outstandingChargeAmount = outstandingChargeAmount;
-        this.runningBalance = runningBalance;
-        this.reversed = reversed;
-        this.paymentTypeOptions = paymentTypeOptions;
-        this.submittedOnDate = submittedOnDate;
-        this.interestedPostedAsOn = interestedPostedAsOn;
-        this.cumulativeBalance = cumulativeBalance;
-        this.transfer = null;
-        this.submittedByUsername = null;
-        this.note = null;
-        this.balanceEndDate = balanceEndDate;
-        this.isManualTransaction = false;
-        this.isReversal = null;
-        this.originalTransactionId = null;
-        this.lienTransaction = lienTransaction;
-        this.releaseTransactionId = null;
-        this.reasonForBlock = null;
-    }
-
-    public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
-            final boolean reversed, final AccountTransferData transfer, final boolean interestedPostedAsOn,
-            final String submittedByUsername, final String note, final LocalDate submittedOnDate) {
-        final Collection<PaymentTypeData> paymentTypeOptions = null;
-        return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
-                amount, outstandingChargeAmount, runningBalance, reversed, transfer, paymentTypeOptions, interestedPostedAsOn,
-                submittedByUsername, note, false, submittedOnDate);
-    }
-
-    public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
-            final boolean reversed, final AccountTransferData transfer, final LocalDate submittedOnDate, final boolean interestedPostedAsOn,
-            final String submittedByUsername, final String note, final Boolean isReversal, final Long originalTransactionId,
-            final Boolean lienTransaction, final Long releaseTransactionId, final String reasonForBlock) {
-        final Collection<PaymentTypeData> paymentTypeOptions = null;
-        return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
-                amount, outstandingChargeAmount, runningBalance, reversed, transfer, paymentTypeOptions, submittedOnDate,
-                interestedPostedAsOn, submittedByUsername, note, isReversal, originalTransactionId, lienTransaction, releaseTransactionId,
-                reasonForBlock);
-    }
-
-    public static SavingsAccountTransactionData create(final Long id) {
-        final Collection<PaymentTypeData> paymentTypeOptions = null;
-        return new SavingsAccountTransactionData(id, null, null, null, null, null, null, null, null, null, false, null, paymentTypeOptions,
-                null, false, null, null, null, null, false, null, null);
-    }
-
-    public static SavingsAccountTransactionData template(final Long savingsId, final String savingsAccountNo,
-            final LocalDate defaultLocalDate, final CurrencyData currency) {
-        final Long id = null;
-        final SavingsAccountTransactionEnumData transactionType = null;
-        final BigDecimal amount = null;
-        final BigDecimal outstandingChargeAmount = null;
-        final BigDecimal runningBalance = null;
-        final boolean reversed = false;
-        final PaymentDetailData paymentDetailData = null;
-        final Collection<CodeValueData> paymentTypeOptions = null;
-        final boolean interestedPostedAsOn = false;
-        final String submittedByUsername = null;
-        final String note = null;
-        final Boolean lienTransaction = false;
-        return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, defaultLocalDate,
-                currency, amount, outstandingChargeAmount, runningBalance, reversed, null, null, interestedPostedAsOn, submittedByUsername,
-                note, lienTransaction, defaultLocalDate);
-    }
-
-    public static SavingsAccountTransactionData templateOnTop(final SavingsAccountTransactionData savingsAccountTransactionData,
-            final Collection<PaymentTypeData> paymentTypeOptions) {
-        return new SavingsAccountTransactionData(savingsAccountTransactionData.getId(), savingsAccountTransactionData.getTransactionType(),
-                savingsAccountTransactionData.getPaymentDetailData(), savingsAccountTransactionData.getAccountId(),
-                savingsAccountTransactionData.getAccountNo(), savingsAccountTransactionData.getDate(),
-                savingsAccountTransactionData.getCurrency(), savingsAccountTransactionData.getAmount(),
-                savingsAccountTransactionData.getOutstandingChargeAmount(), savingsAccountTransactionData.getRunningBalance(),
-                savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getTransfer(), paymentTypeOptions,
-                savingsAccountTransactionData.isInterestedPostedAsOn(), savingsAccountTransactionData.getSubmittedByUsername(),
-                savingsAccountTransactionData.getNote(), savingsAccountTransactionData.getLienTransaction(),
-                savingsAccountTransactionData.getSubmittedOnDate());
-    }
-
-    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
-            final boolean reversed, final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,
-            final boolean interestedPostedAsOn, final String submittedByUsername, final String note, final Boolean lienTransaction,
-            final LocalDate submittedOnDate) {
-
-        this(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency, amount, outstandingChargeAmount,
-                runningBalance, reversed, transfer, paymentTypeOptions, submittedOnDate, interestedPostedAsOn, submittedByUsername, note,
-                null, null, lienTransaction, null, null);
-    }
-
-    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
-            final boolean reversed, final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,
-            final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final String submittedByUsername, final String note,
-            final Boolean isReversal, final Long originalTransactionId, final Boolean lienTransaction, final Long releaseTransactionId,
-            final String reasonForBlock) {
-        this.id = id;
-        this.transactionType = transactionType;
-        TransactionEntryType entryType = null;
-        if (transactionType != null) {
-            entryType = transactionType.getTransactionTypeEnum().getEntryType();
-            entryType = Boolean.TRUE.equals(isReversal) ? entryType.getReversal() : entryType;
-        }
-        this.entryType = entryType;
-        this.paymentDetailData = paymentDetailData;
-        this.accountId = savingsId;
-        this.accountNo = savingsAccountNo;
-        this.date = date;
-        this.currency = currency;
-        this.amount = amount;
-        this.outstandingChargeAmount = outstandingChargeAmount;
-        this.runningBalance = runningBalance;
-        this.reversed = reversed;
-        this.transfer = transfer;
-        this.paymentTypeOptions = paymentTypeOptions;
-        this.submittedOnDate = submittedOnDate;
-
-        this.interestedPostedAsOn = interestedPostedAsOn;
-        this.submittedByUsername = submittedByUsername;
-        this.note = note;
-        this.isManualTransaction = false;
-        this.isReversal = isReversal;
-        this.originalTransactionId = originalTransactionId;
-        this.lienTransaction = lienTransaction;
-        this.releaseTransactionId = releaseTransactionId;
-        this.reasonForBlock = reasonForBlock;
-    }
-
-    public static SavingsAccountTransactionData withWithDrawalTransactionDetails(
-            final SavingsAccountTransactionData savingsAccountTransactionData) {
-
-        final LocalDate currentDate = DateUtils.getBusinessLocalDate();
-        final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations
-                .transactionType(SavingsAccountTransactionType.WITHDRAWAL.getValue());
-
-        return new SavingsAccountTransactionData(savingsAccountTransactionData.getId(), transactionType,
-                savingsAccountTransactionData.getPaymentDetailData(), savingsAccountTransactionData.getAccountId(),
-                savingsAccountTransactionData.getAccountNo(), currentDate, savingsAccountTransactionData.getCurrency(),
-                savingsAccountTransactionData.getAmount(), savingsAccountTransactionData.getOutstandingChargeAmount(),
-                savingsAccountTransactionData.getRunningBalance(), savingsAccountTransactionData.isReversed(),
-                savingsAccountTransactionData.getTransfer(), savingsAccountTransactionData.getPaymentTypeOptions(),
-                savingsAccountTransactionData.isInterestedPostedAsOn(), savingsAccountTransactionData.getSubmittedByUsername(),
-                savingsAccountTransactionData.getNote(), savingsAccountTransactionData.getLienTransaction(),
-                savingsAccountTransactionData.getSubmittedOnDate());
     }
 
     public void setId(final Long id) {
