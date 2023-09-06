@@ -16,22 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.self.loanaccount.service;
+package org.apache.fineract.portfolio.self.loanaccount.starter;
 
-import lombok.RequiredArgsConstructor;
+import org.apache.fineract.portfolio.self.loanaccount.service.AppuserLoansMapperReadService;
+import org.apache.fineract.portfolio.self.loanaccount.service.AppuserLoansMapperReadServiceImpl;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@RequiredArgsConstructor
-public class AppuserLoansMapperReadServiceImpl implements AppuserLoansMapperReadService {
+@Configuration
+public class SelfLoanAccountConfiguration {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    @Override
-    public Boolean isLoanMappedToUser(Long loanId, Long appUserId) {
-        return this.jdbcTemplate.queryForObject(
-                "select case when (count(*) > 0) then true else false end " + " from m_selfservice_user_client_mapping as m "
-                        + " left join m_loan as l on l.client_id = m.client_id " + " where l.id = ? and m.appuser_id = ? ",
-                Boolean.class, loanId, appUserId);
+    @Bean
+    @ConditionalOnMissingBean(AppuserLoansMapperReadService.class)
+    public AppuserLoansMapperReadService appuserLoansMapperReadService(JdbcTemplate jdbcTemplate) {
+        return new AppuserLoansMapperReadServiceImpl(jdbcTemplate);
     }
-
 }
