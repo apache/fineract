@@ -19,15 +19,14 @@
 
 package org.apache.fineract.portfolio.self.pockets.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.self.loanaccount.service.AppuserLoansMapperReadService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class AccountEntityServiceForLoanImpl implements AccountEntityService {
 
     private static final String KEY = EntityAccountType.LOAN.name();
@@ -35,16 +34,6 @@ public class AccountEntityServiceForLoanImpl implements AccountEntityService {
     private final PlatformSecurityContext context;
     private final AppuserLoansMapperReadService appuserLoansMapperReadService;
     private final LoanReadPlatformService loanReadPlatformService;
-
-    @Autowired
-    public AccountEntityServiceForLoanImpl(final PlatformSecurityContext context,
-            final AppuserLoansMapperReadService appuserLoansMapperReadService, final LoanReadPlatformService loanReadPlatformService) {
-
-        this.context = context;
-        this.appuserLoansMapperReadService = appuserLoansMapperReadService;
-        this.loanReadPlatformService = loanReadPlatformService;
-
-    }
 
     @Override
     public String getKey() {
