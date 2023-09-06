@@ -20,33 +20,22 @@ package org.apache.fineract.portfolio.self.pockets.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.self.pockets.data.PocketAccountMappingData;
 import org.apache.fineract.portfolio.self.pockets.domain.PocketAccountMapping;
 import org.apache.fineract.portfolio.self.pockets.domain.PocketAccountMappingRepositoryWrapper;
 import org.apache.fineract.portfolio.self.pockets.domain.PocketRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class PocketAccountMappingReadPlatformServiceImpl implements PocketAccountMappingReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final PocketRepositoryWrapper pocketRepositoryWrapper;
     private final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper;
-
-    @Autowired
-    public PocketAccountMappingReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final PlatformSecurityContext context,
-            final PocketRepositoryWrapper pocketRepositoryWrapper,
-            final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.context = context;
-        this.pocketRepositoryWrapper = pocketRepositoryWrapper;
-        this.pocketAccountMappingRepositoryWrapper = pocketAccountMappingRepositoryWrapper;
-    }
 
     @Override
     public PocketAccountMappingData retrieveAll() {
