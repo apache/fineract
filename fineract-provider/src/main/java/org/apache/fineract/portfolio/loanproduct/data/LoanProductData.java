@@ -167,6 +167,9 @@ public class LoanProductData implements Serializable {
     private final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions;
     private final List<EnumOptionData> rescheduleStrategyTypeOptions;
     private final List<EnumOptionData> preClosureInterestCalculationStrategyOptions;
+    private final List<EnumOptionData> advancedPaymentAllocationTransactionTypes;
+    private final List<EnumOptionData> advancedPaymentAllocationFutureInstallmentAllocationRules;
+    private final List<EnumOptionData> advancedPaymentAllocationTypes;
 
     private final List<EnumOptionData> interestRecalculationFrequencyTypeOptions;
     private final List<FloatingRateData> floatingRateOptions;
@@ -835,6 +838,9 @@ public class LoanProductData implements Serializable {
         this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;
         this.repaymentStartDateType = repaymentStartDateType;
         this.repaymentStartDateTypeOptions = null;
+        this.advancedPaymentAllocationTransactionTypes = null;
+        this.advancedPaymentAllocationFutureInstallmentAllocationRules = null;
+        this.advancedPaymentAllocationTypes = null;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -851,7 +857,10 @@ public class LoanProductData implements Serializable {
             final List<EnumOptionData> preCloseInterestCalculationStrategyOptions, final List<FloatingRateData> floatingRateOptions,
             final List<EnumOptionData> interestRecalculationNthDayTypeOptions,
             final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions, final boolean isRatesEnabled,
-            final Collection<DelinquencyBucketData> delinquencyBucketOptions, final List<EnumOptionData> repaymentStartDateTypeOptions) {
+            final Collection<DelinquencyBucketData> delinquencyBucketOptions, final List<EnumOptionData> repaymentStartDateTypeOptions,
+            final List<EnumOptionData> advancedPaymentAllocationTransactionTypes,
+            final List<EnumOptionData> advancedPaymentAllocationFutureInstallmentAllocationRules,
+            final List<EnumOptionData> advancedPaymentAllocationTypes) {
         this.id = productData.id;
         this.name = productData.name;
         this.shortName = productData.shortName;
@@ -992,6 +1001,9 @@ public class LoanProductData implements Serializable {
         this.paymentAllocation = productData.paymentAllocation;
         this.repaymentStartDateType = productData.repaymentStartDateType;
         this.repaymentStartDateTypeOptions = repaymentStartDateTypeOptions;
+        this.advancedPaymentAllocationTransactionTypes = advancedPaymentAllocationTransactionTypes;
+        this.advancedPaymentAllocationFutureInstallmentAllocationRules = advancedPaymentAllocationFutureInstallmentAllocationRules;
+        this.advancedPaymentAllocationTypes = advancedPaymentAllocationTypes;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

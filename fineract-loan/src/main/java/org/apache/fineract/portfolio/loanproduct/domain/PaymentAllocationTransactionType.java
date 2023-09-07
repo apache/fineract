@@ -18,24 +18,31 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+import java.util.Arrays;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 @Getter
 @RequiredArgsConstructor
 public enum PaymentAllocationTransactionType {
 
-    DEFAULT(null), //
-    REPAYMENT(LoanTransactionType.REPAYMENT), //
-    DOWN_PAYMENT(LoanTransactionType.DOWN_PAYMENT), //
-    MERCHANT_ISSUED_REFUND(LoanTransactionType.MERCHANT_ISSUED_REFUND), //
-    PAYOUT_REFUND(LoanTransactionType.PAYOUT_REFUND), //
-    GOODWILL_CREDIT(LoanTransactionType.GOODWILL_CREDIT), //
-    CHARGE_REFUND(LoanTransactionType.CHARGE_REFUND), //
-    CHARGE_ADJUSTMENT(LoanTransactionType.CHARGE_ADJUSTMENT), //
-    WAIVE_INTEREST(LoanTransactionType.WAIVE_INTEREST),//
-    ; //
+    DEFAULT(null, "Default"), //
+    REPAYMENT(LoanTransactionType.REPAYMENT, "Repayment"), //
+    DOWN_PAYMENT(LoanTransactionType.DOWN_PAYMENT, "Down payment"), //
+    MERCHANT_ISSUED_REFUND(LoanTransactionType.MERCHANT_ISSUED_REFUND, "Merchant issued refund"), //
+    PAYOUT_REFUND(LoanTransactionType.PAYOUT_REFUND, "Payout refund"), //
+    GOODWILL_CREDIT(LoanTransactionType.GOODWILL_CREDIT, "Goodwill credit"), //
+    CHARGE_REFUND(LoanTransactionType.CHARGE_REFUND, "Charge refund"), //
+    CHARGE_ADJUSTMENT(LoanTransactionType.CHARGE_ADJUSTMENT, "Charge adjustment"), //
+    WAIVE_INTEREST(LoanTransactionType.WAIVE_INTEREST, "Waive interest");//
 
     private final LoanTransactionType loanTransactionType;
+    private final String humanReadableName;
+
+    public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
+        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+    }
 }
