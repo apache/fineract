@@ -813,7 +813,7 @@ final class LoanProductsApiResourceSwagger {
             public Boolean penalty;
             public GetLoanProductsCurrencyOptions currency;
             @Schema(example = "100")
-            public Long amount;
+            public BigDecimal amount;
             public GetLoanChargeTimeType chargeTimeType;
             public GetLoanProductsChargeAppliesTo chargeAppliesTo;
             public GetLoanChargeCalculationType chargeCalculationType;
@@ -865,7 +865,7 @@ final class LoanProductsApiResourceSwagger {
                 @Schema(example = "over payment")
                 public String name;
                 @Schema(example = "13")
-                public Integer glCode;
+                public String glCode;
                 @Schema(example = "false")
                 public Boolean disabled;
                 @Schema(example = "true")
@@ -888,7 +888,7 @@ final class LoanProductsApiResourceSwagger {
                 @Schema(example = "Loan portfolio")
                 public String name;
                 @Schema(example = "02")
-                public Integer glCode;
+                public String glCode;
                 @Schema(example = "false")
                 public Boolean disabled;
                 @Schema(example = "true")
@@ -923,7 +923,7 @@ final class LoanProductsApiResourceSwagger {
                 @Schema(example = "loans written off 2")
                 public String name;
                 @Schema(example = "12")
-                public Integer glCode;
+                public String glCode;
                 @Schema(example = "false")
                 public Boolean disabled;
                 @Schema(example = "true")
@@ -958,7 +958,7 @@ final class LoanProductsApiResourceSwagger {
                 @Schema(example = "income from interest")
                 public String name;
                 @Schema(example = "04")
-                public Integer glCode;
+                public String glCode;
                 @Schema(example = "false")
                 public Boolean disabled;
                 @Schema(example = "true")
@@ -1031,6 +1031,9 @@ final class LoanProductsApiResourceSwagger {
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsRescheduleStrategyType> rescheduleStrategyTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsInterestRecalculationCompoundingFrequencyType> interestRecalculationFrequencyTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsRepaymentStartDateType> repaymentStartDateTypeOptions;
+        public List<EnumOptionData> advancedPaymentAllocationTransactionTypes;
+        public List<EnumOptionData> advancedPaymentAllocationFutureInstallmentAllocationRules;
+        public List<EnumOptionData> advancedPaymentAllocationTypes;
     }
 
     @Schema(description = "GetLoanProductsProductIdResponse")

@@ -18,8 +18,23 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+import java.util.Arrays;
+import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
+@Getter
+@RequiredArgsConstructor
 public enum FutureInstallmentAllocationRule {
-    NEXT_INSTALLMENT, //
-    LAST_INSTALLMENT, //
-    REAMORTIZATION //
+
+    NEXT_INSTALLMENT("Next installment"), //
+    LAST_INSTALLMENT("Last installment"), //
+    REAMORTIZATION("Reamortization"); //
+
+    private final String humanReadableName;
+
+    public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
+        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+    }
 }

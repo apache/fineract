@@ -26,27 +26,35 @@ import static org.apache.fineract.portfolio.loanproduct.domain.DueType.DUE;
 import static org.apache.fineract.portfolio.loanproduct.domain.DueType.IN_ADVANCE;
 import static org.apache.fineract.portfolio.loanproduct.domain.DueType.PAST_DUE;
 
+import java.util.Arrays;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @Getter
 @RequiredArgsConstructor
 public enum PaymentAllocationType {
 
-    PAST_DUE_PENALTY(PAST_DUE, PENALTY), //
-    PAST_DUE_FEE(PAST_DUE, FEE), //
-    PAST_DUE_PRINCIPAL(PAST_DUE, PRINCIPAL), //
-    PAST_DUE_INTEREST(PAST_DUE, INTEREST), //
-    DUE_PENALTY(DUE, PENALTY), //
-    DUE_FEE(DUE, FEE), //
-    DUE_PRINCIPAL(DUE, PRINCIPAL), //
-    DUE_INTEREST(DUE, INTEREST), //
-    IN_ADVANCE_PENALTY(IN_ADVANCE, PENALTY), //
-    IN_ADVANCE_FEE(IN_ADVANCE, FEE), //
-    IN_ADVANCE_PRINCIPAL(IN_ADVANCE, PRINCIPAL), //
-    IN_ADVANCE_INTEREST(IN_ADVANCE, INTEREST); //
+    PAST_DUE_PENALTY(PAST_DUE, PENALTY, "Past due penalty"), //
+    PAST_DUE_FEE(PAST_DUE, FEE, "Past due fee"), //
+    PAST_DUE_PRINCIPAL(PAST_DUE, PRINCIPAL, "Past due principal"), //
+    PAST_DUE_INTEREST(PAST_DUE, INTEREST, "Past due interest"), //
+    DUE_PENALTY(DUE, PENALTY, "Due penalty"), //
+    DUE_FEE(DUE, FEE, "Due fee"), //
+    DUE_PRINCIPAL(DUE, PRINCIPAL, "Due principal"), //
+    DUE_INTEREST(DUE, INTEREST, "Due interest"), //
+    IN_ADVANCE_PENALTY(IN_ADVANCE, PENALTY, "In advance penalty"), //
+    IN_ADVANCE_FEE(IN_ADVANCE, FEE, "In advance fee"), //
+    IN_ADVANCE_PRINCIPAL(IN_ADVANCE, PRINCIPAL, "In advance principal"), //
+    IN_ADVANCE_INTEREST(IN_ADVANCE, INTEREST, "In advanced interest"); //
 
     private final DueType dueType;
     private final AllocationType allocationType;
+    private final String humanReadableName;
+
+    public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
+        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+    }
 
 }
