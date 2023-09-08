@@ -138,6 +138,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "enable_auto_repayment_for_down_payment", nullable = false)
     private boolean enableAutoRepaymentForDownPayment;
 
+    @Column(name = "disable_schedule_extension_for_down_payment", nullable = false)
+    private boolean disableScheduleExtensionForDownPayment;
+
     public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -148,14 +151,15 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
-            final boolean enableAutoRepaymentForDownPayment) {
+            final boolean enableAutoRepaymentForDownPayment, final boolean disableScheduleExtensionForDownPayment) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment);
+                isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
+                disableScheduleExtensionForDownPayment);
     }
 
     protected LoanProductRelatedDetail() {
@@ -172,7 +176,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
-            final boolean enableAutoRepaymentForDownPayment) {
+            final boolean enableAutoRepaymentForDownPayment, final boolean disableScheduleExtensionForDownPayment) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -202,6 +206,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.enableDownPayment = enableDownPayment;
         this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
         this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;
+        this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -714,5 +719,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public void updateEnableAutoRepaymentForDownPayment(boolean enableAutoRepaymentForDownPayment) {
         this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;
+    }
+
+    public boolean isDisableScheduleExtensionForDownPayment() {
+        return disableScheduleExtensionForDownPayment;
+    }
+
+    public void updateDisableScheduleExtensionForDownPayment(boolean disableScheduleExtensionForDownPayment) {
+        this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
     }
 }

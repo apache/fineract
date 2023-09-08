@@ -150,6 +150,7 @@ public class LoanProductTestBuilder {
     private String disbursedAmountPercentageForDownPayment = null;
     private boolean enableAutoRepaymentForDownPayment = false;
     private Integer repaymentStartDateType = null;
+    private boolean disableScheduleExtensionForDownPayment = false;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -302,6 +303,9 @@ public class LoanProductTestBuilder {
 
         if (this.repaymentStartDateType != null) {
             map.put("repaymentStartDateType", repaymentStartDateType);
+        }
+        if (disableScheduleExtensionForDownPayment) {
+            map.put("disableScheduleExtensionForDownPayment", disableScheduleExtensionForDownPayment);
         }
 
         return map;
@@ -730,6 +734,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withRepaymentStartDateType(final Integer repaymentStartDateType) {
         this.repaymentStartDateType = repaymentStartDateType;
+        return this;
+    }
+
+    public LoanProductTestBuilder withDisableScheduleExtensionForDownPayment(final Boolean disableScheduleExtensionForDownPayment) {
+        this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
         return this;
     }
 
