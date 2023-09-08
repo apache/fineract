@@ -462,10 +462,14 @@ public class LoanScheduleAssembler {
         final boolean isDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableDownPayment();
         BigDecimal disbursedAmountPercentageForDownPayment = null;
         boolean isAutoRepaymentForDownPaymentEnabled = false;
+        boolean isScheduleExtensionForDownPaymentDisabled = false;
         if (isDownPaymentEnabled) {
             disbursedAmountPercentageForDownPayment = loanProduct.getLoanProductRelatedDetail()
                     .getDisbursedAmountPercentageForDownPayment();
             isAutoRepaymentForDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableAutoRepaymentForDownPayment();
+            isScheduleExtensionForDownPaymentDisabled = loanProduct.getLoanProductRelatedDetail()
+                    .isDisableScheduleExtensionForDownPayment();
+
         }
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
@@ -480,7 +484,8 @@ public class LoanScheduleAssembler {
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
                 allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
                 fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled,
-                disbursedAmountPercentageForDownPayment, isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate);
+                disbursedAmountPercentageForDownPayment, isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate,
+                isScheduleExtensionForDownPaymentDisabled);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

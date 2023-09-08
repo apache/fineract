@@ -1080,6 +1080,8 @@ final class LoansApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
+        @Schema(example = "false")
+        public Boolean disableScheduleExtensionForDownPayment;
     }
 
     @Schema(description = "GetLoansResponse")
