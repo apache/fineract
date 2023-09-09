@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.self.savings.service;
+package org.apache.fineract.portfolio.self.savings.starter;
 
-import lombok.RequiredArgsConstructor;
+import org.apache.fineract.portfolio.self.savings.service.AppuserSavingsMapperReadService;
+import org.apache.fineract.portfolio.self.savings.service.AppuserSavingsMapperReadServiceImpl;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@RequiredArgsConstructor
-public class AppuserSavingsMapperReadServiceImpl implements AppuserSavingsMapperReadService {
+@Configuration
+public class SelfSavingsConfiguration {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    @Override
-    public Boolean isSavingsMappedToUser(Long savingsId, Long appUserId) {
-        return this.jdbcTemplate.queryForObject(
-                "select case when (count(*) > 0) then true else false end " + " from m_selfservice_user_client_mapping as m "
-                        + " left join m_savings_account as s on s.client_id = m.client_id " + " where s.id = ? and m.appuser_id = ? ",
-                Boolean.class, savingsId, appUserId);
+    @Bean
+    @ConditionalOnMissingBean(AppuserSavingsMapperReadService.class)
+    public AppuserSavingsMapperReadService appuserSavingsMapperReadService(JdbcTemplate jdbcTemplate) {
+        return new AppuserSavingsMapperReadServiceImpl(jdbcTemplate);
     }
 }
