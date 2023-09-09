@@ -93,4 +93,20 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
             throw new PlatformEmailSendException(e);
         }
     }
+
+    @Override
+    public void sendToUserForgotPassword(String contactName, String address, String username, String unencodedPassword) {
+        final String subject = "Password Reset Request for Your " + username + " Account";
+
+        final String body = "You are receiving this email because a password reset request has been initiated for your account " + username
+                + ". \n If you did not request this change, please disregard this message.You are receiving this email as your email account: "
+                + address + "\n You can login using the following credentials:\nusername: " + username + "\n" + "password: "
+                + unencodedPassword + "\n"
+                + "You must change this password upon  log in using Uppercase, Lowercase, number and character.\n"
+                + "Please note that this password reset  is valid for 24 hours. After this time, you will need to initiate a new password reset request if necessary."
+                + "Thank you and welcome to the organisation.";
+
+        final EmailDetail emailDetail = new EmailDetail(subject, body, address, contactName);
+        sendDefinedEmail(emailDetail);
+    }
 }

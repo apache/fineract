@@ -40,4 +40,12 @@ public class AppUserRepositoryWrapper {
         }
         return user;
     }
+
+    public AppUser findByUsername(String username) {
+        final AppUser user = this.appUserRepository.findAppUserByName(username);
+        if (user == null) {
+            throw new UserNotFoundException(username);
+        }
+        return user;
+    }
 }
