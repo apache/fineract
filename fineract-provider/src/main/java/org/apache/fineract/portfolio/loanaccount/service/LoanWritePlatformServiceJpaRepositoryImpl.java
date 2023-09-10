@@ -869,16 +869,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
                     existingReversedTransactionIds, isAccountTransfer);
             journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
-
-            // Remove All the Disbursement Details If the Loan Product is disabled and exists one
-            if (loan.loanProduct().isDisallowExpectedDisbursements() && !loan.getDisbursementDetails().isEmpty()) {
-                List<LoanDisbursementDetails> reversedDisbursementDetails = new ArrayList<>();
-                for (LoanDisbursementDetails disbursementDetail : loan.getAllDisbursementDetails()) {
-                    disbursementDetail.reverse();
-                    reversedDisbursementDetails.add(disbursementDetail);
-                }
-                this.loanDisbursementDetailsRepository.saveAllAndFlush(reversedDisbursementDetails);
-            }
             loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoDisbursalBusinessEvent(loan));
         }
