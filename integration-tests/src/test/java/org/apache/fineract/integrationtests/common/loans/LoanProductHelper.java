@@ -38,6 +38,10 @@ public class LoanProductHelper extends IntegrationTest {
         return ok(fineract().loanProducts.retrieveLoanProductDetails1(externalId));
     }
 
+    public GetLoanProductsProductIdResponse retrieveLoanProductById(Long loanProductId) {
+        return ok(fineract().loanProducts.retrieveLoanProductDetails(loanProductId));
+    }
+
     public PutLoanProductsProductIdResponse updateLoanProductByExternalId(String externalId, PutLoanProductsProductIdRequest request) {
         return ok(fineract().loanProducts.updateLoanProduct1(externalId, request));
     }

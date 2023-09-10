@@ -118,4 +118,13 @@ public class JournalEntryHelper {
         return GSON.fromJson(response, GetJournalEntriesTransactionIdResponse.class);
     }
 
+    public GetJournalEntriesTransactionIdResponse getJournalEntriesForLoan(final Long loanId) {
+        log.info("Getting GL Journal entries for loan id {}", loanId);
+        final String url = "/fineract-provider/api/v1/journalentries?loanId=" + loanId + "&tenantIdentifier=default"
+                + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy";
+        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, null);
+        log.info("response {}", response);
+        return GSON.fromJson(response, GetJournalEntriesTransactionIdResponse.class);
+    }
+
 }

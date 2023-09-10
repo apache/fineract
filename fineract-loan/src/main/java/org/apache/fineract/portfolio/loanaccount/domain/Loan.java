@@ -3044,7 +3044,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     ? Boolean.FALSE
                     : Boolean.TRUE;
             this.loanRepaymentScheduleDetail.setPrincipal(this.approvedPrincipal);
-            if (this.loanProduct.isMultiDisburseLoan()) {
+            // Remove All the Disbursement Details If the Loan Product is disabled and exists one
+            if (this.loanProduct().isDisallowExpectedDisbursements() && !getDisbursementDetails().isEmpty()) {
+                for (LoanDisbursementDetails disbursementDetail : getAllDisbursementDetails()) {
+                    disbursementDetail.reverse();
+                }
+            } else {
                 for (final LoanDisbursementDetails details : getDisbursementDetails()) {
                     details.updateActualDisbursementDate(null);
                 }
@@ -5535,6 +5540,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     }
 
+    public ChangedTransactionDetail recalculateScheduleFromLastTransaction(final ScheduleGeneratorDTO generatorDTO) {
+        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            regenerateRepaymentScheduleWithInterestRecalculation(generatorDTO);
+        } else {
+            regenerateRepaymentSchedule(generatorDTO);
+        }
+        return processTransactions();
+
+    }
+
     public ChangedTransactionDetail handleRegenerateRepaymentScheduleWithInterestRecalculation(final ScheduleGeneratorDTO generatorDTO) {
         regenerateRepaymentScheduleWithInterestRecalculation(generatorDTO);
         return processTransactions();
@@ -6505,7 +6520,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             }
         }
         reverseExistingTransactionsTillLastDisbursal(lastDisbursalTransaction);
-        loan.recalculateScheduleFromLastTransaction(scheduleGeneratorDTO, existingTransactionIds, existingReversedTransactionIds);
+        loan.recalculateScheduleFromLastTransaction(scheduleGeneratorDTO);
         actualChanges.put("undolastdisbursal", "true");
         actualChanges.put("disbursedAmount", this.getDisbursedAmount());
         updateLoanSummaryDerivedFields();
@@ -6529,6 +6544,28 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 transaction.reverse();
             }
         }
+        if (isAutoRepaymentForDownPaymentEnabled()) {
+            // identify down-payment amount for the transaction
+            BigDecimal disbursedAmountPercentageForDownPayment = this.loanRepaymentScheduleDetail
+                    .getDisbursedAmountPercentageForDownPayment();
+            Money downPaymentMoney = Money.of(getCurrency(),
+                    MathUtil.percentageOf(lastDisbursalTransaction.getAmount(), disbursedAmountPercentageForDownPayment, 19));
+
+            // find the matching down-payment transaction based on date, amount and it also must have downpayment
+            // installment linked
+            Optional<LoanTransaction> downPaymentTransaction = this.loanTransactions.stream()
+                    .filter(tr -> tr.getTransactionDate().equals(lastDisbursalTransaction.getTransactionDate())
+                            && hasAnInstallmentWithDownPayment(tr, downPaymentMoney.getAmount()))
+                    .max(Comparator.comparing(LoanTransaction::getId));
+
+            // reverse the down-payment transaction
+            downPaymentTransaction.ifPresent(LoanTransaction::reverse);
+        }
+    }
+
+    private boolean hasAnInstallmentWithDownPayment(LoanTransaction tr, BigDecimal amount) {
+        return tr.getAmount().compareTo(amount) == 0 && tr.getLoanTransactionToRepaymentScheduleMappings().stream()
+                .anyMatch(mapping -> mapping.getLoanRepaymentScheduleInstallment().isDownPayment());
     }
 
     private void updateLoanToLastDisbursalState(LoanDisbursementDetails disbursementDetail) {

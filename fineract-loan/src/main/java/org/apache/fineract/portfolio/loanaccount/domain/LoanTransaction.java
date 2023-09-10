@@ -910,7 +910,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo() {
-        return isDisbursement() || isAccrual() || isRepaymentAtDisbursement();
+        return isDisbursement() || isAccrual() || isRepaymentAtDisbursement() || isRepayment();
     }
 
     public boolean isAccrualTransaction() {
