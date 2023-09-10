@@ -27,4 +27,10 @@ public class FinancialActivityData {
     private final Integer id;
     private final String name;
     private final GLAccountType mappedGLAccountType;
+
+    public FinancialActivityData(Integer id, String name, GLAccountType mappedGLAccountType) {
+        this.id = id;
+        this.name = name;
+        this.mappedGLAccountType = mappedGLAccountType;
+    }
 }
