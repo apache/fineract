@@ -101,6 +101,7 @@ import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
@@ -140,6 +141,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final HolidayRepositoryWrapper holidayRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
+    private final SavingsAccountDomainService savingsAccountDomainService;
 
     @Transactional
     @Override
@@ -507,6 +509,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Transactional
     private void postInterest(final SavingsAccount account) {
 
+        account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -521,6 +524,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final boolean postReversals = false;
         account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                 postInterestOnDate, false, postReversals);
+        List<SavingsAccountTransaction> transactions = this.savingsAccountDomainService.extractNewTransactions(account);
+        for (SavingsAccountTransaction accountTransaction : transactions) {
+            if (accountTransaction.getId() == null) {
+                this.savingsAccountTransactionRepository.save(accountTransaction);
+            }
+        }
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);

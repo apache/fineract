@@ -488,7 +488,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
         checkClientOrGroupActive(account);
-
+        account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transactionDate, account);
 
         if (postInterestAs == true) {

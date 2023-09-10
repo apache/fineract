@@ -48,4 +48,6 @@ public interface SavingsAccountDomainService {
 
     SavingsAccountTransaction handleHold(SavingsAccount account, AppUser createdUser, BigDecimal amount, LocalDate transactionDate,
             Boolean lienAllowed);
+
+    List<SavingsAccountTransaction> extractNewTransactions(SavingsAccount account);
 }
