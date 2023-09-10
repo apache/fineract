@@ -4348,7 +4348,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             throw new LoanOfficerAssignmentDateException("cannot.be.before.loan.submittal.date", errorMessage, assignmentDate,
                     getSubmittedOnDate());
 
-        } else if (lastAssignmentRecord != null && lastAssignmentRecord.isEndDateAfter(assignmentDate)) {
+        } else if (lastAssignmentRecord != null && lastAssignmentRecord.getEndDate() != null
+                && lastAssignmentRecord.isEndDateAfter(assignmentDate)) {
 
             final String errorMessage = "The Loan Officer assignment date (" + assignmentDate
                     + ") cannot be before previous Loan Officer unassigned date (" + lastAssignmentRecord.getEndDate() + ").";
