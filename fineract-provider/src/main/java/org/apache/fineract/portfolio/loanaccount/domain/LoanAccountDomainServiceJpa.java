@@ -53,8 +53,6 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanRefundPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanRefundPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPostBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionGoodwillCreditPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionGoodwillCreditPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
@@ -292,7 +290,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         } else if (isRecoveryRepayment) {
             repaymentEvent = new LoanTransactionRecoveryPaymentPreBusinessEvent(loan);
         } else if (repaymentTransactionType.isDownPayment()) {
-            repaymentEvent = new LoanTransactionDownPaymentPreBusinessEvent(loan);
+            repaymentEvent = new LoanTransactionMakeRepaymentPreBusinessEvent(loan);
         }
         return repaymentEvent;
     }
@@ -313,7 +311,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         } else if (isRecoveryRepayment) {
             repaymentEvent = new LoanTransactionRecoveryPaymentPostBusinessEvent(transaction);
         } else if (repaymentTransactionType.isDownPayment()) {
-            repaymentEvent = new LoanTransactionDownPaymentPostBusinessEvent(transaction);
+            repaymentEvent = new LoanTransactionMakeRepaymentPostBusinessEvent(transaction);
         }
         return repaymentEvent;
     }

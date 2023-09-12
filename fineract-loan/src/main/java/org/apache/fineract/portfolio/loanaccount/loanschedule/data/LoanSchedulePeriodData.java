@@ -72,6 +72,7 @@ public final class LoanSchedulePeriodData {
     private final BigDecimal totalActualCostOfLoanForPeriod;
     private final BigDecimal totalInstallmentAmountForPeriod;
     private final BigDecimal totalCredits;
+    private final Boolean downPaymentPeriod;
 
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
             final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
@@ -205,6 +206,7 @@ public final class LoanSchedulePeriodData {
             this.totalOverdue = null;
         }
         this.totalCredits = BigDecimal.ZERO;
+        this.downPaymentPeriod = false;
     }
 
     /*
@@ -268,9 +270,13 @@ public final class LoanSchedulePeriodData {
             this.totalOverdue = null;
         }
         this.totalCredits = BigDecimal.ZERO;
+        this.downPaymentPeriod = false;
     }
 
     // TODO refactor the class to builder pattern
+    /*
+     * used for down payment only period when creating an empty loan schedule for preview etc
+     */
     private LoanSchedulePeriodData(Integer periodNumber, LocalDate fromDate, LocalDate dueDate, BigDecimal principalDue,
             BigDecimal principalOutstanding) {
         this.period = periodNumber;
@@ -323,6 +329,7 @@ public final class LoanSchedulePeriodData {
             this.totalOverdue = null;
         }
         this.totalCredits = BigDecimal.ZERO;
+        this.downPaymentPeriod = true;
     }
 
     /*
@@ -396,6 +403,7 @@ public final class LoanSchedulePeriodData {
             this.totalOverdue = null;
         }
         this.totalCredits = totalCredits;
+        this.downPaymentPeriod = false;
     }
 
     private BigDecimal defaultToZeroIfNull(final BigDecimal possibleNullValue) {

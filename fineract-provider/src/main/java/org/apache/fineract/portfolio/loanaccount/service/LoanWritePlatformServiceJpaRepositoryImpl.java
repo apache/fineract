@@ -82,6 +82,8 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanDisbursalTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMakeRepaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoChargeOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoWrittenOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanWaiveInterestBusinessEvent;
@@ -456,7 +458,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, null, downPaymentEnabled);
             }
             loan.adjustNetDisbursalAmount(amountToDisburse.getAmount());
-            loan.handleDownPayment(amountToDisburse.getAmount(), command, scheduleGeneratorDTO);
+            if (loan.isAutoRepaymentForDownPaymentEnabled()) {
+                businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionMakeRepaymentPreBusinessEvent(loan));
+                LoanTransaction downPaymentTransaction = loan.handleDownPayment(amountToDisburse.getAmount(), command,
+                        scheduleGeneratorDTO);
+                businessEventNotifierService
+                        .notifyPostBusinessEvent(new LoanTransactionMakeRepaymentPostBusinessEvent(downPaymentTransaction));
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+            }
         }
         if (!changes.isEmpty()) {
             if (changedTransactionDetail != null) {
