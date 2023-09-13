@@ -68,7 +68,21 @@ class AdvancedPaymentAllocationsJsonParserTest {
 
         // then
         Assertions.assertNull(loanProductPaymentAllocationRules);
-        Mockito.verifyNoInteractions(advancedPaymentAllocationsValidator);
+        Mockito.verify(advancedPaymentAllocationsValidator, times(1)).validate(null, "other-strategy");
+    }
+
+    @Test
+    public void testNullAllocationRuleJson() throws JsonProcessingException {
+        Map<String, Object> map = new HashMap<>();
+        JsonCommand command = createJsonCommand(map);
+
+        // when
+        List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = advancedPaymentAllocationsJsonParser
+                .assembleLoanProductPaymentAllocationRules(command, "advanced-payment-allocation-strategy");
+
+        // then
+        Assertions.assertNull(loanProductPaymentAllocationRules);
+        Mockito.verify(advancedPaymentAllocationsValidator, times(1)).validate(null, "advanced-payment-allocation-strategy");
     }
 
     @Test

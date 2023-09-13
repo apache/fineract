@@ -81,6 +81,22 @@ class AdvancedPaymentAllocationsValidatorTest {
     }
 
     @Test
+    public void testValidateEmptyRuleList() {
+        assertPlatformValidationException(
+                "Advanced-payment-allocation-strategy was selected but no DEFAULT payment allocation was provided",
+                "advanced-payment-strategy-without-default-payment-allocation",
+                () -> underTest.validate(List.of(), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+    }
+
+    @Test
+    public void testValidateMissingList() {
+        assertPlatformValidationException(
+                "Advanced-payment-allocation-strategy was selected but no DEFAULT payment allocation was provided",
+                "advanced-payment-strategy-without-default-payment-allocation",
+                () -> underTest.validate(null, ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+    }
+
+    @Test
     public void testValidatePaymentAllocationThrowsErrorWhenNoDefault() {
         LoanProductPaymentAllocationRule lppr2 = createLoanProductAllocationRule2();
         assertPlatformValidationException(
