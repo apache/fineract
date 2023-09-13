@@ -1923,4 +1923,10 @@ public class LoanTransactionHelper extends IntegrationTest {
     public List<AdvancedPaymentData> getAdvancedPaymentAllocationRules(final Integer loanId) {
         return ok(fineract().legacy.getAdvancedPaymentAllocationRulesOfLoan(loanId.longValue()));
     }
+
+    public Object disburseLoanWithTransactionAmountWithError(final String date, final Integer loanID, final String transactionAmount,
+            final String jsonAttributeToGetBack) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, transactionAmount, null), jsonAttributeToGetBack);
+    }
 }

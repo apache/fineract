@@ -2599,21 +2599,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean canDisburse(final LocalDate actualDisbursementDate) {
-        LocalDate lastDisburseDate = this.actualDisbursementDate;
+        LocalDate loanSubmittedOnDate = this.submittedOnDate;
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_DISBURSED, this);
 
         boolean isMultiTrancheDisburse = false;
         LoanStatus actualLoanStatus = LoanStatus.fromInt(this.loanStatus);
         if ((actualLoanStatus.isActive() || actualLoanStatus.isClosedObligationsMet() || actualLoanStatus.isOverpaid())
                 && isAllTranchesNotDisbursed()) {
-            LoanDisbursementDetails details = fetchLastDisburseDetail();
-
-            if (details != null) {
-                lastDisburseDate = details.actualDisbursementDate();
-            }
-            if (actualDisbursementDate.isBefore(lastDisburseDate)) {
-                final String errorMsg = "Loan can't be disbursed before " + lastDisburseDate;
-                throw new LoanDisbursalException(errorMsg, "actualdisbursementdate.before.lastdusbursedate", lastDisburseDate,
+            if (actualDisbursementDate.isBefore(loanSubmittedOnDate)) {
+                final String errorMsg = "Loan can't be disbursed before " + loanSubmittedOnDate;
+                throw new LoanDisbursalException(errorMsg, "actualdisbursementdate.before.submittedDate", loanSubmittedOnDate,
                         actualDisbursementDate);
             }
             isMultiTrancheDisburse = true;
@@ -2625,6 +2620,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         Money disburseAmount = this.loanRepaymentScheduleDetail.getPrincipal().zero();
         BigDecimal principalDisbursed = command.bigDecimalValueOfParameterNamed(LoanApiConstants.principalDisbursedParameterName);
         if (this.actualDisbursementDate == null) {
+            this.actualDisbursementDate = actualDisbursementDate;
+        } else if (actualDisbursementDate.isBefore(this.actualDisbursementDate)) {
             this.actualDisbursementDate = actualDisbursementDate;
         }
         BigDecimal diff = BigDecimal.ZERO;
