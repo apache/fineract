@@ -133,7 +133,7 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
 
     @Test
     public void testUpdateLoanProductOneAllocationIsAdded() {
-        // given a loan with one allocations
+        // given a loan with one allocation
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
         AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
         Integer loanProductId = LOAN_TRANSACTION_HELPER.getLoanProductId(createLoanJSON(defaultAllocation));
@@ -148,6 +148,7 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
 
         // then it shall be added.
         loanProduct = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
+        Assertions.assertNotNull(loanProduct.getPaymentAllocation());
         Assertions.assertEquals(2, loanProduct.getPaymentAllocation().size());
         Optional<AdvancedPaymentData> first = loanProduct.getPaymentAllocation().stream()
                 .filter(advancedPaymentData -> "DEFAULT".equals(advancedPaymentData.getTransactionType())).findFirst();
@@ -201,6 +202,24 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
     }
 
     @Test
+    public void testCreateShouldFailWhenNoAllocationRuleIsProvided() {
+        // given
+        ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+        LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(REQUEST_SPEC, errorResponse);
+
+        String loanProduct = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
+                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).withRepaymentStrategy("advanced-payment-allocation-strategy").build();
+
+        // when
+        List<Map<String, String>> loanProductError = validationErrorHelper.getLoanProductError(loanProduct, "errors");
+        Assertions.assertEquals("Advanced-payment-allocation-strategy was selected but no DEFAULT payment allocation was provided",
+                loanProductError.get(0).get("defaultUserMessage"));
+    }
+
+    @Test
     public void testCreateShouldFailWhenNoDefaultAllocationIsProvided() {
         // given
         AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
@@ -215,12 +234,11 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
     }
 
     private String createLoanJSON(AdvancedPaymentData... advancedPaymentData) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
+        return new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4").withRepaymentAfterEvery("1")
+                .withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).addAdvancedPaymentAllocation(advancedPaymentData).build();
-        return loanProductJSON;
     }
 
     private PutLoanProductsProductIdRequest updateLoanProductRequest(AdvancedPaymentData... advancedPaymentData) {

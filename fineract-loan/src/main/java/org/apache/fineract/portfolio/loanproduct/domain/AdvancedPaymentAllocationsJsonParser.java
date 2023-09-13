@@ -39,8 +39,9 @@ public class AdvancedPaymentAllocationsJsonParser {
     public List<LoanProductPaymentAllocationRule> assembleLoanProductPaymentAllocationRules(final JsonCommand command,
             String loanTransactionProcessingStrategyCode) {
         JsonArray paymentAllocations = command.arrayOfParameterNamed("paymentAllocation");
+        List<LoanProductPaymentAllocationRule> productPaymentAllocationRules = null;
         if (paymentAllocations != null) {
-            List<LoanProductPaymentAllocationRule> productPaymentAllocationRules = paymentAllocations.asList().stream().map(json -> {
+            productPaymentAllocationRules = paymentAllocations.asList().stream().map(json -> {
                 Map<String, JsonElement> map = json.getAsJsonObject().asMap();
                 LoanProductPaymentAllocationRule loanProductPaymentAllocationRule = new LoanProductPaymentAllocationRule();
                 populatePaymentAllocationRules(map, loanProductPaymentAllocationRule);
@@ -48,10 +49,9 @@ public class AdvancedPaymentAllocationsJsonParser {
                 populateTransactionType(map, loanProductPaymentAllocationRule);
                 return loanProductPaymentAllocationRule;
             }).toList();
-            advancedPaymentAllocationsValidator.validate(productPaymentAllocationRules, loanTransactionProcessingStrategyCode);
-            return productPaymentAllocationRules;
         }
-        return null;
+        advancedPaymentAllocationsValidator.validate(productPaymentAllocationRules, loanTransactionProcessingStrategyCode);
+        return productPaymentAllocationRules;
     }
 
     private void populatePaymentAllocationRules(Map<String, JsonElement> map,

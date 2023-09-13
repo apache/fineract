@@ -73,7 +73,8 @@ public class AdvancedPaymentAllocationsValidator {
     }
 
     private boolean hasDuplicateTransactionTypes(List<LoanProductPaymentAllocationRule> rules) {
-        return rules.stream().map(LoanProductPaymentAllocationRule::getTransactionType).distinct().toList().size() != rules.size();
+        return rules != null
+                && rules.stream().map(LoanProductPaymentAllocationRule::getTransactionType).distinct().toList().size() != rules.size();
     }
 
     private void validateAllocationRule(LoanProductPaymentAllocationRule rule) {
@@ -92,14 +93,14 @@ public class AdvancedPaymentAllocationsValidator {
     }
 
     private boolean hasAtLeastOneDefaultPaymentAllocation(List<LoanProductPaymentAllocationRule> rules) {
-        return rules.stream() //
+        return rules != null && rules.stream() //
                 .filter(r -> PaymentAllocationTransactionType.DEFAULT.equals(r.getTransactionType())) //
                 .toList() //
                 .size() > 0;
     }
 
     private boolean hasLoanProductPaymentAllocationRule(List<LoanProductPaymentAllocationRule> rules) {
-        return rules.size() > 0;
+        return rules != null && rules.size() > 0;
     }
 
     private void raiseValidationError(String globalisationMessageCode, String msg) {
