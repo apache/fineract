@@ -91,7 +91,7 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String countLastExecutedQueryResult(String sql) {
+    public String countLastExecutedQueryResult(@NotNull String sql) {
         if (databaseTypeResolver.isMySQL()) {
             return "SELECT FOUND_ROWS()";
         } else {
@@ -99,7 +99,9 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String countQueryResult(String sql) {
+    public String countQueryResult(@NotNull String sql) {
+        // Needs to remove the limit and offset
+        sql = sql.replaceAll("LIMIT \\d+", "").replaceAll("OFFSET \\d+", "").trim();
         return format("SELECT COUNT(*) FROM (%s) AS temp", sql);
     }
 
