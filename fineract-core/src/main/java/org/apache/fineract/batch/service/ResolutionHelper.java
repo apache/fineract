@@ -182,6 +182,9 @@ public class ResolutionHelper {
         } else if (element.isJsonArray()) {
             final JsonArray jsElementArray = element.getAsJsonArray();
             value = processJsonArray(jsElementArray, responseCtx);
+        } else if (element.isJsonNull()) {
+            // No further processing of null values
+            value = element;
         } else {
             value = resolveDependentVariable(element, responseCtx);
         }
