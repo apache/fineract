@@ -820,9 +820,8 @@ public final class BatchHelper {
         br.setRelativeUrl(String.format("v1/loans/$.loanId/transactions?command=%s", transactionCommand));
         br.setMethod("POST");
         String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        br.setBody(String.format(
-                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
-                dateString, amount));
+        br.setBody(String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
+                + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s, \"note\":null}", dateString, amount));
 
         return br;
     }
