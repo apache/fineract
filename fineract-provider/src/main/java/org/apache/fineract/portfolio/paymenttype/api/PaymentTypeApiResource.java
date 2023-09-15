@@ -75,7 +75,7 @@ public class PaymentTypeApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.GetPaymentTypesResponse.class)))) })
     public String getAllPaymentTypes(@Context final UriInfo uriInfo,
             @QueryParam("onlyWithCode") @Parameter(description = "onlyWithCode") final boolean onlyWithCode) {
-        this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
+        this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.ENTITY_NAME);
         Collection<PaymentTypeData> paymentTypes = null;
         if (onlyWithCode) {
             paymentTypes = this.readPlatformService.retrieveAllPaymentTypesWithCode();
@@ -95,7 +95,7 @@ public class PaymentTypeApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.GetPaymentTypesPaymentTypeIdResponse.class))) })
     public String retrieveOnePaymentType(@PathParam("paymentTypeId") @Parameter(description = "paymentTypeId") final Long paymentTypeId,
             @Context final UriInfo uriInfo) {
-        this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
+        this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.ENTITY_NAME);
         this.paymentTypeRepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
         final PaymentTypeData paymentTypes = this.readPlatformService.retrieveOne(paymentTypeId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
