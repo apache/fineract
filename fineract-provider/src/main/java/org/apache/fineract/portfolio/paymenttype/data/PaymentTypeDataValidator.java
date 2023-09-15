@@ -69,7 +69,7 @@ public class PaymentTypeDataValidator {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(PaymentTypeApiResourceConstants.resourceNameForPermissions);
+                .resource(PaymentTypeApiResourceConstants.ENTITY_NAME);
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.NAME, element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.NAME, element);
@@ -131,7 +131,7 @@ public class PaymentTypeDataValidator {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(PaymentTypeApiResourceConstants.resourceNameForPermissions);
+                .resource(PaymentTypeApiResourceConstants.ENTITY_NAME);
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.NAME, element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.NAME, element);
