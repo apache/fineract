@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -39,25 +40,13 @@ import org.apache.fineract.portfolio.collateralmanagement.exception.ClientCollat
 import org.apache.fineract.portfolio.collateralmanagement.exception.ClientCollateralNotFoundException;
 import org.apache.fineract.portfolio.collateralmanagement.exception.CollateralNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class ClientCollateralManagementWritePlatformServiceImpl implements ClientCollateralManagementWritePlatformService {
 
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
     private final CollateralManagementRepositoryWrapper collateralManagementRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
-
-    @Autowired
-    public ClientCollateralManagementWritePlatformServiceImpl(
-            final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
-            final CollateralManagementRepositoryWrapper collateralManagementRepositoryWrapper,
-            final ClientRepositoryWrapper clientRepositoryWrapper) {
-        this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
-        this.collateralManagementRepositoryWrapper = collateralManagementRepositoryWrapper;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-    }
 
     @Transactional
     @Override
@@ -136,7 +125,7 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
         }
 
         BigDecimal totalQuantity = BigDecimal.ZERO;
-        if (clientCollateralManagement.getLoanCollateralManagementSet().size() > 0) {
+        if (!clientCollateralManagement.getLoanCollateralManagementSet().isEmpty()) {
             for (LoanCollateralManagement loanCollateralManagement : clientCollateralManagement.getLoanCollateralManagementSet()) {
                 totalQuantity = totalQuantity.add(loanCollateralManagement.getQuantity());
             }
@@ -167,7 +156,7 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
             throw new CollateralNotFoundException(clientCollateralId);
         }
 
-        if (clientCollateralManagement.getLoanCollateralManagementSet().size() > 0) {
+        if (!clientCollateralManagement.getLoanCollateralManagementSet().isEmpty()) {
             for (LoanCollateralManagement loanCollateralManagement : clientCollateralManagement.getLoanCollateralManagementSet()) {
                 if (!loanCollateralManagement.isReleased()) {
                     throw new ClientCollateralCannotBeDeletedException(
