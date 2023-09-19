@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -38,24 +39,14 @@ import org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManag
 import org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementRepositoryWrapper;
 import org.apache.fineract.portfolio.collateralmanagement.exception.CollateralCannotBeDeletedException;
 import org.apache.fineract.portfolio.collateralmanagement.exception.CollateralNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 public class CollateralManagementWritePlatformServiceImpl implements CollateralManagementWritePlatformService {
 
     private final CollateralManagementRepositoryWrapper collateralManagementRepositoryWrapper;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
     private final FromJsonHelper fromApiJsonHelper;
-
-    @Autowired
-    public CollateralManagementWritePlatformServiceImpl(final CollateralManagementRepositoryWrapper collateralManagementRepositoryWrapper,
-            final ApplicationCurrencyRepository applicationCurrencyRepository, final FromJsonHelper fromApiJsonHelper) {
-        this.collateralManagementRepositoryWrapper = collateralManagementRepositoryWrapper;
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
 
     @Transactional
     @Override
