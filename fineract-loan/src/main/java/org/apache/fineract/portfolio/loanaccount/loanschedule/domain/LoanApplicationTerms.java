@@ -215,6 +215,7 @@ public final class LoanApplicationTerms {
     private RepaymentStartDateType repaymentStartDateType;
     private LocalDate submittedOnDate;
     private boolean isScheduleExtensionForDownPaymentDisabled;
+    private Money disbursedPrincipal;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -379,6 +380,7 @@ public final class LoanApplicationTerms {
         this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
 
         this.principal = principal;
+        this.disbursedPrincipal = principal;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.repaymentsStartingFromDate = repaymentsStartingFromDate;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
@@ -680,7 +682,7 @@ public final class LoanApplicationTerms {
         switch (this.interestMethod) {
             case FLAT:
                 final BigDecimal interestRateForLoanTerm = calculateFlatInterestRateForLoanTerm(calculator, mc);
-                totalInterestDue = this.principal.minus(totalPrincipalAccountedForInterestCalcualtion)
+                totalInterestDue = this.disbursedPrincipal.minus(totalPrincipalAccountedForInterestCalcualtion)
                         .multiplyRetainScale(interestRateForLoanTerm, mc.getRoundingMode());
 
             break;

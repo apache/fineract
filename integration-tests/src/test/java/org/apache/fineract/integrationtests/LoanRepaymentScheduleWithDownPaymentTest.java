@@ -335,7 +335,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "4", "0");
+        final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "3", "0");
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -404,7 +404,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "4", "0");
+        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "3", "0");
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -550,7 +550,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "4", "0");
+        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "3", "0");
 
         final Double feeAmount = 10.00;
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
@@ -713,7 +713,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
-        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "4", "1");
+        final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "3", "1");
 
         final Double feeAmount = 10.00;
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
@@ -798,6 +798,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
     public void testDelinquencyRangeOnDownPaymentInstallment() {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            LocalDate businessDate = LocalDate.of(2022, 9, 5);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
@@ -821,9 +823,6 @@ public class LoanRepaymentScheduleWithDownPaymentTest {
             assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
             final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
-
-            LocalDate businessDate = LocalDate.of(2022, 9, 5);
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
 
             final String jobName = "Loan COB";
             final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);

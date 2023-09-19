@@ -106,7 +106,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -179,7 +179,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -251,7 +251,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -324,7 +324,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -416,7 +416,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -505,7 +505,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -592,7 +592,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -683,7 +683,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -757,7 +757,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -845,7 +845,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -910,7 +910,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -984,7 +984,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -1072,7 +1072,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -1162,7 +1162,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -1249,7 +1249,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -1310,7 +1310,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -1371,7 +1371,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -1432,7 +1432,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.20").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -1531,7 +1531,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.20").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
@@ -1650,7 +1650,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.02.20").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 60, 15, 4, 0,
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 500L, 45, 15, 3, 0,
                     "01 January 2023", "01 January 2023");
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
