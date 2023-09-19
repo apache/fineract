@@ -414,7 +414,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
-                    installment(1000.0, false, "31 January 2023") //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
             );
 
             // Disburse Loan
@@ -460,7 +461,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
-                    installment(1000.0, false, "31 January 2023") //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
             );
 
             // Disburse Loan
@@ -507,9 +509,11 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     journalEntry(1000.0, suspenseClearingAccount, "DEBIT") //
             );
 
+            // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
-                    installment(1000.0, false, "31 January 2023") //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
             );
         });
     }
@@ -529,7 +533,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
-                    installment(1000.0, false, "31 January 2023") //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
             );
 
             // Disburse Loan
@@ -588,9 +593,11 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     journalEntry(250.0, suspenseClearingAccount, "CREDIT") //
             );
 
+            // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
-                    installment(1000.0, false, "31 January 2023") //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
             );
         });
     }
@@ -610,7 +617,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
-                    installment(1000.0, false, "31 January 2023") //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
             );
 
             // Disburse Loan
@@ -654,10 +662,11 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     journalEntry(1000.0, suspenseClearingAccount, "DEBIT") //
             );
 
-            // verify repayment entries are reverted
+            // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
-                    installment(1000.0, false, "31 January 2023") //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
             );
         });
     }
@@ -675,7 +684,9 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0);
 
             // Verify Repayment Schedule
-            verifyRepaymentSchedule(loanId, installment(1000.0, null, "01 January 2023"), installment(1000.0, false, "31 January 2023"));
+            verifyRepaymentSchedule(loanId, installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023"));//
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
@@ -740,10 +751,9 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // Verify Repayment Schedule
-            verifyRepaymentSchedule(loanId, //
-                    installment(1000.0, null, "01 January 2023"), //
-                    installment(1000.0, false, "31 January 2023") //
-            );
+            verifyRepaymentSchedule(loanId, installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, false, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023"));//
         });
     }
 
@@ -762,7 +772,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             // 1st Disburse Loan
@@ -874,7 +885,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             // 1st Disburse Loan
@@ -995,7 +1007,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             // 1st Disburse Loan
@@ -1083,7 +1096,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             // 1st Disburse Loan
@@ -1177,7 +1191,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             // 1st Disburse Loan
@@ -1245,7 +1260,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             verifyNoTransactions(loanId);
@@ -1294,7 +1310,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             // 1st Disburse Loan
@@ -1368,7 +1385,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             verifyNoTransactions(loanId);
@@ -1417,7 +1435,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             // 1st Disburse Loan
@@ -1491,7 +1510,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             verifyNoTransactions(loanId);
@@ -1548,7 +1568,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             // 1st Disburse Loan
@@ -1627,7 +1648,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
-                    installment(1500.0, false, "31 January 2023") //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
             );
 
             verifyNoTransactions(loanId);
