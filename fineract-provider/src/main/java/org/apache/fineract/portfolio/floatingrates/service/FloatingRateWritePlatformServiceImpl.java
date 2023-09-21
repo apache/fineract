@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.floatingrates.service;
 
 import jakarta.persistence.PersistenceException;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -28,27 +30,16 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
 import org.apache.fineract.portfolio.floatingrates.serialization.FloatingRateDataValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
+@Slf4j
 public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FloatingRateWritePlatformServiceImpl.class);
     private final FloatingRateDataValidator fromApiJsonDeserializer;
     private final FloatingRateRepositoryWrapper floatingRateRepository;
-
-    @Autowired
-    public FloatingRateWritePlatformServiceImpl(final FloatingRateDataValidator fromApiJsonDeserializer,
-            final FloatingRateRepositoryWrapper floatingRateRepository) {
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.floatingRateRepository = floatingRateRepository;
-    }
 
     @Transactional
     @Override
@@ -118,7 +109,7 @@ public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePl
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(Exception dve) {
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
 
     }
 
