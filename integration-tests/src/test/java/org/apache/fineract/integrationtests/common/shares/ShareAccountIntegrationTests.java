@@ -383,7 +383,7 @@ public class ShareAccountIntegrationTests {
 
         Map<String, Object> shareAccountDataForUpdate = new HashMap<>();
         shareAccountDataForUpdate.put("requestedShares", 30);
-        shareAccountDataForUpdate.put("applicationDate", "02 Mar 2016");
+        shareAccountDataForUpdate.put("applicationDate", "02 March 2016");
         shareAccountDataForUpdate.put("dateFormat", "dd MMMM yyyy");
         shareAccountDataForUpdate.put("locale", "en_GB");
         shareAccountDataForUpdate.put("charges", charges);
@@ -394,7 +394,7 @@ public class ShareAccountIntegrationTests {
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
         Assertions.assertNotNull(transactions);
         Assertions.assertEquals(2, transactions.size());
-        DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -409,7 +409,7 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("60.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-                Assertions.assertEquals("02 Mar 2016", simple.format(date));
+                Assertions.assertEquals("02 March 2016", simple.format(date));
             } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
@@ -444,7 +444,7 @@ public class ShareAccountIntegrationTests {
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
         approveMap.put("dateFormat", "dd MMMM yyyy");
-        approveMap.put("approvedDate", "01 Jan 2016");
+        approveMap.put("approvedDate", "01 January 2016");
         approveMap.put("locale", "en");
         String approve = new Gson().toJson(approveMap);
         ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
@@ -456,7 +456,7 @@ public class ShareAccountIntegrationTests {
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date approvedDate = cal.getTime();
-        Assertions.assertEquals("01 Jan 2016", simple.format(approvedDate));
+        Assertions.assertEquals("01 January 2016", simple.format(approvedDate));
 
         // charges verification
         chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
@@ -483,7 +483,7 @@ public class ShareAccountIntegrationTests {
 
         Map<String, Object> activateMap = new HashMap<>();
         activateMap.put("dateFormat", "dd MMMM yyyy");
-        activateMap.put("activatedDate", "01 Jan 2016");
+        activateMap.put("activatedDate", "01 January 2016");
         activateMap.put("locale", "en");
         String activateJson = new Gson().toJson(activateMap);
         ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
@@ -495,7 +495,7 @@ public class ShareAccountIntegrationTests {
         cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date activatedDate = cal.getTime();
-        Assertions.assertEquals("01 Jan 2016", simple.format(activatedDate));
+        Assertions.assertEquals("01 January 2016", simple.format(activatedDate));
 
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
         Assertions.assertNotNull(transactions);
@@ -514,12 +514,12 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-                Assertions.assertEquals("02 Mar 2016", simple.format(date));
+                Assertions.assertEquals("02 March 2016", simple.format(date));
             } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assertions.assertEquals("01 Jan 2016", simple.format(date));
+                Assertions.assertEquals("01 January 2016", simple.format(date));
             }
         }
 
@@ -552,7 +552,7 @@ public class ShareAccountIntegrationTests {
 
         // apply additional shares
         Map<String, Object> additionalSharesRequestMap = new HashMap<>();
-        additionalSharesRequestMap.put("requestedDate", "01 Apr 2016");
+        additionalSharesRequestMap.put("requestedDate", "01 April 2016");
         additionalSharesRequestMap.put("dateFormat", "dd MMMM yyyy");
         additionalSharesRequestMap.put("locale", "en");
         additionalSharesRequestMap.put("requestedShares", "15");
@@ -573,13 +573,13 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             String transactionDate = simple.format(date);
-            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 Mar 2016")) {
+            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 March 2016")) {
                 Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-            } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 Apr 2016")) {
+            } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 April 2016")) {
                 addtionalSharesRequestId = String.valueOf(transaction.get("id"));
                 Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("32.0", String.valueOf(transaction.get("amount")));
@@ -593,7 +593,7 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assertions.assertEquals("01 Jan 2016", transactionDate);
+                Assertions.assertEquals("01 January 2016", transactionDate);
             }
         }
 
@@ -648,13 +648,13 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             String transactionDate = simple.format(date);
-            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 Mar 2016")) {
+            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 March 2016")) {
                 Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-            } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 Apr 2016")) {
+            } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 April 2016")) {
                 Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("32.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
@@ -667,7 +667,7 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assertions.assertEquals("01 Jan 2016", transactionDate);
+                Assertions.assertEquals("01 January 2016", transactionDate);
             }
         }
 
@@ -843,13 +843,13 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             String transactionDate = simple.format(date);
-            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 Mar 2016")) {
+            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 March 2016")) {
                 Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-            } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 Apr 2016")) {
+            } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 April 2016")) {
                 Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("32.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
@@ -868,7 +868,7 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assertions.assertEquals("01 Jan 2016", transactionDate);
+                Assertions.assertEquals("01 January 2016", transactionDate);
             }
         }
 
@@ -921,13 +921,13 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             String transactionDate = simple.format(date);
-            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 Mar 2016")) {
+            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 March 2016")) {
                 Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-            } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 Apr 2016")) {
+            } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 April 2016")) {
                 Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("32.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
@@ -953,7 +953,7 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assertions.assertEquals("01 Jan 2016", transactionDate);
+                Assertions.assertEquals("01 January 2016", transactionDate);
             }
         }
         // charges verification
@@ -990,16 +990,16 @@ public class ShareAccountIntegrationTests {
 
     private Integer createShareAccount(final Integer clientId, final Integer productId, final Integer savingsAccountId) {
         String josn = new ShareAccountHelper().withClientId(String.valueOf(clientId)).withProductId(String.valueOf(productId))
-                .withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId)).withSubmittedDate("01 Jan 2016")
-                .withApplicationDate("01 Jan 2016").withRequestedShares("25").build();
+                .withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId)).withSubmittedDate("01 January 2016")
+                .withApplicationDate("01 January 2016").withRequestedShares("25").build();
         return ShareAccountTransactionHelper.createShareAccount(josn, requestSpec, responseSpec);
     }
 
     private Integer createShareAccount(final Integer clientId, final Integer productId, final Integer savingsAccountId,
             List<Map<String, Object>> charges) {
         String josn = new ShareAccountHelper().withClientId(String.valueOf(clientId)).withProductId(String.valueOf(productId))
-                .withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId)).withSubmittedDate("01 Jan 2016")
-                .withApplicationDate("01 Jan 2016").withRequestedShares("25").withCharges(charges).build();
+                .withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId)).withSubmittedDate("01 January 2016")
+                .withApplicationDate("01 January 2016").withRequestedShares("25").withCharges(charges).build();
         return ShareAccountTransactionHelper.createShareAccount(josn, requestSpec, responseSpec);
     }
 

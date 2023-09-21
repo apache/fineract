@@ -50,7 +50,7 @@ import org.junit.jupiter.api.Test;
 public class SavingsAccountTransactionTest {
 
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String DEFAULT_DATE_FORMAT = "dd MMM yyyy";
+    public static final String DEFAULT_DATE_FORMAT = "dd MMMM yyyy";
     final String startDateString = "03 June 2023";
     final String depositDateString = "05 June 2023";
     final String withdrawDateString = "10 June 2023";
