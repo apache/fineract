@@ -62,7 +62,7 @@ import org.springframework.data.domain.Sort;
 public class SavingsAccountTransactionsSearchIntegrationTest {
 
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String DEFAULT_DATE_FORMAT = "dd MMM yyyy";
+    public static final String DEFAULT_DATE_FORMAT = "dd MMMM yyyy";
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     final String startDate = "01 May 2023";
     final String firstDepositDate = "05 May 2023";

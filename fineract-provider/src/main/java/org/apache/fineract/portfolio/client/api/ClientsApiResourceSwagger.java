@@ -402,7 +402,7 @@ final class ClientsApiResourceSwagger {
 
         @Schema(example = "03 August 2021")
         public String activationDate;
-        @Schema(example = "dd MMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "en")
         public String locale;

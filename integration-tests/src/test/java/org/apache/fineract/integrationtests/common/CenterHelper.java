@@ -113,7 +113,7 @@ public final class CenterHelper {
         if (activationDate != null) {
             hm.put("active", true);
             hm.put("locale", "en");
-            hm.put("dateFormat", "dd MMM yyyy");
+            hm.put("dateFormat", "dd MMMM yyyy");
             hm.put("activationDate", activationDate);
         }
 

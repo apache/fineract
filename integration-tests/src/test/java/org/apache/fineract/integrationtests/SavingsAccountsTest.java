@@ -42,7 +42,7 @@ public class SavingsAccountsTest extends IntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsTest.class);
     private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy");
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
     private final String formattedDate = simpleDateFormat.format(new Date());
     private int savingId = 1;
 

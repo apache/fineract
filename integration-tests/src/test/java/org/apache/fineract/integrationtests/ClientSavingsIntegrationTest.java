@@ -2235,7 +2235,7 @@ public class ClientSavingsIntegrationTest {
         Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
         Date today = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant());
         String todayDate = today.toString();
-        SimpleDateFormat dt1 = new SimpleDateFormat("dd MMM yyyy");
+        SimpleDateFormat dt1 = new SimpleDateFormat("dd MMMM yyyy");
         todayDate = dt1.format(today).toString();
         withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "300", todayDate,
                 CommonConstants.RESPONSE_RESOURCE_ID);

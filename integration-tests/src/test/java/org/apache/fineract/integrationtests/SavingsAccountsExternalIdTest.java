@@ -44,8 +44,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     public static final String EXTERNAL_ID = UUID.randomUUID().toString();
     private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
-    private final String formattedDate = LocalDate.now(ZoneId.systemDefault()).minusDays(5)
-            .format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+    private final String formattedDate = LocalDate.now(ZoneId.systemDefault()).minusDays(5).format(DateTimeFormatter.ofPattern(dateFormat));
 
     @Test
     @Order(1)
