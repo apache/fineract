@@ -1001,7 +1001,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 periods.add(disbursementPeriod);
 
                 BigDecimal downPaymentAmt = BigDecimal.ZERO;
-                if (loanApplicationTerms.isDownPaymentEnabled() && !disburseDetail.getKey().isEqual(scheduledDueDate)) {
+                if (loanApplicationTerms.isDownPaymentEnabled()) {
                     final LoanScheduleModelDownPaymentPeriod downPaymentPeriod = createDownPaymentPeriod(loanApplicationTerms,
                             scheduleParams, disburseDetail.getKey(), disburseDetail.getValue().getAmount());
                     periods.add(downPaymentPeriod);
