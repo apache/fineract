@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.DEFAULT_STRATEGY;
+import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,15 +31,20 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -52,9 +59,13 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @Slf4j
 @ExtendWith(LoanTestLifecycleExtension.class)
@@ -77,8 +88,9 @@ public class DelinquencyAndChargebackIntegrationTest {
         loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
     }
 
-    @Test
-    public void testLoanClassificationStepAsPartOfCOB() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void testLoanClassificationStepAsPartOfCOB(LoanProductTestBuilder loanProductTestBuilder) {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
@@ -96,7 +108,7 @@ public class DelinquencyAndChargebackIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId());
+                    delinquencyBucket.getId(), loanProductTestBuilder);
             assertNotNull(getLoanProductsProductResponse);
 
             // Older date to have more than one overdue installment
@@ -195,8 +207,9 @@ public class DelinquencyAndChargebackIntegrationTest {
         }
     }
 
-    @Test
-    public void testLoanClassificationStepAsPartOfCOBRepeated() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void testLoanClassificationStepAsPartOfCOBRepeated(LoanProductTestBuilder loanProductTestBuilder) {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
@@ -215,7 +228,7 @@ public class DelinquencyAndChargebackIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId());
+                    delinquencyBucket.getId(), loanProductTestBuilder);
             assertNotNull(getLoanProductsProductResponse);
 
             // Older date to have more than one overdue installment
@@ -325,8 +338,8 @@ public class DelinquencyAndChargebackIntegrationTest {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Integer delinquencyBucketId) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
+            final Integer delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
+        final HashMap<String, Object> loanProductMap = loanProductTestBuilder.build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);
     }
@@ -363,6 +376,53 @@ public class DelinquencyAndChargebackIntegrationTest {
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf(outstanding));
 
         return delinquencyRange;
+    }
+
+    private static AdvancedPaymentData createRepaymentPaymentAllocation() {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType("REPAYMENT");
+        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
+
+        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
+                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_INTEREST, PaymentAllocationType.PAST_DUE_PRINCIPAL,
+                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_INTEREST,
+                PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
+                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
+
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
+        return advancedPaymentData;
+    }
+
+    private static AdvancedPaymentData createDefaultPaymentAllocation() {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType("DEFAULT");
+        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
+
+        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
+                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
+                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
+                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
+                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
+
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
+        return advancedPaymentData;
+    }
+
+    private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
+        AtomicInteger integer = new AtomicInteger(1);
+        return Arrays.stream(paymentAllocationTypes).map(pat -> {
+            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
+            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
+            paymentAllocationOrder.setOrder(integer.getAndIncrement());
+            return paymentAllocationOrder;
+        }).toList();
+    }
+
+    private static Stream<Arguments> loanProductFactory() {
+        return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", new LoanProductTestBuilder().withRepaymentStrategy(DEFAULT_STRATEGY))),
+                Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY",
+                        new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                                .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation()))));
     }
 
 }

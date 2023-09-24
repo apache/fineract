@@ -569,6 +569,7 @@ configure(project.fineractJavaProjects) {
                 'org.mockito:mockito-junit-jupiter',
                 'org.junit.jupiter:junit-jupiter-api',
                 'org.junit.jupiter:junit-jupiter-engine',
+                'org.junit.jupiter:junit-jupiter-params',
                 'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
                 'org.bouncycastle:bcpkix-jdk15to18',
                 'org.bouncycastle:bcprov-jdk15to18',
