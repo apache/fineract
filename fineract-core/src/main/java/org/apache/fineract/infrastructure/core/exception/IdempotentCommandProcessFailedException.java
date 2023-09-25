@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
+import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+
+import jakarta.validation.constraints.NotNull;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
 
@@ -28,16 +31,14 @@ public class IdempotentCommandProcessFailedException extends AbstractIdempotentC
 
     private final Integer statusCode;
 
-    public IdempotentCommandProcessFailedException(CommandWrapper wrapper, CommandSource commandSource) {
-        super(wrapper.actionName(), wrapper.entityName(), wrapper.getIdempotencyKey(), commandSource.getResult());
-        this.statusCode = commandSource.getResultStatusCode();
+    public IdempotentCommandProcessFailedException(CommandWrapper wrapper, String idempotencyKey, CommandSource command) {
+        super(wrapper.actionName(), wrapper.actionName(), idempotencyKey, command.getResult());
+        this.statusCode = command.getResultStatusCode();
     }
 
+    @NotNull
     public Integer getStatusCode() {
         // If the database inconsistent we return http 500 instead of null pointer exception
-        if (statusCode == null) {
-            return 500;
-        }
-        return statusCode;
+        return statusCode == null ? SC_INTERNAL_SERVER_ERROR : statusCode;
     }
 }

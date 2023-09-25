@@ -1587,13 +1587,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (!rs.next()) {
             throw new DatatableNotFoundException(entityTable, appTableId);
         }
-        final Long officeId = rs.getLong("officeId");
-        final Long groupId = rs.getLong("groupId");
-        final Long clientId = rs.getLong("clientId");
-        final Long savingsId = rs.getLong("savingsId");
-        final Long loanId = rs.getLong("loanId");
-        final Long transactionId = rs.getLong("transactionId");
-        final Long entityId = rs.getLong("entityId");
+        final Long officeId = (Long) rs.getObject("officeId");
+        final Long groupId = (Long) rs.getObject("groupId");
+        final Long clientId = (Long) rs.getObject("clientId");
+        final Long savingsId = (Long) rs.getObject("savingsId");
+        final Long loanId = (Long) rs.getObject("loanId");
+        final Long transactionId = (Long) rs.getObject("transactionId");
+        final Long entityId = (Long) rs.getObject("entityId");
 
         if (rs.next()) {
             throw new DatatableSystemErrorException("System Error: More than one row returned from data scoping query");
@@ -1604,7 +1604,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 .withGroupId(groupId) //
                 .withClientId(clientId) //
                 .withSavingsId(savingsId) //
-                .withLoanId(loanId).withTransactionId(String.valueOf(transactionId)).withEntityId(entityId)//
+                .withLoanId(loanId).withTransactionId(transactionId == null ? null : String.valueOf(transactionId)).withEntityId(entityId)//
                 .build();
     }
 

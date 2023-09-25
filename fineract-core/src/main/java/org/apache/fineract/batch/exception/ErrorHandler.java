@@ -76,9 +76,13 @@ public final class ErrorHandler {
             Set<String> exceptionMappers = createSet(ctx.getBeanNamesForType(forClassWithGenerics(ExceptionMapper.class, clazz)));
             Set<String> fineractErrorMappers = createSet(ctx.getBeanNamesForType(FineractExceptionMapper.class));
             SetUtils.SetView<String> intersection = SetUtils.intersection(exceptionMappers, fineractErrorMappers);
-            if (intersection.size() > 0) {
+            if (!intersection.isEmpty()) {
                 // noinspection unchecked
                 return (ExceptionMapper<T>) ctx.getBean(intersection.iterator().next());
+            }
+            if (!exceptionMappers.isEmpty()) {
+                // noinspection unchecked
+                return (ExceptionMapper<T>) ctx.getBean(exceptionMappers.iterator().next());
             }
             clazz = clazz.getSuperclass();
         } while (!clazz.equals(Exception.class));
@@ -98,8 +102,10 @@ public final class ErrorHandler {
         MultivaluedMap<String, Object> headers = response.getHeaders();
         Set<Header> batchHeaders = headers == null ? null
                 : headers.keySet().stream().map(e -> new Header(e, response.getHeaderString(e))).collect(Collectors.toSet());
-        return new ErrorInfo(response.getStatus(), ((FineractExceptionMapper) exceptionMapper).errorCode(),
-                JSON_HELPER.toJson(response.getEntity()), batchHeaders);
+        Integer errorCode = exceptionMapper instanceof FineractExceptionMapper ? ((FineractExceptionMapper) exceptionMapper).errorCode()
+                : null;
+        Object msg = response.getEntity();
+        return new ErrorInfo(response.getStatus(), errorCode, msg instanceof String ? (String) msg : JSON_HELPER.toJson(msg), batchHeaders);
     }
 
     public RuntimeException getMappable(@NotNull Throwable thr) {

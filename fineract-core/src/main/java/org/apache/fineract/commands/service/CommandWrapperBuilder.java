@@ -737,7 +737,6 @@ public class CommandWrapperBuilder {
     }
 
     private void commonDatatableSettings(final String datatable, final Long apptableId, final Long datatableId) {
-
         this.entityName = datatable;
         this.entityId = apptableId;
         this.subentityId = datatableId;

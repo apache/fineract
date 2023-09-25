@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
+import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
 
 /**
@@ -27,9 +28,9 @@ public class IdempotentCommandProcessSucceedException extends AbstractIdempotent
 
     private final Integer statusCode;
 
-    public IdempotentCommandProcessSucceedException(CommandWrapper wrapper, String response, Integer statusCode) {
-        super(wrapper.actionName(), wrapper.entityName(), wrapper.getIdempotencyKey(), response);
-        this.statusCode = statusCode;
+    public IdempotentCommandProcessSucceedException(CommandWrapper wrapper, String idempotencyKey, CommandSource command) {
+        super(wrapper.actionName(), wrapper.entityName(), idempotencyKey, command.getResult());
+        this.statusCode = command.getResultStatusCode();
     }
 
     public Integer getStatusCode() {

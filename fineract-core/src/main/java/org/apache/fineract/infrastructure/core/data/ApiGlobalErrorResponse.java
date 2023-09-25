@@ -23,6 +23,7 @@ import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_FORBIDDEN;
 import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+import static org.apache.http.HttpStatus.SC_LOCKED;
 import static org.apache.http.HttpStatus.SC_METHOD_NOT_ALLOWED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
@@ -106,7 +107,7 @@ public class ApiGlobalErrorResponse {
         return create(SC_CONFLICT, "error.msg.loan.locked", msg, msg);
     }
 
-    public static ApiGlobalErrorResponse conflict(String type, String identifier) {
+    public static ApiGlobalErrorResponse locked(String type, String identifier) {
         String details = "";
         if (type == null) {
             type = "unknown";
@@ -117,7 +118,7 @@ public class ApiGlobalErrorResponse {
             details += " [" + identifier + ']';
         }
         String msg = "The server is currently unable to handle the request due to concurrent modification" + details + ", please try again";
-        return create(SC_CONFLICT, "error.msg.platform.service." + type + ".conflict", msg, msg);
+        return create(SC_LOCKED, "error.msg.platform.service." + type + ".conflict", msg, msg);
     }
 
     public static ApiGlobalErrorResponse unAuthorized(final String defaultUserMessage) {

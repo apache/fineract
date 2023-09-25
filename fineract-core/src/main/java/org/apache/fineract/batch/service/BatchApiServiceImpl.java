@@ -223,7 +223,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                 callRequestRecursive(resolvedChildRequest, childNode, responseList, uriInfo, enclosingTransaction);
             });
         } else {
-            responseList.addAll(parentRequestFailedRecursive(request, requestNode, response, true));
+            responseList.addAll(parentRequestFailedRecursive(request, requestNode, response, null));
         }
         // If the current request fails, then all the child requests are not executed. If we want to write out all the
         // child requests, here is the place.
@@ -296,16 +296,17 @@ public class BatchApiServiceImpl implements BatchApiService {
      *            the current request node
      * @return {@code BatchResponse} list of the generated batch responses
      */
-    private List<BatchResponse> parentRequestFailedRecursive(BatchRequest request, BatchRequestNode requestNode, BatchResponse response,
-            boolean root) {
+    private List<BatchResponse> parentRequestFailedRecursive(@NotNull BatchRequest request, @NotNull BatchRequestNode requestNode,
+            @NotNull BatchResponse response, Long parentId) {
         List<BatchResponse> responseList = new ArrayList<>();
-        if (root) {
+        if (parentId == null) { // root
             BatchRequestContextHolder.getEnclosingTransaction().ifPresent(TransactionExecution::setRollbackOnly);
         } else {
-            responseList.add(buildErrorResponse(request.getRequestId(), response.getStatusCode(), response.getBody(), null));
+            responseList.add(buildErrorResponse(request.getRequestId(), response.getStatusCode(),
+                    "Parent request with id " + parentId + " was erroneous!", null));
         }
-        requestNode.getChildNodes().forEach(
-                childNode -> responseList.addAll(parentRequestFailedRecursive(childNode.getRequest(), childNode, response, false)));
+        requestNode.getChildNodes().forEach(childNode -> responseList
+                .addAll(parentRequestFailedRecursive(childNode.getRequest(), childNode, response, request.getRequestId())));
         return responseList;
     }
 

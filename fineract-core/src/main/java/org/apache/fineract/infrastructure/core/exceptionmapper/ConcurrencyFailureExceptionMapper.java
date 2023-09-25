@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.exceptionmapper;
 
+import static org.apache.http.HttpStatus.SC_LOCKED;
+
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +50,8 @@ public class ConcurrencyFailureExceptionMapper implements FineractExceptionMappe
             type = olex.getPersistentClassName();
             identifier = olex.getIdentifier() == null ? null : String.valueOf(olex.getIdentifier());
         }
-        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.conflict(type, identifier);
-        return Response.status(Status.CONFLICT).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
+        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.locked(type, identifier);
+        return Response.status(SC_LOCKED).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
     }
 
     @Override
