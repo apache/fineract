@@ -30,7 +30,6 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.exception.ErrorHandler;
@@ -48,7 +47,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
-import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessFailedException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessSucceedException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
@@ -174,23 +172,21 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     }
 
     private void exceptionWhenTheRequestAlreadyProcessed(CommandWrapper wrapper, String idempotencyKey, boolean retry) {
-        CommandSource existingCommand = commandSourceService.findCommandSource(wrapper, idempotencyKey);
-        if (existingCommand != null) {
-            idempotentExceptionByStatus(UNDER_PROCESSING, existingCommand,
-                    command -> new IdempotentCommandProcessUnderProcessingException(wrapper));
-            if (!retry) {
-                idempotentExceptionByStatus(ERROR, existingCommand,
-                        command -> new IdempotentCommandProcessFailedException(wrapper, command));
-            }
-            idempotentExceptionByStatus(PROCESSED, existingCommand,
-                    command -> new IdempotentCommandProcessSucceedException(wrapper, command.getResult(), command.getResultStatusCode()));
+        CommandSource command = commandSourceService.findCommandSource(wrapper, idempotencyKey);
+        if (command == null) {
+            return;
         }
-    }
-
-    private void idempotentExceptionByStatus(CommandProcessingResultType status, CommandSource command,
-            Function<CommandSource, AbstractIdempotentCommandException> exceptionMapper) {
-        if (status.getValue().equals(command.getStatus())) {
-            throw exceptionMapper.apply(command);
+        CommandProcessingResultType status = CommandProcessingResultType.fromInt(command.getStatus());
+        switch (status) {
+            case UNDER_PROCESSING -> throw new IdempotentCommandProcessUnderProcessingException(wrapper, idempotencyKey);
+            case PROCESSED -> throw new IdempotentCommandProcessSucceedException(wrapper, idempotencyKey, command);
+            case ERROR -> {
+                if (!retry) {
+                    throw new IdempotentCommandProcessFailedException(wrapper, idempotencyKey, command);
+                }
+            }
+            default -> {
+            }
         }
     }
 

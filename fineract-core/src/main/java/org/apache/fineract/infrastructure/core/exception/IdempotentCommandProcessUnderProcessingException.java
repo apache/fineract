@@ -25,7 +25,7 @@ import org.apache.fineract.commands.domain.CommandWrapper;
  */
 public class IdempotentCommandProcessUnderProcessingException extends AbstractIdempotentCommandException {
 
-    public IdempotentCommandProcessUnderProcessingException(CommandWrapper wrapper) {
-        super(wrapper.actionName(), wrapper.entityName(), wrapper.getIdempotencyKey(), wrapper.getJson());
+    public IdempotentCommandProcessUnderProcessingException(CommandWrapper wrapper, String idempotencyKey) {
+        super(wrapper.actionName(), wrapper.entityName(), idempotencyKey, wrapper.getJson());
     }
 }

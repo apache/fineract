@@ -48,8 +48,10 @@ public class IdempotentCommandExceptionMapper implements FineractExceptionMapper
         log.warn("Processing {} request: {}", exception.getClass().getName(), exception.getMessage());
         Status status = null;
         if (exception instanceof IdempotentCommandProcessSucceedException pse) {
-            status = Status.fromStatusCode(pse.getStatusCode());
-        } else if (exception instanceof IdempotentCommandProcessUnderProcessingException) {
+            Integer statusCode = pse.getStatusCode();
+            status = statusCode == null ? Status.OK : Status.fromStatusCode(statusCode);
+        }
+        if (exception instanceof IdempotentCommandProcessUnderProcessingException) {
             status = Status.CONFLICT;
         } else if (exception instanceof IdempotentCommandProcessFailedException pfe) {
             status = Status.fromStatusCode(pfe.getStatusCode());
