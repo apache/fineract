@@ -20,17 +20,14 @@ package org.apache.fineract.batch.service;
 
 import lombok.Getter;
 import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.exception.ErrorInfo;
 
 @Getter
 public class BatchExecutionException extends RuntimeException {
 
     private final BatchRequest request;
-    private final ErrorInfo errorInfo;
 
-    public BatchExecutionException(BatchRequest request, RuntimeException ex, ErrorInfo errorInfo) {
+    public BatchExecutionException(BatchRequest request, RuntimeException ex) {
         super("Error executing batch request: " + request, ex);
         this.request = request;
-        this.errorInfo = errorInfo;
     }
 }

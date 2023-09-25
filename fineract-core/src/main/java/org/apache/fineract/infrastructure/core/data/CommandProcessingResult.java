@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.core.data;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.ToString;
@@ -51,12 +50,43 @@ public class CommandProcessingResult implements Serializable {
     private final ExternalId resourceExternalId;
     private final ExternalId subResourceExternalId;
 
-    public static CommandProcessingResult fromCommandProcessingResult(CommandProcessingResult commandResult) {
-        return new CommandProcessingResult(commandResult.commandId, commandResult.officeId, commandResult.groupId, commandResult.clientId,
-                commandResult.loanId, commandResult.savingsId, commandResult.resourceIdentifier, commandResult.resourceId,
-                commandResult.transactionId, commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
-                commandResult.creditBureauReportData, commandResult.rollbackTransaction, commandResult.subResourceId,
-                commandResult.resourceExternalId, commandResult.subResourceExternalId);
+    private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
+            final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
+            final Map<String, Object> changes, final Long productId, final Long gsimId, final Long glimId,
+            final Map<String, Object> creditBureauReportData, Boolean rollbackTransaction, final Long subResourceId,
+            final ExternalId resourceExternalId, final ExternalId subResourceExternalId) {
+        this.commandId = commandId;
+        this.officeId = officeId;
+        this.groupId = groupId;
+        this.clientId = clientId;
+        this.loanId = loanId;
+        this.savingsId = savingsId;
+        this.resourceIdentifier = resourceIdentifier;
+        this.resourceId = resourceId;
+        this.changes = changes;
+        this.transactionId = transactionId;
+        this.productId = productId;
+        this.gsimId = gsimId;
+        this.glimId = glimId;
+        this.creditBureauReportData = creditBureauReportData;
+        this.rollbackTransaction = rollbackTransaction;
+        this.subResourceId = subResourceId;
+        this.resourceExternalId = resourceExternalId;
+        this.subResourceExternalId = subResourceExternalId;
+    }
+
+    protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes,
+            Long clientId) {
+        this(commandId, officeId, null, clientId, null, null, resourceId == null ? null : resourceId.toString(), resourceId, null, changes,
+                null, null, null, null, null, null, ExternalId.empty(), ExternalId.empty());
+    }
+
+    protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes) {
+        this(resourceId, officeId, commandId, changes, null);
+    }
+
+    protected CommandProcessingResult(final Long resourceId) {
+        this(resourceId, null, null, null);
     }
 
     public static CommandProcessingResult fromCommandProcessingResult(CommandProcessingResult commandResult, final Long resourceId) {
@@ -65,6 +95,10 @@ public class CommandProcessingResult implements Serializable {
                 commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
                 commandResult.creditBureauReportData, commandResult.rollbackTransaction, commandResult.subResourceId,
                 commandResult.resourceExternalId, commandResult.subResourceExternalId);
+    }
+
+    public static CommandProcessingResult fromCommandProcessingResult(CommandProcessingResult commandResult) {
+        return fromCommandProcessingResult(commandResult, commandResult.getResourceId());
     }
 
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
@@ -81,21 +115,16 @@ public class CommandProcessingResult implements Serializable {
         return new CommandProcessingResult(null, null, commandId, null);
     }
 
-    public static CommandProcessingResult resourceResult(final Long resourceId, final Long commandId) {
-        return new CommandProcessingResult(resourceId, null, commandId, null);
-    }
-
     public static CommandProcessingResult resourceResult(final Long resourceId, final Long commandId, final Map<String, Object> changes) {
         return new CommandProcessingResult(resourceId, null, commandId, changes);
     }
 
-    public static CommandProcessingResult subResourceResult(final Long resourceId, final Long subResourceId, final Long commandId) {
-        return new CommandProcessingResult(resourceId, subResourceId, commandId, null);
+    public static CommandProcessingResult resourceResult(final Long resourceId, final Long commandId) {
+        return new CommandProcessingResult(resourceId, null, commandId, null);
     }
 
-    public static CommandProcessingResult subResourceResult(final Long resourceId, final Long subResourceId, final Long commandId,
-            final Map<String, Object> changes) {
-        return new CommandProcessingResult(resourceId, subResourceId, commandId, changes);
+    public static CommandProcessingResult resourceResult(final Long resourceId) {
+        return new CommandProcessingResult(resourceId);
     }
 
     public static CommandProcessingResult withChanges(final Long resourceId, final Map<String, Object> changes) {
@@ -104,88 +133,6 @@ public class CommandProcessingResult implements Serializable {
 
     public static CommandProcessingResult empty() {
         return new CommandProcessingResult(null, null, null, null);
-    }
-
-    /*
-     * Deprecated
-     */
-    public CommandProcessingResult(final Long entityId) {
-        if (entityId != null) {
-            this.resourceIdentifier = entityId.toString();
-        } else {
-            this.resourceIdentifier = null;
-        }
-        this.resourceId = entityId;
-        this.officeId = null;
-        this.groupId = null;
-        this.clientId = null;
-        this.loanId = null;
-        this.savingsId = null;
-        this.transactionId = null;
-        this.changes = new HashMap<>();
-        this.productId = null;
-        this.gsimId = null;
-        this.glimId = null;
-        this.creditBureauReportData = null;
-        this.subResourceId = null;
-        this.resourceExternalId = ExternalId.empty();
-        this.subResourceExternalId = ExternalId.empty();
-    }
-
-    private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
-            final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
-            final Map<String, Object> changesOnly, final Long productId, final Long gsimId, final Long glimId,
-            final Map<String, Object> creditBureauReportData, Boolean rollbackTransaction, final Long subResourceId,
-            final ExternalId resourceExternalId, final ExternalId subResourceExternalId) {
-        this.commandId = commandId;
-        this.officeId = officeId;
-        this.groupId = groupId;
-        this.clientId = clientId;
-        this.loanId = loanId;
-        this.savingsId = savingsId;
-        this.resourceIdentifier = resourceIdentifier;
-        this.resourceId = resourceId;
-        this.changes = changesOnly;
-        this.transactionId = transactionId;
-        this.productId = productId;
-        this.gsimId = gsimId;
-        this.glimId = glimId;
-        this.creditBureauReportData = creditBureauReportData;
-        this.rollbackTransaction = rollbackTransaction;
-        this.subResourceId = subResourceId;
-        this.resourceExternalId = resourceExternalId;
-        this.subResourceExternalId = subResourceExternalId;
-    }
-
-    protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId,
-            final Map<String, Object> changesOnly) {
-        if (resourceId != null) {
-            this.resourceIdentifier = resourceId.toString();
-        } else {
-            this.resourceIdentifier = null;
-        }
-        this.resourceId = resourceId;
-        this.officeId = officeId;
-        this.groupId = null;
-        this.clientId = null;
-        this.loanId = null;
-        this.savingsId = null;
-        this.transactionId = null;
-        this.commandId = commandId;
-        this.changes = changesOnly;
-        this.productId = null;
-        this.gsimId = null;
-        this.glimId = null;
-        this.creditBureauReportData = null;
-        this.subResourceId = null;
-        this.resourceExternalId = ExternalId.empty();
-        this.subResourceExternalId = ExternalId.empty();
-    }
-
-    protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId,
-            final Map<String, Object> changesOnly, long clientId) {
-        this(commandId, officeId, null, clientId, null, null, null, resourceId, null, changesOnly, null, null, null, null, null, null,
-                ExternalId.empty(), ExternalId.empty());
     }
 
     public void setOfficeId(final Long officeId) {

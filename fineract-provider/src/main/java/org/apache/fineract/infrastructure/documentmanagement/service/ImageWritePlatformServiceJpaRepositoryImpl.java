@@ -103,7 +103,7 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
             this.imageRepository.delete(image);
         }
 
-        return new CommandProcessingResult(clientId);
+        return CommandProcessingResult.resourceResult(clientId);
     }
 
     /**
@@ -151,7 +151,7 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
         }
 
         this.imageRepository.save(image);
-        return new CommandProcessingResult(clientId);
+        return CommandProcessingResult.resourceResult(clientId);
     }
 
     private Image createImage(Image image, final String imageLocation, final StorageType storageType) {

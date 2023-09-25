@@ -21,6 +21,7 @@ package org.apache.fineract.commands.service;
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.ERROR;
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.PROCESSED;
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.UNDER_PROCESSING;
+import static org.apache.http.HttpStatus.SC_OK;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
@@ -79,6 +81,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final IdempotencyKeyResolver idempotencyKeyResolver;
     private final IdempotencyKeyGenerator idempotencyKeyGenerator;
     private final CommandSourceService commandSourceService;
+    private final ErrorHandler errorHandler;
 
     private final FineractRequestContextHolder fineractRequestContextHolder;
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
@@ -90,90 +93,95 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         // Do not store the idempotency key because of the exception handling
         setIdempotencyKeyStoreFlag(false);
 
-        final boolean rollbackTransaction = configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
-        String idempotencyKey = idempotencyKeyResolver.resolve(wrapper);
-        exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey);
+        Long commandId = (Long) fineractRequestContextHolder.getAttribute(COMMAND_SOURCE_ID, null);
+        boolean isRetry = commandId != null;
 
-        // Store idempotency key to the request attribute
-        CommandSource savedCommandSource;
-        if (BatchRequestContextHolder.getEnclosingTransaction().isPresent()) {
-            savedCommandSource = commandSourceService.saveInitialNoTransaction(wrapper, command, context.authenticatedUser(wrapper),
-                    idempotencyKey);
+        CommandSource commandSource = null;
+        String idempotencyKey;
+        if (isRetry) {
+            commandSource = commandSourceService.getCommandSource(commandId);
+            idempotencyKey = commandSource.getIdempotencyKey();
         } else {
-            savedCommandSource = commandSourceService.saveInitial(wrapper, command, context.authenticatedUser(wrapper), idempotencyKey);
+            idempotencyKey = idempotencyKeyResolver.resolve(wrapper);
         }
-        storeCommandToIdempotentFilter(savedCommandSource);
+        exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey, isRetry);
+
+        boolean sameTransaction = BatchRequestContextHolder.getEnclosingTransaction().isPresent();
+        if (commandSource == null) {
+            AppUser user = context.authenticatedUser(wrapper);
+            commandSource = sameTransaction ? commandSourceService.saveInitialSameTransaction(wrapper, command, user, idempotencyKey)
+                    : commandSourceService.saveInitialNewTransaction(wrapper, command, user, idempotencyKey);
+            storeCommandIdInContext(commandSource); // Store command id as a request attribute
+        }
         setIdempotencyKeyStoreFlag(true);
 
         final CommandProcessingResult result;
         try {
             result = findCommandHandler(wrapper).processCommand(command);
         } catch (Throwable t) { // NOSONAR
-            CommandSource source = commandSourceService.findCommandSource(wrapper, idempotencyKey);
-            commandSourceService.saveFailed(source);
-            publishHookErrorEvent(wrapper, command, t);
+            ErrorInfo errorInfo = commandSourceService.generateErrorInfo(t);
+            commandSource.setResultStatusCode(errorInfo.getStatusCode());
+            commandSource.setResult(errorInfo.getMessage());
+            commandSource.setStatus(ERROR);
+            commandSource = sameTransaction ? commandSourceService.saveResultSameTransaction(commandSource)
+                    : commandSourceService.saveResultNewTransaction(commandSource);
+            publishHookErrorEvent(wrapper, command, errorInfo);
             throw t;
         }
-        CommandSource initialCommandSource = commandSourceService.findCommandSource(wrapper, idempotencyKey);
 
-        initialCommandSource.setResult(toApiJsonSerializer.serializeResult(result));
-        initialCommandSource.updateResourceId(result.getResourceId());
-        initialCommandSource.updateForAudit(result);
+        commandSource.updateForAudit(result);
+        commandSource.setResult(toApiJsonSerializer.serializeResult(result));
+        commandSource.setResultStatusCode(SC_OK);
+        commandSource.setStatus(PROCESSED);
 
-        boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker;
-        if (result.hasChanges() && !rollBack) {
-            initialCommandSource.setCommandJson(toApiJsonSerializer.serializeResult(result.getChanges()));
+        boolean isRollback = !isApprovedByChecker && (result.isRollbackTransaction()
+                || configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName()));
+        // TODO: this should be removed, can not override audit information (and maker-checker does not work)
+        if (!isRollback && result.hasChanges()) {
+            commandSource.setCommandJson(toApiJsonSerializer.serializeResult(result.getChanges()));
         }
 
-        initialCommandSource.setStatus(CommandProcessingResultType.PROCESSED.getValue());
-        if (BatchRequestContextHolder.getEnclosingTransaction().isPresent()) {
-            commandSourceService.saveResultNoTransaction(initialCommandSource);
-        } else {
-            commandSourceService.saveResult(initialCommandSource);
-        }
+        commandSource = commandSourceService.saveResultSameTransaction(commandSource);
 
-        if ((rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker) {
+        if (isRollback) {
             /*
              * JournalEntry will generate a new transactionId every time. Updating the transactionId with old
              * transactionId, because as there are no entries are created with new transactionId, will throw an error
              * when checker approves the transaction
              */
-            initialCommandSource.updateTransaction(command.getTransactionId());
-            /*
-             * Update CommandSource json data with JsonCommand json data, line 77 and 81 may update the json data
-             */
-            initialCommandSource.setCommandJson(command.json());
-            throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(initialCommandSource);
+            commandSource.setTransactionId(command.getTransactionId());
+            // TODO: this should be removed together with lines 133-135
+            commandSource.setCommandJson(command.json()); // Set back CommandSource json data
+            throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSource);
         }
-        result.setRollbackTransaction(null);
 
+        result.setRollbackTransaction(null);
         publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, result);
 
         return result;
     }
 
-    private void storeCommandToIdempotentFilter(CommandSource savedCommandSource) {
+    private void storeCommandIdInContext(CommandSource savedCommandSource) {
         if (savedCommandSource.getId() == null) {
             throw new IllegalStateException("Command source not saved");
         }
-        saveCommandToRequest(savedCommandSource);
-    }
-
-    private void saveCommandToRequest(CommandSource savedCommandSource) {
+        // Idempotency filters and retry need this
         fineractRequestContextHolder.setAttribute(COMMAND_SOURCE_ID, savedCommandSource.getId());
     }
 
-    private void publishHookErrorEvent(CommandWrapper wrapper, JsonCommand command, Throwable t) {
-        ErrorInfo ex = commandSourceService.generateErrorException(t);
-        publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, gson.toJson(ex));
+    private void publishHookErrorEvent(CommandWrapper wrapper, JsonCommand command, ErrorInfo errorInfo) {
+        publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, gson.toJson(errorInfo));
     }
 
-    private void exceptionWhenTheRequestAlreadyProcessed(CommandWrapper wrapper, String idempotencyKey) {
+    private void exceptionWhenTheRequestAlreadyProcessed(CommandWrapper wrapper, String idempotencyKey, boolean retry) {
         CommandSource existingCommand = commandSourceService.findCommandSource(wrapper, idempotencyKey);
         if (existingCommand != null) {
             idempotentExceptionByStatus(UNDER_PROCESSING, existingCommand,
                     command -> new IdempotentCommandProcessUnderProcessingException(wrapper));
-            idempotentExceptionByStatus(ERROR, existingCommand, command -> new IdempotentCommandProcessFailedException(wrapper, command));
+            if (!retry) {
+                idempotentExceptionByStatus(ERROR, existingCommand,
+                        command -> new IdempotentCommandProcessFailedException(wrapper, command));
+            }
             idempotentExceptionByStatus(PROCESSED, existingCommand,
                     command -> new IdempotentCommandProcessSucceedException(wrapper, command.getResult(), command.getResultStatusCode()));
         }
@@ -192,24 +200,23 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     @Transactional
     @Override
-    public CommandProcessingResult logCommand(CommandSource commandSourceResult) {
-        commandSourceResult.markAsAwaitingApproval();
-        if (commandSourceResult.getIdempotencyKey() == null) {
-            commandSourceResult.setIdempotencyKey(idempotencyKeyGenerator.create());
+    public CommandProcessingResult logCommand(CommandSource commandSource) {
+        commandSource.markAsAwaitingApproval();
+        if (commandSource.getIdempotencyKey() == null) {
+            commandSource.setIdempotencyKey(idempotencyKeyGenerator.create());
         }
-        commandSourceResult = commandSourceService.saveResultNoTransaction(commandSourceResult);
+        commandSource = commandSourceService.saveResultSameTransaction(commandSource);
 
-        return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId())
-                .withEntityId(commandSourceResult.getResourceId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(commandSource.getId()).withEntityId(commandSource.getResourceId())
+                .build();
     }
 
     @SuppressWarnings("unused")
-    private CommandProcessingResult fallbackExecuteCommand(Exception e) throws Exception {
+    private CommandProcessingResult fallbackExecuteCommand(Exception e) {
         if (e instanceof RollbackTransactionAsCommandIsNotApprovedByCheckerException ex) {
             return logCommand(ex.getCommandSourceResult());
         }
-
-        throw e;
+        throw errorHandler.getMappable(e);
     }
 
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {
@@ -278,7 +285,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     }
 
     private void publishHookEvent(final String entityName, final String actionName, JsonCommand command, final Object result) {
-
         try {
             final AppUser appUser = context.authenticatedUser(CommandWrapper.wrap(actionName, entityName, null, null));
 

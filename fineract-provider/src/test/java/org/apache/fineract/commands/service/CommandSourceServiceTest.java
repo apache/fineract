@@ -74,7 +74,7 @@ public class CommandSourceServiceTest {
         ThreadLocalContextUtil.setTenant(ft);
 
         String idk = "idk";
-        underTest.saveInitial(wrapper, jsonCommand, appUser, idk);
+        underTest.saveInitialNewTransaction(wrapper, jsonCommand, appUser, idk);
 
         ArgumentCaptor<CommandSource> commandSourceArgumentCaptor = ArgumentCaptor.forClass(CommandSource.class);
         Mockito.verify(commandSourceRepository).saveAndFlush(commandSourceArgumentCaptor.capture());
@@ -97,7 +97,7 @@ public class CommandSourceServiceTest {
 
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "t1", "n1", ZoneId.systemDefault().toString(), null));
 
-        CommandSource actual = underTest.saveInitial(wrapper, jsonCommand, appUser, "idk");
+        CommandSource actual = underTest.saveInitialNewTransaction(wrapper, jsonCommand, appUser, "idk");
 
         ArgumentCaptor<CommandSource> commandSourceArgumentCaptor = ArgumentCaptor.forClass(CommandSource.class);
         Mockito.verify(commandSourceRepository).saveAndFlush(commandSourceArgumentCaptor.capture());
@@ -108,9 +108,10 @@ public class CommandSourceServiceTest {
 
     @Test
     public void testGenerateErrorException() {
+        Mockito.when(errorHandler.getMappable(any())).thenAnswer(i -> i.getArguments()[0]);
         Mockito.when(errorHandler.handle(any(CodeNotFoundException.class)))
-                .thenReturn(new ErrorInfo(404, 1001, "Code with name `foo` does not exist"));
-        ErrorInfo result = underTest.generateErrorException(new CodeNotFoundException("foo"));
+                .thenReturn(new ErrorInfo(404, 1001, "Code with name `foo` does not exist", null));
+        ErrorInfo result = underTest.generateErrorInfo(new CodeNotFoundException("foo"));
         Assertions.assertEquals(404, result.getStatusCode());
         Assertions.assertEquals(1001, result.getErrorCode());
         Assertions.assertTrue(result.getMessage().contains("Code with name `foo` does not exist"));

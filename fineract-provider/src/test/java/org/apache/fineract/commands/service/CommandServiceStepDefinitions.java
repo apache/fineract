@@ -20,6 +20,7 @@ package org.apache.fineract.commands.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 
 import io.cucumber.java8.En;
 import io.github.resilience4j.retry.RetryRegistry;
@@ -33,11 +34,14 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class CommandServiceStepDefinitions implements En {
 
@@ -55,16 +59,24 @@ public class CommandServiceStepDefinitions implements En {
 
     private RetryEvent retryEvent;
 
+    private AtomicInteger counter = new AtomicInteger();
+
     public CommandServiceStepDefinitions() {
         Given("/^A command source write service$/", () -> {
             this.commandSourceWritePlatformService = new DummyCommandSourceWriteService(processAndLogCommandService);
             this.command = new DummyCommand();
+            FineractRequestContextHolder contextHolder = Mockito.spy(FineractRequestContextHolder.class);
+            ReflectionTestUtils.setField(processAndLogCommandService, "fineractRequestContextHolder", contextHolder);
+            Mockito.when(contextHolder.getAttribute(any(), any())).thenThrow(new CannotAcquireLockException("BLOW IT UP!!!"))
+                    .thenThrow(new ObjectOptimisticLockingFailureException("Dummy", new RuntimeException("BLOW IT UP!!!")))
+                    .thenThrow(new RollbackTransactionAsCommandIsNotApprovedByCheckerException(new DummyCommandSource()));
+
             this.retryRegistry.retry("executeCommand").getEventPublisher().onRetry(event -> {
                 log.warn("... retry event: {}", event);
 
+                counter.incrementAndGet();
                 CommandServiceStepDefinitions.this.retryEvent = event;
             });
-
         });
 
         When("/^The user executes the command via a command write service with exceptions$/", () -> {
@@ -84,13 +96,11 @@ public class CommandServiceStepDefinitions implements En {
         });
 
         Then("/^The command processing service execute function should be called 3 times$/", () -> {
-            assertEquals(3, command.getCount());
+            assertEquals(2, counter.get());
         });
     }
 
     public static class DummyCommand extends CommandWrapper {
-
-        private AtomicInteger counter = new AtomicInteger();
 
         public DummyCommand() {
             super(null, null, null, null, null, null, null, null, null, null, "{}", null, null, null, null, null, null,
@@ -98,32 +108,8 @@ public class CommandServiceStepDefinitions implements En {
         }
 
         @Override
-        public String taskPermissionName() {
-            // NOTE: simulating a failure scenario that triggers retries; using this function, because it is the first
-            // called in the command processing service
-
-            int step = counter.incrementAndGet();
-
-            log.warn("Round: {}", step);
-
-            if (step == 1) {
-                throw new CannotAcquireLockException("BLOW IT UP!!!");
-            } else if (step == 2) {
-                throw new ObjectOptimisticLockingFailureException("Dummy", new RuntimeException("BLOW IT UP!!!"));
-            } else if (step == 3) {
-                throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(new DummyCommandSource());
-            }
-
-            return "dummy";
-        }
-
-        @Override
         public String actionName() {
             return "dummy";
-        }
-
-        public int getCount() {
-            return counter.get();
         }
     }
 

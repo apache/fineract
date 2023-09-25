@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.service.CommandSourceService;
 import org.apache.fineract.commands.service.SynchronousCommandProcessingService;
+import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -36,15 +37,13 @@ public class IdempotencyStoreHelper {
     private final CommandSourceService commandSourceService;
     private final FineractRequestContextHolder fineractRequestContextHolder;
 
-    public void storeCommandResult(boolean batch, int response, String body, Optional<Long> commandId) {
-        commandSourceRepository.findById(commandId.get()).ifPresent(commandSource -> {
+    public void storeCommandResult(Integer response, String body, Long commandId) {
+        commandSourceRepository.findById(commandId).ifPresent(commandSource -> {
+            boolean sameTransaction = BatchRequestContextHolder.getEnclosingTransaction().isPresent();
             commandSource.setResultStatusCode(response);
             commandSource.setResult(body);
-            if (batch) {
-                commandSourceService.saveResultNoTransaction(commandSource);
-            } else {
-                commandSourceService.saveResult(commandSource);
-            }
+            commandSource = sameTransaction ? commandSourceService.saveResultSameTransaction(commandSource)
+                    : commandSourceService.saveResultNewTransaction(commandSource);
         });
     }
 

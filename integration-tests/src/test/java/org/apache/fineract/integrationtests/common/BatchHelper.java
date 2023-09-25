@@ -34,8 +34,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetTransactionByExternalIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.integrationtests.common.savings.SavingsTransactionData;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1018,8 +1021,7 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a {@link org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy}
-     * request with given requestId and reference.
+     * Creates and returns a {@link GetTransactionByIdCommandStrategy} request with given requestId and reference.
      *
      * @param requestId
      *            the request id
@@ -1049,9 +1051,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.GetTransactionByExternalIdCommandStrategy} request with given
-     * requestId and reference.
+     * Creates and returns a {@link GetTransactionByExternalIdCommandStrategy} request with given requestId and
+     * reference.
      *
      * @param requestId
      *            the request id
@@ -1247,17 +1248,18 @@ public final class BatchHelper {
     /**
      * Creates and returns a batch request to create datatable entry.
      *
-     * @param loanId
-     *            the loan id
+     * @param entityId
+     *            the entity id
      * @param datatableName
      *            the name of datatable
      * @param columnNames
      *            the column names
      * @return the {@link BatchRequest}
      */
-    public static BatchRequest createDatatableEntryRequest(final Long loanId, final String datatableName, final List<String> columnNames) {
+    public static BatchRequest createDatatableEntryRequest(final String entityId, final String datatableName,
+            final List<String> columnNames) {
         final BatchRequest br = new BatchRequest();
-        final String relativeUrl = String.format("v1/datatables/%s/%s", datatableName, loanId);
+        final String relativeUrl = String.format("v1/datatables/%s/%s", datatableName, entityId);
         final Map<String, Object> datatableEntryMap = new HashMap<>();
         datatableEntryMap.putAll(columnNames.stream().collect(Collectors.toMap(v -> v, v -> Utils.randomStringGenerator("VAL_", 3))));
         final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
@@ -1299,6 +1301,18 @@ public final class BatchHelper {
         br.setMethod(HttpMethod.PUT);
         br.setBody(datatableEntryRequestJsonString);
 
+        return br;
+    }
+
+    public static BatchRequest deleteDatatableEntryRequest(final String entityId, final String datatableName,
+            final String datatableEntryId) {
+        final BatchRequest br = new BatchRequest();
+        final String relativeUrl = datatableEntryId == null ? String.format("v1/datatables/%s/%s", datatableName, entityId)
+                : String.format("v1/datatables/%s/%s/%s", datatableName, entityId, datatableEntryId);
+        br.setRequestId(4570L);
+        br.setReference(4569L);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.DELETE);
         return br;
     }
 
@@ -1461,7 +1475,6 @@ public final class BatchHelper {
      *
      * @param datatableName
      * @param resourceId
-     * @param subResourceId
      * @param columnName
      * @param columnValue
      * @return
@@ -1544,51 +1557,66 @@ public final class BatchHelper {
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.SavingsAccountTransactionCommandStrategy}
      * request with given request ID.
      *
-     *
      * @param requestId
      *            the request ID
      * @param reference
-     *            teh reference
+     *            the reference
      * @return BatchRequest the created {@link BatchRequest}
      */
     public static BatchRequest depositSavingAccount(final Long requestId, final Long reference) {
-        final BatchRequest br = new BatchRequest();
-
-        br.setRequestId(requestId);
-        br.setReference(reference);
-        br.setRelativeUrl("v1/savingsaccounts/$.id/transactions?command=deposit");
-        br.setMethod(HttpMethod.POST);
         final LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
         final String transactionDateString = transactionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        br.setBody(String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
-                + "\"transactionDate\": \"%s\", \"transactionAmount\": \"100\", \"paymentTypeId\": \"1\"}", transactionDateString));
-
-        return br;
+        String json = String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
+                + "\"transactionDate\": \"%s\", \"transactionAmount\": \"100\", \"paymentTypeId\": \"1\"}", transactionDateString);
+        return commandSavingAccount(requestId, null, reference, json, "deposit");
     }
 
     /**
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.SavingsAccountTransactionCommandStrategy}
      * request with given request ID.
      *
-     *
      * @param requestId
      *            the request ID
      * @param reference
-     *            teh reference
+     *            the reference
      * @return BatchRequest the created {@link BatchRequest}
      */
     public static BatchRequest withdrawSavingAccount(final Long requestId, final Long reference) {
+        final LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
+        final String transactionDateString = transactionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        String json = String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
+                + "\"transactionDate\": \"%s\", \"transactionAmount\": \"80\", \"paymentTypeId\": \"1\"}", transactionDateString);
+        return commandSavingAccount(requestId, null, reference, json, "withdrawal");
+    }
+
+    public static BatchRequest depositSavingAccount(final Long requestId, final Long savingsId, SavingsTransactionData transactionData) {
+        return commandSavingAccount(requestId, savingsId, transactionData, "deposit");
+    }
+
+    public static BatchRequest withdrawSavingAccount(final Long requestId, final Long savingsId, SavingsTransactionData transactionData) {
+        return commandSavingAccount(requestId, savingsId, transactionData, "withdrawal");
+    }
+
+    public static BatchRequest commandSavingAccount(Long requestId, Long savingsId, SavingsTransactionData transactionData,
+            String command) {
+        String json = transactionData.getJson();
+        return commandSavingAccount(requestId, savingsId, null, json, command);
+    }
+
+    public static BatchRequest commandSavingAccount(Long requestId, Long savingsId, Long reference, String body, String command) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
-        br.setReference(reference);
-        br.setRelativeUrl("v1/savingsaccounts/$.id/transactions?command=withdrawal");
+        String id;
+        if (reference != null) {
+            br.setReference(reference);
+            id = "$.id";
+        } else {
+            id = savingsId.toString();
+        }
+        br.setRelativeUrl("v1/savingsaccounts/" + id + "/transactions?command=" + command);
         br.setMethod(HttpMethod.POST);
-        final LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
-        final String transactionDateString = transactionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        br.setBody(String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
-                + "\"transactionDate\": \"%s\", \"transactionAmount\": \"80\", \"paymentTypeId\": \"1\"}", transactionDateString));
-
+        br.setBody(body);
         return br;
     }
 

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.http.HttpStatus.SC_FORBIDDEN;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +46,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.fineract.batch.command.internal.AdjustTransactionCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -207,7 +209,7 @@ public class BatchApiTest {
 
         // Asserts that all the transactions have been successfully rolled back
         Assertions.assertEquals(1, response.size());
-        Assertions.assertEquals((long) 500, (long) response.get(0).getStatusCode(), "Verify Status code 500");
+        Assertions.assertEquals(SC_FORBIDDEN, response.get(0).getStatusCode(), "Verify Status code 500");
     }
 
     /**
@@ -1074,7 +1076,7 @@ public class BatchApiTest {
      * Test for the successful disbursement and get loan. A '200' status code is expected on successful responses.
      *
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy
+     * @see GetTransactionByIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulDisbursementAndGetTransaction() {
@@ -1432,7 +1434,7 @@ public class BatchApiTest {
         assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
 
         // Create datatable entry batch request
-        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId, datatableName,
+        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId.toString(), datatableName,
                 Arrays.asList(columnName1, columnName2));
 
         // Update datatable entry batch request
@@ -2166,7 +2168,7 @@ public class BatchApiTest {
         Assertions.assertEquals(2L, updateResponse.getRequestId());
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, updateResponse.getStatusCode(),
                 "Verify Status Code 400 for update datatable entry");
-        MatcherAssert.assertThat(updateResponse.getBody(), containsString("No results for path"));
+        MatcherAssert.assertThat(updateResponse.getBody(), containsString("The referenced JSON path is invalid"));
     }
 
     /**
@@ -2211,7 +2213,7 @@ public class BatchApiTest {
         assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
 
         // Create datatable entry batch request
-        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId, datatableName,
+        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId.toString(), datatableName,
                 Arrays.asList(columnName1, columnName2));
 
         // Get datatable entries batch request

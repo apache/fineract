@@ -43,14 +43,9 @@ public class GetSavingsAccountByIdCommandStrategy implements CommandStrategy {
     @Override
     public BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo) {
         final MutableUriInfo parameterizedUriInfo = new MutableUriInfo(uriInfo);
-        final BatchResponse response = new BatchResponse();
-
-        response.setRequestId(batchRequest.getRequestId());
-        response.setHeaders(batchRequest.getHeaders());
-
         final String relativeUrl = relativeUrlWithoutVersion(batchRequest);
 
-        final Long savingsAccountId;
+        final long savingsAccountId;
         Map<String, String> queryParameters = new HashMap<>();
         if (relativeUrl.indexOf('?') > 0) {
             savingsAccountId = Long.parseLong(StringUtils.substringBetween(relativeUrl, "/", "?"));
@@ -74,10 +69,7 @@ public class GetSavingsAccountByIdCommandStrategy implements CommandStrategy {
         final String responseBody = savingsAccountsApiResource.retrieveOne(savingsAccountId,
                 Boolean.parseBoolean(staffInSelectedOfficeOnly), chargeStatus, uriInfo);
 
-        response.setStatusCode(HttpStatus.SC_OK);
-
-        response.setBody(responseBody);
-
-        return response;
+        return new BatchResponse().setRequestId(batchRequest.getRequestId()).setStatusCode(HttpStatus.SC_OK).setBody(responseBody)
+                .setHeaders(batchRequest.getHeaders());
     }
 }

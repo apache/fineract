@@ -24,20 +24,33 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
-import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessFailedException;
+import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.eclipse.persistence.exceptions.OptimisticLockException;
+import org.springframework.context.annotation.Scope;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
+/**
+ * An {@link ExceptionMapper} to map {@link ObjectOptimisticLockingFailureException} thrown by platform into a HTTP API
+ * friendly format.
+ */
 @Provider
 @Component
+@Scope("singleton")
 @Slf4j
-public class IdempotentCommandProcessFailedExceptionMapper implements ExceptionMapper<IdempotentCommandProcessFailedException> {
+public class OptimisticLockExceptionMapper implements FineractExceptionMapper, ExceptionMapper<OptimisticLockException> {
 
     @Override
-    public Response toResponse(final IdempotentCommandProcessFailedException exception) {
-        log.debug("Idempotent processing failed request: {}", exception.getMessage());
-        Status statusCode = Status.fromStatusCode(exception.getStatusCode());
-        return Response.status(statusCode).entity(exception.getResponse())
-                .header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER, "true").type(MediaType.APPLICATION_JSON).build();
+    public Response toResponse(final OptimisticLockException exception) {
+        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        String type = exception.getQuery() == null ? "unknown" : "query";
+        String identifier = "unknown";
+        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.conflict(type, identifier);
+        return Response.status(Status.CONFLICT).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    @Override
+    public int errorCode() {
+        return 4009;
     }
 }

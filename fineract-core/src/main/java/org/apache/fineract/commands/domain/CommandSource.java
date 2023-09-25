@@ -123,16 +123,6 @@ public class CommandSource extends AbstractPersistableCustom {
     @Column(name = "result_status_code")
     private Integer resultStatusCode;
 
-    public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
-            String idempotencyKey, Integer status) {
-        return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker, idempotencyKey, status);
-    }
-
-    protected CommandSource() {
-        //
-    }
-
     private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
             final Long subResourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey,
             final Integer status) {
@@ -148,6 +138,26 @@ public class CommandSource extends AbstractPersistableCustom {
         this.idempotencyKey = idempotencyKey;
     }
 
+    public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
+            String idempotencyKey, Integer status) {
+        CommandSource commandSource = new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(),
+                command.subentityId(), command.json(), maker, idempotencyKey, status);
+        commandSource.officeId = wrapper.getOfficeId();
+        commandSource.groupId = command.getGroupId();
+        commandSource.clientId = command.getClientId();
+        commandSource.loanId = command.getLoanId();
+        commandSource.savingsId = command.getSavingsId();
+        commandSource.productId = command.getProductId();
+        commandSource.transactionId = command.getTransactionId();
+        commandSource.creditBureauId = command.getCreditBureauId();
+        commandSource.organisationCreditBureauId = command.getOrganisationCreditBureauId();
+        return commandSource;
+    }
+
+    protected CommandSource() {
+        //
+    }
+
     public Long getCreditBureauId() {
         return this.creditBureauId;
     }
@@ -160,31 +170,27 @@ public class CommandSource extends AbstractPersistableCustom {
         return this.organisationCreditBureauId;
     }
 
-    public String getJobName() {
-        return this.jobName;
-    }
-
     public void setOrganisationCreditBureauId(Long organisationCreditBureauId) {
         this.organisationCreditBureauId = organisationCreditBureauId;
     }
 
-    public void markAsChecked(final AppUser checker) {
-        this.checker = checker;
-        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
-        this.status = CommandProcessingResultType.PROCESSED.getValue();
+    public String getJobName() {
+        return this.jobName;
     }
 
-    public void markAsRejected(final AppUser checker) {
-        this.checker = checker;
-        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
-        this.status = CommandProcessingResultType.REJECTED.getValue();
+    public Long getResourceId() {
+        return this.resourceId;
     }
 
-    public void updateResourceId(final Long resourceId) {
+    public void setResourceId(final Long resourceId) {
         this.resourceId = resourceId;
     }
 
-    public void updateSubResourceId(final Long subResourceId) {
+    public Long getSubResourceId() {
+        return this.subResourceId;
+    }
+
+    public void setSubResourceId(final Long subResourceId) {
         this.subResourceId = subResourceId;
     }
 
@@ -194,14 +200,6 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public void setCommandJson(final String json) {
         this.commandAsJson = json;
-    }
-
-    public Long resourceId() {
-        return this.resourceId;
-    }
-
-    public Long subResourceId() {
-        return this.subResourceId;
     }
 
     public String getActionName() {
@@ -214,36 +212,6 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public String getPermissionCode() {
         return this.actionName + "_" + this.entityName;
-    }
-
-    public Long getResourceId() {
-        return this.resourceId;
-    }
-
-    public Long getSubResourceId() {
-        return this.subResourceId;
-    }
-
-    public void markAsAwaitingApproval() {
-        this.status = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
-    }
-
-    public boolean isMarkedAsAwaitingApproval() {
-        return this.status.equals(CommandProcessingResultType.AWAITING_APPROVAL.getValue());
-    }
-
-    public void updateForAudit(final CommandProcessingResult result) {
-        this.officeId = result.getOfficeId();
-        this.groupId = result.getGroupId();
-        this.clientId = result.getClientId();
-        this.loanId = result.getLoanId();
-        this.savingsId = result.getSavingsId();
-        this.productId = result.getProductId();
-        this.transactionId = result.getTransactionId();
-        this.resourceId = result.getResourceId();
-        this.resourceExternalId = result.getResourceExternalId();
-        this.subResourceId = result.getSubResourceId();
-        this.subResourceExternalId = result.getSubResourceExternalId();
     }
 
     public String getResourceGetUrl() {
@@ -296,7 +264,7 @@ public class CommandSource extends AbstractPersistableCustom {
         return this.transactionId;
     }
 
-    public void updateTransaction(final String transactionId) {
+    public void setTransactionId(final String transactionId) {
         this.transactionId = transactionId;
     }
 
@@ -324,11 +292,49 @@ public class CommandSource extends AbstractPersistableCustom {
         this.status = status;
     }
 
+    public void setStatus(CommandProcessingResultType status) {
+        setStatus(status == null ? null : status.getValue());
+    }
+
     public Integer getResultStatusCode() {
         return resultStatusCode;
     }
 
     public void setResultStatusCode(Integer resultStatusCode) {
         this.resultStatusCode = resultStatusCode;
+    }
+
+    public void markAsAwaitingApproval() {
+        this.status = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
+    }
+
+    public boolean isMarkedAsAwaitingApproval() {
+        return this.status.equals(CommandProcessingResultType.AWAITING_APPROVAL.getValue());
+    }
+
+    public void markAsChecked(final AppUser checker) {
+        this.checker = checker;
+        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
+        this.status = CommandProcessingResultType.PROCESSED.getValue();
+    }
+
+    public void markAsRejected(final AppUser checker) {
+        this.checker = checker;
+        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
+        this.status = CommandProcessingResultType.REJECTED.getValue();
+    }
+
+    public void updateForAudit(final CommandProcessingResult result) {
+        this.officeId = result.getOfficeId();
+        this.groupId = result.getGroupId();
+        this.clientId = result.getClientId();
+        this.loanId = result.getLoanId();
+        this.savingsId = result.getSavingsId();
+        this.productId = result.getProductId();
+        this.transactionId = result.getTransactionId();
+        this.resourceId = result.getResourceId();
+        this.resourceExternalId = result.getResourceExternalId();
+        this.subResourceId = result.getSubResourceId();
+        this.subResourceExternalId = result.getSubResourceExternalId();
     }
 }

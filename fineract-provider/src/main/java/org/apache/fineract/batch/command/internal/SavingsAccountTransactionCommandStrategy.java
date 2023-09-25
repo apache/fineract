@@ -41,10 +41,6 @@ public class SavingsAccountTransactionCommandStrategy implements CommandStrategy
 
     @Override
     public BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo) {
-        final BatchResponse response = new BatchResponse();
-
-        response.setRequestId(batchRequest.getRequestId());
-        response.setHeaders(batchRequest.getHeaders());
         String relativeUrl = relativeUrlWithoutVersion(batchRequest);
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
         String command = null;
@@ -56,10 +52,7 @@ public class SavingsAccountTransactionCommandStrategy implements CommandStrategy
         Long savingsAccountId = Long.parseLong(pathParameters.get(1));
         final String responseBody = savingsAccountTransactionsApiResource.transaction(savingsAccountId, command, batchRequest.getBody());
 
-        response.setStatusCode(HttpStatus.SC_OK);
-
-        response.setBody(responseBody);
-
-        return response;
+        return new BatchResponse().setRequestId(batchRequest.getRequestId()).setStatusCode(HttpStatus.SC_OK).setBody(responseBody)
+                .setHeaders(batchRequest.getHeaders());
     }
 }
