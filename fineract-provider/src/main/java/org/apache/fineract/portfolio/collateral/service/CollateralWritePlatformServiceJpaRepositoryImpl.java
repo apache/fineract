@@ -138,7 +138,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleCollateralDataIntegrityViolation(dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.resourceResult(-1L);
         }
     }
 

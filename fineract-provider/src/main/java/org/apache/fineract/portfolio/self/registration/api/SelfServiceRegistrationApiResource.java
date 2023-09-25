@@ -53,7 +53,7 @@ public class SelfServiceRegistrationApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createSelfServiceUser(final String apiRequestBodyAsJson) {
         AppUser user = this.selfServiceRegistrationWritePlatformService.createUser(apiRequestBodyAsJson);
-        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(user.getId(), null));
+        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(user.getId()));
     }
 
 }

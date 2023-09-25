@@ -30,6 +30,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.batch.exception.BatchReferenceInvalidException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.stereotype.Component;
 
@@ -55,23 +56,19 @@ public class ResolutionHelper {
         private BatchRequest request;
         private final List<BatchRequestNode> childRequests = new ArrayList<>();
 
-        public BatchRequestNode() {
-
+        public BatchRequestNode(BatchRequest request) {
+            this.request = request;
         }
 
         public BatchRequest getRequest() {
             return this.request;
         }
 
-        public void setRequest(BatchRequest request) {
-            this.request = request;
-        }
-
-        public List<BatchRequestNode> getChildRequests() {
+        public List<BatchRequestNode> getChildNodes() {
             return this.childRequests;
         }
 
-        public void addChildRequest(final BatchRequestNode batchRequest) {
+        public void addChildNode(final BatchRequestNode batchRequest) {
             this.childRequests.add(batchRequest);
         }
 
@@ -84,35 +81,37 @@ public class ResolutionHelper {
      * different list is identified with a "Key" which is the "requestId" of the request at topmost level in dependency
      * hierarchy of that particular list.
      *
-     * @param batchRequests
+     * @param requests
      * @return List&lt;ArrayList&lt;BatchRequestNode&gt;&gt;
      */
-    public List<BatchRequestNode> getDependingRequests(final List<BatchRequest> batchRequests) {
-        final List<BatchRequestNode> rootRequests = new ArrayList<>();
-
-        for (BatchRequest batchRequest : batchRequests) {
-            if (batchRequest.getReference() == null) {
-                final BatchRequestNode node = new BatchRequestNode();
-                node.setRequest(batchRequest);
-                rootRequests.add(node);
+    public List<BatchRequestNode> buildNodesTree(final List<BatchRequest> requests) {
+        final List<BatchRequestNode> rootNodes = new ArrayList<>();
+        for (BatchRequest request : requests) {
+            if (request.getReference() == null) {
+                final BatchRequestNode node = new BatchRequestNode(request);
+                rootNodes.add(node);
             } else {
-                this.addDependingRequest(batchRequest, rootRequests);
+                if (!addDependingRequest(request, rootNodes)) {
+                    throw new BatchReferenceInvalidException(request.getReference());
+                }
             }
         }
-
-        return rootRequests;
+        return rootNodes;
     }
 
-    private void addDependingRequest(final BatchRequest batchRequest, final List<BatchRequestNode> parentRequests) {
-        for (BatchRequestNode batchRequestNode : parentRequests) {
-            if (batchRequestNode.getRequest().getRequestId().equals(batchRequest.getReference())) {
-                final BatchRequestNode dependingRequest = new BatchRequestNode();
-                dependingRequest.setRequest(batchRequest);
-                batchRequestNode.addChildRequest(dependingRequest);
+    private boolean addDependingRequest(final BatchRequest request, final List<BatchRequestNode> parentNodes) {
+        for (BatchRequestNode parentNode : parentNodes) {
+            if (parentNode.getRequest().getRequestId().equals(request.getReference())) {
+                final BatchRequestNode childNode = new BatchRequestNode(request);
+                parentNode.addChildNode(childNode);
+                return true;
             } else {
-                addDependingRequest(batchRequest, batchRequestNode.getChildRequests());
+                if (addDependingRequest(request, parentNode.getChildNodes())) {
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     /**
@@ -123,34 +122,27 @@ public class ResolutionHelper {
      * @param parentResponse
      * @return BatchRequest
      */
-    public BatchRequest resoluteRequest(final BatchRequest request, final BatchResponse parentResponse) {
-
-        // Create a duplicate request
-        final BatchRequest br = request;
-
+    public BatchRequest resolveRequest(final BatchRequest request, final BatchResponse parentResponse) {
         final ReadContext responseCtx = JsonPath.parse(parentResponse.getBody());
-
         // Gets the body from current Request as a JsonObject
-        final JsonObject jsonRequestBody = this.fromJsonHelper.parse(request.getBody()).getAsJsonObject();
-
-        JsonObject jsonResultBody = new JsonObject();
-
-        // Iterate through each element in the requestBody to find dependent
-        // parameter
-        for (Map.Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
-            final String key = element.getKey();
-            final JsonElement value = resolveDependentVariables(element, responseCtx);
-            jsonResultBody.add(key, value);
+        String requestBody = request.getBody();
+        if (requestBody != null) {
+            final JsonObject jsonRequestBody = this.fromJsonHelper.parse(requestBody).getAsJsonObject();
+            JsonObject jsonResultBody = new JsonObject();
+            // Iterate through each element in the requestBody to find dependent
+            // parameter
+            for (Map.Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
+                final String key = element.getKey();
+                final JsonElement value = resolveDependentVariables(element, responseCtx);
+                jsonResultBody.add(key, value);
+            }
+            // Set the body after dependency resolution
+            request.setBody(jsonResultBody.toString());
         }
-
-        // Set the body after dependency resolution
-        br.setBody(jsonResultBody.toString());
 
         // Also check the relativeUrl for any dependency resolution
         String relativeUrl = request.getRelativeUrl();
-
         if (relativeUrl.contains("$.")) {
-
             String queryParams = "";
             if (relativeUrl.contains("?")) {
                 queryParams = relativeUrl.substring(relativeUrl.indexOf("?"));
@@ -158,24 +150,21 @@ public class ResolutionHelper {
             }
 
             final Iterable<String> parameters = Splitter.on('/').split(relativeUrl);
-
             for (String parameter : parameters) {
                 if (parameter.contains("$.")) {
                     final String resParamValue = responseCtx.read(parameter).toString();
                     relativeUrl = relativeUrl.replace(parameter, resParamValue);
-                    br.setRelativeUrl(relativeUrl + queryParams);
+                    request.setRelativeUrl(relativeUrl + queryParams);
                 }
             }
         }
 
-        return br;
+        return request;
     }
 
     private JsonElement resolveDependentVariables(final Map.Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
-        JsonElement value = null;
-
+        JsonElement value;
         final JsonElement element = entryElement.getValue();
-
         if (element.isJsonObject()) {
             final JsonObject jsObject = element.getAsJsonObject();
             value = processJsonObject(jsObject, responseCtx);
@@ -202,16 +191,13 @@ public class ResolutionHelper {
     }
 
     private JsonArray processJsonArray(final JsonArray elementArray, final ReadContext responseCtx) {
-
         JsonArray valueArr = new JsonArray();
-
         for (JsonElement element : elementArray) {
             if (element.isJsonObject()) {
                 final JsonObject jsObject = element.getAsJsonObject();
                 valueArr.add(processJsonObject(jsObject, responseCtx));
             }
         }
-
         return valueArr;
     }
 

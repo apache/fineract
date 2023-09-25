@@ -50,7 +50,6 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -66,10 +65,8 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformS
 import org.apache.fineract.portfolio.savings.service.search.SavingsAccountTransactionSearchService;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
 import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/savingsaccounts/{savingsId}/transactions")
@@ -185,42 +182,33 @@ public class SavingsAccountTransactionsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsResponse.class))) })
     public String transaction(@PathParam("savingsId") final Long savingsId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
-        try {
-            final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
-            CommandProcessingResult result = null;
-            if (is(commandParam, "deposit")) {
-                final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            } else if (is(commandParam, "gsimDeposit")) {
-                final CommandWrapper commandRequest = builder.gsimSavingsAccountDeposit(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            } else if (is(commandParam, "withdrawal")) {
-                final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            } else if (is(commandParam, "postInterestAsOn")) {
-                final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            } else if (is(commandParam, SavingsApiConstants.COMMAND_HOLD_AMOUNT)) {
-                final CommandWrapper commandRequest = builder.holdAmount(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            }
-
-            if (result == null) {
-                //
-                throw new UnrecognizedQueryParamException("command", commandParam,
-                        new Object[] { "deposit", "withdrawal", SavingsApiConstants.COMMAND_HOLD_AMOUNT });
-            }
-
-            return this.toApiJsonSerializer.serialize(result);
-        } catch (ObjectOptimisticLockingFailureException lockingFailureException) {
-            throw new PlatformDataIntegrityException("error.msg.savings.concurrent.operations",
-                    "Concurrent Transactions being made on this savings account: " + lockingFailureException.getMessage(),
-                    lockingFailureException);
-        } catch (CannotAcquireLockException cannotAcquireLockException) {
-            throw new PlatformDataIntegrityException("error.msg.savings.concurrent.operations.unable.to.acquire.lock",
-                    "Unable to acquir lock for this transaction: " + cannotAcquireLockException.getMessage(), cannotAcquireLockException);
+        CommandProcessingResult result = null;
+        if (is(commandParam, "deposit")) {
+            final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "gsimDeposit")) {
+            final CommandWrapper commandRequest = builder.gsimSavingsAccountDeposit(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "withdrawal")) {
+            final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "postInterestAsOn")) {
+            final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_HOLD_AMOUNT)) {
+            final CommandWrapper commandRequest = builder.holdAmount(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
+
+        if (result == null) {
+            //
+            throw new UnrecognizedQueryParamException("command", commandParam,
+                    new Object[] { "deposit", "withdrawal", SavingsApiConstants.COMMAND_HOLD_AMOUNT });
+        }
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @POST

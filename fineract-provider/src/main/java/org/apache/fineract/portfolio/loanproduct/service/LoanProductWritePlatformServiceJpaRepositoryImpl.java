@@ -255,7 +255,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
         } catch (final DataIntegrityViolationException | JpaSystemException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return new CommandProcessingResult((long) -1);
+            return CommandProcessingResult.resourceResult(-1L);
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);

@@ -42,10 +42,6 @@ public class SavingsAccountAdjustTransactionCommandStrategy implements CommandSt
 
     @Override
     public BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo) {
-        final BatchResponse response = new BatchResponse();
-
-        response.setRequestId(batchRequest.getRequestId());
-        response.setHeaders(batchRequest.getHeaders());
         String relativeUrl = relativeUrlWithoutVersion(batchRequest);
         final List<String> pathParameters;
         String command = null;
@@ -63,10 +59,7 @@ public class SavingsAccountAdjustTransactionCommandStrategy implements CommandSt
         final String responseBody = savingsAccountTransactionsApiResource.adjustTransaction(savingsAccountId, transactionId, command,
                 batchRequest.getBody());
 
-        response.setStatusCode(HttpStatus.SC_OK);
-
-        response.setBody(responseBody);
-
-        return response;
+        return new BatchResponse().setRequestId(batchRequest.getRequestId()).setStatusCode(HttpStatus.SC_OK).setBody(responseBody)
+                .setHeaders(batchRequest.getHeaders());
     }
 }

@@ -20,10 +20,13 @@ package org.apache.fineract.batch.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public class ClientDetailsNotFoundException extends AbstractPlatformDomainRuleException {
+public class BatchReferenceInvalidException extends AbstractPlatformDomainRuleException {
 
-    public ClientDetailsNotFoundException() {
-        super("validation.msg.batch.jlg.no.clients.defined", "No Client details found", "");
+    public BatchReferenceInvalidException() {
+        super("validation.msg.batch.root.invalid", "Root request not found");
     }
 
+    public BatchReferenceInvalidException(Long reference) {
+        super("validation.msg.batch.reference.invalid", "Referenced request not found", reference);
+    }
 }

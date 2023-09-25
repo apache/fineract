@@ -47,7 +47,7 @@ public class InvalidInstanceTypeMethodExceptionMapperTest {
         assertEquals(Response.Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
         assertNotNull(response.getEntity());
         final ApiGlobalErrorResponse errorResponse = (ApiGlobalErrorResponse) response.getEntity();
-        assertEquals(String.valueOf(Response.Status.METHOD_NOT_ALLOWED.getReasonPhrase()), errorResponse.getHttpStatusCode());
+        assertEquals(String.valueOf(Response.Status.METHOD_NOT_ALLOWED.getStatusCode()), errorResponse.getHttpStatusCode());
         assertEquals("Invalid instance type called in api request for the method POST", errorResponse.getDeveloperMessage());
         assertEquals("error.msg.invalid.instance.type", errorResponse.getUserMessageGlobalisationCode());
         assertEquals("Invalid method POST used with request to this instance type.", errorResponse.getDefaultUserMessage());

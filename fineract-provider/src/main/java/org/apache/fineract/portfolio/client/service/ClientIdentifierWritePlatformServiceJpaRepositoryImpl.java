@@ -164,7 +164,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.resourceResult(-1L);
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);

@@ -40,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -193,7 +194,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -247,7 +247,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final ExternalIdFactory externalIdFactory;
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
-    private final JdbcTemplate jdbcTemplate;
+    private final ErrorHandler errorHandler;
 
     @Transactional
     @Override
@@ -2426,13 +2426,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @SuppressWarnings("unused")
     private void fallbackRecalculateInterest(Throwable t) {
         // NOTE: allow caller to catch the exceptions
-
-        if (t instanceof RuntimeException re) {
-            throw re;
-        }
-
         // NOTE: wrap throwable only if really necessary
-        throw new RuntimeException(t);
+        throw errorHandler.getMappable(t, null, null, "loan.recalculateinterest");
     }
 
     @Override

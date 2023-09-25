@@ -48,23 +48,11 @@ public class ApplySavingsCommandStrategy implements CommandStrategy {
 
     @Override
     public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
+        // Calls 'submitApplication' function from 'SavingsAccountsApiResource' to Apply Savings to an existing client
+        String responseBody = savingsAccountsApiResource.submitApplication(request.getBody());
 
-        final BatchResponse response = new BatchResponse();
-        final String responseBody;
-
-        response.setRequestId(request.getRequestId());
-        response.setHeaders(request.getHeaders());
-
-        // Calls 'submitApplication' function from
-        // 'SavingsAccountsApiResource' to Apply Savings to an existing
-        // client
-        responseBody = savingsAccountsApiResource.submitApplication(request.getBody());
-
-        response.setStatusCode(HttpStatus.SC_OK);
-        // Sets the body of the response after savings is successfully
-        // applied
-        response.setBody(responseBody);
-
-        return response;
+        // Sets the body of the response after savings is successfully applied
+        return new BatchResponse().setRequestId(request.getRequestId()).setStatusCode(HttpStatus.SC_OK).setBody(responseBody)
+                .setHeaders(request.getHeaders());
     }
 }

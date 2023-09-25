@@ -450,11 +450,11 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     .build();
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return new CommandProcessingResult((long) -1);
+            return CommandProcessingResult.resourceResult(-1L);
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
-            return new CommandProcessingResult((long) -1);
+            return CommandProcessingResult.resourceResult(-1L);
         }
     }
 
@@ -521,11 +521,11 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     .build();
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.resourceResult(-1L);
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.resourceResult(-1L);
         }
     }
 

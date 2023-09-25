@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.command;
 
+import static jakarta.ws.rs.HttpMethod.DELETE;
 import static jakarta.ws.rs.HttpMethod.GET;
 import static jakarta.ws.rs.HttpMethod.POST;
 import static jakarta.ws.rs.HttpMethod.PUT;
@@ -207,7 +208,9 @@ public class CommandStrategyProvider {
                 .method(PUT).build(), "updateDatatableEntryOneToOneCommandStrategy");
         commandStrategies.put(CommandContext
                 .resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX + "\\/" + NUMBER_REGEX)
-                .method(PUT).build(), "updateDatatableEntryOneToManyCommandStrategy");
+                .method(DELETE).build(), "deleteDatatableEntryOneToManyCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX)
+                .method(DELETE).build(), "deleteDatatableEntryOneToOneCommandStrategy");
         commandStrategies.put(CommandContext
                 .resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX + OPTIONAL_QUERY_PARAM_REGEX)
                 .method(GET).build(), "getDatatableEntryByAppTableIdCommandStrategy");
