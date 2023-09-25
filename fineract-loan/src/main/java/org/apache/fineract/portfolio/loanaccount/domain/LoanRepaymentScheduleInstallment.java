@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
@@ -625,7 +626,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public boolean isOverdueOn(final LocalDate date) {
-        return getDueDate().isBefore(date);
+        return DateUtils.isAfter(date, getDueDate());
     }
 
     public void updateChargePortion(final Money feeChargesDue, final Money feeChargesWaived, final Money feeChargesWrittenOff,
@@ -665,11 +666,11 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     private boolean isInAdvance(final LocalDate transactionDate) {
-        return transactionDate.isBefore(getDueDate());
+        return DateUtils.isBefore(transactionDate, getDueDate());
     }
 
     private boolean isLatePayment(final LocalDate transactionDate) {
-        return transactionDate.isAfter(getDueDate());
+        return DateUtils.isAfter(transactionDate, getDueDate());
     }
 
     private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
@@ -926,6 +927,11 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public boolean isFirstPeriod() {
         return (this.installmentNumber == 1);
+    }
+
+    public boolean isInPeriod(LocalDate date) {
+        return (isFirstPeriod() ? !DateUtils.isBefore(date, getFromDate()) : DateUtils.isAfter(date, getFromDate()))
+                && !DateUtils.isAfter(date, getDueDate());
     }
 
     public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {

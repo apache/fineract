@@ -38,12 +38,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Test class for {@link AdjustTransactionByExternalIdCommandStrategy}.
+ * Test class for {@link AdjustLoanTransactionByExternalIdCommandStrategy}.
  */
-public class AdjustTransactionByExternalIdCommandStrategyTest {
+public class AdjustLoanTransactionByExternalIdCommandStrategyTest {
 
     /**
-     * Test {@link AdjustTransactionByExternalIdCommandStrategy#execute} happy path scenario.
+     * Test {@link AdjustLoanTransactionByExternalIdCommandStrategy#execute} happy path scenario.
      */
     @Test
     public void testExecuteWithoutCommandSuccessScenario() {
@@ -73,7 +73,7 @@ public class AdjustTransactionByExternalIdCommandStrategyTest {
     }
 
     /**
-     * Test {@link AdjustTransactionByExternalIdCommandStrategy#execute} happy path scenario.
+     * Test {@link AdjustLoanTransactionByExternalIdCommandStrategy#execute} happy path scenario.
      */
     @Test
     public void testExecuteWithCommandSuccessScenario() {
@@ -150,14 +150,14 @@ public class AdjustTransactionByExternalIdCommandStrategyTest {
         /**
          * The class under test.
          */
-        private final AdjustTransactionByExternalIdCommandStrategy subjectToTest;
+        private final AdjustLoanTransactionByExternalIdCommandStrategy subjectToTest;
 
         /**
          * Constructor.
          */
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            subjectToTest = new AdjustTransactionByExternalIdCommandStrategy(loanTransactionsApiResource);
+            subjectToTest = new AdjustLoanTransactionByExternalIdCommandStrategy(loanTransactionsApiResource);
         }
     }
 }

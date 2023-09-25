@@ -43,10 +43,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.apache.fineract.batch.command.internal.AdjustTransactionCommandStrategy;
+import org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -471,7 +470,7 @@ public class BatchApiTest {
     /**
      * Test for a successful charge adjustment. A '200' status code is expected on successful responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulChargeAdjustment() {
@@ -1076,7 +1075,7 @@ public class BatchApiTest {
      * Test for the successful disbursement and get loan. A '200' status code is expected on successful responses.
      *
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
-     * @see GetTransactionByIdCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.GetLoanTransactionByIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulDisbursementAndGetTransaction() {
@@ -1591,7 +1590,7 @@ public class BatchApiTest {
     /**
      * Test for the successful repayment reversal transaction. A '200' status code is expected on successful responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentReversal() {
@@ -1664,7 +1663,7 @@ public class BatchApiTest {
      * Test for the successful repayment reversal transaction using loan external id and transaction external id. A
      * '200' status code is expected on successful responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentReversalUsingExternalId() {
@@ -1769,7 +1768,7 @@ public class BatchApiTest {
      * Test for the successful repayment chargeback transaction. A '200' status code is expected on successful
      * responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentChargeback() {
@@ -1840,7 +1839,7 @@ public class BatchApiTest {
      * Tests successful run of batch goodwill credit reversal for loans. A '200' status code is expected on successful
      * responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchGoodwillCreditReversal() {
@@ -1914,7 +1913,7 @@ public class BatchApiTest {
      * Test for the successful merchant issued refund and payout refund reversal transaction. A '200' status code is
      * expected on successful responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulTransactionMerchantIssuedAndPayoutRefundReversal() {

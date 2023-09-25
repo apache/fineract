@@ -37,9 +37,10 @@ import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} to retrieve a transaction by id. It passes the contents of the body from the
- * BatchRequest to {@link LoanTransactionsApiResource} and gets back the response. This class will also catch any errors
- * raised by {@link LoanTransactionsApiResource} and map those errors to appropriate status codes in BatchResponse.
+ * Implements {@link CommandStrategy} to retrieve a transaction by external id. It passes the contents of the body from
+ * the BatchRequest to {@link LoanTransactionsApiResource} and gets back the response. This class will also catch any
+ * errors raised by {@link LoanTransactionsApiResource} and map those errors to appropriate status codes in
+ * BatchResponse.
  *
  * @see CommandStrategy
  * @see BatchRequest
@@ -47,7 +48,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class GetTransactionByIdCommandStrategy implements CommandStrategy {
+public class GetLoanTransactionByExternalIdCommandStrategy implements CommandStrategy {
 
     /**
      * Loan transactions api resource {@link LoanTransactionsApiResource}.
@@ -66,14 +67,15 @@ public class GetTransactionByIdCommandStrategy implements CommandStrategy {
 
         final String relativeUrl = relativeUrlWithoutVersion(request);
 
+        // Expected pattern - loans\/external-id\/[\w\d_-]+\/transactions\/external-id\/[\w\d_-]+
         // Get the loan and transaction ids for use in loanTransactionsApiResource
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
-        final Long loanId = Long.parseLong(pathParameters.get(1));
-        Long transactionId;
+        final String loanExternalId = pathParameters.get(2);
+        String transactionExternalId;
         if (relativeUrl.indexOf('?') > 0) {
-            transactionId = Long.parseLong(StringUtils.substringBeforeLast(pathParameters.get(3), "?"));
+            transactionExternalId = StringUtils.substringBeforeLast(pathParameters.get(5), "?");
         } else {
-            transactionId = Long.parseLong(pathParameters.get(3));
+            transactionExternalId = pathParameters.get(5);
         }
 
         Map<String, String> queryParameters = new HashMap<>();
@@ -91,8 +93,9 @@ public class GetTransactionByIdCommandStrategy implements CommandStrategy {
             }
         }
 
-        // Calls 'retrieveTransaction' function from 'loanTransactionsApiResource'
-        responseBody = loanTransactionsApiResource.retrieveTransaction(loanId, transactionId, fields, uriInfo);
+        // Calls 'retrieveTransaction' function from 'loanTransactionsApiResource' using external id
+        responseBody = loanTransactionsApiResource.retrieveTransactionByLoanExternalIdAndTransactionExternalId(loanExternalId,
+                transactionExternalId, fields, uriInfo);
 
         response.setStatusCode(HttpStatus.SC_OK);
 

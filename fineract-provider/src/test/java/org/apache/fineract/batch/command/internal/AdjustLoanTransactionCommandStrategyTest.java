@@ -36,12 +36,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Test class for {@link AdjustTransactionCommandStrategy}.
+ * Test class for {@link AdjustLoanTransactionCommandStrategy}.
  */
-public class AdjustTransactionCommandStrategyTest {
+public class AdjustLoanTransactionCommandStrategyTest {
 
     /**
-     * Test {@link AdjustTransactionCommandStrategy#execute} happy path scenario.
+     * Test {@link AdjustLoanTransactionCommandStrategy#execute} happy path scenario.
      */
     @Test
     public void testExecuteWithoutCommandSuccessScenario() {
@@ -71,7 +71,7 @@ public class AdjustTransactionCommandStrategyTest {
     }
 
     /**
-     * Test {@link AdjustTransactionCommandStrategy#execute} happy path scenario.
+     * Test {@link AdjustLoanTransactionCommandStrategy#execute} happy path scenario.
      */
     @Test
     public void testExecuteWithCommandSuccessScenario() {
@@ -148,14 +148,14 @@ public class AdjustTransactionCommandStrategyTest {
         /**
          * The class under test.
          */
-        private final AdjustTransactionCommandStrategy subjectToTest;
+        private final AdjustLoanTransactionCommandStrategy subjectToTest;
 
         /**
          * Constructor.
          */
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            subjectToTest = new AdjustTransactionCommandStrategy(loanTransactionsApiResource);
+            subjectToTest = new AdjustLoanTransactionCommandStrategy(loanTransactionsApiResource);
         }
     }
 }
