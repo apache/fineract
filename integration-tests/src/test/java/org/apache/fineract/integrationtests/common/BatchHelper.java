@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
-import org.apache.fineract.batch.command.internal.GetTransactionByExternalIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.integrationtests.common.savings.SavingsTransactionData;

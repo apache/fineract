@@ -128,7 +128,7 @@ public class CommandProcessingResultBuilder {
     }
 
     public CommandProcessingResultBuilder setRollbackTransaction(final boolean rollbackTransaction) {
-        this.rollbackTransaction = this.rollbackTransaction || rollbackTransaction;
+        this.rollbackTransaction |= rollbackTransaction;
         return this;
     }
 

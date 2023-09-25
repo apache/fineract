@@ -22,11 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.UUID;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -40,16 +38,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Test class for {@link GetTransactionByExternalIdCommandStrategy}.
+ * Test class for {@link GetLoanTransactionByIdCommandStrategy}.
  */
-public class GetTransactionByExternalIdCommandStrategyTest {
+public class GetLoanTransactionByIdCommandStrategyTest {
 
     private static Stream<Arguments> provideQueryParameters() {
         return Stream.of(Arguments.of(null, 0), Arguments.of("id,date,amount", 1));
     }
 
     /**
-     * Test {@link GetTransactionByExternalIdCommandStrategy#execute} happy path scenario.
+     * Test {@link GetLoanTransactionByIdCommandStrategy#execute} happy path scenario.
      */
     @ParameterizedTest
     @MethodSource("provideQueryParameters")
@@ -57,9 +55,9 @@ public class GetTransactionByExternalIdCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final String loanExternalId = UUID.randomUUID().toString();
-        final String transactionExternalId = UUID.randomUUID().toString();
-        final BatchRequest request = getBatchRequest(loanExternalId, transactionExternalId, fields);
+        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final BatchRequest request = getBatchRequest(loanId, transactionId, fields);
         final String responseBody = "{\"id\":12,\"officeId\":1,\"officeName\":\"Head Office\",\"type\":{\"id\":10,\"code\":"
                 + "\"loanTransactionType.accrual\",\"value\":\"Accrual\",\"disbursement\":false,\"repaymentAtDisbursement\":false,"
                 + "\"repayment\":false,\"contra\":false,\"waiveInterest\":false,\"waiveCharges\":false,\"accrual\":true,\"writeOff\":false,"
@@ -71,8 +69,8 @@ public class GetTransactionByExternalIdCommandStrategyTest {
                 + "\"unrecognizedIncomePortion\":0,\"outstandingLoanBalance\":0,\"submittedOnDate\":[2022,3,29],\"manuallyReversed\":false,"
                 + "\"loanChargePaidByList\":[],\"numberOfRepayments\":0}";
 
-        given(testContext.loanTransactionsApiResource.retrieveTransactionByLoanExternalIdAndTransactionExternalId(eq(loanExternalId),
-                eq(transactionExternalId), eq(fields), any(UriInfo.class))).willReturn(responseBody);
+        given(testContext.loanTransactionsApiResource.retrieveTransaction(eq(loanId), eq(transactionId), eq(fields), any(UriInfo.class)))
+                .willReturn(responseBody);
 
         // when
         final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
@@ -82,23 +80,21 @@ public class GetTransactionByExternalIdCommandStrategyTest {
         assertThat(response.getRequestId()).isEqualTo(request.getRequestId());
         assertThat(response.getHeaders()).isEqualTo(request.getHeaders());
         assertThat(response.getBody()).isEqualTo(responseBody);
-        verify(testContext.loanTransactionsApiResource).retrieveTransactionByLoanExternalIdAndTransactionExternalId(eq(loanExternalId),
-                eq(transactionExternalId), eq(fields), any(UriInfo.class));
     }
 
     /**
-     * Creates and returns a request with the given loan external id and transaction external id.
+     * Creates and returns a request with the given loan id and transaction id.
      *
-     * @param loanExternalId
-     *            the loan external id
-     * @param transactionExternalId
-     *            the transaction external id
+     * @param loanId
+     *            the loan id
+     * @param transactionId
+     *            the transaction id
      * @return BatchRequest
      */
-    private BatchRequest getBatchRequest(final String loanExternalId, final String transactionExternalId, final String fields) {
+    private BatchRequest getBatchRequest(final Long loanId, final Long transactionId, final String fields) {
 
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/external-id/" + loanExternalId + "/transactions/external-id/" + transactionExternalId;
+        String relativeUrl = "loans/" + loanId + "/transactions/" + transactionId;
         if (fields != null) {
             relativeUrl = relativeUrl + "?fields=" + fields;
         }
@@ -132,7 +128,7 @@ public class GetTransactionByExternalIdCommandStrategyTest {
         /**
          * The class under test.
          */
-        private final GetTransactionByExternalIdCommandStrategy subjectToTest;
+        private final GetLoanTransactionByIdCommandStrategy subjectToTest;
 
         /**
          * Constructor.
@@ -140,7 +136,7 @@ public class GetTransactionByExternalIdCommandStrategyTest {
 
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            subjectToTest = new GetTransactionByExternalIdCommandStrategy(loanTransactionsApiResource);
+            subjectToTest = new GetLoanTransactionByIdCommandStrategy(loanTransactionsApiResource);
         }
     }
 }

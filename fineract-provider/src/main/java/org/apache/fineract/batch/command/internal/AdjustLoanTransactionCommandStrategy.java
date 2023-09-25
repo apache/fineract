@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class AdjustTransactionCommandStrategy implements CommandStrategy {
+public class AdjustLoanTransactionCommandStrategy implements CommandStrategy {
 
     /**
      * Loan transactions api resource {@link LoanTransactionsApiResource}.
