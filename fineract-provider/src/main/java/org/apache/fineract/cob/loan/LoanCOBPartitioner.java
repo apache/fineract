@@ -81,8 +81,8 @@ public class LoanCOBPartitioner implements Partitioner {
         }
         StopWatch sw = new StopWatch();
         sw.start();
-        List<LoanCOBPartition> loanCOBPartitions = new ArrayList<>(retrieveLoanIdService.retrieveLoanCOBPartitions(numberOfDays,
-                businessDate, isCatchUp != null ? isCatchUp : false, partitionSize));
+        List<LoanCOBPartition> loanCOBPartitions = new ArrayList<>(
+                retrieveLoanIdService.retrieveLoanCOBPartitions(numberOfDays, businessDate, isCatchUp != null && isCatchUp, partitionSize));
         sw.stop();
         // if there is no loan to be closed, we still would like to create at least one partition
 

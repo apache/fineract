@@ -36,18 +36,18 @@ public class SearchConditions {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
         this.exactMatch = exactMatch;
-        this.clientSearch = (null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTS.name().toLowerCase())) ? true : false;
-        this.groupSearch = (null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.GROUPS.name().toLowerCase())) ? true : false;
-        this.loanSeach = (null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.LOANS.name().toLowerCase())) ? true : false;
-        this.savingSeach = (null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.SAVINGS.name().toLowerCase())) ? true : false;
-        this.shareSeach = (null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.SHARES.name().toLowerCase())) ? true : false;
-        this.clientIdentifierSearch = (null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTIDENTIFIERS.name().toLowerCase())) ? true : false;
+        this.clientSearch = null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTS.name().toLowerCase());
+        this.groupSearch = null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.GROUPS.name().toLowerCase());
+        this.loanSeach = null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.LOANS.name().toLowerCase());
+        this.savingSeach = null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.SAVINGS.name().toLowerCase());
+        this.shareSeach = null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.SHARES.name().toLowerCase());
+        this.clientIdentifierSearch = null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTIDENTIFIERS.name().toLowerCase());
     }
 
     public SearchConditions(final String searchQueryParam, final String searchResource, final Boolean clientSearch,

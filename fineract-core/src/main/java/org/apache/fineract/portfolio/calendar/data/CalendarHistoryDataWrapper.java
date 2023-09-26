@@ -20,10 +20,10 @@ package org.apache.fineract.portfolio.calendar.data;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 
 public class CalendarHistoryDataWrapper {
@@ -37,16 +37,16 @@ public class CalendarHistoryDataWrapper {
 
             @Override
             public int compare(CalendarHistory calendarHistory1, CalendarHistory calendarHistory2) {
-                return calendarHistory1.getEndDateLocalDate().compareTo(calendarHistory2.getEndDateLocalDate());
+                return DateUtils.compare(calendarHistory1.getEndDate(), calendarHistory2.getEndDate());
             }
         };
-        Collections.sort(this.calendarHistoryList, orderByDate);
+        this.calendarHistoryList.sort(orderByDate);
     }
 
     public CalendarHistory getCalendarHistory(final LocalDate dueRepaymentPeriodDate) {
         CalendarHistory calendarHistory = null;
         for (CalendarHistory history : this.calendarHistoryList) {
-            if (history.getEndDateLocalDate().isAfter(dueRepaymentPeriodDate)) {
+            if (DateUtils.isAfter(history.getEndDate(), dueRepaymentPeriodDate)) {
                 calendarHistory = history;
                 break;
             }

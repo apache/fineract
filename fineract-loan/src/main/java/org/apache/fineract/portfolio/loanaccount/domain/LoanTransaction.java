@@ -29,7 +29,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -850,29 +849,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.manuallyAdjustedOrReversed = true;
     }
 
-    @Override
-    public OffsetDateTime getCreatedDateTime() {
-        return (this.getCreatedDate().isPresent() ? this.getCreatedDate().get() : DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
-    }
-
-    public boolean isLastTransaction(final LoanTransaction loanTransaction) {
-        boolean isLatest = false;
-        if (loanTransaction != null) {
-            isLatest = this.getTransactionDate().isBefore(loanTransaction.getTransactionDate())
-                    || (this.getTransactionDate().isEqual(loanTransaction.getTransactionDate())
-                            && this.getCreatedDateTime().isBefore(loanTransaction.getCreatedDateTime()));
-        }
-        return isLatest;
-    }
-
-    public boolean isLatestTransaction(final LoanTransaction loanTransaction) {
-        boolean isLatest = false;
-        if (loanTransaction != null) {
-            isLatest = this.getCreatedDateTime().isBefore(loanTransaction.getCreatedDateTime());
-        }
-        return isLatest;
-    }
-
     public void updateLoanTransactionToRepaymentScheduleMappings(final Collection<LoanTransactionToRepaymentScheduleMapping> mappings) {
         Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings = new ArrayList<>();
         for (LoanTransactionToRepaymentScheduleMapping updatedrepaymentScheduleMapping : mappings) {
@@ -961,6 +937,18 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    public boolean isBefore(final LocalDate date) {
+        return DateUtils.isBefore(getTransactionDate(), date);
+    }
+
+    public boolean isAfter(final LocalDate date) {
+        return DateUtils.isAfter(getTransactionDate(), date);
+    }
+
+    public boolean isOn(final LocalDate date) {
+        return DateUtils.isEqual(getTransactionDate(), date);
     }
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as

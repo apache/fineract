@@ -420,7 +420,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             LocalDate current = DateUtils.getLocalDateOfTenant();
             LocalDate getExpiryDate = creditBureauToken.getExpires();
 
-            if (getExpiryDate.isBefore(current)) {
+            if (DateUtils.isBefore(getExpiryDate, current)) {
                 this.tokenRepositoryWrapper.delete(creditBureauToken);
                 creditBureauToken = null;
             }

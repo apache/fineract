@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -105,7 +106,7 @@ public class LoanRescheduleRequestDataValidator {
                 jsonElement);
         dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
 
-        if (submittedOnDate != null && loan.getDisbursementDate().isAfter(submittedOnDate)) {
+        if (submittedOnDate != null && DateUtils.isAfter(loan.getDisbursementDate(), submittedOnDate)) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.submittedOnDateParamName)
                     .failWithCode("before.loan.disbursement.date", "Submission date cannot be before the loan disbursement date");
         }
@@ -161,7 +162,7 @@ public class LoanRescheduleRequestDataValidator {
         final LocalDate adjustedDueDate = this.fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.adjustedDueDateParamName,
                 jsonElement);
 
-        if (adjustedDueDate != null && rescheduleFromDate != null && adjustedDueDate.isBefore(rescheduleFromDate)) {
+        if (adjustedDueDate != null && DateUtils.isBefore(adjustedDueDate, rescheduleFromDate)) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).failWithCode(
                     "adjustedDueDate.before.rescheduleFromDate", "Adjusted due date cannot be before the reschedule from date");
         }
@@ -212,7 +213,7 @@ public class LoanRescheduleRequestDataValidator {
             LocalDate rescheduleFromDate = installment.getFromDate();
             Collection<LoanCharge> charges = loan.getLoanCharges();
             for (LoanCharge loanCharge : charges) {
-                if (loanCharge.isOverdueInstallmentCharge() && loanCharge.getDueLocalDate().isAfter(rescheduleFromDate)) {
+                if (loanCharge.isOverdueInstallmentCharge() && DateUtils.isAfter(loanCharge.getDueLocalDate(), rescheduleFromDate)) {
                     dataValidatorBuilder.failWithCodeNoParameterAddedToErrorCode("not.allowed.due.to.overdue.charges");
                     break;
                 }
@@ -247,7 +248,7 @@ public class LoanRescheduleRequestDataValidator {
                 jsonElement);
         dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.approvedOnDateParam).value(approvedOnDate).notNull();
 
-        if (approvedOnDate != null && loanRescheduleRequest.getSubmittedOnDate().isAfter(approvedOnDate)) {
+        if (approvedOnDate != null && DateUtils.isAfter(loanRescheduleRequest.getSubmittedOnDate(), approvedOnDate)) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.approvedOnDateParam).failWithCode("before.submission.date",
                     "Approval date cannot be before the request submission date.");
         }
@@ -319,7 +320,7 @@ public class LoanRescheduleRequestDataValidator {
                 jsonElement);
         dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rejectedOnDateParam).value(rejectedOnDate).notNull();
 
-        if (rejectedOnDate != null && loanRescheduleRequest.getSubmittedOnDate().isAfter(rejectedOnDate)) {
+        if (rejectedOnDate != null && DateUtils.isAfter(loanRescheduleRequest.getSubmittedOnDate(), rejectedOnDate)) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rejectedOnDateParam).failWithCode("before.submission.date",
                     "Rejection date cannot be before the request submission date.");
         }

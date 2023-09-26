@@ -88,51 +88,63 @@ public enum CalendarEntityType {
     }
 
     public static boolean isGroup(final Integer value) {
-        return CalendarEntityType.GROUPS.value.equals(value) ? true : false;
+        return CalendarEntityType.GROUPS.value.equals(value);
     }
 
     public static boolean isGroup(final String name) {
-        return CalendarEntityType.GROUPS.name().equalsIgnoreCase(name) ? true : false;
+        return CalendarEntityType.GROUPS.name().equalsIgnoreCase(name);
     }
 
     public static boolean isCenter(final Integer value) {
-        return CalendarEntityType.CENTERS.value.equals(value) ? true : false;
+        return CalendarEntityType.CENTERS.value.equals(value);
     }
 
     public static boolean isCenter(final String name) {
-        return CalendarEntityType.CENTERS.name().equalsIgnoreCase(name) ? true : false;
+        return CalendarEntityType.CENTERS.name().equalsIgnoreCase(name);
     }
 
     public static boolean isLoan(final Integer value) {
-        return CalendarEntityType.LOANS.value.equals(value) ? true : false;
+        return CalendarEntityType.LOANS.value.equals(value);
     }
 
     public static boolean isLoan(final String name) {
-        return CalendarEntityType.LOANS.name().equalsIgnoreCase(name) ? true : false;
+        return CalendarEntityType.LOANS.name().equalsIgnoreCase(name);
     }
 
     public static boolean isClient(final Integer value) {
-        return CalendarEntityType.CLIENTS.value.equals(value) ? true : false;
+        return CalendarEntityType.CLIENTS.value.equals(value);
     }
 
     public static boolean isClient(final String name) {
-        return CalendarEntityType.CLIENTS.name().equalsIgnoreCase(name) ? true : false;
+        return CalendarEntityType.CLIENTS.name().equalsIgnoreCase(name);
+    }
+
+    public static boolean isSavings(final Integer value) {
+        return CalendarEntityType.SAVINGS.value.equals(value);
+    }
+
+    public static boolean isSavings(final String name) {
+        return CalendarEntityType.SAVINGS.name().equalsIgnoreCase(name);
     }
 
     public boolean isCenter() {
-        return this.value.equals(CalendarEntityType.CENTERS.getValue());
+        return this == CENTERS;
     }
 
     public boolean isGroup() {
-        return this.value.equals(CalendarEntityType.GROUPS.getValue());
+        return this == GROUPS;
     }
 
     public boolean isLoan() {
-        return this.value.equals(CalendarEntityType.LOANS.getValue());
+        return this == LOANS;
     }
 
     public boolean isClient() {
-        return this.value.equals(CalendarEntityType.CLIENTS.getValue());
+        return this == CLIENTS;
+    }
+
+    public boolean isSavings() {
+        return this == SAVINGS;
     }
 
     private static final Map<String, CalendarEntityType> entityNameToEnumMap = new HashMap<>();
@@ -146,17 +158,4 @@ public enum CalendarEntityType {
     public static CalendarEntityType getEntityType(String entityType) {
         return entityNameToEnumMap.get(entityType.toLowerCase());
     }
-
-    public static boolean isSavings(final Integer value) {
-        return CalendarEntityType.SAVINGS.value.equals(value) ? true : false;
-    }
-
-    public static boolean isSavings(final String name) {
-        return CalendarEntityType.SAVINGS.name().equalsIgnoreCase(name) ? true : false;
-    }
-
-    public boolean isSavings() {
-        return this.value.equals(CalendarEntityType.SAVINGS.getValue());
-    }
-
 }

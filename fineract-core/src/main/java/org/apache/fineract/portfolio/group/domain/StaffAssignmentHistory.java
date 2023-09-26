@@ -25,6 +25,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
 
 @Entity
@@ -73,7 +74,7 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public boolean matchesStartDateOf(final LocalDate matchingDate) {
-        return getStartDate().isEqual(matchingDate);
+        return DateUtils.isEqual(matchingDate, getStartDate());
     }
 
     public LocalDate getStartDate() {

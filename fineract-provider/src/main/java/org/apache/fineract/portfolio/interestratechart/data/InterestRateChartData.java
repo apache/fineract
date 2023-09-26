@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 /**
  * Immutable data object representing a InterestRateChart.
@@ -143,7 +144,7 @@ public final class InterestRateChartData {
     }
 
     public boolean isFromDateAfter(final LocalDate compareDate) {
-        return (compareDate == null) ? false : this.fromDate.isAfter(compareDate);
+        return compareDate != null && DateUtils.isAfter(this.fromDate, compareDate);
     }
 
     public LocalDate endDate() {

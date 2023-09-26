@@ -80,8 +80,8 @@ public class InternalClientInformationApiResource implements InitializingBean {
 
         final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         Map<String, Object> auditFields = new HashMap<>(
-                Map.of(CREATED_BY, client.getCreatedBy().orElse(null), CREATED_DATE, client.getCreatedDate().orElse(null), LAST_MODIFIED_BY,
-                        client.getLastModifiedBy().orElse(null), LAST_MODIFIED_DATE, client.getLastModifiedDate().orElse(null)));
+                Map.of(CREATED_BY, client.getCreatedBy().orElse(null), CREATED_DATE, client.getCreatedDateTime(), LAST_MODIFIED_BY,
+                        client.getLastModifiedBy().orElse(null), LAST_MODIFIED_DATE, client.getLastModifiedDateTime()));
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, auditFields);
     }

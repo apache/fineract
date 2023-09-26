@@ -39,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.apache.fineract.organisation.office.exception.RootOfficeParentCannotBeUpdated;
@@ -155,11 +156,11 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     }
 
     public boolean isOpeningDateBefore(final LocalDate baseDate) {
-        return getOpeningLocalDate().isBefore(baseDate);
+        return DateUtils.isBefore(getOpeningLocalDate(), baseDate);
     }
 
-    public boolean isOpeningDateAfter(final LocalDate activationLocalDate) {
-        return getOpeningLocalDate().isAfter(activationLocalDate);
+    public boolean isOpeningDateAfter(final LocalDate baseDate) {
+        return DateUtils.isAfter(getOpeningLocalDate(), baseDate);
     }
 
     public LocalDate getOpeningLocalDate() {

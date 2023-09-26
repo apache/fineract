@@ -119,7 +119,7 @@ public class AccountingScenarioIntegrationTest {
     private SchedulerJobHelper schedulerJobHelper;
     private PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
 
-    private TimeZone systemTimeZone;
+    private TimeZone tenantTimeZone;
 
     @BeforeEach
     public void setup() {
@@ -135,7 +135,7 @@ public class AccountingScenarioIntegrationTest {
         this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec, responseSpec);
 
-        this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
+        this.tenantTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
     }
 
     @Test
@@ -805,8 +805,8 @@ public class AccountingScenarioIntegrationTest {
 
         final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
-        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
-        final ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final LocalDate localDate = LocalDate.now(this.tenantTimeZone.toZoneId());
+        final ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.tenantTimeZone.toZoneId());
         ZonedDateTime zonedDate = currentDate.minusDays(4);
         final String LOAN_DISBURSEMENT_DATE = dateFormat.format(zonedDate);
 
@@ -907,7 +907,7 @@ public class AccountingScenarioIntegrationTest {
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
-        Calendar todayDate = Calendar.getInstance(this.systemTimeZone);
+        Calendar todayDate = Calendar.getInstance(this.tenantTimeZone);
 
         todayDate.add(Calendar.DATE, -4);
 
@@ -915,7 +915,7 @@ public class AccountingScenarioIntegrationTest {
 
         todayDate.add(Calendar.MONTH, 2);
 
-        todayDate = Calendar.getInstance(this.systemTimeZone);
+        todayDate = Calendar.getInstance(this.tenantTimeZone);
         todayDate.add(Calendar.DATE, -2);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);

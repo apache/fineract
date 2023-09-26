@@ -65,8 +65,7 @@ public class LoanCalculateRepaymentPastDueService {
         List<LoanRepaymentScheduleInstallment> loanRepayments = loan.getRepaymentScheduleInstallments();
         LocalDate currentBusinessDate = DateUtils.getBusinessLocalDate();
         return loanRepayments.stream()
-                .filter((repayment) -> (!repayment.isObligationsMet()
-                        && (repayment.getDueDate().isBefore(currentBusinessDate) || repayment.getDueDate().isEqual(currentBusinessDate))))
+                .filter(repayment -> (!repayment.isObligationsMet() && !DateUtils.isAfter(repayment.getDueDate(), currentBusinessDate)))
                 .collect(Collectors.toList());
     }
 }

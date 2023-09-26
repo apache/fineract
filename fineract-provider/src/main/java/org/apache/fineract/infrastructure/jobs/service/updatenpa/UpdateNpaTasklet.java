@@ -63,7 +63,7 @@ public class UpdateNpaTasklet implements Tasklet {
             resetNPASqlBuilder.append("set is_npa = false").append(", last_modified_by = ?, last_modified_on_utc = ? ").append(" FROM ")
                     .append(fromPart).append(wherePart);
         }
-        jdbcTemplate.update(resetNPASqlBuilder.toString(), user.getId(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
+        jdbcTemplate.update(resetNPASqlBuilder.toString(), user.getId(), DateUtils.getAuditOffsetDateTime());
 
         final StringBuilder updateSqlBuilder = new StringBuilder(900);
 
@@ -82,8 +82,7 @@ public class UpdateNpaTasklet implements Tasklet {
                     .append(fromPart).append(wherePart);
         }
 
-        final int result = jdbcTemplate.update(updateSqlBuilder.toString(), user.getId(),
-                DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
+        final int result = jdbcTemplate.update(updateSqlBuilder.toString(), user.getId(), DateUtils.getAuditOffsetDateTime());
 
         log.debug("{}: Records affected by updateNPA: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         return RepeatStatus.FINISHED;

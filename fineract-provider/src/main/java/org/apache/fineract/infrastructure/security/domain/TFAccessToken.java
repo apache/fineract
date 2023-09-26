@@ -67,19 +67,12 @@ public class TFAccessToken extends AbstractPersistableCustom {
     }
 
     public boolean isValid() {
-        return this.enabled && isDateInTheFuture(getValidTo()) && isDateInThePast(getValidFrom());
+        // valid_from is in the past inclusive, valid_to is in the future exclusive
+        return this.enabled && !DateUtils.isAfterTenantDateTime(getValidFrom()) && DateUtils.isAfterTenantDateTime(getValidTo());
     }
 
     public AccessTokenData toTokenData() {
         return new AccessTokenData().setToken(this.token).setValidFrom(getValidFrom().atZone(DateUtils.getDateTimeZoneOfTenant()))
                 .setValidTo(getValidTo().atZone(DateUtils.getDateTimeZoneOfTenant()));
-    }
-
-    private boolean isDateInTheFuture(LocalDateTime dateTime) {
-        return dateTime.isAfter(DateUtils.getLocalDateTimeOfTenant());
-    }
-
-    private boolean isDateInThePast(LocalDateTime dateTime) {
-        return (dateTime.isBefore(DateUtils.getLocalDateTimeOfTenant()) || dateTime.isEqual(DateUtils.getLocalDateTimeOfTenant()));
     }
 }

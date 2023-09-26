@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.api.HolidayApiConstants;
 import org.apache.fineract.organisation.holiday.data.HolidayDataValidator;
@@ -206,18 +207,15 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     }
 
     private void validateInputDates(final LocalDate fromDate, final LocalDate toDate, final LocalDate repaymentsRescheduledTo) {
-
         String defaultUserMessage = "";
 
-        if (toDate.isBefore(fromDate)) {
+        if (DateUtils.isBefore(toDate, fromDate)) {
             defaultUserMessage = "To Date date cannot be before the From Date.";
             throw new HolidayDateException("to.date.cannot.be.before.from.date", defaultUserMessage, fromDate.toString(),
                     toDate.toString());
         }
         if (repaymentsRescheduledTo != null) {
-            if ((repaymentsRescheduledTo.isEqual(fromDate) || repaymentsRescheduledTo.isEqual(toDate)
-                    || (repaymentsRescheduledTo.isAfter(fromDate) && repaymentsRescheduledTo.isBefore(toDate)))) {
-
+            if (!DateUtils.isBefore(repaymentsRescheduledTo, fromDate) && !DateUtils.isAfter(repaymentsRescheduledTo, toDate)) {
                 defaultUserMessage = "Repayments rescheduled date should be before from date or after to date.";
                 throw new HolidayDateException("repayments.rescheduled.date.should.be.before.from.date.or.after.to.date",
                         defaultUserMessage, repaymentsRescheduledTo.toString());
@@ -235,13 +233,12 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             // validate repaymentsRescheduledTo date
             // 1. should be within a 30 days date range.
             // 2. Alternative date should not be an exist holiday.//TBD
-            // 3. Holiday should not be on an repaymentsRescheduledTo date of
-            // another holiday.//TBD
+            // 3. Holiday should not be on an repaymentsRescheduledTo date of another holiday.//TBD
 
-            // restricting repaymentsRescheduledTo date to be within 30 days
-            // range
-            // before or after from date and to date.
-            if (repaymentsRescheduledTo.isBefore(fromDate.minusDays(30)) || repaymentsRescheduledTo.isAfter(toDate.plusDays(30))) {
+            // restricting repaymentsRescheduledTo date to be within 30 days range before or after from date and to
+            // date.
+            if (DateUtils.isBefore(repaymentsRescheduledTo, fromDate.minusDays(30))
+                    || DateUtils.isAfter(repaymentsRescheduledTo, toDate.plusDays(30))) {
                 defaultUserMessage = "Repayments Rescheduled to date must be within 30 days before or after from and to dates";
                 throw new HolidayDateException("repayments.rescheduled.to.must.be.within.range", defaultUserMessage, fromDate.toString(),
                         toDate.toString(), repaymentsRescheduledTo.toString());

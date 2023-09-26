@@ -32,6 +32,7 @@ import net.fortuna.ical4j.model.property.RRule;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;
 
@@ -1045,7 +1046,7 @@ public class DataValidatorBuilder {
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;
-            if (date.isAfter(dateVal)) {
+            if (DateUtils.isAfter(date, dateVal)) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.less.than.date");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
@@ -1065,7 +1066,7 @@ public class DataValidatorBuilder {
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;
-            if (date.isBefore(dateVal)) {
+            if (DateUtils.isBefore(date, dateVal)) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.greater.than.date");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
@@ -1085,7 +1086,7 @@ public class DataValidatorBuilder {
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;
-            if (dateVal.isAfter(date)) {
+            if (DateUtils.isAfter(dateVal, date)) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.greater.than.date");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
@@ -1105,7 +1106,7 @@ public class DataValidatorBuilder {
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;
-            if (!dateVal.isEqual(date)) {
+            if (!DateUtils.isEqual(dateVal, date)) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.not.equal.to.date");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)

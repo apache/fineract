@@ -99,7 +99,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     }
 
     private void markEventsAsSent(List<Long> eventIds) {
-        OffsetDateTime sentAt = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
+        OffsetDateTime sentAt = DateUtils.getAuditOffsetDateTime();
 
         // Partitioning dataset to avoid exception: PreparedStatement can have at most 65,535 parameters
         List<List<Long>> partitions = Lists.partition(eventIds, 5_000);

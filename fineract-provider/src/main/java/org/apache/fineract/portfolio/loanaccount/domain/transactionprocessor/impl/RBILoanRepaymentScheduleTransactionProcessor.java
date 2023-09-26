@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -174,14 +175,12 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
 
     private LoanRepaymentScheduleInstallment nearestInstallment(final LocalDate transactionDate,
             final List<LoanRepaymentScheduleInstallment> installments) {
-
-        LoanRepaymentScheduleInstallment nearest = installments.get(0);
+        LoanRepaymentScheduleInstallment nearest = installments.get(0); // installments must be sorted by dates
         for (final LoanRepaymentScheduleInstallment installment : installments) {
-            if (installment.getDueDate().isBefore(transactionDate) || installment.getDueDate().isEqual(transactionDate)) {
-                nearest = installment;
-            } else if (installment.getDueDate().isAfter(transactionDate)) {
+            if (DateUtils.isBefore(transactionDate, installment.getDueDate())) {
                 break;
             }
+            nearest = installment;
         }
         return nearest;
     }

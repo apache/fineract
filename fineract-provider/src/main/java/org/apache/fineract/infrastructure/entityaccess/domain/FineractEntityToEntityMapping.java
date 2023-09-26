@@ -33,6 +33,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityToEntityMappingDateException;
 
@@ -69,7 +70,6 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
     }
 
     public Map<String, Object> updateMap(final JsonCommand command) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         if (command.isChangeInLongParameterNamed(FineractEntityApiResourceConstants.fromEnityType, this.fromId)) {
@@ -95,10 +95,8 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
             actualChanges.put(FineractEntityApiResourceConstants.endDate, valueAsInput);
             this.endDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
         }
-        if (startDate != null && endDate != null) {
-            if (endDate.isBefore(startDate)) {
-                throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
-            }
+        if (endDate != null && DateUtils.isBefore(endDate, startDate)) {
+            throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
         }
 
         return actualChanges;

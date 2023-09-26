@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 /**
  * Immutable data object representing disbursement information.
@@ -85,8 +86,7 @@ public final class DisbursementData implements Comparable<DisbursementData> {
         if (obj == null) {
             return -1;
         }
-
-        return obj.expectedDisbursementDate.compareTo(this.expectedDisbursementDate);
+        return DateUtils.compare(obj.expectedDisbursementDate, this.expectedDisbursementDate);
     }
 
     public boolean isDueForDisbursement(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
@@ -96,14 +96,11 @@ public final class DisbursementData implements Comparable<DisbursementData> {
 
     private boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,
             final LocalDate target) {
-        return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
+        return DateUtils.isAfter(target, fromNotInclusive) && !DateUtils.isAfter(target, upToAndInclusive);
     }
 
     public BigDecimal getWaivedChargeAmount() {
-        if (this.waivedChargeAmount == null) {
-            return BigDecimal.ZERO;
-        }
-        return this.waivedChargeAmount;
+        return this.waivedChargeAmount == null ? BigDecimal.ZERO : this.waivedChargeAmount;
     }
 
 }

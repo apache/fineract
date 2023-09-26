@@ -167,7 +167,7 @@ public class TaxComponent extends AbstractAuditableCustom {
     }
 
     private boolean occursOnDayFrom(final LocalDate target) {
-        return target != null && target.isAfter(startDate());
+        return DateUtils.isAfter(target, startDate());
     }
 
     public Set<TaxComponentHistory> getTaxComponentHistories() {

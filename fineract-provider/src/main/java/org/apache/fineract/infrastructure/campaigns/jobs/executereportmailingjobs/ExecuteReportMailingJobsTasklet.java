@@ -80,7 +80,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
             final LocalDateTime localDateTimeOftenant = DateUtils.getLocalDateTimeOfTenant();
             final LocalDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
 
-            if (nextRunDateTime != null && nextRunDateTime.isBefore(localDateTimeOftenant)) {
+            if (nextRunDateTime != null && DateUtils.isBefore(nextRunDateTime, localDateTimeOftenant)) {
                 final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = ReportMailingJobEmailAttachmentFileFormat
                         .newInstance(reportMailingJob.getEmailAttachmentFileFormat());
 

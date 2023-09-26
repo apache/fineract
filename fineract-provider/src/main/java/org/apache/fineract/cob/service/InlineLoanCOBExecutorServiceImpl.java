@@ -51,6 +51,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
 import org.apache.fineract.infrastructure.core.exception.PlatformRequestBodyItemLimitValidationException;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
@@ -112,7 +113,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         List<LoanIdAndLastClosedBusinessDate> loansToBeProcessed = getLoansToBeProcessed(loanIds, cobBusinessDate);
         LocalDate executingBusinessDate = getOldestCOBBusinessDate(loansToBeProcessed).plusDays(1);
         if (!loansToBeProcessed.isEmpty()) {
-            while (!executingBusinessDate.isAfter(cobBusinessDate)) {
+            while (!DateUtils.isAfter(executingBusinessDate, cobBusinessDate)) {
                 execute(getLoanIdsToBeProcessed(loansToBeProcessed, executingBusinessDate), jobName, executingBusinessDate);
                 executingBusinessDate = executingBusinessDate.plusDays(1);
             }
@@ -123,7 +124,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         List<Long> loanIdsToBeProcessed = new ArrayList<>();
         loansToBeProcessed.forEach(loan -> {
             if (loan.getLastClosedBusinessDate() != null) {
-                if (loan.getLastClosedBusinessDate().isBefore(executingBusinessDate)) {
+                if (DateUtils.isBefore(loan.getLastClosedBusinessDate(), executingBusinessDate)) {
                     loanIdsToBeProcessed.add(loan.getId());
                 }
             } else {

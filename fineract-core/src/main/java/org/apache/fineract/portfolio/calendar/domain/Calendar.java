@@ -175,23 +175,19 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public Map<String, Object> updateStartDateAndDerivedFeilds(final LocalDate newMeetingStartDate) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
-
-        if (newMeetingStartDate.isBefore(currentDate)) {
+        if (DateUtils.isBefore(newMeetingStartDate, currentDate)) {
             final String defaultUserMessage = "New meeting effective from date cannot be in past";
             throw new CalendarDateException("new.start.date.cannot.be.in.past", defaultUserMessage, newMeetingStartDate,
                     getStartDateLocalDate());
         } else if (isStartDateAfter(newMeetingStartDate) && isStartDateBeforeOrEqual(currentDate)) {
-            // new meeting date should be on or after start date or current
-            // date
+            // new meeting date should be on or after start date or current date
             final String defaultUserMessage = "New meeting effective from date cannot be a date before existing meeting start date";
             throw new CalendarDateException("new.start.date.before.existing.date", defaultUserMessage, newMeetingStartDate,
                     getStartDateLocalDate());
         } else {
-
             actualChanges.put(CalendarSupportedParameters.START_DATE.getValue(), newMeetingStartDate.toString());
             this.startDate = newMeetingStartDate;
 
@@ -200,33 +196,25 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
              * recurring day and update it if it is changed. For weekly type is weekday and for monthly type it is day
              * of the month
              */
-
             CalendarFrequencyType calendarFrequencyType = CalendarUtils.getFrequency(this.recurrence);
             Integer interval = CalendarUtils.getInterval(this.recurrence);
             Integer repeatsOnDay = null;
 
-            /*
-             * Repeats on day, need to derive based on the start date
-             */
-
+            // Repeats on day, need to derive based on the start date
             if (calendarFrequencyType.isWeekly()) {
                 repeatsOnDay = newMeetingStartDate.get(ChronoField.DAY_OF_WEEK);
             } else if (calendarFrequencyType.isMonthly()) {
                 repeatsOnDay = newMeetingStartDate.getDayOfMonth();
             }
-
             // TODO cover other recurrence also
 
             this.recurrence = constructRecurrence(calendarFrequencyType, interval, repeatsOnDay, null);
-
         }
 
         return actualChanges;
-
     }
 
     public Map<String, Object> update(final JsonCommand command, final Boolean areActiveEntitiesSynced) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.TITLE.getValue(), this.title)) {
@@ -234,13 +222,11 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
             actualChanges.put(CalendarSupportedParameters.TITLE.getValue(), newValue);
             this.title = StringUtils.defaultIfEmpty(newValue, null);
         }
-
         if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue(), this.description)) {
             final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue());
             actualChanges.put(CalendarSupportedParameters.DESCRIPTION.getValue(), newValue);
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
-
         if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.LOCATION.getValue(), this.location)) {
             final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.LOCATION.getValue());
             actualChanges.put(CalendarSupportedParameters.LOCATION.getValue(), newValue);
@@ -251,12 +237,11 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
         final String localeAsInput = command.locale();
         final String startDateParamName = CalendarSupportedParameters.START_DATE.getValue();
         if (command.isChangeInLocalDateParameterNamed(startDateParamName, getStartDateLocalDate())) {
-
             final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
             final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
 
-            if (newValue.isBefore(currentDate)) {
+            if (DateUtils.isBefore(newValue, currentDate)) {
                 final String defaultUserMessage = "New meeting effective from date cannot be in past";
                 throw new CalendarDateException("new.start.date.cannot.be.in.past", defaultUserMessage, newValue, getStartDateLocalDate());
             } else if (isStartDateAfter(newValue) && isStartDateBeforeOrEqual(currentDate)) {
@@ -472,24 +457,19 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean isStartDateBefore(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null && getStartDateLocalDate().isBefore(compareDate)) {
-            return true;
-        }
-        return false;
+        return startDate != null && DateUtils.isBefore(startDate, compareDate);
     }
 
     public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
-        return this.startDate != null && compareDate != null
-                && (getStartDateLocalDate().isBefore(compareDate) || getStartDateLocalDate().equals(compareDate));
+        return startDate != null && !DateUtils.isAfter(startDate, compareDate);
     }
 
     public boolean isStartDateAfter(final LocalDate compareDate) {
-        return this.startDate != null && compareDate != null && getStartDateLocalDate().isAfter(compareDate);
+        return compareDate != null && DateUtils.isAfter(startDate, compareDate);
     }
 
     public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
-        return this.endDate != null && compareDate != null
-                && (getEndDateLocalDate().isAfter(compareDate) || getEndDateLocalDate().isEqual(compareDate));
+        return compareDate != null && !DateUtils.isBefore(endDate, compareDate);
     }
 
     public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
@@ -585,7 +565,7 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
         // validate with history details.
         for (CalendarHistory history : history()) {
             if (history.isBetweenStartAndEndDate(compareDate)) {
-                return CalendarUtils.isValidRedurringDate(history.getRecurrence(), history.getStartDateLocalDate(), compareDate,
+                return CalendarUtils.isValidRedurringDate(history.getRecurrence(), history.getStartDate(), compareDate,
                         isSkipRepaymentOnFirstMonth, numberOfDays);
             }
         }

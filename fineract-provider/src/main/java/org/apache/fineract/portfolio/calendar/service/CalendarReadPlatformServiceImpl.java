@@ -279,7 +279,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             periodStartDate = fromDate;
         } else {
             final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
-            if (seedDate.isBefore(currentDate.minusYears(1))) {
+            if (DateUtils.isBefore(seedDate, currentDate.minusYears(1))) {
                 periodStartDate = currentDate.minusYears(1);
             } else {
                 periodStartDate = recurrenceStartDate;
@@ -294,7 +294,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
         if (tillDate != null) {
             if (endDate != null) {
-                if (endDate.isAfter(tillDate)) {
+                if (DateUtils.isAfter(endDate, tillDate)) {
                     // to retrieve meeting dates tillspecified date (tillDate)
                     periodEndDate = tillDate;
                 }
@@ -302,7 +302,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 // end date is null then fetch meeting dates tillDate
                 periodEndDate = tillDate;
             }
-        } else if (endDate == null || endDate.isAfter(currentDate.plusYears(1))) {
+        } else if (endDate == null || DateUtils.isAfter(endDate, currentDate.plusYears(1))) {
             periodEndDate = currentDate.plusYears(1);
         }
         return periodEndDate;

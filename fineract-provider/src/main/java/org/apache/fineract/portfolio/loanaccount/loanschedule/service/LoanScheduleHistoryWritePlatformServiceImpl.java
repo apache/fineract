@@ -73,7 +73,7 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             final BigDecimal penaltyCharges = repaymentScheduleInstallment.getPenaltyChargesCharged(currency).getAmount();
 
             Map<String, Object> oldDates = null;
-            OffsetDateTime createdOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
+            OffsetDateTime createdOnDate = DateUtils.getAuditOffsetDateTime();
             LocalDateTime oldCreatedOnDate = null;
             LocalDateTime oldLastModifiedOnDate = null;
             if (repaymentScheduleInstallment.getCreatedDate().isPresent()) {
@@ -89,7 +89,7 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy()
                     .orElse(platformSecurityContext.authenticatedUser().getId());
 
-            OffsetDateTime lastModifiedOnDate = DateUtils.getOffsetDateTimeOfTenantWithMostPrecision();
+            OffsetDateTime lastModifiedOnDate = DateUtils.getAuditOffsetDateTime();
             if (repaymentScheduleInstallment.getLastModifiedDate().isPresent()) {
                 lastModifiedOnDate = repaymentScheduleInstallment.getLastModifiedDate().get();
             } else if (repaymentScheduleInstallment.getId() != null && oldDates == null) {

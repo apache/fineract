@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
@@ -106,7 +107,7 @@ public class ShareProductDividendAssembler {
                 if (status.isApproved() && !type.isChargePayment()) {
 
                     LocalDate shareStartDate = purchasedSharesData.getPurchasedDate();
-                    if (shareStartDate.isBefore(lastDividendPostDate)) {
+                    if (DateUtils.isBefore(shareStartDate, lastDividendPostDate)) {
                         shareStartDate = lastDividendPostDate;
                     }
                     int numberOfPurchseDays = Math.toIntExact(ChronoUnit.DAYS.between(shareStartDate, postingDate));

@@ -75,12 +75,12 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                 LocalDate startDate = data.validFrom();
                 if (frequencyType.isMonthly()) {
                     startDate = startDate.withDayOfMonth(data.recurrenceOnDay());
-                    if (startDate.isBefore(data.validFrom())) {
+                    if (DateUtils.isBefore(startDate, data.validFrom())) {
                         startDate = startDate.plusMonths(1);
                     }
                 } else if (frequencyType.isYearly()) {
                     startDate = startDate.withDayOfMonth(data.recurrenceOnDay()).withMonth(data.recurrenceOnMonth());
-                    if (startDate.isBefore(data.validFrom())) {
+                    if (DateUtils.isBefore(startDate, data.validFrom())) {
                         startDate = startDate.plusYears(1);
                     }
                 }

@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityDataValidator;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccess;
@@ -86,9 +87,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     @Override
     @Transactional
     public CommandProcessingResult createEntityToEntityMapping(Long relId, JsonCommand command) {
-
         try {
-
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final FineractEntityRelation mapId = this.fineractEntityRelationRepositoryWrapper.findOneWithNotFoundDetection(relId);
@@ -99,10 +98,8 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
             final LocalDate endDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
 
             fromApiJsonDeserializer.checkForEntity(relId.toString(), fromId, toId);
-            if (startDate != null && endDate != null) {
-                if (endDate.isBefore(startDate)) {
-                    throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
-                }
+            if (endDate != null && DateUtils.isBefore(endDate, startDate)) {
+                throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
             }
 
             final FineractEntityToEntityMapping newMap = FineractEntityToEntityMapping.newMap(mapId, fromId, toId, startDate, endDate);
@@ -123,9 +120,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     @Override
     @Transactional
     public CommandProcessingResult updateEntityToEntityMapping(Long mapId, JsonCommand command) {
-
         try {
-
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final FineractEntityToEntityMapping mapForUpdate = this.fineractEntityToEntityMappingRepositoryWrapper

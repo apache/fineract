@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 
 @Entity
@@ -71,16 +72,11 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof LoanDisbursementDetails)) {
+        if (!(obj instanceof LoanDisbursementDetails loanDisbursementDetails)) {
             return false;
         }
-        final LoanDisbursementDetails loanDisbursementDetails = (LoanDisbursementDetails) obj;
-        if (loanDisbursementDetails.principal.equals(this.principal)
-                && loanDisbursementDetails.expectedDisbursementDate.compareTo(this.expectedDisbursementDate) == 0 ? Boolean.TRUE
-                        : Boolean.FALSE) {
-            return true;
-        }
-        return false;
+        return loanDisbursementDetails.principal.equals(this.principal)
+                && DateUtils.isEqual(loanDisbursementDetails.expectedDisbursementDate, this.expectedDisbursementDate);
     }
 
     @Override

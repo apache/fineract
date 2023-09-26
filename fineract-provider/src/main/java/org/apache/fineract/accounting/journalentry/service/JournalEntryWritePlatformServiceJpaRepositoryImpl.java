@@ -314,9 +314,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final LocalDate journalEntriesTransactionDate = journalEntries.get(0).getTransactionDate();
         final GLClosure latestGLClosureByBranch = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
         if (latestGLClosureByBranch != null) {
-            if (latestGLClosureByBranch.getClosingDate().isAfter(journalEntriesTransactionDate)
-                    || latestGLClosureByBranch.getClosingDate().compareTo(journalEntriesTransactionDate) == 0 ? Boolean.TRUE
-                            : Boolean.FALSE) {
+            if (!DateUtils.isBefore(latestGLClosureByBranch.getClosingDate(), journalEntriesTransactionDate)) {
                 final String accountName = null;
                 final String accountGLCode = null;
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED,
@@ -555,24 +553,22 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void validateBusinessRulesForJournalEntries(final JournalEntryCommand command) {
-        /** check if date of Journal entry is valid ***/
+        // check if date of Journal entry is valid
         final LocalDate transactionDate = command.getTransactionDate();
         // shouldn't be in the future
-        final LocalDate todaysDate = DateUtils.getBusinessLocalDate();
-        if (transactionDate.isAfter(todaysDate)) {
+        if (DateUtils.isDateInTheFuture(transactionDate)) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.FUTURE_DATE, transactionDate, null, null);
         }
         // shouldn't be before an accounting closure
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
         if (latestGLClosure != null) {
-            if (latestGLClosure.getClosingDate().isAfter(transactionDate)
-                    || latestGLClosure.getClosingDate().compareTo(transactionDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
+            if (!DateUtils.isBefore(latestGLClosure.getClosingDate(), transactionDate)) {
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(),
                         null, null);
             }
         }
 
-        /*** check if credits and debits are valid **/
+        // check if credits and debits are valid
         final SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
         final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
 

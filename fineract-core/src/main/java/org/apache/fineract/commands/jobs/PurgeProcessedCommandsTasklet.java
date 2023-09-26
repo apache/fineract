@@ -43,7 +43,7 @@ public class PurgeProcessedCommandsTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         try {
             Long numberOfDaysForPurgeCriteria = configurationDomainService.retrieveProcessedCommandsPurgeDaysCriteria();
-            OffsetDateTime dateForPurgeCriteria = DateUtils.getOffsetDateTimeOfTenant().minusDays(numberOfDaysForPurgeCriteria);
+            OffsetDateTime dateForPurgeCriteria = DateUtils.getAuditOffsetDateTime().minusDays(numberOfDaysForPurgeCriteria);
             repository.deleteOlderEventsWithStatus(CommandProcessingResultType.PROCESSED.getValue(), dateForPurgeCriteria);
         } catch (Exception e) {
             log.error("Error occurred while purging processed commands: ", e);

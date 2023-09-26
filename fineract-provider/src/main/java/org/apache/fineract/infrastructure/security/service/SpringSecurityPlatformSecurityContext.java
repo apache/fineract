@@ -157,7 +157,7 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
 
             final LocalDate passwordExpirationDate = passWordLastUpdateDate.plusDays(passwordDurationDays);
 
-            if (DateUtils.getLocalDateOfTenant().isAfter(passwordExpirationDate)) {
+            if (DateUtils.isBeforeTenantDate(passwordExpirationDate)) {
                 return true;
             }
         }

@@ -53,9 +53,8 @@ public class AccountEntityServiceForShareAccountsImpl implements AccountEntitySe
     @Override
     public void validateSelfUserAccountMapping(Long accountId) {
         if (!this.appUserShareAccountsMapperReadPlatformService.isShareAccountsMappedToUser(accountId,
-                this.context.getAuthenticatedUserIfPresent().getId())) {
+                this.context.authenticatedUser().getId())) {
             throw new ShareAccountNotFoundException(accountId);
-
         }
     }
 

@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 @Entity
@@ -116,8 +117,7 @@ public class ClientNonPerson extends AbstractPersistableCustom {
 
     private void validateIncorpValidityTillDate(final Client client, final List<ApiParameterError> dataValidationErrors) {
         if (getIncorpValidityTillLocalDate() != null && client.dateOfBirthLocalDate() != null
-                && client.dateOfBirthLocalDate().isAfter(getIncorpValidityTillLocalDate())) {
-
+                && DateUtils.isAfter(client.dateOfBirthLocalDate(), getIncorpValidityTillLocalDate())) {
             final String defaultUserMessage = "incorpvaliditytill date cannot be after the incorporation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.incorpValidityTill.after.incorp.date",
                     defaultUserMessage, ClientApiConstants.incorpValidityTillParamName, this.incorpValidityTill);

@@ -18,19 +18,16 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import static org.apache.fineract.useradministration.service.AppUserConstants.ADMIN_USER_ID;
+
 import java.util.Optional;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.AppUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AuditorAwareImpl implements AuditorAware<Long> {
-
-    @Autowired
-    private AppUserRepository userRepository;
 
     @Override
     public Optional<Long> getCurrentAuditor() {
@@ -50,6 +47,6 @@ public class AuditorAwareImpl implements AuditorAware<Long> {
     }
 
     private Optional<Long> retrieveSuperUser() {
-        return Optional.of(1L);
+        return Optional.of(ADMIN_USER_ID); // TODO change to SYSTEM_USER_ID and add rights
     }
 }

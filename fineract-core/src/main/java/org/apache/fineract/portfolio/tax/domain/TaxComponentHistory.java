@@ -24,6 +24,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_tax_component_history")
@@ -62,10 +63,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
     }
 
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
-        if (this.endDate == null) {
-            return target != null && target.isAfter(startDate());
-        }
-        return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
+        return DateUtils.isAfter(target, startDate()) && (endDate == null || !DateUtils.isAfter(target, endDate()));
     }
 
     public BigDecimal getPercentage() {

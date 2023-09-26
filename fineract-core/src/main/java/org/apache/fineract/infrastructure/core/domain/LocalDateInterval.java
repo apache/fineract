@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 public class LocalDateInterval {
 
@@ -66,11 +67,11 @@ public class LocalDateInterval {
     }
 
     private boolean isBetweenInclusive(final LocalDate start, final LocalDate end, final LocalDate target) {
-        return !target.isBefore(start) && !target.isAfter(end);
+        return !DateUtils.isBefore(target, start) && !DateUtils.isAfter(target, end);
     }
 
     public boolean fallsBefore(final LocalDate dateToCheck) {
-        return this.endDate.isBefore(dateToCheck);
+        return DateUtils.isBefore(this.endDate, dateToCheck);
     }
 
     @Override

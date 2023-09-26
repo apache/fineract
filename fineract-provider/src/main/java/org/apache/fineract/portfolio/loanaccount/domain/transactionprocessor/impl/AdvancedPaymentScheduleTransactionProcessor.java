@@ -194,7 +194,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 switch (paymentAllocationType.getDueType()) {
                     case PAST_DUE -> {
                         currentInstallment = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                                .filter(e -> loanTransaction.getTransactionDate().isAfter(e.getDueDate()))
+                                .filter(e -> loanTransaction.isAfter(e.getDueDate()))
                                 .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).orElse(null);
                         if (currentInstallment != null) {
                             LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = getTransactionMapping(
@@ -206,7 +206,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     }
                     case DUE -> {
                         currentInstallment = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                                .filter(e -> loanTransaction.getTransactionDate().isEqual(e.getDueDate()))
+                                .filter(e -> loanTransaction.isOn(e.getDueDate()))
                                 .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).orElse(null);
                         if (currentInstallment != null) {
                             LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = getTransactionMapping(
@@ -222,14 +222,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         List<LoanRepaymentScheduleInstallment> currentInstallments = new ArrayList<>();
                         if (FutureInstallmentAllocationRule.REAMORTIZATION.equals(futureInstallmentAllocationRule)) {
                             currentInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                                    .filter(e -> loanTransaction.getTransactionDate().isBefore(e.getDueDate())).toList();
+                                    .filter(e -> loanTransaction.isBefore(e.getDueDate())).toList();
                         } else if (FutureInstallmentAllocationRule.NEXT_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
                             currentInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                                    .filter(e -> loanTransaction.getTransactionDate().isBefore(e.getDueDate()))
+                                    .filter(e -> loanTransaction.isBefore(e.getDueDate()))
                                     .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
                         } else if (FutureInstallmentAllocationRule.LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
                             currentInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                                    .filter(e -> loanTransaction.getTransactionDate().isBefore(e.getDueDate()))
+                                    .filter(e -> loanTransaction.isBefore(e.getDueDate()))
                                     .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
                         }
                         int numberOfInstallments = currentInstallments.size();

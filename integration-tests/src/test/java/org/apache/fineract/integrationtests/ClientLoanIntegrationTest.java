@@ -87,6 +87,7 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
@@ -6308,7 +6309,7 @@ public class ClientLoanIntegrationTest {
             LocalDate expectedMaturityDate = loanDetails.getTimeline().getExpectedMaturityDate();
             LocalDate actualMaturityDate = loanDetails.getTimeline().getActualMaturityDate();
 
-            assertTrue(expectedMaturityDate.isEqual(actualMaturityDate));
+            assertTrue(DateUtils.isEqual(expectedMaturityDate, actualMaturityDate));
 
             LOAN_TRANSACTION_HELPER.makeRepayment("04 September 2022", Float.parseFloat("500"), loanID);
             LOAN_TRANSACTION_HELPER.makeRepayment("05 September 2022", Float.parseFloat("700"), loanID);

@@ -30,6 +30,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_trial_balance")
@@ -70,9 +71,8 @@ public class TrialBalance extends AbstractPersistableCustom {
         }
         TrialBalance other = (TrialBalance) obj;
         return Objects.equals(other.officeId, officeId) && Objects.equals(other.glAccountId, glAccountId)
-                && Objects.equals(other.amount, amount) && other.entryDate.compareTo(entryDate) == 0 ? Boolean.TRUE
-                        : Boolean.FALSE && other.transactionDate.compareTo(transactionDate) == 0 ? Boolean.TRUE
-                                : Boolean.FALSE && Objects.equals(other.closingBalance, closingBalance);
+                && Objects.equals(other.amount, amount) && DateUtils.isEqual(other.entryDate, entryDate)
+                && DateUtils.isEqual(other.transactionDate, transactionDate) && Objects.equals(other.closingBalance, closingBalance);
     }
 
     @Override

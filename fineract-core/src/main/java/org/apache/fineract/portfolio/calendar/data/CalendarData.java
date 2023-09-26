@@ -28,6 +28,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRemindBy;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
@@ -377,12 +378,11 @@ public final class CalendarData implements Serializable {
     }
 
     public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
-        return this.startDate != null && compareDate != null
-                && (this.startDate.isBefore(compareDate) || this.startDate.equals(compareDate));
+        return this.startDate != null && compareDate != null && !DateUtils.isAfter(this.startDate, compareDate);
     }
 
     public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
-        return this.endDate != null && compareDate != null && (this.endDate.isAfter(compareDate) || this.endDate.isEqual(compareDate));
+        return this.endDate != null && compareDate != null && !DateUtils.isBefore(this.endDate, compareDate);
     }
 
     public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {

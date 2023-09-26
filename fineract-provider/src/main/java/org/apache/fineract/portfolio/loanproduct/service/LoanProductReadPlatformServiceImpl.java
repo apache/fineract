@@ -369,7 +369,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final boolean enableInstallmentLevelDelinquency = rs.getBoolean("enableInstallmentLevelDelinquency");
 
             String status = "";
-            if (closeDate != null && closeDate.isBefore(DateUtils.getBusinessLocalDate())) {
+            if (closeDate != null && DateUtils.isBeforeBusinessDate(closeDate)) {
                 status = "loanProduct.inActive";
             } else {
                 status = "loanProduct.active";

@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.holiday.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 
@@ -30,47 +31,29 @@ public final class HolidayUtil {
     }
 
     public static LocalDate getRepaymentRescheduleDateToIfHoliday(LocalDate repaymentDate, final List<Holiday> holidays) {
-
         for (final Holiday holiday : holidays) {
-            if (repaymentDate.equals(holiday.getFromDate()) || repaymentDate.equals(holiday.getToDate())
-                    || (repaymentDate.isAfter(holiday.getFromDate()) && repaymentDate.isBefore(holiday.getToDate()))) {
-                repaymentDate = getRepaymentRescheduleDateIfHoliday(repaymentDate, holidays);
-            }
-        }
-        return repaymentDate;
-    }
-
-    private static LocalDate getRepaymentRescheduleDateIfHoliday(final LocalDate repaymentDate, final List<Holiday> holidays) {
-
-        for (final Holiday holiday : holidays) {
-            if (repaymentDate.equals(holiday.getFromDate()) || repaymentDate.equals(holiday.getToDate())
-                    || (repaymentDate.isAfter(holiday.getFromDate()) && repaymentDate.isBefore(holiday.getToDate()))) {
-                // should be take from holiday
-                return holiday.getRepaymentsRescheduledTo();
+            if (isHoliday(repaymentDate, holiday)) {
+                repaymentDate = holiday.getRepaymentsRescheduledTo();
             }
         }
         return repaymentDate;
     }
 
     public static boolean isHoliday(final LocalDate date, final List<Holiday> holidays) {
-        for (final Holiday holiday : holidays) {
-            if (date.isEqual(holiday.getFromDate()) || date.isEqual(holiday.getToDate())
-                    || (date.isAfter(holiday.getFromDate()) && date.isBefore(holiday.getToDate()))) {
-                return true;
-            }
-        }
-
-        return false;
+        return getApplicableHoliday(date, holidays) != null;
     }
 
     public static Holiday getApplicableHoliday(final LocalDate repaymentDate, final List<Holiday> holidays) {
-        Holiday referedHoliday = null;
         for (final Holiday holiday : holidays) {
-            if (!repaymentDate.isBefore(holiday.getFromDate()) && !repaymentDate.isAfter(holiday.getToDate())) {
-                referedHoliday = holiday;
+            if (isHoliday(repaymentDate, holiday)) {
+                return holiday;
             }
         }
-        return referedHoliday;
+        return null;
+    }
+
+    public static boolean isHoliday(LocalDate date, Holiday holiday) {
+        return !DateUtils.isBefore(date, holiday.getFromDate()) && !DateUtils.isAfter(date, holiday.getToDate());
     }
 
     public static void updateRepaymentRescheduleDateToWorkingDayIfItIsHoliday(final AdjustedDateDetailsDTO adjustedDateDetailsDTO,

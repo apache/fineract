@@ -27,6 +27,7 @@ import java.util.Map;
 import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Getter
 public final class TaxComponentData implements Serializable {
@@ -136,7 +137,7 @@ public final class TaxComponentData implements Serializable {
     }
 
     private boolean occursOnDayFrom(final LocalDate target) {
-        return target != null && target.isAfter(startDate());
+        return DateUtils.isAfter(target, startDate());
     }
 
     public LocalDate startDate() {

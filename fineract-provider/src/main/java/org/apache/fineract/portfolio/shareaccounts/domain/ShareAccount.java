@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -209,7 +210,7 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setSubmittedDate(final LocalDate submittedDate) {
         boolean toReturn = false;
-        if (this.submittedDate.compareTo(submittedDate) == 0 ? Boolean.FALSE : Boolean.TRUE) {
+        if (!DateUtils.isEqual(submittedDate, this.submittedDate)) {
             this.submittedDate = submittedDate;
             toReturn = true;
         }
@@ -218,7 +219,7 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setApprovedDate(final LocalDate approvedDate) {
         boolean toReturn = false;
-        if (this.approvedDate.compareTo(approvedDate) == 0 ? Boolean.FALSE : Boolean.TRUE) {
+        if (!DateUtils.isEqual(approvedDate, this.approvedDate)) {
             this.approvedDate = approvedDate;
             toReturn = true;
         }
@@ -514,11 +515,11 @@ public class ShareAccount extends AbstractPersistableCustom {
     public ShareAccountTransaction getShareAccountTransaction(final ShareAccountTransaction transaction) {
         ShareAccountTransaction returnTrans = null;
         for (ShareAccountTransaction tran : this.shareAccountTransactions) {
-            if (tran.getPurchasedDate().compareTo(transaction.getPurchasedDate()) == 0 ? Boolean.TRUE
-                    : Boolean.FALSE && tran.getTotalShares().equals(transaction.getTotalShares())
-                            && tran.getPurchasePrice().compareTo(transaction.getPurchasePrice()) == 0 ? Boolean.TRUE
-                                    : Boolean.FALSE && tran.getTransactionStatus().equals(transaction.getTransactionStatus())
-                                            && tran.getTransactionType().equals(transaction.getTransactionType())) {
+            if (DateUtils.isEqual(tran.getPurchasedDate(), transaction.getPurchasedDate())
+                    && tran.getTotalShares().equals(transaction.getTotalShares())
+                    && tran.getPurchasePrice().compareTo(transaction.getPurchasePrice()) == 0
+                    && tran.getTransactionStatus().equals(transaction.getTransactionStatus())
+                    && tran.getTransactionType().equals(transaction.getTransactionType())) {
                 returnTrans = tran;
                 break;
             }

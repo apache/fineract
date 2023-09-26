@@ -153,7 +153,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
             LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
-            if (active && submittedOnDate.isAfter(activationDate)) {
+            if (active && DateUtils.isAfter(submittedOnDate, activationDate)) {
                 submittedOnDate = activationDate;
             }
             if (command.hasParameter(GroupingTypesApiConstants.submittedOnDateParamName)) {
@@ -616,7 +616,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName() + " cannot be closed because of non-closed loans.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close", "loan.not.closed",
                         errorMessage);
-            } else if (loanStatus.isClosed() && loan.getClosedOnDate().isAfter(closureDate)) {
+            } else if (loanStatus.isClosed() && DateUtils.isAfter(loan.getClosedOnDate(), closureDate)) {
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName()
                         + "closureDate cannot be before the loan closedOnDate.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close",
@@ -640,7 +640,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                         + " cannot be closed with active savings accounts associated.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close",
                         "savings.account.not.closed", errorMessage);
-            } else if (saving.isClosed() && saving.getClosedOnDate().isAfter(closureDate)) {
+            } else if (saving.isClosed() && DateUtils.isAfter(saving.getClosedOnDate(), closureDate)) {
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName()
                         + " closureDate cannot be before the loan closedOnDate.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close",
@@ -906,7 +906,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     public void validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(final Office groupOffice, final GroupLevel groupLevel,
             final LocalDate activationDate) {
-        if (activationDate != null && groupOffice.getOpeningLocalDate().isAfter(activationDate)) {
+        if (activationDate != null && DateUtils.isAfter(groupOffice.getOpeningLocalDate(), activationDate)) {
             final String levelName = groupLevel.getLevelName();
             final String errorMessage = levelName + " activation date should be greater than or equal to the parent Office's creation date "
                     + activationDate.toString();
@@ -916,10 +916,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     private void checkGroupMembersMeetingSyncWithCenterMeeting(final Long centerId, final Set<Group> groupMembers) {
-
-        /**
-         * Get parent(center) calendar
-         */
+        // Get parent(center) calendar
         Calendar ceneterCalendar = null;
         final CalendarInstance parentCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                 centerId, CalendarEntityType.CENTERS.getValue(), CalendarType.COLLECTION.getValue());
@@ -928,9 +925,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
 
         for (final Group group : groupMembers) {
-            /**
-             * Get child(group) calendar
-             */
+            // Get child(group) calendar
             Calendar groupCalendar = null;
             final CalendarInstance groupCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                     group.getId(), CalendarEntityType.GROUPS.getValue(), CalendarType.COLLECTION.getValue());
@@ -938,19 +933,14 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 groupCalendar = groupCalendarInstance.getCalendar();
             }
 
-            /**
-             * Group shouldn't have a meeting when no meeting attached for center
-             */
+            // Group shouldn't have a meeting when no meeting attached for center
             if (ceneterCalendar == null && groupCalendar != null) {
                 throw new GeneralPlatformDomainRuleException(
                         "error.msg.center.associating.group.not.allowed.with.meeting.attached.to.group",
                         "Group with id " + group.getId() + " is already associated with meeting", group.getId());
             }
-            /**
-             * Group meeting recurrence should match with center meeting recurrence
-             */
+            // Group meeting recurrence should match with center meeting recurrence
             else if (ceneterCalendar != null && groupCalendar != null) {
-
                 if (!ceneterCalendar.getRecurrence().equalsIgnoreCase(groupCalendar.getRecurrence())) {
                     throw new GeneralPlatformDomainRuleException("error.msg.center.associating.group.not.allowed.with.different.meeting",
                             "Group with id " + group.getId() + " meeting recurrence doesnot matched with center meeting recurrence",
