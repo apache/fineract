@@ -26,10 +26,13 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
@@ -168,6 +171,68 @@ public class LoanTest {
         final LoanTransaction userTransaction = loan.getLastUserTransaction();
         assertNotNull(userTransaction);
         assertEquals(loanTransaction2, userTransaction);
+    }
+
+    /**
+     * Tests {@link Loan#getLastUserTransaction()} where there are user transactions
+     */
+    @Test
+    public void testTransactionComparator() {
+        final Loan loan = new Loan();
+        LocalDate today = LocalDate.of(2023, 10, 12);
+        OffsetDateTime now = DateUtils.getAuditOffsetDateTime();
+
+        LoanTransaction lt1 = new LoanTransaction();
+        ReflectionTestUtils.setField(lt1, "id", 1L);
+        ReflectionTestUtils.setField(lt1, "typeOf", LoanTransactionType.DISBURSEMENT.getValue());
+        ReflectionTestUtils.setField(lt1, "dateOf", today);
+        ReflectionTestUtils.setField(lt1, "createdDate", now);
+        LoanTransaction lt2 = new LoanTransaction();
+        ReflectionTestUtils.setField(lt2, "id", 2L);
+        ReflectionTestUtils.setField(lt2, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER.getValue());
+        ReflectionTestUtils.setField(lt2, "dateOf", today);
+        ReflectionTestUtils.setField(lt2, "createdDate", now);
+        LoanTransaction lt3 = new LoanTransaction();
+        ReflectionTestUtils.setField(lt3, "id", 3L);
+        ReflectionTestUtils.setField(lt3, "typeOf", LoanTransactionType.REPAYMENT.getValue());
+        ReflectionTestUtils.setField(lt3, "dateOf", today);
+        ReflectionTestUtils.setField(lt3, "createdDate", now);
+        ReflectionTestUtils.setField(lt3, "reversed", true);
+        LoanTransaction lt4 = new LoanTransaction();
+        ReflectionTestUtils.setField(lt4, "id", 4L);
+        ReflectionTestUtils.setField(lt4, "typeOf", LoanTransactionType.WAIVE_INTEREST.getValue());
+        ReflectionTestUtils.setField(lt4, "dateOf", today);
+        ReflectionTestUtils.setField(lt4, "createdDate", now);
+        LoanTransaction lt5 = new LoanTransaction();
+        ReflectionTestUtils.setField(lt5, "id", 5L);
+        ReflectionTestUtils.setField(lt5, "typeOf", LoanTransactionType.INCOME_POSTING.getValue());
+        ReflectionTestUtils.setField(lt5, "dateOf", today);
+        ReflectionTestUtils.setField(lt5, "createdDate", now);
+        LoanTransaction lt6 = new LoanTransaction();
+        ReflectionTestUtils.setField(lt6, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER.getValue());
+        ReflectionTestUtils.setField(lt6, "dateOf", today.minusDays(2));
+        LoanTransaction lt7 = new LoanTransaction();
+        ReflectionTestUtils.setField(lt7, "id", 7L);
+        ReflectionTestUtils.setField(lt7, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER.getValue());
+        ReflectionTestUtils.setField(lt7, "dateOf", today.minusDays(2));
+        LoanTransaction lt8 = new LoanTransaction();
+        ReflectionTestUtils.setField(lt8, "id", 8L);
+        ReflectionTestUtils.setField(lt8, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER.getValue());
+        ReflectionTestUtils.setField(lt8, "dateOf", today.minusDays(2));
+        ReflectionTestUtils.setField(lt8, "createdDate", now.minusMinutes(2));
+
+        List<LoanTransaction> transactions = Arrays.asList(lt1, lt2, lt3, lt4, lt5, lt6, lt7, lt8);
+        transactions.sort(LoanTransactionComparator.INSTANCE);
+
+        assertEquals(8L, transactions.get(0).getId());
+        assertEquals(7L, transactions.get(1).getId());
+        assertNull(transactions.get(2).getId());
+        assertEquals(today.minusDays(2), transactions.get(2).getTransactionDate());
+        assertEquals(5L, transactions.get(3).getId());
+        assertEquals(4L, transactions.get(4).getId());
+        assertEquals(1L, transactions.get(5).getId());
+        assertEquals(2L, transactions.get(6).getId());
+        assertEquals(3L, transactions.get(7).getId());
     }
 
     /**

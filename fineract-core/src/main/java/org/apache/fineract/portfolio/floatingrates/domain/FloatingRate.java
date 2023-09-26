@@ -89,9 +89,8 @@ public class FloatingRate extends AbstractAuditableWithUTCDateTimeCustom {
 
         final String name = command.stringValueOfParameterNamed("name");
         final boolean isBaseLendingRate = command.parameterExists("isBaseLendingRate")
-                ? command.booleanPrimitiveValueOfParameterNamed("isBaseLendingRate")
-                : false;
-        final boolean isActive = command.parameterExists("isActive") ? command.booleanPrimitiveValueOfParameterNamed("isActive") : true;
+                && command.booleanPrimitiveValueOfParameterNamed("isBaseLendingRate");
+        final boolean isActive = !command.parameterExists("isActive") || command.booleanPrimitiveValueOfParameterNamed("isActive");
         final List<FloatingRatePeriod> floatingRatePeriods = getRatePeriods(command);
 
         return new FloatingRate(name, isBaseLendingRate, isActive, floatingRatePeriods);
@@ -109,8 +108,7 @@ public class FloatingRate extends AbstractAuditableWithUTCDateTimeCustom {
             final LocalDate fromDate = helper.extractLocalDateNamed("fromDate", ratePeriod, new HashSet<String>());
             final BigDecimal interestRate = ratePeriodObject.get("interestRate").getAsBigDecimal();
             final boolean isDifferentialToBaseLendingRate = helper.parameterExists("isDifferentialToBaseLendingRate", ratePeriod)
-                    ? ratePeriodObject.get("isDifferentialToBaseLendingRate").getAsBoolean()
-                    : false;
+                    && ratePeriodObject.get("isDifferentialToBaseLendingRate").getAsBoolean();
             final boolean isActive = true;
             ratePeriods.add(new FloatingRatePeriod(fromDate, interestRate, isDifferentialToBaseLendingRate, isActive));
         }
@@ -170,7 +168,7 @@ public class FloatingRate extends AbstractAuditableWithUTCDateTimeCustom {
         if (this.floatingRatePeriods != null) {
             for (FloatingRatePeriod ratePeriod : this.floatingRatePeriods) {
                 LocalDate fromDate = ratePeriod.getFromDate();
-                if (fromDate.isAfter(today)) {
+                if (DateUtils.isAfter(fromDate, today)) {
                     ratePeriod.setActive(false);
                 }
             }
@@ -188,7 +186,7 @@ public class FloatingRate extends AbstractAuditableWithUTCDateTimeCustom {
         for (FloatingRatePeriod floatingRatePeriod : this.floatingRatePeriods) {
             if (floatingRatePeriod.isActive()) {
                 // will enter
-                if (applicableRates.isEmpty() && floatingRateDTO.getStartDate().isBefore(floatingRatePeriod.fetchFromDate())) {
+                if (applicableRates.isEmpty() && DateUtils.isBefore(floatingRateDTO.getStartDate(), floatingRatePeriod.fetchFromDate())) {
                     if (floatingRateDTO.isFloatingInterestRate()) {
                         addPeriodData = true;
                     }

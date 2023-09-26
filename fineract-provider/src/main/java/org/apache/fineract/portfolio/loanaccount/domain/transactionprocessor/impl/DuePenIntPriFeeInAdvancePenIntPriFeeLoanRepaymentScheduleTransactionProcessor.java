@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -102,7 +103,7 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
 
             List<LoanCharge> orderedLoanChargesByDueDate = charges.stream().filter(LoanCharge::isActive).filter(LoanCharge::isChargePending)
                     .filter(loanCharge -> loanCharge.getEffectiveDueDate() == null
-                            || !loanCharge.getEffectiveDueDate().isAfter(transactionDate))
+                            || !DateUtils.isAfter(loanCharge.getEffectiveDueDate(), transactionDate))
                     .sorted(LoanChargeEffectiveDueDateComparator.INSTANCE).toList();
             Money calculatedPenaltyCharge = Money.zero(currency);
             Money calculatedFeeCharge = Money.zero(currency);
@@ -129,13 +130,11 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
                 penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
 
                 Money subInterestPortion;
-                if (ignoreDueDateCheck || !transactionDate.isBefore(currentInstallment.getDueDate())) {
+                if (ignoreDueDateCheck || !DateUtils.isBefore(transactionDate, currentInstallment.getDueDate())) {
                     subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
                     interestPortion = interestPortion.add(subInterestPortion);
-                }
 
-                if (ignoreDueDateCheck || !transactionDate.isBefore(currentInstallment.getDueDate())) {
                     Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
                     principalPortion = principalPortion.add(subPrincipalPortion);

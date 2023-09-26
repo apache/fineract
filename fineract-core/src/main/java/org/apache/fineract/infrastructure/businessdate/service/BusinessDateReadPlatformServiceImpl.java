@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.businessdate.service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -70,8 +69,7 @@ public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlat
     @Override
     public HashMap<BusinessDateType, LocalDate> getBusinessDates() {
         HashMap<BusinessDateType, LocalDate> businessDateMap = new HashMap<>();
-        ZoneId zone = DateUtils.getDateTimeZoneOfTenant();
-        LocalDate tenantDate = LocalDate.now(zone);
+        LocalDate tenantDate = DateUtils.getLocalDateOfTenant();
         businessDateMap.put(BusinessDateType.BUSINESS_DATE, tenantDate);
         businessDateMap.put(BusinessDateType.COB_DATE, tenantDate);
         if (configurationDomainService.isBusinessDateEnabled()) {
@@ -80,7 +78,6 @@ public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlat
                 businessDateMap.put(BusinessDateType.valueOf(businessDateData.getType()), businessDateData.getDate());
             }
         }
-
         return businessDateMap;
     }
 }

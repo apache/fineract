@@ -41,6 +41,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -605,7 +606,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
                 LocalDate downPaymentEntryDate = LocalDate.of(downPaymentDateAsArray.get(0), downPaymentDateAsArray.get(1),
                         downPaymentDateAsArray.get(2));
 
-                if (transactionDate.isEqual(downPaymentEntryDate)) {
+                if (DateUtils.isEqual(transactionDate, downPaymentEntryDate)) {
                     isTransactionFound = true;
                     assertEquals(principalPortion, Float.valueOf(String.valueOf(transactions.get(i).get("principalPortion"))),
                             "Mismatch in transaction amounts");

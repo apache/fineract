@@ -70,10 +70,6 @@ public final class DateUtils {
         return truncate == null ? now : now.truncatedTo(truncate);
     }
 
-    public static OffsetDateTime getOffsetDateTimeOfTenantWithMostPrecision() {
-        return getOffsetDateTimeOfTenant(null);
-    }
-
     public static OffsetDateTime getOffsetDateTimeOfTenant() {
         return getOffsetDateTimeOfTenant(null);
     }

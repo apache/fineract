@@ -167,7 +167,7 @@ public class Meeting extends AbstractPersistableCustom {
     }
 
     public boolean isMeetingDateBefore(final LocalDate newStartDate) {
-        return this.meetingDate != null && newStartDate != null && getMeetingDateLocalDate().isBefore(newStartDate) ? true : false;
+        return this.meetingDate != null && DateUtils.isBefore(getMeetingDateLocalDate(), newStartDate);
     }
 
     private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final LocalDate meetingDate,
@@ -181,7 +181,7 @@ public class Meeting extends AbstractPersistableCustom {
     }
 
     private boolean isMeetingDateAfter(final LocalDate date) {
-        return getMeetingDateLocalDate().isAfter(date);
+        return DateUtils.isAfter(getMeetingDateLocalDate(), date);
     }
 
     public Collection<ClientAttendance> getClientsAttendance() {

@@ -175,8 +175,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
 
                 params.add(new Object[] { Boolean.TRUE, runningBalance, officeRunningBalance,
-                        platformSecurityContext.authenticatedUser().getId(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(),
-                        entryData.getId() });
+                        platformSecurityContext.authenticatedUser().getId(), DateUtils.getAuditOffsetDateTime(), entryData.getId() });
                 batchIndex++;
                 if (batchIndex == batchUpdateSize || index == entryDataList.size() - 1) {
                     this.jdbcTemplate.batchUpdate(sql, params);
@@ -213,7 +212,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         for (JournalEntryData entryData : entryDataList) {
             BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
             params.add(new Object[] { runningBalance, platformSecurityContext.authenticatedUser().getId(),
-                    DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(), entryData.getId() });
+                    DateUtils.getAuditOffsetDateTime(), entryData.getId() });
         }
         this.jdbcTemplate.batchUpdate(sql, params);
     }

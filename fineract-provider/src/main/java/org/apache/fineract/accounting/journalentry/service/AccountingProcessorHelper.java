@@ -59,6 +59,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.journalentry.LoanJournalEntryCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -502,12 +503,9 @@ public class AccountingProcessorHelper {
      * @param transactionDate
      */
     public void checkForBranchClosures(final GLClosure latestGLClosure, final LocalDate transactionDate) {
-        /**
-         * check if an accounting closure has happened for this branch after the transaction Date
-         **/
+        // check if an accounting closure has happened for this branch after the transaction Date
         if (latestGLClosure != null) {
-            if (latestGLClosure.getClosingDate().isAfter(transactionDate)
-                    || latestGLClosure.getClosingDate().compareTo(transactionDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
+            if (!DateUtils.isBefore(latestGLClosure.getClosingDate(), transactionDate)) {
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(),
                         null, null);
             }

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.tax.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 public class TaxComponentHistoryData implements Serializable {
 
@@ -38,10 +39,7 @@ public class TaxComponentHistoryData implements Serializable {
     }
 
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
-        if (this.endDate == null) {
-            return target != null && target.isAfter(startDate());
-        }
-        return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
+        return DateUtils.isAfter(target, startDate()) && (endDate == null || !DateUtils.isAfter(target, endDate()));
     }
 
     public LocalDate startDate() {

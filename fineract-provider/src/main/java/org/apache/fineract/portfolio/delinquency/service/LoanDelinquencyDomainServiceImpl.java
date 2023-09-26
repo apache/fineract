@@ -55,7 +55,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         // Get the oldest overdue installment if exists one
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             if (!installment.isObligationsMet()) {
-                if (installment.getDueDate().isBefore(businessDate)) {
+                if (DateUtils.isBefore(installment.getDueDate(), businessDate)) {
                     log.debug("Loan Id: {} with installment {} due date {}", loan.getId(), installment.getInstallmentNumber(),
                             installment.getDueDate());
                     outstandingAmount = outstandingAmount.add(installment.getTotalOutstanding(loanCurrency).getAmount());
@@ -69,13 +69,13 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
 
                         boolean isLatestInstallment = Objects.equals(installment.getId(), latestInstallment.getId());
                         for (LoanTransaction loanTransaction : chargebackTransactions) {
-                            boolean isLoanTransactionIsOnOrAfterInstallmentFromDate = loanTransaction.getTransactionDate().isEqual(
-                                    installment.getFromDate()) || loanTransaction.getTransactionDate().isAfter(installment.getFromDate());
+                            boolean isLoanTransactionIsOnOrAfterInstallmentFromDate = DateUtils
+                                    .isEqual(loanTransaction.getTransactionDate(), installment.getFromDate())
+                                    || DateUtils.isAfter(loanTransaction.getTransactionDate(), installment.getFromDate());
                             boolean isLoanTransactionIsBeforeNotLastInstallmentDueDate = !isLatestInstallment
-                                    && loanTransaction.getTransactionDate().isBefore(installment.getDueDate());
+                                    && DateUtils.isBefore(loanTransaction.getTransactionDate(), installment.getDueDate());
                             boolean isLoanTransactionIsOnOrBeforeLastInstallmentDueDate = isLatestInstallment
-                                    && (loanTransaction.getTransactionDate().isEqual(installment.getDueDate())
-                                            || loanTransaction.getTransactionDate().isBefore(installment.getDueDate()));
+                                    && !DateUtils.isAfter(loanTransaction.getTransactionDate(), installment.getDueDate());
                             if (isLoanTransactionIsOnOrAfterInstallmentFromDate && (isLoanTransactionIsBeforeNotLastInstallmentDueDate
                                     || isLoanTransactionIsOnOrBeforeLastInstallmentDueDate)) {
                                 amountAvailable = amountAvailable.subtract(loanTransaction.getAmount());
@@ -93,11 +93,12 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
                     amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
                     log.debug("Amount available {}", amountAvailable);
                     for (LoanTransaction loanTransaction : chargebackTransactions) {
-                        boolean isLoanTransactionIsOnOrAfterInstallmentFromDate = loanTransaction.getTransactionDate().isEqual(
-                                installment.getFromDate()) || loanTransaction.getTransactionDate().isAfter(installment.getFromDate());
-                        boolean isLoanTransactionIsBeforeInstallmentDueDate = loanTransaction.getTransactionDate()
-                                .isBefore(installment.getDueDate());
-                        boolean isLoanTransactionIsBeforeBusinessDate = loanTransaction.getTransactionDate().isBefore(businessDate);
+                        boolean isLoanTransactionIsOnOrAfterInstallmentFromDate = !DateUtils.isBefore(loanTransaction.getTransactionDate(),
+                                installment.getFromDate());
+                        boolean isLoanTransactionIsBeforeInstallmentDueDate = DateUtils.isBefore(loanTransaction.getTransactionDate(),
+                                installment.getDueDate());
+                        boolean isLoanTransactionIsBeforeBusinessDate = DateUtils.isBefore(loanTransaction.getTransactionDate(),
+                                businessDate);
                         if (isLoanTransactionIsOnOrAfterInstallmentFromDate && isLoanTransactionIsBeforeInstallmentDueDate
                                 && isLoanTransactionIsBeforeBusinessDate) {
                             log.debug("Loan CB Transaction: {} {} {}", loanTransaction.getId(), loanTransaction.getTransactionDate(),

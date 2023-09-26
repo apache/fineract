@@ -37,6 +37,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioPr
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.springframework.stereotype.Service;
 
@@ -61,7 +62,7 @@ public class InvestorAccountingHelper {
          **/
         GLClosure gLClosure = getLatestClosureByBranch(officeId);
         if (gLClosure != null) {
-            if (gLClosure.getClosingDate().isAfter(transactionDate) || gLClosure.getClosingDate().isEqual(transactionDate)) {
+            if (!DateUtils.isAfter(transactionDate, gLClosure.getClosingDate())) {
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, gLClosure.getClosingDate(), null,
                         null);
             }

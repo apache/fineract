@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.teller.exception.InvalidDateInputException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -113,7 +114,7 @@ public final class TellerCommandFromApiJsonDeserializer {
         final String status = this.fromApiJsonHelper.extractStringNamed(STATUS, element);
         baseDataValidator.reset().parameter(STATUS).value(status).notBlank().notExceedingLengthOf(50);
 
-        if (endDate != null && endDate.isBefore(startDate)) {
+        if (endDate != null && DateUtils.isBefore(endDate, startDate)) {
             throw new InvalidDateInputException(startDate.toString(), endDate.toString());
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

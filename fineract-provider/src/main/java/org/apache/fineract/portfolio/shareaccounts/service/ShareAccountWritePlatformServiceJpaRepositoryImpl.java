@@ -128,7 +128,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
 
     private Map<String, Object> populateJournalEntries(final ShareAccount account, final Set<ShareAccountTransaction> transactions) {
         final Map<String, Object> accountingBridgeData = new HashMap<>();
-        Boolean cashBasedAccounting = account.getShareProduct().getAccountingType() == 2 ? Boolean.TRUE : Boolean.FALSE;
+        Boolean cashBasedAccounting = account.getShareProduct().getAccountingType() == 2;
         accountingBridgeData.put("cashBasedAccountingEnabled", cashBasedAccounting);
         accountingBridgeData.put("accrualBasedAccountingEnabled", Boolean.FALSE);
         accountingBridgeData.put("shareAccountId", account.getId());

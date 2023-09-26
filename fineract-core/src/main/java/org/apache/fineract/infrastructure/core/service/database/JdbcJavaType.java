@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.service.database;
 
 import com.google.common.collect.ImmutableList;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.sql.JDBCType;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 
@@ -272,7 +273,7 @@ public enum JdbcJavaType {
     }
 
     @com.google.errorprone.annotations.Immutable
-    private static final class DialectType {
+    private static final class DialectType implements Serializable {
 
         @NotNull
         private final JDBCType jdbcType;

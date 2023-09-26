@@ -73,7 +73,7 @@ public class ImportDocument extends AbstractPersistableCustom {
         final Boolean completed = Boolean.FALSE;
         final Integer successCount = 0;
         final Integer failureCount = 0;
-        final LocalDateTime endTime = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
+        final LocalDateTime endTime = DateUtils.getLocalDateTimeOfTenant();
 
         return new ImportDocument(document, importTime, endTime, completed, entityType, createdBy, totalRecords, successCount,
                 failureCount);

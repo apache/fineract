@@ -2352,8 +2352,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
             final LocalDate submittalDate = this.submittedOnDate;
             if (DateUtils.isBefore(approvedOn, submittalDate)) {
-                final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: "
-                        + submittalDate.toString();
+                final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: " + submittalDate;
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
                         getApprovedOnDate(), submittalDate);
             }
@@ -3394,8 +3393,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 incomePostTransactions.add(transaction);
             }
         }
-        final LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
-        Collections.sort(incomePostTransactions, transactionComparator);
+        incomePostTransactions.sort(LoanTransactionComparator.INSTANCE);
         return incomePostTransactions;
     }
 
@@ -3408,8 +3406,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 repaymentsOrWaivers.add(transaction);
             }
         }
-        final LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
-        Collections.sort(repaymentsOrWaivers, transactionComparator);
+        repaymentsOrWaivers.sort(LoanTransactionComparator.INSTANCE);
         return repaymentsOrWaivers;
     }
 
@@ -3422,8 +3419,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 repaymentsOrWaivers.add(transaction);
             }
         }
-        final LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
-        Collections.sort(repaymentsOrWaivers, transactionComparator);
+        repaymentsOrWaivers.sort(LoanTransactionComparator.INSTANCE);
         return repaymentsOrWaivers;
     }
 
@@ -3434,8 +3430,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 repaymentsOrWaivers.add(transaction);
             }
         }
-        final LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
-        Collections.sort(repaymentsOrWaivers, transactionComparator);
+        repaymentsOrWaivers.sort(LoanTransactionComparator.INSTANCE);
         return repaymentsOrWaivers;
     }
 
@@ -3446,8 +3441,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 transactions.add(transaction);
             }
         }
-        final LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
-        Collections.sort(transactions, transactionComparator);
+        transactions.sort(LoanTransactionComparator.INSTANCE);
         return transactions;
     }
 
@@ -3458,8 +3452,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 transactions.add(transaction);
             }
         }
-        final LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
-        Collections.sort(transactions, transactionComparator);
+        transactions.sort(LoanTransactionComparator.INSTANCE);
         return transactions;
     }
 
@@ -6670,7 +6663,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     paidFromFutureInstallments = paidFromFutureInstallments.plus(balancesForCurrentPeroid[4])
                             .minus(balancesForCurrentPeroid[2]);
                 }
-            } else if (installment.getDueDate().isAfter(paymentDate)) {
+            } else {
                 paidFromFutureInstallments = paidFromFutureInstallments.plus(installment.getInterestPaid(currency))
                         .plus(installment.getPenaltyChargesPaid(currency)).plus(installment.getFeeChargesPaid(currency));
             }

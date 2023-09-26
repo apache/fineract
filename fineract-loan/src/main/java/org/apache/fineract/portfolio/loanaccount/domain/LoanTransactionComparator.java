@@ -19,47 +19,40 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.util.Comparator;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 /**
  * Sort loan transactions by transaction date, created date and transaction type placing
  */
 public class LoanTransactionComparator implements Comparator<LoanTransaction> {
 
+    public static final LoanTransactionComparator INSTANCE = new LoanTransactionComparator();
+
     @Override
     public int compare(final LoanTransaction o1, final LoanTransaction o2) {
-        int compareResult = 0;
-        final int comparsion = o1.getTransactionDate().compareTo(o2.getTransactionDate());
-        /**
-         * For transactions bearing the same transaction date, we sort transactions based on created date (when
-         * available) after which sorting for waivers takes place
-         **/
-        if (comparsion == 0) {
-            int comparisonBasedOnCreatedDate = 0;
-            if (o1.isIncomePosting() && o2.isNotIncomePosting()) {
-                compareResult = -1;
-            } else if (o1.isNotIncomePosting() && o2.isIncomePosting()) {
-                compareResult = 1;
-            } else {
-                compareResult = 0;
-            }
-            if (o1.getCreatedDateTime() != null && o2.getCreatedDateTime() != null) {
-                comparisonBasedOnCreatedDate = o1.getCreatedDateTime().compareTo(o2.getCreatedDateTime());
-            }
-            // equal transaction dates
-            if (comparisonBasedOnCreatedDate == 0) {
-                if (o1.isWaiver() && o2.isNotWaiver()) {
-                    compareResult = -1;
-                } else if (o1.isNotWaiver() && o2.isWaiver()) {
-                    compareResult = 1;
-                } else {
-                    compareResult = 0;
-                }
-            }
-        } else {
-            compareResult = comparsion;
+        int result = DateUtils.compare(o1.getTransactionDate(), o2.getTransactionDate());
+        if (result != 0) {
+            return result;
         }
-
-        return compareResult;
+        // For transactions bearing the same transaction date, we sort transactions based on created date (when
+        // available) after which sorting for waivers takes place
+        result = o1.getCreatedDate().isPresent()
+                ? (o2.getCreatedDate().isPresent() ? DateUtils.compare(o1.getCreatedDateTime(), o2.getCreatedDateTime()) : -1)
+                : (o2.getCreatedDate().isPresent() ? 1 : 0);
+        if (result != 0) {
+            return result;
+        }
+        // equal transaction dates
+        if (o1.isIncomePosting() != o2.isIncomePosting()) {
+            return o1.isIncomePosting() ? -1 : 1;
+        }
+        if (o1.isWaiver() != o2.isWaiver()) {
+            return o1.isWaiver() ? -1 : 1;
+        }
+        result = o1.getId() != null ? (o2.getId() != null ? Long.compare(o1.getId(), o2.getId()) : -1) : (o2.getId() != null ? 1 : 0);
+        if (result != 0) {
+            return result;
+        }
+        return 0;
     }
-
 }

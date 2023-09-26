@@ -140,8 +140,8 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         if (marketDataSet != null && !marketDataSet.isEmpty()) {
             LocalDate currentDate = DateUtils.getBusinessLocalDate();
             for (ShareProductMarketPriceData data : marketDataSet) {
-                LocalDate futureDate = data.getFromDate();
-                if (currentDate.isAfter(futureDate)) {
+                LocalDate fromDate = data.getFromDate();
+                if (DateUtils.isBefore(fromDate, currentDate)) {
                     marketValue = data.getShareValue();
                 }
             }

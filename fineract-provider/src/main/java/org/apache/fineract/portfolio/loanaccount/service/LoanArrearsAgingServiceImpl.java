@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
@@ -145,12 +146,12 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         LocalDate businessDate = DateUtils.getBusinessLocalDate();
         LocalDate overDueSince = businessDate;
         for (LoanRepaymentScheduleInstallment installment : installments) {
-            if (installment.getDueDate().isBefore(businessDate)) {
+            if (DateUtils.isBefore(installment.getDueDate(), businessDate)) {
                 principalOverdue = principalOverdue.add(installment.getPrincipalOutstanding(loan.getCurrency()).getAmount());
                 interestOverdue = interestOverdue.add(installment.getInterestOutstanding(loan.getCurrency()).getAmount());
                 feeOverdue = feeOverdue.add(installment.getFeeChargesOutstanding(loan.getCurrency()).getAmount());
                 penaltyOverdue = penaltyOverdue.add(installment.getPenaltyChargesOutstanding(loan.getCurrency()).getAmount());
-                if (installment.isNotFullyPaidOff() && overDueSince.isAfter(installment.getDueDate())) {
+                if (installment.isNotFullyPaidOff() && DateUtils.isAfter(overDueSince, installment.getDueDate())) {
                     overDueSince = installment.getDueDate();
                 }
             }
@@ -208,8 +209,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
                             .add(loanSchedulePeriodData.getFeeChargesDue().subtract(loanSchedulePeriodData.getFeeChargesPaid()));
                     penaltyOverdue = penaltyOverdue
                             .add(loanSchedulePeriodData.getPenaltyChargesDue().subtract(loanSchedulePeriodData.getPenaltyChargesPaid()));
-                    if (overDueSince.isAfter(loanSchedulePeriodData.getDueDate()) && loanSchedulePeriodData.getPrincipalDue()
-                            .subtract(loanSchedulePeriodData.getPrincipalPaid()).compareTo(BigDecimal.ZERO) > 0) {
+                    if (DateUtils.isAfter(overDueSince, loanSchedulePeriodData.getDueDate()) && MathUtil
+                            .isGreaterThan(loanSchedulePeriodData.getPrincipalDue(), loanSchedulePeriodData.getPrincipalPaid())) {
                         overDueSince = loanSchedulePeriodData.getDueDate();
                     }
                 }

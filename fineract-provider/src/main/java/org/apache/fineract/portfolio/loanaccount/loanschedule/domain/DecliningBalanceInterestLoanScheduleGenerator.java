@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
@@ -89,7 +90,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
 
             for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
 
-                if (!principal.getKey().isAfter(periodEndDate)) {
+                if (!DateUtils.isAfter(principal.getKey(), periodEndDate)) {
                     int interestForDays = Math.toIntExact(ChronoUnit.DAYS.between(interestStartDate, principal.getKey()));
                     if (interestForDays > 0) {
                         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,

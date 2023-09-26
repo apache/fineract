@@ -103,14 +103,14 @@ public final class CalendarUtils {
         final DateTime periodStart = new DateTime(java.util.Date.from(startDate.atZone(ZoneId.systemDefault()).toInstant()));
         final Date seed = convertToiCal4JCompatibleDate(seedDate);
         final Date nextRecDate = recur.getNextDate(seed, periodStart);
-        return nextRecDate == null ? null : LocalDateTime.ofInstant(nextRecDate.toInstant(), DateUtils.getSystemZoneId());
+        return nextRecDate == null ? null : LocalDateTime.ofInstant(nextRecDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     private static LocalDate getNextRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate startDate) {
         final DateTime periodStart = new DateTime(java.util.Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final Date seed = convertToiCal4JCompatibleDate(seedDate.atStartOfDay());
         final Date nextRecDate = recur.getNextDate(seed, periodStart);
-        return nextRecDate == null ? null : LocalDate.ofInstant(nextRecDate.toInstant(), DateUtils.getSystemZoneId());
+        return nextRecDate == null ? null : LocalDate.ofInstant(nextRecDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     private static Date convertToiCal4JCompatibleDate(final LocalDateTime inputDate) {
@@ -125,16 +125,16 @@ public final class CalendarUtils {
     }
 
     public static Collection<LocalDate> getRecurringDates(final String recurringRule, final LocalDate seedDate, final LocalDate endDate) {
-
         final LocalDate periodStartDate = DateUtils.getLocalDateOfTenant();
-        final LocalDate periodEndDate = (endDate == null) ? DateUtils.getLocalDateOfTenant().plusYears(5) : endDate;
+        final LocalDate periodEndDate = endDate == null ? periodStartDate.plusYears(5) : endDate;
         return getRecurringDates(recurringRule, seedDate, periodStartDate, periodEndDate);
     }
 
     public static Collection<LocalDate> getRecurringDatesFrom(final String recurringRule, final LocalDate seedDate,
             final LocalDate startDate) {
-        final LocalDate periodStartDate = (startDate == null) ? DateUtils.getLocalDateOfTenant() : startDate;
-        final LocalDate periodEndDate = DateUtils.getLocalDateOfTenant().plusYears(5);
+        LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate periodStartDate = startDate == null ? currentDate : startDate;
+        final LocalDate periodEndDate = currentDate.plusYears(5);
         return getRecurringDates(recurringRule, seedDate, periodStartDate, periodEndDate);
     }
 
@@ -150,7 +150,6 @@ public final class CalendarUtils {
     public static Collection<LocalDate> getRecurringDates(final String recurringRule, final LocalDate seedDate,
             final LocalDate periodStartDate, final LocalDate periodEndDate, final int maxCount, boolean isSkippMeetingOnFirstDay,
             final Integer numberOfDays) {
-
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
 
         return getRecurringDates(recur, seedDate, periodStartDate, periodEndDate, maxCount, isSkippMeetingOnFirstDay, numberOfDays);
@@ -173,7 +172,6 @@ public final class CalendarUtils {
 
     private static Collection<LocalDate> convertToLocalDateList(final DateList dates, final LocalDate seedDate,
             final PeriodFrequencyType frequencyType, boolean isSkippMeetingOnFirstDay, final Integer numberOfDays) {
-
         final Collection<LocalDate> recurringDates = new ArrayList<>();
 
         for (@SuppressWarnings("rawtypes")

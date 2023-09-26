@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
@@ -1182,7 +1183,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                         if (jsonObject2.has(LoanApiConstants.expectedDisbursementDateParameterName)) {
                             LocalDate date2 = this.fromApiJsonHelper.extractLocalDateNamed(
                                     LoanApiConstants.expectedDisbursementDateParameterName, jsonObject2, dateFormat, locale);
-                            if (date1.isAfter(date2)) {
+                            if (DateUtils.isAfter(date1, date2)) {
                                 baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
                                         .failWithCode(LoanApiConstants.DISBURSEMENT_DATES_NOT_IN_ORDER);
                             }
@@ -1196,7 +1197,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
     public void validateLoanMultiDisbursementDate(final JsonElement element, final DataValidatorBuilder baseDataValidator,
             LocalDate expectedDisbursement, BigDecimal totalPrincipal) {
-
         this.validateDisbursementsAreDatewiseOrdered(element, baseDataValidator);
 
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
@@ -1228,7 +1228,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     if (i == 0 && expectedDisbursementDate != null && !expectedDisbursement.equals(expectedDisbursementDate)) {
                         baseDataValidator.reset().parameter(LoanApiConstants.expectedDisbursementDateParameterName)
                                 .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_START_WITH_ERROR);
-                    } else if (i > 0 && expectedDisbursementDate != null && expectedDisbursementDate.isBefore(expectedDisbursement)) {
+                    } else if (i > 0 && expectedDisbursementDate != null
+                            && DateUtils.isBefore(expectedDisbursementDate, expectedDisbursement)) {
                         baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
                                 .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_BEFORE_ERROR);
                     }

@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,8 +167,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
 
     private void validateRepaymentsStartingFromDateIsAfterDisbursementDate(final List<ApiParameterError> dataValidationErrors,
             final LocalDate expectedDisbursementDate, final LocalDate repaymentsStartingFromDate) {
-        if (expectedDisbursementDate != null && repaymentsStartingFromDate != null
-                && expectedDisbursementDate.isAfter(repaymentsStartingFromDate)) {
+        if (repaymentsStartingFromDate != null && DateUtils.isAfter(expectedDisbursementDate, repaymentsStartingFromDate)) {
             final ApiParameterError error = ApiParameterError.parameterError(
                     "validation.msg.loan.expectedDisbursementDate.cannot.be.after.first.repayment.date",
                     "The parameter expectedDisbursementDate has a date which falls after the date for repaymentsStartingFromDate.",

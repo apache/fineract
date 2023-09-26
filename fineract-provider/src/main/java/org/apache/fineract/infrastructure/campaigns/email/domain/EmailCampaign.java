@@ -160,7 +160,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
-        LocalDateTime recurrenceStartDate = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDateTime recurrenceStartDate = DateUtils.getLocalDateTimeOfTenant();
         if (EmailCampaignType.fromInt(campaignType.intValue()).isSchedule()) {
             if (command.hasParameter(EmailCampaignValidator.recurrenceStartDate)) {
                 recurrenceStartDate = LocalDateTime.parse(command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceStartDate),
@@ -178,7 +178,6 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     public Map<String, Object> update(JsonCommand command) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
         if (command.isChangeInStringParameterNamed(EmailCampaignValidator.campaignName, this.campaignName)) {
@@ -229,7 +228,6 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
-
         if (isActive()) {
             // handle errors if already activated
             final String defaultUserMessage = "Cannot activate campaign. Campaign is already active.";
@@ -271,14 +269,13 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     public void reactivate(final AppUser currentUser, final DateTimeFormatter dateTimeFormat, final LocalDate reactivateLocalDate) {
-
         if (!isClosed()) {
             // handle errors if already activated
             final String defaultUserMessage = "Cannot reactivate campaign. Campaign must be in closed state.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.must.be.closed", defaultUserMessage,
                     EmailCampaignValidator.statusParamName, EmailCampaignStatus.fromInt(this.status).getCode());
 
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -352,55 +349,45 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
-
-        if (getSubmittedOnDate() != null && isDateInTheFuture(getSubmittedOnDate())) {
-
+        if (getSubmittedOnDate() != null && DateUtils.isDateInTheFuture(getSubmittedOnDate())) {
             final String defaultUserMessage = "submitted date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.submittedOnDate.in.the.future",
                     defaultUserMessage, EmailCampaignValidator.submittedOnDateParamName, this.submittedOnDate);
 
             dataValidationErrors.add(error);
         }
-
-        if (getApprovedOnDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getApprovedOnDate())) {
-
+        if (getApprovedOnDate() != null && DateUtils.isAfter(getSubmittedOnDate(), getApprovedOnDate())) {
             final String defaultUserMessage = "submitted date cannot be after the activation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.submittedOnDate.after.activation.date",
                     defaultUserMessage, EmailCampaignValidator.submittedOnDateParamName, this.submittedOnDate);
 
             dataValidationErrors.add(error);
         }
-
-        if (getApprovedOnDate() != null && isDateInTheFuture(getApprovedOnDate())) {
-
+        if (DateUtils.isDateInTheFuture(getApprovedOnDate())) {
             final String defaultUserMessage = "Activation date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.activationDate.in.the.future",
                     defaultUserMessage, EmailCampaignValidator.activationDateParamName, getApprovedOnDate());
 
             dataValidationErrors.add(error);
         }
-
     }
 
     private void validateReactivationDate(final List<ApiParameterError> dataValidationErrors) {
-        if (getApprovedOnDate() != null && isDateInTheFuture(getApprovedOnDate())) {
-
+        if (DateUtils.isDateInTheFuture(getApprovedOnDate())) {
             final String defaultUserMessage = "Activation date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.activationDate.in.the.future",
                     defaultUserMessage, EmailCampaignValidator.activationDateParamName, getApprovedOnDate());
 
             dataValidationErrors.add(error);
         }
-        if (getApprovedOnDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getApprovedOnDate())) {
-
+        if (getApprovedOnDate() != null && DateUtils.isAfter(getSubmittedOnDate(), getApprovedOnDate())) {
             final String defaultUserMessage = "submitted date cannot be after the activation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.submittedOnDate.after.activation.date",
                     defaultUserMessage, EmailCampaignValidator.submittedOnDateParamName, this.submittedOnDate);
 
             dataValidationErrors.add(error);
         }
-        if (getSubmittedOnDate() != null && isDateInTheFuture(getSubmittedOnDate())) {
-
+        if (DateUtils.isDateInTheFuture(getSubmittedOnDate())) {
             final String defaultUserMessage = "submitted date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.submittedOnDate.in.the.future",
                     defaultUserMessage, EmailCampaignValidator.submittedOnDateParamName, this.submittedOnDate);
@@ -411,7 +398,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     private void validateClosureDate(final List<ApiParameterError> dataValidationErrors) {
-        if (getClosureDate() != null && isDateInTheFuture(getClosureDate())) {
+        if (getClosureDate() != null && DateUtils.isDateInTheFuture(getClosureDate())) {
             final String defaultUserMessage = "closure date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.closureDate.in.the.future",
                     defaultUserMessage, EmailCampaignValidator.closureDateParamName, this.closureDate);
@@ -419,9 +406,4 @@ public class EmailCampaign extends AbstractPersistableCustom {
             dataValidationErrors.add(error);
         }
     }
-
-    private boolean isDateInTheFuture(final LocalDate localDate) {
-        return localDate.isAfter(DateUtils.getBusinessLocalDate());
-    }
-
 }

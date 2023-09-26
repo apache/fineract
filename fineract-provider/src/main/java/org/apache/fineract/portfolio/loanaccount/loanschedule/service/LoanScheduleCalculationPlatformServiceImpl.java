@@ -168,7 +168,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             if (currentInstallment.isNotFullyPaidOff()) {
-                if (!currentInstallment.getDueDate().isAfter(today)) {
+                if (!DateUtils.isAfter(currentInstallment.getDueDate(), today)) {
                     totalPrincipal = totalPrincipal.plus(currentInstallment.getPrincipalOutstanding(currency));
                 }
             }
@@ -190,7 +190,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         LoanScheduleData scheduleDate = model.toData();
         Collection<LoanSchedulePeriodData> periodDatas = scheduleDate.getPeriods();
         for (LoanSchedulePeriodData periodData : periodDatas) {
-            if ((periodData.getDueDate().isEqual(today) || periodData.getDueDate().isAfter(today)) && isNewPaymentRequired) {
+            if (isNewPaymentRequired && !DateUtils.isBefore(periodData.getDueDate(), today)) {
                 LoanSchedulePeriodData loanSchedulePeriodData = LoanSchedulePeriodData.repaymentOnlyPeriod(periodData.getPeriod(),
                         periodData.getFromDate(), periodData.getDueDate(), totalPrincipal.getAmount(),
                         periodData.getPrincipalLoanBalanceOutstanding(), interestDue.getAmount(),
@@ -199,7 +199,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
                         totalPrincipal.plus(interestDue).getAmount());
                 futureInstallments.add(loanSchedulePeriodData);
                 isNewPaymentRequired = false;
-            } else if (periodData.getDueDate().isAfter(today)) {
+            } else if (DateUtils.isAfter(periodData.getDueDate(), today)) {
                 futureInstallments.add(periodData);
             }
 
@@ -239,7 +239,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
         for (LoanRepaymentScheduleInstallment installment : installments) {
             if (loanDisbursementDetails != null
-                    && !loanDisbursementDetails.expectedDisbursementDateAsLocalDate().isAfter(installment.getDueDate())) {
+                    && !DateUtils.isAfter(loanDisbursementDetails.expectedDisbursementDateAsLocalDate(), installment.getDueDate())) {
                 outstanding = outstanding.plus(loanDisbursementDetails.principal());
                 principal = principal.plus(loanDisbursementDetails.principal());
                 if (disbursementItr.hasNext()) {

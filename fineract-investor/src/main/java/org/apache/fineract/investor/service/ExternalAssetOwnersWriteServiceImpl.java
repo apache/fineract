@@ -170,7 +170,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
             throw new ExternalAssetOwnerInitiateTransferException(
                     String.format("This loan cannot be bought back, effective transfer is not in right state: %s",
                             effectiveTransfers.get(0).getStatus()));
-        } else if (settlementDate.isBefore(effectiveTransfers.get(0).getSettlementDate())) {
+        } else if (DateUtils.isBefore(settlementDate, effectiveTransfers.get(0).getSettlementDate())) {
             throw new ExternalAssetOwnerInitiateTransferException(
                     String.format("This loan cannot be bought back, settlement date is earlier than effective transfer settlement date: %s",
                             effectiveTransfers.get(0).getSettlementDate()));
@@ -251,7 +251,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     }
 
     private void validateSettlementDate(LocalDate settlementDate) {
-        if (settlementDate.isBefore(ThreadLocalContextUtil.getBusinessDate())) {
+        if (DateUtils.isBeforeBusinessDate(settlementDate)) {
             throw new ExternalAssetOwnerInitiateTransferException("Settlement date cannot be in the past");
         }
     }

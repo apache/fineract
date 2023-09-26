@@ -340,7 +340,7 @@ public class GroupGeneralData implements Serializable {
     }
 
     public boolean isChildGroup() {
-        return this.centerId == null ? false : true;
+        return this.centerId != null;
     }
 
     public Long getParentId() {

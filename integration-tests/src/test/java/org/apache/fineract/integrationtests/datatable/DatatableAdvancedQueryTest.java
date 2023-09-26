@@ -48,7 +48,6 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,8 +121,7 @@ public class DatatableAdvancedQueryTest {
     @Test
     public void testDatatableAdvancedQuery() {
         String datatable = createAndVerifyDatatable(SAVINGS_TRANSACTION_APP_TABLE_NAME, null, false);
-
-        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        LocalDate today = Utils.getLocalDateOfTenant();
         String todayS = DateUtils.format(today, SAVINGS_DATE_FORMAT);
         LocalDate yesterday = today.minus(1, ChronoUnit.DAYS);
         String yesterdayS = DateUtils.format(yesterday, SAVINGS_DATE_FORMAT);
@@ -207,7 +205,7 @@ public class DatatableAdvancedQueryTest {
     public void testApptableWithDatatableAdvancedQuery() {
         String datatable = createAndVerifyDatatable(SAVINGS_TRANSACTION_APP_TABLE_NAME, null, false);
 
-        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        LocalDate today = Utils.getLocalDateOfTenant();
         String todayS = DateUtils.format(today, SAVINGS_DATE_FORMAT);
         LocalDate yesterday = today.minus(1, ChronoUnit.DAYS);
         String yesterdayS = DateUtils.format(yesterday, SAVINGS_DATE_FORMAT);

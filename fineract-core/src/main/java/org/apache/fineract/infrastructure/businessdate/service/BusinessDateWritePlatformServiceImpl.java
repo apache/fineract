@@ -132,15 +132,11 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
     private void updateBusinessDate(BusinessDate businessDate, LocalDate newDate, Map<String, Object> changes) {
         LocalDate oldDate = businessDate.getDate();
 
-        if (!hasChange(oldDate, newDate)) {
+        if (DateUtils.isEqual(oldDate, newDate)) {
             return;
         }
         businessDate.setDate(newDate);
         repository.save(businessDate);
         changes.put(businessDate.getType().name(), newDate);
-    }
-
-    private boolean hasChange(@NotNull LocalDate oldDate, @NotNull LocalDate date) {
-        return (date.isBefore(oldDate) || date.isAfter(oldDate));
     }
 }

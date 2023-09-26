@@ -145,8 +145,7 @@ public final class ImportHandlerUtils {
             return null;
         }
 
-        LocalDate localDate = LocalDate.ofInstant(c.getDateCellValue().toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        return localDate;
+        return LocalDate.ofInstant(c.getDateCellValue().toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public static Boolean readAsBoolean(int colIndex, Row row) {

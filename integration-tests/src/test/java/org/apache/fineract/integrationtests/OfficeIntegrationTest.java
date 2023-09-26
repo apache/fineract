@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -97,6 +98,6 @@ public class OfficeIntegrationTest {
         GetOfficesResponse newOffice = officeResult.body();
 
         Assertions.assertTrue(name.equals(newOffice.getName()));
-        Assertions.assertTrue(newOffice.getOpeningDate().isEqual(LocalDate.of(2007, 7, 2)));
+        Assertions.assertTrue(DateUtils.isEqual(newOffice.getOpeningDate(), LocalDate.of(2007, 7, 2)));
     }
 }

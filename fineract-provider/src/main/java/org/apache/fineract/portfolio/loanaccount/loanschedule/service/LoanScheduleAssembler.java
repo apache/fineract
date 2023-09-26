@@ -431,7 +431,7 @@ public class LoanScheduleAssembler {
                 LoanTermVariationsData loanTermVariation = new LoanTermVariationsData(
                         LoanEnumerations.loanVariationType(LoanTermVariationType.INTEREST_RATE), periodData.getFromDateAsLocalDate(),
                         periodData.getInterestRate(), dateValue, isSpecificToInstallment);
-                if (!interestRateStartDate.isBefore(periodData.getFromDateAsLocalDate())) {
+                if (!DateUtils.isBefore(interestRateStartDate, periodData.getFromDateAsLocalDate())) {
                     interestRateStartDate = periodData.getFromDateAsLocalDate();
                     annualNominalInterestRate = periodData.getInterestRate();
                 }
@@ -753,7 +753,7 @@ public class LoanScheduleAssembler {
         LocalDate lastDate = loan.getExpectedDisbursedOnLocalDate();
         for (LoanRepaymentScheduleInstallment installment : installments) {
             dueDates.add(installment.getDueDate());
-            if (lastDate.isBefore(installment.getDueDate())) {
+            if (DateUtils.isBefore(lastDate, installment.getDueDate())) {
                 lastDate = installment.getDueDate();
             }
             if (graceOnPrincipal.equals(installment.getInstallmentNumber())) {
@@ -781,14 +781,14 @@ public class LoanScheduleAssembler {
                     } else {
                         dueDates.add(termVariations.fetchTermApplicaDate());
                     }
-                    if (!graceApplicable.isBefore(termVariations.fetchTermApplicaDate())) {
+                    if (!DateUtils.isBefore(graceApplicable, termVariations.fetchTermApplicaDate())) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.insert.not.allowed.before.grace.period", "Loan schedule insert request invalid");
                     }
-                    if (termVariations.fetchTermApplicaDate().isAfter(lastDate)) {
+                    if (DateUtils.isAfter(termVariations.fetchTermApplicaDate(), lastDate)) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.insert.not.allowed.after.last.period.date", "Loan schedule insert request invalid");
-                    } else if (termVariations.fetchTermApplicaDate().isBefore(loan.getExpectedDisbursedOnLocalDate())) {
+                    } else if (DateUtils.isBefore(termVariations.fetchTermApplicaDate(), loan.getExpectedDisbursedOnLocalDate())) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.insert.not.allowed.before.disbursement.date", "Loan schedule insert request invalid");
                     }
@@ -800,14 +800,13 @@ public class LoanScheduleAssembler {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("variable.schedule.remove.date.invalid",
                                 "Loan schedule remove request invalid");
                     }
-                    if (termVariations.fetchTermApplicaDate().isEqual(lastDate)) {
+                    if (DateUtils.isEqual(lastDate, termVariations.fetchTermApplicaDate())) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.delete.not.allowed.for.last.period.date", "Loan schedule remove request invalid");
                     }
                 break;
                 case DUE_DATE:
                     if (dueDates.contains(termVariations.fetchTermApplicaDate())) {
-
                         if (overlappings.contains(termVariations.fetchTermApplicaDate())) {
                             overlappings.remove(termVariations.fetchTermApplicaDate());
                         } else {
@@ -822,17 +821,17 @@ public class LoanScheduleAssembler {
                     } else {
                         dueDates.add(termVariations.fetchDateValue());
                     }
-                    if (termVariations.fetchDateValue().isBefore(loan.getExpectedDisbursedOnLocalDate())) {
+                    if (DateUtils.isBefore(termVariations.fetchDateValue(), loan.getExpectedDisbursedOnLocalDate())) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.insert.not.allowed.before.disbursement.date", "Loan schedule insert request invalid");
                     }
-                    if (termVariations.fetchTermApplicaDate().isEqual(lastDate)) {
+                    if (DateUtils.isEqual(lastDate, termVariations.fetchTermApplicaDate())) {
                         lastDate = termVariations.fetchDateValue();
                     }
                 break;
                 case PRINCIPAL_AMOUNT:
                 case EMI_AMOUNT:
-                    if (!graceApplicable.isBefore(termVariations.fetchTermApplicaDate())) {
+                    if (!DateUtils.isBefore(graceApplicable, termVariations.fetchTermApplicaDate())) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.amount.update.not.allowed.before.grace.period", "Loan schedule modify request invalid");
                     }
@@ -840,7 +839,7 @@ public class LoanScheduleAssembler {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.amount.update.from.date.invalid", "Loan schedule modify request invalid");
                     }
-                    if (termVariations.fetchTermApplicaDate().isEqual(lastDate)) {
+                    if (DateUtils.isEqual(termVariations.fetchTermApplicaDate(), lastDate)) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.amount.update.not.allowed.for.last.period", "Loan schedule modify request invalid");
                     }
@@ -941,7 +940,7 @@ public class LoanScheduleAssembler {
                     }
                     if (dueDateVariations.containsKey(loanTermVariations.fetchTermApplicaDate())) {
                         LoanTermVariations existingVariation = dueDateVariations.get(loanTermVariations.fetchTermApplicaDate());
-                        if (existingVariation.fetchTermApplicaDate().isEqual(loanTermVariations.fetchDateValue())) {
+                        if (DateUtils.isEqual(existingVariation.fetchTermApplicaDate(), loanTermVariations.fetchDateValue())) {
                             variations.remove(existingVariation);
                         } else {
                             existingVariation.setTermApplicableFrom(loanTermVariations.getDateValue());
@@ -1086,21 +1085,16 @@ public class LoanScheduleAssembler {
             final LocalDate expectedDisbursementDate, final PeriodFrequencyType repaymentPeriodFrequencyType,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar, final LocalDate submittedOnDate,
             final RepaymentStartDateType repaymentStartDateType) {
-
         LocalDate derivedFirstRepayment = null;
 
         final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = RepaymentStartDateType.DISBURSEMENT_DATE.equals(
                 repaymentStartDateType) ? expectedDisbursementDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment) : submittedOnDate;
 
         if (calendar != null) {
-
-            final LocalDate refernceDateForCalculatingFirstRepaymentDate = expectedDisbursementDate;
-            derivedFirstRepayment = deriveFirstRepaymentDateForLoans(repaymentEvery, expectedDisbursementDate,
-                    refernceDateForCalculatingFirstRepaymentDate, repaymentPeriodFrequencyType,
-                    minimumDaysBetweenDisbursalAndFirstRepayment, calendar, submittedOnDate, repaymentStartDateType);
-
-        } /*** Individual or group account, or JLG not linked to a meeting ***/
-        else {
+            derivedFirstRepayment = deriveFirstRepaymentDateForLoans(repaymentEvery, expectedDisbursementDate, expectedDisbursementDate,
+                    repaymentPeriodFrequencyType, minimumDaysBetweenDisbursalAndFirstRepayment, calendar, submittedOnDate,
+                    repaymentStartDateType);
+        } else { // Individual or group account, or JLG not linked to a meeting
             LocalDate dateBasedOnRepaymentFrequency;
             // Derive the first repayment date as greater date among
             // (disbursement date + plus frequency) or
@@ -1121,16 +1115,15 @@ public class LoanScheduleAssembler {
                         ? expectedDisbursementDate.plusMonths(repaymentEvery)
                         : submittedOnDate.plusMonths(repaymentEvery);
 
-            } /** yearly loan **/
-            else {
+            } else { // yearly loan
                 dateBasedOnRepaymentFrequency = RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType)
                         ? expectedDisbursementDate.plusYears(repaymentEvery)
                         : submittedOnDate.plusYears(repaymentEvery);
 
             }
-            derivedFirstRepayment = dateBasedOnRepaymentFrequency.isAfter(dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment)
-                    ? dateBasedOnRepaymentFrequency
-                    : dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment;
+            derivedFirstRepayment = DateUtils.isAfter(dateBasedOnRepaymentFrequency,
+                    dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment) ? dateBasedOnRepaymentFrequency
+                            : dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment;
         }
 
         return derivedFirstRepayment;
@@ -1148,7 +1141,7 @@ public class LoanScheduleAssembler {
         final LocalDate minimumFirstRepaymentDate = RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType)
                 ? expectedDisbursementDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment)
                 : submittedOnDate;
-        return minimumFirstRepaymentDate.isBefore(derivedFirstRepayment) ? derivedFirstRepayment
+        return DateUtils.isBefore(minimumFirstRepaymentDate, derivedFirstRepayment) ? derivedFirstRepayment
                 : deriveFirstRepaymentDateForLoans(repaymentEvery, expectedDisbursementDate, derivedFirstRepayment,
                         repaymentPeriodFrequencyType, minimumDaysBetweenDisbursalAndFirstRepayment, calendar, submittedOnDate,
                         repaymentStartDateType);
@@ -1156,9 +1149,8 @@ public class LoanScheduleAssembler {
 
     private void validateMinimumDaysBetweenDisbursalAndFirstRepayment(final LocalDate disbursalDate, final LocalDate firstRepaymentDate,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment) {
-
         final LocalDate minimumFirstRepaymentDate = disbursalDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
-        if (firstRepaymentDate.isBefore(minimumFirstRepaymentDate)) {
+        if (DateUtils.isBefore(firstRepaymentDate, minimumFirstRepaymentDate)) {
             throw new MinDaysBetweenDisbursalAndFirstRepaymentViolationException(disbursalDate, firstRepaymentDate,
                     minimumDaysBetweenDisbursalAndFirstRepayment);
         }

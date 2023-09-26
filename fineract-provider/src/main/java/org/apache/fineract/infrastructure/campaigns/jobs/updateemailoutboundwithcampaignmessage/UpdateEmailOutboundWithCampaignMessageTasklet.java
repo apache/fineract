@@ -43,7 +43,6 @@ import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageRep
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignReadPlatformService;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignWritePlatformService;
-import org.apache.fineract.infrastructure.campaigns.jobs.TenantDateTimeUtil;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -69,11 +68,11 @@ public class UpdateEmailOutboundWithCampaignMessageTasklet implements Tasklet {
                 .retrieveAllScheduleActiveCampaign();
         if (emailCampaignDataCollection != null) {
             for (EmailCampaignData emailCampaignData : emailCampaignDataCollection) {
-                LocalDateTime tenantDateNow = TenantDateTimeUtil.tenantDateTime();
+                LocalDateTime tenantDateNow = DateUtils.getLocalDateTimeOfTenant();
                 LocalDateTime nextTriggerDate = emailCampaignData.getNextTriggerDate().toLocalDateTime();
 
                 log.debug("tenant time {} trigger time {}", tenantDateNow, nextTriggerDate);
-                if (nextTriggerDate.isBefore(tenantDateNow)) {
+                if (DateUtils.isBefore(nextTriggerDate, tenantDateNow)) {
                     insertDirectCampaignIntoEmailOutboundTable(emailCampaignData.getParamValue(), emailCampaignData.getEmailSubject(),
                             emailCampaignData.getEmailMessage(), emailCampaignData.getCampaignName(), emailCampaignData.getId());
                     updateTriggerDates(emailCampaignData.getId());
@@ -115,13 +114,12 @@ public class UpdateEmailOutboundWithCampaignMessageTasklet implements Tasklet {
                 .orElseThrow(() -> new EmailCampaignNotFound(campaignId));
         LocalDateTime nextTriggerDate = emailCampaign.getNextTriggerDate();
         emailCampaign.setLastTriggerDate(nextTriggerDate);
-        LocalDateTime newTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
-                emailCampaign.getNextTriggerDate(), nextTriggerDate);
-        if (newTriggerDateWithTime.isBefore(DateUtils.getLocalDateTimeOfTenant())) {
-            newTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), emailCampaign.getNextTriggerDate(),
-                    DateUtils.getLocalDateTimeOfTenant());
+        LocalDateTime newTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), nextTriggerDate,
+                nextTriggerDate);
+        LocalDateTime tenantDateTime = DateUtils.getLocalDateTimeOfTenant();
+        if (DateUtils.isBefore(newTriggerDateWithTime, tenantDateTime)) {
+            newTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), nextTriggerDate, tenantDateTime);
         }
-
         emailCampaign.setNextTriggerDate(newTriggerDateWithTime);
         emailCampaignRepository.saveAndFlush(emailCampaign);
     }

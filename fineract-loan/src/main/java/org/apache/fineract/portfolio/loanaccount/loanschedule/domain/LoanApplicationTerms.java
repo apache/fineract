@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -716,7 +718,7 @@ public final class LoanApplicationTerms {
                 // number of days from 'ideal disbursement' to final date
 
                 LocalDate loanStartDate = getExpectedDisbursementDate();
-                if (getInterestChargedFromDate() != null && loanStartDate.isBefore(getInterestChargedFromLocalDate())) {
+                if (DateUtils.isBefore(loanStartDate, getInterestChargedFromLocalDate())) {
                     loanStartDate = getInterestChargedFromLocalDate();
                 }
 
@@ -773,7 +775,7 @@ public final class LoanApplicationTerms {
                                 CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(getLoanTermPeriodFrequencyType()),
                                 this.holidayDetailDTO.getWorkingDays(), isSkipRepaymentOnFirstDayOfMonth, numberOfDays);
                     }
-                    if (!expectedStartDate.isEqual(startDate)) {
+                    if (!DateUtils.isEqual(expectedStartDate, startDate)) {
                         diffDays = Math.toIntExact(ChronoUnit.DAYS.between(startDate, expectedStartDate));
                     }
                     if (numberOfMonths == 0) {
@@ -1368,6 +1370,7 @@ public final class LoanApplicationTerms {
         return this.multiDisburseLoan;
     }
 
+    @NotNull
     public Money getMaxOutstandingBalance() {
         return Money.of(getCurrency(), this.maxOutstandingBalance);
     }
@@ -1440,7 +1443,7 @@ public final class LoanApplicationTerms {
 
                         int months = getPeriodsBetween(fromDate, toDate);
                         fromDate = fromDate.plusMonths(months);
-                        isSameAsRepaymentPeriod = fromDate.isEqual(toDate);
+                        isSameAsRepaymentPeriod = DateUtils.isEqual(fromDate, toDate);
                     }
 
                 break;

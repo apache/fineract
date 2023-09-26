@@ -282,7 +282,7 @@ public class TaxValidator {
         for (TaxGroupMappings mapping : groupMappings) {
             if (mapping.getId() != null) {
                 TaxGroupMappings existing = taxGroup.findOneBy(mapping);
-                if (existing.endDate() != null && mapping.endDate() != null && !existing.endDate().isEqual(mapping.endDate())) {
+                if (existing.endDate() != null && mapping.endDate() != null && !DateUtils.isEqual(existing.endDate(), mapping.endDate())) {
                     baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName)
                             .failWithCode("can.not.modify.end.date.once.updated");
                 } else {
@@ -335,7 +335,7 @@ public class TaxValidator {
                 if (groupMappingsOne.getTaxComponent().equals(groupMappings.getTaxComponent())) {
                     if (groupMappingsOne.endDate() == null && groupMappings.endDate() == null) {
                         baseDataValidator.reset().parameter(COMPONENT).failWithCode(DATES_ARE_OVERLAPPING);
-                    } else if (groupMappingsOne.startDate().isAfter(groupMappings.startDate())) {
+                    } else if (DateUtils.isAfter(groupMappingsOne.startDate(), groupMappings.startDate())) {
                         baseDataValidator.reset().parameter(COMPONENT_START_DATE).value(groupMappingsOne.startDate())
                                 .validateDateAfter(groupMappings.endDate());
                     } else {

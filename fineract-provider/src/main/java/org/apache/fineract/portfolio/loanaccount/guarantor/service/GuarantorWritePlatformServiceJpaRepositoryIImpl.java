@@ -187,7 +187,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
     private void validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(final Loan loan,
             final SavingsAccount savingsAccount) {
-        if (loan.getSubmittedOnDate().isBefore(savingsAccount.getActivationDate())) {
+        if (DateUtils.isBefore(loan.getSubmittedOnDate(), savingsAccount.getActivationDate())) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.guarantor.saving.account.activation.date.is.on.or.before.loan.submitted.on.date",
                     "Guarantor saving account activation date [" + savingsAccount.getActivationDate()

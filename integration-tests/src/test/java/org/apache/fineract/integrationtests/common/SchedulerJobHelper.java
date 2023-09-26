@@ -41,6 +41,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.hamcrest.MatcherAssert;
 import org.slf4j.Logger;
@@ -185,8 +186,7 @@ public class SchedulerJobHelper extends IntegrationTest {
                     }
                     Instant jobRunStartTime = df.parse(jobRunStartText, Instant::from);
                     Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
-                    return (jobRunStartTime.equals(beforeExecuteTime) || jobRunStartTime.isAfter(beforeExecuteTime))
-                            && (jobRunEndTime.equals(jobRunStartTime) || jobRunEndTime.isAfter(jobRunStartTime));
+                    return !jobRunStartTime.isBefore(beforeExecuteTime) && !jobRunEndTime.isBefore(jobRunStartTime);
                 });
 
         // Verify triggerType
@@ -206,7 +206,7 @@ public class SchedulerJobHelper extends IntegrationTest {
 
     public void fastForwardTime(LocalDate lastBusinessDateBeforeFastForward, LocalDate dateToFastForward, String jobName,
             ResponseSpecification responseSpec) {
-        while (lastBusinessDateBeforeFastForward.isBefore(dateToFastForward)) {
+        while (DateUtils.isBefore(lastBusinessDateBeforeFastForward, dateToFastForward)) {
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, lastBusinessDateBeforeFastForward);
             executeAndAwaitJob(jobName);
             lastBusinessDateBeforeFastForward = lastBusinessDateBeforeFastForward.plusDays(1);

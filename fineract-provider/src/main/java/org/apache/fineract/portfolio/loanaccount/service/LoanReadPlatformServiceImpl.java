@@ -1223,8 +1223,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                             this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.getPrincipal());
                             disbursementPeriodIds.add(data.getId());
                         } else if (data.isDueForDisbursement(fromDate, dueDate) && !disbursementPeriodIds.contains(data.getId())) {
-                            if (!excludePastUndisbursed || data.isDisbursed()
-                                    || !data.disbursementDate().isBefore(DateUtils.getBusinessLocalDate())) {
+                            if (!excludePastUndisbursed || data.isDisbursed() || !DateUtils.isBeforeBusinessDate(data.disbursementDate())) {
                                 principal = principal.add(data.getPrincipal());
                                 LoanSchedulePeriodData periodData;
                                 if (data.getChargeAmount() == null) {
@@ -2385,12 +2384,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final Collection<InterestRatePeriodData> intRates = this.floatingRatesReadPlatformService
                     .retrieveInterestRatePeriods(loanData.getLoanProductId());
             for (final InterestRatePeriodData rate : intRates) {
-                if (loanData.getTimeline() != null && rate.getFromDate().compareTo(loanData.getTimeline().getDisbursementDate()) > 0
-                        && loanData.isFloatingInterestRate()) {
+                if (loanData.getTimeline() == null) {
+                    continue;
+                }
+                boolean isAfterDisbursement = DateUtils.isAfter(rate.getFromDate(), loanData.getTimeline().getDisbursementDate());
+                if (isAfterDisbursement && loanData.isFloatingInterestRate()) {
                     updateInterestRatePeriodData(rate, loanData);
                     intRatePeriodData.add(rate);
-                } else if (loanData.getTimeline() != null
-                        && rate.getFromDate().compareTo(loanData.getTimeline().getDisbursementDate()) <= 0) {
+                } else if (!isAfterDisbursement) {
                     updateInterestRatePeriodData(rate, loanData);
                     intRatePeriodData.add(rate);
                     break;
@@ -2416,7 +2417,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         }
         rate.setEffectiveInterestRate(effectiveInterestRate);
 
-        if (loan.getTimeline() != null && rate.getFromDate().compareTo(loan.getTimeline().getDisbursementDate()) < 0) {
+        if (loan.getTimeline() != null && DateUtils.isBefore(rate.getFromDate(), loan.getTimeline().getDisbursementDate())) {
             rate.setFromDate(loan.getTimeline().getDisbursementDate());
         }
     }

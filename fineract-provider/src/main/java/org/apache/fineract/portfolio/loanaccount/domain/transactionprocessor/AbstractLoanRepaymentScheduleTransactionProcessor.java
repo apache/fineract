@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -312,7 +313,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     protected boolean isTransactionInAdvanceOfInstallment(final int installmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
         final LoanRepaymentScheduleInstallment currentInstallment = installments.get(installmentIndex);
-        return transactionDate.isBefore(currentInstallment.getDueDate());
+        return DateUtils.isBefore(transactionDate, currentInstallment.getDueDate());
     }
 
     /**
@@ -325,7 +326,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     protected boolean isTransactionALateRepaymentOnInstallment(final int installmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
         final LoanRepaymentScheduleInstallment currentInstallment = installments.get(installmentIndex);
-        return transactionDate.isAfter(currentInstallment.getDueDate());
+        return DateUtils.isAfter(transactionDate, currentInstallment.getDueDate());
     }
 
     private void recalculateChargeOffTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
@@ -477,7 +478,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             LocalDate pastDueDate = null;
             for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
                 pastDueDate = currentInstallment.getDueDate();
-                if (!currentInstallment.isAdditional() && currentInstallment.getDueDate().isAfter(transactionDate)) {
+                if (!currentInstallment.isAdditional() && DateUtils.isAfter(currentInstallment.getDueDate(), transactionDate)) {
                     currentInstallment.addToCredits(transactionAmount.getAmount());
                     currentInstallment.addToPrincipal(transactionDate, transactionAmount);
                     if (repaidAmount.isGreaterThanZero()) {
@@ -491,7 +492,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     // If already exists an additional installment just update the due date and
                     // principal from the Loan chargeback / CBR transaction
                 } else if (currentInstallment.isAdditional()) {
-                    if (transactionDate.isAfter(currentInstallment.getDueDate())) {
+                    if (DateUtils.isAfter(transactionDate, currentInstallment.getDueDate())) {
                         currentInstallment.updateDueDate(transactionDate);
                     }
 
@@ -669,18 +670,19 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanCharge.getAmountOutstanding(currency).isGreaterThanZero() && !loanCharge.isDueAtDisbursement()) {
                 if (loanCharge.isInstalmentFee()) {
                     LoanInstallmentCharge unpaidLoanChargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
-                    if (chargePerInstallment == null || chargePerInstallment.getRepaymentInstallment().getDueDate()
-                            .isAfter(unpaidLoanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
+                    if (chargePerInstallment == null || DateUtils.isAfter(chargePerInstallment.getRepaymentInstallment().getDueDate(),
+                            unpaidLoanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
                         installemntCharge = loanCharge;
                         chargePerInstallment = unpaidLoanChargePerInstallment;
                     }
-                } else if (earliestUnpaidCharge == null || loanCharge.getDueLocalDate().isBefore(earliestUnpaidCharge.getDueLocalDate())) {
+                } else if (earliestUnpaidCharge == null
+                        || DateUtils.isBefore(loanCharge.getDueLocalDate(), earliestUnpaidCharge.getDueLocalDate())) {
                     earliestUnpaidCharge = loanCharge;
                 }
             }
         }
-        if (earliestUnpaidCharge == null || (chargePerInstallment != null
-                && earliestUnpaidCharge.getDueLocalDate().isAfter(chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+        if (earliestUnpaidCharge == null || (chargePerInstallment != null && DateUtils.isAfter(earliestUnpaidCharge.getDueLocalDate(),
+                chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
             earliestUnpaidCharge = installemntCharge;
         }
 
@@ -791,20 +793,20 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 if (loanCharge.isInstalmentFee()) {
                     LoanInstallmentCharge paidLoanChargePerInstallment = loanCharge
                             .getLastPaidOrPartiallyPaidInstallmentLoanCharge(currency);
-                    if (chargePerInstallment == null
-                            || (paidLoanChargePerInstallment != null && chargePerInstallment.getRepaymentInstallment().getDueDate()
-                                    .isBefore(paidLoanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+                    if (chargePerInstallment == null || (paidLoanChargePerInstallment != null
+                            && DateUtils.isBefore(chargePerInstallment.getRepaymentInstallment().getDueDate(),
+                                    paidLoanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                         installemntCharge = loanCharge;
                         chargePerInstallment = paidLoanChargePerInstallment;
                     }
                 } else if (latestPaidCharge == null || (loanCharge.isPaidOrPartiallyPaid(currency)
-                        && loanCharge.getDueLocalDate().isAfter(latestPaidCharge.getDueLocalDate()))) {
+                        && DateUtils.isAfter(loanCharge.getDueLocalDate(), latestPaidCharge.getDueLocalDate()))) {
                     latestPaidCharge = loanCharge;
                 }
             }
         }
         if (latestPaidCharge == null || (chargePerInstallment != null
-                && latestPaidCharge.getDueLocalDate().isAfter(chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+                && DateUtils.isAfter(latestPaidCharge.getDueLocalDate(), chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
             latestPaidCharge = installemntCharge;
         }
 

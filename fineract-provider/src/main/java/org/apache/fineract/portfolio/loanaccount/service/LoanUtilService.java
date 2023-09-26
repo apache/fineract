@@ -281,7 +281,7 @@ public class LoanUtilService {
                     isSkipRepaymentOnFirstMonth = isLoanRepaymentsSyncWithMeeting(loan.group(), historyList.get(0).getCalendar());
                 }
                 calculatedRepaymentsStartingFromDate = CalendarUtils.getNextRepaymentMeetingDate(historyList.get(0).getRecurrence(),
-                        historyList.get(0).getStartDateLocalDate(), actualDisbursementDate, repayEvery, frequency, workingDays,
+                        historyList.get(0).getStartDate(), actualDisbursementDate, repayEvery, frequency, workingDays,
                         isSkipRepaymentOnFirstMonth, numberOfDays);
             }
         }

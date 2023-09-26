@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.springframework.stereotype.Component;
@@ -230,7 +231,7 @@ public final class LoanSummaryWrapper {
         if (totalOverdue.isGreaterThanZero()) {
             for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
                 if (installment.isOverdueOn(from)) {
-                    if (overdueSince == null || overdueSince.isAfter(installment.getDueDate())) {
+                    if (overdueSince == null || DateUtils.isAfter(overdueSince, installment.getDueDate())) {
                         overdueSince = installment.getDueDate();
                     }
                 }

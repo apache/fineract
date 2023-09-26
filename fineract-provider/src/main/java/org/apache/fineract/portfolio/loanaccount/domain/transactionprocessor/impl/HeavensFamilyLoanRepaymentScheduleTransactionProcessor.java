@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -85,9 +86,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
         final LoanRepaymentScheduleInstallment previousInstallment = installments.get(previousInstallmentIndex);
         lastInstallmentDueDate = previousInstallment.getDueDate();
 
-        isInAdvance = !(transactionDate.isAfter(lastInstallmentDueDate) || transactionDate.isEqual(lastInstallmentDueDate));
-
-        return isInAdvance;
+        return DateUtils.isBefore(transactionDate, lastInstallmentDueDate);
     }
 
     /**

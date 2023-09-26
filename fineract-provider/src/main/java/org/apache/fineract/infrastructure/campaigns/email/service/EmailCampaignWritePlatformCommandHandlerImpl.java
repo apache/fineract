@@ -31,7 +31,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
@@ -56,11 +55,9 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportParameterUsage;
@@ -98,7 +95,6 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     @Transactional
     @Override
     public CommandProcessingResult create(JsonCommand command) {
-
         final AppUser currentUser = this.context.authenticatedUser();
 
         this.emailCampaignValidator.validateCreate(command.json());
@@ -286,24 +282,21 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         if (emailCampaign.isDirect()) {
             insertDirectCampaignIntoEmailOutboundTable(emailCampaign.getParamValue(), emailCampaign.getEmailSubject(),
                     emailCampaign.getEmailMessage(), emailCampaign.getCampaignName(), emailCampaign.getId());
-        } else {
-            if (emailCampaign.isSchedule()) {
-
-                /**
-                 * if recurrence start date is in the future calculate next trigger date if not use recurrence start
-                 * date us next trigger date when activating
-                 */
-                LocalDateTime nextTriggerDateWithTime;
-                if (emailCampaign.getRecurrenceStartDate().isBefore(tenantDateTime())) {
-                    nextTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
-                            emailCampaign.getRecurrenceStartDate(), DateUtils.getLocalDateTimeOfTenant());
-                } else {
-                    nextTriggerDateWithTime = emailCampaign.getRecurrenceStartDate();
-                }
-
-                emailCampaign.setNextTriggerDate(nextTriggerDateWithTime);
-                this.emailCampaignRepository.saveAndFlush(emailCampaign);
+        } else if (emailCampaign.isSchedule()) {
+            // if recurrence start date is in the past, calculate next trigger date, otherwise use recurrence start
+            // date as next trigger date when activating
+            LocalDateTime nextTriggerDateWithTime;
+            LocalDateTime recurrenceStartDate = emailCampaign.getRecurrenceStartDate();
+            LocalDateTime tenantDateTime = DateUtils.getLocalDateTimeOfTenant();
+            if (DateUtils.isBefore(recurrenceStartDate, tenantDateTime)) {
+                nextTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), recurrenceStartDate,
+                        tenantDateTime);
+            } else {
+                nextTriggerDateWithTime = recurrenceStartDate;
             }
+
+            emailCampaign.setNextTriggerDate(nextTriggerDateWithTime);
+            this.emailCampaignRepository.saveAndFlush(emailCampaign);
         }
 
         /*
@@ -420,7 +413,6 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     @Transactional
     @Override
     public CommandProcessingResult reactivateEmailCampaign(final Long campaignId, JsonCommand command) {
-
         this.emailCampaignValidator.validateActivation(command.json());
 
         final AppUser currentUser = this.context.authenticatedUser();
@@ -433,23 +425,18 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final LocalDate reactivationDate = command.localDateValueOfParameterNamed("activationDate");
         emailCampaign.reactivate(currentUser, fmt, reactivationDate);
         if (emailCampaign.isSchedule()) {
-
-            /**
-             * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
-             * next trigger date when activating
-             */
+            // if recurrence start date is in the past, calculate next trigger date, otherwise use recurrence start date
+            // as next trigger date when activating
             LocalDateTime nextTriggerDate = null;
-            if (emailCampaign.getRecurrenceStartDate().isBefore(tenantDateTime())) {
-                nextTriggerDate = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), emailCampaign.getRecurrenceStartDate(),
-                        DateUtils.getLocalDateTimeOfTenant());
+            LocalDateTime tenantDateTime = DateUtils.getLocalDateTimeOfTenant();
+            LocalDateTime recurrenceStartDate = emailCampaign.getRecurrenceStartDate();
+            if (DateUtils.isBefore(recurrenceStartDate, tenantDateTime)) {
+                nextTriggerDate = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), recurrenceStartDate, tenantDateTime);
             } else {
-                nextTriggerDate = emailCampaign.getRecurrenceStartDate();
+                nextTriggerDate = recurrenceStartDate;
             }
-            // to get time of tenant
-            final LocalDateTime getTime = emailCampaign.getRecurrenceStartDate();
-
-            final String dateString = nextTriggerDate.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":"
-                    + getTime.getSecond();
+            final String dateString = nextTriggerDate.toString() + " " + recurrenceStartDate.getHour() + ":"
+                    + recurrenceStartDate.getMinute() + ":" + recurrenceStartDate.getSecond();
             final DateTimeFormatter simpleDateFormat = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
                     .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
             final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
@@ -469,18 +456,5 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
         throw new PlatformDataIntegrityException("error.msg.email.campaign.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
-    }
-
-    private LocalDateTime tenantDateTime() {
-        LocalDateTime today = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
-        final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-
-        if (tenant != null) {
-            final ZoneId zone = ZoneId.of(tenant.getTimezoneId());
-            if (zone != null) {
-                today = LocalDateTime.now(zone);
-            }
-        }
-        return today;
     }
 }

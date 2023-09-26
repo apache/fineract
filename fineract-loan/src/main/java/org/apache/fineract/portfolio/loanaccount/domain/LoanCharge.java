@@ -363,13 +363,11 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom {
         if (this.loan != null) {
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case PERCENT_OF_AMOUNT:
-                    // If charge type is specified due date and loan is multi
-                    // disburment loan.
-                    // Then we need to get as of this loan charge due date how
-                    // much amount disbursed.
+                    // If charge type is specified due date and loan is multi disburment loan.
+                    // Then we need to get as of this loan charge due date how much amount disbursed.
                     if (this.loan.isMultiDisburmentLoan() && this.isSpecifiedDueDate()) {
                         for (final LoanDisbursementDetails loanDisbursementDetails : this.loan.getDisbursementDetails()) {
-                            if (!loanDisbursementDetails.expectedDisbursementDate().isAfter(this.getDueDate())) {
+                            if (!DateUtils.isAfter(loanDisbursementDetails.expectedDisbursementDate(), this.getDueDate())) {
                                 amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
                             }
                         }
@@ -635,13 +633,12 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom {
 
     private boolean occursOnDayFromExclusiveAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,
             final LocalDate target) {
-        return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
+        return DateUtils.isAfter(target, fromNotInclusive) && !DateUtils.isAfter(target, upToAndInclusive);
     }
 
     private boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromAndInclusive, final LocalDate upToAndInclusive,
             final LocalDate target) {
-        return target != null && (target.isEqual(fromAndInclusive) || target.isAfter(fromAndInclusive))
-                && !target.isAfter(upToAndInclusive);
+        return target != null && !DateUtils.isBefore(target, fromAndInclusive) && !DateUtils.isAfter(target, upToAndInclusive);
     }
 
     public boolean isFeeCharge() {
@@ -792,8 +789,9 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom {
     public LoanInstallmentCharge getUnpaidInstallmentLoanCharge() {
         LoanInstallmentCharge unpaidChargePerInstallment = null;
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (loanChargePerInstallment.isPending() && (unpaidChargePerInstallment == null || unpaidChargePerInstallment
-                    .getRepaymentInstallment().getDueDate().isAfter(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+            if (loanChargePerInstallment.isPending() && (unpaidChargePerInstallment == null
+                    || DateUtils.isAfter(unpaidChargePerInstallment.getRepaymentInstallment().getDueDate(),
+                            loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                 unpaidChargePerInstallment = loanChargePerInstallment;
             }
         }
@@ -802,7 +800,7 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LoanInstallmentCharge getInstallmentLoanCharge(final LocalDate periodDueDate) {
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (periodDueDate.isEqual(loanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
+            if (DateUtils.isEqual(periodDueDate, loanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
                 return loanChargePerInstallment;
             }
         }
@@ -974,8 +972,9 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom {
             Money outstanding = Money.of(currency, loanChargePerInstallment.getAmountOutstanding());
             final boolean partiallyPaid = outstanding.isGreaterThanZero()
                     && outstanding.isLessThan(loanChargePerInstallment.getAmount(currency));
-            if ((partiallyPaid || loanChargePerInstallment.isPaid()) && (paidChargePerInstallment == null || paidChargePerInstallment
-                    .getRepaymentInstallment().getDueDate().isBefore(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+            if ((partiallyPaid || loanChargePerInstallment.isPaid()) && (paidChargePerInstallment == null
+                    || DateUtils.isBefore(paidChargePerInstallment.getRepaymentInstallment().getDueDate(),
+                            loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                 paidChargePerInstallment = loanChargePerInstallment;
             }
         }

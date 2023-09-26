@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 
 @Getter
@@ -64,7 +65,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     }
 
     private boolean occursOnDayFromAndUpTo(final LocalDate fromNotInclusive, final LocalDate upToInclusive, final LocalDate target) {
-        return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToInclusive);
+        return DateUtils.isAfter(target, fromNotInclusive) && !DateUtils.isAfter(target, upToInclusive);
     }
 
     public boolean isApplicable(final LocalDate fromDate) {
@@ -72,7 +73,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     }
 
     private boolean occursBefore(final LocalDate date, final LocalDate target) {
-        return target != null && !target.isAfter(date);
+        return target != null && !DateUtils.isAfter(target, date);
     }
 
     public boolean isSpecificToInstallment() {
@@ -84,7 +85,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     }
 
     public Boolean isProcessed() {
-        return this.isProcessed == null ? false : this.isProcessed;
+        return this.isProcessed != null && this.isProcessed;
     }
 
     public void setProcessed(Boolean isProcessed) {

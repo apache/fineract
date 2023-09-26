@@ -81,7 +81,7 @@ public class PurgeProcessedCommandsTaskletTest {
         // then
         verify(repository, times(1)).deleteOlderEventsWithStatus(Mockito.any(), Mockito.any());
         verify(repository).deleteOlderEventsWithStatus(Mockito.any(), dateCriteriaCaptor.capture());
-        OffsetDateTime expectedDateForPurgeCriteriaTest = DateUtils.getOffsetDateTimeOfTenant().minusDays(2);
+        OffsetDateTime expectedDateForPurgeCriteriaTest = DateUtils.getAuditOffsetDateTime().minusDays(2);
         OffsetDateTime actualDateForPurgeCriteria = dateCriteriaCaptor.getValue();
         assertTrue(expectedDateForPurgeCriteriaTest.toEpochSecond() - actualDateForPurgeCriteria.toEpochSecond() <= 1);
         assertEquals(RepeatStatus.FINISHED, resultStatus);

@@ -23,7 +23,6 @@ import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.fineract.infrastructure.campaigns.jobs.TenantDateTimeUtil;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignStatus;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
@@ -51,12 +50,12 @@ public class UpdateSmsOutboundWithCampaignMessageTasklet implements Tasklet {
                 .findByTriggerTypeAndStatus(SmsCampaignTriggerType.SCHEDULE.getValue(), SmsCampaignStatus.ACTIVE.getValue());
         if (!CollectionUtils.isEmpty(smsCampaignDataCollection)) {
             for (SmsCampaign smsCampaign : smsCampaignDataCollection) {
-                LocalDateTime tenantDateNow = TenantDateTimeUtil.tenantDateTime();
+                LocalDateTime tenantDateNow = DateUtils.getLocalDateTimeOfTenant();
                 LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
 
                 log.debug("tenant time {} trigger time {} {}", tenantDateNow, nextTriggerDate,
                         JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name());
-                if (nextTriggerDate.isBefore(tenantDateNow)) {
+                if (DateUtils.isBefore(nextTriggerDate, tenantDateNow)) {
                     smsCampaignWritePlatformService.insertDirectCampaignIntoSmsOutboundTable(smsCampaign);
                     updateTriggerDates(smsCampaign.getId());
                 }
@@ -70,11 +69,10 @@ public class UpdateSmsOutboundWithCampaignMessageTasklet implements Tasklet {
                 .orElseThrow(() -> new SmsCampaignNotFound(campaignId));
         LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
         smsCampaign.setLastTriggerDate(nextTriggerDate);
-        LocalDateTime nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getNextTriggerDate(),
-                nextTriggerDate);
-        if (nextRuntime.isBefore(DateUtils.getLocalDateTimeOfTenant())) {
-            nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getNextTriggerDate(),
-                    DateUtils.getLocalDateTimeOfTenant());
+        LocalDateTime nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), nextTriggerDate, nextTriggerDate);
+        LocalDateTime tenantDateTime = DateUtils.getLocalDateTimeOfTenant();
+        if (DateUtils.isBefore(nextRuntime, tenantDateTime)) {
+            nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), nextTriggerDate, tenantDateTime);
         }
 
         smsCampaign.setNextTriggerDate(nextRuntime);

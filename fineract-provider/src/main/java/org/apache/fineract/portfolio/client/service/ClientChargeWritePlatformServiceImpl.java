@@ -99,9 +99,9 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                     .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-            LocalDate activationDate = client.getActivationLocalDate();
+            LocalDate activationDate = client.getActivationDate();
             LocalDate dueDate = clientCharge.getDueLocalDate();
-            if (dueDate.isBefore(activationDate)) {
+            if (DateUtils.isBefore(dueDate, activationDate)) {
                 baseDataValidator.reset().parameter(ClientApiConstants.dueAsOfDateParamName).value(dueDate.format(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("dueDate.before.activationDate");
 
@@ -275,7 +275,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
         if (requiresTransactionDateValidation) {
             validateTransactionDateOnWorkingDay(transactionDate, clientCharge, fmt);
 
-            if (client.getActivationLocalDate() != null && transactionDate.isBefore(client.getActivationLocalDate())) {
+            if (DateUtils.isBefore(transactionDate, client.getActivationDate())) {
                 baseDataValidator.reset().parameter(ClientApiConstants.transactionDateParamName).value(transactionDate.format(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("transaction.before.activationDate");
                 throw new PlatformApiDataValidationException(dataValidationErrors);

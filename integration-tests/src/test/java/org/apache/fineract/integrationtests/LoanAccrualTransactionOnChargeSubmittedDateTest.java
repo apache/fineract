@@ -41,6 +41,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -746,7 +747,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
                 LocalDate accrualEntryDate = LocalDate.of(accrualEntryDateAsArray.get(0), accrualEntryDateAsArray.get(1),
                         accrualEntryDateAsArray.get(2));
 
-                if (transactionDate.isEqual(accrualEntryDate)) {
+                if (DateUtils.isEqual(transactionDate, accrualEntryDate)) {
                     isTransactionFound = true;
                     verifyAmounts(0.0f, 0.0f, 10.0f, Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))),
                             Float.valueOf(String.valueOf(transactions.get(i).get("feeChargesPortion"))),
@@ -875,7 +876,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
                 LocalDate accrualEntryDate = LocalDate.of(accrualEntryDateAsArray.get(0), accrualEntryDateAsArray.get(1),
                         accrualEntryDateAsArray.get(2));
 
-                if (transactionDate.isEqual(accrualEntryDate)) {
+                if (DateUtils.isEqual(transactionDate, accrualEntryDate)) {
                     isTransactionFound = true;
                     assertEquals(interestPortion, Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))),
                             "Mismatch in transaction amounts");
