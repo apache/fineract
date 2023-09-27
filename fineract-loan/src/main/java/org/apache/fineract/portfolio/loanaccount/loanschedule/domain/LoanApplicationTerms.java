@@ -1774,4 +1774,8 @@ public final class LoanApplicationTerms {
     public boolean isScheduleExtensionForDownPaymentDisabled() {
         return isScheduleExtensionForDownPaymentDisabled;
     }
+
+    public Integer getInstallmentAmountInMultiplesOf() {
+        return installmentAmountInMultiplesOf;
+    }
 }

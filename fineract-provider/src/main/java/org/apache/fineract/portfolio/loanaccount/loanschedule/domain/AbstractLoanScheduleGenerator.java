@@ -141,6 +141,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (loanApplicationTerms.isDownPaymentEnabled()) {
                 downPaymentAmount = MathUtil.percentageOf(scheduleParams.getOutstandingBalance().getAmount(),
                         loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19);
+                if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
+                    downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount,
+                            loanApplicationTerms.getInstallmentAmountInMultiplesOf());
+                }
+
             }
             Money calculatedAmortizableAmount = loanApplicationTerms.getPrincipal().minus(downPaymentAmount);
             scheduleParams.setOutstandingBalance(calculatedAmortizableAmount);
@@ -155,6 +160,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 if (loanApplicationTerms.isDownPaymentEnabled()) {
                     downPaymentAmt = MathUtil.percentageOf(disburseAmt, loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(),
                             19);
+                    if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
+                        downPaymentAmt = Money.roundToMultiplesOf(downPaymentAmt, loanApplicationTerms.getInstallmentAmountInMultiplesOf());
+                    }
                 }
                 BigDecimal remainingPrincipalAmt = disburseAmt.subtract(downPaymentAmt);
                 scheduleParams.setPrincipalToBeScheduled(Money.of(currency, remainingPrincipalAmt));
@@ -2022,6 +2030,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             LoanScheduleParams scheduleParams, LocalDate date, BigDecimal periodBaseAmount) {
         BigDecimal downPaymentAmount = MathUtil.percentageOf(periodBaseAmount,
                 loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19);
+        if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
+            downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, loanApplicationTerms.getInstallmentAmountInMultiplesOf());
+        }
         Money downPayment = Money.of(loanApplicationTerms.getCurrency(), downPaymentAmount);
         LoanScheduleModelDownPaymentPeriod installment = LoanScheduleModelDownPaymentPeriod
                 .downPayment(scheduleParams.getInstalmentNumber(), date, downPayment, scheduleParams.getOutstandingBalance());
@@ -2238,8 +2249,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     : loanApplicationTerms.getSubmittedOnDate();
             BigDecimal downPaymentAmount = BigDecimal.ZERO;
             if (loanApplicationTerms.isDownPaymentEnabled()) {
-                downPaymentAmount = MathUtil.percentageOf(loanScheduleParams.getOutstandingBalance().getAmount(),
-                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19);
+                double downPaymentAmt = MathUtil.percentageOf(loanScheduleParams.getOutstandingBalance().getAmount(),
+                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19).doubleValue();
+                if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
+                    downPaymentAmt = Money.roundToMultiplesOf(downPaymentAmt, loanApplicationTerms.getInstallmentAmountInMultiplesOf());
+                }
+                downPaymentAmount = BigDecimal.valueOf(downPaymentAmt);
             }
             Money calculatedAmortizableAmount = principalToBeScheduled.minus(downPaymentAmount);
             loanScheduleParams.setOutstandingBalance(calculatedAmortizableAmount);
