@@ -2024,8 +2024,8 @@ public class BatchApiTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, Long.valueOf(savingsId), "chargeStatus=all", null);
-        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L);
-        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L);
+        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L, 100F);
+        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L, 10F);
 
         final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
                 holdAmountOnSavingAccountRequest);
@@ -2039,7 +2039,7 @@ public class BatchApiTest {
         final Long holdAmountTransactionId = jsonHelper.parse(responses1.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
 
         final BatchRequest releaseAmountOnSavingAccountRequest = BatchHelper.releaseAmountOnSavingAccount(2L, 1L, holdAmountTransactionId);
-        final BatchRequest withdrawSavingAccountRequest = BatchHelper.withdrawSavingAccount(3L, 1L);
+        final BatchRequest withdrawSavingAccountRequest = BatchHelper.withdrawSavingAccount(3L, 1L, 80F);
 
         final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
                 withdrawSavingAccountRequest);
@@ -2555,6 +2555,59 @@ public class BatchApiTest {
                 this.responseSpec, jsonifiedRepaymentRequest);
 
         Assertions.assertEquals(HttpStatus.SC_CONFLICT, repaymentResponse.get(0).getStatusCode(), "Verify Status Code 409 for Locked Loan");
+    }
+
+    @Test
+    public void verifyCalculatingRunningBalanceAfterBatchWithReleaseAmount() {
+        final float holdAmount = 10F;
+        final float withdrawalAmount = 80F;
+        final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, 2L, "chargeStatus=all", null);
+        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L, 300F);
+        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L, holdAmount);
+
+        final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
+                holdAmountOnSavingAccountRequest);
+        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests1));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(2).getStatusCode(),
+                "Verify Status Code 200 for hold amount on saving account");
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final Long holdAmountTransactionId = jsonHelper.parse(responses1.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
+
+        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        HashMap accountDetails = savingsAccountHelper.getSavingsDetails(2);
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
+        final float runningBalanceBeforeBatch = (float) transactions.get(0).get("runningBalance");
+
+        final BatchRequest releaseAmountOnSavingAccountRequest = BatchHelper.releaseAmountOnSavingAccount(2L, 1L, holdAmountTransactionId);
+        final BatchRequest withdrawSavingAccountRequest1 = BatchHelper.withdrawSavingAccount(3L, 1L, withdrawalAmount);
+        final BatchRequest withdrawSavingAccountRequest2 = BatchHelper.withdrawSavingAccount(4L, 1L, withdrawalAmount);
+
+        final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
+                withdrawSavingAccountRequest1, withdrawSavingAccountRequest2);
+        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests2));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(0).getStatusCode(),
+                "Verify Status Code 200 for release amount on saving account");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(1).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(2).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
+
+        accountDetails = savingsAccountHelper.getSavingsDetails(2);
+        transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
+
+        final HashMap<String, Object> transactionRelease = transactions.get(2);
+        final HashMap<String, Object> transactionWithdrawal1 = transactions.get(1);
+        final HashMap<String, Object> transactionWithdrawal2 = transactions.get(0);
+
+        assertEquals(runningBalanceBeforeBatch + holdAmount, transactionRelease.get("runningBalance"),
+                "Verify running balance after release amount");
+        assertEquals(runningBalanceBeforeBatch + holdAmount - withdrawalAmount, transactionWithdrawal1.get("runningBalance"),
+                "Verify running balance after first withdrawal");
+        assertEquals(runningBalanceBeforeBatch + holdAmount - withdrawalAmount - withdrawalAmount,
+                transactionWithdrawal2.get("runningBalance"), "Verify running balance after second withdrawal");
     }
 
     /**
