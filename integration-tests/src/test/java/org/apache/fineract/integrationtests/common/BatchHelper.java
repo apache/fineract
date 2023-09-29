@@ -1561,13 +1561,17 @@ public final class BatchHelper {
      *            the request ID
      * @param reference
      *            the reference
+     * @param amount
+     *            the transaction amount
      * @return BatchRequest the created {@link BatchRequest}
      */
-    public static BatchRequest depositSavingAccount(final Long requestId, final Long reference) {
+    public static BatchRequest depositSavingAccount(final Long requestId, final Long reference, final float amount) {
         final LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
         final String transactionDateString = transactionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        String json = String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
-                + "\"transactionDate\": \"%s\", \"transactionAmount\": \"100\", \"paymentTypeId\": \"1\"}", transactionDateString);
+        String json = String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
+                        + "\"transactionDate\": \"%s\", \"transactionAmount\": \"%s\", \"paymentTypeId\": \"1\"}",
+                transactionDateString, amount);
         return commandSavingAccount(requestId, null, reference, json, "deposit");
     }
 
@@ -1579,13 +1583,17 @@ public final class BatchHelper {
      *            the request ID
      * @param reference
      *            the reference
+     * @param amount
+     *            the transaction amount
      * @return BatchRequest the created {@link BatchRequest}
      */
-    public static BatchRequest withdrawSavingAccount(final Long requestId, final Long reference) {
+    public static BatchRequest withdrawSavingAccount(final Long requestId, final Long reference, final float amount) {
         final LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
         final String transactionDateString = transactionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        String json = String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
-                + "\"transactionDate\": \"%s\", \"transactionAmount\": \"80\", \"paymentTypeId\": \"1\"}", transactionDateString);
+        String json = String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
+                        + "\"transactionDate\": \"%s\", \"transactionAmount\": \"%s\", \"paymentTypeId\": \"1\"}",
+                transactionDateString, amount);
         return commandSavingAccount(requestId, null, reference, json, "withdrawal");
     }
 
@@ -1624,14 +1632,15 @@ public final class BatchHelper {
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.SavingsAccountTransactionCommandStrategy}
      * request with given request ID.
      *
-     *
      * @param requestId
      *            the request ID
      * @param reference
-     *            teh reference
+     *            the reference
+     * @param amount
+     *            the transaction amount
      * @return BatchRequest the created {@link BatchRequest}
      */
-    public static BatchRequest holdAmountOnSavingAccount(final Long requestId, final Long reference) {
+    public static BatchRequest holdAmountOnSavingAccount(final Long requestId, final Long reference, final float amount) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -1642,8 +1651,8 @@ public final class BatchHelper {
         final String transactionDateString = transactionDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody(String.format(
                 "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
-                        + "\"transactionDate\": \"%s\", \"transactionAmount\": \"10\", \"reasonForBlock\": \"test\"}",
-                transactionDateString));
+                        + "\"transactionDate\": \"%s\", \"transactionAmount\": \"%s\", \"reasonForBlock\": \"test\"}",
+                transactionDateString, amount));
 
         return br;
     }
