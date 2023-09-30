@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
@@ -90,14 +91,13 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountNotFoundException;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
+@RequiredArgsConstructor
+
 public class DepositAccountReadPlatformServiceImpl implements DepositAccountReadPlatformService {
 
     private static final FixedDepositAccountMapper FIXED_DEPOSIT_ACCOUNT_MAPPER = new FixedDepositAccountMapper();
@@ -114,7 +114,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationHelper paginationHelper;
-    private final SavingsAccountTransactionsMapper transactionsMapper;
+    private final SavingsAccountTransactionsMapper transactionsMapper = new SavingsAccountTransactionsMapper();
     private final ClientReadPlatformService clientReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
@@ -123,46 +123,10 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final StaffReadPlatformService staffReadPlatformService;
     private final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private final RecurringAccountDepositTransactionTemplateMapper rdTransactionTemplateMapper;
+    private final RecurringAccountDepositTransactionTemplateMapper rdTransactionTemplateMapper = new RecurringAccountDepositTransactionTemplateMapper();
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
-
-    @Autowired
-    public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final DepositAccountInterestRateChartReadPlatformService chartReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator,
-            final ClientReadPlatformService clientReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
-            final DepositProductReadPlatformService depositProductReadPlatformService,
-            final SavingsDropdownReadPlatformService savingsDropdownReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService,
-            final InterestRateChartReadPlatformService productChartReadPlatformService,
-            final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final DropdownReadPlatformService dropdownReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
-            PaginationHelper paginationHelper) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.accountChartReadPlatformService = chartReadPlatformService;
-        this.paginationParametersDataValidator = paginationParametersDataValidator;
-        this.sqlGenerator = sqlGenerator;
-        this.transactionsMapper = new SavingsAccountTransactionsMapper();
-        this.clientReadPlatformService = clientReadPlatformService;
-        this.groupReadPlatformService = groupReadPlatformService;
-        this.depositProductReadPlatformService = depositProductReadPlatformService;
-        this.savingsDropdownReadPlatformService = savingsDropdownReadPlatformService;
-        this.chargeReadPlatformService = chargeReadPlatformService;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.depositsDropdownReadPlatformService = depositsDropdownReadPlatformService;
-        this.productChartReadPlatformService = productChartReadPlatformService;
-        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-        this.rdTransactionTemplateMapper = new RecurringAccountDepositTransactionTemplateMapper();
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.calendarReadPlatformService = calendarReadPlatformService;
-        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
-        this.paginationHelper = paginationHelper;
-    }
 
     @Override
     public Collection<DepositAccountData> retrieveAll(final DepositAccountType depositAccountType,

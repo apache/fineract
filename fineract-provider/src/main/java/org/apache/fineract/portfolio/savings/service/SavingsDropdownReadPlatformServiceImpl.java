@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.service;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -28,9 +29,8 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsWithdrawalFeesType;
-import org.springframework.stereotype.Service;
 
-@Service
+@NoArgsConstructor
 public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownReadPlatformService {
 
     @Override

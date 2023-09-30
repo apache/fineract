@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -41,26 +42,15 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimel
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ColumnValidator columnValidator;
-
-    @Autowired
-    public GSIMReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final ColumnValidator columnValidator) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.columnValidator = columnValidator;
-
-    }
 
     private static final class GSIMFieldsMapper implements RowMapper<GroupSavingsIndividualMonitoringAccountData> {
 

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -45,18 +46,11 @@ import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.service.TaxUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountInterestPostingService {
 
     private final SavingsHelper savingsHelper;
-
-    @Autowired
-    public SavingsAccountInterestPostingServiceImpl(final SavingsHelper savingsHelper) {
-        this.savingsHelper = savingsHelper;
-    }
 
     @Override
     public SavingsAccountData postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final boolean isInterestTransfer,
