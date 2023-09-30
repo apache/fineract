@@ -18,16 +18,26 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import static lombok.AccessLevel.PROTECTED;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.HttpStatus.SC_CONFLICT;
+import static org.apache.http.HttpStatus.SC_FORBIDDEN;
+import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+import static org.apache.http.HttpStatus.SC_METHOD_NOT_ALLOWED;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
+import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
-import jakarta.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
-/**
- *
- */
+@Getter
+@Setter(PROTECTED)
 public class ApiGlobalErrorResponse {
 
     /**
@@ -58,206 +68,130 @@ public class ApiGlobalErrorResponse {
 
     private List<ApiParameterError> errors = new ArrayList<>();
 
+    protected ApiGlobalErrorResponse() {}
+
+    public static ApiGlobalErrorResponse create(int statusCode, String msgCode, String developerMessage, String defaultUserMessage,
+            List<ApiParameterError> errors) {
+        ApiGlobalErrorResponse response = new ApiGlobalErrorResponse();
+        response.setHttpStatusCode(String.valueOf(statusCode));
+        response.setUserMessageGlobalisationCode(msgCode);
+        response.setDeveloperMessage(developerMessage);
+        response.setDefaultUserMessage(defaultUserMessage);
+        response.setErrors(errors);
+        return response;
+    }
+
+    public static ApiGlobalErrorResponse create(int statusCode, String msgCode, String developerMessage, String defaultUserMessage) {
+        return create(statusCode, msgCode, developerMessage, defaultUserMessage, null);
+    }
+
     public static ApiGlobalErrorResponse unAuthenticated() {
-
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("401");
-        globalErrorResponse.setDeveloperMessage("Invalid authentication details were passed in api request.");
-        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.not.authenticated");
-        globalErrorResponse.setDefaultUserMessage("Unauthenticated. Please login.");
-
-        return globalErrorResponse;
+        return create(SC_UNAUTHORIZED, "error.msg.not.authenticated", "Invalid authentication details were passed in api request.",
+                "Unauthenticated. Please login.");
     }
 
     public static ApiGlobalErrorResponse invalidTenantIdentifier() {
-
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("401");
-        globalErrorResponse.setDeveloperMessage("Invalid tenant details were passed in api request.");
-        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.invalid.tenant.identifier");
-        globalErrorResponse.setDefaultUserMessage("Invalid tenant identifier provided with request.");
-
-        return globalErrorResponse;
+        return create(SC_UNAUTHORIZED, "error.msg.invalid.tenant.identifier", "Invalid tenant details were passed in api request.",
+                "Invalid tenant identifier provided with request.");
     }
 
     public static ApiGlobalErrorResponse invalidInstanceTypeMethod(final String method) {
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode(Status.METHOD_NOT_ALLOWED.toString());
-        globalErrorResponse.setDeveloperMessage("Invalid instance type called in api request for the method " + method);
-        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.invalid.instance.type");
-        globalErrorResponse.setDefaultUserMessage("Invalid method " + method + " used with request to this instance type.");
-
-        return globalErrorResponse;
+        return create(SC_METHOD_NOT_ALLOWED, "error.msg.invalid.instance.type",
+                "Invalid instance type called in api request for the method " + method,
+                "Invalid method " + method + " used with request to this instance type.");
     }
 
     public static ApiGlobalErrorResponse loanIsLocked(final Long loanId) {
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode(Status.CONFLICT.toString());
-        globalErrorResponse.setDeveloperMessage("Loan is locked by the COB job. Loan ID: " + loanId);
-        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.loan.locked");
-        globalErrorResponse.setDefaultUserMessage("Loan is locked by the COB job. Loan ID: \" + loanId");
+        String msg = "Loan is locked by the COB job. Loan ID: " + loanId;
+        return create(SC_CONFLICT, "error.msg.loan.locked", msg, msg);
+    }
 
-        return globalErrorResponse;
+    public static ApiGlobalErrorResponse conflict(String type, String identifier) {
+        String details = "";
+        if (type == null) {
+            type = "unknown";
+        } else {
+            details = " on " + type;
+        }
+        if (identifier != null) {
+            details += " [" + identifier + ']';
+        }
+        String msg = "The server is currently unable to handle the request due to concurrent modification" + details + ", please try again";
+        return create(SC_CONFLICT, "error.msg.platform.service." + type + ".conflict", msg, msg);
     }
 
     public static ApiGlobalErrorResponse unAuthorized(final String defaultUserMessage) {
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("403");
-        globalErrorResponse.setDeveloperMessage(
-                "The user associated with credentials passed on this request does not have sufficient privileges to perform this action.");
-        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.not.authorized");
-        globalErrorResponse.setDefaultUserMessage("Insufficient privileges to perform this action.");
+        String msgCode = "error.msg.not.authorized";
+        final List<ApiParameterError> errors = List.of(ApiParameterError.generalError(msgCode, defaultUserMessage));
 
-        final List<ApiParameterError> errors = new ArrayList<>();
-        errors.add(ApiParameterError.generalError("error.msg.not.authorized", defaultUserMessage));
-        globalErrorResponse.setErrors(errors);
-
-        return globalErrorResponse;
+        return create(SC_FORBIDDEN, msgCode,
+                "The user associated with credentials passed on this request does not have sufficient privileges to perform this action.",
+                "Insufficient privileges to perform this action.", errors);
     }
 
     public static ApiGlobalErrorResponse domainRuleViolation(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("403");
-        globalErrorResponse.setDeveloperMessage("Request was understood but caused a domain rule violation.");
-        globalErrorResponse.setUserMessageGlobalisationCode("validation.msg.domain.rule.violation");
-        globalErrorResponse.setDefaultUserMessage("Errors contain reason for domain rule violation.");
-
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
-        globalErrorResponse.setErrors(errors);
 
-        return globalErrorResponse;
-    }
-
-    public static ApiGlobalErrorResponse notFound(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("404");
-        globalErrorResponse.setDeveloperMessage("The requested resource is not available.");
-        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.resource.not.found");
-        globalErrorResponse.setDefaultUserMessage("The requested resource is not available.");
-
-        final List<ApiParameterError> errors = new ArrayList<>();
-        errors.add(ApiParameterError.resourceIdentifierNotFound(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
-        globalErrorResponse.setErrors(errors);
-
-        return globalErrorResponse;
+        return create(SC_FORBIDDEN, "validation.msg.domain.rule.violation", "Request was understood but caused a domain rule violation.",
+                "Errors contain reason for domain rule violation.", errors);
     }
 
     public static ApiGlobalErrorResponse dataIntegrityError(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final Object... defaultUserMessageArgs) {
-
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("403");
-        globalErrorResponse.setDeveloperMessage("The request caused a data integrity issue to be fired by the database.");
-        globalErrorResponse.setUserMessageGlobalisationCode(globalisationMessageCode);
-        globalErrorResponse.setDefaultUserMessage(defaultUserMessage);
-
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.parameterError(globalisationMessageCode, defaultUserMessage, parameterName, defaultUserMessageArgs));
-        globalErrorResponse.setErrors(errors);
 
-        return globalErrorResponse;
+        return create(SC_FORBIDDEN, globalisationMessageCode, "The request caused a data integrity issue to be fired by the database.",
+                defaultUserMessage, errors);
+    }
+
+    public static ApiGlobalErrorResponse notFound(final String globalisationMessageCode, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
+        String msg = "The requested resource is not available.";
+        final List<ApiParameterError> errors = new ArrayList<>();
+        errors.add(ApiParameterError.resourceIdentifierNotFound(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
+
+        return create(SC_NOT_FOUND, "error.msg.resource.not.found", msg, msg, errors);
     }
 
     public static ApiGlobalErrorResponse badClientRequest(final String globalisationMessageCode, final String defaultUserMessage,
             final List<ApiParameterError> errors) {
-
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("400");
-        globalErrorResponse
-                .setDeveloperMessage("The request was invalid. This typically will happen due to validation errors which are provided.");
-        globalErrorResponse.setUserMessageGlobalisationCode(globalisationMessageCode);
-        globalErrorResponse.setDefaultUserMessage(defaultUserMessage);
-
-        globalErrorResponse.setErrors(errors);
-
-        return globalErrorResponse;
+        return create(SC_BAD_REQUEST, globalisationMessageCode,
+                "The request was invalid. This typically will happen due to validation errors which are provided.", defaultUserMessage,
+                errors);
     }
 
     public static ApiGlobalErrorResponse badClientRequest(final String globalisationMessageCode, final String defaultUserMessage) {
         return badClientRequest(globalisationMessageCode, defaultUserMessage, Collections.emptyList());
     }
 
+    public static ApiGlobalErrorResponse jobIsDisabled(final String globalisationMessageCode, final String defaultUserMessage) {
+        return create(SC_FORBIDDEN, globalisationMessageCode, defaultUserMessage, defaultUserMessage);
+    }
+
     public static ApiGlobalErrorResponse serverSideError(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
-
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("500");
-        globalErrorResponse.setDeveloperMessage("An unexpected error occured on the platform server.");
-        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.platform.server.side.error");
-        globalErrorResponse.setDefaultUserMessage("An unexpected error occured on the platform server.");
-
+        String msg = "An unexpected error occured on the platform server.";
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
-        globalErrorResponse.setErrors(errors);
 
-        return globalErrorResponse;
+        return create(SC_INTERNAL_SERVER_ERROR, "error.msg.platform.server.side.error", msg, msg, errors);
     }
 
     public static ApiGlobalErrorResponse serviceUnavailable(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
-
-        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-        globalErrorResponse.setHttpStatusCode("503");
-        globalErrorResponse.setDeveloperMessage("The server is currently unable to handle the request , please try after some time.");
-        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.platform.service.unavailable");
-        globalErrorResponse.setDefaultUserMessage("The server is currently unable to handle the request , please try after some time.");
-
+        String msg = "The server is currently unable to handle the request , please try after some time.";
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
-        globalErrorResponse.setErrors(errors);
 
-        return globalErrorResponse;
-    }
-
-    protected ApiGlobalErrorResponse() {}
-
-    public ApiGlobalErrorResponse(final List<ApiParameterError> errors) {
-        this.errors = errors;
+        return create(SC_SERVICE_UNAVAILABLE, "error.msg.platform.service.unavailable", msg, msg, errors);
     }
 
     @JsonProperty("errors")
     public List<ApiParameterError> getErrors() {
         return this.errors;
-    }
-
-    public void setErrors(final List<ApiParameterError> errors) {
-        this.errors = errors;
-    }
-
-    public String getDeveloperMessage() {
-        return this.developerMessage;
-    }
-
-    public void setDeveloperMessage(final String developerMessage) {
-        this.developerMessage = developerMessage;
-    }
-
-    public String getHttpStatusCode() {
-        return this.httpStatusCode;
-    }
-
-    public void setHttpStatusCode(final String httpStatusCode) {
-        this.httpStatusCode = httpStatusCode;
-    }
-
-    public String getDefaultUserMessage() {
-        return this.defaultUserMessage;
-    }
-
-    public void setDefaultUserMessage(final String defaultUserMessage) {
-        this.defaultUserMessage = defaultUserMessage;
-    }
-
-    public String getUserMessageGlobalisationCode() {
-        return this.userMessageGlobalisationCode;
-    }
-
-    public void setUserMessageGlobalisationCode(final String userMessageGlobalisationCode) {
-        this.userMessageGlobalisationCode = userMessageGlobalisationCode;
     }
 
     public String toJson() {

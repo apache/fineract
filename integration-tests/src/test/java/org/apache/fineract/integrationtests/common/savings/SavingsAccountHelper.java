@@ -18,8 +18,12 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
+import static org.apache.fineract.integrationtests.common.Utils.DEFAULT_TENANT;
+import static org.apache.fineract.integrationtests.common.Utils.TENANT_PARAM_NAME;
+
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -36,9 +40,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.client.models.PagedRequestSavingsTransactionSearch;
+import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -48,7 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes" })
-public class SavingsAccountHelper {
+public class SavingsAccountHelper extends IntegrationTest {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -92,7 +97,7 @@ public class SavingsAccountHelper {
     public static final String TRANSACTION_DATE_PLUS_ONE = "02 March 2013";
     public static final String LAST_TRANSACTION_DATE = "01 March 2013";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final Integer PAYMENT_TYPE_ID = 1;
+    public static final Long PAYMENT_TYPE_ID = 1L;
 
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
     private static final Boolean IS_BLOCK = false;
@@ -100,6 +105,14 @@ public class SavingsAccountHelper {
     public SavingsAccountHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
+    }
+
+    public RequestSpecification getRequestSpec() {
+        return requestSpec;
+    }
+
+    public ResponseSpecification getResponseSpec() {
+        return responseSpec;
     }
 
     public static String getFutureDate() {
@@ -250,21 +263,29 @@ public class SavingsAccountHelper {
 
     public Object depositToSavingsAccount(final Integer savingsID, final String amount, String date, String jsonAttributeToGetback) {
         LOG.info("--------------------------------- SAVINGS TRANSACTION DEPOSIT --------------------------------");
-        return performSavingActions(createSavingsTransactionURL(DEPOSIT_SAVINGS_COMMAND, savingsID),
-                getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
+        return depositToSavingsAccount(savingsID, getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
+    }
+
+    public Object depositToSavingsAccount(final Integer savingsID, final String jsonBody, String jsonAttributeToGetback) {
+        LOG.info("--------------------------------- SAVINGS TRANSACTION DEPOSIT --------------------------------");
+        return performSavingActions(createSavingsTransactionURL(DEPOSIT_SAVINGS_COMMAND, savingsID), jsonBody, jsonAttributeToGetback);
     }
 
     public Object withdrawalFromSavingsAccount(final Integer savingsId, final String amount, String date, String jsonAttributeToGetback) {
         LOG.info("\n--------------------------------- SAVINGS TRANSACTION WITHDRAWAL --------------------------------");
-        return performSavingActions(createSavingsTransactionURL(WITHDRAW_SAVINGS_COMMAND, savingsId),
-                getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
+        return withdrawalFromSavingsAccount(savingsId, getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
     }
 
-    public Object withdrawalFromSavingsAccountWithPaymentType(final Integer savingsId, final String amount, String date, String paymentType,
+    public Object withdrawalFromSavingsAccountWithPaymentType(final Integer savingsId, final String amount, String date, Long paymentTypeId,
             String jsonAttributeToGetback) {
         LOG.info("\n--------------------------------- SAVINGS TRANSACTION WITHDRAWAL WITH PAYMENT TYPE--------------------------------");
-        return performSavingActions(createSavingsTransactionURL(WITHDRAW_SAVINGS_COMMAND, savingsId),
-                getSavingsTransactionPaymentTypeJSON(amount, date, paymentType), jsonAttributeToGetback);
+        return withdrawalFromSavingsAccount(savingsId, getSavingsTransactionPaymentTypeJSON(amount, date, paymentTypeId),
+                jsonAttributeToGetback);
+    }
+
+    public Object withdrawalFromSavingsAccount(final Integer savingsId, final String jsonBody, String jsonAttributeToGetback) {
+        LOG.info("\n--------------------------------- SAVINGS TRANSACTION WITHDRAWAL --------------------------------");
+        return performSavingActions(createSavingsTransactionURL(WITHDRAW_SAVINGS_COMMAND, savingsId), jsonBody, jsonAttributeToGetback);
     }
 
     public Object payChargeToSavingsAccount(final Integer savingsID, final Integer chargeId, final String amount, String date,
@@ -468,52 +489,22 @@ public class SavingsAccountHelper {
     }
 
     private String getSavingsTransactionJSON(final String amount, final String transactionDate) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("dateFormat", CommonConstants.DATE_FORMAT);
-        map.put("transactionDate", transactionDate);
-        map.put("transactionAmount", amount);
-        map.put("paymentTypeId", PAYMENT_TYPE_ID);
-        String savingsAccountWithdrawalJson = new Gson().toJson(map);
-        LOG.info(savingsAccountWithdrawalJson);
-        return savingsAccountWithdrawalJson;
+        return SavingsTransactionData.builder().transactionDate(transactionDate).transactionAmount(amount).paymentTypeId(PAYMENT_TYPE_ID)
+                .build().getJson();
     }
 
     private String getSavingsTransactionJSON(final String amount, final String transactionDate, final boolean isBulk) {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("dateFormat", CommonConstants.DATE_FORMAT);
-        map.put("transactionDate", transactionDate);
-        map.put("transactionAmount", amount);
-        map.put("isBulk", String.valueOf(isBulk));
-        String savingsAccountWithdrawalJson = new Gson().toJson(map);
-        LOG.info(savingsAccountWithdrawalJson);
-        return savingsAccountWithdrawalJson;
+        return SavingsTransactionData.builder().transactionDate(transactionDate).transactionAmount(amount).isBulk(isBulk).build().getJson();
     }
 
     private String getLienSavingsTransactionJSON(final String amount, final String transactionDate, final Boolean lienAllowed) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("dateFormat", CommonConstants.DATE_FORMAT);
-        map.put("transactionDate", transactionDate);
-        map.put("transactionAmount", amount);
-        map.put("lienAllowed", lienAllowed);
-        map.put("reasonForBlock", "unUsualActivity");
-        String savingsAccountWithdrawalJson = new Gson().toJson(map);
-        LOG.info(savingsAccountWithdrawalJson);
-        return savingsAccountWithdrawalJson;
+        return SavingsTransactionData.builder().transactionDate(transactionDate).transactionAmount(amount).lienAllowed(lienAllowed)
+                .reasonForBlock("unUsualActivity").build().getJson();
     }
 
-    private String getSavingsTransactionPaymentTypeJSON(final String amount, final String transactionDate, final String paymentTypeId) {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("dateFormat", CommonConstants.DATE_FORMAT);
-        map.put("transactionDate", transactionDate);
-        map.put("transactionAmount", amount);
-        map.put("paymentTypeId", paymentTypeId);
-        String savingsAccountWithdrawalJson = new Gson().toJson(map);
-        LOG.info(savingsAccountWithdrawalJson);
-        return savingsAccountWithdrawalJson;
+    private String getSavingsTransactionPaymentTypeJSON(final String amount, final String transactionDate, final Long paymentTypeId) {
+        return SavingsTransactionData.builder().transactionDate(transactionDate).transactionAmount(amount).paymentTypeId(paymentTypeId)
+                .build().getJson();
     }
 
     private String getCalculatedInterestForSavingsApplicationAsJSON() {
@@ -650,13 +641,17 @@ public class SavingsAccountHelper {
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
     }
 
-    public SavingsAccountTransactionsSearchResponse searchTransactions(Integer savingsId,
-            PagedRequestSavingsTransactionSearch searchReqeust) {
-        final String SAVINGS_TRANSACTIONS_SEARCH_URL = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search" + "?"
-                + Utils.TENANT_IDENTIFIER;
-        String jsonBodyToSend = GSON.toJson(searchReqeust);
-        String response = Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_TRANSACTIONS_SEARCH_URL, jsonBodyToSend);
+    public SavingsAccountTransactionsSearchResponse searchSavingsTransactions(Integer savingsId, Map<String, Object> queryParams) {
+        final String url = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search";
+        queryParams.put(TENANT_PARAM_NAME, DEFAULT_TENANT);
+        requestSpec.queryParams(queryParams);
+        String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url);
         return GSON.fromJson(response, SavingsAccountTransactionsSearchResponse.class);
+    }
+
+    public Map<String, Object> querySavingsTransactions(Integer savingsId, PagedLocalRequestAdvancedQueryRequest request) {
+        String response = ok(fineract().savingsTransactions.advancedQuery1(savingsId.longValue(), request));
+        return JsonPath.from(response).get("");
     }
 
     public List<HashMap> getSavingsTransactions(final Integer savingsID) {

@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -56,12 +57,10 @@ import org.apache.fineract.portfolio.meeting.data.MeetingDataValidator;
 import org.apache.fineract.portfolio.meeting.domain.Meeting;
 import org.apache.fineract.portfolio.meeting.domain.MeetingRepository;
 import org.apache.fineract.portfolio.meeting.domain.MeetingRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWritePlatformService {
 
     private final MeetingRepositoryWrapper meetingRepositoryWrapper;
@@ -73,23 +72,6 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     private final GroupRepository groupRepository;
     private final FromJsonHelper fromApiJsonHelper;
     private final ConfigurationDomainService configurationDomainService;
-
-    @Autowired
-    public MeetingWritePlatformServiceJpaRepositoryImpl(final MeetingRepositoryWrapper meetingRepositoryWrapper,
-            final MeetingRepository meetingRepository, final MeetingDataValidator meetingDataValidator,
-            final CalendarInstanceRepository calendarInstanceRepository, final CalendarRepository calendarRepository,
-            final ClientRepositoryWrapper clientRepositoryWrapper, final GroupRepository groupRepository,
-            final FromJsonHelper fromApiJsonHelper, final ConfigurationDomainService configurationDomainService) {
-        this.meetingRepositoryWrapper = meetingRepositoryWrapper;
-        this.meetingRepository = meetingRepository;
-        this.meetingDataValidator = meetingDataValidator;
-        this.calendarInstanceRepository = calendarInstanceRepository;
-        this.calendarRepository = calendarRepository;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.groupRepository = groupRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.configurationDomainService = configurationDomainService;
-    }
 
     @Override
     public CommandProcessingResult createMeeting(final JsonCommand command) {

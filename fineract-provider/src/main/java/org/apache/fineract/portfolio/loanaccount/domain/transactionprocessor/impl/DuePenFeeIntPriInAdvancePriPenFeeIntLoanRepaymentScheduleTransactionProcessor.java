@@ -100,7 +100,7 @@ public class DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactio
             boolean ignoreDueDateCheck = false;
             boolean rerun = false;
 
-            List<LoanCharge> orderedLoanChargesByDueDate = charges.stream().filter(LoanCharge::isActive).filter(LoanCharge::isNotFullyPaid)
+            List<LoanCharge> orderedLoanChargesByDueDate = charges.stream().filter(LoanCharge::isActive).filter(LoanCharge::isChargePending)
                     .filter(loanCharge -> loanCharge.getEffectiveDueDate() == null
                             || !loanCharge.getEffectiveDueDate().isAfter(transactionDate))
                     .sorted(LoanChargeEffectiveDueDateComparator.INSTANCE).toList();
@@ -243,11 +243,6 @@ public class DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactio
                     principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
         return transactionAmountRemaining;
-    }
-
-    @Override
-    protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
-        // TODO - KW - dont do anything with loan over-payment for now
     }
 
     @Override

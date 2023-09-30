@@ -23,7 +23,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -40,6 +43,8 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.loanproduct.data.AdvancedPaymentData;
+import org.apache.fineract.portfolio.loanproduct.data.AdvancedPaymentData.PaymentAllocationOrder;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductGuaranteeData;
@@ -78,9 +83,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Collection<RateData> rates = this.rateReadService.retrieveProductLoanRates(loanProductId);
             final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(
                     loanProductId);
+            final Collection<AdvancedPaymentData> advancedPaymentData = retrieveAdvancedPaymentData(loanProductId);
             final Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService
                     .retrieveAllDelinquencyBuckets();
-            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates, delinquencyBucketOptions);
+            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates, delinquencyBucketOptions,
+                    advancedPaymentData);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, loanProductId); // NOSONAR
@@ -103,11 +110,18 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     }
 
     @Override
+    public List<AdvancedPaymentData> retrieveAdvancedPaymentData(final Long loanProductId) {
+        final AdvancedPaymentDataMapper apdm = new AdvancedPaymentDataMapper();
+        final String sql = "select " + apdm.schema() + " where loan_product_id = ?";
+        return this.jdbcTemplate.query(sql, apdm, loanProductId); // NOSONAR
+    }
+
+    @Override
     public Collection<LoanProductData> retrieveAllLoanProducts() {
 
         this.context.authenticatedUser();
 
-        final LoanProductMapper rm = new LoanProductMapper(null, null, null, null);
+        final LoanProductMapper rm = new LoanProductMapper(null, null, null, null, null);
 
         String sql = "select " + rm.loanProductSchema();
 
@@ -184,17 +198,20 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         private final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas;
 
+        private final Collection<AdvancedPaymentData> advancedPaymentData;
+
         private final Collection<RateData> rates;
 
         private final Collection<DelinquencyBucketData> delinquencyBucketOptions;
 
         LoanProductMapper(final Collection<ChargeData> charges,
                 final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas, final Collection<RateData> rates,
-                final Collection<DelinquencyBucketData> delinquencyBucketOptions) {
+                final Collection<DelinquencyBucketData> delinquencyBucketOptions, Collection<AdvancedPaymentData> advancedPaymentData) {
             this.charges = charges;
             this.borrowerCycleVariationDatas = borrowerCycleVariationDatas;
             this.rates = rates;
             this.delinquencyBucketOptions = delinquencyBucketOptions;
+            this.advancedPaymentData = advancedPaymentData;
         }
 
         public String loanProductSchema() {
@@ -212,7 +229,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.disallow_expected_disbursements as disallowExpectedDisbursements, lp.allow_approved_disbursed_amounts_over_applied as allowApprovedDisbursedAmountsOverApplied, lp.over_applied_calculation_type as overAppliedCalculationType, over_applied_number as overAppliedNumber, "
                     + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
                     + "lp.can_define_fixed_emi_amount as canDefineInstallmentAmount, lp.instalment_amount_in_multiples_of as installmentAmountInMultiplesOf, "
-                    + "lp.due_days_for_repayment_event as dueDaysForRepaymentEvent, lp.overdue_days_for_repayment_event as overDueDaysForRepaymentEvent,"
+                    + "lp.due_days_for_repayment_event as dueDaysForRepaymentEvent, lp.overdue_days_for_repayment_event as overDueDaysForRepaymentEvent, lp.enable_down_payment as enableDownPayment, lp.disbursed_amount_percentage_for_down_payment as disbursedAmountPercentageForDownPayment, lp.enable_auto_repayment_for_down_payment as enableAutoRepaymentForDownPayment, lp.repayment_start_date_type_enum as repaymentStartDateType, "
+                    + "lp.disable_schedule_extension_for_down_payment as disableScheduleExtensionForDownPayment, "
                     + "lpr.pre_close_interest_calculation_strategy as preCloseInterestCalculationStrategy, "
                     + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
                     + "lpr.rest_frequency_type_enum as restFrequencyEnum, lpr.rest_frequency_interval as restFrequencyInterval, "
@@ -344,6 +362,13 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LocalDate closeDate = JdbcSupport.getLocalDate(rs, "closeDate");
             final Integer dueDaysForRepaymentEvent = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "dueDaysForRepaymentEvent");
             final Integer overDueDaysForRepaymentEvent = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "overDueDaysForRepaymentEvent");
+            final boolean enableDownPayment = rs.getBoolean("enableDownPayment");
+            final BigDecimal disbursedAmountPercentageForDownPayment = rs.getBigDecimal("disbursedAmountPercentageForDownPayment");
+            final boolean enableAutoRepaymentForDownPayment = rs.getBoolean("enableAutoRepaymentForDownPayment");
+            final Integer repaymentStartDateTypeId = JdbcSupport.getInteger(rs, "repaymentStartDateType");
+            final EnumOptionData repaymentStartDateType = LoanEnumerations.repaymentStartDateType(repaymentStartDateTypeId);
+            final boolean disableScheduleExtensionForDownPayment = rs.getBoolean("disableScheduleExtensionForDownPayment");
+
             String status = "";
             if (closeDate != null && closeDate.isBefore(DateUtils.getBusinessLocalDate())) {
                 status = "loanProduct.inActive";
@@ -499,7 +524,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
                     maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates,
                     isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket,
-                    dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent);
+                    dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageForDownPayment,
+                    enableAutoRepaymentForDownPayment, advancedPaymentData, repaymentStartDateType, disableScheduleExtensionForDownPayment);
         }
     }
 
@@ -543,6 +569,30 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
     }
 
+    private static final class AdvancedPaymentDataMapper implements RowMapper<AdvancedPaymentData> {
+
+        public String schema() {
+            return "transaction_type, allocation_types, future_installment_allocation_rule from m_loan_product_payment_allocation_rule";
+        }
+
+        @Override
+        public AdvancedPaymentData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final String transactionType = rs.getString("transaction_type");
+            final String allocationTypes = rs.getString("allocation_types");
+            final String futureInstallmentAllocationRule = rs.getString("future_installment_allocation_rule");
+            return new AdvancedPaymentData(transactionType, futureInstallmentAllocationRule, convert(allocationTypes));
+        }
+
+        private List<PaymentAllocationOrder> convert(String futureInstallmentAllocationRule) {
+            String[] allocationRule = futureInstallmentAllocationRule.split(",");
+            AtomicInteger order = new AtomicInteger(1);
+            return Arrays.stream(allocationRule) //
+                    .map(s -> new PaymentAllocationOrder(s, order.getAndIncrement())) //
+                    .toList();
+        }
+
+    }
+
     private static final class LoanProductBorrowerCycleMapper implements RowMapper<LoanProductBorrowerCycleVariationData> {
 
         public String schema() {
@@ -574,7 +624,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductData> retrieveAllLoanProductsForCurrency(String currencyCode) {
         this.context.authenticatedUser();
 
-        final LoanProductMapper rm = new LoanProductMapper(null, null, null, null);
+        final LoanProductMapper rm = new LoanProductMapper(null, null, null, null, null);
 
         String sql = "select " + rm.loanProductSchema() + " where lp.currency_code= ? ";
 

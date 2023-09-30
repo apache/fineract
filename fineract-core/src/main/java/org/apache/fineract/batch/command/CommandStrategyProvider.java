@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.command;
 
+import static jakarta.ws.rs.HttpMethod.DELETE;
 import static jakarta.ws.rs.HttpMethod.GET;
 import static jakarta.ws.rs.HttpMethod.POST;
 import static jakarta.ws.rs.HttpMethod.PUT;
@@ -176,11 +177,11 @@ public class CommandStrategyProvider {
         commandStrategies.put(
                 CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\/transactions\\/" + NUMBER_REGEX + OPTIONAL_COMMAND_PARAM_REGEX)
                         .method(POST).build(),
-                "adjustTransactionCommandStrategy");
+                "adjustLoanTransactionCommandStrategy");
         commandStrategies.put(
                 CommandContext.resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/transactions\\/external-id\\/"
                         + UUID_PARAM_REGEX + OPTIONAL_COMMAND_PARAM_REGEX).method(POST).build(),
-                "adjustTransactionByExternalIdCommandStrategy");
+                "adjustLoanTransactionByExternalIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/clients\\/" + NUMBER_REGEX + "\\?command=activate").method(POST).build(),
                 "activateClientCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\?command=approve").method(POST).build(),
@@ -195,9 +196,11 @@ public class CommandStrategyProvider {
                 "approveLoanRescheduleCommandStrategy");
         commandStrategies.put(
                 CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\/transactions\\/" + NUMBER_REGEX).method(GET).build(),
-                "getTransactionByIdCommandStrategy");
-        commandStrategies.put(CommandContext.resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/transactions\\/external-id\\/"
-                + UUID_PARAM_REGEX + OPTIONAL_QUERY_PARAM_REGEX).method(GET).build(), "getTransactionByExternalIdCommandStrategy");
+                "getLoanTransactionByIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/transactions\\/external-id\\/"
+                        + UUID_PARAM_REGEX + OPTIONAL_QUERY_PARAM_REGEX).method(GET).build(),
+                "getLoanTransactionByExternalIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX)
                 .method(POST).build(), "createDatatableEntryCommandStrategy");
         commandStrategies.put(CommandContext
@@ -207,7 +210,9 @@ public class CommandStrategyProvider {
                 .method(PUT).build(), "updateDatatableEntryOneToOneCommandStrategy");
         commandStrategies.put(CommandContext
                 .resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX + "\\/" + NUMBER_REGEX)
-                .method(PUT).build(), "updateDatatableEntryOneToManyCommandStrategy");
+                .method(DELETE).build(), "deleteDatatableEntryOneToManyCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX)
+                .method(DELETE).build(), "deleteDatatableEntryOneToOneCommandStrategy");
         commandStrategies.put(CommandContext
                 .resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX + OPTIONAL_QUERY_PARAM_REGEX)
                 .method(GET).build(), "getDatatableEntryByAppTableIdCommandStrategy");

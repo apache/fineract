@@ -23,12 +23,18 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.UUID;
+import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import retrofit2.Response;
 
 public class OfficeIntegrationTest {
 
@@ -56,5 +62,41 @@ public class OfficeIntegrationTest {
 
         Assertions.assertTrue(name.equals(newOffice.getName()));
         Assertions.assertArrayEquals(dateArr, newOffice.getOpeningDate());
+    }
+
+    @Test
+    public void testOfficeModificationWithExternalId() throws IOException {
+        OfficeHelper oh = new OfficeHelper(requestSpec, responseSpec);
+        String externalId = UUID.randomUUID().toString();
+        int officeId = oh.createOfficeWithExternalId(externalId, "01 July 2007");
+        String date = "02 July 2007";
+        String name = Utils.uniqueRandomStringGenerator("New_Office_", 4);
+        String[] dateArr = { "2007", "7", "2" };
+
+        Response<PutOfficesOfficeIdResponse> updateResult = oh.updateOfficeUsingExternalId(externalId, name, date);
+        Assertions.assertTrue(updateResult.isSuccessful());
+        Assertions.assertEquals(officeId, updateResult.body().getOfficeId());
+        OfficeDomain newOffice = oh.retrieveOfficeByID(officeId);
+
+        Assertions.assertTrue(name.equals(newOffice.getName()));
+        Assertions.assertArrayEquals(dateArr, newOffice.getOpeningDate());
+    }
+
+    @Test
+    public void testOfficeModificationAndFetchWithExternalId() throws IOException {
+        OfficeHelper oh = new OfficeHelper(requestSpec, responseSpec);
+        String externalId = UUID.randomUUID().toString();
+        int officeId = oh.createOfficeWithExternalId(externalId, "01 July 2007");
+        String name = Utils.uniqueRandomStringGenerator("New_Office_", 4);
+        String date = "02 July 2007";
+        String[] dateArr = { "2007", "7", "2" };
+
+        oh.updateOfficeUsingExternalId(externalId, name, date);
+        Response<GetOfficesResponse> officeResult = oh.retrieveOfficeByExternalId(externalId);
+
+        GetOfficesResponse newOffice = officeResult.body();
+
+        Assertions.assertTrue(name.equals(newOffice.getName()));
+        Assertions.assertTrue(newOffice.getOpeningDate().isEqual(LocalDate.of(2007, 7, 2)));
     }
 }

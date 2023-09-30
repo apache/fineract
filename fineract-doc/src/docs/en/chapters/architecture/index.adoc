@@ -33,3 +33,5 @@ include::modules.adoc[leveloffset=+1]
 include::business-date.adoc[leveloffset=+1]
 
 include::reliable-event-framework.adoc[leveloffset=+1]
+
+include::advanced-payment-allocation.adoc[leveloffset=+1]

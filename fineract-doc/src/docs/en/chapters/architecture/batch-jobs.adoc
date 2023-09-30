@@ -254,3 +254,55 @@ PUT /fineract-provider/api/v1/jobs/{jobName}/steps?tenantIdentifier={tenantId}
 ----
 
 The business step configuration for jobs are tracked within the database in the `m_batch_business_steps` table.
+
+== Inline Jobs
+
+Some jobs that work with business entities have a corresponding job that can trigger the job with a list of specified entities.
+When the Inline job gets triggered then then the corresponding existing job will run in real time with the given entities as a dataset.
+
+=== List of Inline jobs
+
+[cols="1,1"]
+|===
+|*Inline Job name*
+|*Corresponding Job*
+
+|LOAN_COB
+|LOAN_CLOSE_OF_BUSINESS
+
+|===
+
+Triggering the Inline Loan COB Job:
+
+[source]
+----
+POST /fineract-provider/api/v1/jobs/LOAN_COB/inline?tenantIdentifier={tenantId}
+
+{
+  "loanIds": [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+  ]
+}
+----
+In this case the Loan COB job will work only with the given loan IDs.
+
+== Global Configuration for enabling/disabling jobs
+
+Some jobs can be enabled/disabled with global configuration.
+If the job is disabled with the global configuration then it cannot be scheduled and cannot be triggered via API.
+
+=== List of jobs with global configuration
+
+[cols="1,1,1,1"]
+|===
+|*Job name*
+|*Application property*
+|*Environment variable*
+|*Default value*
+
+|LOAN_CLOSE_OF_BUSINESS
+|fineract.job.loan-cob-enabled
+|FINERACT_JOB_LOAN_COB_ENABLED
+|true
+
+|===

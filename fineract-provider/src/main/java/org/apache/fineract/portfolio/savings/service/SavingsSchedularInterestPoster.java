@@ -204,7 +204,7 @@ public class SavingsSchedularInterestPoster {
                             savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getTransactionType().getId(),
                             savingsAccountTransactionData.getTransactionDate(), savingsAccountTransactionData.getAmount(), balanceEndDate,
                             savingsAccountTransactionData.getBalanceNumberOfDays(), savingsAccountTransactionData.getRunningBalance(),
-                            savingsAccountTransactionData.getCumulativeBalance(), currentDate, Integer.valueOf(1),
+                            savingsAccountTransactionData.getCumulativeBalance(), currentDate, 1,
                             savingsAccountTransactionData.isManualTransaction(), savingsAccountTransactionData.getRefNo(),
                             savingsAccountTransactionData.isReversalTransaction(), savingsAccountTransactionData.getOverdraftAmount(),
                             DateUtils.getBusinessLocalDate() });

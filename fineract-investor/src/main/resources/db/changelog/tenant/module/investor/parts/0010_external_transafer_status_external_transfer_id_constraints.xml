@@ -22,7 +22,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
-    <changeSet author="fineract" id="1" context="mysql">
+    <changeSet author="fineract" id="1">
         <addUniqueConstraint tableName="m_external_asset_owner_transfer" columnNames="status, external_id" constraintName="external_transfer_status_external_id"/>
     </changeSet>
 </databaseChangeLog>

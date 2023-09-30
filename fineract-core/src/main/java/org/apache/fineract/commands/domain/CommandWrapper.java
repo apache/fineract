@@ -302,6 +302,10 @@ public class CommandWrapper {
         return this.taskPermissionName;
     }
 
+    public Long getOfficeId() {
+        return officeId;
+    }
+
     public Long getGroupId() {
         return this.groupId;
     }

@@ -155,7 +155,7 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, clientID, "clientId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(registeredTableName, clientID, "clientId");
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -215,7 +215,7 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, groupId, "groupId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(registeredTableName, groupId, "groupId");
         assertEquals(groupId, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -290,7 +290,7 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, savingsId, "savingsId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(registeredTableName, savingsId, "savingsId");
         assertEquals(savingsId, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -372,7 +372,7 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, loanID, "loanId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(registeredTableName, loanID, "loanId");
         assertEquals(loanID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -567,7 +567,7 @@ public class EntityDatatableChecksIntegrationTest {
                 .toLowerCase();
 
         String itsAString = "itsastring";
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsAString, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, itsAString, "String", true, 10, null);
 
         // Person Subtype
         columnMap.put("datatableName", datatableNamePerson);

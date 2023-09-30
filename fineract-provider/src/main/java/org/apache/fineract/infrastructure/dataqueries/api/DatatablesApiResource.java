@@ -52,11 +52,14 @@ import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/datatables")
@@ -225,6 +228,19 @@ public class DatatablesApiResource {
         return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
     }
 
+    @POST
+    @Path("{datatable}/query")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Query Data Table values", description = "Query values from a registered data table.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class))) })
+    public String advancedQuery(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
+            PagedLocalRequest<AdvancedQueryData> queryRequest, @Context final UriInfo uriInfo) {
+        final Page<JsonObject> result = this.readWriteNonCoreDataService.queryDataTableAdvanced(datatable, queryRequest);
+        return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
+    }
+
     @GET
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -298,7 +314,7 @@ public class DatatablesApiResource {
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createDatatable(datatable, apptableId, null) //
+                .createDatatableEntry(datatable, apptableId, null) //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
 
@@ -320,7 +336,7 @@ public class DatatablesApiResource {
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateDatatable(datatable, apptableId, null) //
+                .updateDatatableEntry(datatable, apptableId, null) //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
 
@@ -343,7 +359,7 @@ public class DatatablesApiResource {
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateDatatable(datatable, apptableId, datatableId) //
+                .updateDatatableEntry(datatable, apptableId, datatableId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
 
@@ -364,7 +380,7 @@ public class DatatablesApiResource {
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteDatatable(datatable, apptableId, null) //
+                .deleteDatatableEntry(datatable, apptableId, null) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -380,13 +396,11 @@ public class DatatablesApiResource {
             + "\n")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.DeleteDataTablesDatatableAppTableIdDatatableIdResponse.class))) })
-    public String deleteDatatableEntries(
-            @PathParam("datatable") @Parameter(description = "datatable", example = "{}") final String datatable,
+    public String deleteDatatableEntry(@PathParam("datatable") @Parameter(description = "datatable", example = "{}") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,
             @PathParam("datatableId") @Parameter(description = "datatableId") final Long datatableId) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteDatatable(datatable, apptableId, datatableId) //
+                .deleteDatatableEntry(datatable, apptableId, datatableId) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

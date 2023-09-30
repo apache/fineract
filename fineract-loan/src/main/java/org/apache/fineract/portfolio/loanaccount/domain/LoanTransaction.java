@@ -180,6 +180,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 externalId);
     }
 
+    public static LoanTransaction downPayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate paymentDate, final ExternalId externalId) {
+        return new LoanTransaction(null, office, LoanTransactionType.DOWN_PAYMENT, paymentDetail, amount.getAmount(), paymentDate,
+                externalId);
+    }
+
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
         for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
             final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
@@ -558,7 +564,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isRepaymentLikeType() {
         return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
-                || isChargeAdjustment();
+                || isChargeAdjustment() || isDownPayment();
     }
 
     public boolean isTypeAllowedForChargeback() {
@@ -571,6 +577,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isMerchantIssuedRefund() {
         return LoanTransactionType.MERCHANT_ISSUED_REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isDownPayment() {
+        return LoanTransactionType.DOWN_PAYMENT.equals(getTypeOf()) && isNotReversed();
     }
 
     public boolean isPayoutRefund() {
@@ -900,7 +910,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo() {
-        return isDisbursement() || isAccrual() || isRepaymentAtDisbursement();
+        return isDisbursement() || isAccrual() || isRepaymentAtDisbursement() || isRepayment();
     }
 
     public boolean isAccrualTransaction() {

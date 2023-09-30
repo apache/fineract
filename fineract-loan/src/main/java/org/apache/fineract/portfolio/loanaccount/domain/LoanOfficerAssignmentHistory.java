@@ -25,6 +25,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
 
 @Entity
@@ -72,16 +73,16 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
         this.endDate = endDate;
     }
 
-    public boolean matchesStartDateOf(final LocalDate matchingDate) {
-        return getStartDate().isEqual(matchingDate);
-    }
-
     public LocalDate getStartDate() {
         return this.startDate;
     }
 
-    public boolean hasStartDateBefore(final LocalDate matchingDate) {
-        return matchingDate.isBefore(getStartDate());
+    public boolean matchesStartDateOf(final LocalDate matchingDate) {
+        return DateUtils.isEqual(matchingDate, getStartDate());
+    }
+
+    public boolean isBeforeStartDate(final LocalDate matchingDate) {
+        return DateUtils.isBefore(matchingDate, getStartDate());
     }
 
     public boolean isCurrentRecord() {
@@ -95,7 +96,7 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
      * @return
      */
     public boolean isEndDateAfter(final LocalDate compareDate) {
-        return this.endDate.isAfter(compareDate);
+        return DateUtils.isAfter(this.endDate, compareDate);
     }
 
     public LocalDate getEndDate() {

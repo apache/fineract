@@ -21,9 +21,11 @@ package org.apache.fineract.integrationtests.common.loans;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
@@ -88,6 +90,7 @@ public class LoanProductTestBuilder {
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private String inArrearsTolerance = "0";
     private String transactionProcessingStrategyCode = DEFAULT_STRATEGY;
+    private List<AdvancedPaymentData> advancedPaymentAllocations = null;
     private String accountingRule = NONE;
     private final String currencyCode = USD;
     private String amortizationType = EQUAL_INSTALLMENTS;
@@ -143,6 +146,16 @@ public class LoanProductTestBuilder {
     private Integer delinquencyBucketId;
     private Integer dueDaysForRepaymentEvent = null;
     private Integer overDueDaysForRepaymentEvent = null;
+    private boolean enableDownPayment = false;
+    private String disbursedAmountPercentageForDownPayment = null;
+    private boolean enableAutoRepaymentForDownPayment = false;
+    private Integer repaymentStartDateType = null;
+    private boolean disableScheduleExtensionForDownPayment = false;
+
+    public String build() {
+        final HashMap<String, Object> map = build(null, null);
+        return new Gson().toJson(map);
+    }
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = build(chargeId, null);
@@ -179,6 +192,7 @@ public class LoanProductTestBuilder {
         map.put("interestCalculationPeriodType", this.interestCalculationPeriodType);
         map.put("inArrearsTolerance", this.inArrearsTolerance);
         map.put("transactionProcessingStrategyCode", this.transactionProcessingStrategyCode);
+        map.put("paymentAllocation", this.advancedPaymentAllocations);
         map.put("accountingRule", this.accountingRule);
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
@@ -278,6 +292,20 @@ public class LoanProductTestBuilder {
         }
         if (this.overDueDaysForRepaymentEvent != null) {
             map.put("overDueDaysForRepaymentEvent", this.overDueDaysForRepaymentEvent);
+        }
+        map.put("enableDownPayment", enableDownPayment);
+        if (this.disbursedAmountPercentageForDownPayment != null) {
+            map.put("disbursedAmountPercentageForDownPayment", disbursedAmountPercentageForDownPayment);
+        }
+        if (enableAutoRepaymentForDownPayment) {
+            map.put("enableAutoRepaymentForDownPayment", enableAutoRepaymentForDownPayment);
+        }
+
+        if (this.repaymentStartDateType != null) {
+            map.put("repaymentStartDateType", repaymentStartDateType);
+        }
+        if (disableScheduleExtensionForDownPayment) {
+            map.put("disableScheduleExtensionForDownPayment", disableScheduleExtensionForDownPayment);
         }
 
         return map;
@@ -687,6 +715,30 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withOverDueDaysForRepaymentEvent(final Integer overDueDaysForRepaymentEvent) {
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
+        return this;
+    }
+
+    public LoanProductTestBuilder withEnableDownPayment(final Boolean enableDownPayment,
+            final String disbursedAmountPercentageForDownPayment, final Boolean enableAutoRepaymentForDownPayment) {
+        this.enableDownPayment = enableDownPayment;
+        this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
+        this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;
+        return this;
+    }
+
+    public LoanProductTestBuilder addAdvancedPaymentAllocation(AdvancedPaymentData... advancedPaymentData) {
+        this.transactionProcessingStrategyCode = "advanced-payment-allocation-strategy";
+        this.advancedPaymentAllocations = new ArrayList<>(Arrays.stream(advancedPaymentData).toList());
+        return this;
+    }
+
+    public LoanProductTestBuilder withRepaymentStartDateType(final Integer repaymentStartDateType) {
+        this.repaymentStartDateType = repaymentStartDateType;
+        return this;
+    }
+
+    public LoanProductTestBuilder withDisableScheduleExtensionForDownPayment(final Boolean disableScheduleExtensionForDownPayment) {
+        this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
         return this;
     }
 

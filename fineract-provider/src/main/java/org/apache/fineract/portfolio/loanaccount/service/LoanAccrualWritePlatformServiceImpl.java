@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction.accrueTransaction;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -28,7 +30,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -40,12 +41,15 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -72,6 +76,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final LoanRepository loanRepository;
+    private final OfficeRepository officeRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
@@ -265,24 +271,20 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             BigDecimal totalAccInterest, BigDecimal feePortion, BigDecimal totalAccFee, BigDecimal penaltyPortion,
             BigDecimal totalAccPenalty, final LocalDate accruedTill) throws DataAccessException {
         AppUser user = context.authenticatedUser();
-        String transactionSql = "INSERT INTO m_loan_transaction  (loan_id,office_id,is_reversed,external_id,transaction_type_enum,transaction_date,amount,interest_portion_derived,"
-                + "fee_charges_portion_derived,penalty_charges_portion_derived, submitted_on_date, created_by, last_modified_by, created_on_utc, last_modified_on_utc) "
-                + "VALUES (?, ?, false, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
-                externalIdFactory.create().getValue(), LoanTransactionType.ACCRUAL.getValue(), accruedTill, amount, interestPortion,
-                feePortion, penaltyPortion, DateUtils.getBusinessLocalDate(), user.getId(), user.getId(),
-                DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
-        final Long transactionId = this.jdbcTemplate.queryForObject("SELECT " + sqlGenerator.lastInsertId(), Long.class); // NOSONAR
+        Loan loan = loanRepository.getReferenceById(scheduleAccrualData.getLoanId());
+        Office office = officeRepository.getReferenceById(scheduleAccrualData.getOfficeId());
+        LoanTransaction loanTransaction = loanTransactionRepository.saveAndFlush(accrueTransaction(loan, office, accruedTill, amount,
+                interestPortion, feePortion, penaltyPortion, externalIdFactory.create()));
 
         Map<LoanChargeData, BigDecimal> applicableCharges = scheduleAccrualData.getApplicableCharges();
         String chargesPaidSql = "INSERT INTO m_loan_charge_paid_by (loan_transaction_id, loan_charge_id, amount,installment_number) VALUES (?,?,?,?)";
         for (Map.Entry<LoanChargeData, BigDecimal> entry : applicableCharges.entrySet()) {
             LoanChargeData chargeData = entry.getKey();
-            this.jdbcTemplate.update(chargesPaidSql, transactionId, chargeData.getId(), entry.getValue(),
+            this.jdbcTemplate.update(chargesPaidSql, loanTransaction.getId(), chargeData.getId(), entry.getValue(),
                     scheduleAccrualData.getInstallmentNumber());
         }
 
-        Map<String, Object> transactionMap = toMapData(transactionId, amount, interestPortion, feePortion, penaltyPortion,
+        Map<String, Object> transactionMap = toMapData(loanTransaction.getId(), amount, interestPortion, feePortion, penaltyPortion,
                 scheduleAccrualData, accruedTill);
 
         String repaymentUpdateSql = "UPDATE m_loan_repayment_schedule SET accrual_interest_derived=?, accrual_fee_charges_derived=?, "
@@ -294,12 +296,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         this.jdbcTemplate.update(updateLoan, accruedTill, user.getId(), DateUtils.getOffsetDateTimeOfTenantWithMostPrecision(),
                 scheduleAccrualData.getLoanId());
 
-        Optional<LoanTransaction> loanAccrualTransaction = loanTransactionRepository.findByIdAndLoanId(transactionId,
-                scheduleAccrualData.getLoanId());
-        if (!loanAccrualTransaction.isEmpty()) {
-            businessEventNotifierService
-                    .notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(loanAccrualTransaction.get()));
-        }
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(loanTransaction));
 
         final Map<String, Object> accountingBridgeData = deriveAccountingBridgeData(scheduleAccrualData, transactionMap);
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);

@@ -176,6 +176,7 @@ public class DatatableUniqueAndIndexColumnTest {
         changeColumns.setName(column1Name);
         String newColumnName = column1Name + "new";
         changeColumns.setNewName(newColumnName);
+        changeColumns.setUnique(false);
         changeColumns.setIndexed(true);
 
         updateRequest.addChangeColumnsItem(changeColumns);

@@ -661,16 +661,6 @@ public final class SavingsEnumerations {
         return optionData;
     }
 
-    public static List<EnumOptionData> depositTermFrequencyType(final SavingsPeriodFrequencyType[] types) {
-        final List<EnumOptionData> optionDatas = new ArrayList<>();
-        for (final SavingsPeriodFrequencyType type : types) {
-            if (!type.isInvalid()) {
-                optionDatas.add(recurringDepositFrequencyType(type));
-            }
-        }
-        return optionDatas;
-    }
-
     public static EnumOptionData inMultiplesOfDepositTermFrequencyType(final int id) {
         return depositTermFrequencyType(SavingsPeriodFrequencyType.fromInt(id));
     }
@@ -700,16 +690,6 @@ public final class SavingsEnumerations {
             break;
         }
         return optionData;
-    }
-
-    public static List<EnumOptionData> inMultiplesOfDepositTermFrequencyType(final SavingsPeriodFrequencyType[] types) {
-        final List<EnumOptionData> optionDatas = new ArrayList<>();
-        for (final SavingsPeriodFrequencyType type : types) {
-            if (!type.isInvalid()) {
-                optionDatas.add(recurringDepositFrequencyType(type));
-            }
-        }
-        return optionDatas;
     }
 
     public static EnumOptionData depositType(final Integer id) {

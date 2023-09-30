@@ -22,7 +22,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.interoperation.util.MathUtil;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -101,7 +101,7 @@ public class InteropTransactionData extends CommandProcessingResult {
         SavingsAccount savingsAccount = transaction.getSavingsAccount();
 
         String transactionId = transaction.getId().toString();
-        SavingsAccountTransactionType transactionType = SavingsAccountTransactionType.fromInt(transaction.getTypeOf());
+        SavingsAccountTransactionType transactionType = transaction.getTransactionType();
         BigDecimal amount = transaction.getAmount();
 
         BigDecimal chargeAmount = null;
@@ -143,7 +143,7 @@ public class InteropTransactionData extends CommandProcessingResult {
             sb.append(SavingsEnumerations.transactionType(transactionType).getValue());
         }
 
-        return new InteropTransactionData(savingsAccount.getId(), savingsAccount.getExternalId(), transactionId, transactionType, amount,
-                chargeAmount, currency, runningBalance, bookingDateTime, valueDateTime, sb.toString());
+        return new InteropTransactionData(savingsAccount.getId(), savingsAccount.getExternalId().getValue(), transactionId, transactionType,
+                amount, chargeAmount, currency, runningBalance, bookingDateTime, valueDateTime, sb.toString());
     }
 }

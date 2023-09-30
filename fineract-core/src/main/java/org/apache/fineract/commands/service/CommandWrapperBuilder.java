@@ -718,19 +718,19 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createDatatable(final String datatable, final Long apptableId, final Long datatableId) {
+    public CommandWrapperBuilder createDatatableEntry(final String datatable, final Long apptableId, final Long datatableId) {
         this.actionName = "CREATE";
         commonDatatableSettings(datatable, apptableId, datatableId);
         return this;
     }
 
-    public CommandWrapperBuilder updateDatatable(final String datatable, final Long apptableId, final Long datatableId) {
+    public CommandWrapperBuilder updateDatatableEntry(final String datatable, final Long apptableId, final Long datatableId) {
         this.actionName = "UPDATE";
         commonDatatableSettings(datatable, apptableId, datatableId);
         return this;
     }
 
-    public CommandWrapperBuilder deleteDatatable(final String datatable, final Long apptableId, final Long datatableId) {
+    public CommandWrapperBuilder deleteDatatableEntry(final String datatable, final Long apptableId, final Long datatableId) {
         this.actionName = "DELETE";
         commonDatatableSettings(datatable, apptableId, datatableId);
         return this;
@@ -3644,6 +3644,14 @@ public class CommandWrapperBuilder {
         this.entityName = "ASSET_OWNER_TRANSACTION";
         this.entityId = id;
         this.href = "/external-asset-owners/transfers/" + id;
+        return this;
+    }
+
+    public CommandWrapperBuilder downPayment(final Long loanId) {
+        this.actionName = "DOWNPAYMENT";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=downPayment";
         return this;
     }
 }

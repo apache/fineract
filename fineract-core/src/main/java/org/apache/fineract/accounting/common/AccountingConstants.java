@@ -36,11 +36,24 @@ public final class AccountingConstants {
      ***/
     public enum CashAccountsForLoan {
 
-        FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(
-                6), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12), GOODWILL_CREDIT(13), INCOME_FROM_CHARGE_OFF_INTEREST(
-                        14), INCOME_FROM_CHARGE_OFF_FEES(15), CHARGE_OFF_EXPENSE(16), CHARGE_OFF_FRAUD_EXPENSE(
-                                17), INCOME_FROM_CHARGE_OFF_PENALTY(18), INCOME_FROM_GOODWILL_CREDIT_INTEREST(
-                                        19), INCOME_FROM_GOODWILL_CREDIT_FEES(20), INCOME_FROM_GOODWILL_CREDIT_PENALTY(21);
+        FUND_SOURCE(1), //
+        LOAN_PORTFOLIO(2), //
+        INTEREST_ON_LOANS(3), //
+        INCOME_FROM_FEES(4), //
+        INCOME_FROM_PENALTIES(5), //
+        LOSSES_WRITTEN_OFF(6), //
+        TRANSFERS_SUSPENSE(10), //
+        OVERPAYMENT(11), //
+        INCOME_FROM_RECOVERY(12), //
+        GOODWILL_CREDIT(13), //
+        INCOME_FROM_CHARGE_OFF_INTEREST(14), //
+        INCOME_FROM_CHARGE_OFF_FEES(15), //
+        CHARGE_OFF_EXPENSE(16), //
+        CHARGE_OFF_FRAUD_EXPENSE(17), //
+        INCOME_FROM_CHARGE_OFF_PENALTY(18), //
+        INCOME_FROM_GOODWILL_CREDIT_INTEREST(19), //
+        INCOME_FROM_GOODWILL_CREDIT_FEES(20), //
+        INCOME_FROM_GOODWILL_CREDIT_PENALTY(21); //
 
         private final Integer value;
 
@@ -76,12 +89,27 @@ public final class AccountingConstants {
      ***/
     public enum AccrualAccountsForLoan {
 
-        FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), //
-        LOSSES_WRITTEN_OFF(6), INTEREST_RECEIVABLE(7), FEES_RECEIVABLE(8), PENALTIES_RECEIVABLE(9), //
-        TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12), GOODWILL_CREDIT(13), INCOME_FROM_CHARGE_OFF_INTEREST(
-                14), INCOME_FROM_CHARGE_OFF_FEES(15), CHARGE_OFF_EXPENSE(16), CHARGE_OFF_FRAUD_EXPENSE(17), INCOME_FROM_CHARGE_OFF_PENALTY(
-                        18), INCOME_FROM_GOODWILL_CREDIT_INTEREST(
-                                19), INCOME_FROM_GOODWILL_CREDIT_FEES(20), INCOME_FROM_GOODWILL_CREDIT_PENALTY(21);
+        FUND_SOURCE(1), //
+        LOAN_PORTFOLIO(2), //
+        INTEREST_ON_LOANS(3), //
+        INCOME_FROM_FEES(4), //
+        INCOME_FROM_PENALTIES(5), //
+        LOSSES_WRITTEN_OFF(6), //
+        INTEREST_RECEIVABLE(7), //
+        FEES_RECEIVABLE(8), //
+        PENALTIES_RECEIVABLE(9), //
+        TRANSFERS_SUSPENSE(10), //
+        OVERPAYMENT(11), //
+        INCOME_FROM_RECOVERY(12), //
+        GOODWILL_CREDIT(13), //
+        INCOME_FROM_CHARGE_OFF_INTEREST(14), //
+        INCOME_FROM_CHARGE_OFF_FEES(15), //
+        CHARGE_OFF_EXPENSE(16), //
+        CHARGE_OFF_FRAUD_EXPENSE(17), //
+        INCOME_FROM_CHARGE_OFF_PENALTY(18), //
+        INCOME_FROM_GOODWILL_CREDIT_INTEREST(19), //
+        INCOME_FROM_GOODWILL_CREDIT_FEES(20), //
+        INCOME_FROM_GOODWILL_CREDIT_PENALTY(21); //
 
         private final Integer value;
 
@@ -118,28 +146,33 @@ public final class AccountingConstants {
      ***/
     public enum LoanProductAccountingParams {
 
-        FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS(
-                "interestOnLoanAccountId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), INCOME_FROM_PENALTIES(
-                        "incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), GOODWILL_CREDIT(
-                                "goodwillCreditAccountId"), OVERPAYMENT("overpaymentLiabilityAccountId"), INTEREST_RECEIVABLE(
-                                        "receivableInterestAccountId"), FEES_RECEIVABLE("receivableFeeAccountId"), PENALTIES_RECEIVABLE(
-                                                "receivablePenaltyAccountId"), TRANSFERS_SUSPENSE(
-                                                        "transfersInSuspenseAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING(
-                                                                "paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
-                                                                        "paymentTypeId"), FEE_INCOME_ACCOUNT_MAPPING(
-                                                                                "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(
-                                                                                        "penaltyToIncomeAccountMappings"), CHARGE_ID(
-                                                                                                "chargeId"), INCOME_ACCOUNT_ID(
-                                                                                                        "incomeAccountId"), INCOME_FROM_RECOVERY(
-                                                                                                                "incomeFromRecoveryAccountId"), INCOME_FROM_CHARGE_OFF_INTEREST(
-                                                                                                                        "incomeFromChargeOffInterestAccountId"), INCOME_FROM_CHARGE_OFF_FEES(
-                                                                                                                                "incomeFromChargeOffFeesAccountId"), CHARGE_OFF_EXPENSE(
-                                                                                                                                        "chargeOffExpenseAccountId"), CHARGE_OFF_FRAUD_EXPENSE(
-                                                                                                                                                "chargeOffFraudExpenseAccountId"), INCOME_FROM_CHARGE_OFF_PENALTY(
-                                                                                                                                                        "incomeFromChargeOffPenaltyAccountId"), INCOME_FROM_GOODWILL_CREDIT_INTEREST(
-                                                                                                                                                                "incomeFromGoodwillCreditInterestAccountId"), INCOME_FROM_GOODWILL_CREDIT_FEES(
-                                                                                                                                                                        "incomeFromGoodwillCreditFeesAccountId"), INCOME_FROM_GOODWILL_CREDIT_PENALTY(
-                                                                                                                                                                                "incomeFromGoodwillCreditPenaltyAccountId");
+        FUND_SOURCE("fundSourceAccountId"), //
+        LOAN_PORTFOLIO("loanPortfolioAccountId"), //
+        INTEREST_ON_LOANS("interestOnLoanAccountId"), //
+        INCOME_FROM_FEES("incomeFromFeeAccountId"), //
+        INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), //
+        LOSSES_WRITTEN_OFF("writeOffAccountId"), //
+        GOODWILL_CREDIT("goodwillCreditAccountId"), //
+        OVERPAYMENT("overpaymentLiabilityAccountId"), //
+        INTEREST_RECEIVABLE("receivableInterestAccountId"), //
+        FEES_RECEIVABLE("receivableFeeAccountId"), //
+        PENALTIES_RECEIVABLE("receivablePenaltyAccountId"), //
+        TRANSFERS_SUSPENSE("transfersInSuspenseAccountId"), //
+        PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), //
+        PAYMENT_TYPE("paymentTypeId"), //
+        FEE_INCOME_ACCOUNT_MAPPING("feeToIncomeAccountMappings"), //
+        PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), //
+        CHARGE_ID("chargeId"), //
+        INCOME_ACCOUNT_ID("incomeAccountId"), //
+        INCOME_FROM_RECOVERY("incomeFromRecoveryAccountId"), //
+        INCOME_FROM_CHARGE_OFF_INTEREST("incomeFromChargeOffInterestAccountId"), //
+        INCOME_FROM_CHARGE_OFF_FEES("incomeFromChargeOffFeesAccountId"), //
+        CHARGE_OFF_EXPENSE("chargeOffExpenseAccountId"), //
+        CHARGE_OFF_FRAUD_EXPENSE("chargeOffFraudExpenseAccountId"), //
+        INCOME_FROM_CHARGE_OFF_PENALTY("incomeFromChargeOffPenaltyAccountId"), //
+        INCOME_FROM_GOODWILL_CREDIT_INTEREST("incomeFromGoodwillCreditInterestAccountId"), //
+        INCOME_FROM_GOODWILL_CREDIT_FEES("incomeFromGoodwillCreditFeesAccountId"), //
+        INCOME_FROM_GOODWILL_CREDIT_PENALTY("incomeFromGoodwillCreditPenaltyAccountId"); //
 
         private final String value;
 
@@ -159,24 +192,29 @@ public final class AccountingConstants {
 
     public enum LoanProductAccountingDataParams {
 
-        FUND_SOURCE("fundSourceAccount"), LOAN_PORTFOLIO("loanPortfolioAccount"), INTEREST_ON_LOANS(
-                "interestOnLoanAccount"), INCOME_FROM_FEES("incomeFromFeeAccount"), INCOME_FROM_PENALTIES(
-                        "incomeFromPenaltyAccount"), LOSSES_WRITTEN_OFF("writeOffAccount"), GOODWILL_CREDIT(
-                                "goodwillCreditAccount"), OVERPAYMENT("overpaymentLiabilityAccount"), INTEREST_RECEIVABLE(
-                                        "receivableInterestAccount"), FEES_RECEIVABLE("receivableFeeAccount"), PENALTIES_RECEIVABLE(
-                                                "receivablePenaltyAccount"), TRANSFERS_SUSPENSE(
-                                                        "transfersInSuspenseAccount"), INCOME_ACCOUNT_ID(
-                                                                "incomeAccount"), INCOME_FROM_RECOVERY(
-                                                                        "incomeFromRecoveryAccount"), LIABILITY_TRANSFER_SUSPENSE(
-                                                                                "liabilityTransferInSuspenseAccount"), INCOME_FROM_CHARGE_OFF_INTEREST(
-                                                                                        "incomeFromChargeOffInterestAccount"), INCOME_FROM_CHARGE_OFF_FEES(
-                                                                                                "incomeFromChargeOffFeesAccount"), CHARGE_OFF_EXPENSE(
-                                                                                                        "chargeOffExpenseAccount"), CHARGE_OFF_FRAUD_EXPENSE(
-                                                                                                                "chargeOffFraudExpenseAccount"), INCOME_FROM_CHARGE_OFF_PENALTY(
-                                                                                                                        "incomeFromChargeOffPenaltyAccount"), INCOME_FROM_GOODWILL_CREDIT_INTEREST(
-                                                                                                                                "incomeFromGoodwillCreditInterestAccount"), INCOME_FROM_GOODWILL_CREDIT_FEES(
-                                                                                                                                        "incomeFromGoodwillCreditFeesAccount"), INCOME_FROM_GOODWILL_CREDIT_PENALTY(
-                                                                                                                                                "incomeFromGoodwillCreditPenaltyAccount");
+        FUND_SOURCE("fundSourceAccount"), //
+        LOAN_PORTFOLIO("loanPortfolioAccount"), //
+        INTEREST_ON_LOANS("interestOnLoanAccount"), //
+        INCOME_FROM_FEES("incomeFromFeeAccount"), //
+        INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), //
+        LOSSES_WRITTEN_OFF("writeOffAccount"), //
+        GOODWILL_CREDIT("goodwillCreditAccount"), //
+        OVERPAYMENT("overpaymentLiabilityAccount"), //
+        INTEREST_RECEIVABLE("receivableInterestAccount"), //
+        FEES_RECEIVABLE("receivableFeeAccount"), //
+        PENALTIES_RECEIVABLE("receivablePenaltyAccount"), //
+        TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), //
+        INCOME_ACCOUNT_ID("incomeAccount"), //
+        INCOME_FROM_RECOVERY("incomeFromRecoveryAccount"), //
+        LIABILITY_TRANSFER_SUSPENSE("liabilityTransferInSuspenseAccount"), //
+        INCOME_FROM_CHARGE_OFF_INTEREST("incomeFromChargeOffInterestAccount"), //
+        INCOME_FROM_CHARGE_OFF_FEES("incomeFromChargeOffFeesAccount"), //
+        CHARGE_OFF_EXPENSE("chargeOffExpenseAccount"), //
+        CHARGE_OFF_FRAUD_EXPENSE("chargeOffFraudExpenseAccount"), //
+        INCOME_FROM_CHARGE_OFF_PENALTY("incomeFromChargeOffPenaltyAccount"), //
+        INCOME_FROM_GOODWILL_CREDIT_INTEREST("incomeFromGoodwillCreditInterestAccount"), //
+        INCOME_FROM_GOODWILL_CREDIT_FEES("incomeFromGoodwillCreditFeesAccount"), //
+        INCOME_FROM_GOODWILL_CREDIT_PENALTY("incomeFromGoodwillCreditPenaltyAccount"); //
 
         private final String value;
 
@@ -199,8 +237,16 @@ public final class AccountingConstants {
      ***/
     public enum CashAccountsForSavings {
 
-        SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
-                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(14);
+        SAVINGS_REFERENCE(1), //
+        SAVINGS_CONTROL(2), //
+        INTEREST_ON_SAVINGS(3), //
+        INCOME_FROM_FEES(4), //
+        INCOME_FROM_PENALTIES(5), //
+        TRANSFERS_SUSPENSE(10), //
+        OVERDRAFT_PORTFOLIO_CONTROL(11), //
+        INCOME_FROM_INTEREST(12), //
+        LOSSES_WRITTEN_OFF(13), //
+        ESCHEAT_LIABILITY(14); //
 
         private final Integer value;
 
@@ -236,19 +282,23 @@ public final class AccountingConstants {
      ***/
     public enum SavingProductAccountingParams {
 
-        SAVINGS_REFERENCE("savingsReferenceAccountId"), SAVINGS_CONTROL("savingsControlAccountId"), INCOME_FROM_FEES(
-                "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), INTEREST_ON_SAVINGS(
-                        "interestOnSavingsAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING(
-                                "paymentChannelToFundSourceMappings"), PAYMENT_TYPE("paymentTypeId"), FUND_SOURCE(
-                                        "fundSourceAccountId"), TRANSFERS_SUSPENSE(
-                                                "transfersInSuspenseAccountId"), FEE_INCOME_ACCOUNT_MAPPING(
-                                                        "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(
-                                                                "penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
-                                                                        "incomeAccountId"), OVERDRAFT_PORTFOLIO_CONTROL(
-                                                                                "overdraftPortfolioControlId"), INCOME_FROM_INTEREST(
-                                                                                        "incomeFromInterestId"), LOSSES_WRITTEN_OFF(
-                                                                                                "writeOffAccountId"), ESCHEAT_LIABILITY(
-                                                                                                        "escheatLiabilityId");
+        SAVINGS_REFERENCE("savingsReferenceAccountId"), //
+        SAVINGS_CONTROL("savingsControlAccountId"), //
+        INCOME_FROM_FEES("incomeFromFeeAccountId"), //
+        INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), //
+        INTEREST_ON_SAVINGS("interestOnSavingsAccountId"), //
+        PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), //
+        PAYMENT_TYPE("paymentTypeId"), //
+        FUND_SOURCE("fundSourceAccountId"), //
+        TRANSFERS_SUSPENSE("transfersInSuspenseAccountId"), //
+        FEE_INCOME_ACCOUNT_MAPPING("feeToIncomeAccountMappings"), //
+        PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), //
+        CHARGE_ID("chargeId"), //
+        INCOME_ACCOUNT_ID("incomeAccountId"), //
+        OVERDRAFT_PORTFOLIO_CONTROL("overdraftPortfolioControlId"), //
+        INCOME_FROM_INTEREST("incomeFromInterestId"), //
+        LOSSES_WRITTEN_OFF("writeOffAccountId"), //
+        ESCHEAT_LIABILITY("escheatLiabilityId"); //
 
         private final String value;
 
@@ -268,14 +318,21 @@ public final class AccountingConstants {
 
     public enum SavingProductAccountingDataParams {
 
-        SAVINGS_REFERENCE("savingsReferenceAccount"), SAVINGS_CONTROL("savingsControlAccount"), INCOME_FROM_FEES(
-                "incomeFromFeeAccount"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS(
-                        "interestOnSavingsAccount"), PAYMENT_TYPE("paymentType"), FUND_SOURCE("fundSourceAccount"), TRANSFERS_SUSPENSE(
-                                "transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID(
-                                        "charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
-                                                "overdraftPortfolioControl"), INCOME_FROM_INTEREST(
-                                                        "incomeFromInterest"), LOSSES_WRITTEN_OFF(
-                                                                "writeOffAccount"), ESCHEAT_LIABILITY("escheatLiabilityAccount");
+        SAVINGS_REFERENCE("savingsReferenceAccount"), //
+        SAVINGS_CONTROL("savingsControlAccount"), //
+        INCOME_FROM_FEES("incomeFromFeeAccount"), //
+        INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), //
+        INTEREST_ON_SAVINGS("interestOnSavingsAccount"), //
+        PAYMENT_TYPE("paymentType"), //
+        FUND_SOURCE("fundSourceAccount"), //
+        TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), //
+        PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), //
+        CHARGE_ID("charge"), //
+        INCOME_ACCOUNT_ID("incomeAccount"), //
+        OVERDRAFT_PORTFOLIO_CONTROL("overdraftPortfolioControl"), //
+        INCOME_FROM_INTEREST("incomeFromInterest"), //
+        LOSSES_WRITTEN_OFF("writeOffAccount"), //
+        ESCHEAT_LIABILITY("escheatLiabilityAccount"); //
 
         private final String value;
 
@@ -295,11 +352,13 @@ public final class AccountingConstants {
 
     public enum FinancialActivity {
 
-        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer",
-                GLAccountType.LIABILITY), CASH_AT_MAINVAULT(101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102,
-                        "cashAtTeller", GLAccountType.ASSET), OPENING_BALANCES_TRANSFER_CONTRA(300, "openingBalancesTransferContra",
-                                GLAccountType.EQUITY), ASSET_FUND_SOURCE(103, "fundSource",
-                                        GLAccountType.ASSET), PAYABLE_DIVIDENDS(201, "payableDividends", GLAccountType.LIABILITY);
+        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), //
+        LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY), //
+        CASH_AT_MAINVAULT(101, "cashAtMainVault", GLAccountType.ASSET), //
+        CASH_AT_TELLER(102, "cashAtTeller", GLAccountType.ASSET), //
+        OPENING_BALANCES_TRANSFER_CONTRA(300, "openingBalancesTransferContra", GLAccountType.EQUITY), //
+        ASSET_FUND_SOURCE(103, "fundSource", GLAccountType.ASSET), //
+        PAYABLE_DIVIDENDS(201, "payableDividends", GLAccountType.LIABILITY); //
 
         private final Integer value;
         private final String code;
@@ -411,8 +470,10 @@ public final class AccountingConstants {
      ***/
     public enum SharesProductAccountingParams {
 
-        SHARES_REFERENCE("shareReferenceId"), SHARES_SUSPENSE("shareSuspenseId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), SHARES_EQUITY(
-                "shareEquityId");
+        SHARES_REFERENCE("shareReferenceId"), //
+        SHARES_SUSPENSE("shareSuspenseId"), //
+        INCOME_FROM_FEES("incomeFromFeeAccountId"), //
+        SHARES_EQUITY("shareEquityId"); //
 
         private final String value;
 

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.infrastructure.core.service.DateUtils.parseLocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,18 +30,18 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.client.models.Filters;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.fineract.client.models.GetSavingsAccountTransactionsPageItem;
-import org.apache.fineract.client.models.PagedRequestSavingsTransactionSearch;
-import org.apache.fineract.client.models.RangeFilterBigDecimal;
-import org.apache.fineract.client.models.RangeFilterLocalDate;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
-import org.apache.fineract.client.models.SavingsTransactionSearch;
-import org.apache.fineract.client.models.SortOrder;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -48,16 +49,21 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
+import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 @SuppressWarnings({ "rawtypes" })
 public class SavingsAccountTransactionsSearchIntegrationTest {
 
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String DEFAULT_DATE_FORMAT = "dd MMM yyyy";
+    public static final String DEFAULT_DATE_FORMAT = "dd MMMM yyyy";
+    public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     final String startDate = "01 May 2023";
     final String firstDepositDate = "05 May 2023";
     final String secondDepositDate = "09 May 2023";
@@ -78,191 +84,229 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
         this.savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec, this.responseSpecForValidationError);
         this.savingsProductHelper = new SavingsProductHelper();
     }
 
     @Test
-    public void testSavingsTransactionsSearchWithAmountFilterLteGte() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchAmountFrom() throws JsonProcessingException {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
-
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        Filters filters = new Filters();
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.GTE, BigDecimal.valueOf(100)));
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.LTE, BigDecimal.valueOf(200)));
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, null, null, null);
-        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchTransactions(savingsId,
-                searchRequest);
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().fromAmount(BigDecimal.valueOf(100));
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
         Assertions.assertNotNull(transactionsResponse);
-        assertEquals(1, transactionsResponse.getTotalFilteredRecords());
-        Assertions.assertNotNull(transactionsResponse.getPageItems());
-        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getPageItems());
-        BigDecimal expectedAmount = BigDecimal.valueOf(100);
-        assertEquals(0, expectedAmount.compareTo(pageItemsList.get(0).getAmount()));
+        assertEquals(2, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        assertEquals(2, pageItemsList.size());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(100), pageItemsList.get(1).getAmount()));
     }
 
     @Test
-    public void testSavingsTransactionsSearchWithAmountFilterLtGt() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchAmountFromTo() throws JsonProcessingException {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
-
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        Filters filters = new Filters();
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.GT, BigDecimal.valueOf(100)));
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.LT, BigDecimal.valueOf(400)));
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, null, null, null);
-        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchTransactions(savingsId,
-                searchRequest);
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().fromAmount(BigDecimal.valueOf(100))
+                .toAmount(BigDecimal.valueOf(200));
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
         Assertions.assertNotNull(transactionsResponse);
-        assertEquals(1, transactionsResponse.getTotalFilteredRecords());
-        Assertions.assertNotNull(transactionsResponse.getPageItems());
-        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getPageItems());
-        BigDecimal expectedAmount = BigDecimal.valueOf(300);
-        assertEquals(0, expectedAmount.compareTo(pageItemsList.get(0).getAmount()));
+        assertEquals(1, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        assertEquals(1, pageItemsList.size());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(100), pageItemsList.get(0).getAmount()));
     }
 
     @Test
-    public void testSavingsTransactionsSearchWithDateFilterLteGte() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchDateFromTo() throws JsonProcessingException {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
-
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        Filters filters = new Filters();
-        filters.addTransactionDateItem(buildTransactionDateRange(RangeFilterLocalDate.OperatorEnum.GTE, LocalDate.of(2023, 05, 06)));
-        filters.addTransactionDateItem(buildTransactionDateRange(RangeFilterLocalDate.OperatorEnum.LTE, LocalDate.of(2023, 05, 10)));
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, null, null, null);
-        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchTransactions(savingsId,
-                searchRequest);
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest()
+                .fromDate(firstDepositDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE).toDate(withdrawDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
         Assertions.assertNotNull(transactionsResponse);
-        assertEquals(2, transactionsResponse.getTotalFilteredRecords());
-        Assertions.assertNotNull(transactionsResponse.getPageItems());
-        assertEquals(2, transactionsResponse.getPageItems().size());
-        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getPageItems());
-        assertEquals(0, parseDate(withdrawDate, DEFAULT_DATE_FORMAT).compareTo(pageItemsList.get(0).getDate()));
-        assertEquals(0, parseDate(secondDepositDate, DEFAULT_DATE_FORMAT).compareTo(pageItemsList.get(1).getDate()));
+        assertEquals(3, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        assertEquals(3, pageItemsList.size());
+        assertEquals(parseLocalDate(withdrawDate, DEFAULT_DATE_FORMAT), pageItemsList.get(0).getDate());
+        assertEquals(parseLocalDate(secondDepositDate, DEFAULT_DATE_FORMAT), pageItemsList.get(1).getDate());
     }
 
     @Test
-    public void testSavingsTransactionsSearchWithTransactionTypeDepositAndDefaultSort() {
+    public void testSavingsTransactionsSearchSubmittedDateFromTo() throws JsonProcessingException {
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
+        final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, true);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
+            this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, false);
+        }
+        String submittedDate = DateUtils.format(businessDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest()
+                .fromSubmittedDate(submittedDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE)
+                .toSubmittedDate(submittedDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
+        Assertions.assertNotNull(transactionsResponse);
+        assertEquals(3, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        assertEquals(3, pageItemsList.size());
+        assertEquals(businessDate, pageItemsList.get(0).getSubmittedOnDate());
+        assertEquals(businessDate, pageItemsList.get(1).getSubmittedOnDate());
+        assertEquals(businessDate, pageItemsList.get(2).getSubmittedOnDate());
+    }
+
+    @Test
+    public void testSavingsTransactionsSearchTransactionTypeDepositAndDefaultSort() {
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        Filters filters = new Filters();
-        filters.setTransactionType(List.of(Filters.TransactionTypeEnum.DEPOSIT));
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, null, null, null);
-        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchTransactions(savingsId,
-                searchRequest);
+        int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD));
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
         Assertions.assertNotNull(transactionsResponse);
-        assertEquals(2, transactionsResponse.getTotalFilteredRecords());
-        Assertions.assertNotNull(transactionsResponse.getPageItems());
-        assertEquals(2, transactionsResponse.getPageItems().size());
-        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getPageItems());
-        assertTrue(Filters.TransactionTypeEnum.DEPOSIT.getValue().equalsIgnoreCase(pageItemsList.get(0).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(300).compareTo(pageItemsList.get(0).getAmount()));
-        assertEquals(0, parseDate(secondDepositDate, DEFAULT_DATE_FORMAT).compareTo(pageItemsList.get(0).getDate()));
-        assertTrue(Filters.TransactionTypeEnum.DEPOSIT.getValue().equalsIgnoreCase(pageItemsList.get(1).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(pageItemsList.get(1).getAmount()));
-        assertEquals(0, parseDate(firstDepositDate, DEFAULT_DATE_FORMAT).compareTo(pageItemsList.get(1).getDate()));
+        assertEquals(2, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        assertEquals(2, pageItemsList.size());
+        GetSavingsAccountTransactionsPageItem first = pageItemsList.get(0);
+        assertEquals(Long.valueOf(typeD), first.getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(300), first.getAmount()));
+        assertEquals(parseLocalDate(secondDepositDate, DEFAULT_DATE_FORMAT), first.getDate());
+        GetSavingsAccountTransactionsPageItem second = pageItemsList.get(1);
+        assertEquals(Long.valueOf(typeD), second.getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(100), second.getAmount()));
+        assertEquals(parseLocalDate(firstDepositDate, DEFAULT_DATE_FORMAT), second.getDate());
     }
 
     @Test
-    public void testSavingsTransactionsSearchWithTransactionTypeWithdrawAndDeposit() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchTransactionTypesWithdrawAndDeposit() throws JsonProcessingException {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
-
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        Filters filters = new Filters();
-        filters.setTransactionType(List.of(Filters.TransactionTypeEnum.DEPOSIT, Filters.TransactionTypeEnum.WITHDRAWAL));
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, null, null, null);
-        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchTransactions(savingsId,
-                searchRequest);
+        int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
+        int typeW = SavingsAccountTransactionType.WITHDRAWAL.getId();
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD) + ',' + typeW);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
         Assertions.assertNotNull(transactionsResponse);
-        assertEquals(3, transactionsResponse.getTotalFilteredRecords());
-        Assertions.assertNotNull(transactionsResponse.getPageItems());
-        assertEquals(3, transactionsResponse.getPageItems().size());
-        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getPageItems());
-        assertTrue(
-                Filters.TransactionTypeEnum.WITHDRAWAL.getValue().equalsIgnoreCase(pageItemsList.get(0).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(pageItemsList.get(0).getAmount()));
-        assertTrue(Filters.TransactionTypeEnum.DEPOSIT.getValue().equalsIgnoreCase(pageItemsList.get(1).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(300).compareTo(pageItemsList.get(1).getAmount()));
-        assertTrue(Filters.TransactionTypeEnum.DEPOSIT.getValue().equalsIgnoreCase(pageItemsList.get(2).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(pageItemsList.get(2).getAmount()));
+        assertEquals(3, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        assertEquals(3, pageItemsList.size());
+        assertEquals(Long.valueOf(typeW), pageItemsList.get(0).getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(100), pageItemsList.get(0).getAmount()));
+        assertEquals(Long.valueOf(typeD), pageItemsList.get(1).getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(300), pageItemsList.get(1).getAmount()));
+        assertEquals(Long.valueOf(typeD), pageItemsList.get(2).getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(100), pageItemsList.get(2).getAmount()));
     }
 
     @Test
-    public void testSavingsTransactionsSearchWithPaginationAndNoFilter() {
+    public void testSavingsTransactionsSearchPaginationAndNoFilter() {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
-        Filters filters = new Filters();
-        int page = 0;
-        int size = 2;
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, page, size, null);
-        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchTransactions(savingsId,
-                searchRequest);
+
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().pageable(0, 2, null, null);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
         Assertions.assertNotNull(transactionsResponse);
-        assertEquals(3, transactionsResponse.getTotalFilteredRecords());
-        Assertions.assertNotNull(transactionsResponse.getPageItems());
-        assertEquals(2, transactionsResponse.getPageItems().size());
+        assertEquals(3, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        assertEquals(2, transactionsResponse.getContent().size());
     }
 
     @Test
-    public void testSavingsTransactionsSearchWithTransactionTypeDepositAndSortByAmountAsc() {
+    public void testSavingsTransactionsSearchTransactionTypeDepositAndSortByAmountAsc() {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "200", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
-        Filters filters = new Filters();
-        filters.setTransactionType(List.of(Filters.TransactionTypeEnum.DEPOSIT));
-        SortOrder sortOrder = new SortOrder();
-        sortOrder.setProperty("amount");
-        sortOrder.setDirection(SortOrder.DirectionEnum.ASC);
-        List<SortOrder> sortOrders = List.of(sortOrder);
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, null, null, sortOrders);
-        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchTransactions(savingsId,
-                searchRequest);
+
+        int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD)).pageable(null, null,
+                "amount", Sort.Direction.ASC);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
         Assertions.assertNotNull(transactionsResponse);
-        assertEquals(2, transactionsResponse.getTotalFilteredRecords());
-        Assertions.assertNotNull(transactionsResponse.getPageItems());
-        assertEquals(2, transactionsResponse.getPageItems().size());
-        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getPageItems());
-        assertTrue(Filters.TransactionTypeEnum.DEPOSIT.getValue().equalsIgnoreCase(pageItemsList.get(0).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(pageItemsList.get(0).getAmount()));
-        assertTrue(Filters.TransactionTypeEnum.DEPOSIT.getValue().equalsIgnoreCase(pageItemsList.get(1).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(300).compareTo(pageItemsList.get(1).getAmount()));
+        assertEquals(2, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        assertEquals(2, pageItemsList.size());
+        GetSavingsAccountTransactionsPageItem first = pageItemsList.get(0);
+        assertEquals(Long.valueOf(typeD), first.getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(100), first.getAmount()));
+        assertEquals(parseLocalDate(firstDepositDate, DEFAULT_DATE_FORMAT), first.getDate());
+        GetSavingsAccountTransactionsPageItem second = pageItemsList.get(1);
+        assertEquals(Long.valueOf(typeD), second.getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(300), second.getAmount()));
+        assertEquals(parseLocalDate(secondDepositDate, DEFAULT_DATE_FORMAT), second.getDate());
     }
 
     @Test
@@ -270,69 +314,56 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "50", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "400", thirdDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", fourthDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
-
         this.savingsAccountHelper.postInterestForSavings(savingsId);
-        Filters filters = new Filters();
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.GTE, BigDecimal.valueOf(100)));
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.LT, BigDecimal.valueOf(500)));
-        filters.addTransactionDateItem(buildTransactionDateRange(RangeFilterLocalDate.OperatorEnum.GT, LocalDate.of(2023, 05, 06)));
-        filters.addTransactionDateItem(buildTransactionDateRange(RangeFilterLocalDate.OperatorEnum.LTE, LocalDate.of(2023, 06, 01)));
-        filters.setTransactionType(List.of(Filters.TransactionTypeEnum.DEPOSIT));
-        SortOrder sortOrder = new SortOrder();
-        sortOrder.setProperty("amount");
-        sortOrder.setDirection(SortOrder.DirectionEnum.DESC);
-        List<SortOrder> sortOrders = List.of(sortOrder);
-        int page = 0;
-        int size = 2;
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, page, size, sortOrders);
-        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchTransactions(savingsId,
-                searchRequest);
-        Assertions.assertNotNull(transactionsResponse);
-        assertEquals(3, transactionsResponse.getTotalFilteredRecords());
-        Assertions.assertNotNull(transactionsResponse.getPageItems());
-        assertEquals(2, transactionsResponse.getPageItems().size());
-        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getPageItems());
-        assertTrue(Filters.TransactionTypeEnum.DEPOSIT.getValue().equalsIgnoreCase(pageItemsList.get(0).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(400).compareTo(pageItemsList.get(0).getAmount()));
-        assertEquals(0, parseDate(thirdDepositDate, DEFAULT_DATE_FORMAT).compareTo(pageItemsList.get(0).getDate()));
-        assertTrue(Filters.TransactionTypeEnum.DEPOSIT.getValue().equalsIgnoreCase(pageItemsList.get(1).getTransactionType().getValue()));
-        assertEquals(0, BigDecimal.valueOf(300).compareTo(pageItemsList.get(1).getAmount()));
-        assertEquals(0, parseDate(secondDepositDate, DEFAULT_DATE_FORMAT).compareTo(pageItemsList.get(1).getDate()));
 
+        int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().fromAmount(BigDecimal.valueOf(100))
+                .toAmount(BigDecimal.valueOf(500)).fromDate("2023-05-06", DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE)
+                .toDate("2023-06-01", DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE).types(String.valueOf(typeD))
+                .pageable(0, 2, "amount", Sort.Direction.DESC);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
+                queryParams);
+
+        Assertions.assertNotNull(transactionsResponse);
+        assertEquals(3, transactionsResponse.getTotal());
+        Assertions.assertNotNull(transactionsResponse.getContent());
+        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        assertEquals(2, pageItemsList.size());
+        GetSavingsAccountTransactionsPageItem first = pageItemsList.get(0);
+        assertEquals(Long.valueOf(typeD), first.getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(400), first.getAmount()));
+        assertEquals(parseLocalDate(thirdDepositDate, DEFAULT_DATE_FORMAT), first.getDate());
+        GetSavingsAccountTransactionsPageItem second = pageItemsList.get(1);
+        assertEquals(Long.valueOf(typeD), second.getTransactionType().getId());
+        assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(300), second.getAmount()));
+        assertEquals(parseLocalDate(secondDepositDate, DEFAULT_DATE_FORMAT), second.getDate());
     }
 
     @Test
-    public void testSavingsTransactionsSearchFilterRangeValidationError() {
+    public void testSavingsTransactionsSearchDateValidationError() {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "50", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "400", thirdDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", fourthDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        Filters filters = new Filters();
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.GTE, BigDecimal.valueOf(100)));
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.LT, BigDecimal.valueOf(500)));
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.LT, BigDecimal.valueOf(1000)));
-        filters.addTransactionDateItem(buildTransactionDateRange(RangeFilterLocalDate.OperatorEnum.GT, LocalDate.of(2023, 05, 6)));
-        filters.addTransactionDateItem(buildTransactionDateRange(RangeFilterLocalDate.OperatorEnum.LTE, LocalDate.of(2023, 06, 1)));
-        filters.addTransactionDateItem(buildTransactionDateRange(RangeFilterLocalDate.OperatorEnum.LTE, LocalDate.of(2023, 06, 8)));
-        filters.setTransactionType(List.of(Filters.TransactionTypeEnum.DEPOSIT));
-        SortOrder sortOrder = new SortOrder();
-        sortOrder.setProperty("amount");
-        sortOrder.setDirection(SortOrder.DirectionEnum.DESC);
-        List<SortOrder> sortOrders = List.of(sortOrder);
-        int page = 0;
-        int size = 2;
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, page, size, sortOrders);
-        this.savingsAccountHelperValidationError.searchTransactions(savingsId, searchRequest);
+        int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().fromAmount(BigDecimal.valueOf(100))
+                .toAmount(BigDecimal.valueOf(500));
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        queryParams.put("fromDate", "05 May 2023"); // wrong date format
+        this.savingsAccountHelperValidationError.searchSavingsTransactions(savingsId, queryParams);
     }
 
     @Test
@@ -346,11 +377,11 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "400", thirdDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", fourthDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        Filters filters = new Filters();
-        filters.addTransactionAmountItem(buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum.GTE, BigDecimal.valueOf(-100)));
-        filters.setTransactionType(List.of(Filters.TransactionTypeEnum.DEPOSIT));
-        PagedRequestSavingsTransactionSearch searchRequest = buildTransactionsSearchReqeust(filters, null, null, null);
-        this.savingsAccountHelperValidationError.searchTransactions(savingsId, searchRequest);
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest();
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        queryParams.put("fromAmount", "test"); // not number
+        responseSpecForValidationError.statusCode(404);
+        this.savingsAccountHelperValidationError.searchSavingsTransactions(savingsId, queryParams);
     }
 
     private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
@@ -372,36 +403,53 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 
-    private PagedRequestSavingsTransactionSearch buildTransactionsSearchReqeust(Filters filters, Integer page, Integer size,
-            List<SortOrder> sorts) {
-        final Integer DEFAULT_PAGE_SIZE = 50;
-        SavingsTransactionSearch savingsTransactionSearch = new SavingsTransactionSearch();
-        savingsTransactionSearch.setFilters(filters);
-        PagedRequestSavingsTransactionSearch pagedRequest = new PagedRequestSavingsTransactionSearch();
-        pagedRequest.setRequest(savingsTransactionSearch);
-        pagedRequest.setSorts(sorts != null ? sorts : new ArrayList<>());
-        pagedRequest.setPage(page != null ? page : 0);
-        pagedRequest.setSize(size != null ? size : DEFAULT_PAGE_SIZE);
-        return pagedRequest;
-    }
-
-    private RangeFilterBigDecimal buildTransactionAmountRange(RangeFilterBigDecimal.OperatorEnum operator, BigDecimal value) {
-        RangeFilterBigDecimal transactionAmountFilter = new RangeFilterBigDecimal();
-        transactionAmountFilter.setOperator(operator);
-        transactionAmountFilter.setValue(value);
-        return transactionAmountFilter;
-    }
-
-    private RangeFilterLocalDate buildTransactionDateRange(RangeFilterLocalDate.OperatorEnum operator, LocalDate value) {
-        RangeFilterLocalDate transactionDateFilter = new RangeFilterLocalDate();
-        transactionDateFilter.setOperator(operator);
-        transactionDateFilter.setValue(value);
-        return transactionDateFilter;
-    }
-
-    public static LocalDate parseDate(String dateStr, String pattern) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-        return LocalDate.parse(dateStr, formatter);
+    private Map<String, Object> buildTransactionsSearchQuery(TransactionSearchRequest searchParams, String dateFormat, Locale locale) {
+        HashMap<String, Object> params = new HashMap<>();
+        if (searchParams.getFromDate() != null) {
+            params.put("fromDate", DateUtils.format(searchParams.getFromDate(), dateFormat, locale));
+        }
+        if (searchParams.getToDate() != null) {
+            params.put("toDate", DateUtils.format(searchParams.getToDate(), dateFormat, locale));
+        }
+        if (searchParams.getFromSubmittedDate() != null) {
+            params.put("fromSubmittedDate", DateUtils.format(searchParams.getFromSubmittedDate(), dateFormat, locale));
+        }
+        if (searchParams.getToSubmittedDate() != null) {
+            params.put("toSubmittedDate", DateUtils.format(searchParams.getToSubmittedDate(), dateFormat, locale));
+        }
+        if (searchParams.getFromAmount() != null) {
+            params.put("fromAmount", searchParams.getFromAmount());
+        }
+        if (searchParams.getToAmount() != null) {
+            params.put("toAmount", searchParams.getToAmount());
+        }
+        if (searchParams.getTypes() != null) {
+            params.put("types", String.join(",", searchParams.getTypes()));
+        }
+        if (searchParams.getCredit() != null) {
+            params.put("credit", searchParams.getCredit());
+        }
+        if (searchParams.getDebit() != null) {
+            params.put("debit", searchParams.getDebit());
+        }
+        PageRequest pageable = searchParams.getPageable();
+        if (pageable != null) {
+            params.put("offset", pageable.getPageNumber());
+            params.put("limit", pageable.getPageSize());
+            Sort sort = pageable.getSort();
+            if (sort.isSorted()) {
+                List<Sort.Order> orders = sort.toList();
+                params.put("sortOrder", orders.get(0).getDirection());
+                params.put("orderBy", orders.stream().map(Sort.Order::getProperty).collect(Collectors.joining(",")));
+            }
+        }
+        if (dateFormat != null) {
+            params.put("dateFormat", dateFormat);
+        }
+        if (locale != null) {
+            params.put("locale", locale.toString());
+        }
+        return params;
     }
 
     // Reset configuration fields

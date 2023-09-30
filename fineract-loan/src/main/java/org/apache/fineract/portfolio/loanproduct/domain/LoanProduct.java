@@ -90,6 +90,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "loan_transaction_strategy_name")
     private String transactionProcessingStrategyName;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<LoanProductPaymentAllocationRule> paymentAllocationRules = new ArrayList<>();
+
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
@@ -210,9 +213,12 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "overdue_days_for_repayment_event")
     private Integer overDueDaysForRepaymentEvent;
 
+    @Column(name = "repayment_start_date_type_enum", nullable = false)
+    private RepaymentStartDateType repaymentStartDateType;
+
     public static LoanProduct assembleFromJson(final Fund fund, final String loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
-            final List<Rate> productRates) {
+            final List<Rate> productRates, List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.SHORT_NAME);
@@ -385,23 +391,36 @@ public class LoanProduct extends AbstractPersistableCustom {
         final Integer overDueDaysForRepaymentEvent = command
                 .integerValueOfParameterNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT);
 
-        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
-                maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
-                annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
-                repaymentFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment,
-                recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
-                inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate, externalId,
-                useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuarantorFunds,
-                loanProductGuaranteeDetails, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
-                canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates,
-                floatingRate, interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate,
-                defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
-                minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
-                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
-                overDueDaysForRepaymentEvent);
+        final boolean enableDownPayment = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT);
+        final BigDecimal disbursedAmountPercentageDownPayment = command
+                .bigDecimalValueOfParameterNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT);
+        final boolean enableAutoRepaymentForDownPayment = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT);
+
+        final RepaymentStartDateType repaymentStartDateType = RepaymentStartDateType
+                .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE));
+
+        final boolean disableScheduleExtensionForDownPayment = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT);
+
+        return new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules, name, shortName, description,
+                currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod,
+                interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
+                allowPartialPeriodInterestCalcualtion, repaymentEvery, repaymentFrequencyType, numberOfRepayments, minNumberOfRepayments,
+                maxNumberOfRepayments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment,
+                graceOnInterestCharged, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle,
+                startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
+                outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
+                holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstallment,
+                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes,
+                isLinkedToFloatingInterestRates, floatingRate, interestRateDifferential, minDifferentialLendingRate,
+                maxDifferentialLendingRate, defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed,
+                isVariableInstallmentsAllowed, minimumGapBetweenInstallments, maximumGapBetweenInstallments,
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment,
+                disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
+                dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment,
+                enableAutoRepaymentForDownPayment, repaymentStartDateType, disableScheduleExtensionForDownPayment);
 
     }
 
@@ -583,7 +602,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.loanProductMinMaxConstraints = null;
     }
 
-    public LoanProduct(final Fund fund, final String transactionProcessingStrategyCode, final String name, final String shortName,
+    public LoanProduct(final Fund fund, final String transactionProcessingStrategyCode,
+            final List<LoanProductPaymentAllocationRule> paymentAllocationRules, final String name, final String shortName,
             final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
@@ -612,9 +632,20 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
             final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
-            final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent) {
+            final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent,
+            final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
+            final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType,
+            final boolean disableScheduleExtensionForDownPayment) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
+
+        this.paymentAllocationRules = paymentAllocationRules;
+        if (this.paymentAllocationRules != null) {
+            for (LoanProductPaymentAllocationRule loanProductPaymentAllocationRule : this.paymentAllocationRules) {
+                loanProductPaymentAllocationRule.setLoanProduct(this);
+            }
+        }
+
         this.name = name.trim();
         this.shortName = shortName.trim();
         if (StringUtils.isNotBlank(description)) {
@@ -645,7 +676,8 @@ public class LoanProduct extends AbstractPersistableCustom {
                 considerPartialPeriodInterest, repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
-                isInterestRecalculationEnabled, isEqualAmortization);
+                isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
+                enableAutoRepaymentForDownPayment, disableScheduleExtensionForDownPayment);
 
         this.loanProductRelatedDetail.validateRepaymentPeriodWithGraceSettings();
 
@@ -697,11 +729,18 @@ public class LoanProduct extends AbstractPersistableCustom {
 
         this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
+        this.repaymentStartDateType = repaymentStartDateType;
 
         validateLoanProductPreSave();
     }
 
     public void validateLoanProductPreSave() {
+        if (this.paymentAllocationRules != null && paymentAllocationRules.size() > 0
+                && !transactionProcessingStrategyCode.equals("advanced-payment-allocation-strategy")) {
+            throw new LoanProductGeneralRuleException(
+                    "payment_allocation.must.not.be.provided.when.allocation.strategy.is.not.advanced-payment-strategy",
+                    "In case '" + transactionProcessingStrategyCode + "' payment strategy, payment_allocation must not be provided");
+        }
 
         if (this.disallowExpectedDisbursements) {
             if (!this.isMultiDisburseLoan()) {
@@ -766,6 +805,10 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
     }
 
+    public String getTransactionProcessingStrategyCode() {
+        return this.transactionProcessingStrategyCode;
+    }
+
     public void setTransactionProcessingStrategyName(final String transactionProcessingStrategyName) {
         this.transactionProcessingStrategyName = transactionProcessingStrategyName;
     }
@@ -826,6 +869,10 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public List<Charge> getLoanProductCharges() {
         return this.charges;
+    }
+
+    public List<LoanProductPaymentAllocationRule> getPaymentAllocationRules() {
+        return this.paymentAllocationRules;
     }
 
     public void update(final LoanProductConfigurableAttributes loanConfigurableAttributes) {
@@ -911,6 +958,14 @@ public class LoanProduct extends AbstractPersistableCustom {
         if (command.isChangeInStringParameterNamed(transactionProcessingStrategyCodeParamName, this.transactionProcessingStrategyCode)) {
             final String newValue = command.stringValueOfParameterNamed(transactionProcessingStrategyCodeParamName);
             actualChanges.put(transactionProcessingStrategyCodeParamName, newValue);
+        }
+
+        final String paymentAllocationParamName = "paymentAllocation";
+        if (command.hasParameter(paymentAllocationParamName)) {
+            final JsonArray jsonArray = command.arrayOfParameterNamed(paymentAllocationParamName);
+            if (jsonArray != null) {
+                actualChanges.put(paymentAllocationParamName, command.jsonFragment(paymentAllocationParamName));
+            }
         }
 
         final String chargesParamName = "charges";
@@ -1214,6 +1269,42 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, newValue);
             actualChanges.put("locale", localeAsInput);
             this.overDueDaysForRepaymentEvent = newValue;
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT,
+                this.loanProductRelatedDetail.isEnableDownPayment())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT);
+            actualChanges.put(LoanProductConstants.ENABLE_DOWN_PAYMENT, newValue);
+            this.loanProductRelatedDetail.updateEnableDownPayment(newValue);
+        }
+
+        if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
+                this.loanProductRelatedDetail.getDisbursedAmountPercentageForDownPayment())) {
+            BigDecimal newValue = command.bigDecimalValueOfParameterNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT);
+            actualChanges.put(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, newValue);
+            this.loanProductRelatedDetail.updateDisbursedAmountPercentageForDownPayment(newValue);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT,
+                this.loanProductRelatedDetail.isEnableAutoRepaymentForDownPayment())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT);
+            actualChanges.put(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, newValue);
+            this.loanProductRelatedDetail.updateEnableAutoRepaymentForDownPayment(newValue);
+        }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE,
+                this.repaymentStartDateType.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE);
+            actualChanges.put(LoanProductConstants.REPAYMENT_START_DATE_TYPE, newValue);
+            this.repaymentStartDateType = RepaymentStartDateType.fromInt(newValue);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT,
+                this.loanProductRelatedDetail.isDisableScheduleExtensionForDownPayment())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT);
+            actualChanges.put(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, newValue);
+            this.loanProductRelatedDetail.updateDisableScheduleExtensionForDownPayment(newValue);
         }
 
         return actualChanges;
@@ -1609,6 +1700,10 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public Integer getOverDueDaysForRepaymentEvent() {
         return this.overDueDaysForRepaymentEvent;
+    }
+
+    public RepaymentStartDateType getRepaymentStartDateType() {
+        return this.repaymentStartDateType == null ? RepaymentStartDateType.INVALID : this.repaymentStartDateType;
     }
 
 }

@@ -41,7 +41,9 @@ buildscript {
         fineractPublishProjects = subprojects.findAll{
             [
                 'fineract-avro-schemas',
+                'fineract-api',
                 'fineract-client',
+                'fineract-core',
                 'fineract-provider',
                 'fineract-investor',
                 'fineract-loan'
@@ -65,6 +67,7 @@ buildscript {
 }
 
 plugins {
+    id 'me.qoomon.git-versioning' version '6.4.2'
     id "org.barfuin.gradle.taskinfo" version "2.1.0"
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'com.diffplug.spotless' version '6.19.0' apply false
@@ -83,7 +86,6 @@ plugins {
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
     id 'com.google.cloud.tools.jib' version '3.3.2' apply false
-    id 'fr.brouillard.oss.gradle.jgitver' version '0.10.0-rc03'
     id 'org.sonarqube' version '4.2.1.3168'
     id 'com.github.andygoossens.modernizer' version '1.8.0' apply false
     id 'com.github.spotbugs' version '5.0.14' apply false
@@ -97,16 +99,29 @@ description = '''\
 Run as:
 gradle clean bootRun'''
 
+version = "0.0.0-SNAPSHOT"
+gitVersioning.apply {
+    refs {
+        considerTagsOnBranches = true
+
+        tag("(?<version>.*)") {
+            version = "\${ref.version}"
+        }
+
+        branch(".+") {
+            version = "\${describe.tag.version.major}.\${describe.tag.version.minor}.\${describe.tag.version.patch.next}-SNAPSHOT"
+        }
+    }
+    rev {
+        version = "\${commit}"
+    }
+}
+
 ext['groovy.version'] = '4.0.6'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.json".toString()
 
 allprojects  {
     group = 'org.apache.fineract'
-
-    jgitver {
-        strategy 'PATTERN'
-        versionPattern ( project.hasProperty('fineract.release.version') ? '${v}' : '${M}.${m}.${p}-${meta.GIT_SHA1_8}' )
-    }
 
     repositories {
         mavenCentral()
@@ -554,6 +569,7 @@ configure(project.fineractJavaProjects) {
                 'org.mockito:mockito-junit-jupiter',
                 'org.junit.jupiter:junit-jupiter-api',
                 'org.junit.jupiter:junit-jupiter-engine',
+                'org.junit.jupiter:junit-jupiter-params',
                 'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
                 'org.bouncycastle:bcpkix-jdk15to18',
                 'org.bouncycastle:bcprov-jdk15to18',

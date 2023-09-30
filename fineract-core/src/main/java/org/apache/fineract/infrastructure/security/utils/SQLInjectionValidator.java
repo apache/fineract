@@ -144,7 +144,7 @@ public final class SQLInjectionValidator {
 
     private static void validateSQLCommand(String lowerCaseSQL, String[] commands, SQLCommandCondition condition) {
         for (String command : commands) {
-            if (condition.checkCondition(command, lowerCaseSQL)) {
+            if (condition.checkCondition(lowerCaseSQL, command)) {
                 throw new SQLInjectionException();
             }
         }

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.http.HttpStatus.SC_NOT_IMPLEMENTED;
+
 import jakarta.ws.rs.core.UriInfo;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -35,15 +37,8 @@ public class UnknownCommandStrategy implements CommandStrategy {
 
     @Override
     public BatchResponse execute(BatchRequest batchRequest, @SuppressWarnings("unused") UriInfo uriInfo) {
-
-        final BatchResponse batchResponse = new BatchResponse();
-
-        batchResponse.setRequestId(batchRequest.getRequestId());
-        batchResponse.setStatusCode(501);
-        batchResponse.setBody("Resource with method " + batchRequest.getMethod() + " and relativeUrl " + batchRequest.getRelativeUrl()
-                + " doesn't exist");
-
-        return batchResponse;
+        return new BatchResponse().setRequestId(batchRequest.getRequestId()).setStatusCode(SC_NOT_IMPLEMENTED)
+                .setBody("Resource with method " + batchRequest.getMethod() + " and relativeUrl " + batchRequest.getRelativeUrl()
+                        + " doesn't exist");
     }
-
 }

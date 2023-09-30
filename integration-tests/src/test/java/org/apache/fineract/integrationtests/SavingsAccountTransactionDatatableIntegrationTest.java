@@ -56,10 +56,8 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
 
     private static final String SAVINGS_TRANSACTION_APP_TABLE_NAME = EntityTables.SAVINGS_TRANSACTION.getName();
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String DEFAULT_DATE_FORMAT = "dd MMM yyyy";
     final String startDate = "01 Jun 2023";
     final String firstDepositDate = "05 Jun 2023";
-    final String secondDepositDate = "09 Jun 2023";
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private DatatableHelper datatableHelper;
@@ -136,7 +134,7 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
         assertNotNull(columnHeaderData);
 
         // two columns with 1 primary key and 2 audit columns created
-        assertEquals(columnHeaderData.size(), 6);
+        assertEquals(6, columnHeaderData.size());
 
         // deleting the datatable
         String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);
@@ -180,7 +178,8 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
 
         assertNotNull(response);
 
-        String datatableId = response.getResourceIdentifier();
+        String createdName = response.getResourceIdentifier();
+        assertEquals(datatableName, createdName);
 
         // add entries
         final HashMap<String, Object> datatableEntryMap = new HashMap<>();
@@ -192,13 +191,14 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
 
         final boolean genericResultSet = true;
 
-        HashMap<String, Object> datatableEntryResponseFirst = this.datatableHelper.createDatatableEntry(datatableId, transactionId,
+        HashMap<String, Object> datatableEntryResponseFirst = this.datatableHelper.createDatatableEntry(datatableName, transactionId,
                 genericResultSet, datatabelEntryRequestJsonString);
 
-        assertNotNull(datatableEntryResponseFirst.get("resourceId"));
+        Integer datatableId = (Integer) datatableEntryResponseFirst.get("resourceId");
+        assertNotNull(datatableId);
 
         // Read the Datatable entry generated with genericResultSet
-        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableId, transactionId, genericResultSet, null, "");
+        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, transactionId, genericResultSet, null, "");
         assertNotNull(items);
         assertEquals(1, ((List) items.get("data")).size());
 
@@ -208,13 +208,14 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
         datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
         datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         HashMap<String, Object> updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, transactionId,
-                false, datatabelEntryRequestJsonString);
+                datatableId, false, datatabelEntryRequestJsonString);
 
-        assertEquals(transactionId, updatedDatatableEntryResponse.get("resourceId"));
+        assertEquals(transactionId, Integer.valueOf((String) updatedDatatableEntryResponse.get("transactionId")));
+        assertEquals(datatableId, updatedDatatableEntryResponse.get("resourceId"));
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, transactionId, "resourceId");
-        assertEquals(transactionId, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
+        String deletedTransactionId = (String) this.datatableHelper.deleteDatatableEntries(datatableName, transactionId, "transactionId");
+        assertEquals(transactionId, Integer.valueOf(deletedTransactionId), "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
         String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);

@@ -27,8 +27,8 @@ import java.util.stream.Stream;
 import org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy;
 import org.apache.fineract.batch.command.internal.AdjustChargeByChargeExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.AdjustChargeCommandStrategy;
-import org.apache.fineract.batch.command.internal.AdjustTransactionByExternalIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.AdjustTransactionCommandStrategy;
+import org.apache.fineract.batch.command.internal.AdjustLoanTransactionByExternalIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy;
 import org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.ApplySavingsCommandStrategy;
 import org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy;
@@ -50,8 +50,8 @@ import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdC
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByQueryCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetLoanByExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.GetTransactionByExternalIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetLoanTransactionByExternalIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetLoanTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.LoanStateTransistionsByExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.ModifyLoanApplicationCommandStrategy;
 import org.apache.fineract.batch.command.internal.UnknownCommandStrategy;
@@ -140,18 +140,18 @@ public class CommandStrategyProviderTest {
                         mock(CreateTransactionLoanCommandStrategy.class)),
                 Arguments.of("loans/123/transactions?command=chargeRefund", HttpMethod.POST, "createTransactionLoanCommandStrategy",
                         mock(CreateTransactionLoanCommandStrategy.class)),
-                Arguments.of("loans/123/transactions/123", HttpMethod.POST, "adjustTransactionCommandStrategy",
-                        mock(AdjustTransactionCommandStrategy.class)),
-                Arguments.of("loans/123/transactions/123?command=chargeback", HttpMethod.POST, "adjustTransactionCommandStrategy",
-                        mock(AdjustTransactionCommandStrategy.class)),
+                Arguments.of("loans/123/transactions/123", HttpMethod.POST, "adjustLoanTransactionCommandStrategy",
+                        mock(AdjustLoanTransactionCommandStrategy.class)),
+                Arguments.of("loans/123/transactions/123?command=chargeback", HttpMethod.POST, "adjustLoanTransactionCommandStrategy",
+                        mock(AdjustLoanTransactionCommandStrategy.class)),
                 Arguments.of(
                         "loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/transactions/external-id/7dfad438-2319-48ce-8520-10a62801e9ab",
-                        HttpMethod.POST, "adjustTransactionByExternalIdCommandStrategy",
-                        mock(AdjustTransactionByExternalIdCommandStrategy.class)),
+                        HttpMethod.POST, "adjustLoanTransactionByExternalIdCommandStrategy",
+                        mock(AdjustLoanTransactionByExternalIdCommandStrategy.class)),
                 Arguments.of(
                         "loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/transactions/external-id/7dfad438-2319-48ce-8520-10a62801e9ab?command=chargeback",
-                        HttpMethod.POST, "adjustTransactionByExternalIdCommandStrategy",
-                        mock(AdjustTransactionByExternalIdCommandStrategy.class)),
+                        HttpMethod.POST, "adjustLoanTransactionByExternalIdCommandStrategy",
+                        mock(AdjustLoanTransactionByExternalIdCommandStrategy.class)),
                 Arguments.of("clients/456?command=activate", HttpMethod.POST, "activateClientCommandStrategy",
                         mock(ActivateClientCommandStrategy.class)),
                 Arguments.of("loans/123?command=approve", HttpMethod.POST, "approveLoanCommandStrategy",
@@ -166,11 +166,12 @@ public class CommandStrategyProviderTest {
                         mock(CreateLoanRescheduleRequestCommandStrategy.class)),
                 Arguments.of("rescheduleloans/123?command=approve", HttpMethod.POST, "approveLoanRescheduleCommandStrategy",
                         mock(ApproveLoanRescheduleCommandStrategy.class)),
-                Arguments.of("loans/123/transactions/123", HttpMethod.GET, "getTransactionByIdCommandStrategy",
-                        mock(GetTransactionByIdCommandStrategy.class)),
+                Arguments.of("loans/123/transactions/123", HttpMethod.GET, "getLoanTransactionByIdCommandStrategy",
+                        mock(GetLoanTransactionByIdCommandStrategy.class)),
                 Arguments.of(
                         "loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/transactions/external-id/7dfad438-2319-48ce-8520-10a62801e9ab?fields=id",
-                        HttpMethod.GET, "getTransactionByExternalIdCommandStrategy", mock(GetTransactionByExternalIdCommandStrategy.class)),
+                        HttpMethod.GET, "getLoanTransactionByExternalIdCommandStrategy",
+                        mock(GetLoanTransactionByExternalIdCommandStrategy.class)),
                 Arguments.of("datatables/test_dt_table/123", HttpMethod.GET, "getDatatableEntryByAppTableIdCommandStrategy",
                         mock(GetDatatableEntryByAppTableIdCommandStrategy.class)),
                 Arguments.of("datatables/test_dt_table/123?genericResultSet=true", HttpMethod.GET,

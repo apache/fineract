@@ -43,9 +43,9 @@ public class IdempotencyStoreBatchFilter implements BatchFilter {
                 .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey));
         BatchResponse result = chain.serviceCall(batchRequest, uriInfo);
         Optional<Long> commandId = helper.getCommandId(null);
-        boolean isSuccessWithoutStored = helper.isStoreIdempotencyKey(null) && commandId.isPresent();
+        boolean isSuccessWithoutStored = commandId.isPresent() && helper.isStoreIdempotencyKey(null);
         if (isSuccessWithoutStored) {
-            helper.storeCommandResult(true, result.getStatusCode(), result.getBody(), commandId);
+            helper.storeCommandResult(result.getStatusCode(), result.getBody(), commandId.get());
         }
         return result;
     }

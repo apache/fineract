@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common.loans;
 
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
@@ -37,7 +38,15 @@ public class LoanProductHelper extends IntegrationTest {
         return ok(fineract().loanProducts.retrieveLoanProductDetails1(externalId));
     }
 
+    public GetLoanProductsProductIdResponse retrieveLoanProductById(Long loanProductId) {
+        return ok(fineract().loanProducts.retrieveLoanProductDetails(loanProductId));
+    }
+
     public PutLoanProductsProductIdResponse updateLoanProductByExternalId(String externalId, PutLoanProductsProductIdRequest request) {
         return ok(fineract().loanProducts.updateLoanProduct1(externalId, request));
+    }
+
+    public GetLoanProductsTemplateResponse getLoanProductTemplate(boolean isProductMixTemplate) {
+        return ok(fineract().loanProducts.retrieveTemplate11(isProductMixTemplate));
     }
 }

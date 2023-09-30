@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.DEFAULT_STRATEGY;
+import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -28,9 +30,13 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
@@ -40,6 +46,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -54,9 +61,13 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @Slf4j
 @ExtendWith(LoanTestLifecycleExtension.class)
@@ -91,10 +102,11 @@ public class LoanTransactionChargebackTest {
         this.operationDate = Utils.dateFormatter.format(this.todaysDate);
     }
 
-    @Test
-    public void applyLoanTransactionChargeback() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyLoanTransactionChargeback(LoanProductTestBuilder loanProductTestBuilder) {
         // Client and Loan account creation
-        final Integer loanId = createAccounts(15, 1, true);
+        final Integer loanId = createAccounts(15, 1, true, loanProductTestBuilder);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -106,6 +118,7 @@ public class LoanTransactionChargebackTest {
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
         final Long transactionId = loanIdTransactionsResponse.getResourceId();
+        assertNotNull(transactionId);
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -142,10 +155,11 @@ public class LoanTransactionChargebackTest {
         reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId, transactionId, operationDate, responseSpecErr503);
     }
 
-    @Test
-    public void applyAndAdjustLoanTransactionChargeback() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyAndAdjustLoanTransactionChargeback(LoanProductTestBuilder loanProductTestBuilder) {
         // Client and Loan account creation
-        final Integer loanId = createAccounts(15, 1, false);
+        final Integer loanId = createAccounts(15, 1, false, loanProductTestBuilder);
 
         Float amount = Float.valueOf(amountVal);
         PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
@@ -160,10 +174,11 @@ public class LoanTransactionChargebackTest {
         loanTransactionHelper.adjustLoanTransaction(loanId, chargebackTransactionId, operationDate, responseSpecErr403);
     }
 
-    @Test
-    public void applyLoanTransactionChargebackWithAmountZero() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyLoanTransactionChargebackWithAmountZero(LoanProductTestBuilder loanProductTestBuilder) {
         // Client and Loan account creation
-        final Integer loanId = createAccounts(15, 1, false);
+        final Integer loanId = createAccounts(15, 1, false, loanProductTestBuilder);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -183,8 +198,9 @@ public class LoanTransactionChargebackTest {
         loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "0.00", 0, responseSpecErr400);
     }
 
-    @Test
-    public void applyLoanTransactionChargebackInLongTermLoan() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyLoanTransactionChargebackInLongTermLoan(LoanProductTestBuilder loanProductTestBuilder) {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             LocalDate businessDate = LocalDate.of(2023, 1, 20);
@@ -193,7 +209,7 @@ public class LoanTransactionChargebackTest {
             // Client and Loan account creation
             final Integer daysToSubtract = 1;
             final Integer numberOfRepayments = 3;
-            final Integer loanId = createAccounts(daysToSubtract, numberOfRepayments, false);
+            final Integer loanId = createAccounts(daysToSubtract, numberOfRepayments, false, loanProductTestBuilder);
 
             GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             assertNotNull(getLoansLoanIdResponse);
@@ -210,6 +226,9 @@ public class LoanTransactionChargebackTest {
             assertNotNull(loanIdTransactionsResponse);
             final Long transactionId = loanIdTransactionsResponse.getResourceId();
             reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("666.67"));
+
+            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            assertNotNull(getLoansLoanIdResponse);
 
             final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, amount.toString(),
                     0, responseSpec);
@@ -240,10 +259,11 @@ public class LoanTransactionChargebackTest {
         }
     }
 
-    @Test
-    public void applyLoanTransactionChargebackOverNoRepaymentType() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyLoanTransactionChargebackOverNoRepaymentType(LoanProductTestBuilder loanProductTestBuilder) {
         // Client and Loan account creation
-        final Integer loanId = createAccounts(15, 1, false);
+        final Integer loanId = createAccounts(15, 1, false, loanProductTestBuilder);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -259,8 +279,9 @@ public class LoanTransactionChargebackTest {
         loanTransactionHelper.applyChargebackTransaction(loanId, loanTransaction.getId(), amountVal, 0, responseSpecErr503);
     }
 
-    @Test
-    public void applyLoanTransactionChargebackAfterMature() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyLoanTransactionChargebackAfterMature(LoanProductTestBuilder loanProductTestBuilder) {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
 
@@ -269,7 +290,7 @@ public class LoanTransactionChargebackTest {
             log.info("Current Business date {}", todaysDate);
 
             // Client and Loan account creation
-            final Integer loanId = createAccounts(45, 1, false);
+            final Integer loanId = createAccounts(45, 1, false, loanProductTestBuilder);
 
             GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             assertNotNull(getLoansLoanIdResponse);
@@ -370,10 +391,11 @@ public class LoanTransactionChargebackTest {
         }
     }
 
-    @Test
-    public void applyLoanTransactionChargebackWithLoanOverpaidToLoanActive() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyLoanTransactionChargebackWithLoanOverpaidToLoanActive(LoanProductTestBuilder loanProductTestBuilder) {
         // Client and Loan account creation
-        final Integer loanId = createAccounts(15, 1, true);
+        final Integer loanId = createAccounts(15, 1, true, loanProductTestBuilder);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -425,10 +447,11 @@ public class LoanTransactionChargebackTest {
         log.info("Loan Delinquency Range is null {}", (delinquencyRange == null));
     }
 
-    @Test
-    public void applyLoanTransactionChargebackWithLoanOverpaidToLoanClose() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyLoanTransactionChargebackWithLoanOverpaidToLoanClose(LoanProductTestBuilder loanProductTestBuilder) {
         // Client and Loan account creation
-        final Integer loanId = createAccounts(15, 1, false);
+        final Integer loanId = createAccounts(15, 1, false, loanProductTestBuilder);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -460,10 +483,11 @@ public class LoanTransactionChargebackTest {
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("0.00"));
     }
 
-    @Test
-    public void applyLoanTransactionChargebackWithLoanOverpaidToKeepAsLoanOverpaid() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyLoanTransactionChargebackWithLoanOverpaidToKeepAsLoanOverpaid(LoanProductTestBuilder loanProductTestBuilder) {
         // Client and Loan account creation
-        final Integer loanId = createAccounts(15, 1, true);
+        final Integer loanId = createAccounts(15, 1, true, loanProductTestBuilder);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -510,8 +534,9 @@ public class LoanTransactionChargebackTest {
         assertEquals("DEBIT", journalEntries.getPageItems().get(1).getEntryType().getValue());
     }
 
-    @Test
-    public void applyMultipleLoanTransactionChargeback() {
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void applyMultipleLoanTransactionChargeback(LoanProductTestBuilder loanProductTestBuilder) {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             final LocalDate todaysDate = Utils.getLocalDateOfTenant();
@@ -519,7 +544,7 @@ public class LoanTransactionChargebackTest {
             log.info("Current Business date {}", todaysDate);
 
             // Client and Loan account creation
-            final Integer loanId = createAccounts(15, 1, false);
+            final Integer loanId = createAccounts(15, 1, false, loanProductTestBuilder);
 
             GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             assertNotNull(getLoansLoanIdResponse);
@@ -579,7 +604,8 @@ public class LoanTransactionChargebackTest {
         }
     }
 
-    private Integer createAccounts(final Integer daysToSubtract, final Integer numberOfRepayments, final boolean withJournalEntries) {
+    private Integer createAccounts(final Integer daysToSubtract, final Integer numberOfRepayments, final boolean withJournalEntries,
+            LoanProductTestBuilder loanProductTestBuilder) {
         // Delinquency Bucket
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
         final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
@@ -588,7 +614,7 @@ public class LoanTransactionChargebackTest {
         // Client and Loan account creation
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
         final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucketId, withJournalEntries);
+                delinquencyBucketId, withJournalEntries, loanProductTestBuilder);
         assertNotNull(getLoanProductsProductResponse);
         log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
         assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
@@ -602,18 +628,18 @@ public class LoanTransactionChargebackTest {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Integer delinquencyBucketId, final boolean withJournalEntries) {
+            final Integer delinquencyBucketId, final boolean withJournalEntries, LoanProductTestBuilder loanProductTestBuilder) {
         final HashMap<String, Object> loanProductMap;
         if (withJournalEntries) {
             final Account assetAccount = accountHelper.createAssetAccount();
             final Account expenseAccount = accountHelper.createExpenseAccount();
             final Account incomeAccount = accountHelper.createIncomeAccount();
             final Account overpaymentAccount = accountHelper.createLiabilityAccount();
-            loanProductMap = new LoanProductTestBuilder()
+            loanProductMap = loanProductTestBuilder
                     .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, expenseAccount, incomeAccount, overpaymentAccount })
                     .build(null, delinquencyBucketId);
         } else {
-            loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
+            loanProductMap = loanProductTestBuilder.build(null, delinquencyBucketId);
         }
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);
@@ -648,6 +674,53 @@ public class LoanTransactionChargebackTest {
         assertEquals(expectedSize, getLoansTransactionResponse.getTransactionRelations().size());
         // Outstanding amount
         assertEquals(outstandingBalance, getLoansTransactionResponse.getOutstandingLoanBalance());
+    }
+
+    private static AdvancedPaymentData createRepaymentPaymentAllocation() {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType("REPAYMENT");
+        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
+
+        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
+                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_INTEREST, PaymentAllocationType.PAST_DUE_PRINCIPAL,
+                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_INTEREST,
+                PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
+                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
+
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
+        return advancedPaymentData;
+    }
+
+    private static AdvancedPaymentData createDefaultPaymentAllocation() {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType("DEFAULT");
+        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
+
+        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
+                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
+                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
+                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
+                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
+
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
+        return advancedPaymentData;
+    }
+
+    private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
+        AtomicInteger integer = new AtomicInteger(1);
+        return Arrays.stream(paymentAllocationTypes).map(pat -> {
+            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
+            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
+            paymentAllocationOrder.setOrder(integer.getAndIncrement());
+            return paymentAllocationOrder;
+        }).toList();
+    }
+
+    private static Stream<Arguments> loanProductFactory() {
+        return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", new LoanProductTestBuilder().withRepaymentStrategy(DEFAULT_STRATEGY))),
+                Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY",
+                        new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                                .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation()))));
     }
 
 }

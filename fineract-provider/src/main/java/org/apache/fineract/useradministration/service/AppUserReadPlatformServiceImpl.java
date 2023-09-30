@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -39,33 +40,19 @@ import org.apache.fineract.useradministration.domain.AppUserClientMapping;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.apache.fineract.useradministration.domain.Role;
 import org.apache.fineract.useradministration.exception.UserNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final JdbcTemplate jdbcTemplate;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final RoleReadPlatformService roleReadPlatformService;
     private final AppUserRepository appUserRepository;
     private final StaffReadPlatformService staffReadPlatformService;
-
-    @Autowired
-    public AppUserReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final OfficeReadPlatformService officeReadPlatformService, final RoleReadPlatformService roleReadPlatformService,
-            final AppUserRepository appUserRepository, final StaffReadPlatformService staffReadPlatformService) {
-        this.context = context;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.roleReadPlatformService = roleReadPlatformService;
-        this.appUserRepository = appUserRepository;
-        this.jdbcTemplate = jdbcTemplate;
-        this.staffReadPlatformService = staffReadPlatformService;
-    }
 
     /*
      * used for caching in spring expression language.
@@ -218,10 +205,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     public boolean isUsernameExist(String username) {
         String sql = "select count(*) from m_appuser where username = ?";
         Object[] params = new Object[] { username };
-        Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class, params);
-        if (count == 0) {
-            return false;
-        }
-        return true;
+        int count = this.jdbcTemplate.queryForObject(sql, Integer.class, params);
+        return count != 0;
     }
 }

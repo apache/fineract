@@ -48,6 +48,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.interoperation.data.InteropAccountData;
@@ -76,7 +78,6 @@ import org.apache.fineract.interoperation.exception.InteropTransferAlreadyCommit
 import org.apache.fineract.interoperation.exception.InteropTransferAlreadyOnHoldException;
 import org.apache.fineract.interoperation.exception.InteropTransferMissingException;
 import org.apache.fineract.interoperation.serialization.InteropDataValidator;
-import org.apache.fineract.interoperation.util.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -233,7 +234,7 @@ public class InteropServiceImpl implements InteropService {
         SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
 
         Predicate<SavingsAccountTransaction> transFilter = t -> {
-            SavingsAccountTransactionType transactionType = SavingsAccountTransactionType.fromInt(t.getTypeOf());
+            SavingsAccountTransactionType transactionType = t.getTransactionType();
             if (debit != transactionType.isDebit() && credit != transactionType.isCredit()) {
                 return false;
             }
@@ -267,7 +268,7 @@ public class InteropServiceImpl implements InteropService {
             throw new InteropAccountNotFoundException(idType, idValue, subIdOrType);
         }
 
-        return InteropIdentifierAccountResponseData.build(identifier.getId(), identifier.getAccount().getExternalId());
+        return InteropIdentifierAccountResponseData.build(identifier.getId(), identifier.getAccount().getExternalId().getValue());
     }
 
     @NotNull
@@ -288,7 +289,7 @@ public class InteropServiceImpl implements InteropService {
 
             identifierRepository.saveAndFlush(identifier);
 
-            return InteropIdentifierAccountResponseData.build(identifier.getId(), savingsAccount.getExternalId());
+            return InteropIdentifierAccountResponseData.build(identifier.getId(), savingsAccount.getExternalId().getValue());
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleInteropDataIntegrityIssues(idType, request.getAccountId(), dve.getMostSpecificCause(), dve);
             return InteropIdentifierAccountResponseData.empty();
@@ -309,7 +310,7 @@ public class InteropServiceImpl implements InteropService {
             throw new InteropAccountNotFoundException(idType, idValue, subIdOrType);
         }
 
-        String accountId = identifier.getAccount().getExternalId();
+        String accountId = identifier.getAccount().getExternalId().getValue();
         Long id = identifier.getId();
 
         identifierRepository.delete(identifier);
@@ -356,8 +357,8 @@ public class InteropServiceImpl implements InteropService {
         if (transactionType.isDebit()) {
             fee = savingsAccount.calculateWithdrawalFee(request.getAmount().getAmount());
             if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), request.getAmount().getAmount().add(fee))) {
-                throw new InsufficientAccountBalanceException(savingsAccount.getExternalId(), savingsAccount.getWithdrawableBalance(), fee,
-                        request.getAmount().getAmount());
+                throw new InsufficientAccountBalanceException(savingsAccount.getExternalId().getValue(),
+                        savingsAccount.getWithdrawableBalance(), fee, request.getAmount().getAmount());
             }
         } else {
             fee = BigDecimal.ZERO;
@@ -390,15 +391,15 @@ public class InteropServiceImpl implements InteropService {
             BigDecimal total = calculateTotalTransferAmount(request, savingsAccount);
 
             if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), total)) {
-                throw new InsufficientAccountBalanceException(savingsAccount.getExternalId(), savingsAccount.getWithdrawableBalance(), null,
-                        total);
+                throw new InsufficientAccountBalanceException(savingsAccount.getExternalId().getValue(),
+                        savingsAccount.getWithdrawableBalance(), null, total);
             }
             if (findTransaction(savingsAccount, transferCode, AMOUNT_HOLD.getValue()) != null) {
-                throw new InteropTransferAlreadyOnHoldException(savingsAccount.getExternalId(), transferCode);
+                throw new InteropTransferAlreadyOnHoldException(savingsAccount.getExternalId().getValue(), transferCode);
             }
 
-            PaymentDetail paymentDetail = instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode,
-                    null);
+            PaymentDetail paymentDetail = instance(findPaymentType(), savingsAccount.getExternalId().getValue(), null, getRoutingCode(),
+                    transferCode, null);
             SavingsAccountTransaction holdTransaction = SavingsAccountTransaction.holdAmount(savingsAccount, savingsAccount.office(),
                     paymentDetail, transactionDate, Money.of(savingsAccount.getCurrency(), total), DateUtils.getLocalDateTimeOfTenant(),
                     getLoginUser(), false);
@@ -427,7 +428,7 @@ public class InteropServiceImpl implements InteropService {
         String transferCode = request.getTransferCode();
 
         if (findTransaction(savingsAccount, transferCode, (isDebit ? WITHDRAWAL : DEPOSIT).getValue()) != null) {
-            throw new InteropTransferAlreadyCommittedException(savingsAccount.getExternalId(), transferCode);
+            throw new InteropTransferAlreadyCommittedException(savingsAccount.getExternalId().getValue(), transferCode);
         }
 
         LocalDateTime transactionDateTime = DateUtils.getLocalDateTimeOfTenant();
@@ -439,17 +440,17 @@ public class InteropServiceImpl implements InteropService {
         if (isDebit) {
             SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, transferCode, AMOUNT_HOLD.getValue());
             if (holdTransaction == null) {
-                throw new InteropTransferMissingException(savingsAccount.getExternalId(), transferCode);
+                throw new InteropTransferMissingException(savingsAccount.getExternalId().getValue(), transferCode);
             }
 
             BigDecimal totalTransferAmount = calculateTotalTransferAmount(request, savingsAccount);
             if (holdTransaction.getAmount().compareTo(totalTransferAmount) != 0) {
-                throw new InteropTransferMissingException(savingsAccount.getExternalId(), transferCode);
+                throw new InteropTransferMissingException(savingsAccount.getExternalId().getValue(), transferCode);
             }
 
             if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance().add(holdTransaction.getAmount()), totalTransferAmount)) {
-                throw new InsufficientAccountBalanceException(savingsAccount.getExternalId(), savingsAccount.getWithdrawableBalance(), null,
-                        totalTransferAmount);
+                throw new InsufficientAccountBalanceException(savingsAccount.getExternalId().getValue(),
+                        savingsAccount.getWithdrawableBalance(), null, totalTransferAmount);
             }
 
             if (holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
@@ -464,12 +465,12 @@ public class InteropServiceImpl implements InteropService {
 
             SavingsTransactionBooleanValues transactionValues = new SavingsTransactionBooleanValues(false, true, true, false, false);
             transaction = savingsAccountService.handleWithdrawal(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
-                    instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null),
+                    instance(findPaymentType(), savingsAccount.getExternalId().getValue(), null, getRoutingCode(), transferCode, null),
                     transactionValues, backdatedTxnsAllowedTill);
         } else {
             transaction = savingsAccountService.handleDeposit(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
-                    instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null), false, true,
-                    backdatedTxnsAllowedTill);
+                    instance(findPaymentType(), savingsAccount.getExternalId().getValue(), null, getRoutingCode(), transferCode, null),
+                    false, true, backdatedTxnsAllowedTill);
         }
 
         String note = request.getNote();
@@ -506,7 +507,7 @@ public class InteropServiceImpl implements InteropService {
 
             savingsAccountRepository.save(savingsAccount);
         } else {
-            throw new InteropTransferMissingException(savingsAccount.getExternalId(), request.getTransferCode());
+            throw new InteropTransferMissingException(savingsAccount.getExternalId().getValue(), request.getTransferCode());
         }
 
         return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
@@ -558,7 +559,7 @@ public class InteropServiceImpl implements InteropService {
     }
 
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
-        SavingsAccount savingsAccount = savingsAccountRepository.findByExternalId(accountId);
+        SavingsAccount savingsAccount = savingsAccountRepository.findByExternalId(ExternalIdFactory.produce(accountId));
         if (savingsAccount == null) {
             throw new SavingsAccountNotFoundException(accountId);
         }

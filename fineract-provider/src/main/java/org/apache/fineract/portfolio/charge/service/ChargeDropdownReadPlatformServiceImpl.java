@@ -30,9 +30,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.springframework.stereotype.Service;
 
-@Service
 public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownReadPlatformService {
 
     @Override

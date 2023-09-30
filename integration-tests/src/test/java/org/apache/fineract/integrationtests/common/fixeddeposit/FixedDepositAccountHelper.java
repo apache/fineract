@@ -24,6 +24,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
@@ -97,6 +98,7 @@ public class FixedDepositAccountHelper {
     private String savingsId = null;
     private boolean transferInterest = false;
     private Integer maturityInstructionId;
+    private List<HashMap<String, String>> charges;
 
     public String build(final String clientId, final String productId, final String penalInterestType) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -129,17 +131,24 @@ public class FixedDepositAccountHelper {
         map.put("linkAccountId", savingsId);
         map.put("transferInterestToSavings", transferInterest);
         map.put("maturityInstructionId", maturityInstructionId);
+        map.put("charges", charges);
 
         String fixedDepositAccountJson = new Gson().toJson(map);
         LOG.info("{}", fixedDepositAccountJson);
         return fixedDepositAccountJson;
     }
 
-    public static Integer applyFixedDepositApplication(final String fixedDepositAccountAsJson, final RequestSpecification requestSpec,
+    public static Integer applyFixedDepositApplicationGetId(final String fixedDepositAccountAsJson, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         LOG.info("--------------------- APPLYING FOR FIXED DEPOSIT ACCOUNT ------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, APPLY_FIXED_DEPOSIT_ACCOUNT_URL, fixedDepositAccountAsJson,
                 CommonConstants.RESPONSE_RESOURCE_ID);
+    }
+
+    public static String applyFixedDepositApplication(final String fixedDepositAccountAsJson, final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
+        LOG.info("--------------------- APPLYING FOR FIXED DEPOSIT ACCOUNT ------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, APPLY_FIXED_DEPOSIT_ACCOUNT_URL, fixedDepositAccountAsJson);
     }
 
     public static HashMap getFixedDepositAccountById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -473,6 +482,11 @@ public class FixedDepositAccountHelper {
 
     public FixedDepositAccountHelper withMaturityInstructionId(Integer maturityInstructionId) {
         this.maturityInstructionId = maturityInstructionId;
+        return this;
+    }
+
+    public FixedDepositAccountHelper withCharges(List<HashMap<String, String>> charges) {
+        this.charges = charges;
         return this;
     }
 }

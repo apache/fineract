@@ -23,6 +23,8 @@ import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.JobIsNotFoundOrNotEnabledException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +38,11 @@ public class InlineJobExecuteHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
         InlineJobType inlineJobType = InlineJobType.getInlineJobType(command.getJobName());
-        InlineExecutorService inlineJobExecutorService = applicationContext.getBean(inlineJobType.getExecutorServiceClass());
-        return inlineJobExecutorService.executeInlineJob(command, inlineJobType.getInlineJobName());
+        try {
+            InlineExecutorService inlineJobExecutorService = applicationContext.getBean(inlineJobType.getExecutorServiceClass());
+            return inlineJobExecutorService.executeInlineJob(command, inlineJobType.getInlineJobName());
+        } catch (NoSuchBeanDefinitionException e) {
+            throw new JobIsNotFoundOrNotEnabledException(e, inlineJobType.getInlineJobName());
+        }
     }
 }

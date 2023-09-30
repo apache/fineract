@@ -18,88 +18,123 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
+import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.ACTIVATE;
+import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.APPROVE;
+import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.CLOSE;
+import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.CREATE;
+import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.DISBURSE;
+import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.REJECTED;
+import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.WITHDRAWN;
+import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.WRITE_OFF;
+
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
-import java.util.HashMap;
+import jakarta.validation.constraints.NotNull;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public enum EntityTables {
 
-    CLIENT("m_client", ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.ACTIVATE.getCode(), StatusEnum.CLOSE.getCode()),
-            "client_id"), LOAN("m_loan",
-                    ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.APPROVE.getCode(), StatusEnum.DISBURSE.getCode(),
-                            StatusEnum.WITHDRAWN.getCode(), StatusEnum.REJECTED.getCode(), StatusEnum.WRITE_OFF.getCode()),
-                    "loan_id"), GROUP("m_group",
-                            ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.ACTIVATE.getCode(), StatusEnum.CLOSE.getCode()),
-                            "group_id"), SAVING("m_savings_account",
-                                    ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.APPROVE.getCode(),
-                                            StatusEnum.ACTIVATE.getCode(), StatusEnum.WITHDRAWN.getCode(), StatusEnum.REJECTED.getCode(),
-                                            StatusEnum.CLOSE.getCode()),
-                                    "savings_account_id"), SAVINGS_TRANSACTION("m_savings_account_transaction", ImmutableList.of(),
-                                            "savings_account_transcation_id"), OFFICE("m_office", ImmutableList.of(),
-                                                    "office_id"), PRODUCT_LOAN("m_product_loan", ImmutableList.of(),
-                                                            "product_loan_id"), SAVINGS_PRODUCT("m_savings_product", ImmutableList.of(),
-                                                                    "savings_product_id"), SHARE_PRODUCT("m_share_product",
-                                                                            ImmutableList.of(), "share_product_id");
+    CLIENT("m_client", "client_id", "id", CREATE, ACTIVATE, CLOSE), //
+    GROUP("m_group", "group_id", "id", CREATE, ACTIVATE, CLOSE), //
+    CENTER("m_center", "m_group", "center_id", "id"), //
+    OFFICE("m_office", "office_id", "id"), //
+    LOAN_PRODUCT("m_product_loan", "product_loan_id", "id"), //
+    LOAN("m_loan", "loan_id", "id", CREATE, APPROVE, DISBURSE, WITHDRAWN, REJECTED, WRITE_OFF), //
+    SAVINGS_PRODUCT("m_savings_product", "savings_product_id", "id"), //
+    SAVINGS("m_savings_account", "savings_account_id", "id", CREATE, APPROVE, ACTIVATE, WITHDRAWN, REJECTED, CLOSE), //
+    SAVINGS_TRANSACTION("m_savings_account_transaction", "savings_transaction_id", "id"), //
+    SHARE_PRODUCT("m_share_product", "share_product_id", "id"), //
+    ;
 
-    private static final Map<String, EntityTables> lookup = new HashMap<String, EntityTables>();
+    public static final EntityTables[] VALUES = values();
 
-    static {
-        for (EntityTables d : EntityTables.values()) {
-            lookup.put(d.getName(), d);
-        }
-    }
+    private static final List<String> ENTITY_NAMES = Arrays.stream(VALUES).map(EntityTables::getName).toList();
 
+    private static final Map<String, EntityTables> BY_ENTITY_NAME = Arrays.stream(VALUES)
+            .collect(Collectors.toMap(EntityTables::getName, e -> e));
+
+    @NotNull
     private final String name;
+    @NotNull
+    private final String apptableName;
 
-    private final ImmutableList<Integer> codes;
-
+    @NotNull
     private final String foreignKeyColumnNameOnDatatable;
+    @NotNull
+    private final String refColumn; // referenced column name on apptable
 
-    EntityTables(String name, ImmutableList<Integer> codes, String foreignKeyColumnNameOnDatatable) {
+    private final ImmutableList<StatusEnum> checkStatuses;
+
+    EntityTables(@NotNull String name, @NotNull String apptableName, @NotNull String foreignKeyColumnNameOnDatatable,
+            @NotNull String refColumn, StatusEnum... statuses) {
         this.name = name;
-        this.codes = codes;
+        this.apptableName = apptableName;
         this.foreignKeyColumnNameOnDatatable = foreignKeyColumnNameOnDatatable;
+        this.refColumn = refColumn;
+        this.checkStatuses = statuses == null ? ImmutableList.of() : ImmutableList.copyOf(statuses);
     }
 
-    public static List<String> getEntitiesList() {
-
-        List<String> data = new ArrayList<String>();
-
-        for (EntityTables entity : EntityTables.values()) {
-            data.add(entity.name);
-        }
-
-        return data;
-
+    EntityTables(@NotNull String name, @NotNull String foreignKeyColumnNameOnDatatable, @NotNull String refColumn, StatusEnum... statuses) {
+        this(name, name, foreignKeyColumnNameOnDatatable, refColumn, statuses);
     }
 
-    public static ImmutableList<Integer> getStatus(String name) {
-        if (lookup.get(name) != null) {
-            return lookup.get(name).getCodes();
-        }
-        return ImmutableList.of();
-    }
-
-    public static EntityTables fromName(String name) {
-        return name == null ? null : lookup.get(name.toLowerCase());
-    }
-
-    public ImmutableList<Integer> getCodes() {
-        return this.codes;
-    }
-
+    @NotNull
     public String getName() {
         return name;
     }
 
+    @NotNull
+    public String getApptableName() {
+        return apptableName;
+    }
+
+    @NotNull
     public String getForeignKeyColumnNameOnDatatable() {
         return this.foreignKeyColumnNameOnDatatable;
     }
 
-    public static String getForeignKeyColumnNameOnDatatable(String name) {
-        return lookup.get(name).foreignKeyColumnNameOnDatatable;
+    @NotNull
+    public String getRefColumn() {
+        return refColumn;
     }
 
+    public List<StatusEnum> getCheckStatuses() {
+        return checkStatuses;
+    }
+
+    public boolean hasCheck() {
+        return checkStatuses != null && !checkStatuses.isEmpty();
+    }
+
+    public static List<String> getEntityNames() {
+        return ENTITY_NAMES;
+    }
+
+    public static EntityTables fromEntityName(String name) {
+        return name == null ? null : BY_ENTITY_NAME.get(name.toLowerCase());
+    }
+
+    public static String getForeignKeyColumnNameOnDatatable(String name) {
+        EntityTables entityTable = fromEntityName(name);
+        return entityTable == null ? null : entityTable.getForeignKeyColumnNameOnDatatable();
+    }
+
+    @NotNull
+    public static List<StatusEnum> getCheckStatuses(String name) {
+        EntityTables entityTable = fromEntityName(name);
+        return entityTable == null ? List.of() : entityTable.getCheckStatuses();
+    }
+
+    @NotNull
+    public static List<Integer> getCheckStatusCodes(String name) {
+        return getCheckStatuses(name).stream().map(StatusEnum::getCode).toList();
+    }
+
+    @NotNull
+    public static List<EntityTables> getFiltered(Predicate<EntityTables> filter) {
+        return Arrays.stream(VALUES).filter(filter).toList();
+    }
 }

@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadP
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.JobIsNotFoundOrNotEnabledException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
@@ -63,7 +64,11 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
             final List<ScheduledJobDetail> scheduledJobDetails = schedularWritePlatformService
                     .retrieveAllJobs(fineractProperties.getNodeId());
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
-                jobRegisterService.scheduleJob(jobDetails);
+                try {
+                    jobRegisterService.scheduleJob(jobDetails);
+                } catch (JobIsNotFoundOrNotEnabledException e) {
+                    log.warn("{}", e.getMessage());
+                }
                 jobDetails.setTriggerMisfired(false);
                 schedularWritePlatformService.saveOrUpdate(jobDetails);
             }

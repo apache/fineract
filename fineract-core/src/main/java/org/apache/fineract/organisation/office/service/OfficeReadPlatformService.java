@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.office.service;
 
 import java.util.Collection;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.data.OfficeTransactionData;
@@ -30,6 +31,8 @@ public interface OfficeReadPlatformService {
     Collection<OfficeData> retrieveAllOfficesForDropdown();
 
     OfficeData retrieveOffice(Long officeId);
+
+    OfficeData retrieveOfficeWithExternalId(ExternalId externalId);
 
     OfficeData retrieveNewOfficeTemplate();
 

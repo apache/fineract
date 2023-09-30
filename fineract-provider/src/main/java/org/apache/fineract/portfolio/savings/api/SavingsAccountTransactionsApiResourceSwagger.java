@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.fineract.portfolio.TransactionEntryType;
 
 final class SavingsAccountTransactionsApiResourceSwagger {
 
@@ -147,6 +148,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
             @Schema(example = "1")
             public Long id;
             public GetTranscationEnumData transactionType;
+            @Schema(example = "CREDIT")
+            public TransactionEntryType entryType;
             @Schema(example = "1")
             public Long accountId;
             @Schema(example = "000000001")
@@ -182,8 +185,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Long totalFilteredRecords;
-        public Set<GetSavingsAccountTransactionsPageItem> pageItems;
+        public Long total;
+        public Set<GetSavingsAccountTransactionsPageItem> content;
     }
 
     @Schema(description = "PostSavingsAccountTransactionsRequest")

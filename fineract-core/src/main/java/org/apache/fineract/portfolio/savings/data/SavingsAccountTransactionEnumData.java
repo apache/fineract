@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.io.Serializable;
 import lombok.Getter;
+import org.apache.fineract.portfolio.TransactionEntryType;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 
 /**
@@ -43,7 +44,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     private final boolean rejectTransfer;
     private final boolean overdraftInterest;
     private final boolean writtenoff;
-    private final boolean overdraftFee = true;
+    private final boolean overdraftFee;
     private final boolean withholdTax;
     private final boolean escheat;
     private final boolean amountHold;
@@ -53,23 +54,25 @@ public class SavingsAccountTransactionEnumData implements Serializable {
         this.id = id;
         this.code = code;
         this.value = value;
-        this.deposit = Long.valueOf(SavingsAccountTransactionType.DEPOSIT.getValue()).equals(this.id);
-        this.dividendPayout = Long.valueOf(SavingsAccountTransactionType.DIVIDEND_PAYOUT.getValue()).equals(this.id);
-        this.withdrawal = Long.valueOf(SavingsAccountTransactionType.WITHDRAWAL.getValue()).equals(this.id);
-        this.interestPosting = Long.valueOf(SavingsAccountTransactionType.INTEREST_POSTING.getValue()).equals(this.id);
-        this.feeDeduction = Long.valueOf(SavingsAccountTransactionType.ANNUAL_FEE.getValue()).equals(this.id)
-                || Long.valueOf(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue()).equals(this.id)
-                || Long.valueOf(SavingsAccountTransactionType.PAY_CHARGE.getValue()).equals(this.id);
-        this.initiateTransfer = Long.valueOf(SavingsAccountTransactionType.INITIATE_TRANSFER.getValue()).equals(this.id);
-        this.approveTransfer = Long.valueOf(SavingsAccountTransactionType.APPROVE_TRANSFER.getValue()).equals(this.id);
-        this.withdrawTransfer = Long.valueOf(SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue()).equals(this.id);
-        this.rejectTransfer = Long.valueOf(SavingsAccountTransactionType.REJECT_TRANSFER.getValue()).equals(this.id);
-        this.writtenoff = Long.valueOf(SavingsAccountTransactionType.WRITTEN_OFF.getValue()).equals(this.id);
-        this.overdraftInterest = Long.valueOf(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue()).equals(this.id);
-        this.withholdTax = Long.valueOf(SavingsAccountTransactionType.WITHHOLD_TAX.getValue()).equals(this.id);
-        this.escheat = Long.valueOf(SavingsAccountTransactionType.ESCHEAT.getValue()).equals(this.id);
-        this.amountHold = Long.valueOf(SavingsAccountTransactionType.AMOUNT_HOLD.getValue()).equals(this.id);
-        this.amountRelease = Long.valueOf(SavingsAccountTransactionType.AMOUNT_RELEASE.getValue()).equals(this.id);
+        SavingsAccountTransactionType transactionType = id == null ? null : SavingsAccountTransactionType.fromInt(id.intValue());
+        this.deposit = transactionType == SavingsAccountTransactionType.DEPOSIT;
+        this.dividendPayout = transactionType == SavingsAccountTransactionType.DIVIDEND_PAYOUT;
+        this.withdrawal = transactionType == SavingsAccountTransactionType.WITHDRAWAL;
+        this.interestPosting = transactionType == SavingsAccountTransactionType.INTEREST_POSTING;
+        this.feeDeduction = transactionType == SavingsAccountTransactionType.ANNUAL_FEE
+                || transactionType == SavingsAccountTransactionType.WITHDRAWAL_FEE
+                || transactionType == SavingsAccountTransactionType.PAY_CHARGE;
+        this.initiateTransfer = transactionType == SavingsAccountTransactionType.INITIATE_TRANSFER;
+        this.approveTransfer = transactionType == SavingsAccountTransactionType.APPROVE_TRANSFER;
+        this.withdrawTransfer = transactionType == SavingsAccountTransactionType.WITHDRAW_TRANSFER;
+        this.rejectTransfer = transactionType == SavingsAccountTransactionType.REJECT_TRANSFER;
+        this.writtenoff = transactionType == SavingsAccountTransactionType.WRITTEN_OFF;
+        this.overdraftFee = false;
+        this.overdraftInterest = transactionType == SavingsAccountTransactionType.OVERDRAFT_INTEREST;
+        this.withholdTax = transactionType == SavingsAccountTransactionType.WITHHOLD_TAX;
+        this.escheat = transactionType == SavingsAccountTransactionType.ESCHEAT;
+        this.amountHold = transactionType == SavingsAccountTransactionType.AMOUNT_HOLD;
+        this.amountRelease = transactionType == SavingsAccountTransactionType.AMOUNT_RELEASE;
     }
 
     public boolean isIncomeFromInterest() {
@@ -85,7 +88,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     }
 
     public boolean isChargeTransaction() {
-        return isPayCharge() || isWithdrawalFee() || isAnnualFee();
+        return feeDeduction;
     }
 
     public boolean isAnnualFee() {
@@ -100,4 +103,22 @@ public class SavingsAccountTransactionEnumData implements Serializable {
         return Long.valueOf(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue()).equals(this.id);
     }
 
+    public boolean isCredit() {
+        SavingsAccountTransactionType transactionType = getTransactionTypeEnum();
+        return transactionType != null && transactionType.isCredit();
+    }
+
+    public boolean isDebit() {
+        SavingsAccountTransactionType transactionType = getTransactionTypeEnum();
+        return transactionType != null && transactionType.isDebit();
+    }
+
+    public TransactionEntryType getEntryType() {
+        SavingsAccountTransactionType transactionType = getTransactionTypeEnum();
+        return transactionType == null ? null : transactionType.getEntryType();
+    }
+
+    public SavingsAccountTransactionType getTransactionTypeEnum() {
+        return id == null ? null : SavingsAccountTransactionType.fromInt(id.intValue());
+    }
 }

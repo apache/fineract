@@ -147,4 +147,11 @@ public interface LoanProductConstants {
     String DUE_DAYS_FOR_REPAYMENT_EVENT = "dueDaysForRepaymentEvent";
     String OVER_DUE_DAYS_FOR_REPAYMENT_EVENT = "overDueDaysForRepaymentEvent";
 
+    // down-payment related
+    String ENABLE_DOWN_PAYMENT = "enableDownPayment";
+    String DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT = "disbursedAmountPercentageForDownPayment";
+    String ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT = "enableAutoRepaymentForDownPayment";
+    String REPAYMENT_START_DATE_TYPE = "repaymentStartDateType";
+    String DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT = "disableScheduleExtensionForDownPayment";
+
 }

@@ -58,10 +58,10 @@ public class DatabaseTypeResolver implements InitializingBean {
     }
 
     public boolean isPostgreSQL() {
-        return DatabaseType.POSTGRESQL.equals(currentDatabaseType.get());
+        return DatabaseType.POSTGRESQL == currentDatabaseType.get();
     }
 
     public boolean isMySQL() {
-        return DatabaseType.MYSQL.equals(currentDatabaseType.get());
+        return DatabaseType.MYSQL == currentDatabaseType.get();
     }
 }

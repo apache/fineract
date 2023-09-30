@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.organisation.office.domain;
 
+import java.util.Optional;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
-    // no added behaviour
+
+    Optional<Office> findByExternalId(ExternalId externalId);
 }

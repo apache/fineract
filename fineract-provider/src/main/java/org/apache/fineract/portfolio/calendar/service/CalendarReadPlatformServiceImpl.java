@@ -39,10 +39,8 @@ import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
 @RequiredArgsConstructor
 public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformService {
 
@@ -265,10 +263,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 + " ci.entity_type_enum = ?";
         try {
             int calendarInstaneId = this.jdbcTemplate.queryForObject(query, Integer.class, entityId, calendarId, entityTypeId);
-            if (calendarInstaneId > 0) {
-                return true;
-            }
-            return false;
+            return calendarInstaneId > 0;
         } catch (final EmptyResultDataAccessException e) {
             return false;
         }

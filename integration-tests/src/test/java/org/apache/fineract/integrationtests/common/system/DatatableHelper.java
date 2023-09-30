@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
@@ -31,8 +32,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.fineract.client.models.GetDataTablesResponse;
+import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryData;
 import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
@@ -152,7 +155,7 @@ public class DatatableHelper extends IntegrationTest {
                 DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER, "resourceIdentifier");
     }
 
-    public Integer deleteDatatableEntries(final String datatableName, final Integer apptableId, String jsonAttributeToGetBack) {
+    public Object deleteDatatableEntries(final String datatableName, final Integer apptableId, String jsonAttributeToGetBack) {
         final String deleteEntryUrl = DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=true" + "&"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, deleteEntryUrl, jsonAttributeToGetBack);
@@ -185,14 +188,14 @@ public class DatatableHelper extends IntegrationTest {
             map.put("entitySubType", "");
         }
         map.put("multiRow", multiRow);
-        addDatatableColumns(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
-        addDatatableColumns(datatableColumnsList, "itsADate", "Date", true, null, null);
-        addDatatableColumns(datatableColumnsList, "itsADatetime", "Datetime", true, null, null);
-        addDatatableColumns(datatableColumnsList, "itsADecimal", "Decimal", true, null, null);
-        addDatatableColumns(datatableColumnsList, "itsADropdown", "Dropdown", false, null, codeName);
-        addDatatableColumns(datatableColumnsList, "itsANumber", "Number", true, null, null);
-        addDatatableColumns(datatableColumnsList, "itsAString", "String", true, 10, null);
-        addDatatableColumns(datatableColumnsList, "itsAText", "Text", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADate", "Date", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADatetime", "Datetime", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADecimal", "Decimal", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsADropdown", "Dropdown", false, null, codeName);
+        addDatatableColumn(datatableColumnsList, "itsANumber", "Number", true, null, null);
+        addDatatableColumn(datatableColumnsList, "itsAString", "String", true, 10, null);
+        addDatatableColumn(datatableColumnsList, "itsAText", "Text", true, null, null);
         map.put("columns", datatableColumnsList);
         String requestJsonString = new Gson().toJson(map);
         LOG.info("map : {}", requestJsonString);
@@ -206,10 +209,10 @@ public class DatatableHelper extends IntegrationTest {
         map.put("apptableName", apptableName);
         map.put("entitySubType", "PERSON");
         map.put("multiRow", multiRow);
-        addDatatableColumns(datatableColumnsList, "Spouse Name", "String", true, 25, null);
-        addDatatableColumns(datatableColumnsList, "Number of Dependents", "Number", true, null, null);
-        addDatatableColumns(datatableColumnsList, "Time of Visit", "DateTime", false, null, null);
-        addDatatableColumns(datatableColumnsList, "Date of Approval", "Date", false, null, null);
+        addDatatableColumn(datatableColumnsList, "Spouse Name", "String", true, 25, null);
+        addDatatableColumn(datatableColumnsList, "Number of Dependents", "Number", true, null, null);
+        addDatatableColumn(datatableColumnsList, "Time of Visit", "DateTime", false, null, null);
+        addDatatableColumn(datatableColumnsList, "Date of Approval", "Date", false, null, null);
         map.put("columns", datatableColumnsList);
         String requestJsonString = new Gson().toJson(map);
         LOG.info("map : {}", requestJsonString);
@@ -229,13 +232,14 @@ public class DatatableHelper extends IntegrationTest {
         return requestJsonString;
     }
 
-    public static List<HashMap<String, Object>> addDatatableColumns(List<HashMap<String, Object>> datatableColumnsList, String columnName,
+    public static HashMap<String, Object> addDatatableColumn(List<HashMap<String, Object>> datatableColumnsList, String columnName,
             String columnType, boolean isMandatory, Integer length, String codeName) {
-
         final HashMap<String, Object> datatableColumnMap = new HashMap<>();
 
         datatableColumnMap.put("name", columnName);
-        datatableColumnMap.put("type", columnType);
+        if (columnType != null) {
+            datatableColumnMap.put("type", columnType);
+        }
         datatableColumnMap.put("mandatory", isMandatory);
         if (length != null) {
             datatableColumnMap.put("length", length);
@@ -245,10 +249,10 @@ public class DatatableHelper extends IntegrationTest {
         }
 
         datatableColumnsList.add(datatableColumnMap);
-        return datatableColumnsList;
+        return datatableColumnMap;
     }
 
-    public static List<HashMap<String, Object>> addDatatableColumnsWithUniqueAndIndex(List<HashMap<String, Object>> datatableColumnsList,
+    public static List<HashMap<String, Object>> addDatatableColumnWithUniqueAndIndex(List<HashMap<String, Object>> datatableColumnsList,
             String columnName, String columnType, boolean isMandatory, Integer length, String codeName, boolean isUnique,
             boolean isIndexed) {
 
@@ -293,4 +297,8 @@ public class DatatableHelper extends IntegrationTest {
         return GSON.fromJson(response, PutDataTablesResponse.class);
     }
 
+    public Map<String, Object> queryDatatable(String dataTableName, PagedLocalRequestAdvancedQueryData request) {
+        String response = ok(fineract().dataTables.advancedQuery(dataTableName, request));
+        return JsonPath.from(response).get("");
+    }
 }

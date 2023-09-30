@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import com.google.common.collect.ImmutableList;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,6 +29,9 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
+import org.apache.fineract.infrastructure.core.service.database.SqlOperator;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableCheckStatusData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableChecksData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -52,6 +54,7 @@ import org.springframework.stereotype.Service;
 public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatatableChecksReadService {
 
     private final JdbcTemplate jdbcTemplate;
+    protected final DatabaseTypeResolver databaseTypeResolver;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final RegisterDataTableMapper registerDataTableMapper;
     private final EntityDataTableChecksMapper entityDataTableChecksMapper;
@@ -62,14 +65,14 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     private final PaginationHelper paginationHelper;
 
     @Autowired
-    public EntityDatatableChecksReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final LoanProductReadPlatformService loanProductReadPlatformService,
+    public EntityDatatableChecksReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseTypeResolver databaseTypeResolver,
+            DatabaseSpecificSQLGenerator sqlGenerator, final LoanProductReadPlatformService loanProductReadPlatformService,
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
             final EntityDatatableChecksRepository entityDatatableChecksRepository,
-            final ReadWriteNonCoreDataService readWriteNonCoreDataService, DatabaseSpecificSQLGenerator sqlGenerator,
-            PaginationHelper paginationHelper) {
+            final ReadWriteNonCoreDataService readWriteNonCoreDataService, PaginationHelper paginationHelper) {
 
         this.jdbcTemplate = jdbcTemplate;
+        this.databaseTypeResolver = databaseTypeResolver;
         this.sqlGenerator = sqlGenerator;
         this.registerDataTableMapper = new RegisterDataTableMapper();
         this.entityDataTableChecksMapper = new EntityDataTableChecksMapper();
@@ -141,28 +144,25 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
 
     @Override
     public EntityDataTableChecksTemplateData retrieveTemplate() {
-
         List<DatatableChecksData> dataTables = getDataTables();
-        List<String> entities = EntityTables.getEntitiesList();
-        List<DatatableCheckStatusData> statusClient = getStatusList(EntityTables.getStatus("m_client"));
-        List<DatatableCheckStatusData> statusLoan = getStatusList(EntityTables.getStatus("m_loan"));
-        List<DatatableCheckStatusData> statusGroup = getStatusList(EntityTables.getStatus("m_group"));
-        List<DatatableCheckStatusData> statusSavings = getStatusList(EntityTables.getStatus("m_savings_account"));
+        List<String> entities = EntityTables.getEntityNames();
+        List<DatatableCheckStatusData> clientStatuses = getStatusList(EntityTables.CLIENT.getCheckStatuses());
+        List<DatatableCheckStatusData> loanStatuses = getStatusList(EntityTables.LOAN.getCheckStatuses());
+        List<DatatableCheckStatusData> groupstatuses = getStatusList(EntityTables.GROUP.getCheckStatuses());
+        List<DatatableCheckStatusData> savingsStatuses = getStatusList(EntityTables.SAVINGS.getCheckStatuses());
 
         Collection<LoanProductData> loanProductDatas = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup(true);
         Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookup();
 
-        return new EntityDataTableChecksTemplateData(entities, statusClient, statusGroup, statusSavings, statusLoan, dataTables,
+        return new EntityDataTableChecksTemplateData(entities, clientStatuses, groupstatuses, savingsStatuses, loanStatuses, dataTables,
                 loanProductDatas, savingsProductDatas);
-
     }
 
-    private List<DatatableCheckStatusData> getStatusList(ImmutableList<Integer> statuses) {
+    private List<DatatableCheckStatusData> getStatusList(List<StatusEnum> statuses) {
         List<DatatableCheckStatusData> ret = new ArrayList<>();
         if (statuses != null) {
-            for (Integer status : statuses) {
-                StatusEnum statusEnum = StatusEnum.fromInt(status);
-                ret.add(new DatatableCheckStatusData(statusEnum.name(), statusEnum.getCode()));
+            for (StatusEnum status : statuses) {
+                ret.add(new DatatableCheckStatusData(status.name(), status.getCode()));
             }
         }
         return ret;
@@ -174,11 +174,12 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         return this.jdbcTemplate.query(sql, this.registerDataTableMapper); // NOSONAR
     }
 
-    protected static final class RegisterDataTableMapper implements RowMapper<DatatableChecksData> {
+    protected final class RegisterDataTableMapper implements RowMapper<DatatableChecksData> {
+
+        public static final String SELECT_FROM = " t.application_table_name as entity, t.registered_table_name as tableName FROM x_registered_table t WHERE ";
 
         @Override
         public DatatableChecksData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
             final String entity = rs.getString("entity");
             final String tableName = rs.getString("tableName");
 
@@ -186,8 +187,8 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         }
 
         public String schema() {
-            return " t.application_table_name as entity, t.registered_table_name as tableName " + " from x_registered_table t "
-                    + " where application_table_name IN( 'm_client','m_group','m_savings_account','m_loan')";
+            String[] values = EntityTables.getFiltered(EntityTables::hasCheck).stream().map(EntityTables::getName).toArray(String[]::new);
+            return SELECT_FROM + SqlOperator.IN.formatSql(sqlGenerator, JdbcJavaType.VARCHAR, "application_table_name", null, values);
         }
     }
 

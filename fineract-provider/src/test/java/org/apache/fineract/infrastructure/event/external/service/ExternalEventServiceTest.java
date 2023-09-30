@@ -32,7 +32,6 @@ import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,8 @@ import java.util.Optional;
 import org.apache.fineract.avro.BulkMessageItemV1;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
+import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
+import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DataEnricherProcessor;
@@ -54,11 +55,14 @@ import org.apache.fineract.infrastructure.event.external.service.serialization.s
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializerFactory;
 import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
 import org.apache.fineract.investor.enricher.LoanAccountDataV1Enricher;
+import org.apache.fineract.investor.enricher.LoanTransactionAdjustmentDataV1Enricher;
+import org.apache.fineract.investor.enricher.LoanTransactionDataV1Enricher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,16 +84,23 @@ class ExternalEventServiceTest {
     private BulkMessageItemFactory bulkMessageItemFactory;
     @Mock
     private EntityManager entityManager;
-
     @Mock
     private LoanAccountDataV1Enricher loanAccountDataV1Enricher;
+    @Mock
+    private LoanTransactionAdjustmentDataV1Enricher loanTransactionAdjustmentDataV1Enricher;
+    @Mock
+    private LoanTransactionDataV1Enricher loanTransactionDataV1Enricher;
 
     private ExternalEventService underTest;
 
     @BeforeEach
     public void setUp() {
-        lenient().when(loanAccountDataV1Enricher.isDataTypeSupported(any())).thenReturn(true);
-        DataEnricherProcessor dataEnricherProcessor = new DataEnricherProcessor(Optional.of(Arrays.asList(loanAccountDataV1Enricher)));
+        lenient().when(loanAccountDataV1Enricher.isDataTypeSupported(Mockito.eq(LoanAccountDataV1.class))).thenReturn(true);
+        lenient().when(loanTransactionDataV1Enricher.isDataTypeSupported(Mockito.eq(LoanTransactionDataV1.class))).thenReturn(true);
+        lenient().when(loanTransactionAdjustmentDataV1Enricher.isDataTypeSupported(Mockito.eq(LoanTransactionAdjustmentDataV1.class)))
+                .thenReturn(true);
+        DataEnricherProcessor dataEnricherProcessor = new DataEnricherProcessor(
+                Optional.of(List.of(loanAccountDataV1Enricher, loanTransactionAdjustmentDataV1Enricher, loanTransactionDataV1Enricher)));
         underTest = new ExternalEventService(repository, idempotencyKeyGenerator, serializerFactory, byteBufferConverter,
                 bulkMessageItemFactory, dataEnricherProcessor);
         underTest.setEntityManager(entityManager);
@@ -123,7 +134,7 @@ class ExternalEventServiceTest {
     }
 
     @Test
-    public void testPostEventShouldWorkWithRegularEvent() throws IOException {
+    public void testPostEventShouldWorkWithRegularEvent() {
         // given
         ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
 
@@ -182,7 +193,7 @@ class ExternalEventServiceTest {
     }
 
     @Test
-    public void testPostEventShouldSaveEventCategory() throws IOException {
+    public void testPostEventShouldSaveEventCategory() {
         // given
         ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
         String eventSchema = "org.apache.fineract.avro.loan.v1.LoanAccountDataV1";
@@ -208,7 +219,7 @@ class ExternalEventServiceTest {
     }
 
     @Test
-    public void testEventShouldSaveDatesInMilliSecondFormat() throws IOException {
+    public void testEventShouldSaveDatesInMilliSecondFormat() {
         // given
         ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
         String eventSchema = "org.apache.fineract.avro.loan.v1.LoanAccountDataV1";
@@ -232,4 +243,67 @@ class ExternalEventServiceTest {
         assertThat(externalEvent.getCreatedAt().isSupported(ChronoUnit.MILLIS)).isTrue();
     }
 
+    @Test
+    public void testPostEventShouldWorkWithTransactionEvent() {
+        // given
+        ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
+
+        String eventSchema = "org.apache.fineract.avro.loan.v1.LoanTransactionDataV1";
+        String eventType = "TestType";
+        String idempotencyKey = "key";
+        BusinessEvent event = mock(BusinessEvent.class);
+        BusinessEventSerializer eventSerializer = mock(BusinessEventSerializer.class);
+        byte[] data = new byte[0];
+
+        given(event.getType()).willReturn(eventType);
+        given(idempotencyKeyGenerator.generate(event)).willReturn(idempotencyKey);
+        given(serializerFactory.create(event)).willReturn(eventSerializer);
+        LoanTransactionDataV1 loanTransactionData = new LoanTransactionDataV1();
+        given(eventSerializer.getSupportedSchema()).will(invocation -> LoanTransactionDataV1.class);
+        given(eventSerializer.toAvroDTO(event)).willReturn(loanTransactionData);
+        given(byteBufferConverter.convert(any(ByteBuffer.class))).willReturn(data);
+        // when
+        underTest.postEvent(event);
+        // then
+        verify(repository).save(externalEventArgumentCaptor.capture());
+        verify(loanTransactionDataV1Enricher).isDataTypeSupported(LoanTransactionDataV1.class);
+        verify(loanTransactionDataV1Enricher).enrich(loanTransactionData);
+        ExternalEvent externalEvent = externalEventArgumentCaptor.getValue();
+        assertThat(externalEvent.getIdempotencyKey()).isEqualTo(idempotencyKey);
+        assertThat(externalEvent.getData()).isEqualTo(data);
+        assertThat(externalEvent.getType()).isEqualTo(eventType);
+        assertThat(externalEvent.getSchema()).isEqualTo(eventSchema);
+    }
+
+    @Test
+    public void testPostEventShouldWorkWithTransactionAdjustEvent() {
+        // given
+        ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
+
+        String eventSchema = "org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1";
+        String eventType = "TestType";
+        String idempotencyKey = "key";
+        BusinessEvent event = mock(BusinessEvent.class);
+        BusinessEventSerializer eventSerializer = mock(BusinessEventSerializer.class);
+        byte[] data = new byte[0];
+
+        given(event.getType()).willReturn(eventType);
+        given(idempotencyKeyGenerator.generate(event)).willReturn(idempotencyKey);
+        given(serializerFactory.create(event)).willReturn(eventSerializer);
+        LoanTransactionAdjustmentDataV1 loanTransactionAdjustmentData = new LoanTransactionAdjustmentDataV1();
+        given(eventSerializer.getSupportedSchema()).will(invocation -> LoanTransactionAdjustmentDataV1.class);
+        given(eventSerializer.toAvroDTO(event)).willReturn(loanTransactionAdjustmentData);
+        given(byteBufferConverter.convert(any(ByteBuffer.class))).willReturn(data);
+        // when
+        underTest.postEvent(event);
+        // then
+        verify(repository).save(externalEventArgumentCaptor.capture());
+        verify(loanTransactionAdjustmentDataV1Enricher).isDataTypeSupported(LoanTransactionAdjustmentDataV1.class);
+        verify(loanTransactionAdjustmentDataV1Enricher).enrich(loanTransactionAdjustmentData);
+        ExternalEvent externalEvent = externalEventArgumentCaptor.getValue();
+        assertThat(externalEvent.getIdempotencyKey()).isEqualTo(idempotencyKey);
+        assertThat(externalEvent.getData()).isEqualTo(data);
+        assertThat(externalEvent.getType()).isEqualTo(eventType);
+        assertThat(externalEvent.getSchema()).isEqualTo(eventSchema);
+    }
 }

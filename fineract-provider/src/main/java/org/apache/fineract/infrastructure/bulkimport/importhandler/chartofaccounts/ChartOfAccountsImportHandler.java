@@ -134,8 +134,9 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
             tagIdCodeValueData = new CodeValueData().setId(tagId);
         }
         String description = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.DESCRIPTION_COL, row);
-        return GLAccountData.importInstance(accountName, parentId, glCode, manualEntriesAllowed, accountTypeEnum, usageEnum, description,
-                tagIdCodeValueData, row.getRowNum());
+        return new GLAccountData().setName(accountName).setParentId(parentId).setGlCode(glCode)
+                .setManualEntriesAllowed(manualEntriesAllowed).setType(accountTypeEnum).setUsage(usageEnum).setDescription(description)
+                .setTagId(tagIdCodeValueData).setRowIndex(row.getRowNum());
     }
 
     private Count importEntity(final Workbook workbook, final List<GLAccountData> glAccounts, final List<JournalEntryData> glTransactions,

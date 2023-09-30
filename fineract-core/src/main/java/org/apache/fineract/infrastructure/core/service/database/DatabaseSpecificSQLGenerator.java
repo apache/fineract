@@ -20,8 +20,14 @@ package org.apache.fineract.infrastructure.core.service.database;
 
 import static java.lang.String.format;
 
+import jakarta.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,6 +41,10 @@ public class DatabaseSpecificSQLGenerator {
         this.databaseTypeResolver = databaseTypeResolver;
     }
 
+    public DatabaseType getDialect() {
+        return databaseTypeResolver.databaseType();
+    }
+
     public String escape(String arg) {
         if (databaseTypeResolver.isMySQL()) {
             return format("`%s`", arg);
@@ -42,6 +52,10 @@ public class DatabaseSpecificSQLGenerator {
             return format("\"%s\"", arg);
         }
         return arg;
+    }
+
+    public String formatValue(JdbcJavaType columnType, String value) {
+        return (columnType.isStringType() || columnType.isAnyDateType()) ? format("'%s'", value) : value;
     }
 
     public String groupConcat(String arg) {
@@ -77,7 +91,7 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String countLastExecutedQueryResult(String sql) {
+    public String countLastExecutedQueryResult(@NotNull String sql) {
         if (databaseTypeResolver.isMySQL()) {
             return "SELECT FOUND_ROWS()";
         } else {
@@ -85,7 +99,9 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String countQueryResult(String sql) {
+    public String countQueryResult(@NotNull String sql) {
+        // Needs to remove the limit and offset
+        sql = sql.replaceAll("LIMIT \\d+", "").replaceAll("OFFSET \\d+", "").trim();
         return format("SELECT COUNT(*) FROM (%s) AS temp", sql);
     }
 
@@ -188,5 +204,65 @@ public class DatabaseSpecificSQLGenerator {
         } else {
             throw new IllegalStateException("Database type is not supported for casting to json " + databaseTypeResolver.databaseType());
         }
+    }
+
+    public String alias(@NotNull String field, String alias) {
+        return Strings.isEmpty(alias) ? field : (alias + '.') + field;
+    }
+
+    public String buildSelect(Collection<String> fields, String alias, boolean embedded) {
+        if (fields == null || fields.isEmpty()) {
+            return "";
+        }
+        String select = "";
+        if (!embedded) {
+            select = "SELECT ";
+        }
+        return select + fields.stream().map(e -> alias(escape(e), alias)).collect(Collectors.joining(", "));
+    }
+
+    public String buildFrom(String definition, String alias, boolean embedded) {
+        if (definition == null) {
+            return "";
+        }
+        String from = "";
+        if (!embedded) {
+            from = "FROM ";
+        }
+        return from + escape(definition) + (Strings.isEmpty(alias) ? "" : (" " + alias));
+    }
+
+    public String buildJoin(@NotNull String definition, String alias, @NotNull String fkCol, String refAlias, @NotNull String refCol,
+            String joinType) {
+        String join = Strings.isEmpty(joinType) ? "JOIN" : (joinType + " JOIN");
+        alias = Strings.isEmpty(alias) ? "" : (" " + alias);
+        return format("%s %s%s ON %s = %s", join, escape(definition), alias, alias(escape(fkCol), alias), alias(escape(refCol), refAlias));
+    }
+
+    public String buildOrderBy(List<Sort.Order> orders, String alias, boolean embedded) {
+        if (orders == null || orders.isEmpty()) {
+            return "";
+        }
+        String orderBy = "";
+        if (!embedded) {
+            orderBy = "ORDER BY ";
+        }
+        return orderBy + orders.stream().map(e -> String.join(" ", alias(escape(e.getProperty()), alias), e.getDirection().name()))
+                .collect(Collectors.joining(", "));
+    }
+
+    public String buildInsert(@NotNull String definition, Collection<String> fields) {
+        if (fields == null || fields.isEmpty()) {
+            return "";
+        }
+        return "INSERT INTO " + escape(definition) + '(' + fields.stream().map(this::escape).collect(Collectors.joining(", "))
+                + ") VALUES (?" + ", ?".repeat(fields.size() - 1) + ')';
+    }
+
+    public String buildUpdate(@NotNull String definition, Collection<String> fields) {
+        if (fields == null || fields.isEmpty()) {
+            return "";
+        }
+        return "UPDATE " + escape(definition) + " SET " + fields.stream().map(e -> escape(e) + " = ?").collect(Collectors.joining(", "));
     }
 }

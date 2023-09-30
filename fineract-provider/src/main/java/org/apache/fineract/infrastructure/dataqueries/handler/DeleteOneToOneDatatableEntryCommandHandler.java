@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.dataqueries.handler;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,18 +39,6 @@ public class DeleteOneToOneDatatableEntryCommandHandler implements NewCommandSou
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        final CommandProcessingResult commandProcessingResult = this.writePlatformService.deleteDatatableEntries(command.entityName(),
-                command.entityId());
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(command.entityId()) //
-                .withOfficeId(commandProcessingResult.getOfficeId()) //
-                .withGroupId(commandProcessingResult.getGroupId()) //
-                .withClientId(commandProcessingResult.getClientId()) //
-                .withSavingsId(commandProcessingResult.getSavingsId()) //
-                .withLoanId(commandProcessingResult.getLoanId()) //
-                .build();
+        return this.writePlatformService.deleteDatatableEntries(command.entityName(), command.entityId(), command);
     }
 }

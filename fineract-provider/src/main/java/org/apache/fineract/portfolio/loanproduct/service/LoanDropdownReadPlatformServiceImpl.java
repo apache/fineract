@@ -32,6 +32,7 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyDayOfWeekType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyNthDayType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentStartDateType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
 
 import java.util.Arrays;
@@ -52,6 +53,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCa
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -176,5 +178,11 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
 
         return Arrays.asList(preCloseInterestCalculationStrategy(LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE),
                 preCloseInterestCalculationStrategy(LoanPreClosureInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE));
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveRepaymentStartDateTypeOptions() {
+        return Arrays.asList(repaymentStartDateType(RepaymentStartDateType.DISBURSEMENT_DATE),
+                repaymentStartDateType(RepaymentStartDateType.SUBMITTED_ON_DATE));
     }
 }

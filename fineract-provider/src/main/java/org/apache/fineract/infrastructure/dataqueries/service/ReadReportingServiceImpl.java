@@ -47,6 +47,7 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
@@ -230,7 +231,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             table.completeRow();
 
             Integer rSize;
-            String currColType;
+            JdbcJavaType currColType;
             String currVal;
             log.debug("NO. of Rows: {}", data.size());
             for (ResultsetRowData element : data) {
@@ -240,9 +241,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     currColType = columnHeaders.get(j).getColumnType();
                     currVal = (String) row.get(j);
                     if (currVal != null) {
-                        if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
-                                || currColType.equals("SMALLINT") || currColType.equals("INT")) {
-
+                        if (currColType.isNumericType()) {
                             table.addCell(currVal.toString());
                         } else {
                             table.addCell(currVal.toString());

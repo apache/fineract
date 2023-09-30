@@ -20,11 +20,8 @@ package org.apache.fineract.infrastructure.core.api;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
@@ -147,17 +144,5 @@ public final class ApiParameterHelper {
 
     public static boolean genericResultSetPassed(final MultivaluedMap<String, String> queryParams) {
         return queryParams.getFirst("genericResultSet") != null;
-    }
-
-    public static Map<String, String> asMap(final MultivaluedMap<String, String> queryParameters) {
-
-        final Map<String, String> map = new HashMap<>(queryParameters.size());
-
-        for (final String parameterName : queryParameters.keySet()) {
-            final List<String> values = queryParameters.get(parameterName);
-            map.put(parameterName, values.get(0));
-        }
-
-        return map;
     }
 }

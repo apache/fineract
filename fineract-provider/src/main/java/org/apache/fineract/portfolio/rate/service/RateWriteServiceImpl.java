@@ -125,7 +125,7 @@ public class RateWriteServiceImpl implements RateWriteService {
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleRateDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return new CommandProcessingResult((long) -1);
+            return CommandProcessingResult.resourceResult(-1L);
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleRateDataIntegrityIssues(command, throwable, dve);

@@ -69,7 +69,6 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
     @Transactional
     @Override
     public CommandProcessingResult createCheck(final JsonCommand command) {
-
         try {
             this.context.authenticatedUser();
 
@@ -105,11 +104,11 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                     throw new EntityDatatableCheckAlreadyExistsException(entity, status, datatableName);
                 }
             } else {
-                EntityTables entityTable = EntityTables.fromName(entity);
-                if (EntityTables.LOAN == entityTable) {
+                EntityTables entityTable = EntityTables.fromEntityName(entity);
+                if (entityTable == EntityTables.LOAN) {
                     // if invalid loan product id, throws exception
                     this.loanProductReadPlatformService.retrieveLoanProduct(productId);
-                } else if (EntityTables.SAVING == entityTable) {
+                } else if (entityTable == EntityTables.SAVINGS) {
                     // if invalid savings product id, throws exception
                     this.savingsProductReadPlatformService.retrieveOne(productId);
                 } else {
@@ -273,5 +272,4 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
         throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
-
 }

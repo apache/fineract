@@ -38,6 +38,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 
 public final class LoanEnumerations {
 
@@ -57,6 +58,7 @@ public final class LoanEnumerations {
     public static final String LOAN_TYPE = "loanType";
     public static final String INTEREST_RECALCULATION_COMPOUNDING_TYPE = "interestRecalculationCompoundingType";
     public static final String RESCHEDULE_STRATEGY_TYPE = "rescheduleStrategyType";
+    public static final String REPAYMENT_START_DATE_TYPE = "repaymentStartDateType";
 
     public static EnumOptionData loanEnumeration(final String typeName, final int id) {
         return switch (typeName) {
@@ -71,7 +73,23 @@ public final class LoanEnumerations {
             case LOAN_TYPE -> AccountEnumerations.loanType(id);
             case INTEREST_RECALCULATION_COMPOUNDING_TYPE -> interestRecalculationCompoundingType(id);
             case RESCHEDULE_STRATEGY_TYPE -> rescheduleStrategyType(id);
+            case REPAYMENT_START_DATE_TYPE -> repaymentStartDateType(id);
             default -> null;
+        };
+    }
+
+    public static EnumOptionData repaymentStartDateType(int id) {
+        return repaymentStartDateType(RepaymentStartDateType.fromInt(id));
+    }
+
+    public static EnumOptionData repaymentStartDateType(final RepaymentStartDateType type) {
+        return switch (type) {
+            case DISBURSEMENT_DATE -> new EnumOptionData(RepaymentStartDateType.DISBURSEMENT_DATE.getValue().longValue(),
+                    RepaymentStartDateType.DISBURSEMENT_DATE.getCode(), "Disbursement Date");
+            case SUBMITTED_ON_DATE -> new EnumOptionData(RepaymentStartDateType.SUBMITTED_ON_DATE.getValue().longValue(),
+                    RepaymentStartDateType.SUBMITTED_ON_DATE.getCode(), "Submitted On Date");
+            default -> new EnumOptionData(RepaymentStartDateType.INVALID.getValue().longValue(), RepaymentStartDateType.INVALID.getCode(),
+                    "Invalid");
         };
     }
 
@@ -293,6 +311,8 @@ public final class LoanEnumerations {
                     LoanTransactionType.CHARGE_ADJUSTMENT.getCode(), "Charge Adjustment");
             case CHARGE_OFF -> new LoanTransactionEnumData(LoanTransactionType.CHARGE_OFF.getValue().longValue(),
                     LoanTransactionType.CHARGE_OFF.getCode(), "Charge-off");
+            case DOWN_PAYMENT -> new LoanTransactionEnumData(LoanTransactionType.DOWN_PAYMENT.getValue().longValue(),
+                    LoanTransactionType.DOWN_PAYMENT.getCode(), "Down Payment");
         };
     }
 

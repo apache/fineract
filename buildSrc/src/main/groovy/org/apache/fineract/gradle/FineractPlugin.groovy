@@ -66,7 +66,6 @@ class FineractPlugin implements Plugin<Project> {
             this.confluenceService = new ConfluenceService(extension.config.confluence)
             this.subversionService = new SubversionService(extension.config.subversion)
             this.emailService = new EmailService(extension.config.smtp)
-            this.gpgService = new GpgService(extension.config.gpg)
             this.gitService = new GitService(extension.config.git, extension.config.gpg)
             this.context = context(project)
         }
@@ -331,7 +330,7 @@ class FineractPlugin implements Plugin<Project> {
         project.tasks.register("fineractReleaseStep7") {
             doFirst {
                 FineractPluginExtension.FineractPluginStep step = step(extension, "step7")
-
+                gpgService = new GpgService(extension.config.gpg)
                 gpgService.sign(step.gpg)
 
                 step.gpg.files.findAll {

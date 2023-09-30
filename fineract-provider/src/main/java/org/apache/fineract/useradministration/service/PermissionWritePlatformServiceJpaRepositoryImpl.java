@@ -21,6 +21,7 @@ package org.apache.fineract.useradministration.service;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -30,26 +31,16 @@ import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
 import org.apache.fineract.useradministration.exception.PermissionNotFoundException;
 import org.apache.fineract.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 public class PermissionWritePlatformServiceJpaRepositoryImpl implements PermissionWritePlatformService {
 
     private final PlatformSecurityContext context;
     private final PermissionRepository permissionRepository;
     private final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-
-    @Autowired
-    public PermissionWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final PermissionRepository permissionRepository, final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
-        this.context = context;
-        this.permissionRepository = permissionRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-    }
 
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     @Transactional

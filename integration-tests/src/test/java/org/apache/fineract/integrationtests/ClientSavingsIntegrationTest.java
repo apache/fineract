@@ -2235,7 +2235,7 @@ public class ClientSavingsIntegrationTest {
         Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
         Date today = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant());
         String todayDate = today.toString();
-        SimpleDateFormat dt1 = new SimpleDateFormat("dd MMM yyyy");
+        SimpleDateFormat dt1 = new SimpleDateFormat("dd MMMM yyyy");
         todayDate = dt1.format(today).toString();
         withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "300", todayDate,
                 CommonConstants.RESPONSE_RESOURCE_ID);
@@ -2655,8 +2655,7 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper.addChargesForSavings(savingsId, chargeIdOne, false, BigDecimal.valueOf(withdrawalChargeOne));
 
         Integer withdrawTransactionIdOne = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccountWithPaymentType(savingsId,
-                withdrawalAmountOne, SavingsAccountHelper.TRANSACTION_DATE, paymentTypeIdOne.toString(),
-                CommonConstants.RESPONSE_RESOURCE_ID);
+                withdrawalAmountOne, SavingsAccountHelper.TRANSACTION_DATE, paymentTypeIdOne, CommonConstants.RESPONSE_RESOURCE_ID);
 
         Float balance = Float.parseFloat("8990");
         // Withdraw charge from paymentType 1 is 10 So balance should be 10,000(deposit)-1000(wd)-"10(charge)" = 8990
@@ -2678,8 +2677,7 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper.addChargesForSavings(savingsId, chargeIdTwo, false, BigDecimal.valueOf(withdrawalChargeTwo));
 
         Integer withdrawTransactionIdTwo = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccountWithPaymentType(savingsId,
-                withdrawalAmountTwo, SavingsAccountHelper.TRANSACTION_DATE, paymentTypeIdTwo.toString(),
-                CommonConstants.RESPONSE_RESOURCE_ID);
+                withdrawalAmountTwo, SavingsAccountHelper.TRANSACTION_DATE, paymentTypeIdTwo, CommonConstants.RESPONSE_RESOURCE_ID);
 
         Float balanceAfterChargeTwo = Float.parseFloat("6970");
         // Withdraw charge from paymentType 2 is 20 So balance should be 8990(balance)-2000(wd)-"20(charge)" = 6970
@@ -3162,7 +3160,56 @@ public class ClientSavingsIntegrationTest {
 
         assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+    }
 
+    @Test
+    public void testSavingsAccountDepositAfterNegativeHoldAmount() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, "0", null, false, true, false);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        this.savingsAccountHelper.approveSavings(savingsId);
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        float balance = 0F;
+        float transactionAmount = 100F;
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId,
+                String.valueOf(transactionAmount), SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        Assertions.assertNotNull(depositTransactionId);
+        balance = balance + transactionAmount;
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(balance, summary.get("availableBalance"), "Verifying Balance after deposit");
+        Integer withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId,
+                String.valueOf(transactionAmount), SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        Assertions.assertNotNull(withdrawalTransactionId);
+        balance = balance - transactionAmount;
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(balance, summary.get("availableBalance"), "Verifying Balance after withdrawal");
+
+        float holdAmount = 50F;
+        Integer holdTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, String.valueOf(holdAmount),
+                false, SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        Assertions.assertNotNull(holdTransactionId);
+        balance = balance - holdAmount;
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(balance, summary.get("availableBalance"), "Verifying Balance after hold amount");
+        this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
+        balance = balance + holdAmount;
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(balance, summary.get("availableBalance"), "Verifying Balance after release amount");
+
+        depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, String.valueOf(transactionAmount),
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        Assertions.assertNotNull(depositTransactionId);
+        balance = balance + transactionAmount;
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(balance, summary.get("availableBalance"), "Verifying Balance after hold-release-deposit");
     }
 
     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {

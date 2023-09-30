@@ -126,7 +126,7 @@ public class DocumentManagementApiResource {
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
                 fileSize, bodyPart.getMediaType().toString(), description, null);
         final Long documentId = this.documentWritePlatformService.createDocument(documentCommand, inputStream);
-        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId, null));
+        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId));
     }
 
     @PUT

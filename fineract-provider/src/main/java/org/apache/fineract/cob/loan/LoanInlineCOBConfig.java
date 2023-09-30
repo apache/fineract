@@ -21,7 +21,7 @@ package org.apache.fineract.cob.loan;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.common.ResetContextTasklet;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.listener.InlineCOBLoanItemListener;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -30,6 +30,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
@@ -38,12 +39,14 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 @EnableBatchIntegration
+@Conditional(LoanCOBEnabledCondition.class)
 public class LoanInlineCOBConfig {
 
     @Autowired
@@ -56,8 +59,6 @@ public class LoanInlineCOBConfig {
     private LoanRepository loanRepository;
     @Autowired
     private COBBusinessStepService cobBusinessStepService;
-    @Autowired
-    private LoanAccountLockRepository accountLockRepository;
     @Autowired
     private TransactionTemplate transactionTemplate;
     @Autowired
@@ -96,11 +97,13 @@ public class LoanInlineCOBConfig {
                 .build();
     }
 
+    @JobScope
     @Bean
     public InlineCOBLoanItemReader inlineCobWorkerItemReader() {
         return new InlineCOBLoanItemReader(loanRepository);
     }
 
+    @JobScope
     @Bean
     public InlineCOBLoanItemProcessor inlineCobWorkerItemProcessor() {
         return new InlineCOBLoanItemProcessor(cobBusinessStepService);

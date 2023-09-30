@@ -27,6 +27,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -34,14 +35,17 @@ import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.springframework.format.number.NumberStyleFormatter;
 
@@ -329,7 +333,7 @@ public class JsonParserHelper {
         return value;
     }
 
-    public MonthDay extractMonthDayNamed(final String parameterName, final JsonObject element, final String dateFormat,
+    public MonthDay extractMonthDayNamed(final String parameterName, final JsonObject element, String dateFormat,
             final Locale clientApplicationLocale) {
         MonthDay value = null;
         if (element.isJsonObject()) {
@@ -342,9 +346,9 @@ public class JsonParserHelper {
                 if (StringUtils.isNotBlank(valueAsString)) {
                     try {
                         final DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                                .appendPattern(dateFormat).toFormatter(clientApplicationLocale);
+                                .appendPattern(dateFormat).toFormatter(clientApplicationLocale).withResolverStyle(ResolverStyle.STRICT);
                         value = MonthDay.parse(valueAsString, formatter);
-                    } catch (final IllegalArgumentException e) {
+                    } catch (final IllegalArgumentException | DateTimeException e) {
                         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                         final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.month.day",
                                 "The parameter `" + parameterName + "` is invalid based on the monthDayFormat: `" + dateFormat
@@ -396,7 +400,7 @@ public class JsonParserHelper {
 
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
-            value = extractLocalDateTimeNamed(parameterName, element, extractTimeFormatParameter(object), parametersPassedInCommand);
+            value = extractLocalDateTimeNamed(parameterName, element, extractDateFormatParameter(object), parametersPassedInCommand);
         }
         return value;
     }
@@ -437,11 +441,11 @@ public class JsonParserHelper {
                 parametersPassedInCommand.add(parameterName);
 
                 try {
-                    DateTimeFormatter timeFormtter = DateTimeFormatter.ofPattern(timeFormat);
+                    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(timeFormat);
                     final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                     timeValueAsString = primitive.getAsString();
                     if (StringUtils.isNotBlank(timeValueAsString)) {
-                        value = LocalTime.parse(timeValueAsString, timeFormtter);
+                        value = LocalTime.parse(timeValueAsString, timeFormatter);
                     }
                 } catch (IllegalArgumentException e) {
                     final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -459,28 +463,32 @@ public class JsonParserHelper {
         return value;
     }
 
-    public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element, final String timeFormat,
+    public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
             final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDateTime value = null;
-        String timeValueAsString = null;
+        String timeValueAsString;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 parametersPassedInCommand.add(parameterName);
 
                 try {
-                    DateTimeFormatter timeFormtter = DateTimeFormatter.ofPattern(timeFormat);
+                    String strictResolveCompatibleTimeFormat = timeFormat.replace("y", "u");
                     final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                     timeValueAsString = primitive.getAsString();
+                    DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
+                            .appendPattern(strictResolveCompatibleTimeFormat).toFormatter(clientApplicationLocale)
+                            .withResolverStyle(ResolverStyle.STRICT);
                     if (StringUtils.isNotBlank(timeValueAsString)) {
-                        value = LocalDateTime.parse(timeValueAsString, timeFormtter);
+                        value = LocalDateTime.parse(timeValueAsString, timeFormatter);
                     }
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException | DateTimeParseException e) {
                     final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-                    final String defaultMessage = new StringBuilder("The parameter `" + timeValueAsString + "` is not in correct format.")
-                            .toString();
-                    final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.TimeFormat", defaultMessage,
-                            parameterName);
+                    final ApiParameterError error = ApiParameterError
+                            .parameterError("validation.msg.invalid.dateFormat.format",
+                                    "The parameter `" + parameterName + "` is invalid based on the dateFormat: `" + timeFormat
+                                            + "` and locale: `" + clientApplicationLocale + "` provided:",
+                                    parameterName, value, timeFormat);
                     dataValidationErrors.add(error);
                     throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                             dataValidationErrors, e);
@@ -518,17 +526,27 @@ public class JsonParserHelper {
         return convertDateTimeFrom(dateAsString, parameterName, dateFormat, clientApplicationLocale).toLocalDate();
     }
 
-    public static LocalDateTime convertDateTimeFrom(final String dateTimeAsString, final String parameterName, final String dateTimeFormat,
+    public static LocalDate convertFrom(final String dateAsString, final String parameterName, final DateFormat dateFormat,
+            final Locale clientApplicationLocale) {
+
+        String rawDateFormat = Objects.isNull(dateFormat) ? null : dateFormat.getDateFormat();
+
+        return convertDateTimeFrom(dateAsString, parameterName, rawDateFormat, clientApplicationLocale).toLocalDate();
+    }
+
+    public static LocalDateTime convertDateTimeFrom(final String dateTimeAsString, final String parameterName, String dateTimeFormat,
             final Locale clientApplicationLocale) {
 
         validateDateFormatAndLocale(parameterName, dateTimeFormat, clientApplicationLocale);
         LocalDateTime eventLocalDateTime = null;
         if (StringUtils.isNotBlank(dateTimeAsString)) {
             try {
+                String strictResolveCompatibleDateTimeFormat = dateTimeFormat.replace("y", "u");
                 DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                        .appendPattern(dateTimeFormat).optionalStart().appendPattern(" HH:mm:ss").optionalEnd()
+                        .appendPattern(strictResolveCompatibleDateTimeFormat).optionalStart().appendPattern(" HH:mm:ss").optionalEnd()
                         .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-                        .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter(clientApplicationLocale);
+                        .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter(clientApplicationLocale)
+                        .withResolverStyle(ResolverStyle.STRICT);
                 eventLocalDateTime = LocalDateTime.parse(dateTimeAsString, formatter);
             } catch (final IllegalArgumentException | DateTimeParseException e) {
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

@@ -377,30 +377,16 @@ public final class CalendarData implements Serializable {
     }
 
     public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null) {
-            if (this.startDate.isBefore(compareDate) || this.startDate.equals(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return this.startDate != null && compareDate != null
+                && (this.startDate.isBefore(compareDate) || this.startDate.equals(compareDate));
     }
 
     public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
-        if (this.endDate != null && compareDate != null) {
-            if (this.endDate.isAfter(compareDate) || this.endDate.isEqual(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return this.endDate != null && compareDate != null && (this.endDate.isAfter(compareDate) || this.endDate.isEqual(compareDate));
     }
 
     public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
-        if (isStartDateBeforeOrEqual(compareDate)) {
-            if (this.endDate == null || isEndDateAfterOrEqual(compareDate)) {
-                return true;
-            }
-        }
-        return false;
+        return isStartDateBeforeOrEqual(compareDate) && (this.endDate == null || isEndDateAfterOrEqual(compareDate));
     }
 
     public boolean isValidRecurringDate(final LocalDate compareDate, final Boolean isSkipMeetingOnFirstDay, final Integer numberOfDays) {

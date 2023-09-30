@@ -61,6 +61,7 @@ public class FineractProperties {
     private FineractTemplateProperties template;
     private FineractJpaProperties jpa;
 
+    private FineractDatabaseProperties database;
     private FineractQueryProperties query;
     private FineractApiProperties api;
     private FineractSecurityProperties security;
@@ -380,6 +381,7 @@ public class FineractProperties {
     public static class FineractJobProperties {
 
         private int stuckRetryThreshold;
+        private boolean loanCobEnabled;
     }
 
     @Getter
@@ -395,6 +397,13 @@ public class FineractProperties {
     public static class FineractJpaProperties {
 
         private boolean statementLoggingEnabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractDatabaseProperties {
+
+        private String defaultMasterPassword;
     }
 
     @Getter
@@ -452,6 +461,7 @@ public class FineractProperties {
         private FineractTransactionProcessorItemProperties rbiIndia;
         private FineractTransactionProcessorItemProperties duePenaltyFeeInterestPrincipalInAdvancePrincipalPenaltyFeeInterest;
         private FineractTransactionProcessorItemProperties duePenaltyInterestPrincipalFeeInAdvancePenaltyInterestPrincipalFee;
+        private FineractTransactionProcessorItemProperties advancedPaymentStrategy;
         private boolean errorNotFoundFail;
     }
 

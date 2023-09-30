@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -52,11 +53,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
+@RequiredArgsConstructor
 public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWritePlatformService {
 
     private final CalendarRepository calendarRepository;
@@ -68,23 +67,6 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     private final GroupRepositoryWrapper groupRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepository;
-
-    @Autowired
-    public CalendarWritePlatformServiceJpaRepositoryImpl(final CalendarRepository calendarRepository,
-            final CalendarHistoryRepository calendarHistoryRepository, final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CalendarInstanceRepository calendarInstanceRepository, final LoanWritePlatformService loanWritePlatformService,
-            final ConfigurationDomainService configurationDomainService, final GroupRepositoryWrapper groupRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final ClientRepositoryWrapper clientRepository) {
-        this.calendarRepository = calendarRepository;
-        this.calendarHistoryRepository = calendarHistoryRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.calendarInstanceRepository = calendarInstanceRepository;
-        this.loanWritePlatformService = loanWritePlatformService;
-        this.configurationDomainService = configurationDomainService;
-        this.groupRepository = groupRepository;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.clientRepository = clientRepository;
-    }
 
     @Override
     public CommandProcessingResult createCalendar(final JsonCommand command) {

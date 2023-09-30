@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainServiceJpa;
@@ -45,48 +46,28 @@ import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Service;
 
 /**
  * @author vishwas
  *
  */
-@Service
+@RequiredArgsConstructor
 public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
+    private final JdbcTemplate jdbcTemplate;
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final TaxReadPlatformService taxReadPlatformService;
     private final ConfigurationDomainServiceJpa configurationDomainServiceJpa;
-
-    @Autowired
-    public ChargeReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService,
-            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final DropdownReadPlatformService dropdownReadPlatformService, final FineractEntityAccessUtil fineractEntityAccessUtil,
-            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
-            final TaxReadPlatformService taxReadPlatformService, final ConfigurationDomainServiceJpa configurationDomainServiceJpa,
-            final NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
-        this.jdbcTemplate = jdbcTemplate;
-        this.currencyReadPlatformService = currencyReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-        this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        this.taxReadPlatformService = taxReadPlatformService;
-        this.configurationDomainServiceJpa = configurationDomainServiceJpa;
-    }
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
     @Cacheable(value = "charges", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")

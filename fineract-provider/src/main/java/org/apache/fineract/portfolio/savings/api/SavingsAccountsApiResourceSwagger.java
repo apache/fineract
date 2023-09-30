@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -230,6 +231,8 @@ final class SavingsAccountsApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "01 March 2011")
         public String submittedOnDate;
+        @Schema(example = "123")
+        public String externalId;
     }
 
     @Schema(description = "PostSavingsAccountsResponse")
@@ -258,9 +261,9 @@ final class SavingsAccountsApiResourceSwagger {
 
             public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
             @Schema(example = "0")
-            public Integer accountBalance;
+            public BigDecimal accountBalance;
             @Schema(example = "0")
-            public Integer availableBalance;
+            public BigDecimal availableBalance;
         }
 
         @Schema(example = "1")

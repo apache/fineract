@@ -150,7 +150,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         if (active) {
             map.put("active", "true");
             map.put("locale", "en");
-            map.put("dateFormat", "dd MMM yyyy");
+            map.put("dateFormat", "dd MMMM yyyy");
             map.put("activationDate", activationDate);
         } else {
             map.put("active", "false");

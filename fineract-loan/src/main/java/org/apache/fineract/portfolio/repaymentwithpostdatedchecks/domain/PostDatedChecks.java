@@ -22,7 +22,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,7 +39,7 @@ public class PostDatedChecks extends AbstractPersistableCustom {
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false)
     private Loan loan;
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "repayment_id", referencedColumnName = "id", nullable = false)
     private LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment;
     @Column(name = "account_no", nullable = false, length = 10)

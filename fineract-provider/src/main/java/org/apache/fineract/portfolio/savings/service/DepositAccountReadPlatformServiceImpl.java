@@ -1131,6 +1131,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public static final String TO_TRANSFER_REVERSED = "toTransferReversed";
         public static final String TO_TRANSFER_DESCRIPTION = "toTransferDescription";
         public static final String SUBMITTED_BY_USERNAME = "submittedByUsername";
+        public static final String SUBMITTED_ON_DATE = "submittedOnDate";
         private final String schemaSql;
 
         SavingsAccountTransactionsMapper() {
@@ -1139,6 +1140,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
             sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
+            sqlBuilder.append("tr.submitted_on_date as submittedOnDate,");
             sqlBuilder.append("fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed,");
             sqlBuilder.append("fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount,");
             sqlBuilder.append("fromtran.description as fromTransferDescription,");
@@ -1176,6 +1178,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(transactionTypeInt);
 
             final LocalDate date = JdbcSupport.getLocalDate(rs, TRANSACTION_DATE);
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, SUBMITTED_ON_DATE);
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, TRANSACTION_AMOUNT);
             final BigDecimal outstandingChargeAmount = null;
             final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, RUNNING_BALANCE);
@@ -1233,7 +1236,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final String submittedByUsername = rs.getString(SUBMITTED_BY_USERNAME);
             final String note = null;
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount, outstandingChargeAmount, runningBalance, reversed, transfer, postInterestAsOn, submittedByUsername, note);
+                    amount, outstandingChargeAmount, runningBalance, reversed, transfer, postInterestAsOn, submittedByUsername, note,
+                    submittedOnDate);
         }
     }
 
@@ -1662,9 +1666,10 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final boolean postInterestAsOn = false;
             final String submittedByUsername = null;
             final String note = null;
+            final LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
             return SavingsAccountTransactionData.create(savingsId, transactionType, paymentDetailData, savingsId, accountNo, duedate,
                     currency, dueamount, outstandingChargeAmount, runningBalance, false, transfer, postInterestAsOn, submittedByUsername,
-                    note);
+                    note, submittedOnDate);
         }
     }
 

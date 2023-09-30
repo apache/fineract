@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.core.exceptionmapper.IdempotentCommandProcessFailedExceptionMapper;
+import org.apache.fineract.infrastructure.core.exceptionmapper.IdempotentCommandExceptionMapper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class IdempotencyCommandProcessFailedExceptionTest {
 
     @Test
     public void testInconsistentStatus() {
-        IdempotentCommandProcessFailedExceptionMapper mapper = new IdempotentCommandProcessFailedExceptionMapper();
+        IdempotentCommandExceptionMapper mapper = new IdempotentCommandExceptionMapper();
         CommandWrapper command = new CommandWrapper(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null);
         CommandSource source = CommandSource.fullEntryFrom(command, JsonCommand.from("{}"), null, "dummy-key", null);

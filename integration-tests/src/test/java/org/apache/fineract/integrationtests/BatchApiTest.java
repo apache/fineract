@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.http.HttpStatus.SC_FORBIDDEN;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -41,7 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.apache.fineract.batch.command.internal.AdjustTransactionCommandStrategy;
+import org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -65,6 +67,8 @@ import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.http.HttpStatus;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,6 +121,11 @@ public class BatchApiTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
         GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
+    }
+
+    @AfterEach
+    public void postActions() {
+        GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, false);
     }
 
     /**
@@ -199,7 +208,7 @@ public class BatchApiTest {
 
         // Asserts that all the transactions have been successfully rolled back
         Assertions.assertEquals(1, response.size());
-        Assertions.assertEquals((long) 500, (long) response.get(0).getStatusCode(), "Verify Status code 500");
+        Assertions.assertEquals(SC_FORBIDDEN, response.get(0).getStatusCode(), "Verify Status code 500");
     }
 
     /**
@@ -461,7 +470,7 @@ public class BatchApiTest {
     /**
      * Test for a successful charge adjustment. A '200' status code is expected on successful responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulChargeAdjustment() {
@@ -1066,7 +1075,7 @@ public class BatchApiTest {
      * Test for the successful disbursement and get loan. A '200' status code is expected on successful responses.
      *
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.GetLoanTransactionByIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulDisbursementAndGetTransaction() {
@@ -1403,8 +1412,8 @@ public class BatchApiTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", true);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
         columnMap.put("columns", datatableColumnsList);
         final String datatableRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
@@ -1424,7 +1433,7 @@ public class BatchApiTest {
         assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
 
         // Create datatable entry batch request
-        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId, datatableName,
+        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId.toString(), datatableName,
                 Arrays.asList(columnName1, columnName2));
 
         // Update datatable entry batch request
@@ -1581,7 +1590,7 @@ public class BatchApiTest {
     /**
      * Test for the successful repayment reversal transaction. A '200' status code is expected on successful responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentReversal() {
@@ -1654,7 +1663,7 @@ public class BatchApiTest {
      * Test for the successful repayment reversal transaction using loan external id and transaction external id. A
      * '200' status code is expected on successful responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentReversalUsingExternalId() {
@@ -1759,7 +1768,7 @@ public class BatchApiTest {
      * Test for the successful repayment chargeback transaction. A '200' status code is expected on successful
      * responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentChargeback() {
@@ -1830,7 +1839,7 @@ public class BatchApiTest {
      * Tests successful run of batch goodwill credit reversal for loans. A '200' status code is expected on successful
      * responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchGoodwillCreditReversal() {
@@ -1904,7 +1913,7 @@ public class BatchApiTest {
      * Test for the successful merchant issued refund and payout refund reversal transaction. A '200' status code is
      * expected on successful responses.
      *
-     * @see AdjustTransactionCommandStrategy
+     * @see AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulTransactionMerchantIssuedAndPayoutRefundReversal() {
@@ -2015,8 +2024,8 @@ public class BatchApiTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, Long.valueOf(savingsId), "chargeStatus=all", null);
-        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L);
-        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L);
+        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L, 100F);
+        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L, 10F);
 
         final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
                 holdAmountOnSavingAccountRequest);
@@ -2030,7 +2039,7 @@ public class BatchApiTest {
         final Long holdAmountTransactionId = jsonHelper.parse(responses1.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
 
         final BatchRequest releaseAmountOnSavingAccountRequest = BatchHelper.releaseAmountOnSavingAccount(2L, 1L, holdAmountTransactionId);
-        final BatchRequest withdrawSavingAccountRequest = BatchHelper.withdrawSavingAccount(3L, 1L);
+        final BatchRequest withdrawSavingAccountRequest = BatchHelper.withdrawSavingAccount(3L, 1L, 80F);
 
         final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
                 withdrawSavingAccountRequest);
@@ -2061,8 +2070,8 @@ public class BatchApiTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", false);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
         columnMap.put("columns", datatableColumnsList);
         final String datatableRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
@@ -2110,6 +2119,58 @@ public class BatchApiTest {
     }
 
     /**
+     * Test when datatable entry was not found by the query API, and the update fails
+     */
+    @Test
+    public void shouldNotFindAnyDatatableEntryByQueryAPIAndFailsToUpdateItsColumn() {
+        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
+
+        // creating datatable with m_loan association
+        final Map<String, Object> columnMap = new HashMap<>();
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+
+        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
+        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
+        columnMap.put("datatableName", datatableName);
+        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
+        columnMap.put("entitySubType", "PERSON");
+        columnMap.put("multiRow", false);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 15, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 15, null);
+        columnMap.put("columns", datatableColumnsList);
+        final String datatableRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
+
+        this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+
+        final BatchRequest queryDatatableEntriesRequest = BatchHelper.queryDatatableEntries(datatableName, columnName1, "columnValue1",
+                "loan_id");
+        final BatchRequest updateDatatableEntry = BatchHelper.updateDatatableEntry(datatableName, "$.[0].loan_id", columnName2,
+                "columnValue2");
+
+        final List<BatchRequest> batchRequestsToQueryAndUpdateDatatableEntries = Arrays.asList(queryDatatableEntriesRequest,
+                updateDatatableEntry);
+        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+
+        final List<BatchResponse> responseOfQueryAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
+                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+
+        LOG.info("Batch Response : {}", new Gson().toJson(responseOfQueryAndUpdateDatatableBatch));
+
+        final BatchResponse queryResponse = responseOfQueryAndUpdateDatatableBatch.get(0);
+
+        Assertions.assertEquals(1L, queryResponse.getRequestId());
+        Assertions.assertEquals(HttpStatus.SC_OK, queryResponse.getStatusCode(), "Verify Status Code 200 for query datatable entry");
+
+        final BatchResponse updateResponse = responseOfQueryAndUpdateDatatableBatch.get(1);
+
+        Assertions.assertEquals(2L, updateResponse.getRequestId());
+        Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, updateResponse.getStatusCode(),
+                "Verify Status Code 400 for update datatable entry");
+        MatcherAssert.assertThat(updateResponse.getBody(), containsString("The referenced JSON path is invalid"));
+    }
+
+    /**
      * Test for finding datatable entry by the query API and update its value
      */
     @Test
@@ -2128,8 +2189,8 @@ public class BatchApiTest {
         columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
         columnMap.put("entitySubType", "PERSON");
         columnMap.put("multiRow", true);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
         columnMap.put("columns", datatableColumnsList);
         final String datatableRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
@@ -2151,7 +2212,7 @@ public class BatchApiTest {
         assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
 
         // Create datatable entry batch request
-        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId, datatableName,
+        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId.toString(), datatableName,
                 Arrays.asList(columnName1, columnName2));
 
         // Get datatable entries batch request
@@ -2494,6 +2555,59 @@ public class BatchApiTest {
                 this.responseSpec, jsonifiedRepaymentRequest);
 
         Assertions.assertEquals(HttpStatus.SC_CONFLICT, repaymentResponse.get(0).getStatusCode(), "Verify Status Code 409 for Locked Loan");
+    }
+
+    @Test
+    public void verifyCalculatingRunningBalanceAfterBatchWithReleaseAmount() {
+        final float holdAmount = 10F;
+        final float withdrawalAmount = 80F;
+        final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, 2L, "chargeStatus=all", null);
+        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L, 300F);
+        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L, holdAmount);
+
+        final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
+                holdAmountOnSavingAccountRequest);
+        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests1));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(2).getStatusCode(),
+                "Verify Status Code 200 for hold amount on saving account");
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final Long holdAmountTransactionId = jsonHelper.parse(responses1.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
+
+        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        HashMap accountDetails = savingsAccountHelper.getSavingsDetails(2);
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
+        final float runningBalanceBeforeBatch = (float) transactions.get(0).get("runningBalance");
+
+        final BatchRequest releaseAmountOnSavingAccountRequest = BatchHelper.releaseAmountOnSavingAccount(2L, 1L, holdAmountTransactionId);
+        final BatchRequest withdrawSavingAccountRequest1 = BatchHelper.withdrawSavingAccount(3L, 1L, withdrawalAmount);
+        final BatchRequest withdrawSavingAccountRequest2 = BatchHelper.withdrawSavingAccount(4L, 1L, withdrawalAmount);
+
+        final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
+                withdrawSavingAccountRequest1, withdrawSavingAccountRequest2);
+        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests2));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(0).getStatusCode(),
+                "Verify Status Code 200 for release amount on saving account");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(1).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(2).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
+
+        accountDetails = savingsAccountHelper.getSavingsDetails(2);
+        transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
+
+        final HashMap<String, Object> transactionRelease = transactions.get(2);
+        final HashMap<String, Object> transactionWithdrawal1 = transactions.get(1);
+        final HashMap<String, Object> transactionWithdrawal2 = transactions.get(0);
+
+        assertEquals(runningBalanceBeforeBatch + holdAmount, transactionRelease.get("runningBalance"),
+                "Verify running balance after release amount");
+        assertEquals(runningBalanceBeforeBatch + holdAmount - withdrawalAmount, transactionWithdrawal1.get("runningBalance"),
+                "Verify running balance after first withdrawal");
+        assertEquals(runningBalanceBeforeBatch + holdAmount - withdrawalAmount - withdrawalAmount,
+                transactionWithdrawal2.get("runningBalance"), "Verify running balance after second withdrawal");
     }
 
     /**

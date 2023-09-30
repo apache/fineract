@@ -24,24 +24,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.account.data.AccountAssociationsData;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountAssociationsReadPlatformServiceImpl implements AccountAssociationsReadPlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AccountAssociationsReadPlatformServiceImpl.class);
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -56,7 +53,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
         } catch (final EmptyResultDataAccessException e) {
-            LOG.debug("Linking account is not configured");
+            log.debug("Linking account is not configured");
         }
         return linkedAccount;
     }
@@ -85,7 +82,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
         } catch (final EmptyResultDataAccessException e) {
-            LOG.debug("Linking account is not configured");
+            log.debug("Linking account is not configured");
         }
         return linkedAccount;
     }

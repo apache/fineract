@@ -66,9 +66,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollaterals;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataNotAllowedException;
@@ -234,7 +236,7 @@ public class LoanAssembler {
         BigDecimal fixedPrincipalPercentagePerInstallment = fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
 
-        Loan loanApplication = null;
+        Loan loanApplication;
         Client client = null;
         Group group = null;
 
@@ -273,21 +275,19 @@ public class LoanAssembler {
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
                     fixedPrincipalPercentagePerInstallment);
-            loanApplication.updateTransactionProcessingStrategy(transactionProcessingStrategyCode, transactionProcessingStrategyName);
         } else if (group != null) {
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
                     loanPurpose, transactionProcessingStrategyCode, loanProductRelatedDetail, loanCharges, null,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
                     fixedPrincipalPercentagePerInstallment);
-            loanApplication.updateTransactionProcessingStrategy(transactionProcessingStrategyCode, transactionProcessingStrategyName);
         } else if (client != null) {
-
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
                     loanOfficer, loanPurpose, transactionProcessingStrategyCode, loanProductRelatedDetail, loanCharges, collateral,
                     fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement,
                     isFloatingInterestRate, interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
-            loanApplication.updateTransactionProcessingStrategy(transactionProcessingStrategyCode, transactionProcessingStrategyName);
+        } else {
+            loanApplication = null;
         }
 
         final String externalIdStr = this.fromApiJsonHelper.extractStringNamed("externalId", element);
@@ -297,6 +297,8 @@ public class LoanAssembler {
         if (loanApplication == null) {
             throw new IllegalStateException("No loan application exists for either a client or group (or both).");
         }
+        loanApplication.updateTransactionProcessingStrategy(transactionProcessingStrategyCode, transactionProcessingStrategyName);
+        copyAdvancedPaymentRulesIfApplicable(transactionProcessingStrategyCode, loanProduct, loanApplication);
         loanApplication.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);
 
@@ -358,5 +360,16 @@ public class LoanAssembler {
 
         loanApplication.validateExpectedDisbursementForHolidayAndNonWorkingDay(workingDays, allowTransactionsOnHoliday, holidays,
                 allowTransactionsOnNonWorkingDay);
+    }
+
+    private void copyAdvancedPaymentRulesIfApplicable(String transactionProcessingStrategyCode, LoanProduct loanProduct,
+            Loan loanApplication) {
+        if (transactionProcessingStrategyCode.equals(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)) {
+            List<LoanPaymentAllocationRule> loanPaymentAllocationRules = loanProduct.getPaymentAllocationRules().stream()
+                    .map(r -> new LoanPaymentAllocationRule(loanApplication, r.getTransactionType(), r.getAllocationTypes(),
+                            r.getFutureInstallmentAllocationRule()))
+                    .toList();
+            loanApplication.setPaymentAllocationRules(loanPaymentAllocationRules);
+        }
     }
 }

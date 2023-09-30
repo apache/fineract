@@ -29,6 +29,7 @@ import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.JobIsNotFoundOrNotEnabledException;
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
@@ -48,6 +49,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
@@ -118,6 +120,10 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                 scheduler.addJob(jobDetail, true);
                 scheduler.triggerJob(jobKey, jobDataMap);
             }
+        } catch (JobIsNotFoundOrNotEnabledException e) {
+            final String msg = "Job is not found or it is disabled with job ID: " + scheduledJobDetail.getId();
+            log.error("{}", msg, e);
+            throw e;
         } catch (final Exception e) {
             final String msg = "Job execution failed for job with id:" + scheduledJobDetail.getId();
             log.error("{}", msg, e);
@@ -327,7 +333,12 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
         JobNameData jobName = jobNameService.getJobByHumanReadableName(scheduledJobDetail.getJobName());
-        Job job = jobLocator.getJob(jobName.getEnumStyleName());
+        Job job;
+        try {
+            job = jobLocator.getJob(jobName.getEnumStyleName());
+        } catch (NoSuchJobException e) {
+            throw new JobIsNotFoundOrNotEnabledException(e, jobName.getEnumStyleName());
+        }
 
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
         jobDetailFactoryBean.setName(scheduledJobDetail.getJobName() + "JobDetail" + tenant.getId());

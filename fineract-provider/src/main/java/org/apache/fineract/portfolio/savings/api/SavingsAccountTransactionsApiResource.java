@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -37,31 +38,35 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.PagedRequest;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
+import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
-import org.apache.fineract.portfolio.savings.domain.search.SavingsTransactionSearch;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.apache.fineract.portfolio.savings.service.search.SavingsAccountTransactionsSearchServiceImpl;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.apache.fineract.portfolio.savings.service.search.SavingsAccountTransactionSearchService;
+import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
+import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/savingsaccounts/{savingsId}/transactions")
@@ -76,7 +81,7 @@ public class SavingsAccountTransactionsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
-    private final SavingsAccountTransactionsSearchServiceImpl transactionsSearchServiceImpl;
+    private final SavingsAccountTransactionSearchService transactionsSearchService;
 
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
@@ -124,17 +129,49 @@ public class SavingsAccountTransactionsApiResource {
                 SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
-    @POST
+    @GET
     @Path("search")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Search Savings Account Transactions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.SavingsAccountTransactionsSearchResponse.class))) })
-    public String searchTransactions(@PathParam("savingsId") @Parameter(description = "savingsId") final Long savingsId,
-            @Parameter PagedRequest<SavingsTransactionSearch> searchRequest) {
-        Page<SavingsAccountTransactionData> transactionsData = transactionsSearchServiceImpl.searchTransactions(savingsId, searchRequest);
+    public String searchTransactions(@PathParam("savingsId") @Parameter(description = "savings account id") final Long savingsId,
+            @QueryParam("fromDate") @Parameter(description = "minimum value date (inclusive)", example = "2023-08-08") final String fromDate,
+            @QueryParam("toDate") @Parameter(description = "maximum value date (inclusive)", example = "2023-08-15") final String toDate,
+            @QueryParam("fromSubmittedDate") @Parameter(description = "minimum booking date (inclusive)", example = "2023-08-08") final String fromSubmittedDate,
+            @QueryParam("toSubmittedDate") @Parameter(description = "maximum booking date (inclusive)", example = "2023-08-15") final String toSubmittedDate,
+            @QueryParam("fromAmount") @Parameter(description = "minimum transaction amount (inclusive)", example = "1000") final BigDecimal fromAmount,
+            @QueryParam("toAmount") @Parameter(description = "maximum transaction amount (inclusive)", example = "50000000") final BigDecimal toAmount,
+            @QueryParam("types") @Parameter(description = "transaction types", example = "1,2,4,20,21") final String types,
+            @QueryParam("credit") @Parameter(description = "credit") final Boolean credit,
+            @QueryParam("debit") @Parameter(description = "debit") final Boolean debit,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("orderBy") @Parameter(description = "sort properties", example = "createdDate,transactionDate,id") final String orderBy,
+            @QueryParam("sortOrder") @Parameter(description = "sort direction") final Sort.Direction sortOrder,
+            @QueryParam("locale") @Parameter(description = "locale") final String localeString,
+            @QueryParam("dateFormat") @Parameter(description = "date format", example = "yyyy-MM-dd") String dateFormat) {
+        final Locale locale = localeString == null ? null : JsonParserHelper.localeFromString(localeString);
+        TransactionSearchRequest searchParameters = new TransactionSearchRequest().accountId(savingsId)
+                .fromDate(fromDate, dateFormat, locale).toDate(toDate, dateFormat, locale)
+                .fromSubmittedDate(fromSubmittedDate, dateFormat, locale).toSubmittedDate(toSubmittedDate, dateFormat, locale)
+                .fromAmount(fromAmount).toAmount(toAmount).types(types).credit(credit).debit(debit)
+                .pageable(offset, limit, orderBy, sortOrder);
+        Page<SavingsAccountTransactionData> transactionsData = transactionsSearchService.searchTransactions(savingsId, searchParameters);
         return toApiJsonSerializer.serialize(transactionsData);
+    }
+
+    @POST
+    @Path("query")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Advanced search Savings Account Transactions")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class))) })
+    public String advancedQuery(@PathParam("savingsId") @Parameter(description = "savingsId") final Long savingsId,
+            PagedLocalRequest<AdvancedQueryRequest> queryRequest, @Context final UriInfo uriInfo) {
+        final Page<JsonObject> result = transactionsSearchService.queryAdvanced(savingsId, queryRequest);
+        return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
     }
 
     @POST
@@ -145,42 +182,33 @@ public class SavingsAccountTransactionsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsResponse.class))) })
     public String transaction(@PathParam("savingsId") final Long savingsId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
-        try {
-            final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
-            CommandProcessingResult result = null;
-            if (is(commandParam, "deposit")) {
-                final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            } else if (is(commandParam, "gsimDeposit")) {
-                final CommandWrapper commandRequest = builder.gsimSavingsAccountDeposit(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            } else if (is(commandParam, "withdrawal")) {
-                final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            } else if (is(commandParam, "postInterestAsOn")) {
-                final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            } else if (is(commandParam, SavingsApiConstants.COMMAND_HOLD_AMOUNT)) {
-                final CommandWrapper commandRequest = builder.holdAmount(savingsId).build();
-                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            }
-
-            if (result == null) {
-                //
-                throw new UnrecognizedQueryParamException("command", commandParam,
-                        new Object[] { "deposit", "withdrawal", SavingsApiConstants.COMMAND_HOLD_AMOUNT });
-            }
-
-            return this.toApiJsonSerializer.serialize(result);
-        } catch (ObjectOptimisticLockingFailureException lockingFailureException) {
-            throw new PlatformDataIntegrityException("error.msg.savings.concurrent.operations",
-                    "Concurrent Transactions being made on this savings account: " + lockingFailureException.getMessage(),
-                    lockingFailureException);
-        } catch (CannotAcquireLockException cannotAcquireLockException) {
-            throw new PlatformDataIntegrityException("error.msg.savings.concurrent.operations.unable.to.acquire.lock",
-                    "Unable to acquir lock for this transaction: " + cannotAcquireLockException.getMessage(), cannotAcquireLockException);
+        CommandProcessingResult result = null;
+        if (is(commandParam, "deposit")) {
+            final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "gsimDeposit")) {
+            final CommandWrapper commandRequest = builder.gsimSavingsAccountDeposit(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "withdrawal")) {
+            final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "postInterestAsOn")) {
+            final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_HOLD_AMOUNT)) {
+            final CommandWrapper commandRequest = builder.holdAmount(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
+
+        if (result == null) {
+            //
+            throw new UnrecognizedQueryParamException("command", commandParam,
+                    new Object[] { "deposit", "withdrawal", SavingsApiConstants.COMMAND_HOLD_AMOUNT });
+        }
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @POST
