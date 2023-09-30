@@ -17,22 +17,21 @@
  * under the License.
  */
 
-package org.apache.fineract.portfolio.self.shareaccounts.service;
+package org.apache.fineract.portfolio.self.shareaccounts.starter;
 
-import lombok.RequiredArgsConstructor;
+import org.apache.fineract.portfolio.self.shareaccounts.service.AppUserShareAccountsMapperReadPlatformService;
+import org.apache.fineract.portfolio.self.shareaccounts.service.AppUserShareAccountsMapperReadPlatformServiceImpl;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@RequiredArgsConstructor
-public class AppUserShareAccountsMapperReadPlatformServiceImpl implements AppUserShareAccountsMapperReadPlatformService {
+@Configuration
+public class SelfShareAccountsConfiguration {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    @Override
-    public Boolean isShareAccountsMappedToUser(Long accountId, Long appUserId) {
-        return this.jdbcTemplate.queryForObject("select case when (count(*) > 0) then true else false end "
-                + " from m_selfservice_user_client_mapping as m "
-                + " left join m_share_account as shares on shares.client_id = m.client_id  " + " where shares.id = ? and m.appuser_id = ? ",
-                Boolean.class, accountId, appUserId);
+    @Bean
+    @ConditionalOnMissingBean(AppUserShareAccountsMapperReadPlatformService.class)
+    public AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService(JdbcTemplate jdbcTemplate) {
+        return new AppUserShareAccountsMapperReadPlatformServiceImpl(jdbcTemplate);
     }
-
 }
