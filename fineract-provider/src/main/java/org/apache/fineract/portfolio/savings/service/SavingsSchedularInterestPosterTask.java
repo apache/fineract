@@ -26,8 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 /**
  * @author manoj
@@ -35,8 +33,6 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
-@Scope("prototype")
 public class SavingsSchedularInterestPosterTask implements Callable<Void> {
 
     private final SavingsSchedularInterestPoster interestPoster;

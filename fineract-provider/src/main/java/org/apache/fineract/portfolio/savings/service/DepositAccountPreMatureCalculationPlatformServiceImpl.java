@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.closedO
 import com.google.gson.JsonElement;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -40,11 +41,9 @@ import org.apache.fineract.portfolio.savings.domain.DepositAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 public class DepositAccountPreMatureCalculationPlatformServiceImpl implements DepositAccountPreMatureCalculationPlatformService {
 
     private final FromJsonHelper fromJsonHelper;
@@ -53,21 +52,6 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
-
-    @Autowired
-    public DepositAccountPreMatureCalculationPlatformServiceImpl(final FromJsonHelper fromJsonHelper,
-            final DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
-            final DepositAccountAssembler depositAccountAssembler,
-            final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final ConfigurationDomainService configurationDomainService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
-        this.fromJsonHelper = fromJsonHelper;
-        this.depositAccountTransactionDataValidator = depositAccountTransactionDataValidator;
-        this.depositAccountAssembler = depositAccountAssembler;
-        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-        this.configurationDomainService = configurationDomainService;
-        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
-
-    }
 
     @Transactional
     @Override
