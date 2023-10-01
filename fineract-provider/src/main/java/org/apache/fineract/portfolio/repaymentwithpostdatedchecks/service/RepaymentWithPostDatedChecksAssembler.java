@@ -27,22 +27,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class RepaymentWithPostDatedChecksAssembler {
 
     private final FromJsonHelper fromApiJsonHelper;
-
-    @Autowired
-    public RepaymentWithPostDatedChecksAssembler(final FromJsonHelper fromJsonHelper) {
-        this.fromApiJsonHelper = fromJsonHelper;
-    }
 
     public Set<PostDatedChecks> fromParsedJson(final String json, final Loan loan) {
         final Set<PostDatedChecks> postDatedChecks = new HashSet<>();
