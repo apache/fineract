@@ -24,31 +24,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
 import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
  */
-@Service
+@RequiredArgsConstructor
 public class RateReadServiceImpl implements RateReadService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-
-    @Autowired
-    public RateReadServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Collection<RateData> retrieveAllRates() {

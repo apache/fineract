@@ -22,6 +22,8 @@ import static org.apache.fineract.portfolio.rate.api.RateApiConstants.approveUse
 
 import jakarta.persistence.PersistenceException;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -35,35 +37,21 @@ import org.apache.fineract.portfolio.rate.serialization.RateDefinitionCommandFro
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.apache.fineract.useradministration.exception.UserNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
  */
-@Service
+@RequiredArgsConstructor
+@Slf4j
 public class RateWriteServiceImpl implements RateWriteService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RateWriteServiceImpl.class);
 
     private final RateRepository rateRepository;
     private final AppUserRepository appUserRepository;
     private final PlatformSecurityContext context;
     private final RateDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-
-    @Autowired
-    public RateWriteServiceImpl(RateRepository rateRepository, AppUserRepository appUserRepository,
-            final RateDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, PlatformSecurityContext context) {
-        this.rateRepository = rateRepository;
-        this.appUserRepository = appUserRepository;
-        this.context = context;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-    }
 
     @Override
     public CommandProcessingResult createRate(JsonCommand command) {
@@ -143,7 +131,7 @@ public class RateWriteServiceImpl implements RateWriteService {
                     "A rate with name '" + name + "' already exists", "name", name);
         }
 
-        LOG.error("Error due to Exception", dve);
+        log.error("Error due to Exception", dve);
         throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
