@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -30,26 +31,15 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDated
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.exception.PostDatedCheckNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RepaymentWithPostDatedChecksReadPlatformServiceImpl implements RepaymentWithPostDatedChecksReadPlatformService {
 
     private final PostDatedChecksRepository postDatedChecksRepository;
     private final LoanRepository loanRepository;
     private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
-
-    @Autowired
-    public RepaymentWithPostDatedChecksReadPlatformServiceImpl(final PostDatedChecksRepository postDatedChecksRepository,
-            final LoanRepository loanRepository,
-            final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository) {
-        this.postDatedChecksRepository = postDatedChecksRepository;
-        this.loanRepository = loanRepository;
-        this.loanRepaymentScheduleInstallmentRepository = loanRepaymentScheduleInstallmentRepository;
-    }
 
     @Override
     public List<PostDatedChecksData> getPostDatedChecks(final Long id) {
