@@ -339,6 +339,9 @@ public class DatatableIntegrationTest extends IntegrationTest {
         // deleting the datatable
         String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);
         assertEquals(datatableName, deletedDataTableName, "ERROR IN DELETING THE DATATABLE");
+
+        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
+        assertNull(dataTable);
     }
 
     @Test
