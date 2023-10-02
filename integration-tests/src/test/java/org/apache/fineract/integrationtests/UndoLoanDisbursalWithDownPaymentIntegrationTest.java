@@ -40,7 +40,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     private final ClientHelper clientHelper = new ClientHelper(this.responseSpec, this.requestSpec);
 
     @Test
-    public void testUndoDisbursalForLoanWithSingleDisbursalAutoDowpaymentEnabledAndNoManualTransactions() {
+    public void testUndoDisbursalForLoanWithSingleDisbursalAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -110,7 +110,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithSingleDisbursalAutoDowPaymentEnabledAndHasManualTransactions() {
+    public void testUndoDisbursalForLoanWithSingleDisbursalAutoDownPaymentEnabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -193,7 +193,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithSingleDisbursalAutoDowPaymentDisabledAndNoManualTransactions() {
+    public void testUndoDisbursalForLoanWithSingleDisbursalAutoDownPaymentDisabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -262,7 +262,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithSingleDisbursalAutoDowPaymentDisabledAndHasManualTransactions() {
+    public void testUndoDisbursalForLoanWithSingleDisbursalAutoDownPaymentDisabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -352,7 +352,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoLastDisbursalForLoanWithSingleDisbursalAutoDowPaymentEnabledAndNoManualTransactions() {
+    public void testUndoLastDisbursalForLoanWithSingleDisbursalAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -400,7 +400,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoLastDisbursalForLoanWithMultiDisbursalAutoDowPaymentEnabledAndNoManualTransactions() {
+    public void testUndoLastDisbursalForLoanWithMultiDisbursalAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -447,7 +447,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithMultiDisbursalAutoDowPaymentEnabledAndNoManualTransactions() {
+    public void testUndoDisbursalForLoanWithMultiDisbursalAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -519,7 +519,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithMultiDisbursalAutoDowPaymentEnabledAndHasManualTransactions() {
+    public void testUndoDisbursalForLoanWithMultiDisbursalAutoDownPaymentEnabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -603,7 +603,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithMultiDisbursalAutoDowPaymentDisabledAndNoManualTransactions() {
+    public void testUndoDisbursalForLoanWithMultiDisbursalAutoDownPaymentDisabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -672,7 +672,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithMultiDisbursalAutoDowPaymentDisabledAndHasManualTransactions() {
+    public void testUndoDisbursalForLoanWithMultiDisbursalAutoDownPaymentDisabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -684,7 +684,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0);
 
             // Verify Repayment Schedule
-            verifyRepaymentSchedule(loanId, installment(1000.0, null, "01 January 2023"), //
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(250.0, false, "01 January 2023"), //
                     installment(750.0, false, "31 January 2023"));//
 
@@ -758,7 +759,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDowPaymentEnabledAndNoManualTransactions() {
+    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -780,7 +781,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
 
             // verify transactions
-            verifyTransactions(loanId, transaction(250.0, "Down Payment", "01 January 2023"), //
+            verifyTransactions(loanId, //
+                    transaction(250.0, "Down Payment", "01 January 2023"), //
                     transaction(1000.0, "Disbursement", "01 January 2023") //
             );
 
@@ -871,7 +873,140 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDowPaymentDisabledAndNoManualTransactions() {
+    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndNoManualTransactionsWithExtraRepayment() {
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product
+            Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1500.0);
+
+            // Verify Repayment Schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1500.0, null, "01 January 2023"), //
+                    installment(375.0, false, "01 January 2023"), //
+                    installment(1125.0, false, "31 January 2023") //
+            );
+
+            // 1st Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(250.0, "Down Payment", "01 January 2023"), //
+                    transaction(1000.0, "Disbursement", "01 January 2023") //
+            );
+
+            // verify journal entries
+            verifyJournalEntries(loanId, journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(250.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(1000.0, suspenseClearingAccount, "CREDIT") //
+            );
+
+            // Verify Repayment Schedule
+            verifyRepaymentSchedule(loanId, installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, true, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
+            );
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("10 January 2023")
+                    .dateFormat(DATETIME_PATTERN).locale("en"));
+
+            addRepaymentForLoan(loanId, 300.0, "10 January 2023");
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023"), //
+                    transaction(250.0, "Down Payment", "01 January 2023"), //
+                    transaction(300.0, "Repayment", "10 January 2023") //
+            );
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("15 January 2023")
+                    .dateFormat(DATETIME_PATTERN).locale("en"));
+
+            // 2nd Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(250.0, "Down Payment", "01 January 2023"), //
+                    transaction(1000.0, "Disbursement", "01 January 2023"), //
+                    transaction(300.0, "Repayment", "10 January 2023"), //
+                    transaction(100.0, "Down Payment", "15 January 2023"), //
+                    transaction(400.0, "Disbursement", "15 January 2023") //
+            );
+
+            // verify journal entries
+            verifyJournalEntries(loanId, //
+                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(250.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(1000.0, suspenseClearingAccount, "CREDIT"), //
+                    journalEntry(300.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(300.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(100.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(400.0, suspenseClearingAccount, "CREDIT") //
+            );
+
+            // Verify Repayment Schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, true, "01 January 2023"), //
+                    installment(400.0, null, "15 January 2023"), //
+                    installment(100.0, true, "15 January 2023"), //
+                    installment(1050.0, false, "31 January 2023") //
+            );
+
+            // undoLastDisbursal
+            loanTransactionHelper.undoLastDisbursal(loanId.intValue());
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(250.0, "Down Payment", "01 January 2023"), //
+                    transaction(1000.0, "Disbursement", "01 January 2023"), //
+                    transaction(300.0, "Repayment", "10 January 2023") //
+            );
+
+            // verify journal entries
+            verifyJournalEntries(loanId,
+                    // first disbursement + down-payment
+                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(250.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(1000.0, suspenseClearingAccount, "CREDIT"), //
+
+                    // repayment
+                    journalEntry(300.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(300.0, suspenseClearingAccount, "DEBIT"), //
+
+                    // second disbursement + down-payment
+                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(100.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(400.0, suspenseClearingAccount, "CREDIT"), //
+
+                    // compensation of second disbursement + down-payment
+                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(100.0, suspenseClearingAccount, "CREDIT"), //
+                    journalEntry(400.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(400.0, suspenseClearingAccount, "DEBIT") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, true, "01 January 2023"), //
+                    installment(750.0, false, "31 January 2023") //
+            );
+        });
+    }
+
+    @Test
+    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentDisabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -993,7 +1128,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDowPaymentEnabledAndHasManualTransactions() {
+    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -1082,7 +1217,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDowPaymentDisabledAndHasManualTransactions() {
+    public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentDisabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -1177,7 +1312,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDowPaymentEnabledAndNoManualTransactions() {
+    public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -1296,7 +1431,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDowPaymentDisabledAndNoManualTransactions() {
+    public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentDisabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -1421,7 +1556,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDowPaymentEnabledAndHasManualTransactions() {
+    public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -1554,7 +1689,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     }
 
     @Test
-    public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDowPaymentDisabledAndHasManualTransactions() {
+    public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentDisabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();

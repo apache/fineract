@@ -6485,21 +6485,15 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             Money downPaymentMoney = Money.of(getCurrency(),
                     MathUtil.percentageOf(lastDisbursalTransaction.getAmount(), disbursedAmountPercentageForDownPayment, 19));
 
-            // find the matching down-payment transaction based on date, amount and it also must have downpayment
-            // installment linked
+            // find the latest matching down-payment transaction based on date, amount and transaction type
             Optional<LoanTransaction> downPaymentTransaction = this.loanTransactions.stream()
                     .filter(tr -> tr.getTransactionDate().equals(lastDisbursalTransaction.getTransactionDate())
-                            && hasAnInstallmentWithDownPayment(tr, downPaymentMoney.getAmount()))
+                            && tr.getTypeOf().isDownPayment() && tr.getAmount().compareTo(downPaymentMoney.getAmount()) == 0)
                     .max(Comparator.comparing(LoanTransaction::getId));
 
             // reverse the down-payment transaction
             downPaymentTransaction.ifPresent(LoanTransaction::reverse);
         }
-    }
-
-    private boolean hasAnInstallmentWithDownPayment(LoanTransaction tr, BigDecimal amount) {
-        return tr.getAmount().compareTo(amount) == 0 && tr.getLoanTransactionToRepaymentScheduleMappings().stream()
-                .anyMatch(mapping -> mapping.getLoanRepaymentScheduleInstallment().isDownPayment());
     }
 
     private void updateLoanToLastDisbursalState(LoanDisbursementDetails disbursementDetail) {
