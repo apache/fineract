@@ -77,43 +77,58 @@ public class DatatableHelper extends IntegrationTest {
                 getTestDatatableAsJSON(apptableName, multiRow), "resourceIdentifier");
     }
 
+    public PostDataTablesResponse createDatatable(final String json) {
+        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER,
+                json);
+        return GSON.fromJson(response, PostDataTablesResponse.class);
+    }
+
+    public PostDataTablesResponse createDatatable(PostDataTablesRequest request) {
+        return ok(fineract().dataTables.createDatatable(request));
+    }
+
+    public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String generatedDatatableName) {
+        LOG.info("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
+        final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec,
+                DATATABLE_URL + "/" + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
+        assertEquals(generatedDatatableName, responseRegisteredTableName, "ERROR IN CREATING THE DATATABLE");
+    }
+
+    public GetDataTablesResponse getDataTableDetails(final String dataTableName) {
+        return ok(fineract().dataTables.getDatatable(dataTableName));
+    }
+
+    public String runDatatableQuery(final String datatableName, final String columnFilter, final String valueFilter,
+            final String resultColumns) {
+        return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/query" + "?columnFilter="
+                + columnFilter + "&valueFilter=" + valueFilter + "&resultColumns=" + resultColumns + "&" + Utils.TENANT_IDENTIFIER);
+    }
+
+    public Map<String, Object> queryDatatable(String dataTableName, PagedLocalRequestAdvancedQueryData request) {
+        String response = ok(fineract().dataTables.advancedQuery(dataTableName, request));
+        return JsonPath.from(response).get("");
+    }
+
+    public PutDataTablesResponse updateDatatable(String dataTableName, PutDataTablesRequest request) {
+        return ok(fineract().dataTables.updateDatatable(dataTableName, request));
+    }
+
+    public PutDataTablesResponse updateDatatable(String dataTableName, final String json) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
+                DATATABLE_URL + "/" + dataTableName + "?" + Utils.TENANT_IDENTIFIER, json);
+        return GSON.fromJson(response, PutDataTablesResponse.class);
+    }
+
+    public String deleteDatatable(final String datatableName) {
+        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+                DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER, "resourceIdentifier");
+    }
+
     public <T> T createDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
             final String json) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
                 + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
-    }
-
-    public PostDataTablesAppTableIdResponse addDatatableEntry(final String datatableName, final Integer apptableId,
-            final boolean genericResultSet, final String json) {
-        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
-                + apptableId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json);
-        return GSON.fromJson(response, PostDataTablesAppTableIdResponse.class);
-    }
-
-    public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
-            final String json) {
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
-                + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
-    }
-
-    public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final Integer entryId,
-            final boolean genericResultSet, final String json) {
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "/"
-                + entryId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
-    }
-
-    public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
-            final Integer entryId, final String json) {
-        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
-                + apptableId + "/" + entryId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
-        return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
-    }
-
-    public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
-            final String json) {
-        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
-                DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
-        return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
     }
 
     public Integer createDatatableEntry(final String apptableName, final String datatableName, final Integer apptableId,
@@ -122,6 +137,13 @@ public class DatatableHelper extends IntegrationTest {
                 this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet="
                         + Boolean.toString(genericResultSet) + "&" + Utils.TENANT_IDENTIFIER,
                 getTestDatatableEntryAsJSON(dateFormat), jsonAttributeToGetBack);
+    }
+
+    public PostDataTablesAppTableIdResponse addDatatableEntry(final String datatableName, final Integer apptableId,
+            final boolean genericResultSet, final String json) {
+        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
+                + apptableId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json);
+        return GSON.fromJson(response, PostDataTablesAppTableIdResponse.class);
     }
 
     public String readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset) {
@@ -150,29 +172,36 @@ public class DatatableHelper extends IntegrationTest {
         return Utils.convertJsonElementAsDate(jsonElement);
     }
 
-    public String deleteDatatable(final String datatableName) {
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
-                DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER, "resourceIdentifier");
+    public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
+            final String json) {
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
+                + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
+    }
+
+    public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final Integer entryId,
+            final boolean genericResultSet, final String json) {
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "/"
+                + entryId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
+    }
+
+    public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
+            final Integer entryId, final String json) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
+                + apptableId + "/" + entryId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
+        return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
+    }
+
+    public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
+            final String json) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
+                DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
+        return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
     }
 
     public Object deleteDatatableEntries(final String datatableName, final Integer apptableId, String jsonAttributeToGetBack) {
         final String deleteEntryUrl = DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=true" + "&"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, deleteEntryUrl, jsonAttributeToGetBack);
-    }
-
-    public String runDatatableQuery(final String datatableName, final String columnFilter, final String valueFilter,
-            final String resultColumns) {
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/query" + "?columnFilter="
-                + columnFilter + "&valueFilter=" + valueFilter + "&resultColumns=" + resultColumns + "&" + Utils.TENANT_IDENTIFIER);
-    }
-
-    public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String generatedDatatableName) {
-        LOG.info("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
-        final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec,
-                DATATABLE_URL + "/" + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
-        assertEquals(generatedDatatableName, responseRegisteredTableName, "ERROR IN CREATING THE DATATABLE");
     }
 
     public static String getTestDatatableAsJSON(final String apptableName, final String datatableName, final String codeName,
@@ -271,34 +300,5 @@ public class DatatableHelper extends IntegrationTest {
         datatableColumnMap.put("indexed", isIndexed);
         datatableColumnsList.add(datatableColumnMap);
         return datatableColumnsList;
-    }
-
-    public PostDataTablesResponse createDatatable(PostDataTablesRequest request) {
-        return ok(fineract().dataTables.createDatatable(request));
-    }
-
-    public GetDataTablesResponse getDataTableDetails(final String dataTableName) {
-        return ok(fineract().dataTables.getDatatable(dataTableName));
-    }
-
-    public PutDataTablesResponse updateDatatable(String dataTableName, PutDataTablesRequest request) {
-        return ok(fineract().dataTables.updateDatatable(dataTableName, request));
-    }
-
-    public PostDataTablesResponse createDatatable(final String json) {
-        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER,
-                json);
-        return GSON.fromJson(response, PostDataTablesResponse.class);
-    }
-
-    public PutDataTablesResponse updateDatatable(String dataTableName, final String json) {
-        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
-                DATATABLE_URL + "/" + dataTableName + "?" + Utils.TENANT_IDENTIFIER, json);
-        return GSON.fromJson(response, PutDataTablesResponse.class);
-    }
-
-    public Map<String, Object> queryDatatable(String dataTableName, PagedLocalRequestAdvancedQueryData request) {
-        String response = ok(fineract().dataTables.advancedQuery(dataTableName, request));
-        return JsonPath.from(response).get("");
     }
 }
