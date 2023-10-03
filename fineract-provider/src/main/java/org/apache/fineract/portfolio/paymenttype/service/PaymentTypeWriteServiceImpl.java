@@ -32,9 +32,7 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWra
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
