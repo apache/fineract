@@ -27,9 +27,7 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymenttype.mapper.PaymentTypeMapper;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatformService {
 
