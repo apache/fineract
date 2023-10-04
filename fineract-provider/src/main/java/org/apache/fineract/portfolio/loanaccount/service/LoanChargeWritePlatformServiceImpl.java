@@ -985,13 +985,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             }
         }
 
-        LocalDate loanMaturityDate = loan.getExpectedMaturityDate();
-
-        if (loan.getMaturityDate() != null) {
-            loanMaturityDate = loan.getMaturityDate();
-        }
-
-        if (!loan.isInterestBearing() && loanCharge.isSpecifiedDueDate() && loanCharge.getDueDate().isAfter(loanMaturityDate)) {
+        if (!loan.isInterestBearing() && loanCharge.isSpecifiedDueDate()) {
             LoanRepaymentScheduleInstallment latestRepaymentScheduleInstalment = loan.getRepaymentScheduleInstallments()
                     .get(loan.getLoanRepaymentScheduleInstallmentsSize() - 1);
             if (loanCharge.getDueDate().isAfter(latestRepaymentScheduleInstalment.getDueDate())) {
