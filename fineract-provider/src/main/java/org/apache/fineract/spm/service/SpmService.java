@@ -22,6 +22,7 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -29,26 +30,15 @@ import org.apache.fineract.spm.domain.Survey;
 import org.apache.fineract.spm.domain.SurveyRepository;
 import org.apache.fineract.spm.domain.SurveyValidator;
 import org.apache.fineract.spm.exception.SurveyNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class SpmService {
 
     private final PlatformSecurityContext securityContext;
     private final SurveyRepository surveyRepository;
     private final SurveyValidator surveyValidator;
-
-    @Autowired
-    public SpmService(final PlatformSecurityContext securityContext, final SurveyRepository surveyRepository,
-            final SurveyValidator surveyValidator) {
-
-        this.securityContext = securityContext;
-        this.surveyRepository = surveyRepository;
-        this.surveyValidator = surveyValidator;
-    }
 
     public List<Survey> fetchValidSurveys() {
         this.securityContext.authenticatedUser();
