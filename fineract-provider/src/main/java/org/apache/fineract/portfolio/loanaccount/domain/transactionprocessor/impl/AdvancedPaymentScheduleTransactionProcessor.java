@@ -156,6 +156,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
                     WAIVE_INTEREST, RECOVERY_REPAYMENT ->
                 handleRepayment(loanTransaction, currency, installments, charges);
+            case CHARGE_OFF -> handleChargeOff(loanTransaction, currency, installments);
             // TODO: Cover rest of the transaction types
             default -> {
                 log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
@@ -361,6 +362,26 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             onLoanOverpayment(loanTransaction, overpaymentPortion);
             loanTransaction.updateOverPayments(overpaymentPortion);
         }
+    }
+
+    private void handleChargeOff(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        loanTransaction.resetDerivedComponents();
+        // determine how much is outstanding total and breakdown for principal, interest and charges
+        Money principalPortion = Money.zero(currency);
+        Money interestPortion = Money.zero(currency);
+        Money feeChargesPortion = Money.zero(currency);
+        Money penaltychargesPortion = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
+            if (currentInstallment.isNotFullyPaidOff()) {
+                principalPortion = principalPortion.plus(currentInstallment.getPrincipalOutstanding(currency));
+                interestPortion = interestPortion.plus(currentInstallment.getInterestOutstanding(currency));
+                feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesOutstanding(currency));
+                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.getPenaltyChargesCharged(currency));
+            }
+        }
+
+        loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
     }
 
     @AllArgsConstructor
