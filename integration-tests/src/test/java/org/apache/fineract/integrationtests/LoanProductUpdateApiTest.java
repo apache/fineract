@@ -91,6 +91,43 @@ public class LoanProductUpdateApiTest {
 
     }
 
+    @Test
+    public void loanProductWithInterestCalculationTypeDailyModifyForAdvancedPaymentAllocationRuleTest() {
+        // create loan product with Advanced Payment Allocation Strategy with default allocation with future installment
+        // allocation as NEXT_INSTALLMENT
+        String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
+
+        Integer loanProductId = createLoanProductWithInterestCalculationPeriodTypeDaily(defaultAllocation);
+        Assertions.assertNotNull(loanProductId);
+
+        // verify allocation rule
+        GetLoanProductsProductIdResponse loanProduct = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
+        Assertions.assertNotNull(loanProduct.getPaymentAllocation());
+
+        Optional<AdvancedPaymentData> defaultAllocationAfterCreate = loanProduct.getPaymentAllocation().stream()
+                .filter(advancedPaymentData -> "DEFAULT".equals(advancedPaymentData.getTransactionType())).findFirst();
+        Assertions.assertTrue(defaultAllocationAfterCreate.isPresent());
+        Assertions.assertEquals(futureInstallmentAllocationRule, defaultAllocationAfterCreate.get().getFutureInstallmentAllocationRule());
+
+        // Change future installment allocation rule to "LAST_INSTALLMENT" and update loan product
+        futureInstallmentAllocationRule = "LAST_INSTALLMENT";
+        defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
+
+        loanProductId = updateLoanProduct(loanProductId, defaultAllocation);
+        Assertions.assertNotNull(loanProductId);
+
+        loanProduct = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
+        Assertions.assertNotNull(loanProduct.getPaymentAllocation());
+
+        // verify allocation rule
+        Optional<AdvancedPaymentData> defaultAllocationAfterUpdate = loanProduct.getPaymentAllocation().stream()
+                .filter(advancedPaymentData -> "DEFAULT".equals(advancedPaymentData.getTransactionType())).findFirst();
+        Assertions.assertTrue(defaultAllocationAfterUpdate.isPresent());
+        Assertions.assertEquals(futureInstallmentAllocationRule, defaultAllocationAfterUpdate.get().getFutureInstallmentAllocationRule());
+
+    }
+
     private Integer updateLoanProduct(Integer loanProductId, AdvancedPaymentData... advancedPaymentData) {
         final PutLoanProductsProductIdRequest requestModifyLoan = new PutLoanProductsProductIdRequest()
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")
@@ -102,6 +139,16 @@ public class LoanProductUpdateApiTest {
         String loanProductCreateJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .addAdvancedPaymentAllocation(advancedPaymentData).build();
+        return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductCreateJSON);
+
+    }
+
+    private Integer createLoanProductWithInterestCalculationPeriodTypeDaily(AdvancedPaymentData... advancedPaymentData) {
+        String loanProductCreateJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withInterestCalculationPeriodTypeAsDays().withAllowPartialPeriodInterestCalculation(false)
                 .addAdvancedPaymentAllocation(advancedPaymentData).build();
         return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductCreateJSON);
 

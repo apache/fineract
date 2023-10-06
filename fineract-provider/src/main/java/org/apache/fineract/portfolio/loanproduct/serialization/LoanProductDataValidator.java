@@ -2285,7 +2285,9 @@ public final class LoanProductDataValidator {
                     considerPartialPeriodUpdates = considerPartialPeriods;
                 }
             } else if (loanProduct != null) {
-                considerPartialPeriodUpdates = loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalcualtion();
+                if (!interestCalculationPeriodMethod.isDaily()) {
+                    considerPartialPeriodUpdates = loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalcualtion();
+                }
             }
 
             if (!considerPartialPeriodUpdates) {

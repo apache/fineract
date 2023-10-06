@@ -742,4 +742,9 @@ public class LoanProductTestBuilder {
         return this;
     }
 
+    public LoanProductTestBuilder withAllowPartialPeriodInterestCalculation(final Boolean allowPartialPeriodInterestCalcualtion) {
+        this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
+        return this;
+    }
+
 }
