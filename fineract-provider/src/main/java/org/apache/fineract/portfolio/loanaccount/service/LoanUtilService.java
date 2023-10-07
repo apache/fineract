@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
@@ -59,10 +60,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
+@RequiredArgsConstructor
 public class LoanUtilService {
 
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
@@ -74,23 +73,6 @@ public class LoanUtilService {
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
     private final FromJsonHelper fromApiJsonHelper;
     private final CalendarReadPlatformService calendarReadPlatformService;
-
-    @Autowired
-    public LoanUtilService(final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final HolidayRepository holidayRepository, final WorkingDaysRepositoryWrapper workingDaysRepository,
-            final LoanScheduleGeneratorFactory loanScheduleFactory, final FloatingRatesReadPlatformService floatingRatesReadPlatformService,
-            final FromJsonHelper fromApiJsonHelper, final CalendarReadPlatformService calendarReadPlatformService) {
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.calendarInstanceRepository = calendarInstanceRepository;
-        this.configurationDomainService = configurationDomainService;
-        this.holidayRepository = holidayRepository;
-        this.workingDaysRepository = workingDaysRepository;
-        this.loanScheduleFactory = loanScheduleFactory;
-        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.calendarReadPlatformService = calendarReadPlatformService;
-    }
 
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom) {
         final HolidayDetailDTO holidayDetailDTO = null;

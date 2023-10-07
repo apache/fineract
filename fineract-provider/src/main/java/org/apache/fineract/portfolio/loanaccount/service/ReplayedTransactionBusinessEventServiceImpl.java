@@ -26,9 +26,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class ReplayedTransactionBusinessEventServiceImpl implements ReplayedTransactionBusinessEventService {
 

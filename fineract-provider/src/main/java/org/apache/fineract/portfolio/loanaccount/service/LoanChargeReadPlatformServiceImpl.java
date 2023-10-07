@@ -51,9 +51,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatformService {
 

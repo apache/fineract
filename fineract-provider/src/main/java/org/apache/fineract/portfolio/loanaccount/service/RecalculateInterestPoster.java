@@ -22,17 +22,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-@Component
-@Scope("prototype")
+@NoArgsConstructor
+@Slf4j
 public class RecalculateInterestPoster implements Callable<Void> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RecalculateInterestPoster.class);
 
     private Collection<Long> loanIds;
     private LoanWritePlatformService loanWritePlatformService;
@@ -50,7 +46,7 @@ public class RecalculateInterestPoster implements Callable<Void> {
         if (!loanIds.isEmpty()) {
             List<Throwable> errors = new ArrayList<>();
             for (Long loanId : loanIds) {
-                LOG.debug("Loan ID {}", loanId);
+                log.debug("Loan ID {}", loanId);
                 try {
                     loanWritePlatformService.recalculateInterest(loanId);
                 } catch (Exception e) {

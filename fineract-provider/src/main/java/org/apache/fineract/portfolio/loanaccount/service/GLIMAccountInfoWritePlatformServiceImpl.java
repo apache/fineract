@@ -20,15 +20,14 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class GLIMAccountInfoWritePlatformServiceImpl implements GLIMAccountInfoWritePlatformService {
 
     private final PlatformSecurityContext context;
@@ -36,14 +35,6 @@ public class GLIMAccountInfoWritePlatformServiceImpl implements GLIMAccountInfoW
     private final GLIMAccountInfoRepository glimAccountRepository;
 
     private final LoanRepository loanRepository;
-
-    @Autowired
-    public GLIMAccountInfoWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final GLIMAccountInfoRepository glimAccountRepository, final LoanRepository loanRepository) {
-        this.context = context;
-        this.glimAccountRepository = glimAccountRepository;
-        this.loanRepository = loanRepository;
-    }
 
     @Override
     public void addGLIMAccountInfo(String accountNumber, Group group, BigDecimal principalAmount, Long childAccountsCount,

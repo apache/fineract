@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
@@ -32,26 +33,15 @@ import org.apache.fineract.portfolio.loanaccount.data.GLIMContainer;
 import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.GroupLoanIndividualMonitoringAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatforService;
-
-    @Autowired
-    public GLIMAccountInfoReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatforService) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.accountDetailsReadPlatforService = accountDetailsReadPlatforService;
-
-    }
 
     private static final class GLIMFieldsMapper implements RowMapper<GroupLoanIndividualMonitoringAccountData> {
 
