@@ -197,10 +197,8 @@ import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 @Slf4j
 @RequiredArgsConstructor
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {

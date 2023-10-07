@@ -22,14 +22,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentPastDueData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.springframework.stereotype.Component;
 
-@Component
+@NoArgsConstructor
 public class LoanCalculateRepaymentPastDueService {
 
     public LoanRepaymentPastDueData retrieveLoanRepaymentPastDueAmountTillDate(Loan loan) {

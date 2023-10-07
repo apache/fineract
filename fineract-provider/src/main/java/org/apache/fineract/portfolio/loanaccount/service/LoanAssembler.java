@@ -86,9 +86,7 @@ import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequired
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.rate.service.RateAssembler;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class LoanAssembler {
 
