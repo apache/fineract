@@ -54,9 +54,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditio
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlatformService {
 
