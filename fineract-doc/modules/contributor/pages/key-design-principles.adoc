@@ -19,8 +19,6 @@ Java was selected as a suitable high level language allowing the rapid customiza
 
 Fineract Financial Service Engine (simply “the Engine”) is a scalable and extensible framework written in Java, and licensed under the Apache License, version 2.0.
 
-The main design principle of the Engine is CQRS ( Command Query Responsibility Segregation ), a pattern that separates commands and queries into different models and services. This approach has multiple benefits: 1) State changes (commands) are persisted, providing an audit of all changes, 2) fine grained control and extension of state changes, and 3) scalability based on consumer behavior and real system load.
-
 Based on a tiered architecture the Engine provides multiple layers to separate concerns and allow reusability.
 
 == API Layer
@@ -62,19 +60,3 @@ Database caching stores records on the database level and is useful for reportin
 The Engine’s architecture was designed with a focus on modern, scalable and extensible technologies ready to run in the cloud. All components where selected based on their maturity, proven reliability and cost efficiency.
 
 It is our goal to provide a software that is deployable with effectively no cost that can grow with the customer need over time using well known best practices and support from a wide range of communities.
-
-The basic Fineract architecture is as follows:
-
-[cols="3,^1,^1", options="header"]
-|===
-| Resource | Component | Comment 
-| Application Framework	| Spring Framework 5.x | 
-| Application Server | Tomcat v9.x | Embedded Tomcat for development environments 
-| Database | MySQL 5.7 | Embedded MariaDB for development environments
-| Operating System	 | Linux, Windows, Mac OS | 
-| Persistence Framework	 | OpenJPA 3.x | 
-| Persistence Framework	 | Java >=11 | 
-| Test Framework	 | JUnit 5.x 
-Mockito 3.x
-REST-assured 4.x | 
-|===
