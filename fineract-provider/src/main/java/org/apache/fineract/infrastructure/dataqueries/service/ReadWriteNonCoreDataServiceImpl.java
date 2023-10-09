@@ -1657,7 +1657,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private String getGroupOfficeJoinCondition(String officeHierarchy, String appTableAlias) {
-        return " join m_group g on g.id = " + appTableAlias + ".client_id " + getOfficeJoinCondition(officeHierarchy, "g");
+        return " join m_group g on g.id = " + appTableAlias + ".group_id " + getOfficeJoinCondition(officeHierarchy, "g");
     }
 
     private String getOfficeJoinCondition(String officeHierarchy, String joinTableAlias) {

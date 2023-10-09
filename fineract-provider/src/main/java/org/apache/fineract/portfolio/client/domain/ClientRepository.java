@@ -40,7 +40,8 @@ public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecif
             WHERE client.id = :clientId
             AND (office.hierarchy LIKE :officeHierarchy OR transferToOffice.hierarchy LIKE :transferToOfficeHierarchy)
                 """)
-    Client fetchByClientIdAndHierarchy(Long clientId, String officeHierarchy, String transferToOfficeHierarchy);
+    Client fetchByClientIdAndHierarchy(@Param("clientId") Long clientId, @Param("officeHierarchy") String officeHierarchy,
+            @Param("transferToOfficeHierarchy") String transferToOfficeHierarchy);
 
     @Query("SELECT c.id FROM Client c WHERE c.externalId = :externalId")
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);

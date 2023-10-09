@@ -37,7 +37,8 @@ public interface EntityDatatableChecksRepository
                 AND dt.status = :status
                 AND rdt.subtype = :subtype
             """)
-    List<EntityDatatableChecks> findByEntityAndStatusAndSubtype(String entity, Integer status, String subtype);
+    List<EntityDatatableChecks> findByEntityAndStatusAndSubtype(@Param("entity") String entity, @Param("status") Integer status,
+            @Param("subtype") String subtype);
 
     @Query("select t from  EntityDatatableChecks t WHERE t.status =:status and t.entity=:entity and t.productId = :productId ")
     List<EntityDatatableChecks> findByEntityStatusAndProduct(@Param("entity") String entity, @Param("status") Long status,
