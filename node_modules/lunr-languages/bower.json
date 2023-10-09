@@ -1,0 +1,50 @@
+{
+  "name": "lunr-languages",
+  "version": "1.0.0",
+  "homepage": "https://github.com/MihaiValentin/lunr-languages",
+  "authors": [
+    "MihaiValentin <MihaiValentin@users.noreply.github.com>"
+  ],
+  "description": "A a collection of languages stemmers and stopwords for Lunr Javascript library",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "lunr",
+    "languages",
+    "stemmer",
+    "stop words",
+    "danish",
+    "german",
+    "deutsch",
+    "dutch",
+    "spanish",
+    "espanol",
+    "finish",
+    "francais",
+    "french",
+    "hungarian",
+    "magyar",
+    "italian",
+    "japanese",
+    "norwegian",
+    "portuguese",
+    "romanian",
+    "romana",
+    "russian",
+    "swedish",
+    "turkish"
+  ],
+  "license": "MPL",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "build",
+    "demos"
+  ]
+}
