@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.L
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,6 +78,7 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                 BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
@@ -84,6 +86,8 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
+        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
 
         // when
         Loan processedLoan = underTest.execute(loanForProcessing);
@@ -127,6 +131,7 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                 BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
@@ -135,6 +140,8 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         // Loan Product setting overrides global settings
         when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(1);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
+        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
 
         // when
         Loan processedLoan = underTest.execute(loanForProcessing);
