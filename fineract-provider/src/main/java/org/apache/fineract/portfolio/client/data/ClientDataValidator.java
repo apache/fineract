@@ -318,7 +318,7 @@ public final class ClientDataValidator {
 
     private void fullnameCannotBeBlank(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
         final String fullnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam).notBlank().notExceedingLengthOf(100);
+        baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam).notBlank().notExceedingLengthOf(160);
     }
 
     private boolean isIndividualNamePartParameterPassed(final JsonElement element) {

@@ -19,7 +19,11 @@
 package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.integrationtests.client.IntegrationTest.assertThat;
+import static org.apache.fineract.integrationtests.common.ClientHelper.DEFAULT_DATE;
+import static org.apache.fineract.integrationtests.common.ClientHelper.LEGALFORM_ID_PERSON;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.builder.RequestSpecBuilder;
@@ -30,8 +34,10 @@ import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
+import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
@@ -263,4 +269,31 @@ public class ClientTest {
         assertThat(addressResponse.getPostalCode()).isEqualTo(postalCode);
     }
 
+    @Test
+    public void testClientName() {
+        String firstName = Utils.randomStringGenerator("FN", 48);
+        String middleName = Utils.randomStringGenerator("MN", 48);
+        String lastName = Utils.randomStringGenerator("LN", 48);
+        String fullName = firstName + ' ' + middleName + ' ' + lastName;
+
+        PostClientsRequest request = new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON).firstname(firstName)
+                .middlename(middleName).lastname(lastName).externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT)
+                .locale("en").active(true).activationDate(DEFAULT_DATE);
+        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, request);
+        assertNotNull(clientId);
+
+        GetClientsClientIdResponse client = ClientHelper.getClient(requestSpec, responseSpec, clientId);
+        assertNotNull(client);
+        assertEquals(fullName, client.getDisplayName());
+
+        request = new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON).fullname(fullName)
+                .externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
+                .activationDate(DEFAULT_DATE);
+        clientId = ClientHelper.createClient(requestSpec, responseSpec, request);
+        assertNotNull(clientId);
+
+        client = ClientHelper.getClient(requestSpec, responseSpec, clientId);
+        assertNotNull(client);
+        assertEquals(fullName, client.getDisplayName());
+    }
 }

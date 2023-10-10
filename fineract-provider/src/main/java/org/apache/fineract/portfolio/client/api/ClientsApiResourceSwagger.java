@@ -304,6 +304,8 @@ final class ClientsApiResourceSwagger {
         public String fullname;
         @Schema(example = "Client_FirstName")
         public String firstname;
+        @Schema(example = "Client_MiddleName")
+        public String middlename;
         @Schema(example = "123")
         public String externalId;
         @Schema(example = "Client_LastName")
