@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.L
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -51,7 +54,11 @@ public class CheckLoanRepaymentDueBusinessStep implements LoanCOBBusinessStep {
         final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
         for (LoanRepaymentScheduleInstallment repaymentSchedule : loanRepaymentScheduleInstallments) {
             LocalDate repaymentDate = repaymentSchedule.getDueDate();
-            if (repaymentDate.minusDays(numberOfDaysBeforeDueDateToRaiseEvent).equals(currentDate)) {
+            List<LoanStatus> nonDisbursedStatuses = Arrays.asList(LoanStatus.INVALID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL,
+                    LoanStatus.APPROVED);
+            if (repaymentDate.minusDays(numberOfDaysBeforeDueDateToRaiseEvent).equals(currentDate)
+                    && !nonDisbursedStatuses.contains(loan.getStatus())
+                    && loan.getLoanSummary().getTotalOutstanding().compareTo(BigDecimal.ZERO) > 0) {
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanRepaymentDueBusinessEvent(repaymentSchedule));
                 break;
             }
