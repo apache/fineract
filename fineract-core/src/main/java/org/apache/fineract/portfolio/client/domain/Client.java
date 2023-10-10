@@ -100,10 +100,10 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "lastname", length = 50)
     private String lastname;
 
-    @Column(name = "fullname", length = 100)
+    @Column(name = "fullname", length = 160)
     private String fullname;
 
-    @Column(name = "display_name", length = 100, nullable = false)
+    @Column(name = "display_name", length = 160, nullable = false)
     private String displayName;
 
     @Column(name = "mobile_no", length = 50, unique = true)
@@ -493,32 +493,29 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void deriveDisplayName() {
-
-        StringBuilder nameBuilder = new StringBuilder();
-        Integer legalForm = this.getLegalForm();
-        if (legalForm == null || LegalForm.fromInt(legalForm).isPerson()) {
-            if (StringUtils.isNotBlank(this.firstname)) {
-                nameBuilder.append(this.firstname).append(' ');
+        if (StringUtils.isNotBlank(this.fullname)) {
+            this.displayName = this.fullname;
+        } else {
+            StringBuilder nameBuilder = new StringBuilder();
+            if (legalForm == null || LegalForm.fromInt(legalForm).isPerson()) {
+                if (StringUtils.isNotBlank(this.firstname)) {
+                    nameBuilder.append(this.firstname);
+                }
+                if (StringUtils.isNotBlank(this.middlename)) {
+                    if (!nameBuilder.isEmpty()) {
+                        nameBuilder.append(' ');
+                    }
+                    nameBuilder.append(this.middlename);
+                }
+                if (StringUtils.isNotBlank(this.lastname)) {
+                    if (!nameBuilder.isEmpty()) {
+                        nameBuilder.append(' ');
+                    }
+                    nameBuilder.append(this.lastname);
+                }
             }
-
-            if (StringUtils.isNotBlank(this.middlename)) {
-                nameBuilder.append(this.middlename).append(' ');
-            }
-
-            if (StringUtils.isNotBlank(this.lastname)) {
-                nameBuilder.append(this.lastname);
-            }
-
-            if (StringUtils.isNotBlank(this.fullname)) {
-                nameBuilder = new StringBuilder(this.fullname);
-            }
-        } else if (LegalForm.fromInt(legalForm).isEntity()) {
-            if (StringUtils.isNotBlank(this.fullname)) {
-                nameBuilder = new StringBuilder(this.fullname);
-            }
+            this.displayName = nameBuilder.toString();
         }
-
-        this.displayName = nameBuilder.toString();
     }
 
     public LocalDate getActivationLocalDate() {
