@@ -56,9 +56,8 @@ public class CheckLoanRepaymentDueBusinessStep implements LoanCOBBusinessStep {
             LocalDate repaymentDate = repaymentSchedule.getDueDate();
             List<LoanStatus> nonDisbursedStatuses = Arrays.asList(LoanStatus.INVALID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL,
                     LoanStatus.APPROVED);
-            if (repaymentDate.minusDays(numberOfDaysBeforeDueDateToRaiseEvent).equals(currentDate)
-                    && !nonDisbursedStatuses.contains(loan.getStatus())
-                    && loan.getLoanSummary().getTotalOutstanding().compareTo(BigDecimal.ZERO) > 0) {
+            if (isDueEventNeededToBeSent(loan, numberOfDaysBeforeDueDateToRaiseEvent, currentDate, repaymentSchedule, repaymentDate,
+                    nonDisbursedStatuses)) {
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanRepaymentDueBusinessEvent(repaymentSchedule));
                 break;
             }
@@ -75,5 +74,13 @@ public class CheckLoanRepaymentDueBusinessStep implements LoanCOBBusinessStep {
     @Override
     public String getHumanReadableName() {
         return "Check loan repayment due";
+    }
+
+    private static boolean isDueEventNeededToBeSent(Loan loan, Long numberOfDaysBeforeDueDateToRaiseEvent, LocalDate currentDate,
+            LoanRepaymentScheduleInstallment repaymentScheduleInstallment, LocalDate repaymentDate, List<LoanStatus> nonDisbursedStatuses) {
+        return repaymentDate.minusDays(numberOfDaysBeforeDueDateToRaiseEvent).equals(currentDate)
+                && !nonDisbursedStatuses.contains(loan.getStatus())
+                && loan.getLoanSummary().getTotalOutstanding().compareTo(BigDecimal.ZERO) > 0
+                && repaymentScheduleInstallment.getDue(loan.getCurrency()).isGreaterThanZero();
     }
 }
