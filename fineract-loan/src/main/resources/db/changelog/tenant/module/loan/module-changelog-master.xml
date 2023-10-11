@@ -30,4 +30,5 @@
   <include relativeToChangelogFile="true" file="parts/1005_add_loan_product_repayment_start_date_configuration.xml"/>
   <include relativeToChangelogFile="true" file="parts/1006_add_downpayment_transaction_enum_permissions.xml"/>
   <include relativeToChangelogFile="true" file="parts/1007_add_loan_product_schedule_extension_for_down_payment_configuration.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1008_add_loan_installment_delinquency_tag.xml"/>
 </databaseChangeLog>
