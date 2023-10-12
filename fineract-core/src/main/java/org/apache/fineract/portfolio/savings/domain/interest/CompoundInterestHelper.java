@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.domain.interest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
@@ -59,7 +60,7 @@ public class CompoundInterestHelper {
             // account and if already transfered then it includes in interest
             // calculation.
             if (!(postingPeriod.isInterestTransfered() || !interestTransferEnabled
-                    || (lockUntil != null && !postingPeriod.dateOfPostingTransaction().isAfter(lockUntil)))) {
+                    || (lockUntil != null && !DateUtils.isAfter(postingPeriod.dateOfPostingTransaction(), lockUntil)))) {
                 compoundInterestValues.setcompoundedInterest(BigDecimal.ZERO);
             }
         }

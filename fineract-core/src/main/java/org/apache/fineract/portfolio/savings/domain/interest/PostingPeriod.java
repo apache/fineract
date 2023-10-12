@@ -132,7 +132,7 @@ public final class PostingPeriod {
             LocalDate balanceEndDate = periodInterval.endDate();
             Integer numberOfDaysOfBalance = periodInterval.daysInPeriodInclusiveOfEndDate();
 
-            if (balanceEndDate.isAfter(upToInterestCalculationDate)) {
+            if (DateUtils.isAfter(balanceEndDate, upToInterestCalculationDate)) {
                 balanceEndDate = upToInterestCalculationDate;
                 final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
                 numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
@@ -206,7 +206,7 @@ public final class PostingPeriod {
             LocalDate balanceEndDate = periodInterval.endDate();
             Integer numberOfDaysOfBalance = periodInterval.daysInPeriodInclusiveOfEndDate();
 
-            if (balanceEndDate.isAfter(upToInterestCalculationDate)) {
+            if (DateUtils.isAfter(balanceEndDate, upToInterestCalculationDate)) {
                 balanceEndDate = upToInterestCalculationDate;
                 final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
                 numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
@@ -328,23 +328,21 @@ public final class PostingPeriod {
                 compoundingPeriods.add(compoundingPeriod);
             break;
             case MONTHLY:
-
                 final LocalDate postingPeriodEndDate = postingPeriodInterval.endDate();
 
                 LocalDate periodStartDate = postingPeriodInterval.startDate();
                 LocalDate periodEndDate = periodStartDate;
 
-                while (!periodStartDate.isAfter(postingPeriodEndDate) && !periodEndDate.isAfter(postingPeriodEndDate)) {
-
+                while (!DateUtils.isAfter(periodStartDate, postingPeriodEndDate)
+                        && !DateUtils.isAfter(periodEndDate, postingPeriodEndDate)) {
                     periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType, upToInterestCalculationDate,
                             financialYearBeginningMonth);
-                    if (periodEndDate.isAfter(postingPeriodEndDate)) {
+                    if (DateUtils.isAfter(periodEndDate, postingPeriodEndDate)) {
                         periodEndDate = postingPeriodEndDate;
                     }
 
                     final LocalDateInterval compoundingPeriodInterval = LocalDateInterval.create(periodStartDate, periodEndDate);
                     if (postingPeriodInterval.contains(compoundingPeriodInterval)) {
-
                         compoundingPeriod = MonthlyCompoundingPeriod.create(compoundingPeriodInterval, allEndOfDayBalances,
                                 upToInterestCalculationDate);
                         compoundingPeriods.add(compoundingPeriod);
@@ -364,17 +362,16 @@ public final class PostingPeriod {
                 periodStartDate = postingPeriodInterval.startDate();
                 periodEndDate = periodStartDate;
 
-                while (!periodStartDate.isAfter(qPostingPeriodEndDate) && !periodEndDate.isAfter(qPostingPeriodEndDate)) {
-
+                while (!DateUtils.isAfter(periodStartDate, qPostingPeriodEndDate)
+                        && !DateUtils.isAfter(periodEndDate, qPostingPeriodEndDate)) {
                     periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType, upToInterestCalculationDate,
                             financialYearBeginningMonth);
-                    if (periodEndDate.isAfter(qPostingPeriodEndDate)) {
+                    if (DateUtils.isAfter(periodEndDate, qPostingPeriodEndDate)) {
                         periodEndDate = qPostingPeriodEndDate;
                     }
 
                     final LocalDateInterval compoundingPeriodInterval = LocalDateInterval.create(periodStartDate, periodEndDate);
                     if (postingPeriodInterval.contains(compoundingPeriodInterval)) {
-
                         compoundingPeriod = QuarterlyCompoundingPeriod.create(compoundingPeriodInterval, allEndOfDayBalances,
                                 upToInterestCalculationDate);
                         compoundingPeriods.add(compoundingPeriod);
@@ -390,11 +387,11 @@ public final class PostingPeriod {
                 periodStartDate = postingPeriodInterval.startDate();
                 periodEndDate = periodStartDate;
 
-                while (!periodStartDate.isAfter(bPostingPeriodEndDate) && !periodEndDate.isAfter(bPostingPeriodEndDate)) {
-
+                while (!DateUtils.isAfter(periodStartDate, bPostingPeriodEndDate)
+                        && !DateUtils.isAfter(periodEndDate, bPostingPeriodEndDate)) {
                     periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType, upToInterestCalculationDate,
                             financialYearBeginningMonth);
-                    if (periodEndDate.isAfter(bPostingPeriodEndDate)) {
+                    if (DateUtils.isAfter(periodEndDate, bPostingPeriodEndDate)) {
                         periodEndDate = bPostingPeriodEndDate;
                     }
 
@@ -416,11 +413,12 @@ public final class PostingPeriod {
                 periodStartDate = postingPeriodInterval.startDate();
                 periodEndDate = periodStartDate;
 
-                while (!periodStartDate.isAfter(aPostingPeriodEndDate) && !periodEndDate.isAfter(aPostingPeriodEndDate)) {
+                while (!DateUtils.isAfter(periodStartDate, aPostingPeriodEndDate)
+                        && !DateUtils.isAfter(periodEndDate, aPostingPeriodEndDate)) {
 
                     periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType, upToInterestCalculationDate,
                             financialYearBeginningMonth);
-                    if (periodEndDate.isAfter(aPostingPeriodEndDate)) {
+                    if (DateUtils.isAfter(periodEndDate, aPostingPeriodEndDate)) {
                         periodEndDate = aPostingPeriodEndDate;
                     }
 
@@ -483,7 +481,7 @@ public final class PostingPeriod {
             case ANNUAL:
                 periodEndDate = periodStartDate.withMonth(previousMonth);
                 periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
-                if (periodEndDate.isBefore(periodStartDate)) {
+                if (DateUtils.isBefore(periodEndDate, periodStartDate)) {
                     periodEndDate = periodEndDate.plusYears(1);
                 }
             break;

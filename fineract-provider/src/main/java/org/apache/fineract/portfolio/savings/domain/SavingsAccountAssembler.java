@@ -56,7 +56,6 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
@@ -333,7 +332,7 @@ public class SavingsAccountAssembler {
                 nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
-        account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), SAVINGS_ACCOUNT_RESOURCE_NAME);
+        account.validateNewApplicationState(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         account.validateAccountValuesWithProduct();
 
@@ -349,7 +348,7 @@ public class SavingsAccountAssembler {
         List<SavingsAccountTransaction> savingsAccountTransactions = null;
         if (backdatedTxnsAllowedTill) {
             LocalDate pivotDate = account.getSummary().getInterestPostedTillDate();
-            boolean isNotPresent = pivotDate == null ? true : false;
+            boolean isNotPresent = pivotDate == null;
             if (!isNotPresent) {
                 // Get savings account transactions
                 if (isRelaxingDaysConfigForPivotDateEnabled()) {
@@ -468,7 +467,7 @@ public class SavingsAccountAssembler {
                 product.withHoldTax());
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
-        account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), SAVINGS_ACCOUNT_RESOURCE_NAME);
+        account.validateNewApplicationState(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         account.validateAccountValuesWithProduct();
 

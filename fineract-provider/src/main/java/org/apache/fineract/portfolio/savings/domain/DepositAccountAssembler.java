@@ -69,7 +69,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -358,7 +357,7 @@ public class DepositAccountAssembler {
 
         if (account != null) {
             account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
-            account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), depositAccountType.resourceName());
+            account.validateNewApplicationState(depositAccountType.resourceName());
         }
 
         return account;
@@ -448,7 +447,6 @@ public class DepositAccountAssembler {
 
     public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final JsonCommand command,
             final PaymentDetail paymentDetail) {
-        AppUser user = getAppUserIfPresent();
         final String json = command.json();
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -478,7 +476,7 @@ public class DepositAccountAssembler {
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(savingsTransactionElement);
                     }
                     final SavingsAccountTransactionDTO savingsAccountTransactionDTO = new SavingsAccountTransactionDTO(formatter,
-                            transactionDate, dueAmount, detail, DateUtils.getLocalDateTimeOfSystem(), savingsId, user, depositAccountType);
+                            transactionDate, dueAmount, detail, savingsId, depositAccountType);
                     savingsAccountTransactions.add(savingsAccountTransactionDTO);
                 }
             }
@@ -486,13 +484,4 @@ public class DepositAccountAssembler {
 
         return savingsAccountTransactions;
     }
-
-    private AppUser getAppUserIfPresent() {
-        AppUser user = null;
-        if (this.context != null) {
-            user = this.context.getAuthenticatedUserIfPresent();
-        }
-        return user;
-    }
-
 }

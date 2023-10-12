@@ -1609,7 +1609,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage,
                     getSubmittedOnDate());
-        } else if (this.group != null && DateUtils.isBefore(getSubmittedOnDate(), this.group.getActivationLocalDate())) {
+        } else if (this.group != null && DateUtils.isBefore(getSubmittedOnDate(), this.group.getActivationDate())) {
             final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage,
                     getSubmittedOnDate());
@@ -2124,7 +2124,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         if (this.group != null && this.group.isActivatedAfter(submittedOn)) {
             final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, submittedOn,
-                    group.getActivationLocalDate());
+                    group.getActivationDate());
         }
 
         if (DateUtils.isAfter(submittedOn, getExpectedDisbursedOnLocalDate())) {

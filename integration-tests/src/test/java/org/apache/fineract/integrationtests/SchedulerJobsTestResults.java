@@ -37,7 +37,6 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -179,7 +178,7 @@ public class SchedulerJobsTestResults {
         ArrayList<Integer> annualFeeDueDateAsArrayList = (ArrayList<Integer>) annualFeeDetails.get("dueDate");
         LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1),
                 annualFeeDueDateAsArrayList.get(2));
-        LocalDate todaysDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
 
         Truth.assertWithMessage("Verifying that all due Annual Fees have been paid").that(nextDueDateForAnnualFee)
                 .isGreaterThan(todaysDate);

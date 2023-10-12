@@ -327,7 +327,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         if (loan.isApproved() && !loan.isDisbursed()) {
                             final List<SavingsAccountTransaction> transactions = new ArrayList<>();
                             for (final SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {
-                                if (!transaction.getTransactionLocalDate().isAfter(loan.getApprovedOnDate())) {
+                                if (!transaction.getTransactionDate().isAfter(loan.getApprovedOnDate())) {
                                     transactions.add(transaction);
                                 }
                             }

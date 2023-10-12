@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import static org.apache.fineract.infrastructure.core.service.DateUtils.getSystemZoneId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -25,13 +27,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_mandatory_savings_schedule")
-public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom {
+public class RecurringDepositScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id")
@@ -64,15 +70,18 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     @Column(name = "obligations_met_on_date")
     private LocalDate obligationsMetOnDate;
 
+    @Deprecated
+    @Column(name = "created_date")
+    private LocalDateTime createdDateToRemove;
+
+    @Deprecated
+    @Column(name = "lastmodified_date")
+    private LocalDateTime lastModifiedDateToRemove;
+
     /**
      *
      */
-    protected RecurringDepositScheduleInstallment() {
-        this.installmentNumber = null;
-        this.fromDate = null;
-        this.dueDate = null;
-        this.obligationsMet = false;
-    }
+    protected RecurringDepositScheduleInstallment() {}
 
     /**
      * @param account
@@ -165,6 +174,24 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
         return this.dueDate;
     }
 
+    public Integer installmentNumber() {
+        return this.installmentNumber;
+    }
+
+    @Override
+    public Optional<OffsetDateTime> getCreatedDate() {
+        // #audit backward compatibility keep system datetime
+        return Optional.ofNullable(super.getCreatedDate()
+                .orElse(createdDateToRemove == null ? null : createdDateToRemove.atZone(getSystemZoneId()).toOffsetDateTime()));
+    }
+
+    @Override
+    public Optional<OffsetDateTime> getLastModifiedDate() {
+        // #audit backward compatibility keep system datetime
+        return Optional.ofNullable(super.getLastModifiedDate()
+                .orElse(lastModifiedDateToRemove == null ? null : lastModifiedDateToRemove.atZone(getSystemZoneId()).toOffsetDateTime()));
+    }
+
     public Money payInstallment(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
@@ -209,11 +236,11 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     }
 
     private boolean isInAdvance(final LocalDate transactionDate) {
-        return transactionDate.isBefore(dueDate());
+        return DateUtils.isBefore(transactionDate, dueDate());
     }
 
     private boolean isLatePayment(final LocalDate transactionDate) {
-        return transactionDate.isAfter(dueDate());
+        return DateUtils.isAfter(transactionDate, dueDate());
     }
 
     private Money asMoney(final BigDecimal decimal, final MonetaryCurrency currency) {
@@ -231,9 +258,5 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     public void updateDepositAmountAndResetDerivedFields(BigDecimal newDepositAmount) {
         this.depositAmount = newDepositAmount;
         this.resetDerivedFields();
-    }
-
-    public Integer installmentNumber() {
-        return this.installmentNumber;
     }
 }

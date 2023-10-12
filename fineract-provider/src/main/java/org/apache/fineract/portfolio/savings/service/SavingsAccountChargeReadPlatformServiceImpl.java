@@ -94,7 +94,6 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
         @Override
         public SavingsAccountChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
             final Long id = rs.getLong("id");
             final Long chargeId = rs.getLong("chargeId");
             final Long accountId = rs.getLong("accountId");

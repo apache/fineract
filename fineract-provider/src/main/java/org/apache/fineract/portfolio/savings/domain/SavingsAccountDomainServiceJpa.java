@@ -43,7 +43,6 @@ import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,8 +82,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     public SavingsAccountTransaction handleWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final SavingsTransactionBooleanValues transactionBooleanValues, final boolean backdatedTxnsAllowedTill) {
-
-        AppUser user = getAppUserIfPresent();
+        context.authenticatedUser();
         account.validateForAccountBlock();
         account.validateForDebitBlock();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
@@ -107,7 +105,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         Integer accountType = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, DateUtils.getLocalDateTimeOfSystem(), user, accountType);
+                paymentDetail, null, accountType);
         UUID refNo = UUID.randomUUID();
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, transactionBooleanValues.isApplyWithdrawFee(),
                 backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo.toString());
@@ -147,14 +145,6 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         return withdrawal;
     }
 
-    private AppUser getAppUserIfPresent() {
-        AppUser user = null;
-        if (this.context != null) {
-            user = this.context.getAuthenticatedUserIfPresent();
-        }
-        return user;
-    }
-
     @Transactional
     @Override
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
@@ -169,7 +159,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final boolean isAccountTransfer, final boolean isRegularTransaction,
             final SavingsAccountTransactionType savingsAccountTransactionType, final boolean backdatedTxnsAllowedTill) {
-        AppUser user = getAppUserIfPresent();
+        context.authenticatedUser();
         account.validateForAccountBlock();
         account.validateForCreditBlock();
 
@@ -193,7 +183,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         Integer accountType = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, DateUtils.getLocalDateTimeOfSystem(), user, accountType);
+                paymentDetail, null, accountType);
         UUID refNo = UUID.randomUUID();
         final SavingsAccountTransaction deposit = account.deposit(transactionDTO, savingsAccountTransactionType, backdatedTxnsAllowedTill,
                 relaxingDaysConfigForPivotDate, refNo.toString());
@@ -226,13 +216,10 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
     @Transactional
     @Override
-    public SavingsAccountTransaction handleHold(final SavingsAccount account, final AppUser createdUser, BigDecimal amount,
-            LocalDate transactionDate, Boolean lienAllowed) {
-        final PaymentDetail paymentDetails = null;
-
-        SavingsAccountTransaction transaction = SavingsAccountTransaction.holdAmount(account, account.office(), paymentDetails,
-                transactionDate, Money.of(account.getCurrency(), amount), DateUtils.getLocalDateTimeOfSystem(), createdUser, lienAllowed);
-        return transaction;
+    public SavingsAccountTransaction handleHold(final SavingsAccount account, BigDecimal amount, LocalDate transactionDate,
+            Boolean lienAllowed) {
+        return SavingsAccountTransaction.holdAmount(account, account.office(), null, transactionDate,
+                Money.of(account.getCurrency(), amount), lienAllowed);
     }
 
     @Override
@@ -322,7 +309,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final MathContext mc = new MathContext(15, MoneyHelper.getRoundingMode());
         for (SavingsAccountTransaction savingsAccountTransaction : savingsAccountTransactions) {
             if (savingsAccountTransaction.isPostInterestCalculationRequired()
-                    && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate(), backdatedTxnsAllowedTill)) {
+                    && account.isBeforeLastPostingPeriod(savingsAccountTransaction.getTransactionDate(), backdatedTxnsAllowedTill)) {
 
                 account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                         postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
@@ -330,7 +317,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                 account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                         financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
             }
-            account.validatePivotDateTransaction(savingsAccountTransaction.getLastTransactionDate(), backdatedTxnsAllowedTill,
+            account.validatePivotDateTransaction(savingsAccountTransaction.getTransactionDate(), backdatedTxnsAllowedTill,
                     relaxingDaysConfigForPivotDate, "savingsaccount");
             account.validateAccountBalanceDoesNotBecomeNegativeMinimal(savingsAccountTransaction.getAmount(), false);
             account.activateAccountBasedOnBalance();

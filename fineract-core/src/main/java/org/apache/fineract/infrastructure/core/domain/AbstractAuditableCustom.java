@@ -67,7 +67,7 @@ public abstract class AbstractAuditableCustom extends AbstractPersistableCustom 
 
     @Override
     public Optional<LocalDateTime> getCreatedDate() {
-        return null == this.createdDate ? Optional.empty() : Optional.of(this.createdDate);
+        return Optional.ofNullable(this.createdDate);
     }
 
     @Override
@@ -87,7 +87,7 @@ public abstract class AbstractAuditableCustom extends AbstractPersistableCustom 
 
     @Override
     public Optional<LocalDateTime> getLastModifiedDate() {
-        return null == this.lastModifiedDate ? Optional.empty() : Optional.of(this.lastModifiedDate);
+        return Optional.ofNullable(this.lastModifiedDate);
     }
 
     @Override

@@ -230,8 +230,7 @@ public class InterestRateChart extends AbstractPersistableCustom {
             if (!existingChart.equals(this)) {
                 if (this.chartFields.isOverlapping(existingChart.chartFields)) {
                     baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.overlapping.from.and.end.dates",
-                            existingChart.getFromDateAsLocalDate(), existingChart.getEndDateAsLocalDate(), this.getFromDateAsLocalDate(),
-                            this.getEndDateAsLocalDate());
+                            existingChart.getFromDate(), existingChart.getEndDate(), this.getFromDate(), this.getEndDate());
                 }
             }
         }
@@ -318,12 +317,12 @@ public class InterestRateChart extends AbstractPersistableCustom {
         return chartSlabs.remove(chartSlab);
     }
 
-    public LocalDate getFromDateAsLocalDate() {
-        return this.chartFields.getFromDateAsLocalDate();
+    public LocalDate getFromDate() {
+        return this.chartFields.getFromDate();
     }
 
-    public LocalDate getEndDateAsLocalDate() {
-        return this.chartFields.getEndDateAsLocalDate();
+    public LocalDate getEndDate() {
+        return this.chartFields.getEndDate();
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

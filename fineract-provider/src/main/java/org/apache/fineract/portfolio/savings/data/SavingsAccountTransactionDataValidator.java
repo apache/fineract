@@ -37,7 +37,6 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -83,7 +82,6 @@ public class SavingsAccountTransactionDataValidator {
     }
 
     public void validateTransactionWithPivotDate(final LocalDate transactionDate, final SavingsAccount savingsAccount) {
-
         final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
         final boolean isRelaxingDaysConfigOn = this.configurationDomainService.isRelaxingDaysConfigForPivotDateEnabled();
 
@@ -94,14 +92,13 @@ public class SavingsAccountTransactionDataValidator {
             if (isRelaxingDaysConfigOn) {
                 pivotDate = pivotDate.minusDays(this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate());
             }
-            if (pivotDate.isAfter(transactionDate)) {
+            if (DateUtils.isAfter(pivotDate, transactionDate)) {
                 throw new TransactionBeforePivotDateNotAllowed(transactionDate, pivotDate);
             }
         }
     }
 
     public void validate(final JsonCommand command) {
-
         final String json = command.json();
 
         if (StringUtils.isBlank(json)) {
@@ -296,7 +293,7 @@ public class SavingsAccountTransactionDataValidator {
         }
 
         // compare two dates now
-        if (lastTransactionDate != null && transactionDate.isBefore(lastTransactionDate)) {
+        if (DateUtils.isBefore(transactionDate, lastTransactionDate)) {
             baseDataValidator.parameter(SavingsApiConstants.dateParamName).value(lastTransactionDate).failWithCode(
                     "validation.msg.date.can.not.be.before.last.transaction.date", "Amount can be put on hold only after last transaction");
         }
@@ -304,8 +301,7 @@ public class SavingsAccountTransactionDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public SavingsAccountTransaction validateReleaseAmountAndAssembleForm(final SavingsAccountTransaction holdTransaction,
-            final AppUser createdUser) {
+    public SavingsAccountTransaction validateReleaseAmountAndAssembleForm(final SavingsAccountTransaction holdTransaction) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -326,10 +322,8 @@ public class SavingsAccountTransactionDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-        LocalDateTime createdDate = DateUtils.getLocalDateTimeOfSystem();
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-        SavingsAccountTransaction transaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate, createdDate,
-                createdUser);
+        SavingsAccountTransaction transaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate);
         return transaction;
     }
 

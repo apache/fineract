@@ -259,7 +259,7 @@ public final class Group extends AbstractPersistableCustom {
     }
 
     public boolean isActivatedAfter(final LocalDate submittedOn) {
-        return getActivationLocalDate().isAfter(submittedOn);
+        return DateUtils.isAfter(getActivationDate(), submittedOn);
     }
 
     public boolean isNotActive() {
@@ -267,11 +267,7 @@ public final class Group extends AbstractPersistableCustom {
     }
 
     public boolean isActive() {
-        return this.status != null ? GroupingTypeStatus.fromInt(this.status).isActive() : false;
-    }
-
-    private boolean isDateInTheFuture(final LocalDate localDate) {
-        return localDate.isAfter(DateUtils.getBusinessLocalDate());
+        return this.status != null && GroupingTypeStatus.fromInt(this.status).isActive();
     }
 
     public boolean isNotPending() {
@@ -316,7 +312,7 @@ public final class Group extends AbstractPersistableCustom {
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
-        if (command.isChangeInLocalDateParameterNamed(GroupingTypesApiConstants.activationDateParamName, getActivationLocalDate())) {
+        if (command.isChangeInLocalDateParameterNamed(GroupingTypesApiConstants.activationDateParamName, getActivationDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
             actualChanges.put(GroupingTypesApiConstants.activationDateParamName, valueAsInput);
             actualChanges.put(GroupingTypesApiConstants.dateFormatParamName, dateFormatAsInput);
@@ -347,7 +343,7 @@ public final class Group extends AbstractPersistableCustom {
         return this.submittedOnDate;
     }
 
-    public LocalDate getActivationLocalDate() {
+    public LocalDate getActivationDate() {
         return this.activationDate;
     }
 
@@ -494,7 +490,7 @@ public final class Group extends AbstractPersistableCustom {
     }
 
     public boolean isChildGroup() {
-        return this.parent == null ? false : true;
+        return this.parent != null;
 
     }
 
@@ -503,18 +499,17 @@ public final class Group extends AbstractPersistableCustom {
     }
 
     public void close(final AppUser currentUser, final CodeValue closureReason, final LocalDate closureDate) {
-
         if (isClosed()) {
             final String errorMessage = "Group with identifier " + getId() + " is alread closed.";
             throw new InvalidGroupStateTransitionException(this.groupLevel.getLevelName(), "close", "already.closed", errorMessage,
                     getId());
         }
 
-        if (isNotPending() && getActivationLocalDate().isAfter(closureDate)) {
+        if (isNotPending() && DateUtils.isAfter(getActivationDate(), closureDate)) {
             final String errorMessage = "The Group closure Date " + closureDate + " cannot be before the group Activation Date "
-                    + getActivationLocalDate() + ".";
+                    + getActivationDate() + ".";
             throw new InvalidGroupStateTransitionException(this.groupLevel.getLevelName(), "close",
-                    "date.cannot.before.group.actvation.date", errorMessage, closureDate, getActivationLocalDate());
+                    "date.cannot.before.group.actvation.date", errorMessage, closureDate, getActivationDate());
         }
 
         this.closureReason = closureReason;
@@ -644,9 +639,7 @@ public final class Group extends AbstractPersistableCustom {
     }
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
-
-        if (getSubmittedOnDate() != null && isDateInTheFuture(getSubmittedOnDate())) {
-
+        if (getSubmittedOnDate() != null && DateUtils.isDateInTheFuture(getSubmittedOnDate())) {
             final String defaultUserMessage = "Submitted on date cannot be in the future.";
             final String globalisationMessageCode = "error.msg.group.submittedOnDate.in.the.future";
             final ApiParameterError error = ApiParameterError.parameterError(globalisationMessageCode, defaultUserMessage,
@@ -654,31 +647,26 @@ public final class Group extends AbstractPersistableCustom {
 
             dataValidationErrors.add(error);
         }
-
-        if (getActivationLocalDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getActivationLocalDate())) {
-
+        if (getActivationDate() != null && DateUtils.isAfter(getSubmittedOnDate(), getActivationDate())) {
             final String defaultUserMessage = "Submitted on date cannot be after the activation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.group.submittedOnDate.after.activation.date",
                     defaultUserMessage, GroupingTypesApiConstants.submittedOnDateParamName, this.submittedOnDate);
 
             dataValidationErrors.add(error);
         }
-
-        if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
-
+        if (getActivationDate() != null && DateUtils.isDateInTheFuture(getActivationDate())) {
             final String defaultUserMessage = "Activation date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.group.activationDate.in.the.future",
-                    defaultUserMessage, GroupingTypesApiConstants.activationDateParamName, getActivationLocalDate());
+                    defaultUserMessage, GroupingTypesApiConstants.activationDateParamName, getActivationDate());
 
             dataValidationErrors.add(error);
         }
-
-        if (getActivationLocalDate() != null) {
-            if (this.office.isOpeningDateAfter(getActivationLocalDate())) {
+        if (getActivationDate() != null) {
+            if (this.office.isOpeningDateAfter(getActivationDate())) {
                 final String defaultUserMessage = "Activation date cannot be a date before the office opening date.";
                 final ApiParameterError error = ApiParameterError.parameterError(
                         "error.msg.group.activationDate.cannot.be.before.office.activation.date", defaultUserMessage,
-                        GroupingTypesApiConstants.activationDateParamName, getActivationLocalDate());
+                        GroupingTypesApiConstants.activationDateParamName, getActivationDate());
                 dataValidationErrors.add(error);
             }
         }

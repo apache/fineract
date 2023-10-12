@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.service.search;
 
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE_DB_FIELD;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
 import com.google.gson.JsonObject;
@@ -87,7 +88,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
             sortPageable = pageable.withSort(Sort.by(orders.stream()
                     .map(e -> e.withProperty(SearchUtil.validateToJdbcColumnName(e.getProperty(), headersByName, false))).toList()));
         } else {
-            pageable = pageable.withSort(Sort.Direction.DESC, "transaction_date", "created_date", "id");
+            pageable = pageable.withSort(Sort.Direction.DESC, "transaction_date", CREATED_DATE_DB_FIELD, "id");
             sortPageable = pageable;
         }
 

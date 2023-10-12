@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import static org.apache.fineract.infrastructure.core.service.DateUtils.getSystemZoneId;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,8 +30,9 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingTransaction;
@@ -37,7 +40,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountOnHoldTransactionType
 
 @Entity
 @Table(name = "m_deposit_account_on_hold_transaction")
-public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
+public class DepositAccountOnHoldTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     @ManyToOne
     @JoinColumn(name = "savings_account_id", nullable = true)
@@ -55,8 +58,9 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
 
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
+    @Deprecated
+    @Column(name = "created_date", nullable = true)
+    private LocalDateTime createdDateToRemove;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "depositAccountOnHoldTransaction", optional = true, orphanRemoval = true)
     private GuarantorFundingTransaction guarantorFundingTransaction;
@@ -69,7 +73,7 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
         this.amount = amount;
         this.transactionType = transactionType.getValue();
         this.transactionDate = transactionDate;
-        this.createdDate = DateUtils.getLocalDateTimeOfSystem();
+        this.createdDateToRemove = null; // #audit backward compatibility deprecated
         this.reversed = reversed;
     }
 
@@ -87,12 +91,28 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
                 reversed);
     }
 
+    public SavingsAccount getSavingsAccount() {
+        return savingsAccount;
+    }
+
     public BigDecimal getAmount() {
         return this.amount;
     }
 
-    public Money getAmountMoney(final MonetaryCurrency currency) {
+    public Money getAmount(final MonetaryCurrency currency) {
         return Money.of(currency, this.amount);
+    }
+
+    public DepositAccountOnHoldTransactionType getTransactionType() {
+        return DepositAccountOnHoldTransactionType.fromInt(this.transactionType);
+    }
+
+    public LocalDate getTransactionDate() {
+        return this.transactionDate;
+    }
+
+    public MonetaryCurrency getCurrency() {
+        return getSavingsAccount().getCurrency();
     }
 
     public void reverseTransaction() {
@@ -104,12 +124,10 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
         }
     }
 
-    public DepositAccountOnHoldTransactionType getTransactionType() {
-        return DepositAccountOnHoldTransactionType.fromInt(this.transactionType);
+    @Override
+    public Optional<OffsetDateTime> getCreatedDate() {
+        // #audit backward compatibility keep system datetime
+        return Optional.ofNullable(super.getCreatedDate()
+                .orElse(createdDateToRemove == null ? null : createdDateToRemove.atZone(getSystemZoneId()).toOffsetDateTime()));
     }
-
-    public LocalDate getTransactionDate() {
-        return this.transactionDate;
-    }
-
 }

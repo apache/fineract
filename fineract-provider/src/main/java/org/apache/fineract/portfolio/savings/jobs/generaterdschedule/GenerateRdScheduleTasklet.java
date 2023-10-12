@@ -18,15 +18,23 @@
  */
 package org.apache.fineract.portfolio.savings.jobs.generaterdschedule;
 
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_BY_DB_FIELD;
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE_DB_FIELD;
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY_DB_FIELD;
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE_DB_FIELD;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.DepositAccountUtils;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
 import org.springframework.batch.core.StepContribution;
@@ -41,19 +49,20 @@ public class GenerateRdScheduleTasklet implements Tasklet {
 
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final DateTimeFormatter formatterWithTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final PlatformSecurityContext securityContext;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
         final Collection<Map<String, Object>> scheduleDetails = depositAccountReadPlatformService.retriveDataForRDScheduleCreation();
-        String insertSql = "INSERT INTO m_mandatory_savings_schedule (savings_account_id, duedate, installment, deposit_amount, completed_derived, created_date, lastmodified_date) VALUES ";
-        StringBuilder sb = new StringBuilder();
-        String currentDate = DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATTER);
+        String insertSql = "INSERT INTO m_mandatory_savings_schedule (savings_account_id, duedate, installment, deposit_amount, completed_derived, "
+                + CREATED_DATE_DB_FIELD + ", " + CREATED_BY_DB_FIELD + ", " + LAST_MODIFIED_DATE_DB_FIELD + ", " + LAST_MODIFIED_BY_DB_FIELD
+                + ") " + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        List<Object[]> params = new ArrayList<>();
+        Long userId = securityContext.authenticatedUser().getId();
         int iterations = 0;
         for (Map<String, Object> details : scheduleDetails) {
-            Long count = (Long) details.get("futureInstallemts");
+            Long count = (Long) details.get("futureInstallments");
             if (count == null) {
                 count = 0L;
             }
@@ -66,34 +75,20 @@ public class GenerateRdScheduleTasklet implements Tasklet {
                 count++;
                 installmentNumber++;
                 lastDepositDate = DepositAccountUtils.calculateNextDepositDate(lastDepositDate, recurrence);
-
-                if (sb.length() > 0) {
-                    sb.append(", ");
-                }
-                sb.append("(");
-                sb.append(savingsId);
-                sb.append(",'");
-                sb.append(formatter.format(lastDepositDate));
-                sb.append("',");
-                sb.append(installmentNumber);
-                sb.append(",");
-                sb.append(amount);
-                sb.append(", b'0','");
-                sb.append(currentDate);
-                sb.append("','");
-                sb.append(currentDate);
-                sb.append("')");
+                OffsetDateTime auditTime = DateUtils.getAuditOffsetDateTime();
+                params.add(new Object[] { savingsId, lastDepositDate, installmentNumber, amount, false, auditTime, userId, auditTime,
+                        userId });
                 iterations++;
-                if (iterations > 200) {
-                    jdbcTemplate.update(insertSql + sb); // NOSONAR
-                    sb = new StringBuilder();
-                }
-
+            }
+            if (iterations > 200) {
+                jdbcTemplate.batchUpdate(insertSql, params);
+                params.clear();
+                iterations = 0;
             }
         }
 
-        if (sb.length() > 0) {
-            jdbcTemplate.update(insertSql + sb); // NOSONAR
+        if (!params.isEmpty()) {
+            jdbcTemplate.batchUpdate(insertSql, params);
         }
         return RepeatStatus.FINISHED;
     }

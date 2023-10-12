@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.integrationtests;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -42,8 +42,8 @@ public class SavingsAccountsTest extends IntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsTest.class);
     private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
-    private final String formattedDate = simpleDateFormat.format(new Date());
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
+    private final String formattedDate = dateFormatter.format(Utils.getLocalDateOfTenant());
     private int savingId = 1;
 
     @Test

@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
@@ -54,7 +55,7 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
     }
 
     public boolean occursOn(final LocalDate occursOnDate) {
-        return getTransactionDate().isEqual(occursOnDate);
+        return DateUtils.isEqual(occursOnDate, getTransactionDate());
     }
 
     public EndOfDayBalance toEndOfDayBalance(final Money openingBalance) {
@@ -92,7 +93,6 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
     }
 
     public EndOfDayBalance toEndOfDayBalanceBoundedBy(final Money openingBalance, final LocalDateInterval boundedBy) {
-
         final MonetaryCurrency currency = openingBalance.getCurrency();
         Money endOfDayBalance = openingBalance.copy();
 
@@ -101,7 +101,7 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
         LocalDate balanceStartDate = getTransactionDate();
         LocalDate balanceEndDate = getEndOfBalanceDate();
 
-        if (boundedBy.startDate().isAfter(balanceStartDate)) {
+        if (DateUtils.isAfter(boundedBy.startDate(), balanceStartDate)) {
             balanceStartDate = boundedBy.startDate();
             final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
@@ -121,7 +121,7 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
             }
         }
 
-        if (balanceEndDate.isAfter(boundedBy.endDate())) {
+        if (DateUtils.isAfter(balanceEndDate, boundedBy.endDate())) {
             balanceEndDate = boundedBy.endDate();
             final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();

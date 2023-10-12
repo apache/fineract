@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -78,7 +79,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         Group centerOrGroup = null;
         if (command.getGroupId() != null) {
             centerOrGroup = this.groupRepository.findOneWithNotFoundDetection(command.getGroupId());
-            entityActivationDate = centerOrGroup.getActivationLocalDate();
+            entityActivationDate = centerOrGroup.getActivationDate();
             entityType = centerOrGroup.isCenter() ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
             entityId = command.getGroupId();
         } else if (command.getLoanId() != null) {
@@ -88,7 +89,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             entityId = command.getLoanId();
         } else if (command.getClientId() != null) {
             final Client client = this.clientRepository.findOneWithNotFoundDetection(command.getClientId());
-            entityActivationDate = client.getActivationLocalDate();
+            entityActivationDate = client.getActivationDate();
             entityType = CalendarEntityType.CLIENTS;
             entityId = command.getClientId();
         }
@@ -98,7 +99,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("calendar");
-        if (entityActivationDate == null || newCalendar.getStartDateLocalDate().isBefore(entityActivationDate)) {
+        if (entityActivationDate == null || DateUtils.isBefore(newCalendar.getStartDateLocalDate(), entityActivationDate)) {
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
             String dateAsString = "";
             if (entityActivationDate != null) {
