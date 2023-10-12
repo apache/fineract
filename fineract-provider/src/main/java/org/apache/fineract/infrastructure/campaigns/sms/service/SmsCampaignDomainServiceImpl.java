@@ -365,7 +365,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         smsParams.put("depositAmount", savingsAccountTransaction.getAmount(savingsAccount.getCurrency()));
         smsParams.put("balance", savingsAccount.getWithdrawableBalance());
         smsParams.put("officeId", client.getOffice().getId());
-        smsParams.put("transactionDate", savingsAccountTransaction.getTransactionLocalDate().format(dateFormatter));
+        smsParams.put("transactionDate", savingsAccountTransaction.getTransactionDate().format(dateFormatter));
         smsParams.put("savingsTransactionId", savingsAccountTransaction.getId());
 
         if (client.getStaff() != null) {

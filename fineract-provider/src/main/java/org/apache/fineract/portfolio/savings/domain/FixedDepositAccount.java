@@ -197,18 +197,8 @@ public class FixedDepositAccount extends SavingsAccount {
         String refNo = null;
         final Money transactionAmountMoney = Money.of(getCurrency(), this.accountTermAndPreClosure.depositAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null,
-                this.accountSubmittedOrActivationDate(), transactionAmountMoney, DateUtils.getLocalDateTimeOfSystem(), null, refNo); // TODO:
-        // verify
-        // if
-        // it
-        // is
-        // ok
-        // to
-        // pass
-        // null
-        // for
-        // AppUser
-        transaction.updateRunningBalance(transactionAmountMoney);
+                this.accountSubmittedOrActivationDate(), transactionAmountMoney, refNo);
+        transaction.setRunningBalance(transactionAmountMoney);
         transaction.updateCumulativeBalanceAndDates(this.getCurrency(), interestCalculatedUpto());
         allTransactions.add(transaction);
         updateMaturityDateAndAmount(mc, allTransactions, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
@@ -260,8 +250,7 @@ public class FixedDepositAccount extends SavingsAccount {
             }
         }
 
-        final LocalDate todayDate = DateUtils.getBusinessLocalDate();
-        if (!this.maturityDate().isAfter(todayDate)) {
+        if (!DateUtils.isDateInTheFuture(maturityDate())) {
             // update account status
             this.status = SavingsAccountStatusType.MATURED.getValue();
             postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
@@ -338,14 +327,12 @@ public class FixedDepositAccount extends SavingsAccount {
         }
 
         this.summary.updateFromInterestPeriodSummaries(this.currency, allPostingPeriods);
-        this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods, this.getLockedInUntilLocalDate(),
+        this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods, getLockedInUntilDate(),
                 isTransferInterestToOtherAccount());
         return allPostingPeriods;
     }
 
-    public void prematureClosure(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
-            final Map<String, Object> actualChanges) {
-
+    public void prematureClosure(final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME + DepositsApiConstants.preMatureCloseAction);
@@ -362,14 +349,13 @@ public class FixedDepositAccount extends SavingsAccount {
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
 
-        if (closedDate.isBefore(getActivationLocalDate())) {
+        if (DateUtils.isBefore(closedDate, getActivationDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.activation.date");
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-
         if (isAccountLocked(closedDate)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.lockin.period");
@@ -377,16 +363,14 @@ public class FixedDepositAccount extends SavingsAccount {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-
-        if (closedDate.isAfter(maturityDate())) {
+        if (maturityDate() != null && DateUtils.isAfter(closedDate, maturityDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.before.maturity.date");
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-
-        if (closedDate.isAfter(tenantsTodayDate)) {
+        if (DateUtils.isAfterBusinessDate(closedDate)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("cannot.be.a.future.date");
             if (!dataValidationErrors.isEmpty()) {
@@ -437,9 +421,7 @@ public class FixedDepositAccount extends SavingsAccount {
         return Money.of(this.currency, this.accountTermAndPreClosure.depositAmount());
     }
 
-    public void close(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
-            final Map<String, Object> actualChanges) {
-
+    public void close(final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.closeAction);
@@ -456,21 +438,21 @@ public class FixedDepositAccount extends SavingsAccount {
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
 
-        if (closedDate.isBefore(getActivationLocalDate())) {
+        if (DateUtils.isBefore(closedDate, getActivationDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.activation.date");
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-        if (closedDate.isBefore(maturityDate())) {
+        if (DateUtils.isBefore(closedDate, maturityDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.account.maturity.date");
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-        if (closedDate.isAfter(tenantsTodayDate)) {
+        if (DateUtils.isAfterBusinessDate(closedDate)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("cannot.be.a.future.date");
             if (!dataValidationErrors.isEmpty()) {
@@ -548,7 +530,8 @@ public class FixedDepositAccount extends SavingsAccount {
 
             LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
 
-            interestPostingTransactionDate = interestPostingTransactionDate.isAfter(interestPostingUpToDate) ? interestPostingUpToDate
+            interestPostingTransactionDate = DateUtils.isAfter(interestPostingTransactionDate, interestPostingUpToDate)
+                    ? interestPostingUpToDate
                     : interestPostingTransactionDate;
 
             final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
@@ -669,14 +652,14 @@ public class FixedDepositAccount extends SavingsAccount {
     private LocalDate interestPostingUpToDate(final LocalDate interestPostingDate) {
         LocalDate interestPostingUpToDate = interestPostingDate;
         final LocalDate uptoMaturityDate = interestCalculatedUpto();
-        if (uptoMaturityDate != null && uptoMaturityDate.isBefore(interestPostingDate)) {
+        if (uptoMaturityDate != null && DateUtils.isBefore(uptoMaturityDate, interestPostingDate)) {
             interestPostingUpToDate = uptoMaturityDate;
         }
         return interestPostingUpToDate;
     }
 
     public LocalDate maturityDate() {
-        return this.accountTermAndPreClosure.getMaturityLocalDate();
+        return this.accountTermAndPreClosure.getMaturityDate();
     }
 
     public BigDecimal maturityAmount() {
@@ -695,8 +678,8 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     @Override
-    public Map<String, Object> activate(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
-        final Map<String, Object> actualChanges = super.activate(currentUser, command, tenantsTodayDate);
+    public Map<String, Object> activate(final AppUser currentUser, final JsonCommand command) {
+        final Map<String, Object> actualChanges = super.activate(currentUser, command);
 
         // if (isAccountLocked(calculateMaturityDate())) {
         // final List<ApiParameterError> dataValidationErrors = new
@@ -770,8 +753,8 @@ public class FixedDepositAccount extends SavingsAccount {
         }
 
         if (this.chart != null) {
-            final LocalDate chartFromDate = this.chart.getFromDateAsLocalDate();
-            LocalDate chartEndDate = this.chart.getEndDateAsLocalDate();
+            final LocalDate chartFromDate = this.chart.getFromDate();
+            LocalDate chartEndDate = this.chart.getEndDate();
             chartEndDate = chartEndDate == null ? DateUtils.getBusinessLocalDate() : chartEndDate;
 
             final LocalDateInterval chartInterval = LocalDateInterval.create(chartFromDate, chartEndDate);
@@ -783,7 +766,7 @@ public class FixedDepositAccount extends SavingsAccount {
             BigDecimal applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(),
                     calculateMaturityDate(), this.client);
 
-            if (applicableInterestRate.compareTo(BigDecimal.ZERO) == 0 ? Boolean.TRUE : Boolean.FALSE) {
+            if (applicableInterestRate.compareTo(BigDecimal.ZERO) == 0) {
                 baseDataValidator.reset()
                         .failWithCodeNoParameterAddedToErrorCode("no.applicable.interest.rate.is.found.based.on.amount.and.deposit.period");
             }

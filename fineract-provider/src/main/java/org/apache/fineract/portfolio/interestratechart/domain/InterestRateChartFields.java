@@ -88,7 +88,7 @@ public class InterestRateChartFields {
         final String localeAsInput = command.locale();
         final String dateFormat = command.dateFormat();
 
-        if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDateAsLocalDate())) {
+        if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDate())) {
             final String newValueAsString = command.stringValueOfParameterNamed(fromDateParamName);
             actualChanges.put(fromDateParamName, newValueAsString);
             actualChanges.put(localeParamName, localeAsInput);
@@ -96,7 +96,7 @@ public class InterestRateChartFields {
             this.fromDate = command.localDateValueOfParameterNamed(fromDateParamName);
         }
 
-        if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDateAsLocalDate())) {
+        if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDate())) {
             final String newValueAsString = command.stringValueOfParameterNamed(endDateParamName);
             actualChanges.put(endDateParamName, newValueAsString);
             actualChanges.put(localeParamName, localeAsInput);
@@ -116,31 +116,27 @@ public class InterestRateChartFields {
     }
 
     public boolean isFromDateAfterToDate() {
-        return isFromDateAfter(getEndDateAsLocalDate());
+        return isFromDateAfter(getEndDate());
     }
 
     public boolean isFromDateAfter(LocalDate compare) {
-        final LocalDate fromDate = getFromDateAsLocalDate();
-        if (fromDate != null && compare != null) {
-            return fromDate.isAfter(compare);
-        }
-        return false;
+        return compare != null && DateUtils.isAfter(getFromDate(), compare);
     }
 
-    public LocalDate getFromDateAsLocalDate() {
+    public LocalDate getFromDate() {
         return this.fromDate;
     }
 
-    public LocalDate getEndDateAsLocalDate() {
+    public LocalDate getEndDate() {
         return this.endDate;
     }
 
     public boolean isOverlapping(InterestRateChartFields that) {
-        final LocalDate thisFromDate = this.getFromDateAsLocalDate();
-        LocalDate thisEndDate = this.getEndDateAsLocalDate();
+        final LocalDate thisFromDate = this.getFromDate();
+        LocalDate thisEndDate = this.getEndDate();
         thisEndDate = thisEndDate == null ? DateUtils.getBusinessLocalDate() : thisEndDate;
-        final LocalDate thatFromDate = that.getFromDateAsLocalDate();
-        LocalDate thatEndDate = that.getEndDateAsLocalDate();
+        final LocalDate thatFromDate = that.getFromDate();
+        LocalDate thatEndDate = that.getEndDate();
         thatEndDate = thatEndDate == null ? DateUtils.getBusinessLocalDate() : thatEndDate;
 
         final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
@@ -153,8 +149,8 @@ public class InterestRateChartFields {
     }
 
     public boolean isApplicableChartFor(final LocalDate target) {
-        final LocalDate endDate = this.endDate == null ? DateUtils.getBusinessLocalDate() : this.getEndDateAsLocalDate();
-        final LocalDateInterval interval = LocalDateInterval.create(getFromDateAsLocalDate(), endDate);
+        final LocalDate endDate = this.endDate == null ? DateUtils.getBusinessLocalDate() : this.getEndDate();
+        final LocalDateInterval interval = LocalDateInterval.create(getFromDate(), endDate);
         return interval.contains(target);
     }
 

@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 
@@ -136,7 +137,6 @@ public class EndOfDayBalance {
      * @return
      */
     public EndOfDayBalance upTo(final LocalDateInterval compoundingPeriodInterval, final LocalDate upToInterestCalculationDate) {
-
         Money startingBalance = this.openingBalance;
         LocalDate balanceStartDate = this.date;
 
@@ -144,7 +144,7 @@ public class EndOfDayBalance {
 
         int daysOfBalance = this.numberOfDays;
 
-        if (this.date.isBefore(compoundingPeriodInterval.startDate())) {
+        if (DateUtils.isBefore(this.date, compoundingPeriodInterval.startDate())) {
             balanceStartDate = compoundingPeriodInterval.startDate();
             startingBalance = this.endOfDayBalance;
             final LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, oldBalanceEndDate);
@@ -152,12 +152,12 @@ public class EndOfDayBalance {
         }
 
         LocalDate balanceEndDate = balanceStartDate.plusDays(daysOfBalance - 1);
-        if (balanceEndDate.isAfter(compoundingPeriodInterval.endDate())) {
+        if (DateUtils.isAfter(balanceEndDate, compoundingPeriodInterval.endDate())) {
             balanceEndDate = compoundingPeriodInterval.endDate();
             final LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             daysOfBalance = balancePeriodInterval.daysInPeriodInclusiveOfEndDate();
         }
-        if (balanceEndDate.isAfter(upToInterestCalculationDate)) {
+        if (DateUtils.isAfter(balanceEndDate, upToInterestCalculationDate)) {
             balanceEndDate = upToInterestCalculationDate;
             final LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             daysOfBalance = balancePeriodInterval.daysInPeriodInclusiveOfEndDate();
@@ -167,7 +167,6 @@ public class EndOfDayBalance {
     }
 
     public boolean contains(final LocalDateInterval compoundingPeriodInterval) {
-
         final LocalDate balanceUpToDate = this.date.plusDays(this.numberOfDays - 1);
 
         final LocalDateInterval balanceInterval = LocalDateInterval.create(this.date, balanceUpToDate);

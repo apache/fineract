@@ -18,18 +18,24 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import static org.apache.fineract.infrastructure.core.service.DateUtils.getSystemZoneId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
 
 @Entity
 @Table(name = "m_savings_officer_assignment_history")
-public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom {
+public class SavingsOfficerAssignmentHistory extends AbstractAuditableWithUTCDateTimeCustom {
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
@@ -45,10 +51,13 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    public static SavingsOfficerAssignmentHistory createNew(final SavingsAccount account, final Staff savingsOfficer,
-            final LocalDate assignmentDate) {
-        return new SavingsOfficerAssignmentHistory(account, savingsOfficer, assignmentDate, null);
-    }
+    @Deprecated
+    @Column(name = "created_date")
+    private LocalDateTime createdDateToRemove;
+
+    @Deprecated
+    @Column(name = "lastmodified_date")
+    private LocalDateTime lastModifiedDateToRemove;
 
     protected SavingsOfficerAssignmentHistory() {
         //
@@ -62,7 +71,12 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom {
         this.endDate = endDate;
     }
 
-    public void updateSavingsOfficer(final Staff savingsOfficer) {
+    public static SavingsOfficerAssignmentHistory createNew(final SavingsAccount account, final Staff savingsOfficer,
+            final LocalDate startDate) {
+        return new SavingsOfficerAssignmentHistory(account, savingsOfficer, startDate, null);
+    }
+
+    public void setSavingsOfficer(final Staff savingsOfficer) {
         this.savingsOfficer = savingsOfficer;
     }
 
@@ -70,28 +84,28 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom {
         return this.savingsOfficer.identifiedBy(staff);
     }
 
-    public void updateStartDate(final LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public void updateEndDate(final LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public boolean matchesStartDateOf(final LocalDate matchingDate) {
-        return getStartDate().isEqual(matchingDate);
-    }
-
     public LocalDate getStartDate() {
         return this.startDate;
     }
 
-    public boolean hasStartDateBefore(final LocalDate matchingDate) {
-        return matchingDate.isBefore(getStartDate());
+    public void setStartDate(final LocalDate startDate) {
+        this.startDate = startDate;
     }
 
-    public boolean isCurrentRecord() {
-        return this.endDate == null;
+    public LocalDate getEndDate() {
+        return this.endDate;
+    }
+
+    public void setEndDate(final LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public boolean matchesStartDateOf(final LocalDate matchingDate) {
+        return DateUtils.isEqual(matchingDate, getStartDate());
+    }
+
+    public boolean isBeforeStartDate(final LocalDate matchingDate) {
+        return DateUtils.isBefore(matchingDate, getStartDate());
     }
 
     /**
@@ -100,12 +114,25 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom {
      * @param compareDate
      * @return
      */
-    public boolean isEndDateAfter(final LocalDate compareDate) {
-        return this.endDate != null && this.endDate.isAfter(compareDate);
+    public boolean isBeforeEndDate(final LocalDate compareDate) {
+        return DateUtils.isBefore(compareDate, this.endDate);
     }
 
-    public LocalDate getEndDate() {
-        return this.endDate;
+    public boolean isCurrentRecord() {
+        return this.endDate == null;
     }
 
+    @Override
+    public Optional<OffsetDateTime> getCreatedDate() {
+        // #audit backward compatibility keep system datetime
+        return Optional.ofNullable(super.getCreatedDate()
+                .orElse(createdDateToRemove == null ? null : createdDateToRemove.atZone(getSystemZoneId()).toOffsetDateTime()));
+    }
+
+    @Override
+    public Optional<OffsetDateTime> getLastModifiedDate() {
+        // #audit backward compatibility keep system datetime
+        return Optional.ofNullable(super.getLastModifiedDate()
+                .orElse(lastModifiedDateToRemove == null ? null : lastModifiedDateToRemove.atZone(getSystemZoneId()).toOffsetDateTime()));
+    }
 }

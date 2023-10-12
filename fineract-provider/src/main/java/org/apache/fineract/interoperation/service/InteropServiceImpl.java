@@ -243,7 +243,7 @@ public class InteropServiceImpl implements InteropService {
                 return true;
             }
 
-            java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().atStartOfDay(ZoneId.systemDefault()).toLocalDateTime();
+            java.time.LocalDateTime transactionDate = t.getTransactionDate().atStartOfDay(ZoneId.systemDefault()).toLocalDateTime();
             return (transactionsTo == null || transactionsTo.compareTo(transactionDate) > 0) && (transactionsFrom == null
                     || transactionsFrom.compareTo(transactionDate.withHour(23).withMinute(59).withSecond(59)) <= 0);
         };
@@ -276,16 +276,15 @@ public class InteropServiceImpl implements InteropService {
     @Override
     public InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
             String subIdOrType, @NotNull JsonCommand command) {
-
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
         // TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
 
         try {
-            AppUser createdBy = getLoginUser();
+            AppUser createdBy = securityContext.authenticatedUser();
 
             InteropIdentifier identifier = new InteropIdentifier(savingsAccount, request.getIdType(), request.getIdValue(),
-                    request.getSubIdOrType(), createdBy.getUsername(), DateUtils.getLocalDateTimeOfTenant());
+                    request.getSubIdOrType(), createdBy.getUsername());
 
             identifierRepository.saveAndFlush(identifier);
 
@@ -401,10 +400,9 @@ public class InteropServiceImpl implements InteropService {
             PaymentDetail paymentDetail = instance(findPaymentType(), savingsAccount.getExternalId().getValue(), null, getRoutingCode(),
                     transferCode, null);
             SavingsAccountTransaction holdTransaction = SavingsAccountTransaction.holdAmount(savingsAccount, savingsAccount.office(),
-                    paymentDetail, transactionDate, Money.of(savingsAccount.getCurrency(), total), DateUtils.getLocalDateTimeOfTenant(),
-                    getLoginUser(), false);
+                    paymentDetail, transactionDate, Money.of(savingsAccount.getCurrency(), total), false);
             MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
-            holdTransaction.updateRunningBalance(
+            holdTransaction.setRunningBalance(
                     Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().subtract(holdTransaction.getAmount())));
             holdTransaction.updateCumulativeBalanceAndDates(accountCurrency, transactionDate);
 
@@ -454,8 +452,8 @@ public class InteropServiceImpl implements InteropService {
             }
 
             if (holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
-                SavingsAccountTransaction releaseTransaction = savingsAccountTransactionRepository.saveAndFlush(
-                        releaseAmount(holdTransaction, transactionDate, DateUtils.getLocalDateTimeOfSystem(), getLoginUser()));
+                SavingsAccountTransaction releaseTransaction = savingsAccountTransactionRepository
+                        .saveAndFlush(releaseAmount(holdTransaction, transactionDate));
                 holdTransaction.updateReleaseId(releaseTransaction.getId());
                 savingsAccount.releaseOnHoldAmount(holdTransaction.getAmount());
                 savingsAccount.addTransaction(releaseTransaction);
@@ -493,11 +491,10 @@ public class InteropServiceImpl implements InteropService {
         SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, request.getTransferCode(), AMOUNT_HOLD.getValue());
 
         if (holdTransaction != null && holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
-            SavingsAccountTransaction releaseTransaction = releaseAmount(holdTransaction, transactionDate,
-                    DateUtils.getLocalDateTimeOfSystem(), getLoginUser());
+            SavingsAccountTransaction releaseTransaction = releaseAmount(holdTransaction, transactionDate);
             MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
-            releaseTransaction.updateRunningBalance(
-                    Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().add(holdTransaction.getAmount())));
+            releaseTransaction
+                    .setRunningBalance(Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().add(holdTransaction.getAmount())));
             releaseTransaction.updateCumulativeBalanceAndDates(accountCurrency, transactionDate);
             releaseTransaction = savingsAccountTransactionRepository.saveAndFlush(releaseTransaction);
             holdTransaction.updateReleaseId(releaseTransaction.getId());
@@ -650,10 +647,6 @@ public class InteropServiceImpl implements InteropService {
 
     public InteropIdentifier findIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
         return identifierRepository.findOneByTypeAndValueAndSubType(idType, idValue, subIdOrType);
-    }
-
-    private AppUser getLoginUser() {
-        return securityContext.getAuthenticatedUserIfPresent();
     }
 
     /*

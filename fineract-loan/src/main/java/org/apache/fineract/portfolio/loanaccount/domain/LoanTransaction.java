@@ -850,6 +850,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.manuallyAdjustedOrReversed = true;
     }
 
+    @Override
     public OffsetDateTime getCreatedDateTime() {
         return (this.getCreatedDate().isPresent() ? this.getCreatedDate().get() : DateUtils.getOffsetDateTimeOfTenantWithMostPrecision());
     }

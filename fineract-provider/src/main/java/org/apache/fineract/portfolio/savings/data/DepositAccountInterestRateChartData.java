@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartData;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSlabData;
 
@@ -159,12 +160,11 @@ public final class DepositAccountInterestRateChartData {
         if (this.chartSlabs == null) {
             this.chartSlabs = new ArrayList<>();
         }
-
         this.chartSlabs.add(chartSlab);
     }
 
     public boolean isFromDateAfter(final LocalDate compareDate) {
-        return (compareDate == null) ? false : this.fromDate.isAfter(compareDate);
+        return compareDate != null && DateUtils.isAfter(this.fromDate, compareDate);
     }
 
     public LocalDate endDate() {

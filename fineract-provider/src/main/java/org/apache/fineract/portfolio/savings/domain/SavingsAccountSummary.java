@@ -216,7 +216,7 @@ public final class SavingsAccountSummary {
             final SavingsAccountTransaction savingsAccountTransaction = savingsAccountTransactions.get(i);
             if (savingsAccountTransaction.isInterestPostingAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()
                     && !isUpdated) {
-                setInterestPostedTillDate(savingsAccountTransaction.getLastTransactionDate());
+                setInterestPostedTillDate(savingsAccountTransaction.getTransactionDate());
                 isUpdated = true;
                 if (!backdatedTxnsAllowedTill) {
                     break;
@@ -224,7 +224,7 @@ public final class SavingsAccountSummary {
             }
             if (savingsAccountTransaction.isOverdraftInterestAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()
                     && !isUpdated) {
-                setInterestPostedTillDate(savingsAccountTransaction.getLastTransactionDate());
+                setInterestPostedTillDate(savingsAccountTransaction.getTransactionDate());
                 isUpdated = true;
                 if (!backdatedTxnsAllowedTill) {
                     break;

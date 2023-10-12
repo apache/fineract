@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -33,7 +34,6 @@ import java.util.Locale;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.jetbrains.annotations.NotNull;
 
 public final class DateUtils {
 
@@ -46,6 +46,8 @@ public final class DateUtils {
 
     }
 
+    // DateTime
+
     public static ZoneId getSystemZoneId() {
         return ZoneId.systemDefault();
     }
@@ -56,27 +58,38 @@ public final class DateUtils {
     }
 
     public static LocalDate getLocalDateOfTenant() {
-        final ZoneId zone = getDateTimeZoneOfTenant();
-        return LocalDate.now(zone);
+        return LocalDate.now(getDateTimeZoneOfTenant());
     }
 
     public static LocalDateTime getLocalDateTimeOfTenant() {
-        final ZoneId zone = getDateTimeZoneOfTenant();
-        return LocalDateTime.now(zone).truncatedTo(ChronoUnit.SECONDS);
+        return getLocalDateTimeOfTenant(null);
     }
 
-    public static OffsetDateTime getOffsetDateTimeOfTenant() {
-        final ZoneId zone = getDateTimeZoneOfTenant();
-        return OffsetDateTime.now(zone).truncatedTo(ChronoUnit.SECONDS);
+    public static LocalDateTime getLocalDateTimeOfTenant(ChronoUnit truncate) {
+        LocalDateTime now = LocalDateTime.now(getDateTimeZoneOfTenant());
+        return truncate == null ? now : now.truncatedTo(truncate);
     }
 
     public static OffsetDateTime getOffsetDateTimeOfTenantWithMostPrecision() {
-        final ZoneId zone = getDateTimeZoneOfTenant();
-        return OffsetDateTime.now(zone);
+        return getOffsetDateTimeOfTenant(null);
+    }
+
+    public static OffsetDateTime getOffsetDateTimeOfTenant() {
+        return getOffsetDateTimeOfTenant(null);
+    }
+
+    public static OffsetDateTime getOffsetDateTimeOfTenant(ChronoUnit truncate) {
+        OffsetDateTime now = OffsetDateTime.now(getDateTimeZoneOfTenant());
+        return truncate == null ? now : now.truncatedTo(truncate);
     }
 
     public static LocalDateTime getLocalDateTimeOfSystem() {
-        return LocalDateTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS);
+        return getLocalDateTimeOfSystem(null);
+    }
+
+    public static LocalDateTime getLocalDateTimeOfSystem(ChronoUnit truncate) {
+        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        return truncate == null ? now : now.truncatedTo(truncate);
     }
 
     public static LocalDateTime getAuditLocalDateTime() {
@@ -87,20 +100,174 @@ public final class DateUtils {
         return OffsetDateTime.now(ZoneOffset.UTC);
     }
 
-    public static boolean isDateInTheFuture(final LocalDate localDate) {
-        return localDate.isAfter(getBusinessLocalDate());
+    public static int compare(LocalDateTime first, LocalDateTime second) {
+        return compare(first, second, null);
     }
+
+    public static int compare(LocalDateTime first, LocalDateTime second, ChronoUnit truncate) {
+        if (first == null) {
+            return second == null ? 0 : -1;
+        }
+        if (second == null) {
+            return 1;
+        }
+        return truncate == null ? first.compareTo(second) : first.truncatedTo(truncate).compareTo(second.truncatedTo(truncate));
+    }
+
+    public static boolean isEqual(LocalDateTime first, LocalDateTime second) {
+        return isEqual(first, second, null);
+    }
+
+    public static boolean isEqual(LocalDateTime first, LocalDateTime second, ChronoUnit truncate) {
+        return compare(first, second, truncate) == 0;
+    }
+
+    public static boolean isEqualTenantDateTime(LocalDateTime dateTime) {
+        return isEqualTenantDateTime(dateTime, null);
+    }
+
+    public static boolean isEqualTenantDateTime(LocalDateTime dateTime, ChronoUnit truncate) {
+        return isEqual(dateTime, getLocalDateTimeOfTenant(), truncate);
+    }
+
+    public static boolean isEqualSystemDateTime(LocalDateTime dateTime) {
+        return isEqualSystemDateTime(dateTime, null);
+    }
+
+    public static boolean isEqualSystemDateTime(LocalDateTime dateTime, ChronoUnit truncate) {
+        return isEqual(dateTime, getLocalDateTimeOfSystem(), truncate);
+    }
+
+    public static boolean isBefore(LocalDateTime first, LocalDateTime second) {
+        return isBefore(first, second, null);
+    }
+
+    public static boolean isBefore(LocalDateTime first, LocalDateTime second, ChronoUnit truncate) {
+        return compare(first, second, truncate) < 0;
+    }
+
+    public static boolean isBeforeTenantDateTime(LocalDateTime dateTime) {
+        return isBeforeTenantDateTime(dateTime, null);
+    }
+
+    public static boolean isBeforeTenantDateTime(LocalDateTime dateTime, ChronoUnit truncate) {
+        return isBefore(dateTime, getLocalDateTimeOfTenant(), truncate);
+    }
+
+    public static boolean isBeforeSystemDateTime(LocalDateTime dateTime) {
+        return isBeforeSystemDateTime(dateTime, null);
+    }
+
+    public static boolean isBeforeSystemDateTime(LocalDateTime dateTime, ChronoUnit truncate) {
+        return isBefore(dateTime, getLocalDateTimeOfSystem(), truncate);
+    }
+
+    public static boolean isAfter(LocalDateTime first, LocalDateTime second) {
+        return isAfter(first, second, null);
+    }
+
+    public static boolean isAfter(LocalDateTime first, LocalDateTime second, ChronoUnit truncate) {
+        return compare(first, second, truncate) > 0;
+    }
+
+    public static boolean isAfterTenantDateTime(LocalDateTime dateTime) {
+        return isAfterTenantDateTime(dateTime, null);
+    }
+
+    public static boolean isAfterTenantDateTime(LocalDateTime dateTime, ChronoUnit truncate) {
+        return isAfter(dateTime, getLocalDateTimeOfTenant(), truncate);
+    }
+
+    public static boolean isAfterSystemDateTime(LocalDateTime dateTime) {
+        return isAfterSystemDateTime(dateTime, null);
+    }
+
+    public static boolean isAfterSystemDateTime(LocalDateTime dateTime, ChronoUnit truncate) {
+        return isAfter(dateTime, getLocalDateTimeOfSystem(), truncate);
+    }
+
+    public static int compare(OffsetDateTime first, OffsetDateTime second) {
+        return compare(first, second, null);
+    }
+
+    public static int compare(OffsetDateTime first, OffsetDateTime second, ChronoUnit truncate) {
+        if (first == null) {
+            return second == null ? 0 : -1;
+        }
+        if (second == null) {
+            return 1;
+        }
+        return truncate == null ? first.compareTo(second) : first.truncatedTo(truncate).compareTo(second.truncatedTo(truncate));
+    }
+
+    public static boolean isEqual(OffsetDateTime first, OffsetDateTime second) {
+        return isEqual(first, second, null);
+    }
+
+    public static boolean isEqual(OffsetDateTime first, OffsetDateTime second, ChronoUnit truncate) {
+        return compare(first, second, truncate) == 0;
+    }
+
+    public static boolean isEqualTenantDateTime(OffsetDateTime dateTime) {
+        return isEqualTenantDateTime(dateTime, null);
+    }
+
+    public static boolean isEqualTenantDateTime(OffsetDateTime dateTime, ChronoUnit truncate) {
+        return isEqual(dateTime, getOffsetDateTimeOfTenant(), truncate);
+    }
+
+    public static boolean isBefore(OffsetDateTime first, OffsetDateTime second) {
+        return isBefore(first, second, null);
+    }
+
+    public static boolean isBefore(OffsetDateTime first, OffsetDateTime second, ChronoUnit truncate) {
+        return compare(first, second, truncate) < 0;
+    }
+
+    public static boolean isBeforeTenantDateTime(OffsetDateTime dateTime) {
+        return isBeforeTenantDateTime(dateTime, null);
+    }
+
+    public static boolean isBeforeTenantDateTime(OffsetDateTime dateTime, ChronoUnit truncate) {
+        return isBefore(dateTime, getOffsetDateTimeOfTenant(), truncate);
+    }
+
+    public static boolean isAfter(OffsetDateTime first, OffsetDateTime second) {
+        return isAfter(first, second, null);
+    }
+
+    public static boolean isAfter(OffsetDateTime first, OffsetDateTime second, ChronoUnit truncate) {
+        return compare(first, second, truncate) > 0;
+    }
+
+    public static boolean isAfterTenantDateTime(OffsetDateTime dateTime) {
+        return isAfterTenantDateTime(dateTime, null);
+    }
+
+    public static boolean isAfterTenantDateTime(OffsetDateTime dateTime, ChronoUnit truncate) {
+        return isAfter(dateTime, getOffsetDateTimeOfTenant(), truncate);
+    }
+
+    // Date
 
     public static LocalDate getBusinessLocalDate() {
         return ThreadLocalContextUtil.getBusinessDate();
     }
 
-    public static long getDifferenceInDays(final LocalDate localDateBefore, final LocalDate localDateAfter) {
-        return DAYS.between(localDateBefore, localDateAfter);
-    }
-
     public static int compareToBusinessDate(LocalDate date) {
         return compare(date, getBusinessLocalDate());
+    }
+
+    public static boolean isEqualTenantDate(LocalDate date) {
+        return isEqual(date, getLocalDateOfTenant());
+    }
+
+    public static boolean isBeforeTenantDate(LocalDate date) {
+        return isBefore(date, getLocalDateOfTenant());
+    }
+
+    public static boolean isAfterTenantDate(LocalDate date) {
+        return isAfter(date, getLocalDateOfTenant());
     }
 
     public static boolean isEqualBusinessDate(LocalDate date) {
@@ -115,8 +282,12 @@ public final class DateUtils {
         return isAfter(date, getBusinessLocalDate());
     }
 
+    public static boolean isDateInTheFuture(final LocalDate localDate) {
+        return isAfterBusinessDate(localDate);
+    }
+
     public static int compare(LocalDate first, LocalDate second) {
-        return first == null ? (second == null ? 0 : -1) : first.compareTo(second);
+        return first == null ? (second == null ? 0 : -1) : (second == null ? 1 : first.compareTo(second));
     }
 
     public static boolean isEqual(LocalDate first, LocalDate second) {
@@ -130,6 +301,12 @@ public final class DateUtils {
     public static boolean isAfter(LocalDate first, LocalDate second) {
         return first != null && (second == null || first.isAfter(second));
     }
+
+    public static long getDifferenceInDays(final LocalDate localDateBefore, final LocalDate localDateAfter) {
+        return DAYS.between(localDateBefore, localDateAfter);
+    }
+
+    // Parse, format
 
     public static LocalDate parseLocalDate(String stringDate) {
         return parseLocalDate(stringDate, null);

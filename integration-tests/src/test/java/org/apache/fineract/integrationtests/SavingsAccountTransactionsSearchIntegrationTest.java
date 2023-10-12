@@ -30,7 +30,6 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -162,7 +161,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
     @Test
     public void testSavingsTransactionsSearchSubmittedDateFromTo() throws JsonProcessingException {
-        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        LocalDate businessDate = Utils.getLocalDateOfTenant();
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);

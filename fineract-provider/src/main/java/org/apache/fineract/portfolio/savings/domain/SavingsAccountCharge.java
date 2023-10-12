@@ -41,7 +41,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -58,7 +60,7 @@ import org.slf4j.LoggerFactory;
  */
 @Entity
 @Table(name = "m_savings_account_charge")
-public class SavingsAccountCharge extends AbstractPersistableCustom {
+public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountCharge.class);
 
@@ -448,7 +450,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
-        if (command.isChangeInLocalDateParameterNamed(dueAsOfDateParamName, getDueLocalDate())) {
+        if (command.isChangeInLocalDateParameterNamed(dueAsOfDateParamName, getDueDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(dueAsOfDateParamName);
             actualChanges.put(dueAsOfDateParamName, valueAsInput);
             actualChanges.put(dateFormatParamName, dateFormatAsInput);
@@ -521,7 +523,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         return value.compareTo(BigDecimal.ZERO) > 0;
     }
 
-    public LocalDate getDueLocalDate() {
+    public LocalDate getDueDate() {
         return this.dueDate;
     }
 
@@ -754,17 +756,13 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         SavingsAccountCharge that = (SavingsAccountCharge) o;
         return (penaltyCharge == that.penaltyCharge) && (paid == that.paid) && (waived == that.waived) && (status == that.status)
                 && Objects.equals(savingsAccount, that.savingsAccount) && Objects.equals(charge, that.charge)
-                && Objects.equals(chargeTime, that.chargeTime) && dueDate.compareTo(that.dueDate) == 0
-                        ? Boolean.TRUE
-                        : Boolean.FALSE && Objects.equals(feeOnMonth, that.feeOnMonth) && Objects.equals(feeOnDay, that.feeOnDay)
-                                && Objects.equals(feeInterval, that.feeInterval)
-                                && Objects.equals(chargeCalculation, that.chargeCalculation) && Objects.equals(percentage, that.percentage)
-                                && Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo)
-                                && Objects.equals(amount, that.amount) && Objects.equals(amountPaid, that.amountPaid)
-                                && Objects.equals(amountWaived, that.amountWaived)
-                                && Objects.equals(amountWrittenOff, that.amountWrittenOff)
-                                && Objects.equals(amountOutstanding, that.amountOutstanding)
-                                && inactivationDate.compareTo(that.inactivationDate) == 0 ? Boolean.TRUE : Boolean.FALSE;
+                && Objects.equals(chargeTime, that.chargeTime) && DateUtils.isEqual(dueDate, that.dueDate)
+                && Objects.equals(feeOnMonth, that.feeOnMonth) && Objects.equals(feeOnDay, that.feeOnDay)
+                && Objects.equals(feeInterval, that.feeInterval) && Objects.equals(chargeCalculation, that.chargeCalculation)
+                && Objects.equals(percentage, that.percentage) && Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo)
+                && Objects.equals(amount, that.amount) && Objects.equals(amountPaid, that.amountPaid)
+                && Objects.equals(amountWaived, that.amountWaived) && Objects.equals(amountWrittenOff, that.amountWrittenOff)
+                && Objects.equals(amountOutstanding, that.amountOutstanding) && DateUtils.isEqual(inactivationDate, that.inactivationDate);
     }
 
     @Override
@@ -803,12 +801,12 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         if (isAnnualFee() || isMonthlyFee()) {
             nextDueLocalDate = startingDate.withMonth(this.feeOnMonth);
             nextDueLocalDate = setDayOfMonth(nextDueLocalDate);
-            while (startingDate.isAfter(nextDueLocalDate)) {
+            while (DateUtils.isBefore(nextDueLocalDate, startingDate)) {
                 nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
             }
         } else if (isWeeklyFee()) {
-            nextDueLocalDate = getDueLocalDate();
-            while (startingDate.isAfter(nextDueLocalDate)) {
+            nextDueLocalDate = getDueDate();
+            while (DateUtils.isBefore(nextDueLocalDate, startingDate)) {
                 nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
             }
         } else {
@@ -883,12 +881,11 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     public boolean isChargeIsDue(final LocalDate nextDueDate) {
-        return this.getDueLocalDate().isBefore(nextDueDate);
+        return DateUtils.isBefore(getDueDate(), nextDueDate);
     }
 
     public boolean isChargeIsOverPaid(final LocalDate nextDueDate) {
-        final BigDecimal amountPaid = this.amountPaid == null ? BigDecimal.ZERO : amountPaid();
-        return this.getDueLocalDate().isAfter(nextDueDate) && amountPaid.compareTo(BigDecimal.ZERO) > 0;
+        return DateUtils.isAfter(getDueDate(), nextDueDate) && MathUtil.isGreaterThanZero(amountPaid());
     }
 
     private BigDecimal amountPaid() {

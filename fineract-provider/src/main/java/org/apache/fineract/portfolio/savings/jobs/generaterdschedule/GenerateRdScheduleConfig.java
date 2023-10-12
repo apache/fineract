@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.jobs.generaterdschedule;
 
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -43,6 +44,8 @@ public class GenerateRdScheduleConfig {
     private RoutingDataSourceServiceFactory dataSourceServiceFactory;
     @Autowired
     private DepositAccountReadPlatformService depositAccountReadPlatformService;
+    @Autowired
+    private PlatformSecurityContext securityContext;
 
     @Bean
     protected Step generateRdScheduleStep() {
@@ -58,6 +61,6 @@ public class GenerateRdScheduleConfig {
 
     @Bean
     public GenerateRdScheduleTasklet generateRdScheduleTasklet() {
-        return new GenerateRdScheduleTasklet(dataSourceServiceFactory, depositAccountReadPlatformService);
+        return new GenerateRdScheduleTasklet(dataSourceServiceFactory, depositAccountReadPlatformService, securityContext);
     }
 }

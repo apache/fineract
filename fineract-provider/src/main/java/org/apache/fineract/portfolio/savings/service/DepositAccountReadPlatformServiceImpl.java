@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_BY_DB_FIELD;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -524,7 +526,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         sb.append(" select rd.savings_account_id savingsId, rd.mandatory_recommended_deposit_amount as amount,");
         sb.append(" mc.recurrence as recurrence ,");
         sb.append(" max(ms.duedate) as dueDate , max(ms.installment) as installment,");
-        sb.append(" count(ms.installment) as futureInstallemts");
+        sb.append(" count(ms.installment) as futureInstallments");
         sb.append(" from m_deposit_account_term_and_preclosure dat ");
         sb.append(" inner join m_savings_account sa on sa.id = dat.savings_account_id and sa.status_enum = ?");
         sb.append(" inner join m_deposit_account_recurring_detail rd on rd.savings_account_id = dat.savings_account_id ");
@@ -1163,7 +1165,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("left join m_account_transfer_transaction totran on totran.to_savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id ");
             sqlBuilder.append("left join m_payment_type pt on pd.payment_type_id = pt.id ");
-            sqlBuilder.append("left join m_appuser au on au.id=tr.appuser_id ");
+            sqlBuilder.append("left join m_appuser au on au.id = tr." + CREATED_BY_DB_FIELD);
             this.schemaSql = sqlBuilder.toString();
         }
 

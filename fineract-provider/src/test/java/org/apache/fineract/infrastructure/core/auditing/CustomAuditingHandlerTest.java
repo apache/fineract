@@ -54,7 +54,7 @@ public class CustomAuditingHandlerTest {
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
         AbstractAuditableWithUTCDateTimeCustom targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
         targetObject = testInstance.markCreated(targetObject);
-        OffsetDateTime now = OffsetDateTime.now(DateUtils.getDateTimeZoneOfTenant());
+        OffsetDateTime now = DateUtils.getAuditOffsetDateTime();
 
         assertTrue(targetObject.getCreatedDate().isPresent());
         assertEquals(now.getYear(), targetObject.getCreatedDate().get().getYear());
@@ -70,7 +70,7 @@ public class CustomAuditingHandlerTest {
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
         AbstractAuditableWithUTCDateTimeCustom targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
         targetObject = testInstance.markModified(targetObject);
-        OffsetDateTime now = OffsetDateTime.now(DateUtils.getDateTimeZoneOfTenant());
+        OffsetDateTime now = DateUtils.getAuditOffsetDateTime();
 
         assertTrue(targetObject.getLastModifiedDate().isPresent());
         assertEquals(now.getYear(), targetObject.getLastModifiedDate().get().getYear());
@@ -86,7 +86,7 @@ public class CustomAuditingHandlerTest {
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
         AbstractAuditableCustom targetObject = Mockito.spy(AbstractAuditableCustom.class);
         targetObject = testInstance.markModified(targetObject);
-        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime now = DateUtils.getLocalDateTimeOfSystem();
 
         assertTrue(targetObject.getLastModifiedDate().isPresent());
         assertEquals(now.getYear(), targetObject.getLastModifiedDate().get().getYear());
@@ -102,7 +102,7 @@ public class CustomAuditingHandlerTest {
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
         AbstractAuditableCustom targetObject = Mockito.spy(AbstractAuditableCustom.class);
         targetObject = testInstance.markCreated(targetObject);
-        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime now = DateUtils.getLocalDateTimeOfSystem();
 
         assertTrue(targetObject.getCreatedDate().isPresent());
         assertEquals(now.getYear(), targetObject.getCreatedDate().get().getYear());

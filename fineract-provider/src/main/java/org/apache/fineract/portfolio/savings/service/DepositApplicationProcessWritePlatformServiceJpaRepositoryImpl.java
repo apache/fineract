@@ -47,7 +47,6 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.FixedDepositAccountCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.RecurringDepositAccountCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -384,7 +383,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     DepositAccountType.FIXED_DEPOSIT);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), DepositAccountType.FIXED_DEPOSIT.resourceName());
+            account.validateNewApplicationState(DepositAccountType.FIXED_DEPOSIT.resourceName());
 
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
@@ -474,7 +473,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     DepositAccountType.RECURRING_DEPOSIT);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), DepositAccountType.RECURRING_DEPOSIT.resourceName());
+            account.validateNewApplicationState(DepositAccountType.RECURRING_DEPOSIT.resourceName());
 
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
@@ -638,7 +637,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command, DateUtils.getBusinessLocalDate());
+        final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -708,7 +707,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command, DateUtils.getBusinessLocalDate());
+        final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -742,8 +741,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command,
-                DateUtils.getBusinessLocalDate());
+        final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 

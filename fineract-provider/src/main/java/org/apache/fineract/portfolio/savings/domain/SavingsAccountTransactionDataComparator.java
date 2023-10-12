@@ -19,26 +19,25 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.util.Comparator;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 
 public class SavingsAccountTransactionDataComparator implements Comparator<SavingsAccountTransactionData> {
 
     @Override
     public int compare(final SavingsAccountTransactionData o1, final SavingsAccountTransactionData o2) {
-        int compareResult = 0;
-
-        final int comparsion = o1.getTransactionDate().compareTo(o2.getTransactionDate());
-        if (comparsion == 0) {
-            compareResult = o1.getSubmittedOnDate().compareTo(o2.getSubmittedOnDate());
-            if (compareResult == 0 && o1.getId() != null && o2.getId() != null) {
-                compareResult = o1.getId().compareTo(o2.getId());
-            } else {
-                compareResult = comparsion;
-            }
-        } else {
-            compareResult = comparsion;
+        int result = DateUtils.compare(o1.getTransactionDate(), o2.getTransactionDate());
+        if (result != 0) {
+            return result;
         }
-        return compareResult;
+        result = DateUtils.compare(o1.getSubmittedOnDate(), o2.getSubmittedOnDate());
+        if (result != 0) {
+            return result;
+        }
+        if (o1.getId() != null && o2.getId() != null) {
+            return o1.getId().compareTo(o2.getId());
+        }
+        return 0;
     }
 
 }

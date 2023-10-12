@@ -112,8 +112,8 @@ public class InteropTransactionData extends CommandProcessingResult {
         String currency = savingsAccount.getCurrency().getCode();
         BigDecimal runningBalance = transaction.getRunningBalance(savingsAccount.getCurrency()).getAmount();
 
-        LocalDate bookingDateTime = transaction.getTransactionLocalDate();
-        LocalDate endOfBalanceLocalDate = transaction.getEndOfBalanceLocalDate();
+        LocalDate bookingDateTime = transaction.getTransactionDate();
+        LocalDate endOfBalanceLocalDate = transaction.getEndOfBalanceDate();
         LocalDate valueDateTime = endOfBalanceLocalDate == null ? bookingDateTime : endOfBalanceLocalDate;
 
         StringBuilder sb = new StringBuilder();

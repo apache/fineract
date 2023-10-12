@@ -224,7 +224,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
         this.depositAmount = depositAmount;
     }
 
-    public LocalDate getMaturityLocalDate() {
+    public LocalDate getMaturityDate() {
         return this.maturityDate;
     }
 
@@ -247,7 +247,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
         }
 
         Integer actualDepositPeriod = this.depositPeriod;
-        if (depositFromDate == null || getMaturityLocalDate() == null || interestPostingUpToDate.isEqual(getMaturityLocalDate())) {
+        if (depositFromDate == null || getMaturityDate() == null || DateUtils.isEqual(interestPostingUpToDate, getMaturityDate())) {
             return actualDepositPeriod;
         }
 

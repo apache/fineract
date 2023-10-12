@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
@@ -55,8 +56,7 @@ public final class SavingsHelper {
         LocalDate periodEndDate = periodStartDate;
         LocalDate actualPeriodStartDate = periodStartDate;
 
-        while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
-
+        while (!DateUtils.isAfter(periodStartDate, interestPostingUpToDate) && !DateUtils.isAfter(periodEndDate, interestPostingUpToDate)) {
             final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
                     interestPostingUpToDate, financialYearBeginningMonth);
 
@@ -64,8 +64,7 @@ public final class SavingsHelper {
 
             if (!postInterestAsOn.isEmpty()) {
                 for (LocalDate transactiondate : postInterestAsOn) {
-                    if (periodStartDate.isBefore(transactiondate)
-                            && (periodEndDate.isAfter(transactiondate) || periodEndDate.isEqual(transactiondate))) {
+                    if (DateUtils.isAfter(transactiondate, periodStartDate) && !DateUtils.isAfter(transactiondate, periodEndDate)) {
                         periodEndDate = transactiondate.minusDays(1);
                         actualPeriodStartDate = periodEndDate;
                         break;
@@ -75,7 +74,7 @@ public final class SavingsHelper {
 
             postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
 
-            if (actualPeriodStartDate.isEqual(periodEndDate)) {
+            if (DateUtils.isEqual(actualPeriodStartDate, periodEndDate)) {
                 periodEndDate = actualPeriodStartDate.plusDays(1);
                 periodStartDate = actualPeriodStartDate.plusDays(1);
             } else {
@@ -128,7 +127,7 @@ public final class SavingsHelper {
             break;
             case QUATERLY:
                 for (LocalDate quarterlyDate : quarterlyDates) {
-                    if (quarterlyDate.isAfter(periodStartDate)) {
+                    if (DateUtils.isAfter(quarterlyDate, periodStartDate)) {
                         periodEndDate = quarterlyDate;
                         isEndDateSet = true;
                         break;
@@ -141,7 +140,7 @@ public final class SavingsHelper {
             break;
             case BIANNUAL:
                 for (LocalDate biannualDate : biannualDates) {
-                    if (biannualDate.isAfter(periodStartDate)) {
+                    if (DateUtils.isAfter(biannualDate, periodStartDate)) {
                         periodEndDate = biannualDate;
                         isEndDateSet = true;
                         break;

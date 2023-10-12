@@ -258,8 +258,8 @@ public class FixedDepositProduct extends SavingsProduct {
             if (!existingChart.equals(comparingChart)) {
                 if (existingChart.chartFields().isOverlapping(comparingChart.chartFields())) {
                     baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.overlapping.from.and.end.dates",
-                            existingChart.getFromDateAsLocalDate(), existingChart.getEndDateAsLocalDate(),
-                            comparingChart.getFromDateAsLocalDate(), comparingChart.getEndDateAsLocalDate());
+                            existingChart.getFromDate(), existingChart.getEndDate(), comparingChart.getFromDate(),
+                            comparingChart.getEndDate());
                 }
             }
         }

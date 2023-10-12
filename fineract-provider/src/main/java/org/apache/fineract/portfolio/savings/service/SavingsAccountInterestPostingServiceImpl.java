@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -62,7 +64,6 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     public SavingsAccountData postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final boolean isInterestTransfer,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
             final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
-
         Money interestPostedToDate = Money.zero(savingsAccountData.getCurrency());
         LocalDate startInterestDate = getStartInterestCalculationDate(savingsAccountData);
 
@@ -84,13 +85,11 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         withholdTransactions.addAll(findWithHoldSavingsTransactionsWithPivotConfig(savingsAccountData));
 
         for (final PostingPeriod interestPostingPeriod : postingPeriods) {
-
             final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
             final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
 
-            if (!interestPostingTransactionDate.isAfter(interestPostingUpToDate)) {
+            if (!DateUtils.isAfter(interestPostingTransactionDate, interestPostingUpToDate)) {
                 interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
-
                 final SavingsAccountTransactionData postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate,
                         savingsAccountData);
 
@@ -245,7 +244,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         Money periodStartingBalance;
         if (savingsAccountData.getStartInterestCalculationDate() != null
                 && !savingsAccountData.getStartInterestCalculationDate().equals(savingsAccountData.getActivationLocalDate())) {
-            final SavingsAccountTransactionData transaction = retrieveLastTransactions(savingsAccountData);
+            final SavingsAccountTransactionData transaction = retrieveLastTransaction(savingsAccountData);
 
             if (transaction == null) {
                 periodStartingBalance = Money.zero(savingsAccountData.getCurrency());
@@ -329,13 +328,8 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     protected LocalDate getLockedInUntilLocalDate(final SavingsAccountData savingsAccount) {
-        LocalDate lockedInUntilLocalDate = null;
-        if (savingsAccount.getLockedInUntilDate() != null) {
-            lockedInUntilLocalDate = savingsAccount.getActivationLocalDate();
-            // lockedInUntilLocalDate = LocalDate.ofInstant(this.lockedInUntilDate.toInstant(),
-            // DateUtils.getDateTimeZoneOfTenant());
-        }
-        return lockedInUntilLocalDate;
+        LocalDate lockedInUntilLocalDate = savingsAccount.getLockedInUntilDate();
+        return lockedInUntilLocalDate == null ? savingsAccount.getActivationLocalDate() : lockedInUntilLocalDate;
     }
 
     private BigDecimal minBalanceForInterestCalculation(final SavingsAccountData savingsAccountData) {
@@ -358,20 +352,17 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         return savingsAccountData.getSavingsAccountTransactionData();
     }
 
-    private SavingsAccountTransactionData retrieveLastTransactions(final SavingsAccountData savingsAccountData) {
-        if (savingsAccountData.getSavingsAccountTransactionData() != null
-                && savingsAccountData.getSavingsAccountTransactionData().size() == 1) {
-            return savingsAccountData.getSavingsAccountTransactionData().get(0);
+    private SavingsAccountTransactionData retrieveLastTransaction(@NotNull SavingsAccountData savingsAccountData) {
+        List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
+        if (transactions == null || transactions.isEmpty()) {
+            return savingsAccountData.getLastSavingsAccountTransaction(); // what is this?
         }
-        final List<SavingsAccountTransactionData> listOfTransactionsSorted = new ArrayList<>();
-        listOfTransactionsSorted.addAll(savingsAccountData.getSavingsAccountTransactionData());
-        if (!listOfTransactionsSorted.isEmpty()) {
-            final SavingsAccountTransactionDataComparator transactionComparator = new SavingsAccountTransactionDataComparator();
-            Collections.sort(listOfTransactionsSorted, transactionComparator);
-        } else {
-            listOfTransactionsSorted.add(savingsAccountData.getLastSavingsAccountTransaction());
+        if (transactions.size() == 1) {
+            return transactions.get(0);
         }
-        return listOfTransactionsSorted.get(0);
+        final List<SavingsAccountTransactionData> listOfTransactionsSorted = new ArrayList<>(transactions);
+        listOfTransactionsSorted.sort(new SavingsAccountTransactionDataComparator());
+        return listOfTransactionsSorted.get(0); // this is the first transaction, not the last
     }
 
     public LocalDate getStartInterestCalculationDate(final SavingsAccountData savingsAccountData) {

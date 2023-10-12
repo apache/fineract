@@ -103,12 +103,12 @@ public class DepositAccountInterestRateChart extends AbstractPersistableCustom {
         return null;
     }
 
-    public LocalDate getFromDateAsLocalDate() {
-        return this.chartFields.getFromDateAsLocalDate();
+    public LocalDate getFromDate() {
+        return this.chartFields.getFromDate();
     }
 
-    public LocalDate getEndDateAsLocalDate() {
-        return this.chartFields.getEndDateAsLocalDate();
+    public LocalDate getEndDate() {
+        return this.chartFields.getEndDate();
     }
 
     public Long savingsAccountId() {

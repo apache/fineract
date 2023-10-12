@@ -30,6 +30,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 @Entity
@@ -67,18 +68,17 @@ public class InteropIdentifier extends AbstractPersistableCustom {
     protected InteropIdentifier() {}
 
     public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String value, String subType,
-            @NotNull String createdBy, @NotNull LocalDateTime createdOn) {
+            @NotNull String createdBy) {
         this.account = account;
         this.type = type;
         this.value = value;
         this.subType = subType;
         this.createdBy = createdBy;
-        this.createdOn = createdOn;
+        this.createdOn = DateUtils.getAuditLocalDateTime();
     }
 
-    public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String createdBy,
-            @NotNull LocalDateTime createdOn) {
-        this(account, type, null, null, createdBy, createdOn);
+    public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String createdBy) {
+        this(account, type, null, null, createdBy);
     }
 
     public SavingsAccount getAccount() {

@@ -42,7 +42,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -374,6 +376,14 @@ public final class Utils {
         return dateFormat.format(dateToBeConvert.getTime());
     }
 
+    public static OffsetDateTime getAuditOffsetDateTime() {
+        return OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
+    public static LocalDateTime getLocalDateTimeOfSystem() {
+        return LocalDateTime.now(ZoneId.systemDefault());
+    }
+
     public static TimeZone getTimeZoneOfTenant() {
         return TimeZone.getTimeZone(TENANT_TIME_ZONE);
     }
@@ -384,6 +394,10 @@ public final class Utils {
 
     public static LocalDate getLocalDateOfTenant() {
         return LocalDate.now(getZoneIdOfTenant());
+    }
+
+    public static LocalDateTime getLocalDateTimeOfTenant() {
+        return LocalDateTime.now(getZoneIdOfTenant());
     }
 
     public static Date convertJsonElementAsDate(JsonElement jsonElement) {
