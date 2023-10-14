@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.interestratechart.service;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -27,33 +28,16 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDataValidator;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 public class InterestRateChartWritePlatformServiceJpaRepositoryImpl implements InterestRateChartWritePlatformService {
 
-    @SuppressWarnings("unused")
-    private static final Logger LOG = LoggerFactory.getLogger(InterestRateChartWritePlatformServiceJpaRepositoryImpl.class);
     @SuppressWarnings("unused")
     private final PlatformSecurityContext context;
     private final InterestRateChartDataValidator interestRateChartDataValidator;
     private final InterestRateChartAssembler interestRateChartAssembler;
     private final InterestRateChartRepositoryWrapper interestRateChartRepository;
-
-    @Autowired
-    public InterestRateChartWritePlatformServiceJpaRepositoryImpl(PlatformSecurityContext context,
-            final InterestRateChartDataValidator interestRateChartDataValidator,
-            final InterestRateChartAssembler interestRateChartAssembler,
-            final InterestRateChartRepositoryWrapper interestRateChartRepository) {
-        this.context = context;
-        this.interestRateChartDataValidator = interestRateChartDataValidator;
-        this.interestRateChartAssembler = interestRateChartAssembler;
-        this.interestRateChartRepository = interestRateChartRepository;
-    }
 
     @Override
     @Transactional

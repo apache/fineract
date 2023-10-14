@@ -40,15 +40,12 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSla
 import org.apache.fineract.portfolio.interestratechart.exception.InterestRateChartNotFoundException;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
 import org.apache.fineract.portfolio.savings.data.DepositProductData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 public class InterestRateChartReadPlatformServiceImpl implements InterestRateChartReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -59,7 +56,6 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
     private final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
-    @Autowired
     public InterestRateChartReadPlatformServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService,
             final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,

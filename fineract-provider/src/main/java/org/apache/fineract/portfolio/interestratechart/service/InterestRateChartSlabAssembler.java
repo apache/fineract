@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -49,24 +50,13 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartS
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlabFields;
 import org.apache.fineract.portfolio.interestratechart.exception.InterestRateChartSlabNotFoundException;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class InterestRateChartSlabAssembler {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper;
     private final InterestIncentiveAssembler incentiveAssembler;
-
-    @Autowired
-    public InterestRateChartSlabAssembler(final FromJsonHelper fromApiJsonHelper,
-            final InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper,
-            final InterestIncentiveAssembler incentiveAssembler) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.interestRateChartRepositoryWrapper = interestRateChartRepositoryWrapper;
-        this.incentiveAssembler = incentiveAssembler;
-    }
 
     /**
      * Assembles a new {@link InterestRateChartSlab} from JSON Slabs passed in request
