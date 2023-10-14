@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.group.service;
 
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -35,18 +37,13 @@ import org.apache.fineract.portfolio.group.domain.GroupRole;
 import org.apache.fineract.portfolio.group.domain.GroupRoleRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
 import org.apache.fineract.portfolio.group.serialization.GroupRolesDataValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRolesWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(GroupRolesWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final GroupRepositoryWrapper groupRepository;
@@ -54,19 +51,6 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRoleRepositoryWrapper groupRoleRepository;
-
-    @Autowired
-    public GroupRolesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final GroupRepositoryWrapper groupRepository, final GroupRolesDataValidator fromApiJsonDeserializer,
-            final CodeValueRepositoryWrapper codeValueRepository, final ClientRepositoryWrapper clientRepository,
-            final GroupRoleRepositoryWrapper groupRoleRepository) {
-        this.context = context;
-        this.groupRepository = groupRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.codeValueRepository = codeValueRepository;
-        this.clientRepository = clientRepository;
-        this.groupRoleRepository = groupRoleRepository;
-    }
 
     @Override
     public CommandProcessingResult createRole(final JsonCommand command) {
@@ -111,7 +95,7 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
                     GroupingTypesApiConstants.clientIdParamName, roleId, clientId, command.getGroupId());
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
