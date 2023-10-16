@@ -728,4 +728,5 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public void updateDisableScheduleExtensionForDownPayment(boolean disableScheduleExtensionForDownPayment) {
         this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
     }
+
 }

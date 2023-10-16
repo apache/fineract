@@ -306,6 +306,8 @@ public class LoanAssembler {
             }
         }
 
+        loanApplication.updateEnableInstallmentLevelDelinquency(loanProduct.isEnableInstallmentLevelDelinquency());
+
         final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loanApplication.getOfficeId(),

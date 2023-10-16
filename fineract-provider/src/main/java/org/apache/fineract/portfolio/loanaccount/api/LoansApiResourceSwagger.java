@@ -1067,6 +1067,8 @@ final class LoansApiResourceSwagger {
         public GetDelinquencyRangesResponse delinquencyRange;
         @Schema(example = "false")
         public Boolean fraud;
+        @Schema(example = "false")
+        public Boolean enableInstallmentLevelDelinquency;
         @Schema(example = "250.000000")
         public Double totalOverpaid;
         public LocalDate lastClosedBusinessDate;

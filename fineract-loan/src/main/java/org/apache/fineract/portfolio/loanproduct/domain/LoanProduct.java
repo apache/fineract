@@ -207,6 +207,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @JoinColumn(name = "delinquency_bucket_id")
     private DelinquencyBucket delinquencyBucket;
 
+    @Column(name = "enable_installment_level_delinquency", nullable = false)
+    private boolean enableInstallmentLevelDelinquency = false;
+
     @Column(name = "due_days_for_repayment_event")
     private Integer dueDaysForRepaymentEvent;
 
@@ -403,6 +406,9 @@ public class LoanProduct extends AbstractPersistableCustom {
         final boolean disableScheduleExtensionForDownPayment = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT);
 
+        final boolean enableInstallmentLevelDelinquency = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules, name, shortName, description,
                 currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod,
                 interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
@@ -420,7 +426,8 @@ public class LoanProduct extends AbstractPersistableCustom {
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment,
                 disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
                 dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment,
-                enableAutoRepaymentForDownPayment, repaymentStartDateType, disableScheduleExtensionForDownPayment);
+                enableAutoRepaymentForDownPayment, repaymentStartDateType, disableScheduleExtensionForDownPayment,
+                enableInstallmentLevelDelinquency);
 
     }
 
@@ -635,7 +642,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType,
-            final boolean disableScheduleExtensionForDownPayment) {
+            final boolean disableScheduleExtensionForDownPayment, final boolean enableInstallmentLevelDelinquency) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -730,6 +737,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
         this.repaymentStartDateType = repaymentStartDateType;
+
+        this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
 
         validateLoanProductPreSave();
     }
@@ -1307,6 +1316,14 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.loanProductRelatedDetail.updateDisableScheduleExtensionForDownPayment(newValue);
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY,
+                this.isEnableInstallmentLevelDelinquency())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY);
+            actualChanges.put(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, newValue);
+            this.updateEnableInstallmentLevelDelinquency(newValue);
+        }
+
         return actualChanges;
     }
 
@@ -1704,6 +1721,14 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public RepaymentStartDateType getRepaymentStartDateType() {
         return this.repaymentStartDateType == null ? RepaymentStartDateType.INVALID : this.repaymentStartDateType;
+    }
+
+    public boolean isEnableInstallmentLevelDelinquency() {
+        return enableInstallmentLevelDelinquency;
+    }
+
+    public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
+        this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
 
 }

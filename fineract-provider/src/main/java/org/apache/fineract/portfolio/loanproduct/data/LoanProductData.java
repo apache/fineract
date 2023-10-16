@@ -207,6 +207,7 @@ public class LoanProductData implements Serializable {
     private final BigDecimal disbursedAmountPercentageForDownPayment;
     private final boolean enableAutoRepaymentForDownPayment;
     private final boolean disableScheduleExtensionForDownPayment;
+    private final boolean enableInstallmentLevelDelinquency;
 
     /**
      * Used when returning lookup information about loan product for dropdowns.
@@ -302,6 +303,7 @@ public class LoanProductData implements Serializable {
         final boolean enableAutoRepaymentForDownPayment = false;
         final EnumOptionData repaymentStartDateType = null;
         final boolean disableScheduleExtensionForDownPayment = false;
+        final boolean enableInstallmentLevelDelinquency = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -321,7 +323,7 @@ public class LoanProductData implements Serializable {
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
-                paymentAllocation, repaymentStartDateType, disableScheduleExtensionForDownPayment);
+                paymentAllocation, repaymentStartDateType, disableScheduleExtensionForDownPayment, enableInstallmentLevelDelinquency);
 
     }
 
@@ -417,6 +419,7 @@ public class LoanProductData implements Serializable {
         final Collection<AdvancedPaymentData> paymentAllocation = null;
         final EnumOptionData repaymentStartDateType = null;
         final boolean disableScheduleExtensionForDownPayment = false;
+        final boolean enableInstallmentLevelDelinquency = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -436,7 +439,7 @@ public class LoanProductData implements Serializable {
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
-                paymentAllocation, repaymentStartDateType, disableScheduleExtensionForDownPayment);
+                paymentAllocation, repaymentStartDateType, disableScheduleExtensionForDownPayment, enableInstallmentLevelDelinquency);
 
     }
 
@@ -539,6 +542,7 @@ public class LoanProductData implements Serializable {
         final Collection<AdvancedPaymentData> paymentAllocation = null;
         final EnumOptionData repaymentStartDateType = LoanEnumerations.repaymentStartDateType(RepaymentStartDateType.DISBURSEMENT_DATE);
         final boolean disableScheduleExtensionForDownPayment = false;
+        final boolean enableInstallmentLevelDelinquency = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -558,7 +562,7 @@ public class LoanProductData implements Serializable {
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
-                paymentAllocation, repaymentStartDateType, disableScheduleExtensionForDownPayment);
+                paymentAllocation, repaymentStartDateType, disableScheduleExtensionForDownPayment, enableInstallmentLevelDelinquency);
 
     }
 
@@ -655,6 +659,7 @@ public class LoanProductData implements Serializable {
         final Collection<AdvancedPaymentData> paymentAllocation = null;
         final EnumOptionData repaymentStartDateType = LoanEnumerations.repaymentStartDateType(RepaymentStartDateType.DISBURSEMENT_DATE);
         final boolean disableScheduleExtensionForDownPayment = false;
+        final boolean enableInstallmentLevelDelinquency = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -674,7 +679,7 @@ public class LoanProductData implements Serializable {
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
-                paymentAllocation, repaymentStartDateType, disableScheduleExtensionForDownPayment);
+                paymentAllocation, repaymentStartDateType, disableScheduleExtensionForDownPayment, enableInstallmentLevelDelinquency);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -723,7 +728,7 @@ public class LoanProductData implements Serializable {
             final Integer overDueDaysForRepaymentEvent, final boolean enableDownPayment,
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment,
             final Collection<AdvancedPaymentData> paymentAllocation, final EnumOptionData repaymentStartDateType,
-            final boolean disableScheduleExtensionForDownPayment) {
+            final boolean disableScheduleExtensionForDownPayment, final boolean enableInstallmentLevelDelinquency) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -851,6 +856,7 @@ public class LoanProductData implements Serializable {
         this.advancedPaymentAllocationFutureInstallmentAllocationRules = FutureInstallmentAllocationRule.getValuesAsEnumOptionDataList();
         this.advancedPaymentAllocationTypes = PaymentAllocationType.getValuesAsEnumOptionDataList();
         this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
+        this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -1015,6 +1021,7 @@ public class LoanProductData implements Serializable {
         this.advancedPaymentAllocationFutureInstallmentAllocationRules = advancedPaymentAllocationFutureInstallmentAllocationRules;
         this.advancedPaymentAllocationTypes = advancedPaymentAllocationTypes;
         this.disableScheduleExtensionForDownPayment = productData.disableScheduleExtensionForDownPayment;
+        this.enableInstallmentLevelDelinquency = productData.enableInstallmentLevelDelinquency;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

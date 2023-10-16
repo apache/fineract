@@ -163,7 +163,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT,
             LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE,
-            LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT));
+            LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -762,6 +762,13 @@ public final class LoanProductDataValidator {
                     .extractIntegerNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element, Locale.getDefault());
             baseDataValidator.reset().parameter(LoanProductConstants.REPAYMENT_START_DATE_TYPE).value(repaymentStartDateType).notNull()
                     .isOneOfTheseValues(1, 2);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element)) {
+            final Boolean enableInstallmentLevelDelinquency = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY)
+                    .value(enableInstallmentLevelDelinquency).ignoreIfNull().validateForBooleanValue();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -1732,6 +1739,13 @@ public final class LoanProductDataValidator {
         }
         baseDataValidator.reset().parameter(LoanProductConstants.REPAYMENT_START_DATE_TYPE).value(repaymentStartDateType).notNull()
                 .isOneOfTheseValues(1, 2);
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element)) {
+            final Boolean enableInstallmentLevelDelinquency = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY)
+                    .value(enableInstallmentLevelDelinquency).ignoreIfNull().validateForBooleanValue();
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

@@ -460,6 +460,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @JoinColumn(name = "charged_off_by_userid")
     private AppUser chargedOffBy;
 
+    @Column(name = "enable_installment_level_delinquency", nullable = false)
+    private boolean enableInstallmentLevelDelinquency = false;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final String transactionProcessingStrategyCode, final LoanProductRelatedDetail loanRepaymentScheduleDetail,
@@ -7146,4 +7149,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public String getTransactionProcessingStrategyName() {
         return transactionProcessingStrategyName;
     }
+
+    public boolean isEnableInstallmentLevelDelinquency() {
+        return this.enableInstallmentLevelDelinquency;
+    }
+
+    public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
+        this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
+    }
+
 }
