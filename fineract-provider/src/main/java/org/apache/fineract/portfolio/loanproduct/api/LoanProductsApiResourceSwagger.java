@@ -152,6 +152,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean holdGuaranteeFunds;
         @Schema(example = "1")
         public Long delinquencyBucketId;
+        @Schema(example = "false")
+        public Boolean enableInstallmentLevelDelinquency;
         @Schema(example = "3")
         public Integer dueDaysForRepaymentEvent;
         @Schema(example = "3")
@@ -1237,6 +1239,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "50")
         public Integer principalThresholdForLastInstalment;
         public GetDelinquencyBucketsResponse delinquencyBucket;
+        @Schema(example = "false")
+        public Boolean enableInstallmentLevelDelinquency;
         @Schema(example = "true")
         public Boolean disallowExpectedDisbursements;
         @Schema(example = "3")
@@ -1372,6 +1376,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean holdGuaranteeFunds;
         @Schema(example = "1")
         public Long delinquencyBucketId;
+        @Schema(example = "false")
+        public Boolean enableInstallmentLevelDelinquency;
         @Schema(example = "3")
         public Integer dueDaysForRepaymentEvent;
         @Schema(example = "3")

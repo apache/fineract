@@ -145,4 +145,5 @@
     <include file="parts/0123_add_is_down_payment_to_repayment_schedule.xml" relativeToChangelogFile="true" />
     <include file="parts/0124_transaction_summary_with_asset_owner_report_typo_fix_3.xml" relativeToChangelogFile="true" />
     <include file="parts/0125_transaction_summary_with_asset_owner_report_chargeoff_reason.xml" relativeToChangelogFile="true" />
+    <include file="parts/0126_add_loan_product_installment_level_delinquency.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

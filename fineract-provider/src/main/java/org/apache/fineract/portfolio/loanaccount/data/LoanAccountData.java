@@ -253,6 +253,7 @@ public class LoanAccountData {
     private LocalDate overpaidOnDate;
     private CollectionData delinquent;
     private DelinquencyRangeData delinquencyRange;
+    private Boolean enableInstallmentLevelDelinquency;
     private LocalDate lastClosedBusinessDate;
     private Boolean chargedOff;
 
@@ -663,7 +664,7 @@ public class LoanAccountData {
             final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud,
             LocalDate lastClosedBusinessDate, LocalDate overpaidOnDate, final boolean chargedOff, final boolean enableDownPayment,
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment,
-            final boolean disableScheduleExtensionForDownPayment) {
+            final boolean disableScheduleExtensionForDownPayment, final boolean enableInstallmentLevelDelinquency) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -706,7 +707,8 @@ public class LoanAccountData {
                 .setLastClosedBusinessDate(lastClosedBusinessDate).setOverpaidOnDate(overpaidOnDate).setChargedOff(chargedOff)
                 .setEnableDownPayment(enableDownPayment).setDisbursedAmountPercentageForDownPayment(disbursedAmountPercentageForDownPayment)
                 .setEnableAutoRepaymentForDownPayment(enableAutoRepaymentForDownPayment)
-                .setDisableScheduleExtensionForDownPayment(disableScheduleExtensionForDownPayment);
+                .setDisableScheduleExtensionForDownPayment(disableScheduleExtensionForDownPayment)
+                .setEnableInstallmentLevelDelinquency(enableInstallmentLevelDelinquency);
     }
 
     /*
@@ -794,7 +796,8 @@ public class LoanAccountData {
                 .setChargedOff(acc.chargedOff).setEnableDownPayment(acc.enableDownPayment)
                 .setDisbursedAmountPercentageForDownPayment(acc.disbursedAmountPercentageForDownPayment)
                 .setEnableAutoRepaymentForDownPayment(acc.enableAutoRepaymentForDownPayment)
-                .setDisableScheduleExtensionForDownPayment(acc.disableScheduleExtensionForDownPayment);
+                .setDisableScheduleExtensionForDownPayment(acc.disableScheduleExtensionForDownPayment)
+                .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency);
     }
 
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final Collection<LoanProductData> productOptions,
@@ -869,7 +872,8 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
+                .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency);
     }
 
     public static LoanAccountData associateMemberVariations(final LoanAccountData acc, final Map<Long, Integer> memberLoanCycle) {
@@ -966,7 +970,8 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
+                .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency);
     }
 
     public static LoanAccountData withInterestRecalculationCalendarData(final LoanAccountData acc, final CalendarData calendarData,
@@ -1031,7 +1036,8 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
+                .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency);
     }
 
     public static LoanAccountData withLoanCalendarData(final LoanAccountData acc, final CalendarData calendarData) {
@@ -1089,7 +1095,8 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
+                .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency);
     }
 
     public static LoanAccountData withOriginalSchedule(final LoanAccountData acc, final LoanScheduleData originalSchedule) {
@@ -1150,7 +1157,8 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
+                .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency);
     }
 
     public static final Comparator<LoanAccountData> ClientNameComparator = (loan1, loan2) -> {
