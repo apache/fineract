@@ -116,7 +116,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             if (loanTransaction.getId() == null) {
-                processLatestTransaction(loanTransaction, currency, installments, charges, null);
+                processLatestTransaction(loanTransaction, currency, installments, charges, Money.zero(currency));
                 loanTransaction.adjustInterestComponent(currency);
             } else {
                 /**
@@ -127,7 +127,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
                 // Reset derived component of new loan transaction and
                 // re-process transaction
-                processLatestTransaction(newLoanTransaction, currency, installments, charges, null);
+                processLatestTransaction(newLoanTransaction, currency, installments, charges, Money.zero(currency));
                 newLoanTransaction.adjustInterestComponent(currency);
                 /**
                  * Check if the transaction amounts have changed. If so, reverse the original transaction and update
