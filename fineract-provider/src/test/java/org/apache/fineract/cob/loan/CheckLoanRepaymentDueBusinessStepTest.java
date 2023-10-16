@@ -92,7 +92,7 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
         when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
         when(loanForProcessing.getCurrency()).thenReturn(currency);
-        when(repaymentInstallment.getDue(currency)).thenReturn(money);
+        when(repaymentInstallment.getTotalOutstanding(currency)).thenReturn(money);
         when(money.isGreaterThanZero()).thenReturn(true);
 
         // when
@@ -150,7 +150,7 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
         when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
         when(loanForProcessing.getCurrency()).thenReturn(currency);
-        when(repaymentInstallment.getDue(currency)).thenReturn(money);
+        when(repaymentInstallment.getTotalOutstanding(currency)).thenReturn(money);
         when(money.isGreaterThanZero()).thenReturn(true);
 
         // when
