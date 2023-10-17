@@ -23,6 +23,7 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY;
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -30,11 +31,12 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -105,12 +107,7 @@ public class LoanTransactionAuditingIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("11 July 2022", loanID, "10000");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        OffsetDateTime now = OffsetDateTime.now(ZoneId.of("Asia/Kolkata"));
-        // Testing in minutes precision, but still need to take care around the end of the actual minute
-        if (now.getSecond() > 56) {
-            Thread.sleep(5000);
-            now = OffsetDateTime.now(ZoneId.of("Asia/Kolkata"));
-        }
+        OffsetDateTime now = Utils.getAuditDateTimeToCompare();
         HashMap repaymentDetails = this.loanTransactionHelper.makeRepayment("11 July 2022", 100.0f, loanID);
         Integer transactionId = (Integer) repaymentDetails.get("resourceId");
         HashMap auditFieldsResponse = LoanTransactionHelper.getLoanTransactionAuditFields(requestSpec, responseSpec, loanID, transactionId,
@@ -118,59 +115,39 @@ public class LoanTransactionAuditingIntegrationTest {
 
         OffsetDateTime createdDate = OffsetDateTime.parse((String) auditFieldsResponse.get(CREATED_DATE),
                 DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-
         OffsetDateTime lastModifiedDate = OffsetDateTime.parse((String) auditFieldsResponse.get(LAST_MODIFIED_DATE),
                 DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
         LOG.info("-------------------------Check Audit dates---------------------------");
         assertEquals(1, auditFieldsResponse.get(CREATED_BY));
-        assertEquals(now.getYear(), createdDate.getYear());
-        assertEquals(now.getMonth(), createdDate.getMonth());
-        assertEquals(now.getDayOfMonth(), createdDate.getDayOfMonth());
-        assertEquals(now.getHour(), createdDate.getHour());
-        assertEquals(now.getMinute(), createdDate.getMinute());
-
         assertEquals(1, auditFieldsResponse.get(LAST_MODIFIED_BY));
-        assertEquals(now.getYear(), lastModifiedDate.getYear());
-        assertEquals(now.getMonth(), lastModifiedDate.getMonth());
-        assertEquals(now.getDayOfMonth(), lastModifiedDate.getDayOfMonth());
-        assertEquals(now.getHour(), lastModifiedDate.getHour());
-        assertEquals(now.getMinute(), lastModifiedDate.getMinute());
+        assertTrue(DateUtils.isEqual(now, createdDate, ChronoUnit.MINUTES));
+        assertTrue(DateUtils.isEqual(now, lastModifiedDate, ChronoUnit.MINUTES));
 
         Thread.sleep(2000);
 
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization",
                 "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "P4ssw0rd"));
-
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper.reverseRepayment(loanID, transactionId, "11 July 2022");
 
-        now = OffsetDateTime.now(ZoneId.of("Asia/Kolkata"));
+        OffsetDateTime now2 = Utils.getAuditDateTimeToCompare();
+        this.loanTransactionHelper.reverseRepayment(loanID, transactionId, "11 July 2022");
 
         auditFieldsResponse = LoanTransactionHelper.getLoanTransactionAuditFields(requestSpec, responseSpec, loanID, transactionId, "");
 
-        createdDate = OffsetDateTime.parse((String) auditFieldsResponse.get(CREATED_DATE), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-
+        OffsetDateTime createdDate2 = OffsetDateTime.parse((String) auditFieldsResponse.get(CREATED_DATE),
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         lastModifiedDate = OffsetDateTime.parse((String) auditFieldsResponse.get(LAST_MODIFIED_DATE),
                 DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
         LOG.info("-------------------------Check Audit dates---------------------------");
         assertEquals(1, auditFieldsResponse.get(CREATED_BY));
-        assertEquals(now.getYear(), createdDate.getYear());
-        assertEquals(now.getMonth(), createdDate.getMonth());
-        assertEquals(now.getDayOfMonth(), createdDate.getDayOfMonth());
-        assertEquals(now.getHour(), createdDate.getHour());
-        assertEquals(now.getMinute(), createdDate.getMinute());
-
-        now = OffsetDateTime.now(ZoneId.of("Asia/Kolkata"));
+        assertTrue(DateUtils.isEqual(now, createdDate2, ChronoUnit.MINUTES));
+        assertTrue(DateUtils.isEqual(createdDate, createdDate2));
 
         assertEquals(userId, auditFieldsResponse.get(LAST_MODIFIED_BY));
-        assertEquals(now.getYear(), lastModifiedDate.getYear());
-        assertEquals(now.getMonth(), lastModifiedDate.getMonth());
-        assertEquals(now.getDayOfMonth(), lastModifiedDate.getDayOfMonth());
-        assertEquals(now.getHour(), lastModifiedDate.getHour());
-        assertEquals(now.getMinute(), lastModifiedDate.getMinute());
+        assertTrue(DateUtils.isEqual(now2, lastModifiedDate, ChronoUnit.MINUTES));
     }
 
     private Integer applyForLoanApplicationWithPaymentStrategyAndPastMonth(final Integer clientID, final Integer loanProductID,

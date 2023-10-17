@@ -44,7 +44,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -63,7 +62,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.http.conn.HttpHostConnectException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -376,12 +377,15 @@ public final class Utils {
         return dateFormat.format(dateToBeConvert.getTime());
     }
 
-    public static OffsetDateTime getAuditOffsetDateTime() {
-        return OffsetDateTime.now(ZoneOffset.UTC);
-    }
-
-    public static LocalDateTime getLocalDateTimeOfSystem() {
-        return LocalDateTime.now(ZoneId.systemDefault());
+    @NotNull
+    public static OffsetDateTime getAuditDateTimeToCompare() throws InterruptedException {
+        OffsetDateTime now = DateUtils.getAuditOffsetDateTime();
+        // Testing in minutes precision, but still need to take care around the end of the actual minute
+        if (now.getSecond() > 56) {
+            Thread.sleep(5000);
+            now = DateUtils.getAuditOffsetDateTime();
+        }
+        return now;
     }
 
     public static TimeZone getTimeZoneOfTenant() {

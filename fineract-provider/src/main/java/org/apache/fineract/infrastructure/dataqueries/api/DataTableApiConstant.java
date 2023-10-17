@@ -85,5 +85,6 @@ public final class DataTableApiConstant {
     public static final String API_FIELD_TYPE_DATETIME = "datetime";
     public static final String API_FIELD_TYPE_TIMESTAMP = "timestamp";
     public static final String API_FIELD_TYPE_TEXT = "text";
+    public static final String API_FIELD_TYPE_JSON = "json";
     public static final String API_FIELD_TYPE_DROPDOWN = "dropdown";
 }

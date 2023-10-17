@@ -1323,7 +1323,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             params.add(SearchUtil.parseJdbcColumnValue(columnHeader, dataParams.get(key), dateFormat, dateTimeFormat, locale, false,
                     sqlGenerator));
         }
-        final String sql = sqlGenerator.buildInsert(dataTableName, insertColumns);
         if (addScore) {
             List<Object> scoreIds = params.stream().filter(e -> e != null && !String.valueOf(e).isBlank()).toList();
             int scoreValue;
@@ -1339,6 +1338,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             insertColumns.add("score");
             params.add(scoreValue);
         }
+
+        final String sql = sqlGenerator.buildInsert(dataTableName, insertColumns, headersByName);
         try {
             int updated = jdbcTemplate.update(sql, params.toArray(Object[]::new));
             if (updated != 1) {
@@ -1446,8 +1447,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         Locale locale = localeString == null ? null : JsonParserHelper.localeFromString(localeString);
 
         DatabaseType dialect = sqlGenerator.getDialect();
-        List<String> updateColumns = new ArrayList<>(List.of(UPDATEDAT_FIELD_NAME));
-        List<Object> params = new ArrayList<>(List.of(DateUtils.getAuditLocalDateTime()));
+        ArrayList<String> updateColumns = new ArrayList<>(List.of(UPDATEDAT_FIELD_NAME));
+        ArrayList<Object> params = new ArrayList<>(List.of(DateUtils.getAuditLocalDateTime()));
         final HashMap<String, Object> changes = new HashMap<>();
         for (String key : dataParams.keySet()) {
             if (isTechnicalParam(key)) {
@@ -1474,7 +1475,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (!updateColumns.isEmpty()) {
             ResultsetColumnHeaderData pkColumn = SearchUtil.getFiltered(columnHeaders, ResultsetColumnHeaderData::getIsColumnPrimaryKey);
             params.add(primaryKey);
-            final String sql = sqlGenerator.buildUpdate(dataTableName, updateColumns) + " WHERE " + pkColumn.getColumnName() + " = ?";
+            final String sql = sqlGenerator.buildUpdate(dataTableName, updateColumns, headersByName) + " WHERE " + pkColumn.getColumnName()
+                    + " = ?";
             int updated = jdbcTemplate.update(sql, params.toArray(Object[]::new));
             if (updated != 1) {
                 throw new PlatformDataIntegrityException("error.msg.invalid.update", "Expected one updated row.");

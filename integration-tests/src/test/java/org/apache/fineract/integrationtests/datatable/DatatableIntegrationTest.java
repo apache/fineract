@@ -139,6 +139,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         String itsANumber = "itsanumber";
         String itsAString = "itsastring";
         String itsAText = "itsatext";
+        String itsAJson = "itsajson";
         String tst_tst_tst_cd_itsADropdown = tst_tst_tst + "_cd_itsadropdown";
         String dateFormat = "dateFormat";
 
@@ -155,43 +156,45 @@ public class DatatableIntegrationTest extends IntegrationTest {
         columnMap.put("apptableName", null);
         String errorRequestJsonString = new Gson().toJson(columnMap);
         ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, responseSpecError400);
-        HashMap<String, Object> errorResponse = this.datatableHelper.createDatatable(errorRequestJsonString, "");
+        DatatableHelper error400Helper = new DatatableHelper(this.requestSpec, responseSpecError400);
+        HashMap<String, Object> errorResponse = error400Helper.createDatatable(errorRequestJsonString, "");
         assertEquals("validation.msg.validation.errors.exist", ((Map) errorResponse).get("userMessageGlobalisationCode"));
         List errors = (List) ((Map) errorResponse).get("errors");
         assertEquals(2, errors.size());
         assertEquals("validation.msg.datatable.apptableName.cannot.be.blank", ((Map) errors.get(0)).get("userMessageGlobalisationCode"));
         assertEquals("validation.msg.datatable.apptableName.is.not.one.of.expected.enumerations",
                 ((Map) errors.get(1)).get("userMessageGlobalisationCode"));
+
         // set valid apptable name
         columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
 
         // try to create datatable with invalid column type
         HashMap<String, Object> textColumn = addDatatableColumn(datatableColumnsList, itsAText, "Invalid", true, null, null);
         errorRequestJsonString = new Gson().toJson(columnMap);
-        errorResponse = this.datatableHelper.createDatatable(errorRequestJsonString, "");
+        errorResponse = error400Helper.createDatatable(errorRequestJsonString, "");
         assertEquals("validation.msg.validation.errors.exist", ((Map) errorResponse).get("userMessageGlobalisationCode"));
         errors = (List) ((Map) errorResponse).get("errors");
         assertEquals(1, errors.size());
         Map error = (Map) errors.get(0);
         assertEquals("validation.msg.datatable.type.is.not.one.of.expected.enumerations", error.get("userMessageGlobalisationCode"));
-        assertTrue(((String) error.get("defaultUserMessage")).contains("string, number, boolean, decimal, date, datetime, text, dropdown"));
+        assertTrue(((String) error.get("defaultUserMessage"))
+                .contains("string, number, boolean, decimal, date, datetime, text, json, dropdown"));
+
         // set valid type
         textColumn.put("type", "Text");
+        // add json type
+        addDatatableColumn(datatableColumnsList, itsAJson, "Json", false, null, null);
 
         String datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map : {}", datatabelRequestJsonString);
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
 
         HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
         String datatableName = (String) datatableResponse.get("resourceIdentifier");
         DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
 
         // try to create with the same name
-        this.datatableHelper = new DatatableHelper(this.requestSpec, responseSpecError400);
-        errorResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
+        errorResponse = error400Helper.createDatatable(datatabelRequestJsonString, "");
         assertEquals("validation.msg.validation.errors.exist", ((Map) errorResponse).get("userMessageGlobalisationCode"));
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
 
         // creating client with datatables
         final Integer clientID = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
@@ -211,7 +214,19 @@ public class DatatableIntegrationTest extends IntegrationTest {
         datatableEntryMap.put("locale", "en");
         datatableEntryMap.put(dateFormat, "yyyy-MM-dd");
 
+        String json = "{\"testparam\": \"testvalue\"}";
+        // add invalid json
+        datatableEntryMap.put(itsAJson, '{' + json);
+
         String datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        ResponseSpecification responseSpecError403 = new ResponseSpecBuilder().expectStatusCode(403).build();
+        DatatableHelper error403Helper = new DatatableHelper(this.requestSpec, responseSpecError403);
+        errorResponse = error403Helper.createDatatableEntry(datatableName, clientID, genericResultSet, datatabelEntryRequestJsonString);
+
+        // add valid json
+        datatableEntryMap.put(itsAJson, json);
+
+        datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         LOG.info("map : {}", datatabelEntryRequestJsonString);
 
         HashMap<String, Object> datatableEntryResponse = this.datatableHelper.createDatatableEntry(datatableName, clientID,
@@ -222,37 +237,43 @@ public class DatatableIntegrationTest extends IntegrationTest {
         final HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, clientID, genericResultSet,
                 (Integer) datatableEntryResponse.get("resourceId"), "");
         assertNotNull(items);
-        assertEquals(1, ((List) items.get("data")).size());
 
-        assertEquals("client_id", ((Map) ((List) items.get("columnHeaders")).get(0)).get("columnName"));
-        assertEquals(clientID, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(0));
+        List columnHeaders = (List) items.get("columnHeaders");
+        List columnData = (List) items.get("data");
+        assertEquals(1, columnData.size());
 
-        assertEquals(itsABoolean, ((Map) ((List) items.get("columnHeaders")).get(1)).get("columnName"));
-        assertEquals(datatableEntryMap.get(itsABoolean), ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(1));
+        Map data = (Map) columnData.get(0);
 
-        assertEquals(itsADate, ((Map) ((List) items.get("columnHeaders")).get(2)).get("columnName"));
-        assertEquals(datatableEntryMap.get(itsADate),
-                Utils.arrayDateToString((List) ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(2)));
+        assertEquals("client_id", ((Map) columnHeaders.get(0)).get("columnName"));
+        assertEquals(clientID, ((List) data.get("row")).get(0));
 
-        assertEquals(itsADatetime, ((Map) ((List) items.get("columnHeaders")).get(3)).get("columnName"));
-        assertEquals(datatableEntryMap.get(itsADatetime),
-                Utils.arrayDateTimeToString((List) ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(3)));
+        assertEquals(itsABoolean, ((Map) columnHeaders.get(1)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsABoolean), ((List) data.get("row")).get(1));
 
-        assertEquals(itsADecimal, ((Map) ((List) items.get("columnHeaders")).get(4)).get("columnName"));
-        assertEquals(datatableEntryMap.get(itsADecimal), ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(4));
+        assertEquals(itsADate, ((Map) columnHeaders.get(2)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsADate), Utils.arrayDateToString((List) ((List) data.get("row")).get(2)));
 
-        assertEquals(tst_tst_tst_cd_itsADropdown, ((Map) ((List) items.get("columnHeaders")).get(5)).get("columnName"));
-        assertEquals(datatableEntryMap.get(tst_tst_tst_cd_itsADropdown),
-                ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(5));
+        assertEquals(itsADatetime, ((Map) columnHeaders.get(3)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsADatetime), Utils.arrayDateTimeToString((List) ((List) data.get("row")).get(3)));
 
-        assertEquals(itsANumber, ((Map) ((List) items.get("columnHeaders")).get(6)).get("columnName"));
-        assertEquals(datatableEntryMap.get(itsANumber), ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(6));
+        assertEquals(itsADecimal, ((Map) columnHeaders.get(4)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsADecimal), ((List) data.get("row")).get(4));
 
-        assertEquals(itsAString, ((Map) ((List) items.get("columnHeaders")).get(7)).get("columnName"));
-        assertEquals(datatableEntryMap.get(itsAString), ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(7));
+        assertEquals(tst_tst_tst_cd_itsADropdown, ((Map) columnHeaders.get(5)).get("columnName"));
+        assertEquals(datatableEntryMap.get(tst_tst_tst_cd_itsADropdown), ((List) data.get("row")).get(5));
 
-        assertEquals(itsAText, ((Map) ((List) items.get("columnHeaders")).get(8)).get("columnName"));
-        assertEquals(datatableEntryMap.get(itsAText), ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(8));
+        assertEquals(itsANumber, ((Map) columnHeaders.get(6)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsANumber), ((List) data.get("row")).get(6));
+
+        assertEquals(itsAString, ((Map) columnHeaders.get(7)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsAString), ((List) data.get("row")).get(7));
+
+        assertEquals(itsAText, ((Map) columnHeaders.get(8)).get("columnName"));
+        assertEquals(datatableEntryMap.get(itsAText), ((List) data.get("row")).get(8));
+
+        assertEquals(itsAJson, ((Map) columnHeaders.get(9)).get("columnName"));
+        Object jsonResponse = ((List) data.get("row")).get(9);
+        assertEquals(datatableEntryMap.get(itsAJson), jsonResponse instanceof Map ? ((Map) jsonResponse).get("value") : jsonResponse);
 
         // Read the Datatable entry generated with genericResultSet in false
         List<HashMap<String, Object>> datatableEntryResponseNoGenericResult = this.datatableHelper.readDatatableEntry(datatableName,
@@ -260,19 +281,17 @@ public class DatatableIntegrationTest extends IntegrationTest {
         assertNotNull(datatableEntryResponseNoGenericResult, "ERROR IN GETTING THE DATE VALUE FROM DATATABLE RECORD");
         assertEquals(1, datatableEntryResponseNoGenericResult.size());
 
-        assertEquals(clientID, datatableEntryResponseNoGenericResult.get(0).get("client_id"));
-        assertEquals(datatableEntryMap.get(itsABoolean),
-                Boolean.valueOf((String) datatableEntryResponseNoGenericResult.get(0).get(itsABoolean)));
-        assertEquals(datatableEntryMap.get(itsADate),
-                Utils.arrayDateToString((List) datatableEntryResponseNoGenericResult.get(0).get(itsADate)));
-        assertEquals(datatableEntryMap.get(itsADecimal), datatableEntryResponseNoGenericResult.get(0).get(itsADecimal));
-        assertEquals(datatableEntryMap.get(itsADatetime),
-                Utils.arrayDateTimeToString((List<Integer>) datatableEntryResponseNoGenericResult.get(0).get(itsADatetime)));
-        assertEquals(datatableEntryMap.get(tst_tst_tst_cd_itsADropdown),
-                datatableEntryResponseNoGenericResult.get(0).get(tst_tst_tst_cd_itsADropdown));
-        assertEquals(datatableEntryMap.get(itsANumber), datatableEntryResponseNoGenericResult.get(0).get(itsANumber));
-        assertEquals(datatableEntryMap.get(itsAString), datatableEntryResponseNoGenericResult.get(0).get(itsAString));
-        assertEquals(datatableEntryMap.get(itsAText), datatableEntryResponseNoGenericResult.get(0).get(itsAText));
+        HashMap<String, Object> responseMap = datatableEntryResponseNoGenericResult.get(0);
+        assertEquals(clientID, responseMap.get("client_id"));
+        assertEquals(datatableEntryMap.get(itsABoolean), Boolean.valueOf((String) responseMap.get(itsABoolean)));
+        assertEquals(datatableEntryMap.get(itsADate), Utils.arrayDateToString((List) responseMap.get(itsADate)));
+        assertEquals(datatableEntryMap.get(itsADecimal), responseMap.get(itsADecimal));
+        assertEquals(datatableEntryMap.get(itsADatetime), Utils.arrayDateTimeToString((List<Integer>) responseMap.get(itsADatetime)));
+        assertEquals(datatableEntryMap.get(tst_tst_tst_cd_itsADropdown), responseMap.get(tst_tst_tst_cd_itsADropdown));
+        assertEquals(datatableEntryMap.get(itsANumber), responseMap.get(itsANumber));
+        assertEquals(datatableEntryMap.get(itsAString), responseMap.get(itsAString));
+        assertEquals(datatableEntryMap.get(itsAText), responseMap.get(itsAText));
+        assertEquals(datatableEntryMap.get(itsAJson), responseMap.get(itsAJson));
 
         // Update datatable entry
         Boolean previousBoolean = (Boolean) datatableEntryMap.get(itsABoolean);
@@ -475,10 +494,9 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         // try to create with the same name
         ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, responseSpecError400);
-        HashMap<String, Object> response = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
+        DatatableHelper error400Helper = new DatatableHelper(this.requestSpec, responseSpecError400);
+        HashMap<String, Object> response = error400Helper.createDatatable(datatabelRequestJsonString, "");
         assertEquals("validation.msg.validation.errors.exist", ((Map) response).get("userMessageGlobalisationCode"));
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
 
         // creating client with datatables
         final Integer clientID = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
@@ -739,10 +757,9 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         // try to create with the same name
         ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, responseSpecError400);
-        HashMap<String, Object> response = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
+        DatatableHelper error400Helper = new DatatableHelper(this.requestSpec, responseSpecError400);
+        HashMap<String, Object> response = error400Helper.createDatatable(datatabelRequestJsonString, "");
         assertEquals("validation.msg.validation.errors.exist", ((Map) response).get("userMessageGlobalisationCode"));
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
 
         // creating client with datatables
         final Integer clientID = ClientHelper.createClientAsPerson(requestSpec, responseSpec);

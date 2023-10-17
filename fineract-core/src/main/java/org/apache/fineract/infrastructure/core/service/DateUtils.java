@@ -193,6 +193,8 @@ public final class DateUtils {
         if (second == null) {
             return 1;
         }
+        first = first.withOffsetSameInstant(ZoneOffset.UTC);
+        second = second.withOffsetSameInstant(ZoneOffset.UTC);
         return truncate == null ? first.compareTo(second) : first.truncatedTo(truncate).compareTo(second.truncatedTo(truncate));
     }
 

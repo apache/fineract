@@ -23,8 +23,10 @@ import static java.lang.String.format;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -251,18 +253,33 @@ public class DatabaseSpecificSQLGenerator {
                 .collect(Collectors.joining(", "));
     }
 
-    public String buildInsert(@NotNull String definition, Collection<String> fields) {
+    public String buildInsert(@NotNull String definition, List<String> fields, Map<String, ResultsetColumnHeaderData> headers) {
         if (fields == null || fields.isEmpty()) {
             return "";
         }
         return "INSERT INTO " + escape(definition) + '(' + fields.stream().map(this::escape).collect(Collectors.joining(", "))
-                + ") VALUES (?" + ", ?".repeat(fields.size() - 1) + ')';
+                + ") VALUES (" + fields.stream().map(e -> decoratePlaceHolder(headers, e, "?")).collect(Collectors.joining(", ")) + ')';
     }
 
-    public String buildUpdate(@NotNull String definition, Collection<String> fields) {
+    public String buildUpdate(@NotNull String definition, List<String> fields, Map<String, ResultsetColumnHeaderData> headers) {
         if (fields == null || fields.isEmpty()) {
             return "";
         }
-        return "UPDATE " + escape(definition) + " SET " + fields.stream().map(e -> escape(e) + " = ?").collect(Collectors.joining(", "));
+        return "UPDATE " + escape(definition) + " SET "
+                + fields.stream().map(e -> escape(e) + " = " + decoratePlaceHolder(headers, e, "?")).collect(Collectors.joining(", "));
+    }
+
+    private String decoratePlaceHolder(Map<String, ResultsetColumnHeaderData> headers, String field, String placeHolder) {
+        DatabaseType dialect = getDialect();
+        if (dialect.isPostgres()) {
+            ResultsetColumnHeaderData header = headers.get(field);
+            if (header != null) {
+                JdbcJavaType columnType = header.getColumnType();
+                if (columnType.isJsonType()) {
+                    return placeHolder + "::" + columnType.getJdbcName(dialect);
+                }
+            }
+        }
+        return placeHolder;
     }
 }

@@ -23,6 +23,7 @@ import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaT
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.DATETIME;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.DECIMAL;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.INTEGER;
+import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.JSON;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.TEXT;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.TIMESTAMP;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.VARCHAR;
@@ -40,6 +41,7 @@ import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiCon
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_DATETIME;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_DECIMAL;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_DROPDOWN;
+import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_JSON;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_NUMBER;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_STRING;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_TEXT;
@@ -97,7 +99,8 @@ public class DatatableCommandFromApiJsonDeserializer {
             API_FIELD_MANDATORY, API_FIELD_AFTER, API_FIELD_CODE, API_FIELD_NEWCODE, API_FIELD_UNIQUE, API_FIELD_INDEXED);
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_DROP_COLUMNS = Set.of(API_FIELD_NAME);
     private static final Object[] SUPPORTED_COLUMN_TYPES = { API_FIELD_TYPE_STRING, API_FIELD_TYPE_NUMBER, API_FIELD_TYPE_BOOLEAN,
-            API_FIELD_TYPE_DECIMAL, API_FIELD_TYPE_DATE, API_FIELD_TYPE_DATETIME, API_FIELD_TYPE_TEXT, API_FIELD_TYPE_DROPDOWN };
+            API_FIELD_TYPE_DECIMAL, API_FIELD_TYPE_DATE, API_FIELD_TYPE_DATETIME, API_FIELD_TYPE_TEXT, API_FIELD_TYPE_JSON,
+            API_FIELD_TYPE_DROPDOWN };
 
     private final FromJsonHelper fromApiJsonHelper;
     private final DatabaseTypeResolver databaseTypeResolver;
@@ -344,6 +347,8 @@ public class DatatableCommandFromApiJsonDeserializer {
                 return TIMESTAMP;
             case API_FIELD_TYPE_TEXT:
                 return TEXT;
+            case API_FIELD_TYPE_JSON:
+                return JSON;
             default: {
                 if (fail) {
                     throw new PlatformDataIntegrityException("error.msg.datatable.column.type.invalid",

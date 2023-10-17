@@ -74,6 +74,7 @@ public enum JdbcJavaType {
     TINYTEXT(JavaType.STRING, new DialectType(JDBCType.VARCHAR, "TINYTEXT"), new DialectType(JDBCType.VARCHAR, "TEXT")), //
     MEDIUMTEXT(JavaType.STRING, new DialectType(JDBCType.VARCHAR, "MEDIUMTEXT"), new DialectType(JDBCType.VARCHAR, "TEXT")), //
     LONGTEXT(JavaType.STRING, new DialectType(JDBCType.VARCHAR, "LONGTEXT"), new DialectType(JDBCType.VARCHAR, "TEXT")), //
+    JSON(JavaType.STRING, new DialectType(JDBCType.VARCHAR, "JSON"), new DialectType(JDBCType.VARCHAR, "JSON")), //
     DATE(JavaType.LOCAL_DATE, new DialectType(JDBCType.DATE), new DialectType(JDBCType.DATE)), //
     // precision for TIME, TIMESTAMP (postgres) and INTERVAL specifies the number of fractional digits retained in the
     // seconds field, but by default, there is no explicit bound on precision
@@ -126,7 +127,7 @@ public enum JdbcJavaType {
         return javaType;
     }
 
-    public static JdbcJavaType getByTypeName(@NotNull DatabaseType dialect, String name) {
+    public static JdbcJavaType getByTypeName(@NotNull DatabaseType dialect, String name, boolean check) {
         if (name == null) {
             return null;
         }
@@ -144,6 +145,10 @@ public enum JdbcJavaType {
                     }
                 }
             }
+        }
+        if (check) {
+            throw new PlatformServiceUnavailableException("error.msg.database.type.not.supported",
+                    "Data type '" + name + "' is not supported ");
         }
         return null;
     }
@@ -179,7 +184,11 @@ public enum JdbcJavaType {
     }
 
     public boolean isTextType() {
-        return this == TEXT || this == TINYTEXT || this == MEDIUMTEXT || this == LONGTEXT;
+        return this == TEXT || this == TINYTEXT || this == MEDIUMTEXT || this == LONGTEXT || this == JSON;
+    }
+
+    public boolean isJsonType() {
+        return this == JSON;
     }
 
     public boolean isSerialType() {
@@ -262,7 +271,7 @@ public enum JdbcJavaType {
 
     public Object toJdbcValue(@NotNull DatabaseType dialect, Object value, boolean check) {
         if (value != null && check && !javaType.getObjectType().matchType(value.getClass(), false)) {
-            throw new PlatformServiceUnavailableException("error.msg.database.type.not.allowed",
+            throw new PlatformServiceUnavailableException("error.msg.database.type.not.valid",
                     "Data type of parameter " + value + " does not match " + this);
         }
         return toJdbcValueImpl(dialect, value);
