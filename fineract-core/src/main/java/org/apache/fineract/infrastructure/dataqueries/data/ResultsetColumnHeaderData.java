@@ -75,7 +75,7 @@ public final class ResultsetColumnHeaderData implements Serializable {
         this.isColumnIndexed = columnIsIndexed;
 
         // Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
-        this.columnType = JdbcJavaType.getByTypeName(dialect, adjustColumnType(columnType));
+        this.columnType = JdbcJavaType.getByTypeName(dialect, adjustColumnType(columnType), true);
 
         this.columnDisplayType = calcDisplayType();
     }

@@ -117,7 +117,7 @@ public class GenericDataServiceImpl implements GenericDataService {
             // primary keys and unique constrained columns are automatically indexed
             final boolean columnIsIndexed = columnIsPrimaryKey || columnIsUnique
                     || isExplicitlyIndexed(tableName, columnName, indexDefinitions);
-            JdbcJavaType jdbcType = JdbcJavaType.getByTypeName(dialect, columnType);
+            JdbcJavaType jdbcType = JdbcJavaType.getByTypeName(dialect, columnType, false);
 
             List<ResultsetColumnValueData> columnValues = new ArrayList<>();
             String codeName = null;
