@@ -86,7 +86,7 @@ plugins {
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
     id 'com.google.cloud.tools.jib' version '3.3.2' apply false
-    id 'org.sonarqube' version '4.2.1.3168'
+    id 'org.sonarqube' version '4.4.1.3373'
     id 'com.github.andygoossens.modernizer' version '1.8.0' apply false
     id 'com.github.spotbugs' version '5.0.14' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
@@ -356,9 +356,9 @@ configure(project.fineractJavaProjects) {
             // and during an IntelliJ recompilation, it fails
             //"-Werror",
             "-Xmaxwarns",
-            1500,
+            "1500",
             "-Xmaxerrs",
-            1500
+            "1500"
         ]
         // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
 
