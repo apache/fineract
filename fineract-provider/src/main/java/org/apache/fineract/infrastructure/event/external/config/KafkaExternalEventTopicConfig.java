@@ -42,7 +42,7 @@ public class KafkaExternalEventTopicConfig {
     public KafkaAdmin admin() {
         Map<String, Object> props = new HashMap<>(
                 fineractProperties.getEvents().getExternal().getProducer().getKafka().getAdmin().getExtraPropertiesMap());
-        props.put(BOOTSTRAP_SERVERS_CONFIG, fineractProperties.getRemoteJobMessageHandler().getKafka().getBootstrapServers());
+        props.put(BOOTSTRAP_SERVERS_CONFIG, fineractProperties.getEvents().getExternal().getProducer().getKafka().getBootstrapServers());
         return new KafkaAdmin(props);
     }
 
