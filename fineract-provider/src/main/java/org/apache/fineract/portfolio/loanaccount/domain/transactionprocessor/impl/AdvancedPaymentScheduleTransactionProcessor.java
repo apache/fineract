@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -37,13 +38,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
+import org.apache.fineract.portfolio.loanaccount.domain.SingleLoanChargeRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Profile;
 
 //TODO: remove `test` profile when it is finished
@@ -52,6 +54,8 @@ import org.springframework.context.annotation.Profile;
 public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     public static final String ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advanced-payment-allocation-strategy";
+
+    private final SingleLoanChargeRepaymentScheduleProcessingWrapper loanChargeProcessor = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
 
     @Override
     public String getCode() {
@@ -91,10 +95,44 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         throw new NotImplementedException();
     }
 
+    private void processSingleTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges,
+            ChangedTransactionDetail changedTransactionDetail) {
+        if (loanTransaction.getId() == null) {
+            processLatestTransaction(loanTransaction, currency, installments, charges, Money.zero(currency));
+            loanTransaction.adjustInterestComponent(currency);
+        } else {
+            /*
+             * For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties) has
+             * changed.<br>
+             */
+            final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+
+            // Reset derived component of new loan transaction and
+            // re-process transaction
+            processLatestTransaction(newLoanTransaction, currency, installments, charges, Money.zero(currency));
+            newLoanTransaction.adjustInterestComponent(currency);
+            /*
+             * Check if the transaction amounts have changed. If so, reverse the original transaction and update
+             * changedTransactionDetail accordingly
+             */
+            if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
+                loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
+                        newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
+            } else {
+                createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
+            }
+        }
+    }
+
+    private void processSingleCharge(LoanCharge loanCharge, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
+            LocalDate disbursementDate) {
+        loanChargeProcessor.reprocess(currency, disbursementDate, installments, loanCharge);
+    }
+
     @Override
-    public ChangedTransactionDetail reprocessLoanTransactions(LocalDate disbursementDate,
-            List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
+    public ChangedTransactionDetail reprocessLoanTransactions(LocalDate disbursementDate, List<LoanTransaction> loanTransactions,
+            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
 
         // TODO: rewrite this whole logic step by step
         if (charges != null) {
@@ -107,42 +145,35 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetDerivedComponents();
+            currentInstallment.resetChargesFields();
             currentInstallment.updateDerivedFields(currency, disbursementDate);
         }
 
-        // TODO: Remove this reprocess and add the charges to the installment in chronological order
-        final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
-        wrapper.reprocess(currency, disbursementDate, installments, charges);
-        final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
-        for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
-            if (loanTransaction.getId() == null) {
-                processLatestTransaction(loanTransaction, currency, installments, charges, Money.zero(currency));
-                loanTransaction.adjustInterestComponent(currency);
-            } else {
-                /**
-                 * For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties) has
-                 * changed.<br>
-                 **/
-                final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+        List<ChargeOrTransaction> chargeOrTransactions = createSortedChargesAndTransactionsList(loanTransactions, charges);
 
-                // Reset derived component of new loan transaction and
-                // re-process transaction
-                processLatestTransaction(newLoanTransaction, currency, installments, charges, Money.zero(currency));
-                newLoanTransaction.adjustInterestComponent(currency);
-                /**
-                 * Check if the transaction amounts have changed. If so, reverse the original transaction and update
-                 * changedTransactionDetail accordingly
-                 **/
-                if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
-                    loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
-                            newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
-                } else {
-                    createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
-                }
-            }
+        final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
+        for (final ChargeOrTransaction chargeOrTransaction : chargeOrTransactions) {
+            chargeOrTransaction.getLoanTransaction().ifPresent(loanTransaction -> processSingleTransaction(loanTransaction, currency,
+                    installments, charges, changedTransactionDetail));
+            chargeOrTransaction.getLoanCharge()
+                    .ifPresent(loanCharge -> processSingleCharge(loanCharge, currency, installments, disbursementDate));
         }
         reprocessInstallments(installments, currency);
         return changedTransactionDetail;
+    }
+
+    @NotNull
+    private List<ChargeOrTransaction> createSortedChargesAndTransactionsList(List<LoanTransaction> loanTransactions,
+            Set<LoanCharge> charges) {
+        List<ChargeOrTransaction> chargeOrTransactions = new ArrayList<>();
+        if (charges != null) {
+            chargeOrTransactions.addAll(charges.stream().map(ChargeOrTransaction::new).toList());
+        }
+        if (loanTransactions != null) {
+            chargeOrTransactions.addAll(loanTransactions.stream().map(ChargeOrTransaction::new).toList());
+        }
+        Collections.sort(chargeOrTransactions);
+        return chargeOrTransactions;
     }
 
     @Override

@@ -694,8 +694,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         // store Id's of existing loan transactions and existing reversed loan
         // transactions
-        final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
-        wrapper.reprocess(getCurrency(), getDisbursementDate(), getRepaymentScheduleInstallments(), getActiveCharges());
+        final SingleLoanChargeRepaymentScheduleProcessingWrapper wrapper = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
+        wrapper.reprocess(getCurrency(), getDisbursementDate(), getRepaymentScheduleInstallments(), loanCharge);
         updateLoanSummaryDerivedFields();
 
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_ADDED, this);
