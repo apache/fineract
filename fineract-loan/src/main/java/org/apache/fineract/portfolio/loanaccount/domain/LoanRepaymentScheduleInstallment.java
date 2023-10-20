@@ -419,6 +419,15 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyAccrued = null;
     }
 
+    public void resetChargesFields() {
+        this.feeChargesCharged = null;
+        this.feeChargesWaived = null;
+        this.feeChargesWrittenOff = null;
+        this.penaltyCharges = null;
+        this.penaltyChargesWaived = null;
+        this.penaltyChargesWrittenOff = null;
+    }
+
     public Money payPenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
@@ -637,6 +646,16 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyCharges = defaultToNullIfZero(penaltyChargesDue.getAmount());
         this.penaltyChargesWaived = defaultToNullIfZero(penaltyChargesWaived.getAmount());
         this.penaltyChargesWrittenOff = defaultToNullIfZero(penaltyChargesWrittenOff.getAmount());
+    }
+
+    public void addToChargePortion(final Money feeChargesDue, final Money feeChargesWaived, final Money feeChargesWrittenOff,
+            final Money penaltyChargesDue, final Money penaltyChargesWaived, final Money penaltyChargesWrittenOff) {
+        this.feeChargesCharged = defaultToNullIfZero(feeChargesDue.plus(this.feeChargesCharged).getAmount());
+        this.feeChargesWaived = defaultToNullIfZero(feeChargesWaived.plus(this.feeChargesWaived).getAmount());
+        this.feeChargesWrittenOff = defaultToNullIfZero(feeChargesWrittenOff.plus(this.feeChargesWrittenOff).getAmount());
+        this.penaltyCharges = defaultToNullIfZero(penaltyChargesDue.plus(this.penaltyCharges).getAmount());
+        this.penaltyChargesWaived = defaultToNullIfZero(penaltyChargesWaived.plus(this.penaltyChargesWaived).getAmount());
+        this.penaltyChargesWrittenOff = defaultToNullIfZero(penaltyChargesWrittenOff.plus(this.penaltyChargesWrittenOff).getAmount());
     }
 
     public void updateAccrualPortion(final Money interest, final Money feeCharges, final Money penalityCharges) {
