@@ -436,6 +436,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         actualDisbursementDate, txnExternalId);
                 disbursementTransaction.updateLoan(loan);
                 loan.addLoanTransaction(disbursementTransaction);
+                LoanTransaction savedLoanTransaction = loanTransactionRepository.saveAndFlush(disbursementTransaction);
             }
             if (loan.getRepaymentScheduleInstallments().isEmpty()) {
                 /*
@@ -460,8 +461,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionDownPaymentPreBusinessEvent(loan));
                 LoanTransaction downPaymentTransaction = loan.handleDownPayment(amountToDisburse.getAmount(), command,
                         scheduleGeneratorDTO);
-                businessEventNotifierService
-                        .notifyPostBusinessEvent(new LoanTransactionDownPaymentPostBusinessEvent(downPaymentTransaction));
+                LoanTransaction savedLoanTransaction = loanTransactionRepository.saveAndFlush(downPaymentTransaction);
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionDownPaymentPostBusinessEvent(savedLoanTransaction));
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
             }
         }
