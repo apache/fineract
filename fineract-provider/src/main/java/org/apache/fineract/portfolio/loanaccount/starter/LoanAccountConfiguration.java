@@ -326,7 +326,7 @@ public class LoanAccountConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(LoanReadPlatformService.class)
-    public LoanReadPlatformService loanReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
+    public LoanReadPlatformServiceImpl loanReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
             LoanRepositoryWrapper loanRepositoryWrapper, ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             LoanProductReadPlatformService loanProductReadPlatformService, ClientReadPlatformService clientReadPlatformService,
             GroupReadPlatformService groupReadPlatformService, LoanDropdownReadPlatformService loanDropdownReadPlatformService,
