@@ -128,6 +128,10 @@ import org.slf4j.LoggerFactory;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class ClientLoanIntegrationTest {
 
+    static {
+        Utils.initializeRESTAssured();
+    }
+
     private static final String MINIMUM_OPENING_BALANCE = "1000.0";
     private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     private static final Logger LOG = LoggerFactory.getLogger(ClientLoanIntegrationTest.class);
@@ -171,10 +175,6 @@ public class ClientLoanIntegrationTest {
     private static final BusinessDateHelper BUSINESS_DATE_HELPER = new BusinessDateHelper();
     private static final ChargesHelper CHARGES_HELPER = new ChargesHelper();
     private static final ClientHelper CLIENT_HELPER = new ClientHelper(REQUEST_SPEC, RESPONSE_SPEC);
-
-    static {
-        Utils.initializeRESTAssured();
-    }
 
     private static RequestSpecification createRequestSpecification() {
         RequestSpecification request = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
