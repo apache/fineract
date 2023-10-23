@@ -78,9 +78,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
 import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class AccountingProcessorHelper {
 
