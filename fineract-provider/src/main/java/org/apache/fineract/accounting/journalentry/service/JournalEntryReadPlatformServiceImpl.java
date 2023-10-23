@@ -65,10 +65,8 @@ import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
 @RequiredArgsConstructor
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
