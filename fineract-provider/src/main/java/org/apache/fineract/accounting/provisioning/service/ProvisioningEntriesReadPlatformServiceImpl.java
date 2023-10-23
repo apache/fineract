@@ -38,9 +38,7 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningEntriesReadPlatformService {
