@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.workingdays.service;
 
 import java.text.ParseException;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import net.fortuna.ical4j.model.property.RRule;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -30,22 +31,13 @@ import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
 import org.apache.fineract.organisation.workingdays.data.WorkingDayValidator;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 public class WorkingDaysWritePlatformServiceJpaRepositoryImpl implements WorkingDaysWritePlatformService {
 
     private final WorkingDaysRepositoryWrapper daysRepositoryWrapper;
     private final WorkingDayValidator fromApiJsonDeserializer;
-
-    @Autowired
-    public WorkingDaysWritePlatformServiceJpaRepositoryImpl(final WorkingDaysRepositoryWrapper daysRepositoryWrapper,
-            final WorkingDayValidator fromApiJsonDeserializer) {
-        this.daysRepositoryWrapper = daysRepositoryWrapper;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-    }
 
     @Transactional
     @Override
