@@ -22,6 +22,7 @@ import jakarta.persistence.PersistenceException;
 import java.util.Map;
 import java.util.Set;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
@@ -53,18 +54,13 @@ import org.apache.fineract.organisation.teller.exception.CashierExistForTellerEx
 import org.apache.fineract.organisation.teller.exception.CashierNotFoundException;
 import org.apache.fineract.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
-@Service
+@Slf4j
 public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
 
     private final PlatformSecurityContext context;
     private final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -193,7 +189,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     "name", name);
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.teller.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
