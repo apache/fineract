@@ -22,29 +22,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AdHocMapper adHocRowMapper;
-
-    @Autowired
-    public AdHocReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.sqlGenerator = sqlGenerator;
-        this.adHocRowMapper = new AdHocMapper(sqlGenerator);
-    }
 
     @Override
     public Collection<AdHocData> retrieveAllAdHocQuery() {
@@ -70,7 +62,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
         }
     }
 
-    protected static final class AdHocMapper implements RowMapper<AdHocData> {
+    public static final class AdHocMapper implements RowMapper<AdHocData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
 
