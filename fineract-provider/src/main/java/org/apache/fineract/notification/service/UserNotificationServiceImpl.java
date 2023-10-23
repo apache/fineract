@@ -33,9 +33,7 @@ import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserNotificationServiceImpl implements UserNotificationService {
