@@ -27,6 +27,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -45,18 +47,13 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HolidayWritePlatformServiceJpaRepositoryImpl.class);
 
     private final HolidayDataValidator fromApiJsonDeserializer;
     private final HolidayRepositoryWrapper holidayRepository;
@@ -64,19 +61,6 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     private final PlatformSecurityContext context;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final FromJsonHelper fromApiJsonHelper;
-
-    @Autowired
-    public HolidayWritePlatformServiceJpaRepositoryImpl(final HolidayDataValidator fromApiJsonDeserializer,
-            final HolidayRepositoryWrapper holidayRepository, final PlatformSecurityContext context,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final FromJsonHelper fromApiJsonHelper,
-            final WorkingDaysRepositoryWrapper daysRepositoryWrapper) {
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.holidayRepository = holidayRepository;
-        this.context = context;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.daysRepositoryWrapper = daysRepositoryWrapper;
-    }
 
     @Transactional
     @Override
@@ -185,7 +169,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
                     "name", name);
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
