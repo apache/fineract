@@ -38,6 +38,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -104,21 +106,16 @@ import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class InteropServiceImpl implements InteropService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(InteropServiceImpl.class);
 
     private final PlatformSecurityContext securityContext;
     private final InteropDataValidator dataValidator;
@@ -142,33 +139,6 @@ public class InteropServiceImpl implements InteropService {
 
     private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-
-    @Autowired
-    public InteropServiceImpl(PlatformSecurityContext securityContext, InteropDataValidator interopDataValidator,
-            SavingsAccountRepository savingsAccountRepository, SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            ApplicationCurrencyRepository applicationCurrencyRepository, NoteRepository noteRepository,
-            PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository, LoanRepository loanRepository,
-            SavingsHelper savingsHelper, SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            SavingsAccountDomainService savingsAccountService, final JdbcTemplate jdbcTemplate,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.securityContext = securityContext;
-        this.dataValidator = interopDataValidator;
-        this.savingsAccountRepository = savingsAccountRepository;
-        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
-        this.currencyRepository = applicationCurrencyRepository;
-        this.noteRepository = noteRepository;
-        this.paymentTypeRepository = paymentTypeRepository;
-        this.identifierRepository = identifierRepository;
-        this.loanRepository = loanRepository;
-        this.savingsHelper = savingsHelper;
-        this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
-        this.savingsAccountService = savingsAccountService;
-        this.jdbcTemplate = jdbcTemplate;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.sqlGenerator = sqlGenerator;
-    }
 
     private static final class KycMapper implements RowMapper<InteropKycData> {
 
@@ -661,7 +631,7 @@ public class InteropServiceImpl implements InteropService {
                     "idType", idType.name(), accountId);
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.interop.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
