@@ -30,21 +30,20 @@ import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 import org.apache.fineract.mix.data.XBRLData;
 import org.apache.fineract.mix.exception.XBRLMappingInvalidException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class XBRLResultServiceImpl implements XBRLResultService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(XBRLResultServiceImpl.class);
     private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("JavaScript");
 
     private final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService;
@@ -162,7 +161,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
                 eval = value.floatValue();
             }
         } catch (final ScriptException e) {
-            LOG.error("Problem occurred in processMappingString function", e);
+            log.error("Problem occurred in processMappingString function", e);
             throw new IllegalArgumentException(e.getMessage(), e);
         }
 
