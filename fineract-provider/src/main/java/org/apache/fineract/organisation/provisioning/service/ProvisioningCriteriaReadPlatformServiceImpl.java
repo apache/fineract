@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryData;
@@ -32,13 +33,11 @@ import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDe
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCriteriaNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class ProvisioningCriteriaReadPlatformServiceImpl implements ProvisioningCriteriaReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -46,19 +45,6 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
     private final LoanProductReadPlatformService loanProductReaPlatformService;
-
-    @Autowired
-    public ProvisioningCriteriaReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService,
-            final LoanProductReadPlatformService loanProductReadPlatformService,
-            final GLAccountReadPlatformService glAccountReadPlatformService,
-            final LoanProductReadPlatformService loanProductReaPlatformService) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.provisioningCategoryReadPlatformService = provisioningCategoryReadPlatformService;
-        this.loanProductReadPlatformService = loanProductReadPlatformService;
-        this.glAccountReadPlatformService = glAccountReadPlatformService;
-        this.loanProductReaPlatformService = loanProductReaPlatformService;
-    }
 
     @Override
     public ProvisioningCriteriaData retrievePrivisiongCriteriaTemplate() {
