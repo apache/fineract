@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -34,25 +35,18 @@ import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final JdbcTemplate jdbcTemplate;
+
     private static final StaffLookupMapper LOOKUP_MAPPER = new StaffLookupMapper();
     private static final StaffInOfficeHierarchyMapper STAFF_IN_OFFICE_HIERARCHY_MAPPER = new StaffInOfficeHierarchyMapper();
-
-    @Autowired
-    public StaffReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final class StaffMapper implements RowMapper<StaffData> {
 
