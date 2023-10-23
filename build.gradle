@@ -19,7 +19,7 @@
 // TODO: this is work in progress, please follow FINERACT-1171
 buildscript {
     ext {
-        jacocoVersion = '0.8.10'
+        jacocoVersion = '0.8.11'
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.9.3'
         oltuVersion = '1.0.1'
@@ -60,7 +60,7 @@ buildscript {
         classpath 'org.eclipse.persistence:eclipselink:4.0.0'
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
-        classpath 'org.apache.commons:commons-lang3:3.12.0'
+        classpath 'org.apache.commons:commons-lang3:3.13.0'
         classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.11'
         classpath 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     }
@@ -421,7 +421,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:10.12.1'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.12.4'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.1'
     }
 
@@ -443,7 +443,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.20.0"
+        errorprone "com.google.errorprone:error_prone_core:2.23.0"
     }
 
     tasks.withType(JavaCompile) {
