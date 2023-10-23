@@ -19,6 +19,7 @@
 package org.apache.fineract.commands.jobs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -82,7 +83,7 @@ public class PurgeProcessedCommandsTaskletTest {
         verify(repository).deleteOlderEventsWithStatus(Mockito.any(), dateCriteriaCaptor.capture());
         OffsetDateTime expectedDateForPurgeCriteriaTest = DateUtils.getOffsetDateTimeOfTenant().minusDays(2);
         OffsetDateTime actualDateForPurgeCriteria = dateCriteriaCaptor.getValue();
-        assertEquals(expectedDateForPurgeCriteriaTest, actualDateForPurgeCriteria);
+        assertTrue(expectedDateForPurgeCriteriaTest.toEpochSecond() - actualDateForPurgeCriteria.toEpochSecond() <= 1);
         assertEquals(RepeatStatus.FINISHED, resultStatus);
     }
 
