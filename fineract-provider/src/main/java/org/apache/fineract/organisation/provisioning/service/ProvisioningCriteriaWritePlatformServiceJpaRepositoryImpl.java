@@ -26,6 +26,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
@@ -44,17 +46,12 @@ import org.apache.fineract.organisation.provisioning.exception.ProvisioningCrite
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCriteriaNotFoundException;
 import org.apache.fineract.organisation.provisioning.serialization.ProvisioningCriteriaDefinitionJsonDeserializer;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implements ProvisioningCriteriaWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ProvisioningCriteriaDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final ProvisioningCriteriaAssembler provisioningCriteriaAssembler;
@@ -62,21 +59,6 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
     private final FromJsonHelper fromApiJsonHelper;
     private final GLAccountRepository glAccountRepository;
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
-
-    @Autowired
-    public ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl(
-            final ProvisioningCriteriaDefinitionJsonDeserializer fromApiJsonDeserializer,
-            final ProvisioningCriteriaAssembler provisioningCriteriaAssembler,
-            final ProvisioningCriteriaRepository provisioningCriteriaRepository, final FromJsonHelper fromApiJsonHelper,
-            final GLAccountRepository glAccountRepository,
-            final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService) {
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.provisioningCriteriaAssembler = provisioningCriteriaAssembler;
-        this.provisioningCriteriaRepository = provisioningCriteriaRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.glAccountRepository = glAccountRepository;
-        this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService;
-    }
 
     @Override
     public CommandProcessingResult createProvisioningCriteria(JsonCommand command) {
@@ -175,7 +157,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             throw new PlatformDataIntegrityException("error.msg.provisioning.product.id(s).already.associated.existing.criteria",
                     "The selected products already associated with another Provisioning Criteria");
         }
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

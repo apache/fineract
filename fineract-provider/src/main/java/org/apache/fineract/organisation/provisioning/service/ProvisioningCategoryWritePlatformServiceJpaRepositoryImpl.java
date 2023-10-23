@@ -20,6 +20,8 @@ package org.apache.fineract.organisation.provisioning.service;
 
 import jakarta.persistence.PersistenceException;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -30,32 +32,19 @@ import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCategoryCannotBeDeletedException;
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCategoryNotFoundException;
 import org.apache.fineract.organisation.provisioning.serialization.ProvisioningCategoryDefinitionJsonDeserializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implements ProvisioningCategoryWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ProvisioningCategoryRepository provisioningCategoryRepository;
 
     private final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl(final ProvisioningCategoryRepository provisioningCategoryRepository,
-            final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer, final JdbcTemplate jdbcTemplate) {
-        this.provisioningCategoryRepository = provisioningCategoryRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public CommandProcessingResult createProvisioningCateogry(JsonCommand command) {
@@ -127,7 +116,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
             throw new PlatformDataIntegrityException("error.msg.provisioning.duplicate.categoryname",
                     "Provisioning Cateory with name `" + name + "` already exists", "category name", name);
         }
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
@@ -139,7 +128,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
             throw new PlatformDataIntegrityException("error.msg.provisioning.duplicate.categoryname",
                     "Provisioning Cateory with name `" + name + "` already exists", "category name", name);
         }
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
