@@ -16,22 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.delinquency.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-public interface LoanDelinquencyDomainService {
+@AllArgsConstructor
+@ToString
+@Getter
+@Setter
+public class LoanDelinquencyData {
 
-    /**
-     * This method is to calculate the Overdue date and other properties, If the loan is overdue or If there is some
-     * Charge back transaction
-     *
-     * @param loan
-     */
-    CollectionData getOverdueCollectionData(Loan loan);
-
-    LoanDelinquencyData getLoanDelinquencyData(Loan loan);
-
+    private CollectionData loanCollectionData;
+    private Map<Long, CollectionData> loanInstallmentsCollectionData;
 }
