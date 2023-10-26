@@ -2559,9 +2559,25 @@ public class BatchApiTest {
 
     @Test
     public void verifyCalculatingRunningBalanceAfterBatchWithReleaseAmount() {
+        final SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
+        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
+        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
+        final Integer savingsProductID = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+        Assertions.assertNotNull(savingsProductID);
+        final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
+                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+        HashMap savingsStatusHashMap = savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsStatusHashMap = savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
         final float holdAmount = 10F;
         final float withdrawalAmount = 80F;
-        final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, 2L, "chargeStatus=all", null);
+        final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, Long.valueOf(savingsId), "chargeStatus=all", null);
         final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L, 300F);
         final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L, holdAmount);
 
@@ -2576,8 +2592,7 @@ public class BatchApiTest {
         final FromJsonHelper jsonHelper = new FromJsonHelper();
         final Long holdAmountTransactionId = jsonHelper.parse(responses1.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
 
-        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        HashMap accountDetails = savingsAccountHelper.getSavingsDetails(2);
+        HashMap accountDetails = savingsAccountHelper.getSavingsDetails(savingsId);
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
         final float runningBalanceBeforeBatch = (float) transactions.get(0).get("runningBalance");
 
@@ -2595,7 +2610,7 @@ public class BatchApiTest {
         Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(1).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
         Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(2).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
 
-        accountDetails = savingsAccountHelper.getSavingsDetails(2);
+        accountDetails = savingsAccountHelper.getSavingsDetails(savingsId);
         transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
 
         final HashMap<String, Object> transactionRelease = transactions.get(2);
