@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.delinquency.service;
+package org.apache.fineract.portfolio.delinquency.data;
 
-import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import java.math.BigDecimal;
 
-public interface LoanDelinquencyDomainService {
+public interface LoanInstallmentDelinquencyTagData {
 
-    /**
-     * This method is to calculate the Overdue date and other properties, If the loan is overdue or If there is some
-     * Charge back transaction
-     *
-     * @param loan
-     */
-    CollectionData getOverdueCollectionData(Loan loan);
+    InstallmentDelinquencyRange getDelinquencyRange();
 
-    LoanDelinquencyData getLoanDelinquencyData(Loan loan);
+    BigDecimal getOutstandingAmount();
 
+    interface InstallmentDelinquencyRange {
+
+        Long getId();
+
+        String getClassification();
+
+        Integer getMinimumAgeDays();
+
+        Integer getMaximumAgeDays();
+    }
 }

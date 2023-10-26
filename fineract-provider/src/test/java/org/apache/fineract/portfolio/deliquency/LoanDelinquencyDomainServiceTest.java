@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.deliquency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -43,6 +44,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -182,6 +184,97 @@ public class LoanDelinquencyDomainServiceTest {
         assertEquals(0L, collectionData.getDelinquentDays());
         assertEquals(null, collectionData.getDelinquentDate());
         assertEquals(collectionData.getDelinquentDays(), collectionData.getPastDueDays());
+
+    }
+
+    @Test
+    public void givenLoanInstallmentWithOverdueEnableInstallmentDelinquencyThenCalculateDelinquentData() {
+        // given
+        final Long daysDiff = 2L;
+        final LocalDate fromDate = businessDate.minusMonths(1).minusDays(daysDiff);
+        final LocalDate dueDate = businessDate.minusDays(daysDiff);
+
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, 1, fromDate, dueDate, principal,
+                zeroAmount, zeroAmount, zeroAmount, false, new HashSet<>(), zeroAmount);
+        installment.setId(1L);
+        List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = Arrays.asList(installment);
+
+        // when
+        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
+        when(loan.getLoanTransactions(Mockito.any(Predicate.class))).thenReturn(Collections.emptyList());
+        when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
+        when(loan.getCurrency()).thenReturn(currency);
+        when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
+
+        LoanDelinquencyData collectionData = underTest.getLoanDelinquencyData(loan);
+
+        // then
+        assertNotNull(collectionData);
+        assertNotNull(collectionData.getLoanInstallmentsCollectionData());
+        assertEquals(1L, collectionData.getLoanInstallmentsCollectionData().size());
+
+        CollectionData loanCollectionData = collectionData.getLoanCollectionData();
+        CollectionData installmentCollectionData = collectionData.getLoanInstallmentsCollectionData().get(1L);
+
+        assertEquals(daysDiff, loanCollectionData.getDelinquentDays());
+        assertEquals(dueDate, loanCollectionData.getDelinquentDate());
+        assertEquals(loanCollectionData.getDelinquentDays(), loanCollectionData.getPastDueDays());
+
+        assertEquals(daysDiff, installmentCollectionData.getDelinquentDays());
+        assertEquals(dueDate, installmentCollectionData.getDelinquentDate());
+        assertEquals(installmentCollectionData.getDelinquentDays(), installmentCollectionData.getPastDueDays());
+
+    }
+
+    @Test
+    public void givenLoanInstallmentWithoutOverdueWithChargebackAndEnableInstallmentDelinquencyThenCalculateDelinquentData() {
+
+        // given
+        PaymentDetail paymentDetail = Mockito.mock(PaymentDetail.class);
+        Long daysDiff = 2L;
+        final LocalDate fromDate = businessDate.minusMonths(1).plusDays(daysDiff);
+        final LocalDate dueDate = businessDate.plusDays(daysDiff);
+        final LocalDate transactionDate = businessDate.minusDays(daysDiff);
+
+        final Money zeroMoney = Money.zero(currency);
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, 1, fromDate, dueDate, principal,
+                zeroAmount, zeroAmount, zeroAmount, false, new HashSet<>(), zeroAmount);
+        installment.setId(1L);
+        LoanTransaction loanTransaction = LoanTransaction.chargeback(loan, Money.of(currency, principal), paymentDetail, transactionDate,
+                null);
+        installment.getLoanTransactionToRepaymentScheduleMappings().add(LoanTransactionToRepaymentScheduleMapping
+                .createFrom(loanTransaction, installment, zeroMoney, zeroMoney, zeroMoney, zeroMoney));
+
+        List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = Arrays.asList(installment);
+        // when
+        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
+        when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
+        when(loan.getCurrency()).thenReturn(currency);
+        when(loan.getLoanTransactions(Mockito.any(Predicate.class))).thenReturn(Arrays.asList(loanTransaction));
+
+        LoanDelinquencyData collectionData = underTest.getLoanDelinquencyData(loan);
+
+        // then
+        assertNotNull(collectionData);
+        assertNotNull(collectionData.getLoanInstallmentsCollectionData());
+        assertEquals(1L, collectionData.getLoanInstallmentsCollectionData().size());
+
+        CollectionData loanCollectionData = collectionData.getLoanCollectionData();
+        CollectionData installmentCollectionData = collectionData.getLoanInstallmentsCollectionData().get(1L);
+
+        assertEquals(daysDiff, loanCollectionData.getDelinquentDays());
+        assertEquals(transactionDate, loanCollectionData.getDelinquentDate());
+        assertEquals(loanCollectionData.getDelinquentDays(), loanCollectionData.getPastDueDays());
+
+        // then
+        assertEquals(daysDiff, installmentCollectionData.getDelinquentDays());
+        assertEquals(transactionDate, installmentCollectionData.getDelinquentDate());
+        assertEquals(installmentCollectionData.getDelinquentDays(), installmentCollectionData.getPastDueDays());
+        assertEquals(0, principal.compareTo(installmentCollectionData.getDelinquentAmount()));
 
     }
 

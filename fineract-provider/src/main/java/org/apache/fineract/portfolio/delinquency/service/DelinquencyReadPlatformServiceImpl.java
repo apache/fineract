@@ -25,12 +25,14 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
+import org.apache.fineract.portfolio.delinquency.data.LoanInstallmentDelinquencyTagData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
+import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
@@ -52,6 +54,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     private final LoanDelinquencyTagMapper mapperLoanDelinquencyTagHistory;
     private final LoanRepository loanRepository;
     private final LoanDelinquencyDomainService loanDelinquencyDomainService;
+    private final LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag;
 
     @Override
     public Collection<DelinquencyRangeData> retrieveAllDelinquencyRanges() {
@@ -124,6 +127,11 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         }
 
         return collectionData;
+    }
+
+    @Override
+    public Collection<LoanInstallmentDelinquencyTagData> retrieveLoanInstallmentsCurrentDelinquencyTag(Long loanId) {
+        return repositoryLoanInstallmentDelinquencyTag.findInstallmentDelinquencyTags(loanId);
     }
 
 }

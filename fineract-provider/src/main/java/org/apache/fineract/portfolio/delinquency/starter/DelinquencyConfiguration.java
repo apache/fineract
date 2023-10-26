@@ -23,6 +23,7 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMapping
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
+import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
@@ -50,9 +51,11 @@ public class DelinquencyConfiguration {
             DelinquencyBucketRepository repositoryBucket, LoanDelinquencyTagHistoryRepository repositoryLoanDelinquencyTagHistory,
             DelinquencyRangeMapper mapperRange, DelinquencyBucketMapper mapperBucket,
             LoanDelinquencyTagMapper mapperLoanDelinquencyTagHistory, LoanRepository loanRepository,
-            LoanDelinquencyDomainService loanDelinquencyDomainService) {
+            LoanDelinquencyDomainService loanDelinquencyDomainService,
+            LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag) {
         return new DelinquencyReadPlatformServiceImpl(repositoryRange, repositoryBucket, repositoryLoanDelinquencyTagHistory, mapperRange,
-                mapperBucket, mapperLoanDelinquencyTagHistory, loanRepository, loanDelinquencyDomainService);
+                mapperBucket, mapperLoanDelinquencyTagHistory, loanRepository, loanDelinquencyDomainService,
+                repositoryLoanInstallmentDelinquencyTag);
     }
 
     @Bean
@@ -62,10 +65,11 @@ public class DelinquencyConfiguration {
             DelinquencyBucketRepository repositoryBucket, DelinquencyBucketMappingsRepository repositoryBucketMappings,
             LoanDelinquencyTagHistoryRepository loanDelinquencyTagRepository, LoanRepositoryWrapper loanRepository,
             LoanProductRepository loanProductRepository, BusinessEventNotifierService businessEventNotifierService,
-            LoanDelinquencyDomainService loanDelinquencyDomainService) {
+            LoanDelinquencyDomainService loanDelinquencyDomainService,
+            LoanInstallmentDelinquencyTagRepository loanInstallmentDelinquencyTagRepository) {
         return new DelinquencyWritePlatformServiceImpl(dataValidatorBucket, dataValidatorRange, repositoryRange, repositoryBucket,
                 repositoryBucketMappings, loanDelinquencyTagRepository, loanRepository, loanProductRepository, businessEventNotifierService,
-                loanDelinquencyDomainService);
+                loanDelinquencyDomainService, loanInstallmentDelinquencyTagRepository);
     }
 
     @Bean
