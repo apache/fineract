@@ -21,9 +21,11 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,6 +37,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
@@ -152,11 +155,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case WRITEOFF -> handleWriteOff(loanTransaction, currency, installments);
             case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, currency, installments, charges);
             case CHARGEBACK -> handleChargeback(loanTransaction, currency, overpaidAmount, installments);
-
             case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
                     WAIVE_INTEREST, RECOVERY_REPAYMENT ->
                 handleRepayment(loanTransaction, currency, installments, charges);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, currency, installments);
+            case CHARGE_PAYMENT -> handleChargePayment(loanTransaction, currency, installments, charges);
             // TODO: Cover rest of the transaction types
             default -> {
                 log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
@@ -176,6 +179,153 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             loanTransaction.resetDerivedComponents();
         }
         Money transactionAmountUnprocessed = loanTransaction.getAmount(currency);
+        processTransaction(loanTransaction, currency, installments, transactionAmountUnprocessed, charges);
+    }
+
+    private LoanTransactionToRepaymentScheduleMapping getTransactionMapping(
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, LoanTransaction loanTransaction,
+            LoanRepaymentScheduleInstallment currentInstallment, MonetaryCurrency currency) {
+        Money zero = Money.zero(currency);
+        LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = transactionMappings.stream()
+                .filter(e -> loanTransaction.equals(e.getLoanTransaction()))
+                .filter(e -> currentInstallment.equals(e.getLoanRepaymentScheduleInstallment())).findFirst().orElse(null);
+        if (loanTransactionToRepaymentScheduleMapping == null) {
+            loanTransactionToRepaymentScheduleMapping = LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
+                    currentInstallment, zero, zero, zero, zero);
+            transactionMappings.add(loanTransactionToRepaymentScheduleMapping);
+        }
+        return loanTransactionToRepaymentScheduleMapping;
+    }
+
+    private Money payAllocation(PaymentAllocationType paymentAllocationType, LoanRepaymentScheduleInstallment currentInstallment,
+            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
+            LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping, Balances balances) {
+        LocalDate transactionDate = loanTransaction.getTransactionDate();
+        Money zero = transactionAmountUnprocessed.zero();
+        return switch (paymentAllocationType.getAllocationType()) {
+            case PENALTY -> {
+                Money subPenaltyPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountUnprocessed);
+                balances.setAggregatedPenaltyChargesPortion(balances.getAggregatedPenaltyChargesPortion().add(subPenaltyPortion));
+                addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, zero, zero, subPenaltyPortion);
+                yield subPenaltyPortion;
+            }
+            case FEE -> {
+                Money subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountUnprocessed);
+                balances.setAggregatedFeeChargesPortion(balances.getAggregatedFeeChargesPortion().add(subFeePortion));
+                addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, zero, subFeePortion, zero);
+                yield subFeePortion;
+            }
+            case INTEREST -> {
+                Money subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountUnprocessed);
+                balances.setAggregatedInterestPortion(balances.getAggregatedInterestPortion().add(subInterestPortion));
+                addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, subInterestPortion, zero, zero);
+                yield subInterestPortion;
+            }
+            case PRINCIPAL -> {
+                Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountUnprocessed);
+                balances.setAggregatedPrincipalPortion(balances.getAggregatedPrincipalPortion().add(subPrincipalPortion));
+                addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, subPrincipalPortion, zero, zero, zero);
+                yield subPrincipalPortion;
+            }
+        };
+    }
+
+    private void addToTransactionMapping(LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping,
+            Money principalPortion, Money interestPortion, Money feePortion, Money penaltyPortion) {
+        BigDecimal aggregatedPenalty = ObjectUtils
+                .defaultIfNull(loanTransactionToRepaymentScheduleMapping.getPenaltyChargesPortion(), BigDecimal.ZERO)
+                .add(penaltyPortion.getAmount());
+        BigDecimal aggregatedFee = ObjectUtils
+                .defaultIfNull(loanTransactionToRepaymentScheduleMapping.getFeeChargesPortion(), BigDecimal.ZERO)
+                .add(feePortion.getAmount());
+        BigDecimal aggregatedInterest = ObjectUtils
+                .defaultIfNull(loanTransactionToRepaymentScheduleMapping.getInterestPortion(), BigDecimal.ZERO)
+                .add(interestPortion.getAmount());
+        BigDecimal aggregatedPrincipal = ObjectUtils
+                .defaultIfNull(loanTransactionToRepaymentScheduleMapping.getPrincipalPortion(), BigDecimal.ZERO)
+                .add(principalPortion.getAmount());
+        loanTransactionToRepaymentScheduleMapping.setComponents(aggregatedPrincipal, aggregatedInterest, aggregatedFee, aggregatedPenalty);
+    }
+
+    private void handleOverpayment(Money overpaymentPortion, LoanTransaction loanTransaction) {
+        if (overpaymentPortion.isGreaterThanZero()) {
+            onLoanOverpayment(loanTransaction, overpaymentPortion);
+            loanTransaction.updateOverPayments(overpaymentPortion);
+        }
+    }
+
+    private void handleChargeOff(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        loanTransaction.resetDerivedComponents();
+        // determine how much is outstanding total and breakdown for principal, interest and charges
+        Money principalPortion = Money.zero(currency);
+        Money interestPortion = Money.zero(currency);
+        Money feeChargesPortion = Money.zero(currency);
+        Money penaltychargesPortion = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
+            if (currentInstallment.isNotFullyPaidOff()) {
+                principalPortion = principalPortion.plus(currentInstallment.getPrincipalOutstanding(currency));
+                interestPortion = interestPortion.plus(currentInstallment.getInterestOutstanding(currency));
+                feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesOutstanding(currency));
+                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.getPenaltyChargesCharged(currency));
+            }
+        }
+
+        loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
+    }
+
+    private void handleChargePayment(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
+        Money zero = Money.zero(currency);
+        Money feeChargesPortion = zero;
+        Money penaltyChargesPortion = zero;
+        List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
+        LoanChargePaidBy loanChargePaidBy = loanTransaction.getLoanChargesPaid().stream().findFirst().get();
+        LoanCharge loanCharge = loanChargePaidBy.getLoanCharge();
+        Money amountToBePaid = Money.of(currency, loanTransaction.getAmount());
+        if (loanCharge.getAmountOutstanding(currency).isLessThan(amountToBePaid)) {
+            amountToBePaid = loanCharge.getAmountOutstanding(currency);
+        }
+
+        LocalDate startDate = loanTransaction.getLoan().getDisbursementDate();
+
+        Money unprocessed = loanTransaction.getAmount(currency);
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            boolean isDue = installment.isFirstPeriod()
+                    ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(startDate, installment.getDueDate())
+                    : loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate());
+            if (isDue) {
+                Integer installmentNumber = installment.getInstallmentNumber();
+                Money paidAmount = loanCharge.updatePaidAmountBy(amountToBePaid, installmentNumber, zero);
+
+                LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = getTransactionMapping(
+                        transactionMappings, loanTransaction, installment, currency);
+
+                if (loanTransaction.isPenaltyPayment()) {
+                    penaltyChargesPortion = installment.payPenaltyChargesComponent(loanTransaction.getTransactionDate(), paidAmount);
+                    loanTransaction.setLoanChargesPaid(Collections
+                            .singleton(new LoanChargePaidBy(loanTransaction, loanCharge, paidAmount.getAmount(), installmentNumber)));
+                    addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, zero, zero, penaltyChargesPortion);
+                } else {
+                    feeChargesPortion = installment.payFeeChargesComponent(loanTransaction.getTransactionDate(), paidAmount);
+                    loanTransaction.setLoanChargesPaid(Collections
+                            .singleton(new LoanChargePaidBy(loanTransaction, loanCharge, paidAmount.getAmount(), installmentNumber)));
+                    addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, zero, feeChargesPortion, zero);
+                }
+
+                loanTransaction.updateComponents(zero, zero, feeChargesPortion, penaltyChargesPortion);
+                unprocessed = loanTransaction.getAmount(currency).minus(paidAmount);
+                loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
+            }
+        }
+
+        if (unprocessed.isGreaterThanZero()) {
+            processTransaction(loanTransaction, currency, installments, unprocessed, charges);
+        }
+    }
+
+    private void processTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, Money transactionAmountUnprocessed, Set<LoanCharge> charges) {
         Money zero = Money.zero(currency);
         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
 
@@ -272,116 +422,46 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 balances.getAggregatedFeeChargesPortion(), balances.getAggregatedPenaltyChargesPortion());
         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
 
+        payAdditionalCharges(loanTransaction, currency, charges);
+
+        handleOverpayment(transactionAmountUnprocessed, loanTransaction);
+    }
+
+    private void payAdditionalCharges(LoanTransaction loanTransaction, MonetaryCurrency currency, Set<LoanCharge> charges) {
+        final Set<LoanCharge> paidFeeCharges = loanTransaction.getLoanChargesPaid().stream() //
+                .map(LoanChargePaidBy::getLoanCharge) //
+                .filter(LoanCharge::isFeeCharge).collect(Collectors.toSet());
+        final Set<LoanCharge> paidPenaltyCharges = loanTransaction.getLoanChargesPaid().stream() //
+                .map(LoanChargePaidBy::getLoanCharge) //
+                .filter(LoanCharge::isPenaltyCharge).collect(Collectors.toSet());
         // TODO: rewrite to provide sorted list
         final Set<LoanCharge> loanFees = extractFeeCharges(charges);
         final Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
+        loanFees.removeAll(paidFeeCharges);
+        loanPenalties.removeAll(paidPenaltyCharges);
+
+        BigDecimal sumFeePaidAmount = paidFeeCharges.stream() //
+                .map(paidCharge -> paidCharge.getAmountPaid(currency)) //
+                .map(Money::getAmount) //
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal sumPenaltyPaidAmount = paidPenaltyCharges.stream() //
+                .map(paidCharge -> paidCharge.getAmountPaid(currency)) //
+                .map(Money::getAmount) //
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (loanTransaction.isNotWaiver() && !loanTransaction.isAccrual()) {
-            Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
-            Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
+            Money feeCharges = loanTransaction.getFeeChargesPortion(currency).minus(sumFeePaidAmount);
+            Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency).minus(sumPenaltyPaidAmount);
+
             if (feeCharges.isGreaterThanZero()) {
-                // TODO: Rewrite to exclude charge payment
                 updateChargesPaidAmountBy(loanTransaction, feeCharges, loanFees, null);
             }
 
             if (penaltyCharges.isGreaterThanZero()) {
-                // TODO: Rewrite to exclude charge payment
                 updateChargesPaidAmountBy(loanTransaction, penaltyCharges, loanPenalties, null);
             }
         }
-        handleOverpayment(transactionAmountUnprocessed, loanTransaction);
-    }
-
-    private LoanTransactionToRepaymentScheduleMapping getTransactionMapping(
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, LoanTransaction loanTransaction,
-            LoanRepaymentScheduleInstallment currentInstallment, MonetaryCurrency currency) {
-        Money zero = Money.zero(currency);
-        LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = transactionMappings.stream()
-                .filter(e -> loanTransaction.equals(e.getLoanTransaction()))
-                .filter(e -> currentInstallment.equals(e.getLoanRepaymentScheduleInstallment())).findFirst().orElse(null);
-        if (loanTransactionToRepaymentScheduleMapping == null) {
-            loanTransactionToRepaymentScheduleMapping = LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
-                    currentInstallment, zero, zero, zero, zero);
-            transactionMappings.add(loanTransactionToRepaymentScheduleMapping);
-        }
-        return loanTransactionToRepaymentScheduleMapping;
-    }
-
-    private Money payAllocation(PaymentAllocationType paymentAllocationType, LoanRepaymentScheduleInstallment currentInstallment,
-            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
-            LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping, Balances balances) {
-        LocalDate transactionDate = loanTransaction.getTransactionDate();
-        Money zero = transactionAmountUnprocessed.zero();
-        return switch (paymentAllocationType.getAllocationType()) {
-            case PENALTY -> {
-                Money subPenaltyPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountUnprocessed);
-                balances.setAggregatedPenaltyChargesPortion(balances.getAggregatedPenaltyChargesPortion().add(subPenaltyPortion));
-                addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, zero, zero, subPenaltyPortion);
-                yield subPenaltyPortion;
-            }
-            case FEE -> {
-                Money subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountUnprocessed);
-                balances.setAggregatedFeeChargesPortion(balances.getAggregatedFeeChargesPortion().add(subFeePortion));
-                addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, zero, subFeePortion, zero);
-                yield subFeePortion;
-            }
-            case INTEREST -> {
-                Money subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountUnprocessed);
-                balances.setAggregatedInterestPortion(balances.getAggregatedInterestPortion().add(subInterestPortion));
-                addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, subInterestPortion, zero, zero);
-                yield subInterestPortion;
-            }
-            case PRINCIPAL -> {
-                Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountUnprocessed);
-                balances.setAggregatedPrincipalPortion(balances.getAggregatedPrincipalPortion().add(subPrincipalPortion));
-                addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, subPrincipalPortion, zero, zero, zero);
-                yield subPrincipalPortion;
-            }
-        };
-    }
-
-    private void addToTransactionMapping(LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping,
-            Money principalPortion, Money interestPortion, Money feePortion, Money penaltyPortion) {
-        BigDecimal aggregatedPenalty = ObjectUtils
-                .defaultIfNull(loanTransactionToRepaymentScheduleMapping.getPenaltyChargesPortion(), BigDecimal.ZERO)
-                .add(penaltyPortion.getAmount());
-        BigDecimal aggregatedFee = ObjectUtils
-                .defaultIfNull(loanTransactionToRepaymentScheduleMapping.getFeeChargesPortion(), BigDecimal.ZERO)
-                .add(feePortion.getAmount());
-        BigDecimal aggregatedInterest = ObjectUtils
-                .defaultIfNull(loanTransactionToRepaymentScheduleMapping.getInterestPortion(), BigDecimal.ZERO)
-                .add(interestPortion.getAmount());
-        BigDecimal aggregatedPrincipal = ObjectUtils
-                .defaultIfNull(loanTransactionToRepaymentScheduleMapping.getPrincipalPortion(), BigDecimal.ZERO)
-                .add(principalPortion.getAmount());
-        loanTransactionToRepaymentScheduleMapping.setComponents(aggregatedPrincipal, aggregatedInterest, aggregatedFee, aggregatedPenalty);
-    }
-
-    private void handleOverpayment(Money overpaymentPortion, LoanTransaction loanTransaction) {
-        if (overpaymentPortion.isGreaterThanZero()) {
-            onLoanOverpayment(loanTransaction, overpaymentPortion);
-            loanTransaction.updateOverPayments(overpaymentPortion);
-        }
-    }
-
-    private void handleChargeOff(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments) {
-        loanTransaction.resetDerivedComponents();
-        // determine how much is outstanding total and breakdown for principal, interest and charges
-        Money principalPortion = Money.zero(currency);
-        Money interestPortion = Money.zero(currency);
-        Money feeChargesPortion = Money.zero(currency);
-        Money penaltychargesPortion = Money.zero(currency);
-        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
-            if (currentInstallment.isNotFullyPaidOff()) {
-                principalPortion = principalPortion.plus(currentInstallment.getPrincipalOutstanding(currency));
-                interestPortion = interestPortion.plus(currentInstallment.getInterestOutstanding(currency));
-                feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesOutstanding(currency));
-                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.getPenaltyChargesCharged(currency));
-            }
-        }
-
-        loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
     }
 
     @AllArgsConstructor
