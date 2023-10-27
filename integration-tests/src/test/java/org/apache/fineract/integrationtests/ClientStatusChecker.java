@@ -39,7 +39,7 @@ public final class ClientStatusChecker {
     }
 
     public static void verifyClientStatus(final ClientStatus status, final GetClientsClientIdResponse clientResponse) {
-        assertEquals(status.getValue(), clientResponse.getStatus().getId());
+        assertEquals(status.getValue().longValue(), clientResponse.getStatus().getId());
     }
 
     public static void verifyClientClosed(final HashMap<String, Object> clientStatusHashMap) {

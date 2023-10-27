@@ -74,11 +74,11 @@ final class SavingsAccountChargesApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "3")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "57")
-        public Integer accountId;
+        public Long accountId;
         @Schema(example = "Savings account maintenance fee")
         public String name;
         public GetChargesChargeTimeType chargeTimeType;
@@ -138,7 +138,7 @@ final class SavingsAccountChargesApiResourceSwagger {
             }
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "Passbook Fee")
             public String name;
             @Schema(example = "true")
@@ -170,9 +170,9 @@ final class SavingsAccountChargesApiResourceSwagger {
         private GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "Passbook fee")
         public String name;
         public GetSavingsAccountsSavingsAccountIdChargesResponse.GetChargesChargeTimeType chargeTimeType;
@@ -204,7 +204,7 @@ final class SavingsAccountChargesApiResourceSwagger {
         private PostSavingsAccountsSavingsAccountIdChargesRequest() {}
 
         @Schema(example = "2")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "100")
@@ -221,13 +221,13 @@ final class SavingsAccountChargesApiResourceSwagger {
         private PostSavingsAccountsSavingsAccountIdChargesResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "6")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest")
@@ -265,13 +265,13 @@ final class SavingsAccountChargesApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "6")
-        public Integer resourceId;
+        public Long resourceId;
         public PutSavingsChanges changes;
     }
 
@@ -296,13 +296,13 @@ final class SavingsAccountChargesApiResourceSwagger {
         private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "2")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
@@ -311,12 +311,12 @@ final class SavingsAccountChargesApiResourceSwagger {
         private DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "2")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

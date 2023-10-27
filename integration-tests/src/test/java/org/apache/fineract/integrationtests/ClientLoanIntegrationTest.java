@@ -6894,7 +6894,7 @@ public class ClientLoanIntegrationTest {
     }
 
     private PostClientsRequest createRandomClientWithDate(String date) {
-        return new PostClientsRequest().officeId(1).legalFormId(1).firstname(Utils.randomStringGenerator("", 5))
+        return new PostClientsRequest().officeId(1L).legalFormId(1L).firstname(Utils.randomStringGenerator("", 5))
                 .lastname(Utils.randomStringGenerator("", 5)).active(true).locale("en").activationDate(date).dateFormat(DATETIME_PATTERN);
     }
 
@@ -8036,13 +8036,13 @@ public class ClientLoanIntegrationTest {
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, REQUEST_SPEC, RESPONSE_SPEC);
     }
 
-    private PostLoansResponse applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(Integer clientId, Long loanProductId,
+    private PostLoansResponse applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(Long clientId, Long loanProductId,
             String loanDisbursementDate, String repaymentStrategyCode) {
         return LOAN_TRANSACTION_HELPER.applyLoan(new PostLoansRequest().clientId(clientId.longValue()).productId(loanProductId)
                 .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(repaymentStrategyCode).locale("en").submittedOnDate(loanDisbursementDate)
-                .amortizationType(1).interestRatePerPeriod(0).interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0)
-                .repaymentEvery(30).repaymentFrequencyType(0).numberOfRepayments(1).loanTermFrequency(30).loanTermFrequencyType(0)
+                .amortizationType(1L).interestRatePerPeriod(0).interestCalculationPeriodType(1L).interestType(0L).repaymentFrequencyType(0L)
+                .repaymentEvery(30).repaymentFrequencyType(0L).numberOfRepayments(1).loanTermFrequency(30).loanTermFrequencyType(0L)
                 .principal(BigDecimal.valueOf(1000.0)).loanType("individual"));
     }
 
@@ -8066,13 +8066,13 @@ public class ClientLoanIntegrationTest {
                 .minInterestRatePerPeriod((double) 0)//
                 .interestRatePerPeriod((double) 0)//
                 .maxInterestRatePerPeriod((double) 0)//
-                .interestRateFrequencyType(2)//
+                .interestRateFrequencyType(2L)//
                 .repaymentEvery(30)//
-                .repaymentFrequencyType(0)//
-                .amortizationType(1)//
-                .interestType(0)//
+                .repaymentFrequencyType(0L)//
+                .amortizationType(1L)//
+                .interestType(0L)//
                 .isEqualAmortization(false)//
-                .interestCalculationPeriodType(1)//
+                .interestCalculationPeriodType(1L)//
                 .transactionProcessingStrategyCode(
                         LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)//
                 .daysInYearType(1)//
@@ -8100,7 +8100,7 @@ public class ClientLoanIntegrationTest {
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(Collections.emptyList())//
-                .accountingRule(3)//
+                .accountingRule(3L)//
                 .fundSourceAccountId(SUSPENSE_CLEARING_ACCOUNT.getAccountID().longValue())//
                 .loanPortfolioAccountId(LOANS_RECEIVABLE_ACCOUNT.getAccountID().longValue())//
                 .transfersInSuspenseAccountId(SUSPENSE_ACCOUNT.getAccountID().longValue())//

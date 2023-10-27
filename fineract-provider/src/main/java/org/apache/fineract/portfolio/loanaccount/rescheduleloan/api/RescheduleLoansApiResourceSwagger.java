@@ -40,7 +40,7 @@ final class RescheduleLoansApiResourceSwagger {
             private GetRescheduleReasonsAllowedTypes() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "reason")
             public String name;
             @Schema(example = "0")
@@ -66,7 +66,7 @@ final class RescheduleLoansApiResourceSwagger {
             private GetLoanRescheduleRequestStatus() {}
 
             @Schema(example = "100")
-            public Integer id;
+            public Long id;
             @Schema(example = "loanStatusType.submitted.and.pending.approval")
             public String code;
             @Schema(example = "Submitted and pending approval")
@@ -84,7 +84,7 @@ final class RescheduleLoansApiResourceSwagger {
             private RescheduleReasonsCodeValue() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "reason")
             public String name;
             @Schema(example = "true")
@@ -120,7 +120,7 @@ final class RescheduleLoansApiResourceSwagger {
             private LoanTermTypeOptions() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "loanTermType.dueDate")
             public String code;
             @Schema(example = "dueDate")
@@ -132,7 +132,7 @@ final class RescheduleLoansApiResourceSwagger {
             private LoanTermVariationsData() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             public LoanTermTypeOptions termType;
             @Schema(example = "[2022, 5, 1]")
             public LocalDate termVariationApplicableFrom;
@@ -148,11 +148,11 @@ final class RescheduleLoansApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "18")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "15")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "clientName")
         public String clientName;
         @Schema(example = "000000018")

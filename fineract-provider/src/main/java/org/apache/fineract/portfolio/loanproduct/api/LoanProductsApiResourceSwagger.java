@@ -102,15 +102,15 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean useBorrowerCycle;
         @Schema(example = "2")
-        public Integer repaymentFrequencyType;
+        public Long repaymentFrequencyType;
         @Schema(example = "2")
-        public Integer interestRateFrequencyType;
+        public Long interestRateFrequencyType;
         @Schema(example = "1")
-        public Integer amortizationType;
+        public Long amortizationType;
         @Schema(example = "0")
-        public Integer interestType;
+        public Long interestType;
         @Schema(example = "1")
-        public Integer interestCalculationPeriodType;
+        public Long interestCalculationPeriodType;
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
         public List<AdvancedPaymentData> paymentAllocation;
@@ -191,7 +191,7 @@ final class LoanProductsApiResourceSwagger {
 
         // Accounting
         @Schema(example = "3")
-        public Integer accountingRule;
+        public Long accountingRule;
         @Schema(example = "4")
         public Long fundSourceAccountId;
         @Schema(example = "8")
@@ -430,7 +430,7 @@ final class LoanProductsApiResourceSwagger {
             private GetLoanProductsRepaymentStartDateType() {}
 
             @Schema(example = "1")
-            public Long id;
+            public Integer id;
             @Schema(example = "repaymentStartDateType.disbursementDate")
             public String code;
             @Schema(example = "Disbursement Date")
@@ -1062,7 +1062,7 @@ final class LoanProductsApiResourceSwagger {
             private GetLoanProductsRepaymentStartDateType() {}
 
             @Schema(example = "1")
-            public Long id;
+            public Integer id;
             @Schema(example = "repaymentStartDateType.disbursementDate")
             public String code;
             @Schema(example = "Disbursement Date")
@@ -1326,15 +1326,15 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean useBorrowerCycle;
         @Schema(example = "2")
-        public Integer repaymentFrequencyType;
+        public Long repaymentFrequencyType;
         @Schema(example = "2")
-        public Integer interestRateFrequencyType;
+        public Long interestRateFrequencyType;
         @Schema(example = "1")
-        public Integer amortizationType;
+        public Long amortizationType;
         @Schema(example = "0")
-        public Integer interestType;
+        public Long interestType;
         @Schema(example = "1")
-        public Integer interestCalculationPeriodType;
+        public Long interestCalculationPeriodType;
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
         public List<AdvancedPaymentData> paymentAllocation;
@@ -1351,9 +1351,9 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "50")
         public Integer overAppliedNumber;
         @Schema(example = "1")
-        public Integer daysInMonthType;
+        public Long daysInMonthType;
         @Schema(example = "1")
-        public Integer daysInYearType;
+        public Long daysInYearType;
         @Schema(example = "true")
         public Boolean allowPartialPeriodInterestCalcualtion;
         @Schema(example = "179")
@@ -1415,7 +1415,7 @@ final class LoanProductsApiResourceSwagger {
 
         // Accounting
         @Schema(example = "3")
-        public Integer accountingRule;
+        public Long accountingRule;
         @Schema(example = "4")
         public Long fundSourceAccountId;
         @Schema(example = "8")

@@ -44,9 +44,9 @@ final class ClientAddressApiResourcesSwagger {
         @Schema(example = "Mumbai")
         public String city;
         @Schema(example = "800")
-        public Integer stateProvinceId;
+        public Long stateProvinceId;
         @Schema(example = "802")
-        public Integer countryId;
+        public Long countryId;
         @Schema(example = "400064")
         public Long postalCode;
         @Schema(example = "true")
@@ -59,7 +59,7 @@ final class ClientAddressApiResourcesSwagger {
         private PostClientClientIdAddressesResponse() {}
 
         @Schema(example = "15")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetClientClientIdAddressesResponse")
@@ -72,9 +72,9 @@ final class ClientAddressApiResourcesSwagger {
         @Schema(example = "PERMANENT ADDRESS")
         public String addressType;
         @Schema(example = "14")
-        public Integer addressId;
+        public Long addressId;
         @Schema(example = "804")
-        public Integer addressTypeId;
+        public Long addressTypeId;
         @Schema(example = "false")
         public Boolean isActive;
         @Schema(example = "anki's home")
@@ -92,13 +92,13 @@ final class ClientAddressApiResourcesSwagger {
         @Schema(example = " ")
         public String countyDistrict;
         @Schema(example = "801")
-        public Integer stateProvinceId;
+        public Long stateProvinceId;
         @Schema(example = "UNITED STATES")
         public String countryName;
         @Schema(example = "GUJRAT")
         public String stateName;
         @Schema(example = "807")
-        public Integer countryId;
+        public Long countryId;
         @Schema(example = "400095")
         public Long postalCode;
         @Schema(example = " ")
@@ -113,7 +113,7 @@ final class ClientAddressApiResourcesSwagger {
         private PutClientClientIdAddressesRequest() {}
 
         @Schema(example = "67")
-        public Integer addressId;
+        public Long addressId;
         @Schema(example = "goldensource")
         public String street;
     }
@@ -124,6 +124,6 @@ final class ClientAddressApiResourcesSwagger {
         private PutClientClientIdAddressesResponse() {}
 
         @Schema(example = "67")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

@@ -56,7 +56,7 @@ public class ClientTest extends IntegrationTest {
         // TODO why dateFormat and locale required even when no activationDate?!
         // https://issues.apache.org/jira/browse/FINERACT-1233
         return ok(fineract().clients.create6(
-                new PostClientsRequest().legalFormId(1).officeId(1).fullname("TestClient").dateFormat(dateFormat()).locale("en_US")))
+                new PostClientsRequest().legalFormId(1L).officeId(1L).fullname("TestClient").dateFormat(dateFormat()).locale("en_US")))
                 .getClientId();
     }
 

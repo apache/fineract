@@ -39,7 +39,7 @@ final class PocketApiResourceSwagger {
             private GetPocketAccountDetail() {}
 
             @Schema(example = "11")
-            public Integer accountId;
+            public Long accountId;
             @Schema(example = "LOAN")
             public String accountType;
         }
@@ -66,15 +66,15 @@ final class PocketApiResourceSwagger {
             private GetPocketLoanAccounts() {}
 
             @Schema(example = "6")
-            public Integer pocketId;
+            public Long pocketId;
             @Schema(example = "11")
-            public Integer accountId;
+            public Long accountId;
             @Schema(example = "2")
             public Integer accountType;
             @Schema(example = "000000011")
             public Integer accountNumber;
             @Schema(example = "10")
-            public Integer id;
+            public Long id;
         }
 
         static final class GetPocketSavingAccounts {
@@ -82,15 +82,15 @@ final class PocketApiResourceSwagger {
             private GetPocketSavingAccounts() {}
 
             @Schema(example = "6")
-            public Integer pocketId;
+            public Long pocketId;
             @Schema(example = "2")
-            public Integer accountId;
+            public Long accountId;
             @Schema(example = "3")
             public Integer accountType;
             @Schema(example = "000000002")
             public Integer accountNumber;
             @Schema(example = "11")
-            public Integer id;
+            public Long id;
         }
 
         static final class GetPocketShareAccounts {

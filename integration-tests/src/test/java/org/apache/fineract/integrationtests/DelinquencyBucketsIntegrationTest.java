@@ -285,7 +285,7 @@ public class DelinquencyBucketsIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), null);
+                    Math.toIntExact(delinquencyBucket.getId()), null);
             assertNotNull(getLoanProductsProductResponse);
             log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
             assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
@@ -381,7 +381,7 @@ public class DelinquencyBucketsIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), null);
+                    Math.toIntExact(delinquencyBucket.getId()), null);
             assertNotNull(getLoanProductsProductResponse);
             log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
             assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
@@ -478,7 +478,7 @@ public class DelinquencyBucketsIntegrationTest {
         // Client and Loan account creation
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
         final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucket.getId(), null);
+                Math.toIntExact(delinquencyBucket.getId()), null);
         assertNotNull(getLoanProductsProductResponse);
         log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
         assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
@@ -571,7 +571,7 @@ public class DelinquencyBucketsIntegrationTest {
         // Client and Loan account creation
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
         final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucket.getId(), null);
+                Math.toIntExact(delinquencyBucket.getId()), null);
         assertNotNull(getLoanProductsProductResponse);
         log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
         assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
@@ -679,7 +679,7 @@ public class DelinquencyBucketsIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), null);
+                    Math.toIntExact(delinquencyBucket.getId()), null);
             assertNotNull(getLoanProductsProductResponse);
             log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
             assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
@@ -768,7 +768,7 @@ public class DelinquencyBucketsIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), null);
+                    Math.toIntExact(delinquencyBucket.getId()), null);
             assertNotNull(getLoanProductsProductResponse);
             log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
             assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
@@ -870,7 +870,7 @@ public class DelinquencyBucketsIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), "3");
+                    Math.toIntExact(delinquencyBucket.getId()), "3");
             assertNotNull(getLoanProductsProductResponse);
             log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
             assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
@@ -949,7 +949,7 @@ public class DelinquencyBucketsIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), "3");
+                    Math.toIntExact(delinquencyBucket.getId()), "3");
             assertNotNull(getLoanProductsProductResponse);
             log.info("Loan Product Arrears: {}", getLoanProductsProductResponse.getInArrearsTolerance());
             assertEquals(3, getLoanProductsProductResponse.getInArrearsTolerance());

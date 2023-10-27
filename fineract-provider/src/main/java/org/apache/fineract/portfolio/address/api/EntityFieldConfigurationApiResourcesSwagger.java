@@ -34,7 +34,7 @@ final class EntityFieldConfigurationApiResourcesSwagger {
         private GetFieldConfigurationEntityResponse() {}
 
         @Schema(example = "1")
-        public Integer fieldConfigurationId;
+        public Long fieldConfigurationId;
         @Schema(example = "ADDRESS")
         public String entity;
         @Schema(example = "CLIENT")

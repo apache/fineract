@@ -413,15 +413,15 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
 
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse chargeRefundResult = loanTransactionHelper.makeChargeRefund(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en").loanChargeId(penalty1LoanChargeId)
-                        .transactionAmount(1.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en")
+                        .loanChargeId(Long.valueOf(penalty1LoanChargeId)).transactionAmount(1.0));
         assertNotNull(chargeRefundResult.getResourceExternalId());
 
         // Check whether the provided external id was retrieved
         transactionExternalIdStr = UUID.randomUUID().toString();
         final PostLoansLoanIdTransactionsResponse chargeRefundResultWithExternalId = loanTransactionHelper
                 .makeChargeRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en")
-                        .loanChargeId(penalty1LoanChargeId).transactionAmount(1.0).externalId(transactionExternalIdStr));
+                        .loanChargeId(Long.valueOf(penalty1LoanChargeId)).transactionAmount(1.0).externalId(transactionExternalIdStr));
         assertEquals(transactionExternalIdStr, chargeRefundResultWithExternalId.getResourceExternalId());
 
         response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
@@ -934,11 +934,11 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
             PutLoansLoanIdResponse modifyLoanApplicationResult = this.loanTransactionHelper.modifyLoanApplication(loanExternalIdStr2,
                     "modify",
                     new PutLoansLoanIdRequest().submittedOnDate("31 August 2022").dateFormat("dd MMMM yyyy").locale("en")
-                            .loanType("individual").productId(loanProductID.longValue()).clientId(client.getClientId()).interestType(0)
-                            .interestCalculationPeriodType(1).interestRatePerPeriod(0).isEqualAmortization(false).loanTermFrequency(30)
-                            .loanTermFrequencyType(0).maxOutstandingLoanBalance(10000L).numberOfRepayments(1).principal(10000L)
-                            .repaymentEvery(30).repaymentFrequencyType(0).transactionProcessingStrategyCode("mifos-standard-strategy")
-                            .expectedDisbursementDate("2 September 2022").amortizationType(1));
+                            .loanType("individual").productId(loanProductID.longValue()).clientId(client.getClientId()).interestType(0L)
+                            .interestCalculationPeriodType(1L).interestRatePerPeriod(0).isEqualAmortization(false).loanTermFrequency(30)
+                            .loanTermFrequencyType(0L).maxOutstandingLoanBalance(10000L).numberOfRepayments(1).principal(10000L)
+                            .repaymentEvery(30).repaymentFrequencyType(0L).transactionProcessingStrategyCode("mifos-standard-strategy")
+                            .expectedDisbursementDate("2 September 2022").amortizationType(1L));
 
             assertEquals(loanExternalIdStr2, modifyLoanApplicationResult.getResourceExternalId());
             DeleteLoansLoanIdResponse deleteLoanApplicationResult = this.loanTransactionHelper.deleteLoanApplication(loanExternalIdStr2);

@@ -47,7 +47,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "Head Office")
             public String decoratedName;
             @Schema(example = "1")
-            public Integer externalId;
+            public Long externalId;
             @Schema(example = "[2009, 1, 1]")
             public LocalDate openingDate;
             @Schema(example = ".")

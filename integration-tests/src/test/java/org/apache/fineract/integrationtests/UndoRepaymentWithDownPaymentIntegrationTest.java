@@ -260,16 +260,16 @@ public class UndoRepaymentWithDownPaymentIntegrationTest {
                 .minInterestRatePerPeriod((double) 0)//
                 .interestRatePerPeriod((double) 0)//
                 .maxInterestRatePerPeriod((double) 0)//
-                .interestRateFrequencyType(2)//
+                .interestRateFrequencyType(2L)//
                 .repaymentEvery(30)//
-                .repaymentFrequencyType(0)//
+                .repaymentFrequencyType(0L)//
                 .principalVariationsForBorrowerCycle(principalVariationsForBorrowerCycle)//
                 .numberOfRepaymentVariationsForBorrowerCycle(numberOfRepaymentVariationsForBorrowerCycle)//
                 .interestRateVariationsForBorrowerCycle(interestRateVariationsForBorrowerCycle)//
-                .amortizationType(1)//
-                .interestType(0)//
+                .amortizationType(1L)//
+                .interestType(0L)//
                 .isEqualAmortization(false)//
-                .interestCalculationPeriodType(1)//
+                .interestCalculationPeriodType(1L)//
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")//
                 .addPaymentAllocationItem(defaultAllocation)//
                 .daysInYearType(1)//
@@ -298,7 +298,7 @@ public class UndoRepaymentWithDownPaymentIntegrationTest {
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(charges)//
-                .accountingRule(3)//
+                .accountingRule(3L)//
                 .fundSourceAccountId(suspenseClearingAccount.getAccountID().longValue())//
                 .loanPortfolioAccountId(loansReceivable.getAccountID().longValue())//
                 .transfersInSuspenseAccountId(suspenseAccount.getAccountID().longValue())//

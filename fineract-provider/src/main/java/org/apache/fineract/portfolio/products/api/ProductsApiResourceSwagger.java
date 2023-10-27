@@ -58,7 +58,7 @@ final class ProductsApiResourceSwagger {
             private GetProductsMarketPrice() {}
 
             @Schema(example = "4")
-            public Integer id;
+            public Long id;
             @Schema(example = "Feb 1, 2016")
             public String fromDate;
             @Schema(example = "1")
@@ -92,7 +92,7 @@ final class ProductsApiResourceSwagger {
                 private GetChargeTimeType() {}
 
                 @Schema(example = "13")
-                public Integer id;
+                public Long id;
                 @Schema(example = "chargeTimeType.activation")
                 public String code;
                 @Schema(example = "Share Account Activate")
@@ -104,7 +104,7 @@ final class ProductsApiResourceSwagger {
                 private GetChargeAppliesTo() {}
 
                 @Schema(example = "4")
-                public Integer id;
+                public Long id;
                 @Schema(example = "chargeAppliesTo.shares")
                 public String code;
                 @Schema(example = "Shares")
@@ -116,7 +116,7 @@ final class ProductsApiResourceSwagger {
                 private GetChargeCalculationType() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "chargeCalculationType.flat")
                 public String code;
                 @Schema(example = "Flat")
@@ -128,7 +128,7 @@ final class ProductsApiResourceSwagger {
                 private GetChargePaymentMode() {}
 
                 @Schema(example = "0")
-                public Integer id;
+                public Long id;
                 @Schema(example = "chargepaymentmode.regular")
                 public String code;
                 @Schema(example = "Regular")
@@ -136,7 +136,7 @@ final class ProductsApiResourceSwagger {
             }
 
             @Schema(example = "20")
-            public Integer id;
+            public Long id;
             @Schema(example = "Share Account Activation Flat")
             public String name;
             @Schema(example = "true")
@@ -157,7 +157,7 @@ final class ProductsApiResourceSwagger {
             private GetLockPeriodTypeEnum() {}
 
             @Schema(example = "0")
-            public Integer id;
+            public Long id;
             @Schema(example = "Days")
             public String description;
         }
@@ -167,7 +167,7 @@ final class ProductsApiResourceSwagger {
             private GetProductsAccountingRule() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "accountingRuleType.cash")
             public String code;
             @Schema(example = "CASH BASED")
@@ -183,7 +183,7 @@ final class ProductsApiResourceSwagger {
                 private GetShareReferenceId() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "ACCOUNT_NAME_1FJBQ")
                 public String name;
                 @Schema(example = "ASSET_ED1461237837829")
@@ -195,7 +195,7 @@ final class ProductsApiResourceSwagger {
                 private GetIncomeFromFeeAccountId() {}
 
                 @Schema(example = "14")
-                public Integer id;
+                public Long id;
                 @Schema(example = "ACCOUNT_NAME_1FJBQ")
                 public String name;
                 @Schema(example = "INCOME_OY1461237869836")
@@ -207,7 +207,7 @@ final class ProductsApiResourceSwagger {
                 private GetShareEquityId() {}
 
                 @Schema(example = "66")
-                public Integer id;
+                public Long id;
                 @Schema(example = "Equity Account")
                 public String name;
                 @Schema(example = "EQUITY1")
@@ -219,7 +219,7 @@ final class ProductsApiResourceSwagger {
                 private GetShareSuspenseId() {}
 
                 @Schema(example = "8")
-                public Integer id;
+                public Long id;
                 @Schema(example = "ACCOUNT_NAME_1FJBQ")
                 public String name;
                 @Schema(example = "LIABILITY_MA1461237860198")
@@ -237,7 +237,7 @@ final class ProductsApiResourceSwagger {
             private GetProductsMinimumActivePeriodFrequencyTypeOptions() {}
 
             @Schema(example = "0")
-            public Integer id;
+            public Long id;
             @Schema(example = "savings.lockin.sharePeriodFrequencyType.days")
             public String code;
             @Schema(example = "Days")
@@ -257,7 +257,7 @@ final class ProductsApiResourceSwagger {
                     private GetProductsLiabilityType() {}
 
                     @Schema(example = "2")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "accountType.liability")
                     public String code;
                     @Schema(example = "LIABILITY")
@@ -269,7 +269,7 @@ final class ProductsApiResourceSwagger {
                     private GetProductsLiabilityUsage() {}
 
                     @Schema(example = "1")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "accountUsage.detail")
                     public String code;
                     @Schema(example = "DETAIL")
@@ -281,13 +281,13 @@ final class ProductsApiResourceSwagger {
                     private GetProductsTagId() {}
 
                     @Schema(example = "0")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "false")
                     public Boolean isActive;
                 }
 
                 @Schema(example = "4")
-                public Integer id;
+                public Long id;
                 @Schema(example = "ACCOUNT_NAME_1FJBQ")
                 public String name;
                 @Schema(example = "LIABILITY_2T1461237838897")
@@ -314,7 +314,7 @@ final class ProductsApiResourceSwagger {
                     private GetAssetType() {}
 
                     @Schema(example = "1")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "accountType.asset")
                     public String code;
                     @Schema(example = "ASSET")
@@ -322,7 +322,7 @@ final class ProductsApiResourceSwagger {
                 }
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "ACCOUNT_NAME_1FJBQ")
                 public String name;
                 @Schema(example = "ASSET_ED1461237837829")
@@ -349,7 +349,7 @@ final class ProductsApiResourceSwagger {
                     private GetIncomeType() {}
 
                     @Schema(example = "1")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "accountType.income")
                     public String code;
                     @Schema(example = "INCOME")
@@ -357,7 +357,7 @@ final class ProductsApiResourceSwagger {
                 }
 
                 @Schema(example = "2")
-                public Integer id;
+                public Long id;
                 @Schema(example = "ACCOUNT_NAME_1FJBQ")
                 public String name;
                 @Schema(example = "INCOME_9O1461237838422")
@@ -384,7 +384,7 @@ final class ProductsApiResourceSwagger {
                     private GetEquityType() {}
 
                     @Schema(example = "3")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "accountType.equity")
                     public String code;
                     @Schema(example = "EQUITY")
@@ -392,7 +392,7 @@ final class ProductsApiResourceSwagger {
                 }
 
                 @Schema(example = "66")
-                public Integer id;
+                public Long id;
                 @Schema(example = "Equity Account")
                 public String name;
                 @Schema(example = "EQUITY1")
@@ -415,7 +415,7 @@ final class ProductsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "Share Product")
         public String name;
         @Schema(example = "SP")
@@ -466,7 +466,7 @@ final class ProductsApiResourceSwagger {
             private GetProductsPageItems() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Share Product")
             public String name;
             @Schema(example = "Share Product Description")
@@ -504,7 +504,7 @@ final class ProductsApiResourceSwagger {
             private PostProductsChargesSelected() {}
 
             @Schema(example = "20")
-            public Integer id;
+            public Long id;
         }
 
         @Schema(example = "Share Product")
@@ -555,7 +555,7 @@ final class ProductsApiResourceSwagger {
         private PostProductsTypeResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutProductsTypeProductIdRequest")
@@ -589,7 +589,7 @@ final class ProductsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutProductsChanges changes;
     }
 }

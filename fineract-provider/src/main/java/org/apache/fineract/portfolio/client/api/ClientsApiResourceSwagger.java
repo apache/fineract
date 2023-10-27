@@ -41,7 +41,7 @@ final class ClientsApiResourceSwagger {
             private GetClientsOfficeOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Head Office")
             public String name;
             @Schema(example = "Head Office")
@@ -53,7 +53,7 @@ final class ClientsApiResourceSwagger {
             private GetClientsStaffOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "xyz")
             public String firstname;
             @Schema(example = "sjs")
@@ -61,7 +61,7 @@ final class ClientsApiResourceSwagger {
             @Schema(example = "sjs, xyz")
             public String displayName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
             @Schema(example = "true")
@@ -75,7 +75,7 @@ final class ClientsApiResourceSwagger {
             private GetClientsSavingProductOptions() {}
 
             @Schema(example = "4")
-            public Integer id;
+            public Long id;
             @Schema(example = "account overdraft")
             public String name;
             @Schema(example = "false")
@@ -118,7 +118,7 @@ final class ClientsApiResourceSwagger {
         @Schema(example = "[2014, 3, 4]")
         public LocalDate activationDate;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         public Set<GetClientsOfficeOptions> officeOptions;
         public Set<GetClientsStaffOptions> staffOptions;
         public Set<GetClientsSavingProductOptions> savingProductOptions;
@@ -139,7 +139,7 @@ final class ClientsApiResourceSwagger {
                 private GetClientStatus() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "clientStatusType.pending")
                 public String code;
                 @Schema(example = "Pending")
@@ -158,7 +158,7 @@ final class ClientsApiResourceSwagger {
             @Schema(example = "Home Farm Produce")
             public String displayName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
             @Schema(example = "test@test.com")
@@ -180,7 +180,7 @@ final class ClientsApiResourceSwagger {
             private GetClientsClientIdStatus() {}
 
             @Schema(example = "300")
-            public Integer id;
+            public Long id;
             @Schema(example = "clientStatusType.active")
             public String code;
             @Schema(example = "Active")
@@ -225,7 +225,7 @@ final class ClientsApiResourceSwagger {
         }
 
         @Schema(example = "27")
-        public Integer id;
+        public Long id;
         @Schema(example = "000000027")
         public String accountNo;
         public GetClientsClientIdStatus status;
@@ -240,12 +240,12 @@ final class ClientsApiResourceSwagger {
         @Schema(example = "savings test")
         public String displayName;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "Head Office")
         public String officeName;
         public GetClientsTimeline timeline;
         @Schema(example = "4")
-        public Integer savingsProductId;
+        public Long savingsProductId;
         @Schema(example = "account overdraft")
         public String savingsProductName;
         @Schema(example = "[]")
@@ -285,9 +285,9 @@ final class ClientsApiResourceSwagger {
             @Schema(example = "Mumbai")
             public String city;
             @Schema(example = "800")
-            public Integer stateProvinceId;
+            public Long stateProvinceId;
             @Schema(example = "802")
-            public Integer countryId;
+            public Long countryId;
             @Schema(example = "400064")
             public Long postalCode;
             @Schema(example = "1")
@@ -297,9 +297,9 @@ final class ClientsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer legalFormId;
+        public Long legalFormId;
         @Schema(example = "Client of group")
         public String fullname;
         @Schema(example = "Client_FirstName")
@@ -313,7 +313,7 @@ final class ClientsApiResourceSwagger {
         @Schema(example = "[2013, 1, 1]")
         public LocalDate dateOfBirth;
         @Schema(example = "1")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "en")
@@ -338,13 +338,13 @@ final class ClientsApiResourceSwagger {
         private PostClientsResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "2")
         public Long clientId;
         @Schema(example = "2")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "123-456")
         public String resourceExternalId;
     }
@@ -366,11 +366,11 @@ final class ClientsApiResourceSwagger {
         private PutClientsClientIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "123-456")
         public String resourceExternalId;
         public PutClientsClientIdRequest changes;
@@ -388,11 +388,11 @@ final class ClientsApiResourceSwagger {
         private DeleteClientsClientIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "3")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "123-456")
         public String resourceExternalId;
     }
@@ -416,11 +416,11 @@ final class ClientsApiResourceSwagger {
         private PostClientsClientIdResponse() {}
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "2")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "2")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "123-456")
         public String resourceExternalId;
     }
@@ -475,7 +475,7 @@ final class ClientsApiResourceSwagger {
                 private GetClientsLoanAccountsStatus() {}
 
                 @Schema(example = "300")
-                public Integer id;
+                public Long id;
                 @Schema(example = "loanStatusType.active")
                 public String code;
                 @Schema(example = "Active")
@@ -503,7 +503,7 @@ final class ClientsApiResourceSwagger {
                 private GetClientsLoanAccountsType() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "loanType.individual")
                 public String code;
                 @Schema(example = "Individual")
@@ -511,13 +511,13 @@ final class ClientsApiResourceSwagger {
             }
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000001")
             public String accountNo;
             @Schema(example = "456")
-            public Integer externalId;
+            public Long externalId;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "TestOne")
             public String productName;
             public GetClientsLoanAccountsStatus status;
@@ -553,7 +553,7 @@ final class ClientsApiResourceSwagger {
                 private GetClientsSavingsAccountsStatus() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
                 @Schema(example = "Submitted and pending approval")
@@ -585,7 +585,7 @@ final class ClientsApiResourceSwagger {
                 private GetClientsSavingsAccountsDepositType() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "depositAccountType.savingsDeposit")
                 public String code;
                 @Schema(example = "Savings")
@@ -593,11 +593,11 @@ final class ClientsApiResourceSwagger {
             }
 
             @Schema(example = "7")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000007")
             public String accountNo;
             @Schema(example = "2")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "Other product")
             public String productName;
             @Schema(example = "OP")

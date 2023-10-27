@@ -59,7 +59,7 @@ final class InterestRateChartsApiResourceSwagger {
             private GetInterestRateChartsChartSlabs() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             public GetInterestRateChartsTemplateResponse.GetInterestRateChartsTemplatePeriodTypes periodTypes;
             @Schema(example = "1")
             public Integer fromPeriod;
@@ -87,11 +87,11 @@ final class InterestRateChartsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "[2014, 1, 1]")
         public LocalDate fromDate;
         @Schema(example = "1")
-        public Integer savingsProductId;
+        public Long savingsProductId;
         @Schema(example = "Fixed Deposit Product 001")
         public String savingsProductName;
         public Set<GetInterestRateChartsChartSlabs> chartSlabs;
@@ -122,7 +122,7 @@ final class InterestRateChartsApiResourceSwagger {
         private PostInterestRateChartsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutInterestRateChartsChartIdRequest")
@@ -142,7 +142,7 @@ final class InterestRateChartsApiResourceSwagger {
         private PutInterestRateChartsChartIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeleteInterestRateChartsChartIdResponse")
@@ -151,6 +151,6 @@ final class InterestRateChartsApiResourceSwagger {
         private DeleteInterestRateChartsChartIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

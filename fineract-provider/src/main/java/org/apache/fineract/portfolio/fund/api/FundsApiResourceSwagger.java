@@ -33,7 +33,7 @@ final class FundsApiResourceSwagger {
         private GetFundsResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "EU Agri Fund")
         public String name;
     }
@@ -53,7 +53,7 @@ final class FundsApiResourceSwagger {
         private PostFundsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutFundsFundIdRequest")
@@ -71,7 +71,7 @@ final class FundsApiResourceSwagger {
         private PutFundsFundIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutFundsFundIdRequest changes;
     }
 }

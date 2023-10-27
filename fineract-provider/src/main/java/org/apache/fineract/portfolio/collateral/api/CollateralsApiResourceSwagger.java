@@ -38,7 +38,7 @@ final class CollateralsApiResourceSwagger {
             private GetCollateralTypeResponse() {}
 
             @Schema(example = "8")
-            public Integer id;
+            public Long id;
             @Schema(example = "Gold")
             public String name;
         }
@@ -62,7 +62,7 @@ final class CollateralsApiResourceSwagger {
         }
 
         @Schema(example = "12")
-        public Integer id;
+        public Long id;
         public GetCollateralTypeResponse type;
         @Schema(example = "50000")
         public Long value;
@@ -77,7 +77,7 @@ final class CollateralsApiResourceSwagger {
         private PostLoansLoanIdCollateralsRequest() {}
 
         @Schema(example = "9")
-        public Integer collateralTypeId;
+        public Long collateralTypeId;
     }
 
     @Schema(description = "PostLoansLoanIdCollateralsResponse")
@@ -86,7 +86,7 @@ final class CollateralsApiResourceSwagger {
         private PostLoansLoanIdCollateralsResponse() {}
 
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutLoansLoandIdCollateralsCollateralIdRequest")
@@ -104,9 +104,9 @@ final class CollateralsApiResourceSwagger {
         private PutLoansLoanIdCollateralsCollateralIdResponse() {}
 
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
         public PutLoansLoandIdCollateralsCollateralIdRequest changes;
     }
 
@@ -120,7 +120,7 @@ final class CollateralsApiResourceSwagger {
             private GetCollateralsTemplateAllowedTypes() {}
 
             @Schema(example = "9")
-            public Integer id;
+            public Long id;
             @Schema(example = "Silver")
             public String name;
             @Schema(example = "0")
@@ -136,8 +136,8 @@ final class CollateralsApiResourceSwagger {
         private DeleteLoansLoanIdCollateralsCollateralIdResponse() {}
 
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

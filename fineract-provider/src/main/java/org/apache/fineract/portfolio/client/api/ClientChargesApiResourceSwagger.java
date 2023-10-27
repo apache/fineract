@@ -82,11 +82,11 @@ final class ClientChargesApiResourceSwagger {
             }
 
             @Schema(example = "3")
-            public Integer id;
+            public Long id;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "5")
-            public Integer chargeId;
+            public Long chargeId;
             @Schema(example = "Client Fee 1")
             public String name;
             public GetClientChargeTimeType chargeTimeType;
@@ -127,7 +127,7 @@ final class ClientChargesApiResourceSwagger {
         @Schema(example = "100")
         public Integer amount;
         @Schema(example = "226")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "01 September 2015")
@@ -142,11 +142,11 @@ final class ClientChargesApiResourceSwagger {
         private PostClientsClientIdChargesResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "189")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "164")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PostClientsClientIdChargesChargeIdRequest")
@@ -172,13 +172,13 @@ final class ClientChargesApiResourceSwagger {
         private PostClientsClientIdChargesChargeIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "189")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "157")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "221")
-        public Integer transactionId;
+        public Long transactionId;
     }
 
     @Schema(description = "DeleteClientsClientIdChargesChargeIdResponse")
@@ -187,10 +187,10 @@ final class ClientChargesApiResourceSwagger {
         private DeleteClientsClientIdChargesChargeIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "189")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "164")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

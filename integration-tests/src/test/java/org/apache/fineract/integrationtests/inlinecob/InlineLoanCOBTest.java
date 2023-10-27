@@ -185,7 +185,7 @@ public class InlineLoanCOBTest {
             final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                     delinquencyBucketResponse.getResourceId());
 
-            final Integer loanProductID = createLoanProduct(loanTransactionHelper, delinquencyBucket.getId());
+            final Integer loanProductID = createLoanProduct(loanTransactionHelper, Math.toIntExact(delinquencyBucket.getId()));
 
             Assertions.assertNotNull(loanProductID);
             HashMap loanStatusHashMap;

@@ -52,7 +52,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesTimeTypeResponse() {}
 
             @Schema(example = "1")
-            public Long id;
+            public Integer id;
             @Schema(example = "chargeTimeType.disbursement")
             public String code;
             @Schema(example = "Disbursement")
@@ -64,7 +64,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesAppliesToResponse() {}
 
             @Schema(example = "1")
-            public Long id;
+            public Integer id;
             @Schema(example = "chargeAppliesTo.loan")
             public String code;
             @Schema(example = "Loan")
@@ -76,7 +76,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesCalculationTypeResponse() {}
 
             @Schema(example = "1")
-            public Long id;
+            public Integer id;
             @Schema(example = "chargeCalculationType.flat")
             public String code;
             @Schema(example = "Flat")
@@ -88,7 +88,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesPaymentModeResponse() {}
 
             @Schema(example = "1")
-            public Long id;
+            public Integer id;
             @Schema(example = "chargepaymentmode.accounttransfer")
             public String code;
             @Schema(example = "Account Transfer")
@@ -188,7 +188,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesTemplateLoanChargeCalculationTypeOptions() {}
 
             @Schema(example = "1")
-            public Long id;
+            public Integer id;
             @Schema(example = "chargeCalculationType.flat")
             public String code;
             @Schema(example = "Flat")
@@ -200,7 +200,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesTemplateLoanChargeTimeTypeOptions() {}
 
             @Schema(example = "2")
-            public Long id;
+            public Integer id;
             @Schema(example = "chargeTimeType.specifiedDueDate")
             public String code;
             @Schema(example = "Specified due date")

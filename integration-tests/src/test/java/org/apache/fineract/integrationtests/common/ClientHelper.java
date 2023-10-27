@@ -81,8 +81,8 @@ public class ClientHelper extends IntegrationTest {
     public static final String UNDOREJECT_CLIENT_COMMAND = "undoRejection";
     public static final String UNDOWITHDRAWN_CLIENT_COMMAND = "undoWithdrawal";
     public static final String DEFAULT_OFFICE_ID = "1";
-    public static final Integer LEGALFORM_ID_PERSON = 1;
-    public static final Integer LEGALFORM_ID_ENTITY = 2;
+    public static final Long LEGALFORM_ID_PERSON = 1L;
+    public static final Long LEGALFORM_ID_ENTITY = 2L;
     public static final String CREATED_DATE = Utils.getLocalDateOfTenant().minusDays(5).format(Utils.dateFormatter);
     public static final String CREATED_DATE_PLUS_ONE = Utils.getLocalDateOfTenant().minusDays(4).format(Utils.dateFormatter);
     public static final String CREATED_DATE_PLUS_TWO = Utils.getLocalDateOfTenant().minusDays(3).format(Utils.dateFormatter);
@@ -319,12 +319,11 @@ public class ClientHelper extends IntegrationTest {
         return (Integer) getClient(requestSpec, responseSpec, clientId, "staffId");
     }
 
-    public static HashMap<String, Object> setInitialClientValues(final String officeId, final Integer legalFormId) {
+    public static HashMap<String, Object> setInitialClientValues(final String officeId, final Long legalFormId) {
         return setInitialClientValues(officeId, legalFormId, UUID.randomUUID().toString());
     }
 
-    public static HashMap<String, Object> setInitialClientValues(final String officeId, final Integer legalFormId,
-            final String externalId) {
+    public static HashMap<String, Object> setInitialClientValues(final String officeId, final Long legalFormId, final String externalId) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
         map.put("legalFormId", legalFormId);
@@ -338,7 +337,7 @@ public class ClientHelper extends IntegrationTest {
         return map;
     }
 
-    public static String getBasicClientAsJSON(final String officeId, final Integer legalFormId, final String externalId) {
+    public static String getBasicClientAsJSON(final String officeId, final Long legalFormId, final String externalId) {
         HashMap<String, Object> map = setInitialClientValues(officeId, legalFormId, externalId);
         map.put("active", "true");
         map.put("activationDate", DEFAULT_DATE);
@@ -867,7 +866,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public static PostClientsRequest defaultClientCreationRequest() {
-        return new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON)
+        return new PostClientsRequest().officeId(1L).legalFormId(LEGALFORM_ID_PERSON)
                 .firstname(Utils.randomStringGenerator("Client_FirstName_", 5)).lastname(Utils.randomStringGenerator("Client_LastName_", 5))
                 .externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
                 .activationDate(DEFAULT_DATE);
