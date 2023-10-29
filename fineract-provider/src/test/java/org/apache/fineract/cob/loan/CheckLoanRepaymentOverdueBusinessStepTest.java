@@ -83,7 +83,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
                 BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallment);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
+        when(loanProduct.isUseDueForRepaymentsConfigurations()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
         // when
@@ -107,7 +107,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
                         loanInstallmentRepaymentDueDateBefore5Days, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                         BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0)));
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
+        when(loanProduct.isUseDueForRepaymentsConfigurations()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
         // when
         Loan processedLoan = underTest.execute(loanForProcessing);
@@ -132,7 +132,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
 
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallmentPaidOff);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
+        when(loanProduct.isUseDueForRepaymentsConfigurations()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
         // when
@@ -158,6 +158,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallment);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         // product configuration overrides global configuration
+        when(loanProduct.isUseDueForRepaymentsConfigurations()).thenReturn(false);
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(1);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 

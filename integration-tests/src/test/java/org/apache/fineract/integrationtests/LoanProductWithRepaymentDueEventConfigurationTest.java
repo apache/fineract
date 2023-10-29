@@ -113,7 +113,8 @@ public class LoanProductWithRepaymentDueEventConfigurationTest {
         Integer dueDaysForRepaymentEvent = 1;
         Integer overDueDaysForRepaymentEvent = 2;
         final PutLoanProductsProductIdRequest requestModifyLoan = new PutLoanProductsProductIdRequest()
-                .dueDaysForRepaymentEvent(dueDaysForRepaymentEvent).overDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).locale("en");
+                .useDueForRepaymentsConfigurations(false).dueDaysForRepaymentEvent(dueDaysForRepaymentEvent)
+                .overDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).locale("en");
         return loanTransactionHelper.updateLoanProduct(id, requestModifyLoan);
     }
 
@@ -127,7 +128,8 @@ public class LoanProductWithRepaymentDueEventConfigurationTest {
     private Integer createLoanProductWithDueDaysForRepaymentEvent(final LoanTransactionHelper loanTransactionHelper,
             final Integer delinquencyBucketId, Integer dueDaysForRepaymentEvent, Integer overDueDaysForRepaymentEvent) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withDueDaysForRepaymentEvent(dueDaysForRepaymentEvent)
-                .withOverDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).build(null, delinquencyBucketId);
+                .withOverDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).withUseDueForRepaymentsConfigurations(false)
+                .build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanProductId;
     }

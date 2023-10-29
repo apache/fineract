@@ -146,6 +146,7 @@ public interface LoanProductConstants {
     // repayment events related
     String DUE_DAYS_FOR_REPAYMENT_EVENT = "dueDaysForRepaymentEvent";
     String OVER_DUE_DAYS_FOR_REPAYMENT_EVENT = "overDueDaysForRepaymentEvent";
+    String USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS = "useDueForRepaymentsConfigurations";
 
     // down-payment related
     String ENABLE_DOWN_PAYMENT = "enableDownPayment";

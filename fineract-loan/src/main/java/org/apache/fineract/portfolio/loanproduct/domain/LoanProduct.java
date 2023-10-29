@@ -217,6 +217,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "overdue_days_for_repayment_event")
     private Integer overDueDaysForRepaymentEvent;
 
+    @Column(name = "use_due_for_repayments_configurations", nullable = false)
+    private boolean useDueForRepaymentsConfigurations = true;
+
     @Column(name = "repayment_start_date_type_enum", nullable = false)
     private RepaymentStartDateType repaymentStartDateType;
 
@@ -399,9 +402,14 @@ public class LoanProduct extends AbstractPersistableCustom {
 
         final Integer overAppliedNumber = command.integerValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER);
 
-        final Integer dueDaysForRepaymentEvent = command.integerValueOfParameterNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT);
-        final Integer overDueDaysForRepaymentEvent = command
-                .integerValueOfParameterNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT);
+        Integer dueDaysForRepaymentEvent = null;
+        Integer overDueDaysForRepaymentEvent = null;
+        final boolean useDueForRepaymentsConfigurations = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS);
+        if (!useDueForRepaymentsConfigurations) {
+            dueDaysForRepaymentEvent = command.integerValueOfParameterNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT);
+            overDueDaysForRepaymentEvent = command.integerValueOfParameterNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT);
+        }
 
         final boolean enableDownPayment = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT);
         final BigDecimal disbursedAmountPercentageDownPayment = command
@@ -436,7 +444,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
                 dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment,
                 enableAutoRepaymentForDownPayment, repaymentStartDateType, disableScheduleExtensionForDownPayment,
-                enableInstallmentLevelDelinquency, loanScheduleType);
+                enableInstallmentLevelDelinquency, loanScheduleType, useDueForRepaymentsConfigurations);
 
     }
 
@@ -652,7 +660,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType,
             final boolean disableScheduleExtensionForDownPayment, final boolean enableInstallmentLevelDelinquency,
-            final LoanScheduleType loanScheduleType) {
+            final LoanScheduleType loanScheduleType, final boolean useDueForRepaymentsConfigurations) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -746,6 +754,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
         this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
+        this.useDueForRepaymentsConfigurations = useDueForRepaymentsConfigurations;
         this.repaymentStartDateType = repaymentStartDateType;
 
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
@@ -1290,6 +1299,14 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.overDueDaysForRepaymentEvent = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS,
+                isUseDueForRepaymentsConfigurations())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS);
+            actualChanges.put(LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS, newValue);
+            this.updateUseDueForRepaymentsConfigurations(newValue);
+        }
+
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT,
                 this.loanProductRelatedDetail.isEnableDownPayment())) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT);
@@ -1739,6 +1756,18 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
+    }
+
+    public boolean isUseDueForRepaymentsConfigurations() {
+        return useDueForRepaymentsConfigurations;
+    }
+
+    public void updateUseDueForRepaymentsConfigurations(final boolean useDueForRepaymentsConfigurations) {
+        this.useDueForRepaymentsConfigurations = useDueForRepaymentsConfigurations;
+        if (useDueForRepaymentsConfigurations) {
+            dueDaysForRepaymentEvent = null;
+            overDueDaysForRepaymentEvent = null;
+        }
     }
 
 }

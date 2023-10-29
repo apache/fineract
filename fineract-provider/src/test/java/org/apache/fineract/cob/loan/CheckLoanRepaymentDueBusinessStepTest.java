@@ -87,7 +87,7 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallment);
         when(repaymentInstallment.getDueDate()).thenReturn(loanInstallmentRepaymentDueDate);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(null);
+        when(loanProduct.isUseDueForRepaymentsConfigurations()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
         when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
         when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
@@ -117,7 +117,7 @@ public class CheckLoanRepaymentDueBusinessStepTest {
                         loanInstallmentRepaymentDueDateAfter5Days, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                         BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0)));
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(null);
+        when(loanProduct.isUseDueForRepaymentsConfigurations()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
         // when
@@ -145,6 +145,7 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         when(repaymentInstallment.getDueDate()).thenReturn(loanInstallmentRepaymentDueDate);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         // Loan Product setting overrides global settings
+        when(loanProduct.isUseDueForRepaymentsConfigurations()).thenReturn(false);
         when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(1);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
         when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);

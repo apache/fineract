@@ -165,7 +165,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE,
             LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY,
-            LoanProductConstants.LOAN_SCHEDULE_TYPE));
+            LoanProductConstants.LOAN_SCHEDULE_TYPE, LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -743,12 +743,20 @@ public final class LoanProductDataValidator {
         final Integer dueDaysForRepaymentEvent = this.fromApiJsonHelper
                 .extractIntegerWithLocaleNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, element);
         baseDataValidator.reset().parameter(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT).value(dueDaysForRepaymentEvent)
-                .integerZeroOrGreater();
+                .ignoreIfNull().integerZeroOrGreater();
 
         final Integer overDueDaysForRepaymentEvent = this.fromApiJsonHelper
                 .extractIntegerWithLocaleNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, element);
         baseDataValidator.reset().parameter(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT).value(overDueDaysForRepaymentEvent)
-                .integerZeroOrGreater();
+                .ignoreIfNull().integerZeroOrGreater();
+
+        final boolean useDueForRepaymentsConfigurations = this.fromApiJsonHelper
+                .extractBooleanNamed(LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS)
+                .value(useDueForRepaymentsConfigurations).validateForBooleanValue();
+
+        validateDueDayForRepaymentsSettings(baseDataValidator, useDueForRepaymentsConfigurations, dueDaysForRepaymentEvent,
+                overDueDaysForRepaymentEvent);
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_DOWN_PAYMENT, element)) {
             final Boolean enableDownPayment = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT, element);
@@ -1722,12 +1730,20 @@ public final class LoanProductDataValidator {
         final Integer dueDaysForRepaymentEvent = this.fromApiJsonHelper
                 .extractIntegerWithLocaleNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, element);
         baseDataValidator.reset().parameter(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT).value(dueDaysForRepaymentEvent)
-                .integerZeroOrGreater();
+                .ignoreIfNull().integerZeroOrGreater();
 
         final Integer overDueDaysForRepaymentEvent = this.fromApiJsonHelper
                 .extractIntegerWithLocaleNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, element);
         baseDataValidator.reset().parameter(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT).value(overDueDaysForRepaymentEvent)
-                .integerZeroOrGreater();
+                .ignoreIfNull().integerZeroOrGreater();
+
+        final boolean useDueForRepaymentsConfigurations = this.fromApiJsonHelper
+                .extractBooleanNamed(LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.USE_DUE_DAYS_FOR_REPAYMENTS_CONFIGURATIONS)
+                .value(useDueForRepaymentsConfigurations).validateForBooleanValue();
+
+        validateDueDayForRepaymentsSettings(baseDataValidator, useDueForRepaymentsConfigurations, dueDaysForRepaymentEvent,
+                overDueDaysForRepaymentEvent);
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_DOWN_PAYMENT, element)) {
             final Boolean enableDownPayment = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT, element);
@@ -2362,4 +2378,30 @@ public final class LoanProductDataValidator {
 
         }
     }
+
+    private void validateDueDayForRepaymentsSettings(final DataValidatorBuilder baseDataValidator,
+            final boolean useDueForRepaymentsConfigurations, final Integer dueDaysForRepaymentEvent,
+            final Integer overDueDaysForRepaymentEvent) {
+
+        if (useDueForRepaymentsConfigurations) {
+            if (dueDaysForRepaymentEvent != null) {
+                baseDataValidator.reset().parameter(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT)
+                        .failWithCode("use.event.global.settings.can.not.mixed.with.custom.value");
+            }
+            if (overDueDaysForRepaymentEvent != null) {
+                baseDataValidator.reset().parameter(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT)
+                        .failWithCode("use.event.global.settings.can.not.mixed.with.custom.value");
+            }
+        } else {
+            if (dueDaysForRepaymentEvent == null) {
+                baseDataValidator.reset().parameter(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT)
+                        .failWithCode("value.required.for.due.days.for.repayment.event");
+            }
+            if (overDueDaysForRepaymentEvent == null) {
+                baseDataValidator.reset().parameter(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT)
+                        .failWithCode("value.required.for.overdue.days.for.repayment.event");
+            }
+        }
+    }
+
 }

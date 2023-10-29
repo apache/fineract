@@ -45,9 +45,11 @@ public class CheckLoanRepaymentDueBusinessStep implements LoanCOBBusinessStep {
     public Loan execute(Loan loan) {
         log.debug("start processing loan repayment due business step loan for loan with id [{}]", loan.getId());
         Long numberOfDaysBeforeDueDateToRaiseEvent = configurationDomainService.retrieveRepaymentDueDays();
-        if (loan.getLoanProduct().getDueDaysForRepaymentEvent() != null) {
-            if (loan.getLoanProduct().getDueDaysForRepaymentEvent() > 0) {
-                numberOfDaysBeforeDueDateToRaiseEvent = loan.getLoanProduct().getDueDaysForRepaymentEvent().longValue();
+        if (!loan.getLoanProduct().isUseDueForRepaymentsConfigurations()) {
+            if (loan.getLoanProduct().getDueDaysForRepaymentEvent() != null) {
+                if (loan.getLoanProduct().getDueDaysForRepaymentEvent() > 0) {
+                    numberOfDaysBeforeDueDateToRaiseEvent = loan.getLoanProduct().getDueDaysForRepaymentEvent().longValue();
+                }
             }
         }
         final LocalDate currentDate = DateUtils.getBusinessLocalDate();

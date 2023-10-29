@@ -153,6 +153,7 @@ public class LoanProductTestBuilder {
     private Integer repaymentStartDateType = null;
     private boolean disableScheduleExtensionForDownPayment = false;
     private LoanScheduleType loanScheduleType = LoanScheduleType.CUMULATIVE;
+    private boolean useDueForRepaymentsConfigurations = false;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -289,6 +290,9 @@ public class LoanProductTestBuilder {
             map.put("penaltyToIncomeAccountMappings", this.penaltyToIncomeAccountMappings);
         }
 
+        if (this.useDueForRepaymentsConfigurations) {
+            map.put("useDueForRepaymentsConfigurations", this.useDueForRepaymentsConfigurations);
+        }
         if (this.dueDaysForRepaymentEvent != null) {
             map.put("dueDaysForRepaymentEvent", this.dueDaysForRepaymentEvent);
         }
@@ -708,6 +712,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withFeeAndPenaltyAssetAccount(final Account account) {
         this.feeAndPenaltyAssetAccount = account;
+        return this;
+    }
+
+    public LoanProductTestBuilder withUseDueForRepaymentsConfigurations(final boolean useDueForRepaymentsConfigurations) {
+        this.useDueForRepaymentsConfigurations = useDueForRepaymentsConfigurations;
         return this;
     }
 
