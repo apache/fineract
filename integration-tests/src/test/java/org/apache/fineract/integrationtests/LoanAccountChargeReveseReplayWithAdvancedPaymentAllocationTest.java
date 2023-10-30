@@ -23,6 +23,7 @@ import static java.lang.Boolean.TRUE;
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -274,6 +275,70 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
             assertEquals(0.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getFeeChargesOutstanding());
             assertEquals(930.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPrincipalOutstanding());
             assertEquals(930.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalOutstandingForPeriod());
+        });
+    }
+
+    @Test
+    public void testObligationMetDateIsNotMetOnExtraInstallment() {
+        runAt("1 September 2022", () -> {
+            String loanExternalIdStr = UUID.randomUUID().toString();
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(true);
+            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr, true, "1 September 2022",
+                    "1 September 2022");
+
+            // make a repayment on 3rd od Sept
+            updateBusinessDate("3 September 2022");
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 September 2022").locale("en")
+                            .transactionAmount(100.0));
+
+            // apply charges on 4th of Sept backdated to 2nd of Sept 2022
+            updateBusinessDate("4 September 2022");
+            Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+
+            LocalDate targetDate = LocalDate.of(2022, 9, 2);
+            final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+
+            // apply penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+
+            final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
+
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
+
+            // make a full repayment of 10th of September
+            updateBusinessDate("10 September 2022");
+            PostLoansLoanIdTransactionsResponse fullRepayment = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
+                            .transactionAmount(930.0));
+
+            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            assertNotNull(loanDetails.getRepaymentSchedule());
+            assertNotNull(loanDetails.getRepaymentSchedule().getPeriods());
+            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().size());
+            assertEquals(0.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPenaltyChargesOutstanding());
+            assertEquals(0.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getFeeChargesOutstanding());
+            assertEquals(0.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPrincipalOutstanding());
+            assertEquals(0.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalOutstandingForPeriod());
+
+            // adding an extra charge after maturity
+            updateBusinessDate("11 October 2022");
+            Integer snoozeFee = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "30.0", false));
+            loanTransactionHelper.addChargesForLoan(loanId,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(snoozeFee), "11 October 2022", "30.0"));
+
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            assertNotNull(loanDetails.getRepaymentSchedule());
+            assertNotNull(loanDetails.getRepaymentSchedule().getPeriods());
+            assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().size()); // extra instalment is created
+            assertNull(loanDetails.getRepaymentSchedule().getPeriods().get(2).getObligationsMetOnDate()); // not repayed
         });
     }
 

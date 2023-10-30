@@ -388,6 +388,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         if (lastInstallment.isAdditional() && lastInstallment.getDue(currency).isZero()) {
             installments.remove(lastInstallment);
         }
+        // TODO: rewrite and handle it at the proper place when disbursement handling got fixed
+        for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
+            if (loanRepaymentScheduleInstallment.getTotalOutstanding(currency).isGreaterThanZero()) {
+                loanRepaymentScheduleInstallment.updateObligationMet(false);
+                loanRepaymentScheduleInstallment.updateObligationMetOnDate(null);
+            }
+        }
     }
 
     private void recalculateCreditTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
