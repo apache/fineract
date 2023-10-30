@@ -1,0 +1,142 @@
+package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
+
+import java.math.BigDecimal;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
+
+public class ScheduleCurrentPeriodParams {
+
+    Money earlyPaidAmount;
+    LoanScheduleModelPeriod lastInstallment;
+    boolean skipCurrentLoop;
+    Money interestForThisPeriod;
+    Money principalForThisPeriod;
+    Money feeChargesForInstallment;
+    Money penaltyChargesForInstallment;
+    // for adjusting outstandingBalances
+    Money reducedBalance;
+    boolean isEmiAmountChanged;
+    BigDecimal interestCalculationGraceOnRepaymentPeriodFraction;
+
+    ScheduleCurrentPeriodParams(final MonetaryCurrency currency) {
+        this(currency, BigDecimal.ZERO);
+    }
+
+    ScheduleCurrentPeriodParams(final MonetaryCurrency currency, BigDecimal interestCalculationGraceOnRepaymentPeriodFraction) {
+        this.earlyPaidAmount = Money.zero(currency);
+        this.lastInstallment = null;
+        this.skipCurrentLoop = false;
+        this.interestForThisPeriod = Money.zero(currency);
+        this.principalForThisPeriod = Money.zero(currency);
+        this.reducedBalance = Money.zero(currency);
+        this.feeChargesForInstallment = Money.zero(currency);
+        this.penaltyChargesForInstallment = Money.zero(currency);
+        this.isEmiAmountChanged = false;
+        this.interestCalculationGraceOnRepaymentPeriodFraction = interestCalculationGraceOnRepaymentPeriodFraction;
+    }
+
+    public Money getEarlyPaidAmount() {
+        return this.earlyPaidAmount;
+    }
+
+    public void plusEarlyPaidAmount(Money earlyPaidAmount) {
+        this.earlyPaidAmount = this.earlyPaidAmount.plus(earlyPaidAmount);
+    }
+
+    public void minusEarlyPaidAmount(Money earlyPaidAmount) {
+        this.earlyPaidAmount = this.earlyPaidAmount.minus(earlyPaidAmount);
+    }
+
+    public LoanScheduleModelPeriod getLastInstallment() {
+        return this.lastInstallment;
+    }
+
+    public void setLastInstallment(LoanScheduleModelPeriod lastInstallment) {
+        this.lastInstallment = lastInstallment;
+    }
+
+    public boolean isSkipCurrentLoop() {
+        return this.skipCurrentLoop;
+    }
+
+    public void setSkipCurrentLoop(boolean skipCurrentLoop) {
+        this.skipCurrentLoop = skipCurrentLoop;
+    }
+
+    public Money getInterestForThisPeriod() {
+        return this.interestForThisPeriod;
+    }
+
+    public void setInterestForThisPeriod(Money interestForThisPeriod) {
+        this.interestForThisPeriod = interestForThisPeriod;
+    }
+
+    public void minusInterestForThisPeriod(Money interestForThisPeriod) {
+        this.interestForThisPeriod = this.interestForThisPeriod.minus(interestForThisPeriod);
+    }
+
+    public Money getPrincipalForThisPeriod() {
+        return this.principalForThisPeriod;
+    }
+
+    public void setPrincipalForThisPeriod(Money principalForThisPeriod) {
+        this.principalForThisPeriod = principalForThisPeriod;
+    }
+
+    public void plusPrincipalForThisPeriod(Money principalForThisPeriod) {
+        this.principalForThisPeriod = this.principalForThisPeriod.plus(principalForThisPeriod);
+    }
+
+    public void minusPrincipalForThisPeriod(Money principalForThisPeriod) {
+        this.principalForThisPeriod = this.principalForThisPeriod.minus(principalForThisPeriod);
+    }
+
+    public Money getReducedBalance() {
+        return this.reducedBalance;
+    }
+
+    public void setReducedBalance(Money reducedBalance) {
+        this.reducedBalance = reducedBalance;
+    }
+
+    public Money getFeeChargesForInstallment() {
+        return this.feeChargesForInstallment;
+    }
+
+    public void setFeeChargesForInstallment(Money feeChargesForInstallment) {
+        this.feeChargesForInstallment = feeChargesForInstallment;
+    }
+
+    public void minusFeeChargesForInstallment(Money feeChargesForInstallment) {
+        this.feeChargesForInstallment = this.feeChargesForInstallment.minus(feeChargesForInstallment);
+    }
+
+    public Money getPenaltyChargesForInstallment() {
+        return this.penaltyChargesForInstallment;
+    }
+
+    public void setPenaltyChargesForInstallment(Money penaltyChargesForInstallment) {
+        this.penaltyChargesForInstallment = penaltyChargesForInstallment;
+    }
+
+    public void minusPenaltyChargesForInstallment(Money penaltyChargesForInstallment) {
+        this.penaltyChargesForInstallment = this.penaltyChargesForInstallment.minus(penaltyChargesForInstallment);
+    }
+
+    public Money fetchTotalAmountForPeriod() {
+        return this.principalForThisPeriod.plus(interestForThisPeriod).plus(feeChargesForInstallment).plus(penaltyChargesForInstallment);
+    }
+
+    public boolean isEmiAmountChanged() {
+        return this.isEmiAmountChanged;
+    }
+
+    public void setEmiAmountChanged(boolean isEmiAmountChanged) {
+        this.isEmiAmountChanged = isEmiAmountChanged;
+    }
+
+    public BigDecimal getInterestCalculationGraceOnRepaymentPeriodFraction() {
+        return this.interestCalculationGraceOnRepaymentPeriodFraction;
+    }
+
+}

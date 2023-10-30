@@ -1289,7 +1289,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
         applyAccurals();
-
     }
 
     public void updateLoanSchedule(final Collection<LoanRepaymentScheduleInstallment> installments) {
@@ -2530,9 +2529,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         LocalDate firstInstallmentDueDate = fetchRepaymentScheduleInstallment(1).getDueDate();
         if ((interestRecalculationEnabledParam && (DateUtils.isBeforeBusinessDate(firstInstallmentDueDate) || disbursementMissedParam))) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO);
-        } else if (downPaymentEnabled) {
-            LoanScheduleDTO loanSchedule = getRecalculatedSchedule(scheduleGeneratorDTO);
-            updateLoanSchedule(loanSchedule.getInstallments());
         }
     }
 
@@ -2827,11 +2823,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final MathContext mc = new MathContext(8, roundingMode);
 
         final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(scheduleGeneratorDTO);
-        LoanScheduleGenerator loanScheduleGenerator = null;
+        LoanScheduleGenerator loanScheduleGenerator;
         if (loanApplicationTerms.isEqualAmortization()) {
             if (loanApplicationTerms.getInterestMethod().isDecliningBalance()) {
                 final LoanScheduleGenerator decliningLoanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory()
-                        .create(InterestMethod.DECLINING_BALANCE);
+                        .create(loanApplicationTerms.getLoanScheduleType(), InterestMethod.DECLINING_BALANCE);
                 Set<LoanCharge> loanCharges = getActiveCharges();
                 LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges,
                         scheduleGeneratorDTO.getHolidayDetailDTO());
@@ -2840,9 +2836,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                         .updateTotalInterestDue(Money.of(loanApplicationTerms.getCurrency(), loanSchedule.getTotalInterestCharged()));
 
             }
-            loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(InterestMethod.FLAT);
+            loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(loanApplicationTerms.getLoanScheduleType(),
+                    InterestMethod.FLAT);
         } else {
-            loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(loanApplicationTerms.getInterestMethod());
+            loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(loanApplicationTerms.getLoanScheduleType(),
+                    loanApplicationTerms.getInterestMethod());
         }
 
         return loanScheduleGenerator.generate(mc, loanApplicationTerms, getActiveCharges(), scheduleGeneratorDTO.getHolidayDetailDTO());
@@ -3401,8 +3399,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         List<LoanTransaction> trans = getLoanTransactions();
         for (final LoanTransaction transaction : trans) {
-            if (transaction.isNotReversed()
-                    && (transaction.isChargeOff() || !(transaction.isDisbursement() || transaction.isNonMonetaryTransaction()))) {
+            if (transaction.isNotReversed() && (transaction.isChargeOff() || !transaction.isNonMonetaryTransaction())) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -3413,9 +3410,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public List<LoanTransaction> retrieveListOfTransactionsPostDisbursementExcludeAccruals() {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isNotReversed()
-                    && !(transaction.isDisbursement() || transaction.isAccrual() || transaction.isRepaymentAtDisbursement()
-                            || transaction.isNonMonetaryTransaction() || transaction.isIncomePosting())) {
+            if (transaction.isNotReversed() && !(transaction.isAccrual() || transaction.isRepaymentAtDisbursement()
+                    || transaction.isNonMonetaryTransaction() || transaction.isIncomePosting())) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -5754,7 +5750,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             return null;
         }
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
-        final LoanScheduleGenerator loanScheduleGenerator = generatorDTO.getLoanScheduleFactory().create(interestMethod);
+        final LoanScheduleGenerator loanScheduleGenerator = generatorDTO.getLoanScheduleFactory()
+                .create(this.loanRepaymentScheduleDetail.getLoanScheduleType(), interestMethod);
 
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(19, roundingMode);
@@ -5778,7 +5775,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
             final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(scheduleGeneratorDTO);
 
-            final LoanScheduleGenerator loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(interestMethod);
+            final LoanScheduleGenerator loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory()
+                    .create(loanApplicationTerms.getLoanScheduleType(), interestMethod);
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                     .determineProcessor(this.transactionProcessingStrategyCode);
             installment = loanScheduleGenerator.calculatePrepaymentAmount(getCurrency(), onDate, loanApplicationTerms, mc, this,

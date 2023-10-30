@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
@@ -25,7 +27,7 @@ public interface PaymentPeriodsInOneYearCalculator {
 
     Integer calculate(PeriodFrequencyType repaymentFrequencyType);
 
-    double calculatePortionOfRepaymentPeriodInterestChargingGrace(LocalDate repaymentPeriodStartDate, LocalDate scheduledDueDate,
-            LocalDate interestChargedFromLocalDate, PeriodFrequencyType repaymentPeriodFrequencyType, Integer repaidEvery);
+    BigDecimal calculatePortionOfRepaymentPeriodInterestChargingGrace(LocalDate repaymentPeriodStartDate, LocalDate scheduledDueDate,
+            LocalDate interestChargedFromLocalDate, PeriodFrequencyType repaymentPeriodFrequencyType, int repaidEvery, MathContext mc);
 
 }

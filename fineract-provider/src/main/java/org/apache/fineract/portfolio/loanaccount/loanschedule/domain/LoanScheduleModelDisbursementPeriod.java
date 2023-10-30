@@ -40,8 +40,7 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     public static LoanScheduleModelDisbursementPeriod disbursement(final LoanApplicationTerms loanApplicationTerms,
             final BigDecimal chargesDueAtTimeOfDisbursement) {
 
-        final int periodNumber = 0;
-        return new LoanScheduleModelDisbursementPeriod(periodNumber, loanApplicationTerms.getExpectedDisbursementDate(),
+        return new LoanScheduleModelDisbursementPeriod(null, loanApplicationTerms.getExpectedDisbursementDate(),
                 loanApplicationTerms.getPrincipal(), chargesDueAtTimeOfDisbursement);
     }
 

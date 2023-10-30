@@ -419,13 +419,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyAccrued = null;
     }
 
-    public void resetChargesFields() {
+    public void resetChargesCharged() {
         this.feeChargesCharged = null;
-        this.feeChargesWaived = null;
-        this.feeChargesWrittenOff = null;
         this.penaltyCharges = null;
-        this.penaltyChargesWaived = null;
-        this.penaltyChargesWrittenOff = null;
     }
 
     public Money payPenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
@@ -656,6 +652,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyCharges = defaultToNullIfZero(penaltyChargesDue.plus(this.penaltyCharges).getAmount());
         this.penaltyChargesWaived = defaultToNullIfZero(penaltyChargesWaived.plus(this.penaltyChargesWaived).getAmount());
         this.penaltyChargesWrittenOff = defaultToNullIfZero(penaltyChargesWrittenOff.plus(this.penaltyChargesWrittenOff).getAmount());
+        checkIfRepaymentPeriodObligationsAreMet(getObligationsMetOnDate(), feeChargesDue.getCurrency());
     }
 
     public void updateAccrualPortion(final Money interest, final Money feeCharges, final Money penalityCharges) {
@@ -961,4 +958,13 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return isDownPayment;
     }
 
+    public void resetBalances() {
+        resetDerivedComponents();
+        resetPrincipalDue();
+        resetChargesCharged();
+    }
+
+    public void resetPrincipalDue() {
+        this.principal = null;
+    }
 }

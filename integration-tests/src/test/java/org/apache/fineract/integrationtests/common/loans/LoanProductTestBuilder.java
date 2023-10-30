@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 
 public class LoanProductTestBuilder {
 
@@ -151,6 +152,7 @@ public class LoanProductTestBuilder {
     private boolean enableAutoRepaymentForDownPayment = false;
     private Integer repaymentStartDateType = null;
     private boolean disableScheduleExtensionForDownPayment = false;
+    private LoanScheduleType loanScheduleType = LoanScheduleType.CUMULATIVE;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -307,6 +309,7 @@ public class LoanProductTestBuilder {
         if (disableScheduleExtensionForDownPayment) {
             map.put("disableScheduleExtensionForDownPayment", disableScheduleExtensionForDownPayment);
         }
+        map.put("loanScheduleType", loanScheduleType);
 
         return map;
     }
@@ -747,4 +750,8 @@ public class LoanProductTestBuilder {
         return this;
     }
 
+    public LoanProductTestBuilder withLoanScheduleType(LoanScheduleType loanScheduleType) {
+        this.loanScheduleType = loanScheduleType;
+        return this;
+    }
 }

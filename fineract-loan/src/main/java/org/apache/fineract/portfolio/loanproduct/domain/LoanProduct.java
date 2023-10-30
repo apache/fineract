@@ -62,6 +62,7 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductGeneralRuleException;
 import org.apache.fineract.portfolio.rate.domain.Rate;
@@ -303,6 +304,14 @@ public class LoanProduct extends AbstractPersistableCustom {
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
         final ExternalId externalId = ExternalIdFactory.produce(command.stringValueOfParameterNamedAllowingNull("externalId"));
 
+        final LoanScheduleType loanScheduleType;
+        if (command.hasParameter("loanScheduleType")) {
+            loanScheduleType = LoanScheduleType.valueOf(command.stringValueOfParameterNamed("loanScheduleType"));
+        } else {
+            // For backward compatibility
+            loanScheduleType = LoanScheduleType.CUMULATIVE;
+        }
+
         final boolean useBorrowerCycle = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME);
         final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations = new HashSet<>();
@@ -427,7 +436,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
                 dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment,
                 enableAutoRepaymentForDownPayment, repaymentStartDateType, disableScheduleExtensionForDownPayment,
-                enableInstallmentLevelDelinquency);
+                enableInstallmentLevelDelinquency, loanScheduleType);
 
     }
 
@@ -642,7 +651,8 @@ public class LoanProduct extends AbstractPersistableCustom {
             final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType,
-            final boolean disableScheduleExtensionForDownPayment, final boolean enableInstallmentLevelDelinquency) {
+            final boolean disableScheduleExtensionForDownPayment, final boolean enableInstallmentLevelDelinquency,
+            final LoanScheduleType loanScheduleType) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -684,7 +694,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
                 isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
-                enableAutoRepaymentForDownPayment, disableScheduleExtensionForDownPayment);
+                enableAutoRepaymentForDownPayment, disableScheduleExtensionForDownPayment, loanScheduleType);
 
         this.loanProductRelatedDetail.validateRepaymentPeriodWithGraceSettings();
 
