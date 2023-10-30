@@ -49,10 +49,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.context.annotation.Profile;
 
-//TODO: remove `test` profile when it is finished
-@Profile("test")
 @Slf4j
 public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
@@ -182,6 +179,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     public void processLatestTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, Money overpaidAmount) {
         switch (loanTransaction.getTypeOf()) {
+            case DISBURSEMENT -> handleDisbursement(loanTransaction, currency, installments);
             case WRITEOFF -> handleWriteOff(loanTransaction, currency, installments);
             case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, currency, installments, charges);
             case CHARGEBACK -> handleChargeback(loanTransaction, currency, overpaidAmount, installments);
@@ -195,6 +193,48 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
             }
         }
+    }
+
+    private void handleDisbursement(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        updateLoanSchedule(loanTransaction, currency, installments);
+    }
+
+    private void updateLoanSchedule(LoanTransaction disbursementTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        final MathContext mc = MoneyHelper.getMathContext();
+        List<LoanRepaymentScheduleInstallment> candidateRepaymentInstallments = installments.stream()
+                .filter(i -> !i.getDueDate().isBefore(disbursementTransaction.getTransactionDate()) && !i.isDownPayment()).toList();
+        int noCandidateRepaymentInstallments = candidateRepaymentInstallments.size();
+        LoanProductRelatedDetail loanProductRelatedDetail = disbursementTransaction.getLoan().getLoanRepaymentScheduleDetail();
+        Integer installmentAmountInMultiplesOf = disbursementTransaction.getLoan().getLoanProduct().getInstallmentAmountInMultiplesOf();
+        Money downPaymentAmount = Money.zero(currency);
+        if (loanProductRelatedDetail.isEnableDownPayment()) {
+            LoanRepaymentScheduleInstallment downPaymentInstallment = installments.stream()
+                    .filter(i -> i.isDownPayment() && i.getPrincipal(currency).isZero()).findFirst().orElseThrow();
+            BigDecimal downPaymentAmt = MathUtil.percentageOf(disbursementTransaction.getAmount(),
+                    loanProductRelatedDetail.getDisbursedAmountPercentageForDownPayment(), mc);
+            if (installmentAmountInMultiplesOf != null) {
+                downPaymentAmt = Money.roundToMultiplesOf(downPaymentAmt, installmentAmountInMultiplesOf);
+            }
+            downPaymentAmount = Money.of(currency, downPaymentAmt);
+            downPaymentInstallment.addToPrincipal(disbursementTransaction.getTransactionDate(), downPaymentAmount);
+
+        }
+        Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
+        Money increasePrincipalBy = amortizableAmount.dividedBy(noCandidateRepaymentInstallments, mc.getRoundingMode());
+        if (installmentAmountInMultiplesOf != null) {
+            increasePrincipalBy = Money.roundToMultiplesOf(increasePrincipalBy, installmentAmountInMultiplesOf);
+        }
+        Money remainingAmount = increasePrincipalBy.multiplyRetainScale(noCandidateRepaymentInstallments, mc.getRoundingMode())
+                .minus(amortizableAmount);
+
+        Money finalIncreasePrincipalBy = increasePrincipalBy;
+        candidateRepaymentInstallments
+                .forEach(i -> i.addToPrincipal(disbursementTransaction.getTransactionDate(), finalIncreasePrincipalBy));
+        // Hence the rounding, we might need to amend the last installment amount
+        candidateRepaymentInstallments.get(noCandidateRepaymentInstallments - 1)
+                .addToPrincipal(disbursementTransaction.getTransactionDate(), remainingAmount);
     }
 
     @Override
