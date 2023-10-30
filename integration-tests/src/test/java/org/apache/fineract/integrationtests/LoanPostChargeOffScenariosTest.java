@@ -1174,16 +1174,16 @@ public class LoanPostChargeOffScenariosTest {
                 .minInterestRatePerPeriod((double) 0)//
                 .interestRatePerPeriod((double) 0)//
                 .maxInterestRatePerPeriod((double) 0)//
-                .interestRateFrequencyType(2L)//
+                .interestRateFrequencyType(2)//
                 .repaymentEvery(30)//
                 .repaymentFrequencyType(0L)//
                 .principalVariationsForBorrowerCycle(principalVariationsForBorrowerCycle)//
                 .numberOfRepaymentVariationsForBorrowerCycle(numberOfRepaymentVariationsForBorrowerCycle)//
                 .interestRateVariationsForBorrowerCycle(interestRateVariationsForBorrowerCycle)//
-                .amortizationType(1L)//
-                .interestType(0L)//
+                .amortizationType(1)//
+                .interestType(0)//
                 .isEqualAmortization(false)//
-                .interestCalculationPeriodType(1L)//
+                .interestCalculationPeriodType(1)//
                 .transactionProcessingStrategyCode("mifos-standard-strategy")//
                 .daysInYearType(1)//
                 .daysInMonthType(1)//
@@ -1210,7 +1210,7 @@ public class LoanPostChargeOffScenariosTest {
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(charges)//
-                .accountingRule(3L)//
+                .accountingRule(3)//
                 .fundSourceAccountId(suspenseClearingAccount.getAccountID().longValue())//
                 .loanPortfolioAccountId(loansReceivable.getAccountID().longValue())//
                 .transfersInSuspenseAccountId(suspenseAccount.getAccountID().longValue())//

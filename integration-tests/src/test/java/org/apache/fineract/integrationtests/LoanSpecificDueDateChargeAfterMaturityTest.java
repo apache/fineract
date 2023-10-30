@@ -555,10 +555,10 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
                 .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(
                         LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)
-                .locale("en").submittedOnDate(submittedOnDate).amortizationType(1L).interestRatePerPeriod(interestRate)
-                .interestCalculationPeriodType(1L).interestType(0L).repaymentFrequencyType(0L).repaymentEvery(repaymentAfterEvery)
-                .repaymentFrequencyType(0L).numberOfRepayments(numberOfRepayments).loanTermFrequency(loanTermFrequency)
-                .loanTermFrequencyType(0L).principal(BigDecimal.valueOf(principal)).loanType("individual"));
+                .locale("en").submittedOnDate(submittedOnDate).amortizationType(1).interestRatePerPeriod(interestRate)
+                .interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery)
+                .repaymentFrequencyType(0).numberOfRepayments(numberOfRepayments).loanTermFrequency(loanTermFrequency)
+                .loanTermFrequencyType(0).principal(BigDecimal.valueOf(principal)).loanType("individual"));
     }
 
     private static void validateLoanTransaction(GetLoansLoanIdResponse loanDetails, int index, double transactionAmount,

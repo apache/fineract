@@ -119,13 +119,13 @@ public abstract class BaseLoanIntegrationTest {
                 .minInterestRatePerPeriod((double) 0)//
                 .interestRatePerPeriod((double) 0)//
                 .maxInterestRatePerPeriod((double) 0)//
-                .interestRateFrequencyType(2L)//
+                .interestRateFrequencyType(2)//
                 .repaymentEvery(30)//
                 .repaymentFrequencyType(0L)//
-                .amortizationType(1L)//
-                .interestType(0L)//
+                .amortizationType(1)//
+                .interestType(0)//
                 .isEqualAmortization(false)//
-                .interestCalculationPeriodType(1L)//
+                .interestCalculationPeriodType(1)//
                 .transactionProcessingStrategyCode(
                         LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)//
                 .daysInYearType(1)//
@@ -153,7 +153,7 @@ public abstract class BaseLoanIntegrationTest {
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(Collections.emptyList())//
-                .accountingRule(3L)//
+                .accountingRule(3)//
                 .fundSourceAccountId(suspenseClearingAccount.getAccountID().longValue())//
                 .loanPortfolioAccountId(loansReceivableAccount.getAccountID().longValue())//
                 .transfersInSuspenseAccountId(suspenseAccount.getAccountID().longValue())//
@@ -279,9 +279,9 @@ public abstract class BaseLoanIntegrationTest {
         PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId)
                 .productId(loanProductId).expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY)
-                .locale("en").submittedOnDate(loanDisbursementDate).amortizationType(1L).interestRatePerPeriod(0)
-                .interestCalculationPeriodType(1L).interestType(0L).repaymentFrequencyType(0L).repaymentEvery(30).repaymentFrequencyType(0L)
-                .numberOfRepayments(1).loanTermFrequency(30).loanTermFrequencyType(0L).maxOutstandingLoanBalance(BigDecimal.valueOf(amount))
+                .locale("en").submittedOnDate(loanDisbursementDate).amortizationType(1).interestRatePerPeriod(0)
+                .interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0).repaymentEvery(30).repaymentFrequencyType(0)
+                .numberOfRepayments(1).loanTermFrequency(30).loanTermFrequencyType(0).maxOutstandingLoanBalance(BigDecimal.valueOf(amount))
                 .principal(BigDecimal.valueOf(amount)).loanType("individual"));
 
         PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
