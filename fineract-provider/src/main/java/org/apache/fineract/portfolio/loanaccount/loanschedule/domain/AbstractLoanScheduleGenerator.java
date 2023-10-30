@@ -2186,8 +2186,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             Money principalToBeScheduled = getPrincipalToBeScheduled(loanApplicationTerms);
             // actual outstanding balance for interest calculation
             Money outstandingBalance = principalToBeScheduled;
+            loanScheduleParams.setOutstandingBalance(outstandingBalance);
             // total outstanding balance as per rest for interest calculation.
             Money outstandingBalanceAsPerRest = outstandingBalance;
+            loanScheduleParams.setOutstandingBalanceAsPerRest(outstandingBalanceAsPerRest);
 
             // this is required to update total fee amounts in the
             // LoanScheduleModel
