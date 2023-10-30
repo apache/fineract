@@ -70,13 +70,13 @@ public abstract class BaseLoanIntegrationTest {
 
     protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
 
-    protected final ResponseSpecification requestSpec = createResponseSpecification(200);
-    protected final RequestSpecification responseSpec = createRequestSpecification();
+    protected final ResponseSpecification responseSpec = createResponseSpecification(200);
+    protected final RequestSpecification requestSpec = createRequestSpecification();
 
-    protected final AccountHelper accountHelper = new AccountHelper(responseSpec, requestSpec);
-    protected final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(responseSpec, requestSpec);
+    protected final AccountHelper accountHelper = new AccountHelper(requestSpec, responseSpec);
+    protected final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     protected final LoanProductHelper loanProductHelper = new LoanProductHelper();
-    protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(responseSpec, requestSpec);
+    protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
     protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
 
     // asset
@@ -196,7 +196,7 @@ public abstract class BaseLoanIntegrationTest {
 
     protected void verifyUndoLastDisbursalShallFail(Long loanId, String expectedError) {
         ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.responseSpec, errorResponse);
+        LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> {
             validationErrorHelper.undoLastDisbursalLoan(loanId, new PostLoansLoanIdRequest());
         });
@@ -208,7 +208,7 @@ public abstract class BaseLoanIntegrationTest {
     }
 
     protected void verifyTransactions(Long loanId, Transaction... transactions) {
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(responseSpec, requestSpec, loanId.intValue());
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         if (transactions == null || transactions.length == 0) {
             assertNull(loanDetails.getTransactions(), "No transaction is expected");
         } else {
@@ -241,7 +241,7 @@ public abstract class BaseLoanIntegrationTest {
     }
 
     protected void verifyRepaymentSchedule(Long loanId, Installment... installments) {
-        GetLoansLoanIdResponse loanResponse = loanTransactionHelper.getLoan(responseSpec, requestSpec, loanId.intValue());
+        GetLoansLoanIdResponse loanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
         Assertions.assertNotNull(loanResponse.getRepaymentSchedule());
@@ -264,31 +264,36 @@ public abstract class BaseLoanIntegrationTest {
 
     protected void runAt(String date, Runnable runnable) {
         try {
-            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(responseSpec, requestSpec, 42, true);
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(responseSpec, requestSpec, TRUE);
+            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 42, true);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, TRUE);
             businessDateHelper.updateBusinessDate(
                     new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date).dateFormat(DATETIME_PATTERN).locale("en"));
             runnable.run();
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(responseSpec, requestSpec, FALSE);
-            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(responseSpec, requestSpec, 42, false);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, FALSE);
+            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 42, false);
         }
     }
 
-    protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount) {
+    protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
+            int numberOfRepayments) {
         PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId)
                 .productId(loanProductId).expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY)
                 .locale("en").submittedOnDate(loanDisbursementDate).amortizationType(1).interestRatePerPeriod(0)
                 .interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0).repaymentEvery(30).repaymentFrequencyType(0)
-                .numberOfRepayments(1).loanTermFrequency(30).loanTermFrequencyType(0).maxOutstandingLoanBalance(BigDecimal.valueOf(amount))
-                .principal(BigDecimal.valueOf(amount)).loanType("individual"));
+                .numberOfRepayments(numberOfRepayments).loanTermFrequency(numberOfRepayments * 30).loanTermFrequencyType(0)
+                .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)).principal(BigDecimal.valueOf(amount)).loanType("individual"));
 
         PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
                 new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(amount)).dateFormat(DATETIME_PATTERN)
                         .approvedOnDate("01 January 2023").locale("en"));
 
         return approvedLoanResult.getLoanId();
+    }
+
+    protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount) {
+        return applyAndApproveLoan(clientId, loanProductId, loanDisbursementDate, amount, 1);
     }
 
     protected void addRepaymentForLoan(Long loanId, Double amount, String date) {
