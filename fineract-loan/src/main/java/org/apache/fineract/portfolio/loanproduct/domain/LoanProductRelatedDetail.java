@@ -39,6 +39,7 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 
 /**
@@ -141,6 +142,10 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "disable_schedule_extension_for_down_payment", nullable = false)
     private boolean disableScheduleExtensionForDownPayment;
 
+    @Column(name = "loan_schedule_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LoanScheduleType loanScheduleType;
+
     public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -151,7 +156,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
-            final boolean enableAutoRepaymentForDownPayment, final boolean disableScheduleExtensionForDownPayment) {
+            final boolean enableAutoRepaymentForDownPayment, final boolean disableScheduleExtensionForDownPayment,
+            final LoanScheduleType loanScheduleType) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
@@ -159,7 +165,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
-                disableScheduleExtensionForDownPayment);
+                disableScheduleExtensionForDownPayment, loanScheduleType);
     }
 
     protected LoanProductRelatedDetail() {
@@ -176,7 +182,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
-            final boolean enableAutoRepaymentForDownPayment, final boolean disableScheduleExtensionForDownPayment) {
+            final boolean enableAutoRepaymentForDownPayment, final boolean disableScheduleExtensionForDownPayment,
+            final LoanScheduleType loanScheduleType) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -207,6 +214,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
         this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;
         this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
+        this.loanScheduleType = loanScheduleType;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -729,4 +737,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
     }
 
+    public LoanScheduleType getLoanScheduleType() {
+        return loanScheduleType;
+    }
 }

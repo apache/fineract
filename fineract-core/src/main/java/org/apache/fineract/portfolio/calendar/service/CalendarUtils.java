@@ -717,15 +717,12 @@ public final class CalendarUtils {
         if (recur == null) {
             return null;
         }
-        LocalDate date = startDate;
         final LocalDate seedDate = calendar.getStartDateLocalDate();
         /**
          * if (isValidRedurringDate(calendar.getRecurrence(), seedDate, date)) { date = date.plusDays(1); }
          **/
 
-        final LocalDate scheduleDate = getNextRecurringDate(recur, seedDate, date);
-
-        return scheduleDate;
+        return getNextRecurringDate(recur, seedDate, startDate);
     }
 
     public static void validateNthDayOfMonthFrequency(DataValidatorBuilder baseDataValidator, final String repeatsOnNthDayOfMonthParamName,

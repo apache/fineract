@@ -26,10 +26,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -54,11 +56,26 @@ import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
  * minus <b>interest due</b>.
  * </p>
  */
-public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanScheduleGenerator {
+@Component
+@RequiredArgsConstructor
+public class CumulativeDecliningBalanceInterestLoanScheduleGenerator extends AbstractCumulativeLoanScheduleGenerator {
+
+    private final ScheduledDateGenerator scheduledDateGenerator;
+    private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator;
+
+    @Override
+    public ScheduledDateGenerator getScheduledDateGenerator() {
+        return scheduledDateGenerator;
+    }
+
+    @Override
+    public PaymentPeriodsInOneYearCalculator getPaymentPeriodsInOneYearCalculator() {
+        return paymentPeriodsInOneYearCalculator;
+    }
 
     @Override
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
-            final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
+            final BigDecimal interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             @SuppressWarnings("unused") final Money totalCumulativeInterest,
             @SuppressWarnings("unused") final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
             final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,

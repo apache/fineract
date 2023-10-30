@@ -18,19 +18,37 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.springframework.stereotype.Component;
 
-public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGenerator {
+@Component
+@RequiredArgsConstructor
+public class CumulativeFlatInterestLoanScheduleGenerator extends AbstractCumulativeLoanScheduleGenerator {
+
+    private final ScheduledDateGenerator scheduledDateGenerator;
+    private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator;
+
+    @Override
+    public ScheduledDateGenerator getScheduledDateGenerator() {
+        return scheduledDateGenerator;
+    }
+
+    @Override
+    public PaymentPeriodsInOneYearCalculator getPaymentPeriodsInOneYearCalculator() {
+        return paymentPeriodsInOneYearCalculator;
+    }
 
     @Override
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
-            final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
+            final BigDecimal interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             Money totalCumulativeInterest, Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
             final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
             @SuppressWarnings("unused") TreeMap<LocalDate, Money> principalVariation,

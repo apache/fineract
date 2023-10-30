@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.model.Recur;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
@@ -34,12 +35,11 @@ import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
+@Slf4j
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultScheduledDateGenerator.class);
 
     @Override
     public LocalDate getLastRepaymentDate(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {
@@ -240,7 +240,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case INVALID:
             break;
             case WHOLE_TERM:
-                LOG.error("TODO Implement getRepaymentPeriodDate for WHOLE_TERM");
+                log.error("TODO Implement getRepaymentPeriodDate for WHOLE_TERM");
             break;
         }
         return dueRepaymentPeriodDate;
@@ -282,7 +282,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case INVALID:
             break;
             case WHOLE_TERM:
-                LOG.error("TODO Implement isDateFallsInSchedule for WHOLE_TERM");
+                log.error("TODO Implement isDateFallsInSchedule for WHOLE_TERM");
             break;
         }
         return isScheduledDate;
@@ -319,7 +319,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case INVALID:
             break;
             case WHOLE_TERM:
-                LOG.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
+                log.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
             break;
         }
 

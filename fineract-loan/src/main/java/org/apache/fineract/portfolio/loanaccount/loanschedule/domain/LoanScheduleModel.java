@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -32,7 +32,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
  */
 public final class LoanScheduleModel {
 
-    private final Collection<LoanScheduleModelPeriod> periods;
+    private final List<LoanScheduleModelPeriod> periods;
     private final ApplicationCurrency applicationCurrency;
     private final int loanTermInDays;
     private final Money totalPrincipalDisbursed;
@@ -44,7 +44,7 @@ public final class LoanScheduleModel {
     private final BigDecimal totalRepaymentExpected;
     private final BigDecimal totalOutstanding;
 
-    public static LoanScheduleModel from(final Collection<LoanScheduleModelPeriod> periods, final ApplicationCurrency applicationCurrency,
+    public static LoanScheduleModel from(final List<LoanScheduleModelPeriod> periods, final ApplicationCurrency applicationCurrency,
             final int loanTermInDays, final Money principalDisbursed, final BigDecimal totalPrincipalExpected,
             final BigDecimal totalPrincipalPaid, final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged,
             final BigDecimal totalPenaltyChargesCharged, final BigDecimal totalRepaymentExpected, final BigDecimal totalOutstanding) {
@@ -54,7 +54,7 @@ public final class LoanScheduleModel {
                 totalOutstanding);
     }
 
-    public static LoanScheduleModel withOverdueChargeUpdation(final Collection<LoanScheduleModelPeriod> periods,
+    public static LoanScheduleModel withOverdueChargeUpdation(final List<LoanScheduleModelPeriod> periods,
             final LoanScheduleModel loanScheduleModel, final BigDecimal totalPenaltyChargesCharged) {
 
         return new LoanScheduleModel(periods, loanScheduleModel.applicationCurrency, loanScheduleModel.loanTermInDays,
@@ -63,7 +63,7 @@ public final class LoanScheduleModel {
                 loanScheduleModel.totalRepaymentExpected, loanScheduleModel.totalOutstanding);
     }
 
-    public static LoanScheduleModel withLoanScheduleModelPeriods(final Collection<LoanScheduleModelPeriod> periods,
+    public static LoanScheduleModel withLoanScheduleModelPeriods(final List<LoanScheduleModelPeriod> periods,
             final LoanScheduleModel loanScheduleModel) {
 
         return new LoanScheduleModel(periods, loanScheduleModel.applicationCurrency, loanScheduleModel.loanTermInDays,
@@ -72,7 +72,7 @@ public final class LoanScheduleModel {
                 loanScheduleModel.totalPenaltyChargesCharged, loanScheduleModel.totalRepaymentExpected, loanScheduleModel.totalOutstanding);
     }
 
-    private LoanScheduleModel(final Collection<LoanScheduleModelPeriod> periods, final ApplicationCurrency applicationCurrency,
+    private LoanScheduleModel(final List<LoanScheduleModelPeriod> periods, final ApplicationCurrency applicationCurrency,
             final int loanTermInDays, final Money principalDisbursed, final BigDecimal totalPrincipalExpected,
             final BigDecimal totalPrincipalPaid, final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged,
             final BigDecimal totalPenaltyChargesCharged, final BigDecimal totalRepaymentExpected, final BigDecimal totalOutstanding) {
@@ -97,7 +97,7 @@ public final class LoanScheduleModel {
 
         final BigDecimal totalCredits = BigDecimal.ZERO;
 
-        final Collection<LoanSchedulePeriodData> periodsData = new ArrayList<>();
+        final List<LoanSchedulePeriodData> periodsData = new ArrayList<>();
         for (final LoanScheduleModelPeriod modelPeriod : this.periods) {
             periodsData.add(modelPeriod.toData());
         }
@@ -114,7 +114,7 @@ public final class LoanScheduleModel {
                 totalPaidInAdvance, totalPaidLate, this.totalOutstanding, totalCredits);
     }
 
-    public Collection<LoanScheduleModelPeriod> getPeriods() {
+    public List<LoanScheduleModelPeriod> getPeriods() {
         return this.periods;
     }
 

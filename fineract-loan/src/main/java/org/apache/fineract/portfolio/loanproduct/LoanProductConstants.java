@@ -156,4 +156,7 @@ public interface LoanProductConstants {
 
     String ENABLE_INSTALLMENT_LEVEL_DELINQUENCY = "enableInstallmentLevelDelinquency";
 
+    // loan schedule type
+    String LOAN_SCHEDULE_TYPE = "loanScheduleType";
+
 }
