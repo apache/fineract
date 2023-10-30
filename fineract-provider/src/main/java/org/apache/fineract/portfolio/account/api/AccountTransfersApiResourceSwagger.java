@@ -45,7 +45,7 @@ final class AccountTransfersApiResourceSwagger {
             @Schema(example = "HO")
             public String nameDecorated;
             @Schema(example = "1")
-            public Long externalId;
+            public String externalId;
             @Schema(example = "[2009, 1, 1]")
             public LocalDate openingDate;
             @Schema(example = ".")
@@ -304,7 +304,7 @@ final class AccountTransfersApiResourceSwagger {
             @Schema(example = "Head Office")
             public String nameDecorated;
             @Schema(example = "1")
-            public Long externalId;
+            public String externalId;
             @Schema(example = "[2009, 1, 1]")
             public LocalDate openingDate;
             @Schema(example = ".")

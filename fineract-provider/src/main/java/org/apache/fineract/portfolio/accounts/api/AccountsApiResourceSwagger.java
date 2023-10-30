@@ -427,7 +427,7 @@ final class AccountsApiResourceSwagger {
         @Schema(example = "100")
         public Integer requestedShares;
         @Schema(example = "1")
-        public Long externalId;
+        public String externalId;
         @Schema(example = "01 May 2016")
         public String submittedDate;
         @Schema(example = "1")

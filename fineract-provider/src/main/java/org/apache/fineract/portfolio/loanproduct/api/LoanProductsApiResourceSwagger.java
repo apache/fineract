@@ -430,7 +430,7 @@ final class LoanProductsApiResourceSwagger {
             private GetLoanProductsRepaymentStartDateType() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "repaymentStartDateType.disbursementDate")
             public String code;
             @Schema(example = "Disbursement Date")
@@ -1062,7 +1062,7 @@ final class LoanProductsApiResourceSwagger {
             private GetLoanProductsRepaymentStartDateType() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "repaymentStartDateType.disbursementDate")
             public String code;
             @Schema(example = "Disbursement Date")

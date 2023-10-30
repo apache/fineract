@@ -515,7 +515,7 @@ final class ClientsApiResourceSwagger {
             @Schema(example = "000000001")
             public String accountNo;
             @Schema(example = "456")
-            public Long externalId;
+            public String externalId;
             @Schema(example = "1")
             public Long productId;
             @Schema(example = "TestOne")
