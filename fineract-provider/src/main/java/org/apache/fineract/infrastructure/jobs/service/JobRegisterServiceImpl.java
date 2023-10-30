@@ -247,13 +247,13 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @Override
     public void scheduleJob(final ScheduledJobDetail scheduledJobDetails) {
         try {
-            final JobDetail jobDetail = createJobDetail(scheduledJobDetails, Collections.emptySet());
-            scheduledJobDetails.setJobKey(getJobKeyAsString(jobDetail.getKey()));
             if (!scheduledJobDetails.isActiveSchedular()) {
                 scheduledJobDetails.setNextRunTime(null);
                 scheduledJobDetails.setCurrentlyRunning(false);
                 return;
             }
+            final JobDetail jobDetail = createJobDetail(scheduledJobDetails, Collections.emptySet());
+            scheduledJobDetails.setJobKey(getJobKeyAsString(jobDetail.getKey()));
 
             final Trigger trigger = createTrigger(scheduledJobDetails, jobDetail);
             final Scheduler scheduler = getScheduler(scheduledJobDetails);
