@@ -104,13 +104,13 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "2")
         public Long repaymentFrequencyType;
         @Schema(example = "2")
-        public Long interestRateFrequencyType;
+        public Integer interestRateFrequencyType;
         @Schema(example = "1")
-        public Long amortizationType;
+        public Integer amortizationType;
         @Schema(example = "0")
-        public Long interestType;
+        public Integer interestType;
         @Schema(example = "1")
-        public Long interestCalculationPeriodType;
+        public Integer interestCalculationPeriodType;
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
         public List<AdvancedPaymentData> paymentAllocation;
@@ -191,7 +191,7 @@ final class LoanProductsApiResourceSwagger {
 
         // Accounting
         @Schema(example = "3")
-        public Long accountingRule;
+        public Integer accountingRule;
         @Schema(example = "4")
         public Long fundSourceAccountId;
         @Schema(example = "8")
@@ -1326,15 +1326,15 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean useBorrowerCycle;
         @Schema(example = "2")
-        public Long repaymentFrequencyType;
+        public Integer repaymentFrequencyType;
         @Schema(example = "2")
-        public Long interestRateFrequencyType;
+        public Integer interestRateFrequencyType;
         @Schema(example = "1")
-        public Long amortizationType;
+        public Integer amortizationType;
         @Schema(example = "0")
-        public Long interestType;
+        public Integer interestType;
         @Schema(example = "1")
-        public Long interestCalculationPeriodType;
+        public Integer interestCalculationPeriodType;
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
         public List<AdvancedPaymentData> paymentAllocation;
@@ -1415,7 +1415,7 @@ final class LoanProductsApiResourceSwagger {
 
         // Accounting
         @Schema(example = "3")
-        public Long accountingRule;
+        public Integer accountingRule;
         @Schema(example = "4")
         public Long fundSourceAccountId;
         @Schema(example = "8")

@@ -1126,23 +1126,23 @@ final class LoansApiResourceSwagger {
         @Schema(example = "12")
         public Integer loanTermFrequency;
         @Schema(example = "2")
-        public Long loanTermFrequencyType;
+        public Integer loanTermFrequencyType;
         @Schema(example = "12")
         public Integer numberOfRepayments;
         @Schema(example = "1")
         public Integer repaymentEvery;
         @Schema(example = "2")
-        public Long repaymentFrequencyType;
+        public Integer repaymentFrequencyType;
         @Schema(example = "2")
         public Integer interestRatePerPeriod;
         @Schema(example = "1")
-        public Long amortizationType;
+        public Integer amortizationType;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "0")
-        public Long interestType;
+        public Integer interestType;
         @Schema(example = "1")
-        public Long interestCalculationPeriodType;
+        public Integer interestCalculationPeriodType;
         @Schema(example = "20 September 2011")
         public String expectedDisbursementDate;
         @Schema(example = "mifos-standard-strategy")
@@ -1260,21 +1260,21 @@ final class LoansApiResourceSwagger {
         @Schema(example = "10")
         public Integer loanTermFrequency;
         @Schema(example = "0")
-        public Long loanTermFrequencyType;
+        public Integer loanTermFrequencyType;
         @Schema(example = "10")
         public Integer numberOfRepayments;
         @Schema(example = "1")
         public Integer repaymentEvery;
         @Schema(example = "0")
-        public Long repaymentFrequencyType;
+        public Integer repaymentFrequencyType;
         @Schema(example = "2")
         public Integer interestRatePerPeriod;
         @Schema(example = "0")
-        public Long interestType;
+        public Integer interestType;
         @Schema(example = "0")
-        public Long interestCalculationPeriodType;
+        public Integer interestCalculationPeriodType;
         @Schema(example = "1")
-        public Long amortizationType;
+        public Integer amortizationType;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "04 March 2014")
@@ -1286,9 +1286,9 @@ final class LoansApiResourceSwagger {
         @Schema(example = "true")
         public Boolean createStandingInstructionAtDisbursement;
         @Schema(example = "1")
-        public Long repaymentFrequencyNthDayType;
+        public Integer repaymentFrequencyNthDayType;
         @Schema(example = "1")
-        public Long repaymentFrequencyDayOfWeekType;
+        public Integer repaymentFrequencyDayOfWeekType;
         @Schema
         public String repaymentsStartingFromDate;
         @Schema
@@ -1330,11 +1330,11 @@ final class LoansApiResourceSwagger {
             @Schema
             public String dueDate;
             @Schema(example = "1")
-            public Long chargeTimeType;
+            public Integer chargeTimeType;
             @Schema(example = "1")
-            public Long chargeCalculationType;
+            public Integer chargeCalculationType;
             @Schema(example = "1")
-            public Long chargePaymentMode;
+            public Integer chargePaymentMode;
         }
 
         static final class PutLoansLoanIdCollateral {
@@ -1364,7 +1364,7 @@ final class LoansApiResourceSwagger {
             @Schema(example = "1")
             public BigDecimal netDisbursalAmount;
             @Schema(example = "1")
-            public Long interestType;
+            public Integer interestType;
         }
     }
 
