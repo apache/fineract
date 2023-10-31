@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.batch.domain.Header;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 
 /**
  * Provides members to hold the basic information about the exceptions raised in commandStrategy classes.

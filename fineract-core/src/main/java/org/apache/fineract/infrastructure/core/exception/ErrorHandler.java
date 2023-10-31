@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.batch.exception;
+package org.apache.fineract.infrastructure.core.exception;
 
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
@@ -36,9 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.fineract.batch.domain.Header;
+import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.exceptionmapper.DefaultExceptionMapper;
 import org.apache.fineract.infrastructure.core.exceptionmapper.FineractExceptionMapper;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -108,40 +107,45 @@ public final class ErrorHandler {
         return new ErrorInfo(response.getStatus(), errorCode, msg instanceof String ? (String) msg : JSON_HELPER.toJson(msg), batchHeaders);
     }
 
-    public RuntimeException getMappable(@NotNull Throwable thr) {
+    public static RuntimeException getMappable(@NotNull Throwable thr) {
         return getMappable(thr, null, null, null);
     }
 
-    public RuntimeException getMappable(@NotNull Throwable t, String msgCode, String defaultMsg, String param,
+    public static RuntimeException getMappable(@NotNull Throwable thr, String msgCode, String defaultMsg) {
+        return getMappable(thr, msgCode, defaultMsg, null);
+    }
+
+    public static RuntimeException getMappable(@NotNull Throwable t, String msgCode, String defaultMsg, String param,
             final Object... defaultMsgArgs) {
         String msg = defaultMsg == null ? t.getMessage() : defaultMsg;
-        param = param == null ? "unknown" : param;
+        String codePfx = "error.msg" + (param == null ? "" : ("." + param));
+        Object[] args = defaultMsgArgs == null ? new Object[] { t } : defaultMsgArgs;
         if (t instanceof NestedRuntimeException nre) {
             Throwable cause = nre.getMostSpecificCause();
-            msg = cause.getMessage();
+            msg = defaultMsg == null ? cause.getMessage() : defaultMsg;
             if (nre instanceof NonTransientDataAccessException) {
-                msgCode = msgCode == null ? "error.msg." + param + ".data.integrity.issue" : msgCode;
-                return new PlatformDataIntegrityException(msgCode, msg, param, defaultMsgArgs);
+                msgCode = msgCode == null ? codePfx + ".data.integrity.issue" : msgCode;
+                return new PlatformDataIntegrityException(msgCode, msg, param, args);
             }
         }
         if (t instanceof ValidationException) {
-            msgCode = msgCode == null ? "error.msg.validation." + param + ".error" : msgCode;
+            msgCode = msgCode == null ? codePfx + ".validation.error" : msgCode;
             return new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError(msgCode, msg, param, defaultMsgArgs)));
         }
         if (t instanceof PersistenceException) {
-            msgCode = msgCode == null ? "error.msg.persistence." + param + ".error" : msgCode;
-            return new PlatformDataIntegrityException(msgCode, msg, param, defaultMsgArgs);
+            msgCode = msgCode == null ? codePfx + ".persistence.error" : msgCode;
+            return new PlatformDataIntegrityException(msgCode, msg, param, args);
         }
         if (t instanceof AuthenticationException) {
-            msgCode = msgCode == null ? "error.msg.authentication." + param + ".error" : msgCode;
-            return new PlatformDataIntegrityException(msgCode, msg, param, defaultMsgArgs);
+            msgCode = msgCode == null ? codePfx + ".authentication.error" : msgCode;
+            return new PlatformDataIntegrityException(msgCode, msg, param, args);
         }
         if (t instanceof RuntimeException re) {
             return re;
         }
         if (t instanceof ParseException) {
-            msgCode = msgCode == null ? "error.msg.parse." + param + ".error" : msgCode;
-            return new PlatformDataIntegrityException(msgCode, msg, param, defaultMsgArgs);
+            msgCode = msgCode == null ? codePfx + ".parse.error" : msgCode;
+            return new PlatformDataIntegrityException(msgCode, msg, param, args);
         }
         return new RuntimeException(msg, t);
     }

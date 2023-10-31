@@ -29,6 +29,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportParameter;
@@ -179,7 +180,6 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleReportDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("unq_report_name") || realCause.getMessage().contains("report_name_UNIQUE")) {
             final String name = command.stringValueOfParameterNamed("reportName");
             throw new PlatformDataIntegrityException("error.msg.report.duplicate.name", "A report with name '" + name + "' already exists",
@@ -187,7 +187,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         }
 
         LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.report.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 

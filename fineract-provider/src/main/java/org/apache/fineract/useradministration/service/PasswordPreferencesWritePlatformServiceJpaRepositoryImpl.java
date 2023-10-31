@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
 import org.apache.fineract.useradministration.data.PasswordPreferencesDataValidator;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicy;
@@ -82,8 +82,8 @@ public class PasswordPreferencesWritePlatformServiceJpaRepositoryImpl implements
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             log.error("Error occured.", dve);
-            throw new PlatformDataIntegrityException("error.msg.password.validation.policy.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            throw ErrorHandler.getMappable(dve, "error.msg.password.validation.policy.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
         }
     }
 }

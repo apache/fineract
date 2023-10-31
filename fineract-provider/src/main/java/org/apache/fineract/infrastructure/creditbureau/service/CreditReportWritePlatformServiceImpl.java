@@ -32,8 +32,8 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigurations;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureau;
@@ -202,18 +202,15 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
             try {
                 this.creditReportRepository.delete(creditReport);
             } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-                throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
-                        "Unknown data integrity issue with resource: " + dve.getMostSpecificCause(), dve);
+                throw ErrorHandler.getMappable(dve, "error.msg.cund.unknown.data.integrity.issue",
+                        "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
             }
         }
         return new CommandProcessingResultBuilder().withEntityId(creditReport.getId()).build();
     }
 
     private void handleTokenDataIntegrityIssues(final Throwable realCause) {
-
-        throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(realCause, "error.msg.cund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
-
     }
-
 }

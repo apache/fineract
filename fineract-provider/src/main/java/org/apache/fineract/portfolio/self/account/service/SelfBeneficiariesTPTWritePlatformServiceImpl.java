@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -155,7 +156,6 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBenefic
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final DataAccessException dae) {
-
         final Throwable realCause = dae.getMostSpecificCause();
         if (realCause.getMessage().contains("name")) {
 
@@ -165,7 +165,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBenefic
         }
 
         log.error("Error occured.", dae);
-        throw new PlatformDataIntegrityException("error.msg.beneficiary.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dae, "error.msg.beneficiary.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 }

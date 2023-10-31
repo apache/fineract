@@ -26,6 +26,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -204,7 +205,6 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleOfficeDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("externalid_org")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.office.duplicate.externalId",
@@ -216,8 +216,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         }
 
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        throw ErrorHandler.getMappable(dve, "error.msg.office.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 
     /*

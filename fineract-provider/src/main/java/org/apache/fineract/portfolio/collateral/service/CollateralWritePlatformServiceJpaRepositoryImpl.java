@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrappe
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collateral.api.CollateralApiConstants;
 import org.apache.fineract.portfolio.collateral.api.CollateralApiConstants.CollateralJSONinputParams;
@@ -165,7 +165,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
 
     private void handleCollateralDataIntegrityViolation(final NonTransientDataAccessException dve) {
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.collateral.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.collateral.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 }

@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
@@ -236,7 +237,6 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      **/
     private void handleDataIntegrityIssues(final JsonCommand jsonCommand, final Throwable realCause,
             final NonTransientDataAccessException dve) {
-
         if (realCause.getMessage().contains(ReportMailingJobConstants.NAME_PARAM_NAME)) {
             final String name = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.NAME_PARAM_NAME);
             throw new PlatformDataIntegrityException("error.msg.report.mailing.job.duplicate.name",
@@ -244,8 +244,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
         }
 
         LOG.error("Error occured.", dve);
-
-        throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.PlatformEmailSendException;
@@ -283,28 +284,22 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     /*
      * Return an exception to throw, no matter what the data integrity issue is.
      */
-    private PlatformDataIntegrityException handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
-            final Exception dve) {
+    private RuntimeException handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         // TODO: this needs to be fixed. The error condition should be independent from the underlying message and
-        // naming
-        // of the constraint
+        // naming of the constraint
         if (realCause.getMessage().contains("username_org")) {
             final String username = command.stringValueOfParameterNamed("username");
-            final StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(username)
-                    .append(" already exists.");
-            return new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessageBuilder.toString(), "username",
-                    username);
+            final String defaultMessage = "User with username " + username + " already exists.";
+            return new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessage, "username", username);
         }
-
         // TODO: this needs to be fixed. The error condition should be independent from the underlying message and
-        // naming
-        // of the constraint
+        // naming of the constraint
         if (realCause.getMessage().contains("unique_self_client")) {
             return new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist",
                     "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
         }
 
         log.error("handleDataIntegrityIssues: Neither duplicate username nor existing user; unknown error occured", dve);
-        return new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+        return ErrorHandler.getMappable(dve, "error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 }

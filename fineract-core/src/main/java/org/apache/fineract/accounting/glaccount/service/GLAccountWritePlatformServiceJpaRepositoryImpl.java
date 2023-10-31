@@ -42,7 +42,7 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrappe
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -230,7 +230,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
         }
 
         LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }
 
