@@ -79,6 +79,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
@@ -394,28 +395,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            final Throwable cause = dve.getCause();
-            final Throwable realCause = dve.getMostSpecificCause();
-            // even if duplicate is only due to permission duplicate, okay to
-            // show duplicate datatable error msg
-            if (realCause.getMessage().contains("Duplicate entry") || cause.getMessage().contains("Duplicate entry")) {
-                throw new PlatformDataIntegrityException("error.msg.datatable.registered",
-                        "Datatable `" + dataTableName + "` is already registered against an application table.", API_PARAM_DATATABLE_NAME,
-                        dataTableName, dve);
-            }
-            logAsErrorUnexpectedDataIntegrityException(dve);
-            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            handleDataIntegrityIssues(dataTableName, null, dve.getMostSpecificCause(), dve);
         } catch (final PersistenceException dve) {
-            final Throwable cause = dve.getCause();
-            if (cause.getMessage().contains("Duplicate entry")) {
-                throw new PlatformDataIntegrityException("error.msg.datatable.registered",
-                        "Datatable `" + dataTableName + "` is already registered against an application table.", API_PARAM_DATATABLE_NAME,
-                        dataTableName, dve);
-            }
-            logAsErrorUnexpectedDataIntegrityException(dve);
-            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            handleDataIntegrityIssues(dataTableName, null, ExceptionUtils.getRootCause(dve.getCause()), dve);
+
         }
     }
 
@@ -1353,41 +1336,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
             return CommandProcessingResult.fromCommandProcessingResult(commandProcessingResult, resourceId);
         } catch (final DataAccessException dve) {
-            final Throwable cause = dve.getCause();
-            final Throwable realCause = dve.getMostSpecificCause();
-            if (realCause.getMessage().contains("Duplicate entry") || cause.getMessage().contains("Duplicate entry")) {
-                throw new PlatformDataIntegrityException(
-                        "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
-                                + "` and application table with identifier `" + appTableId + "`.",
-                        API_PARAM_DATATABLE_NAME, dataTableName, appTableId, dve);
-            } else if (realCause.getMessage().contains("doesn't have a default value")
-                    || cause.getMessage().contains("doesn't have a default value")) {
-                throw new PlatformDataIntegrityException(
-                        "error.msg.datatable.no.value.provided.for.required.fields", "No values provided for the datatable `"
-                                + dataTableName + "` and application table with identifier `" + appTableId + "`.",
-                        API_PARAM_DATATABLE_NAME, dataTableName, appTableId, dve);
-            }
-
-            logAsErrorUnexpectedDataIntegrityException(dve);
-            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            handleDataIntegrityIssues(dataTableName, appTableId, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
         } catch (final PersistenceException e) {
-            final Throwable cause = e.getCause();
-            if (cause.getMessage().contains("Duplicate entry")) {
-                throw new PlatformDataIntegrityException(
-                        "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
-                                + "` and application table with identifier `" + appTableId + "`.",
-                        API_PARAM_DATATABLE_NAME, dataTableName, appTableId, e);
-            } else if (cause.getMessage().contains("doesn't have a default value")) {
-                throw new PlatformDataIntegrityException(
-                        "error.msg.datatable.no.value.provided.for.required.fields", "No values provided for the datatable `"
-                                + dataTableName + "` and application table with identifier `" + appTableId + "`.",
-                        API_PARAM_DATATABLE_NAME, dataTableName, appTableId, e);
-            }
-
-            logAsErrorUnexpectedDataIntegrityException(e);
-            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", e);
+            handleDataIntegrityIssues(dataTableName, appTableId, ExceptionUtils.getRootCause(e.getCause()), e);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -1785,7 +1738,36 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return code + "_cd_" + columnName;
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        log.error("Error occurred.", dve);
+    private void handleDataIntegrityIssues(String dataTableName, Long appTableId, final Throwable realCause, final Exception e) {
+        String msgCode = "error.msg.datatable";
+        String msg = "Unknown data integrity issue with datatable `" + dataTableName + "`";
+        String param = null;
+        Object[] msgArgs;
+        final Throwable cause = e.getCause();
+        if ((realCause != null && realCause.getMessage().contains("Duplicate entry"))
+                || (cause != null && cause.getMessage().contains("Duplicate entry"))) {
+            msgCode += ".entry.duplicate";
+            param = API_PARAM_DATATABLE_NAME;
+            if (appTableId == null) {
+                msg = "Datatable `" + dataTableName + "` is already registered against an application table.";
+                msgArgs = new Object[] { dataTableName, e };
+            } else {
+                msg = "An entry already exists for datatable `" + dataTableName + "` and application table with identifier `" + appTableId
+                        + "`.";
+                msgArgs = new Object[] { dataTableName, appTableId, e };
+            }
+        } else if ((realCause != null && realCause.getMessage().contains("doesn't have a default value"))
+                || (cause != null && cause.getMessage().contains("doesn't have a default value"))) {
+            msgCode += ".no.value.provided.for.required.fields";
+            msg = "No values provided for the datatable `" + dataTableName + "` and application table with identifier `" + appTableId
+                    + "`.";
+            param = API_PARAM_DATATABLE_NAME;
+            msgArgs = new Object[] { dataTableName, appTableId, e };
+        } else {
+            msgCode += ".unknown.data.integrity.issue";
+            msgArgs = new Object[] { dataTableName, e };
+        }
+        log.error("Error occured.", e);
+        throw ErrorHandler.getMappable(e, msgCode, msg, param, msgArgs);
     }
 }

@@ -43,6 +43,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -152,8 +153,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             log.error("Error occured.", throwable);
-            throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            throw ErrorHandler.getMappable(dve, "error.msg.client.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
         }
     }
 
@@ -161,9 +162,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("external_id")) {
-
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.client.duplicate.externalId",
                     "Client with externalId `" + externalId + "` already exists", "externalId", externalId);
@@ -178,8 +177,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
-        throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        throw ErrorHandler.getMappable(dve, "error.msg.client.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
     @Transactional

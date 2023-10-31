@@ -35,6 +35,7 @@ import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesRe
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.provisioning.constants.ProvisioningCriteriaConstants;
@@ -158,7 +159,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
                     "The selected products already associated with another Provisioning Criteria");
         }
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

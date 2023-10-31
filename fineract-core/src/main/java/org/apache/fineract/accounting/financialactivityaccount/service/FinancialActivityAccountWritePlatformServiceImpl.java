@@ -36,9 +36,8 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrappe
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
@@ -141,7 +140,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     }
 
     private void handleFinancialActivityAccountDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
-            final NonTransientDataAccessException dve) {
+            final Exception dve) {
         if (realCause.getMessage().contains("financial_activity_type")) {
             final Integer financialActivityId = command
                     .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
@@ -149,19 +148,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
         }
 
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
-    }
-
-    private void handleFinancialActivityAccountDataIntegrityIssues(JsonCommand command, Throwable realCause, PersistenceException dve) {
-        if (realCause.getMessage().contains("financial_activity_type")) {
-            final Integer financialActivityId = command
-                    .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
-            throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
-        }
-
-        log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }
 

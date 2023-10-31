@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeDataValidator;
@@ -89,7 +90,6 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
     }
 
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("acc_product_mapping")) {
             throw new PlatformDataIntegrityException("error.msg.payment.type.association.exist",
                     "cannot.delete.payment.type.with.association");
@@ -97,8 +97,7 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
             throw new PlatformDataIntegrityException("error.msg.payment.type.association.exist",
                     "cannot.delete.payment.type.with.association");
         }
-
-        throw new PlatformDataIntegrityException("error.msg.paymenttypes.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.paymenttypes.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 }

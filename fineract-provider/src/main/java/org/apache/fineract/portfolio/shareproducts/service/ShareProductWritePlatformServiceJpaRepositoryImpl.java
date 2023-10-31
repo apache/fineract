@@ -30,6 +30,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToG
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareProductDividentsCreateBusinessEvent;
@@ -181,20 +182,16 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
 
     private void handleDataIntegrityIssues(final Exception e) {
         log.error("Unknown data integrity issue with resource", e);
-        throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(e, "error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("'name'")) {
             final String name = command.stringValueOfParameterNamed(ShareProductApiConstants.name_paramname);
             throw new PlatformDataIntegrityException("error.msg.shareproduct.duplicate.name",
                     "Share Product with name `" + name + "` already exists", "name", name);
         }
-
-        log.error("Unknown data integrity issue with resource", dve);
-        throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        handleDataIntegrityIssues(dve);
     }
 }

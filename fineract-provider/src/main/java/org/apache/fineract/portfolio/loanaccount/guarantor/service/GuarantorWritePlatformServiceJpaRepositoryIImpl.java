@@ -29,9 +29,9 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
@@ -351,7 +351,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
     private void handleGuarantorDataIntegrityIssues(final Throwable realCause, final NonTransientDataAccessException dve) {
         LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.guarantor.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.guarantor.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Guarantor: " + realCause.getMessage());
     }
 }

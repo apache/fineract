@@ -55,7 +55,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -453,8 +453,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final Throwable realCause,
             final NonTransientDataAccessException dve) {
-
-        throw new PlatformDataIntegrityException("error.msg.email.campaign.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.email.campaign.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

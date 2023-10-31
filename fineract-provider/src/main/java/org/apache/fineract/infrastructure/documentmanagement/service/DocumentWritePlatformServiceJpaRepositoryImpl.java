@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 
 import java.io.InputStream;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommandValidator;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
@@ -82,8 +82,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             return document.getId();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);
-            throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            throw ErrorHandler.getMappable(dve, "error.msg.document.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
         }
     }
 
@@ -136,8 +136,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             return CommandProcessingResult.resourceResult(documentForUpdate.getId());
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);
-            throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            throw ErrorHandler.getMappable(dve, "error.msg.document.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
         } catch (final ContentManagementException cme) {
             LOG.error("Error occured.", cme);
             throw new ContentManagementException(documentCommand.getName(), cme.getMessage(), cme);

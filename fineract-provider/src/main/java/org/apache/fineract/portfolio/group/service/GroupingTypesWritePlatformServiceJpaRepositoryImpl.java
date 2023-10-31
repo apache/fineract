@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -567,8 +568,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             log.error("Error occured.", throwable);
-            throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
         }
     }
 
@@ -727,7 +728,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
      */
     private void handleGroupDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve,
             final GroupTypes groupLevel) {
-
         String levelName = "Invalid";
         switch (groupLevel) {
             case CENTER:
@@ -742,16 +742,13 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         String errorMessageForUser = null;
         String errorMessageForMachine = null;
-
         if (realCause.getMessage().contains("'external_id'")) {
-
             final String externalId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
             errorMessageForUser = levelName + " with externalId `" + externalId + "` already exists.";
             errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.externalId";
             throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser,
                     GroupingTypesApiConstants.externalIdParamName, externalId);
         } else if (realCause.getMessage().contains("'name'")) {
-
             final String name = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
             errorMessageForUser = levelName + " with name `" + name + "` already exists.";
             errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.name";
@@ -760,8 +757,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
 
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 
     @Override

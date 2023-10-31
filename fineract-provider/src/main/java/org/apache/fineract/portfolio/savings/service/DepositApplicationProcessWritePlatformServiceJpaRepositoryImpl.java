@@ -45,9 +45,9 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.FixedDepositAccountCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.RecurringDepositAccountCreateBusinessEvent;
@@ -126,26 +126,29 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
-        final StringBuilder errorCodeBuilder = new StringBuilder("error.msg.").append(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        if (realCause.getMessage().contains("'sa_account_no_UNIQUE'")) {
+        String msgCode = "error.msg." + SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+        String msg = "Unknown data integrity issue with savings account.";
+        String param = null;
+        Object[] msgArgs;
+        Throwable checkEx = realCause == null ? dve : realCause;
+        if (checkEx.getMessage().contains("sa_account_no_UNIQUE")) {
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
-            errorCodeBuilder.append(".duplicate.accountNo");
-            throw new PlatformDataIntegrityException(errorCodeBuilder.toString(),
-                    "Savings account with accountNo " + accountNo + " already exists", "accountNo", accountNo);
-
-        } else if (realCause.getMessage().contains("sa_external_id_UNIQUE")) {
-
+            msgCode += ".duplicate.accountNo";
+            msg = "Savings account with accountNo " + accountNo + " already exists";
+            param = "accountNo";
+            msgArgs = new Object[] { accountNo, dve };
+        } else if (checkEx.getMessage().contains("sa_external_id_UNIQUE")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
-            errorCodeBuilder.append(".duplicate.externalId");
-            throw new PlatformDataIntegrityException(errorCodeBuilder.toString(),
-                    "Savings account with externalId " + externalId + " already exists", "externalId", externalId);
+            msgCode += ".duplicate.externalId";
+            msg = "Savings account with externalId " + externalId + " already exists";
+            param = "externalId";
+            msgArgs = new Object[] { externalId, dve };
+        } else {
+            msgCode += ".unknown.data.integrity.issue";
+            msgArgs = new Object[] { dve };
         }
-
-        errorCodeBuilder.append(".unknown.data.integrity.issue");
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException(errorCodeBuilder.toString(), "Unknown data integrity issue with savings account.");
+        throw ErrorHandler.getMappable(dve, msgCode, msg, param, msgArgs);
     }
 
     @Transactional

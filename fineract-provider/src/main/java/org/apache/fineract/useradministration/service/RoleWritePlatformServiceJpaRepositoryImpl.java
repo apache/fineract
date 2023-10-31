@@ -28,6 +28,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.command.PermissionsCommand;
@@ -86,21 +87,14 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("unq_name")) {
-
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.role.duplicate.name", "Role with name `" + name + "` already exists",
                     "name", name);
         }
 
-        logAsErrorUnexpectedDataIntegrityException(dve);
-        throw new PlatformDataIntegrityException("error.msg.role.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
-
-    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
         log.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.role.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
@@ -212,8 +206,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             this.roleRepository.delete(role);
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
+            throw ErrorHandler.getMappable(e, "error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
         }
     }
 
@@ -246,8 +240,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
+            throw ErrorHandler.getMappable(e, "error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
         }
     }
 
@@ -269,8 +263,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
+            throw ErrorHandler.getMappable(e, "error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
         }
     }
 }

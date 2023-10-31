@@ -29,6 +29,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrappe
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
@@ -237,7 +238,6 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("name")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.charge.duplicate.name", "Charge with name `" + name + "` already exists",
@@ -245,7 +245,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         }
 
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
