@@ -45,7 +45,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 @Schema(example = "from 0 to 90 days")
                 public String description;
                 @Schema(example = "1")
-                public Long periodType;
+                public Integer periodType;
                 @Schema(example = "0")
                 public Integer fromPeriod;
                 @Schema(example = "90")

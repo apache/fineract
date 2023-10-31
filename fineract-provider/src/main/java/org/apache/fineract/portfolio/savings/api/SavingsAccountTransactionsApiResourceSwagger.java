@@ -207,7 +207,7 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         @Schema(example = "String")
         public String reasonForBlock;
         @Schema(example = "1")
-        public Long paymentTypeId;
+        public Integer paymentTypeId;
     }
 
     @Schema(description = "PostSavingsAccountTransactionsResponse")

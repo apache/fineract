@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.interestratechart.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.util.Set;
 
 /**
@@ -124,21 +125,21 @@ final class InterestRateChartSlabsApiResourceSwagger {
             private PostInterestRateChartsChartIdChartSlabsIncentives() {}
 
             @Schema(example = "2")
-            public Long entityType;
+            public Integer entityType;
             @Schema(example = "2")
             public Integer attributeName;
             @Schema(example = "2")
-            public Long conditionType;
+            public Integer conditionType;
             @Schema(example = "11")
-            public Integer attributeValue;
+            public String attributeValue;
             @Schema(example = "2")
-            public Long incentiveType;
+            public Integer incentiveType;
             @Schema(example = "-1")
-            public Float amount;
+            public BigDecimal amount;
         }
 
         @Schema(example = "0")
-        public Long periodType;
+        public Integer periodType;
         @Schema(example = "1")
         public Integer fromPeriod;
         @Schema(example = "180")

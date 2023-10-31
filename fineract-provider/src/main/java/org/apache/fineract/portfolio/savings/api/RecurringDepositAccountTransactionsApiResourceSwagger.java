@@ -214,7 +214,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
         @Schema(example = "500")
         public Double transactionAmount;
         @Schema(example = "14")
-        public Long paymentTypeId;
+        public Integer paymentTypeId;
         @Schema(example = "acc123")
         public String accountNumber;
         @Schema(example = "che123")

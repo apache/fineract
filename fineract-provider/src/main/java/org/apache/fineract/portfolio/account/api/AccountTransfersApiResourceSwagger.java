@@ -149,7 +149,7 @@ final class AccountTransfersApiResourceSwagger {
         @Schema(example = "1")
         public Long fromClientId;
         @Schema(example = "2")
-        public Long fromAccountType;
+        public Integer fromAccountType;
         @Schema(example = "1")
         public Long fromAccountId;
         @Schema(example = "1")
@@ -157,7 +157,7 @@ final class AccountTransfersApiResourceSwagger {
         @Schema(example = "1")
         public Long toClientId;
         @Schema(example = "2")
-        public Long toAccountType;
+        public Integer toAccountType;
         @Schema(example = "2")
         public Long toAccountId;
         @Schema(example = "dd MMMM yyyy")
@@ -531,13 +531,13 @@ final class AccountTransfersApiResourceSwagger {
         @Schema(example = "2")
         public Long fromAccountId;
         @Schema(example = "1")
-        public Long fromAccountType;
+        public Integer fromAccountType;
         @Schema(example = "1")
         public Long toOfficeId;
         @Schema(example = "1")
         public Long toClientId;
         @Schema(example = "2")
-        public Long toAccountType;
+        public Integer toAccountType;
         @Schema(example = "1")
         public Long toAccountId;
         @Schema(example = "130")

@@ -842,7 +842,7 @@ final class LoansApiResourceSwagger {
             @Schema(example = "[2022, 07, 01]")
             public LocalDate transactionDate;
             @Schema(example = "101")
-            public Long paymentTypeId;
+            public Integer paymentTypeId;
             @Schema(example = "acct123")
             public String accountNumber;
             @Schema(example = "10001")
@@ -1452,7 +1452,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "28 June 2022")
         public String actualDisbursementDate;
         @Schema(example = "3")
-        public Long paymentTypeId;
+        public Integer paymentTypeId;
         @Schema(example = "28 June 2022")
         public String approvedOnDate;
         @Schema(example = "1000")
