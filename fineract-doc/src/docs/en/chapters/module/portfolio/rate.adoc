@@ -1,0 +1,13 @@
+= Rate Module
+
+WARNING: Needs more editing!
+
+== Rate Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.rate.adoc[leveloffset=+1]
+
+.Rate dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.rate.puml[]
+----

@@ -1,0 +1,13 @@
+= Monetary Module
+
+WARNING: Needs more editing!
+
+== Monetary Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.monetary.adoc[leveloffset=+1]
+
+.Monetary dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.monetary.puml[]
+----

@@ -1,0 +1,13 @@
+= Client Module
+
+WARNING: Needs more editing!
+
+== Client Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.client.adoc[leveloffset=+1]
+
+.Client dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.client.puml[]
+----

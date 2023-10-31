@@ -1,0 +1,13 @@
+= Dataqueries Module
+
+WARNING: Needs more editing!
+
+== Dataqueries Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.dataqueries.adoc[leveloffset=+1]
+
+.Dataqueries dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.dataqueries.puml[]
+----

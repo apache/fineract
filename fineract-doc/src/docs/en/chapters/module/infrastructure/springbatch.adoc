@@ -1,0 +1,13 @@
+= Springbatch Module
+
+WARNING: Needs more editing!
+
+== Springbatch Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.springbatch.adoc[leveloffset=+1]
+
+.Springbatch dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.springbatch.puml[]
+----

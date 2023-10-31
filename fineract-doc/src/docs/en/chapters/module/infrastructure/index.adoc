@@ -1,0 +1,52 @@
+= Infrastructure Module Group
+
+WARNING: Please pick up and complete one of the section files and documet the features.
+
+// include::accountnumberformat.adoc[leveloffset=+1]
+
+// include::bulkimport.adoc[leveloffset=+1]
+
+// include::businessdate.adoc[leveloffset=+1]
+
+// include::cache.adoc[leveloffset=+1]
+
+// include::campaigns.adoc[leveloffset=+1]
+
+// include::codes.adoc[leveloffset=+1]
+
+// include::configuration.adoc[leveloffset=+1]
+
+// include::core.adoc[leveloffset=+1]
+
+// include::creditbureau.adoc[leveloffset=+1]
+
+// include::dataqueries.adoc[leveloffset=+1]
+
+// include::documentmanagement.adoc[leveloffset=+1]
+
+// include::entityaccess.adoc[leveloffset=+1]
+
+// include::event.adoc[leveloffset=+1]
+
+// include::gcm.adoc[leveloffset=+1]
+
+// include::hooks.adoc[leveloffset=+1]
+
+// include::instancemode.adoc[leveloffset=+1]
+
+// include::jobs.adoc[leveloffset=+1]
+
+// include::report.adoc[leveloffset=+1]
+
+// include::reportmailingjob.adoc[leveloffset=+1]
+
+// include::s3.adoc[leveloffset=+1]
+
+// include::security.adoc[leveloffset=+1]
+
+// include::sms.adoc[leveloffset=+1]
+
+// include::springbatch.adoc[leveloffset=+1]
+
+// include::survey.adoc[leveloffset=+1]
+

@@ -1,0 +1,13 @@
+= Workingdays Module
+
+WARNING: Needs more editing!
+
+== Workingdays Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.workingdays.adoc[leveloffset=+1]
+
+.Workingdays dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.workingdays.puml[]
+----

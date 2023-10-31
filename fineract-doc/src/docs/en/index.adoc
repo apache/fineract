@@ -37,6 +37,8 @@ include::chapters/architecture/index.adoc[leveloffset=+1]
 
 include::chapters/development/index.adoc[leveloffset=+1]
 
+include::chapters/module/index.adoc[leveloffset=+1]
+
 include::chapters/custom/index.adoc[leveloffset=+1]
 
 include::chapters/resilience/index.adoc[leveloffset=+1]

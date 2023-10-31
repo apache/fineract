@@ -1,0 +1,26 @@
+= Accounting Module Group
+
+WARNING: Please pick up and complete one of the section files and documet the features.
+
+// include::accrual.adoc[leveloffset=+1]
+
+// include::closure.adoc[leveloffset=+1]
+
+// include::common.adoc[leveloffset=+1]
+
+// include::financialactivityaccount.adoc[leveloffset=+1]
+
+// include::glaccount.adoc[leveloffset=+1]
+
+// include::jobs.adoc[leveloffset=+1]
+
+// include::journalentry.adoc[leveloffset=+1]
+
+// include::producttoaccountmapping.adoc[leveloffset=+1]
+
+// include::provisioning.adoc[leveloffset=+1]
+
+// include::rule.adoc[leveloffset=+1]
+
+// include::trialbalance.adoc[leveloffset=+1]
+

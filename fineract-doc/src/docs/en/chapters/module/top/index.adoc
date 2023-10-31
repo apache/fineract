@@ -1,0 +1,36 @@
+= Top Module Group
+
+WARNING: Please pick up and complete one of the section files and documet the features.
+
+// include::accounting.adoc[leveloffset=+1]
+
+// include::adhocquery.adoc[leveloffset=+1]
+
+// include::avro.adoc[leveloffset=+1]
+
+// include::batch.adoc[leveloffset=+1]
+
+// include::cob.adoc[leveloffset=+1]
+
+// include::commands.adoc[leveloffset=+1]
+
+// include::infrastructure.adoc[leveloffset=+1]
+
+// include::interoperation.adoc[leveloffset=+1]
+
+// include::investor.adoc[leveloffset=+1]
+
+// include::mix.adoc[leveloffset=+1]
+
+// include::notification.adoc[leveloffset=+1]
+
+// include::organisation.adoc[leveloffset=+1]
+
+// include::portfolio.adoc[leveloffset=+1]
+
+// include::spm.adoc[leveloffset=+1]
+
+// include::template.adoc[leveloffset=+1]
+
+// include::useradministration.adoc[leveloffset=+1]
+

@@ -1,0 +1,13 @@
+= Common Module
+
+WARNING: Needs more editing!
+
+== Common Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.common.adoc[leveloffset=+1]
+
+.Common dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.common.puml[]
+----

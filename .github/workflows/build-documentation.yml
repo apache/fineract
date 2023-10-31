@@ -33,4 +33,4 @@ jobs:
             sudo apt-get install ghostscript graphviz -y
 
       - name: Documentation build
-        run: ./gradlew --no-daemon --console=plain doc
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:test --tests org.apache.fineract.ModularityTest doc

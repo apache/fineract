@@ -1,0 +1,13 @@
+= Transfer Module
+
+WARNING: Needs more editing!
+
+== Transfer Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.transfer.adoc[leveloffset=+1]
+
+.Transfer dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.transfer.puml[]
+----

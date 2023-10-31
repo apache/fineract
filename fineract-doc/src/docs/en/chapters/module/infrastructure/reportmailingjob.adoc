@@ -1,0 +1,13 @@
+= Reportmailingjob Module
+
+WARNING: Needs more editing!
+
+== Reportmailingjob Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.reportmailingjob.adoc[leveloffset=+1]
+
+.Reportmailingjob dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.reportmailingjob.puml[]
+----

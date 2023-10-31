@@ -1,0 +1,15 @@
+= Modules
+
+WARNING: Needs more editing!
+
+include::intro.adoc[leveloffset=+1]
+
+include::top/index.adoc[leveloffset=+1]
+
+include::accounting/index.adoc[leveloffset=+1]
+
+include::infrastructure/index.adoc[leveloffset=+1]
+
+include::portfolio/index.adoc[leveloffset=+1]
+
+include::organisation/index.adoc[leveloffset=+1]

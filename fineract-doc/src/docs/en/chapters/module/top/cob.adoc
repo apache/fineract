@@ -1,0 +1,13 @@
+= Cob Module
+
+WARNING: Needs more editing!
+
+== Cob Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.cob.adoc[leveloffset=+1]
+
+.Cob dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.cob.puml[]
+----

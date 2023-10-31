@@ -1,0 +1,13 @@
+= Products Module
+
+WARNING: Needs more editing!
+
+== Products Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.products.adoc[leveloffset=+1]
+
+.Products dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.products.puml[]
+----

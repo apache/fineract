@@ -1,0 +1,13 @@
+= Shareproducts Module
+
+WARNING: Needs more editing!
+
+== Shareproducts Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.shareproducts.adoc[leveloffset=+1]
+
+.Shareproducts dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.shareproducts.puml[]
+----

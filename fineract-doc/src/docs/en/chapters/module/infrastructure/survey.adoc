@@ -1,0 +1,13 @@
+= Survey Module
+
+WARNING: Needs more editing!
+
+== Survey Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.survey.adoc[leveloffset=+1]
+
+.Survey dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.survey.puml[]
+----

@@ -1,0 +1,13 @@
+= Charge Module
+
+WARNING: Needs more editing!
+
+== Charge Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.charge.adoc[leveloffset=+1]
+
+.Charge dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.charge.puml[]
+----

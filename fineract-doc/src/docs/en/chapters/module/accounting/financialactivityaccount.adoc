@@ -1,0 +1,13 @@
+= Financialactivityaccount Module
+
+WARNING: Needs more editing!
+
+== Financialactivityaccount Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.financialactivityaccount.adoc[leveloffset=+1]
+
+.Financialactivityaccount dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.financialactivityaccount.puml[]
+----

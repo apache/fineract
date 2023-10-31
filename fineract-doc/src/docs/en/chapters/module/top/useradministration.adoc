@@ -1,0 +1,13 @@
+= Useradministration Module
+
+WARNING: Needs more editing!
+
+== Useradministration Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.useradministration.adoc[leveloffset=+1]
+
+.Useradministration dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.useradministration.puml[]
+----

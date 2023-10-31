@@ -1,0 +1,13 @@
+= Entityaccess Module
+
+WARNING: Needs more editing!
+
+== Entityaccess Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.entityaccess.adoc[leveloffset=+1]
+
+.Entityaccess dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.entityaccess.puml[]
+----

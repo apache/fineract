@@ -1,0 +1,13 @@
+= Meeting Module
+
+WARNING: Needs more editing!
+
+== Meeting Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.meeting.adoc[leveloffset=+1]
+
+.Meeting dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.meeting.puml[]
+----

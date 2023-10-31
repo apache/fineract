@@ -1,0 +1,13 @@
+= Repaymentwithpostdatedchecks Module
+
+WARNING: Needs more editing!
+
+== Repaymentwithpostdatedchecks Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.repaymentwithpostdatedchecks.adoc[leveloffset=+1]
+
+.Repaymentwithpostdatedchecks dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.repaymentwithpostdatedchecks.puml[]
+----

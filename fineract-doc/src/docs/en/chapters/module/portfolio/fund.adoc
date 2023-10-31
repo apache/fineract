@@ -1,0 +1,13 @@
+= Fund Module
+
+WARNING: Needs more editing!
+
+== Fund Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.fund.adoc[leveloffset=+1]
+
+.Fund dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.fund.puml[]
+----

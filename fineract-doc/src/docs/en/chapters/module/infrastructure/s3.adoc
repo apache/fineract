@@ -1,0 +1,13 @@
+= S3 Module
+
+WARNING: Needs more editing!
+
+== S3 Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.s3.adoc[leveloffset=+1]
+
+.S3 dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.s3.puml[]
+----

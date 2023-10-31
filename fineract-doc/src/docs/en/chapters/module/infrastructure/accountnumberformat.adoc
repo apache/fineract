@@ -1,0 +1,13 @@
+= Accountnumberformat Module
+
+WARNING: Needs more editing!
+
+== Accountnumberformat Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.accountnumberformat.adoc[leveloffset=+1]
+
+.Accountnumberformat dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.accountnumberformat.puml[]
+----

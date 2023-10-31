@@ -1,0 +1,13 @@
+= Trialbalance Module
+
+WARNING: Needs more editing!
+
+== Trialbalance Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.trialbalance.adoc[leveloffset=+1]
+
+.Trialbalance dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.trialbalance.puml[]
+----

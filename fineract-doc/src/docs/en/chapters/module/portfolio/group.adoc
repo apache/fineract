@@ -1,0 +1,13 @@
+= Group Module
+
+WARNING: Needs more editing!
+
+== Group Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.group.adoc[leveloffset=+1]
+
+.Group dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.group.puml[]
+----

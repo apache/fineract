@@ -1,0 +1,13 @@
+= Notification Module
+
+WARNING: Needs more editing!
+
+== Notification Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.notification.adoc[leveloffset=+1]
+
+.Notification dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.notification.puml[]
+----

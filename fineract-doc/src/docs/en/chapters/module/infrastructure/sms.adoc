@@ -1,0 +1,13 @@
+= Sms Module
+
+WARNING: Needs more editing!
+
+== Sms Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.sms.adoc[leveloffset=+1]
+
+.Sms dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.sms.puml[]
+----

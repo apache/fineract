@@ -1,0 +1,13 @@
+= Batch Module
+
+WARNING: Needs more editing!
+
+== Batch Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.batch.adoc[leveloffset=+1]
+
+.Batch dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.batch.puml[]
+----

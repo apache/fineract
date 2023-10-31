@@ -1,0 +1,13 @@
+= Savings Module
+
+WARNING: Needs more editing!
+
+== Savings Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.savings.adoc[leveloffset=+1]
+
+.Savings dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.savings.puml[]
+----

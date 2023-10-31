@@ -1,0 +1,13 @@
+= Journalentry Module
+
+WARNING: Needs more editing!
+
+== Journalentry Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.journalentry.adoc[leveloffset=+1]
+
+.Journalentry dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.journalentry.puml[]
+----

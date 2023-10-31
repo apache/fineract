@@ -1,0 +1,13 @@
+= Adhocquery Module
+
+WARNING: Needs more editing!
+
+== Adhocquery Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.adhocquery.adoc[leveloffset=+1]
+
+.Adhocquery dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.adhocquery.puml[]
+----

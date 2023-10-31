@@ -1,0 +1,13 @@
+= Paymentdetail Module
+
+WARNING: Needs more editing!
+
+== Paymentdetail Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.paymentdetail.adoc[leveloffset=+1]
+
+.Paymentdetail dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.paymentdetail.puml[]
+----

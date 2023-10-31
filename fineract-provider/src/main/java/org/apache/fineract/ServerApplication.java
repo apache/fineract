@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Import;
+import org.springframework.modulith.Modulith;
 
 /**
  * Fineract main() application which launches Fineract in an embedded Tomcat HTTP (using Spring Boot).
@@ -39,6 +40,9 @@ import org.springframework.context.annotation.Import;
  *
  */
 
+@Modulith(systemName = "Fineract", useFullyQualifiedModuleNames = true, additionalPackages = { "org.apache.fineract.infrastructure",
+        "infrastructure", "org.apache.fineract.portfolio", "portfolio", "org.apache.fineract.accounting", "accounting",
+        "org.apache.fineract.organisation", "organisation", "org.apache.fineract" })
 public class ServerApplication extends SpringBootServletInitializer {
 
     @Import({ FineractWebApplicationConfiguration.class, FineractLiquibaseOnlyApplicationConfiguration.class })

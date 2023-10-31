@@ -1,0 +1,13 @@
+= Creditbureau Module
+
+WARNING: Needs more editing!
+
+== Creditbureau Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.creditbureau.adoc[leveloffset=+1]
+
+.Creditbureau dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.creditbureau.puml[]
+----

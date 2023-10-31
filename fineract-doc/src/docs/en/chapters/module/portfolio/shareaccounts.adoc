@@ -1,0 +1,13 @@
+= Shareaccounts Module
+
+WARNING: Needs more editing!
+
+== Shareaccounts Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.shareaccounts.adoc[leveloffset=+1]
+
+.Shareaccounts dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.shareaccounts.puml[]
+----

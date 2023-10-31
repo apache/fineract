@@ -1,0 +1,13 @@
+= Organisation Module
+
+WARNING: Needs more editing!
+
+== Organisation Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.adoc[leveloffset=+1]
+
+.Organisation dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.puml[]
+----

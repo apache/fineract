@@ -1,0 +1,13 @@
+= Teller Module
+
+WARNING: Needs more editing!
+
+== Teller Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.teller.adoc[leveloffset=+1]
+
+.Teller dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.teller.puml[]
+----

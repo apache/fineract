@@ -1,0 +1,13 @@
+= Event Module
+
+WARNING: Needs more editing!
+
+== Event Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.event.adoc[leveloffset=+1]
+
+.Event dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.event.puml[]
+----

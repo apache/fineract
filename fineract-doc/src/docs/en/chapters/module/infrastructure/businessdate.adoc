@@ -1,0 +1,13 @@
+= Businessdate Module
+
+WARNING: Needs more editing!
+
+== Businessdate Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.businessdate.adoc[leveloffset=+1]
+
+.Businessdate dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.businessdate.puml[]
+----

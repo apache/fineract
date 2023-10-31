@@ -1,0 +1,13 @@
+= Glaccount Module
+
+WARNING: Needs more editing!
+
+== Glaccount Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.glaccount.adoc[leveloffset=+1]
+
+.Glaccount dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.glaccount.puml[]
+----

@@ -593,6 +593,9 @@ configure(project.fineractJavaProjects) {
     }
 
     test {
+        minHeapSize = "512m"
+        maxHeapSize = "1024m"
+
         useJUnitPlatform()
 
         if (project.hasProperty('excludeTests')) {

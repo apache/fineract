@@ -1,0 +1,13 @@
+= Tax Module
+
+WARNING: Needs more editing!
+
+== Tax Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.tax.adoc[leveloffset=+1]
+
+.Tax dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.tax.puml[]
+----

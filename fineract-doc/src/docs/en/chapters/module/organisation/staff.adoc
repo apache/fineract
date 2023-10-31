@@ -1,0 +1,13 @@
+= Staff Module
+
+WARNING: Needs more editing!
+
+== Staff Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.staff.adoc[leveloffset=+1]
+
+.Staff dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.staff.puml[]
+----

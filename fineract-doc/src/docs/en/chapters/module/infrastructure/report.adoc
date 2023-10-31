@@ -1,0 +1,13 @@
+= Report Module
+
+WARNING: Needs more editing!
+
+== Report Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.report.adoc[leveloffset=+1]
+
+.Report dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.report.puml[]
+----

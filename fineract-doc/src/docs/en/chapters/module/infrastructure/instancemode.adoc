@@ -1,0 +1,13 @@
+= Instancemode Module
+
+WARNING: Needs more editing!
+
+== Instancemode Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.instancemode.adoc[leveloffset=+1]
+
+.Instancemode dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.instancemode.puml[]
+----

@@ -1,0 +1,13 @@
+= Mix Module
+
+WARNING: Needs more editing!
+
+== Mix Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.mix.adoc[leveloffset=+1]
+
+.Mix dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.mix.puml[]
+----

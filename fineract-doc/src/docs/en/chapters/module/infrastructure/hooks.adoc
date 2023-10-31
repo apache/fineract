@@ -1,0 +1,13 @@
+= Hooks Module
+
+WARNING: Needs more editing!
+
+== Hooks Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.hooks.adoc[leveloffset=+1]
+
+.Hooks dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.hooks.puml[]
+----

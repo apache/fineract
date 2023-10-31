@@ -1,0 +1,13 @@
+= Avro Module
+
+WARNING: Needs more editing!
+
+== Avro Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.avro.adoc[leveloffset=+1]
+
+.Avro dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.avro.puml[]
+----

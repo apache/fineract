@@ -1,0 +1,13 @@
+= Jobs Module
+
+WARNING: Needs more editing!
+
+== Jobs Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.jobs.adoc[leveloffset=+1]
+
+.Jobs dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.jobs.puml[]
+----

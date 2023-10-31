@@ -1,0 +1,13 @@
+= Loanaccount Module
+
+WARNING: Needs more editing!
+
+== Loanaccount Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.loanaccount.adoc[leveloffset=+1]
+
+.Loanaccount dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.loanaccount.puml[]
+----

@@ -1,0 +1,13 @@
+= Spm Module
+
+WARNING: Needs more editing!
+
+== Spm Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.spm.adoc[leveloffset=+1]
+
+.Spm dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.spm.puml[]
+----

@@ -1,0 +1,13 @@
+= Investor Module
+
+WARNING: Needs more editing!
+
+== Investor Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.investor.adoc[leveloffset=+1]
+
+.Investor dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.investor.puml[]
+----

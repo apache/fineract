@@ -1,0 +1,13 @@
+= Account Module
+
+WARNING: Needs more editing!
+
+== Account Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.account.adoc[leveloffset=+1]
+
+.Account dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.account.puml[]
+----

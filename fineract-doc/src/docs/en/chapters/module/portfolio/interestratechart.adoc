@@ -1,0 +1,13 @@
+= Interestratechart Module
+
+WARNING: Needs more editing!
+
+== Interestratechart Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.interestratechart.adoc[leveloffset=+1]
+
+.Interestratechart dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.interestratechart.puml[]
+----

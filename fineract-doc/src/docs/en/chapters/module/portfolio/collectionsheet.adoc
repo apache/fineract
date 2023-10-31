@@ -1,0 +1,13 @@
+= Collectionsheet Module
+
+WARNING: Needs more editing!
+
+== Collectionsheet Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.collectionsheet.adoc[leveloffset=+1]
+
+.Collectionsheet dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.collectionsheet.puml[]
+----

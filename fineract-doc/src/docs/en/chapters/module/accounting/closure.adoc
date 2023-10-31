@@ -1,0 +1,13 @@
+= Closure Module
+
+WARNING: Needs more editing!
+
+== Closure Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.closure.adoc[leveloffset=+1]
+
+.Closure dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.closure.puml[]
+----

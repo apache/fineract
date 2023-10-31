@@ -1,0 +1,13 @@
+= Gcm Module
+
+WARNING: Needs more editing!
+
+== Gcm Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.gcm.adoc[leveloffset=+1]
+
+.Gcm dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.gcm.puml[]
+----

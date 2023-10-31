@@ -1,0 +1,68 @@
+= Portfolio Module Group
+
+WARNING: Please pick up and complete one of the section files and documet the features.
+
+// include::account.adoc[leveloffset=+1]
+
+// include::accountdetails.adoc[leveloffset=+1]
+
+// include::accounts.adoc[leveloffset=+1]
+
+// include::address.adoc[leveloffset=+1]
+
+// include::calendar.adoc[leveloffset=+1]
+
+// include::charge.adoc[leveloffset=+1]
+
+// include::client.adoc[leveloffset=+1]
+
+// include::collateral.adoc[leveloffset=+1]
+
+// include::collateralmanagement.adoc[leveloffset=+1]
+
+// include::collectionsheet.adoc[leveloffset=+1]
+
+// include::common.adoc[leveloffset=+1]
+
+// include::delinquency.adoc[leveloffset=+1]
+
+// include::floatingrates.adoc[leveloffset=+1]
+
+// include::fund.adoc[leveloffset=+1]
+
+// include::group.adoc[leveloffset=+1]
+
+// include::interestratechart.adoc[leveloffset=+1]
+
+// include::loanaccount.adoc[leveloffset=+1]
+
+// include::loanproduct.adoc[leveloffset=+1]
+
+// include::meeting.adoc[leveloffset=+1]
+
+// include::note.adoc[leveloffset=+1]
+
+// include::paymentdetail.adoc[leveloffset=+1]
+
+// include::paymenttype.adoc[leveloffset=+1]
+
+// include::products.adoc[leveloffset=+1]
+
+// include::rate.adoc[leveloffset=+1]
+
+// include::repaymentwithpostdatedchecks.adoc[leveloffset=+1]
+
+// include::savings.adoc[leveloffset=+1]
+
+// include::search.adoc[leveloffset=+1]
+
+// include::self.adoc[leveloffset=+1]
+
+// include::shareaccounts.adoc[leveloffset=+1]
+
+// include::shareproducts.adoc[leveloffset=+1]
+
+// include::tax.adoc[leveloffset=+1]
+
+// include::transfer.adoc[leveloffset=+1]
+

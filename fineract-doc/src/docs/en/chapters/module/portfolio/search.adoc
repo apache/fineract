@@ -1,0 +1,13 @@
+= Search Module
+
+WARNING: Needs more editing!
+
+== Search Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.search.adoc[leveloffset=+1]
+
+.Search dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.search.puml[]
+----

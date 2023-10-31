@@ -1,0 +1,13 @@
+= Configuration Module
+
+WARNING: Needs more editing!
+
+== Configuration Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.configuration.adoc[leveloffset=+1]
+
+.Configuration dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.configuration.puml[]
+----

@@ -1,0 +1,13 @@
+= Floatingrates Module
+
+WARNING: Needs more editing!
+
+== Floatingrates Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.floatingrates.adoc[leveloffset=+1]
+
+.Floatingrates dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.floatingrates.puml[]
+----

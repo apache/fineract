@@ -1,0 +1,13 @@
+= Infrastructure Module
+
+WARNING: Needs more editing!
+
+== Infrastructure Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.adoc[leveloffset=+1]
+
+.Infrastructure dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.puml[]
+----

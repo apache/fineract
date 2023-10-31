@@ -1,0 +1,13 @@
+= Portfolio Module
+
+WARNING: Needs more editing!
+
+== Portfolio Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.adoc[leveloffset=+1]
+
+.Portfolio dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.puml[]
+----

@@ -1,0 +1,13 @@
+= Security Module
+
+WARNING: Needs more editing!
+
+== Security Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.security.adoc[leveloffset=+1]
+
+.Security dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.security.puml[]
+----

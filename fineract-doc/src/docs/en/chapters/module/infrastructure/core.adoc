@@ -1,0 +1,13 @@
+= Core Module
+
+WARNING: Needs more editing!
+
+== Core Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.core.adoc[leveloffset=+1]
+
+.Core dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.core.puml[]
+----

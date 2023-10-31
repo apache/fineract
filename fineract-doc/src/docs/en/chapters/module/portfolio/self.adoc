@@ -1,0 +1,13 @@
+= Self Module
+
+WARNING: Needs more editing!
+
+== Self Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.self.adoc[leveloffset=+1]
+
+.Self dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.self.puml[]
+----

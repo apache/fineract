@@ -1,0 +1,13 @@
+= Interoperation Module
+
+WARNING: Needs more editing!
+
+== Interoperation Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.interoperation.adoc[leveloffset=+1]
+
+.Interoperation dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.interoperation.puml[]
+----

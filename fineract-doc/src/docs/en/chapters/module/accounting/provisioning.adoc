@@ -1,0 +1,13 @@
+= Provisioning Module
+
+WARNING: Needs more editing!
+
+== Provisioning Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.provisioning.adoc[leveloffset=+1]
+
+.Provisioning dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.provisioning.puml[]
+----

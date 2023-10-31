@@ -1,0 +1,13 @@
+= Accrual Module
+
+WARNING: Needs more editing!
+
+== Accrual Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.accrual.adoc[leveloffset=+1]
+
+.Accrual dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.accrual.puml[]
+----

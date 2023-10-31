@@ -1,0 +1,13 @@
+= Accounting Module
+
+WARNING: Needs more editing!
+
+== Accounting Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.adoc[leveloffset=+1]
+
+.Accounting dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.puml[]
+----

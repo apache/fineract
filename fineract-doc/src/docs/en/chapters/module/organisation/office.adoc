@@ -1,0 +1,13 @@
+= Office Module
+
+WARNING: Needs more editing!
+
+== Office Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.office.adoc[leveloffset=+1]
+
+.Office dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.office.puml[]
+----

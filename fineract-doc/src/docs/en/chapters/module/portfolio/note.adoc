@@ -1,0 +1,13 @@
+= Note Module
+
+WARNING: Needs more editing!
+
+== Note Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.note.adoc[leveloffset=+1]
+
+.Note dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.note.puml[]
+----

@@ -1,0 +1,13 @@
+= Holiday Module
+
+WARNING: Needs more editing!
+
+== Holiday Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.holiday.adoc[leveloffset=+1]
+
+.Holiday dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.organisation.holiday.puml[]
+----

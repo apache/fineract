@@ -1,0 +1,13 @@
+= Codes Module
+
+WARNING: Needs more editing!
+
+== Codes Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.codes.adoc[leveloffset=+1]
+
+.Codes dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.codes.puml[]
+----

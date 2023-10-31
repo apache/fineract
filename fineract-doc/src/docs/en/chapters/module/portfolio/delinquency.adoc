@@ -1,0 +1,13 @@
+= Delinquency Module
+
+WARNING: Needs more editing!
+
+== Delinquency Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.delinquency.adoc[leveloffset=+1]
+
+.Delinquency dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.delinquency.puml[]
+----

@@ -1,0 +1,13 @@
+= Address Module
+
+WARNING: Needs more editing!
+
+== Address Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.address.adoc[leveloffset=+1]
+
+.Address dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.address.puml[]
+----

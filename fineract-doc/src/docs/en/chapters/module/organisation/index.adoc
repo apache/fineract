@@ -1,0 +1,18 @@
+= Organisation Module Group
+
+WARNING: Please pick up and complete one of the section files and documet the features.
+
+// include::holiday.adoc[leveloffset=+1]
+
+// include::monetary.adoc[leveloffset=+1]
+
+// include::office.adoc[leveloffset=+1]
+
+// include::provisioning.adoc[leveloffset=+1]
+
+// include::staff.adoc[leveloffset=+1]
+
+// include::teller.adoc[leveloffset=+1]
+
+// include::workingdays.adoc[leveloffset=+1]
+

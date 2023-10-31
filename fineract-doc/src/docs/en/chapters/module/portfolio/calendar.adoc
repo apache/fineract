@@ -1,0 +1,13 @@
+= Calendar Module
+
+WARNING: Needs more editing!
+
+== Calendar Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.calendar.adoc[leveloffset=+1]
+
+.Calendar dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.calendar.puml[]
+----

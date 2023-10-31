@@ -1,0 +1,13 @@
+= Campaigns Module
+
+WARNING: Needs more editing!
+
+== Campaigns Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.campaigns.adoc[leveloffset=+1]
+
+.Campaigns dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.campaigns.puml[]
+----

@@ -1,0 +1,13 @@
+= Documentmanagement Module
+
+WARNING: Needs more editing!
+
+== Documentmanagement Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.documentmanagement.adoc[leveloffset=+1]
+
+.Documentmanagement dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.documentmanagement.puml[]
+----

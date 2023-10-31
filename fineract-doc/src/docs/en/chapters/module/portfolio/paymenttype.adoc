@@ -1,0 +1,13 @@
+= Paymenttype Module
+
+WARNING: Needs more editing!
+
+== Paymenttype Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.paymenttype.adoc[leveloffset=+1]
+
+.Paymenttype dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.paymenttype.puml[]
+----

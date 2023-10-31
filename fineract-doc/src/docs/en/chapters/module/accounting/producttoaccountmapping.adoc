@@ -1,0 +1,13 @@
+= Producttoaccountmapping Module
+
+WARNING: Needs more editing!
+
+== Producttoaccountmapping Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.producttoaccountmapping.adoc[leveloffset=+1]
+
+.Producttoaccountmapping dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.accounting.producttoaccountmapping.puml[]
+----

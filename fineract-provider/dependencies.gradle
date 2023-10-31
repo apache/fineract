@@ -192,6 +192,15 @@ dependencies {
 
     implementation 'io.github.classgraph:classgraph'
 
+    implementation 'org.springframework.modulith:spring-modulith-core'
+    implementation 'org.jmolecules.integrations:jmolecules-starter-ddd'
+    testImplementation ('org.springframework.modulith:spring-modulith-test') {
+        exclude module: 'spring-boot-test-autoconfigure'
+    }
+    testImplementation ('org.springframework.modulith:spring-modulith-starter-test') {
+        exclude module: 'spring-boot-starter-test'
+    }
+
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //

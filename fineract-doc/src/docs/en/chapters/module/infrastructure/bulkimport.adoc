@@ -1,0 +1,13 @@
+= Bulkimport Module
+
+WARNING: Needs more editing!
+
+== Bulkimport Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.bulkimport.adoc[leveloffset=+1]
+
+.Bulkimport dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.bulkimport.puml[]
+----

@@ -1,0 +1,13 @@
+= Cache Module
+
+WARNING: Needs more editing!
+
+== Cache Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.cache.adoc[leveloffset=+1]
+
+.Cache dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.infrastructure.cache.puml[]
+----

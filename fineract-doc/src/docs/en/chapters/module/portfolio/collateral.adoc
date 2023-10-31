@@ -1,0 +1,13 @@
+= Collateral Module
+
+WARNING: Needs more editing!
+
+== Collateral Dependencies
+
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.collateral.adoc[leveloffset=+1]
+
+.Collateral dependency diagram
+[plantuml, format=svg]
+----
+include::{rootdir}/fineract-provider/build/spring-modulith-docs/module-org.apache.fineract.portfolio.collateral.puml[]
+----
