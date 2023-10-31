@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -49,6 +50,7 @@ import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
@@ -1774,6 +1776,22 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             validateRepaymentPeriod(loanDetails, 5, 250.0, 0.0, 250.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
+            // Add Charge Penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "100", true));
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "22 February 2023", "100"));
+            assertNotNull(penalty1LoanChargeId);
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 925.0, 175.0, 825.0, 175.0, null);
+            validateRepaymentPeriod(loanDetails, 1, 125.0, 125.0, 0.0, 0.0, 125.0);
+            validateRepaymentPeriod(loanDetails, 2, 125.0, 0.0, 125.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, 250.0, 50.0, 200.0, 50.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
@@ -1856,6 +1874,28 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
         assertEquals(principalDue, period.getPrincipalDue());
         assertEquals(principalPaid, period.getPrincipalPaid());
         assertEquals(principalOutstanding, period.getPrincipalOutstanding());
+        assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
+        assertEquals(paidLate, period.getTotalPaidLateForPeriod());
+    }
+
+    private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, double principalDue,
+            double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
+            double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
+            double paidInAdvance, double paidLate) {
+        GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
+                .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
+        assertEquals(principalDue, period.getPrincipalDue());
+        assertEquals(principalPaid, period.getPrincipalPaid());
+        assertEquals(principalOutstanding, period.getPrincipalOutstanding());
+        assertEquals(feeDue, period.getFeeChargesDue());
+        assertEquals(feePaid, period.getFeeChargesPaid());
+        assertEquals(feeOutstanding, period.getFeeChargesOutstanding());
+        assertEquals(penaltyDue, period.getPenaltyChargesDue());
+        assertEquals(penaltyPaid, period.getPenaltyChargesPaid());
+        assertEquals(penaltyOutstanding, period.getPenaltyChargesOutstanding());
+        assertEquals(interestDue, period.getInterestDue());
+        assertEquals(interestPaid, period.getInterestPaid());
+        assertEquals(interestOutstanding, period.getInterestOutstanding());
         assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
         assertEquals(paidLate, period.getTotalPaidLateForPeriod());
     }
