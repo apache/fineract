@@ -99,7 +99,7 @@ description = '''\
 Run as:
 gradle clean bootRun'''
 
-version = "0.0.0-SNAPSHOT"
+version = "0.0.1-SNAPSHOT"
 gitVersioning.apply {
     refs {
         considerTagsOnBranches = true
