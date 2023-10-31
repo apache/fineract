@@ -22,7 +22,7 @@ RUN apt-get update -qq && apt-get install -y wget
 COPY . fineract
 WORKDIR /fineract
 
-RUN ./gradlew --no-daemon -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
+RUN ./gradlew -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
 WORKDIR /fineract/target
 RUN jar -xf /fineract/fineract-provider/build/libs/fineract-provider.jar
