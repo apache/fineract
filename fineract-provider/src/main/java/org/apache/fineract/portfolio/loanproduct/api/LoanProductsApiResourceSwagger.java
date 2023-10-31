@@ -259,6 +259,9 @@ final class LoanProductsApiResourceSwagger {
         public AllowAttributeOverrides allowAttributeOverrides;
         public List<RateData> rates;
 
+        @Schema(example = "CUMULATIVE")
+        public String loanScheduleType;
+
         static final class AllowAttributeOverrides {
 
             private AllowAttributeOverrides() {}
@@ -279,6 +282,8 @@ final class LoanProductsApiResourceSwagger {
             public boolean graceOnPrincipalAndInterestPayment;
             @Schema(example = "true")
             public boolean graceOnArrearsAgeing;
+            @Schema(example = "CUMULATIVE")
+            public String loanScheduleType;
         }
 
         static final class ChargeData {
