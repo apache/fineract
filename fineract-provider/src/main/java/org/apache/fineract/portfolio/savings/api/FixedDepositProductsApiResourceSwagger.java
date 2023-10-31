@@ -331,7 +331,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 @Schema(example = "savings ref")
                 public String name;
                 @Schema(example = "20")
-                public Long glCode;
+                public String glCode;
             }
 
             static final class GetFixedDepositProductsProductIdIncomeFromFeeAccount {
@@ -343,7 +343,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 @Schema(example = "income from savings fee")
                 public String name;
                 @Schema(example = "24")
-                public Long glCode;
+                public String glCode;
             }
 
             static final class GetFixedDepositProductsProductIdIncomeFromPenaltyAccount {
@@ -355,7 +355,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 @Schema(example = "income from sav penalties")
                 public String name;
                 @Schema(example = "25")
-                public Long glCode;
+                public String glCode;
             }
 
             static final class GetFixedDepositProductsProductIdInterestOnSavingsAccount {
@@ -367,7 +367,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 @Schema(example = "interest on savings")
                 public String name;
                 @Schema(example = "23")
-                public Long glCode;
+                public String glCode;
             }
 
             static final class GetFixedDepositProductsProductIdSavingsControlAccount {
@@ -379,7 +379,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 @Schema(example = "savings ref tool kit")
                 public String name;
                 @Schema(example = "21")
-                public Long glCode;
+                public String glCode;
             }
 
             static final class GetFixedDepositProductsProductIdTransfersInSuspenseAccount {
@@ -391,7 +391,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 @Schema(example = "saving transfers")
                 public String name;
                 @Schema(example = "22")
-                public Long glCode;
+                public String glCode;
             }
 
             public GetFixedDepositProductsProductIdSavingsReferenceAccount savingsReferenceAccount;
@@ -429,7 +429,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 @Schema(example = "income from savings fee")
                 public String name;
                 @Schema(example = "24")
-                public Long glCode;
+                public String glCode;
             }
 
             public GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge charge;

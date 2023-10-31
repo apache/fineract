@@ -207,7 +207,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     @Schema(example = "Cash in Hand")
                     public String name;
                     @Schema(example = "20301")
-                    public Integer glCode;
+                    public String glCode;
 
                 }
 
@@ -220,7 +220,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     @Schema(example = "Other Operating Income")
                     public String name;
                     @Schema(example = "30105")
-                    public Integer glCode;
+                    public String glCode;
 
                 }
 
@@ -233,7 +233,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     @Schema(example = "Share Equity")
                     public String name;
                     @Schema(example = "00098")
-                    public Integer glCode;
+                    public String glCode;
 
                 }
 
@@ -246,7 +246,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     @Schema(example = "Overpayment Liability")
                     public String name;
                     @Schema(example = "10200")
-                    public Integer glCode;
+                    public String glCode;
 
                 }
 
@@ -336,7 +336,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     @Schema(example = "1")
                     public Integer parentId;
                     @Schema(example = "10104")
-                    public Integer glCode;
+                    public String glCode;
                     @Schema(example = "false")
                     public Boolean disabled;
                     @Schema(example = "true")
@@ -399,7 +399,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     @Schema(example = "8")
                     public Integer parentId;
                     @Schema(example = "20101")
-                    public Integer glCode;
+                    public String glCode;
                     @Schema(example = "false")
                     public Boolean disabled;
                     @Schema(example = "true")
@@ -460,7 +460,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     @Schema(example = "Loan Recovery (Temp)")
                     public String name;
                     @Schema(example = "220002-Temp")
-                    public Integer glCode;
+                    public String glCode;
                     @Schema(example = "false")
                     public Boolean disabled;
                     @Schema(example = "true")
@@ -524,7 +524,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     @Schema(example = "25")
                     public Integer parentId;
                     @Schema(example = "00098")
-                    public Integer glCode;
+                    public String glCode;
                     @Schema(example = "false")
                     public Boolean disabled;
                     @Schema(example = "true")
