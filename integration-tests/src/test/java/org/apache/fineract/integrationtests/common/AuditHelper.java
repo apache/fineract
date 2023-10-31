@@ -51,8 +51,8 @@ public class AuditHelper {
     }
 
     public List getAuditDetails(final Integer resourceId, final String actionName, final String entityName) {
-        final String AUDIT_URL = AUDIT_BASE_URL + "&entityName=" + entityName + "&resourceId=" + resourceId + "&actionName=" + actionName
-                + "&orderBy=id&sortBy=DSC";
+        final String AUDIT_URL = AUDIT_BASE_URL + "&entityName=" + entityName + (resourceId == null ? "" : "&resourceId=" + resourceId)
+                + "&actionName=" + actionName + "&orderBy=id&sortBy=DSC";
         List<HashMap<String, Object>> responseAudits = Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
         return responseAudits;
     }

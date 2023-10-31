@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper.PAYMENT_TYPE_ID;
 import static org.apache.http.HttpStatus.SC_FORBIDDEN;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,6 +50,7 @@ import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdA
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
@@ -62,6 +64,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.common.savings.SavingsTransactionData;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
@@ -105,6 +108,21 @@ public class BatchApiTest {
     private DatatableHelper datatableHelper;
 
     /**
+     * The audit helper
+     */
+    private AuditHelper auditHelper;
+
+    /**
+     * The savings product helper
+     */
+    private SavingsProductHelper savingsProductHelper;
+
+    /**
+     * The savings account helper
+     */
+    private SavingsAccountHelper savingsAccountHelper;
+
+    /**
      * Loan app datatable
      */
     private static final String LOAN_APP_TABLE_NAME = "m_loan";
@@ -120,6 +138,9 @@ public class BatchApiTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
+        this.auditHelper = new AuditHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsProductHelper = new SavingsProductHelper();
         GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
     }
 
@@ -2626,6 +2647,39 @@ public class BatchApiTest {
     }
 
     /**
+     * Here we verify an audit is generated for failed requests of a BatchAPI request without enclosing transaction.
+     */
+    @Test
+    public void batchRequestsWithoutEnclosingTransactionAuditShouldBeCreated() {
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        final Integer savingsProductId = createSavingsProductDailyPosting();
+        assertNotNull(savingsProductId);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId, "INDIVIDUAL");
+        this.savingsAccountHelper.approveSavings(savingsId);
+        final HashMap savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        final SavingsTransactionData transactionData = SavingsTransactionData.builder().transactionDate("01 January 1999")
+                .transactionAmount("100").paymentTypeId(PAYMENT_TYPE_ID).build();
+
+        final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, Long.valueOf(savingsId), "chargeStatus=all", null);
+        final BatchRequest depositRequest = BatchHelper.depositSavingAccount(2L, Long.valueOf(savingsId), transactionData);
+
+        final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositRequest);
+        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests1));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(0).getStatusCode(), "Verify Status Code 200 for get a saving account");
+        Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, responses1.get(1).getStatusCode(), "Verify Status Code 400 for deposit");
+
+        List auditsReceived = this.auditHelper.getAuditDetails(null, "DEPOSIT", "SAVINGSACCOUNT");
+        Assertions.assertFalse(auditsReceived.isEmpty());
+    }
+
+    /**
      * Delete datatable
      *
      * @param datatableName
@@ -2689,5 +2743,11 @@ public class BatchApiTest {
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Repay Loan");
 
         return responses.get(0).getBody();
+    }
+
+    private Integer createSavingsProductDailyPosting() {
+        final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 }

@@ -116,7 +116,7 @@ public class BatchApiServiceImpl implements BatchApiService {
      */
     @Override
     public List<BatchResponse> handleBatchRequestsWithEnclosingTransaction(final List<BatchRequest> requestList, final UriInfo uriInfo) {
-        return callInTransaction(Function.identity()::apply, () -> handleBatchRequests(true, requestList, uriInfo));
+        return callInTransaction(Function.identity()::apply, () -> handleBatchRequests(true, requestList, uriInfo), true);
     }
 
     /**
@@ -126,16 +126,20 @@ public class BatchApiServiceImpl implements BatchApiService {
      *            the enclosing supplier of the command
      * @param transactionConfigurator
      *            consumer to configure the transaction behavior and isolation
+     * @param isEnclosingTransaction
+     *            a boolean parameter that indicates whether the current operation is part of an enclosing transaction
      * @return
      */
     private List<BatchResponse> callInTransaction(Consumer<TransactionTemplate> transactionConfigurator,
-            Supplier<List<BatchResponse>> request) {
+            Supplier<List<BatchResponse>> request, final boolean isEnclosingTransaction) {
         List<BatchResponse> responseList = new ArrayList<>();
         try {
             TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
             transactionConfigurator.accept(transactionTemplate);
             return transactionTemplate.execute(status -> {
-                BatchRequestContextHolder.setEnclosingTransaction(Optional.of(status));
+                if (isEnclosingTransaction) {
+                    BatchRequestContextHolder.setEnclosingTransaction(Optional.of(status));
+                }
                 try {
                     responseList.addAll(request.get());
                     return responseList;
@@ -203,7 +207,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         } else {
             List<BatchResponse> transactionResponse = callInTransaction(
                     transactionTemplate -> transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
-                    () -> List.of(executeRequest(request, uriInfo)));
+                    () -> List.of(executeRequest(request, uriInfo)), false);
             response = transactionResponse.get(0);
         }
         responseList.add(response);

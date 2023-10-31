@@ -139,7 +139,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSource.setCommandJson(toApiJsonSerializer.serializeResult(result.getChanges()));
         }
 
-        commandSource = commandSourceService.saveResultSameTransaction(commandSource);
+        commandSource = sameTransaction ? commandSourceService.saveResultSameTransaction(commandSource)
+                : commandSourceService.saveResultNewTransaction(commandSource);
 
         if (isRollback) {
             /*
