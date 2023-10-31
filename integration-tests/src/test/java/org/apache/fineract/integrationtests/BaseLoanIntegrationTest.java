@@ -121,7 +121,7 @@ public abstract class BaseLoanIntegrationTest {
                 .maxInterestRatePerPeriod((double) 0)//
                 .interestRateFrequencyType(2)//
                 .repaymentEvery(30)//
-                .repaymentFrequencyType(0)//
+                .repaymentFrequencyType(0L)//
                 .amortizationType(1)//
                 .interestType(0)//
                 .isEqualAmortization(false)//

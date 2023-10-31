@@ -38,15 +38,15 @@ final class ClientIdentifiersApiResourceSwagger {
             private GetClientsDocumentType() {}
 
             @Schema(example = "3")
-            public Integer id;
+            public Long id;
             @Schema(example = "Drivers License")
             public String name;
         }
 
         @Schema(example = "2")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         public GetClientsDocumentType documentType;
         @Schema(example = "12345")
         public String documentKey;
@@ -64,7 +64,7 @@ final class ClientIdentifiersApiResourceSwagger {
             private GetClientsAllowedDocumentTypes() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Passport")
             public String name;
             @Schema(example = "0")
@@ -80,7 +80,7 @@ final class ClientIdentifiersApiResourceSwagger {
         private PostClientsClientIdIdentifiersRequest() {}
 
         @Schema(example = "1")
-        public Integer documentTypeId;
+        public Long documentTypeId;
         @Schema(example = "KA-54677")
         public String documentKey;
         @Schema(example = "Document has been verified")
@@ -93,7 +93,7 @@ final class ClientIdentifiersApiResourceSwagger {
         private PutClientsClientIdIdentifiersIdentifierIdRequest() {}
 
         @Schema(example = "4")
-        public Integer documentTypeId;
+        public Long documentTypeId;
         @Schema(example = "KA-94667")
         public String documentKey;
         @Schema(example = "Document has been updated")
@@ -106,11 +106,11 @@ final class ClientIdentifiersApiResourceSwagger {
         private PutClientsClientIdIdentifiersIdentifierIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer resourceId;
+        public Long resourceId;
         public PutClientsClientIdIdentifiersIdentifierIdRequest changes;
     }
 
@@ -120,11 +120,11 @@ final class ClientIdentifiersApiResourceSwagger {
         private PostClientsClientIdIdentifiersResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
@@ -133,10 +133,10 @@ final class ClientIdentifiersApiResourceSwagger {
         private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

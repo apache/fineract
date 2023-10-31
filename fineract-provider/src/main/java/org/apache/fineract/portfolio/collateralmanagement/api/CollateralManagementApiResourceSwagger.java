@@ -115,7 +115,7 @@ final class CollateralManagementApiResourceSwagger {
         private PostCollateralManagementProductResponse() {}
 
         @Schema(example = "14")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutCollateralProductRequest")
@@ -144,7 +144,7 @@ final class CollateralManagementApiResourceSwagger {
         private PutCollateralProductResponse() {}
 
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
         public CollateralManagementApiResourceSwagger.PutCollateralProductRequest changes;
     }
 
@@ -154,6 +154,6 @@ final class CollateralManagementApiResourceSwagger {
         private DeleteCollateralProductResponse() {}
 
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

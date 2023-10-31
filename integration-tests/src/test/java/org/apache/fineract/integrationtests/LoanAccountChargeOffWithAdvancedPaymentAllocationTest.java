@@ -671,7 +671,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest {
                 .maxInterestRatePerPeriod((double) 0)//
                 .interestRateFrequencyType(2)//
                 .repaymentEvery(30)//
-                .repaymentFrequencyType(0)//
+                .repaymentFrequencyType(0L)//
                 .principalVariationsForBorrowerCycle(principalVariationsForBorrowerCycle)//
                 .numberOfRepaymentVariationsForBorrowerCycle(numberOfRepaymentVariationsForBorrowerCycle)//
                 .interestRateVariationsForBorrowerCycle(interestRateVariationsForBorrowerCycle)//

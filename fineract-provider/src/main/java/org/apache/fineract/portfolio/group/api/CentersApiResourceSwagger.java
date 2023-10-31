@@ -39,7 +39,7 @@ final class CentersApiResourceSwagger {
             private GetCentersOfficeOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Head Office")
             public String name;
             @Schema(example = "Head Office")
@@ -51,7 +51,7 @@ final class CentersApiResourceSwagger {
             private GetCentersStaffOptions() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "D, Mary")
             public String displayName;
         }
@@ -61,7 +61,7 @@ final class CentersApiResourceSwagger {
         @Schema(example = "[2013, 4, 18]")
         public LocalDate activationDate;
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         public Set<GetCentersOfficeOptions> officeOptions;
         public Set<GetCentersStaffOptions> staffOptions;
     }
@@ -80,7 +80,7 @@ final class CentersApiResourceSwagger {
                 private GetCentersStatus() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "groupingStatusType.pending")
                 public String code;
                 @Schema(example = "Pending")
@@ -88,14 +88,14 @@ final class CentersApiResourceSwagger {
             }
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             public GetCentersStatus status;
             @Schema(example = "false")
             public Boolean active;
             @Schema(example = "Center 1")
             public String name;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
             @Schema(example = ".2.")
@@ -113,14 +113,14 @@ final class CentersApiResourceSwagger {
         private GetCentersCenterIdResponse() {}
 
         @Schema(example = "8")
-        public Integer id;
+        public Long id;
         public GetCentersResponse.GetCentersPageItems.GetCentersStatus status;
         @Schema(example = "false")
         public Boolean active;
         @Schema(example = "First Center (No groups)")
         public String name;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "Head Office")
         public String officeName;
         @Schema(example = ".8.")
@@ -135,7 +135,7 @@ final class CentersApiResourceSwagger {
         @Schema(example = "First Center (No groups)")
         public String name;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "false")
         public Boolean active;
     }
@@ -146,11 +146,11 @@ final class CentersApiResourceSwagger {
         private PostCentersResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "8")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "8")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutCentersCenterIdRequest")
@@ -176,11 +176,11 @@ final class CentersApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "8")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "8")
-        public Integer resourceId;
+        public Long resourceId;
         public PutCentersChanges changes;
     }
 
@@ -195,7 +195,7 @@ final class CentersApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public DeleteCentersChanges changes;
     }
 
@@ -205,7 +205,7 @@ final class CentersApiResourceSwagger {
         private PostCentersCenterIdRequest() {}
 
         @Schema(example = "32")
-        public Integer closureReasonId;
+        public Long closureReasonId;
         @Schema(example = "05 May 2014")
         public String closureDate;
         @Schema(example = "en")
@@ -220,7 +220,7 @@ final class CentersApiResourceSwagger {
         private PostCentersCenterIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetCentersCenterIdAccountsResponse")
@@ -237,7 +237,7 @@ final class CentersApiResourceSwagger {
                 private GetCentersCenterIdStatus() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
                 @Schema(example = "Submitted and pending approval")
@@ -287,7 +287,7 @@ final class CentersApiResourceSwagger {
                 private GetCentersAccountType() {}
 
                 @Schema(example = "2")
-                public Integer id;
+                public Long id;
                 @Schema(example = "accountType.group")
                 public String code;
                 @Schema(example = "Group")
@@ -313,7 +313,7 @@ final class CentersApiResourceSwagger {
                 private GetCentersDepositType() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "depositAccountType.savingsDeposit")
                 public String code;
                 @Schema(example = "Savings")
@@ -321,11 +321,11 @@ final class CentersApiResourceSwagger {
             }
 
             @Schema(example = "16")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000016")
             public Long accountNo;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "Voluntary savings")
             public String productName;
             public GetCentersCenterIdStatus status;

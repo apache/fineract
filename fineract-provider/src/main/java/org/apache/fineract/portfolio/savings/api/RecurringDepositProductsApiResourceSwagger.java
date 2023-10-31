@@ -280,7 +280,7 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         @Schema(example = "3")
-        public Integer id;
+        public Long id;
         @Schema(example = "RD01")
         public String name;
         @Schema(example = "RD01")
@@ -352,11 +352,11 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdSavingsReferenceAccount() {}
 
                 @Schema(example = "12")
-                public Integer id;
+                public Long id;
                 @Schema(example = "savings ref")
                 public String name;
                 @Schema(example = "20")
-                public Integer glCode;
+                public String glCode;
             }
 
             static final class GetRecurringDepositProductsProductIdIncomeFromFeeAccount {
@@ -364,11 +364,11 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdIncomeFromFeeAccount() {}
 
                 @Schema(example = "16")
-                public Integer id;
+                public Long id;
                 @Schema(example = "income from savings fee")
                 public String name;
                 @Schema(example = "24")
-                public Integer glCode;
+                public String glCode;
             }
 
             static final class GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount {
@@ -376,11 +376,11 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount() {}
 
                 @Schema(example = "17")
-                public Integer id;
+                public Long id;
                 @Schema(example = "income from sav penalties")
                 public String name;
                 @Schema(example = "25")
-                public Integer glCode;
+                public String glCode;
             }
 
             static final class GetRecurringDepositProductsProductIdInterestOnSavingsAccount {
@@ -388,11 +388,11 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdInterestOnSavingsAccount() {}
 
                 @Schema(example = "15")
-                public Integer id;
+                public Long id;
                 @Schema(example = "interest on savings")
                 public String name;
                 @Schema(example = "23")
-                public Integer glCode;
+                public String glCode;
             }
 
             static final class GetRecurringDepositProductsProductIdSavingsControlAccount {
@@ -400,11 +400,11 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdSavingsControlAccount() {}
 
                 @Schema(example = "13")
-                public Integer id;
+                public Long id;
                 @Schema(example = "savings ref tool kit")
                 public String name;
                 @Schema(example = "21")
-                public Integer glCode;
+                public String glCode;
             }
 
             static final class GetRecurringDepositProductsProductIdTransfersInSuspenseAccount {
@@ -412,11 +412,11 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdTransfersInSuspenseAccount() {}
 
                 @Schema(example = "14")
-                public Integer id;
+                public Long id;
                 @Schema(example = "saving transfers")
                 public String name;
                 @Schema(example = "22")
-                public Integer glCode;
+                public String glCode;
             }
 
             public GetRecurringDepositProductsProductIdSavingsReferenceAccount savingsReferenceAccount;
@@ -436,7 +436,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {}
 
                 @Schema(example = "11")
-                public Integer id;
+                public Long id;
                 @Schema(example = "sav charge")
                 public String name;
                 @Schema(example = "false")
@@ -450,11 +450,11 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {}
 
                 @Schema(example = "16")
-                public Integer id;
+                public Long id;
                 @Schema(example = "income from savings fee")
                 public String name;
                 @Schema(example = "24")
-                public Integer glCode;
+                public String glCode;
             }
 
             public GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge charge;
@@ -470,7 +470,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 private GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {}
 
                 @Schema(example = "12")
-                public Integer id;
+                public Long id;
                 @Schema(example = "sav 2")
                 public String name;
                 @Schema(example = "false")
@@ -488,7 +488,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             private GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "preClosurePenalInterestOnType.wholeTerm")
             public String code;
             @Schema(example = "Whole term")
@@ -500,7 +500,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             private GetRecurringDepositProductsProductIdMinDepositTermType() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "deposit.term.savingsPeriodFrequencyType.weeks")
             public String code;
             @Schema(example = "Weeks")
@@ -512,7 +512,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             private GetRecurringDepositProductsProductIdMaxDepositTermType() {}
 
             @Schema(example = "3")
-            public Integer id;
+            public Long id;
             @Schema(example = "deposit.term.savingsPeriodFrequencyType.years")
             public String code;
             @Schema(example = "Years")
@@ -532,7 +532,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                     private GetRecurringDepositProductsProductIdPeriodType() {}
 
                     @Schema(example = "1")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "interestChartPeriodType.weeks")
                     public String code;
                     @Schema(example = "Weeks")
@@ -540,7 +540,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 }
 
                 @Schema(example = "18")
-                public Integer id;
+                public Long id;
                 @Schema(example = "from 0 to 90 days")
                 public String description;
                 public GetRecurringDepositProductsProductIdPeriodType periodType;
@@ -554,11 +554,11 @@ final class RecurringDepositProductsApiResourceSwagger {
             }
 
             @Schema(example = "8")
-            public Integer id;
+            public Long id;
             @Schema(example = "[2014, 1, 1]")
             public LocalDate fromDate;
             @Schema(example = "8")
-            public Integer savingsProductId;
+            public Long savingsProductId;
             @Schema(example = "Recurring deposit product")
             public String savingsProductName;
             public Set<GetRecurringDepositProductsProductIdChartSlabs> chartSlabs;
@@ -566,7 +566,7 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "Recurring deposit product")
         public String name;
         @Schema(example = "RD01")

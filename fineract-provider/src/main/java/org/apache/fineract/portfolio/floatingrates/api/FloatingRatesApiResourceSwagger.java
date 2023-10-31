@@ -62,7 +62,7 @@ final class FloatingRatesApiResourceSwagger {
         private PostFloatingRatesResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetFloatingRatesResponse")
@@ -71,7 +71,7 @@ final class FloatingRatesApiResourceSwagger {
         private GetFloatingRatesResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "Floating Rate 1")
         public String name;
         @Schema(example = "true")
@@ -98,7 +98,7 @@ final class FloatingRatesApiResourceSwagger {
             private GetFloatingRatesRatePeriods() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Dec 15, 2015")
             public String fromDate;
             @Schema(example = "11")
@@ -118,7 +118,7 @@ final class FloatingRatesApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "Floating Rate 1")
         public String name;
         @Schema(example = "true")
@@ -163,7 +163,7 @@ final class FloatingRatesApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutFloatingRatesChanges changes;
     }
 }

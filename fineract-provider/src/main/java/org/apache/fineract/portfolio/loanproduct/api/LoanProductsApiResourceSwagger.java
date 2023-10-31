@@ -102,7 +102,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean useBorrowerCycle;
         @Schema(example = "2")
-        public Integer repaymentFrequencyType;
+        public Long repaymentFrequencyType;
         @Schema(example = "2")
         public Integer interestRateFrequencyType;
         @Schema(example = "1")
@@ -1351,9 +1351,9 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "50")
         public Integer overAppliedNumber;
         @Schema(example = "1")
-        public Integer daysInMonthType;
+        public Long daysInMonthType;
         @Schema(example = "1")
-        public Integer daysInYearType;
+        public Long daysInYearType;
         @Schema(example = "true")
         public Boolean allowPartialPeriodInterestCalcualtion;
         @Schema(example = "179")

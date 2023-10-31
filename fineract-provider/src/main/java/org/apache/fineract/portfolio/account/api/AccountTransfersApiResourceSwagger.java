@@ -39,13 +39,13 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersFromOffice() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "HO")
             public String name;
             @Schema(example = "HO")
             public String nameDecorated;
             @Schema(example = "1")
-            public Integer externalId;
+            public String externalId;
             @Schema(example = "[2009, 1, 1]")
             public LocalDate openingDate;
             @Schema(example = ".")
@@ -57,7 +57,7 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersFromAccountType() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "accountType.savings")
             public String code;
             @Schema(example = "Savings Account")
@@ -69,7 +69,7 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersFromOfficeOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "HO")
             public String name;
             @Schema(example = "HO")
@@ -81,11 +81,11 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersFromClientOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Small shop")
             public String displayName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "HO")
             public String officeName;
         }
@@ -95,7 +95,7 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersFromAccountTypeOptions() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "accountType.savings")
             public String code;
             @Schema(example = "Savings Account")
@@ -107,7 +107,7 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersToOfficeOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "HO")
             public String name;
             @Schema(example = "HO")
@@ -119,7 +119,7 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersToAccountTypeOptions() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "accountType.savings")
             public String code;
             @Schema(example = "Savings Account")
@@ -145,21 +145,21 @@ final class AccountTransfersApiResourceSwagger {
         private PostAccountTransfersRequest() {}
 
         @Schema(example = "1")
-        public Integer fromOfficeId;
+        public Long fromOfficeId;
         @Schema(example = "1")
-        public Integer fromClientId;
+        public Long fromClientId;
         @Schema(example = "2")
         public Integer fromAccountType;
         @Schema(example = "1")
-        public Integer fromAccountId;
+        public Long fromAccountId;
         @Schema(example = "1")
-        public Integer toOfficeId;
+        public Long toOfficeId;
         @Schema(example = "1")
-        public Integer toClientId;
+        public Long toClientId;
         @Schema(example = "2")
         public Integer toAccountType;
         @Schema(example = "2")
-        public Integer toAccountId;
+        public Long toAccountId;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "en")
@@ -178,9 +178,9 @@ final class AccountTransfersApiResourceSwagger {
         private PostAccountTransfersResponse() {}
 
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetAccountTransfersResponse")
@@ -215,7 +215,7 @@ final class AccountTransfersApiResourceSwagger {
                 private GetAccountTransfersPageItemsFromOffice() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "HO")
                 public String name;
             }
@@ -225,7 +225,7 @@ final class AccountTransfersApiResourceSwagger {
                 private GetAccountTransfersPageItemsFromAccount() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "000000001")
                 public Long accountNo;
             }
@@ -235,7 +235,7 @@ final class AccountTransfersApiResourceSwagger {
                 private GetAccountTransfersPageItemsToAccountType() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "accountType.loan")
                 public String code;
                 @Schema(example = "Loan Account")
@@ -243,7 +243,7 @@ final class AccountTransfersApiResourceSwagger {
             }
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "false")
             public Boolean reversed;
             public GetAccountTransfersPageItemsCurrency currency;
@@ -298,13 +298,13 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersTemplateRefundByTransferFromOffice() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Head Office")
             public String name;
             @Schema(example = "Head Office")
             public String nameDecorated;
             @Schema(example = "1")
-            public Integer externalId;
+            public String externalId;
             @Schema(example = "[2009, 1, 1]")
             public LocalDate openingDate;
             @Schema(example = ".")
@@ -320,7 +320,7 @@ final class AccountTransfersApiResourceSwagger {
                 private GetAccountTransfersStatus() {}
 
                 @Schema(example = "300")
-                public Integer id;
+                public Long id;
                 @Schema(example = "clientStatusType.active")
                 public String code;
                 @Schema(example = "Active")
@@ -370,7 +370,7 @@ final class AccountTransfersApiResourceSwagger {
             }
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000001")
             public Long accountNo;
             public GetAccountTransfersStatus status;
@@ -388,7 +388,7 @@ final class AccountTransfersApiResourceSwagger {
             public GetAccountTransfersClientType clientType;
             public GetAccountTransfersClientClassification clientClassification;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
             public GetAccountTransfersTimeline timeline;
@@ -400,19 +400,19 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersTemplateRefundByTransferFromAccount() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000002")
             public Long accountNo;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "Daniel Owusu")
             public String clientName;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "CTRL")
             public String productName;
             @Schema(example = "0")
-            public Integer fieldOfficerId;
+            public Long fieldOfficerId;
             public GetAccountTransfersTemplateRefundByTransferCurrency currency;
             @Schema(example = "130")
             public Float amtForTransfer;
@@ -423,11 +423,11 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersTemplateRefundByTransferToClient() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Daniel Owusu")
             public String displayName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
         }
@@ -437,19 +437,19 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersTemplateRefundByTransferToAccount() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000001")
             public Long accountNo;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "Daniel Owusu")
             public String clientName;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "TEST")
             public String productName;
             @Schema(example = "0")
-            public Integer fieldOfficerId;
+            public Long fieldOfficerId;
             public GetAccountTransfersTemplateRefundByTransferCurrency currency;
         }
 
@@ -458,7 +458,7 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersTemplateRefundByTransferFromOfficeOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Head Office")
             public String name;
             @Schema(example = "Head Office")
@@ -470,11 +470,11 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersTemplateRefundByTransferFromClientOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Daniel Owusu")
             public String displayName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
         }
@@ -484,19 +484,19 @@ final class AccountTransfersApiResourceSwagger {
             private GetAccountTransfersTemplateRefundByTransferFromAccountOptions() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000002")
             public Long accountNo;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "Daniel Owusu")
             public String clientName;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "CTRL")
             public String productName;
             @Schema(example = "0")
-            public Integer fieldOfficerId;
+            public Long fieldOfficerId;
             public GetAccountTransfersTemplateRefundByTransferCurrency currency;
         }
 
@@ -529,17 +529,17 @@ final class AccountTransfersApiResourceSwagger {
         private PostAccountTransfersRefundByTransferRequest() {}
 
         @Schema(example = "2")
-        public Integer fromAccountId;
+        public Long fromAccountId;
         @Schema(example = "1")
         public Integer fromAccountType;
         @Schema(example = "1")
-        public Integer toOfficeId;
+        public Long toOfficeId;
         @Schema(example = "1")
-        public Integer toClientId;
+        public Long toClientId;
         @Schema(example = "2")
         public Integer toAccountType;
         @Schema(example = "1")
-        public Integer toAccountId;
+        public Long toAccountId;
         @Schema(example = "130")
         public Float transferAmount;
         @Schema(example = "31 October 2014")
@@ -551,9 +551,9 @@ final class AccountTransfersApiResourceSwagger {
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "1")
-        public Integer fromClientId;
+        public Long fromClientId;
         @Schema(example = "1")
-        public Integer fromOfficeId;
+        public Long fromOfficeId;
     }
 
     @Schema(description = "PostAccountTransfersRefundByTransferResponse")
@@ -562,8 +562,8 @@ final class AccountTransfersApiResourceSwagger {
         private PostAccountTransfersRefundByTransferResponse() {}
 
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

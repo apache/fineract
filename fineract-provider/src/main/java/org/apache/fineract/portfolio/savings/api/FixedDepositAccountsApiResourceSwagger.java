@@ -39,13 +39,13 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsProductOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Passbook Savings")
             public String name;
         }
 
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "small business")
         public String clientName;
         public Set<GetFixedDepositAccountsProductOptions> productOptions;
@@ -61,7 +61,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsStatus() {}
 
             @Schema(example = "100")
-            public Integer id;
+            public Long id;
             @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
             public String code;
             @Schema(example = "Submitted and pending approval")
@@ -125,7 +125,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsInterestCompoundingPeriodType() {}
 
             @Schema(example = "4")
-            public Integer id;
+            public Long id;
             @Schema(example = "savings.interest.period.savingsCompoundingInterestPeriodType.monthly")
             public String code;
             @Schema(example = "Monthly")
@@ -137,7 +137,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsInterestPostingPeriodType() {}
 
             @Schema(example = "4")
-            public Integer id;
+            public Long id;
             @Schema(example = "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly")
             public String code;
             @Schema(example = "Monthly")
@@ -149,7 +149,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsInterestCalculationType() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "savingsInterestCalculationType.dailybalance")
             public String code;
             @Schema(example = "Daily Balance")
@@ -161,7 +161,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsInterestCalculationDaysInYearType() {}
 
             @Schema(example = "365")
-            public Integer id;
+            public Long id;
             @Schema(example = "savingsInterestCalculationDaysInYearType.days365")
             public String code;
             @Schema(example = "365 Days")
@@ -182,7 +182,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsMinDepositTermType() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "deposit.term.savingsPeriodFrequencyType.months")
             public String code;
             @Schema(example = "Months")
@@ -194,7 +194,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsMaxDepositTermType() {}
 
             @Schema(example = "3")
-            public Integer id;
+            public Long id;
             @Schema(example = "deposit.term.savingsPeriodFrequencyType.years")
             public String code;
             @Schema(example = "Years")
@@ -206,7 +206,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             private GetFixedDepositAccountsDepositPeriodFrequency() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "deposit.period.savingsPeriodFrequencyType.months")
             public String code;
             @Schema(example = "Months")
@@ -214,19 +214,19 @@ final class FixedDepositAccountsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "000000001")
         public Long accountNo;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "Sangamesh N")
         public String clientName;
         @Schema(example = "3")
-        public Integer savingsProductId;
+        public Long savingsProductId;
         @Schema(example = "FD01")
         public String savingsProductName;
         @Schema(example = "0")
-        public Integer fieldOfficerId;
+        public Long fieldOfficerId;
         public GetFixedDepositAccountsStatus status;
         public GetFixedDepositAccountsTimeline timeline;
         public GetFixedDepositAccountsCurrency currency;
@@ -262,9 +262,9 @@ final class FixedDepositAccountsApiResourceSwagger {
         private PostFixedDepositAccountsRequest() {}
 
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -276,7 +276,7 @@ final class FixedDepositAccountsApiResourceSwagger {
         @Schema(example = "6")
         public Integer depositPeriod;
         @Schema(example = "2")
-        public Integer depositPeriodFrequencyId;
+        public Long depositPeriodFrequencyId;
     }
 
     @Schema(description = "PostFixedDepositAccountsResponse")
@@ -285,13 +285,13 @@ final class FixedDepositAccountsApiResourceSwagger {
         private PostFixedDepositAccountsResponse() {}
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetFixedDepositAccountsAccountIdResponse")
@@ -312,7 +312,7 @@ final class FixedDepositAccountsApiResourceSwagger {
                     private GetFixedDepositAccountsPeriodType() {}
 
                     @Schema(example = "0")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "interestChartPeriodType.days")
                     public String code;
                     @Schema(example = "Days")
@@ -338,7 +338,7 @@ final class FixedDepositAccountsApiResourceSwagger {
                 }
 
                 @Schema(example = "13")
-                public Integer id;
+                public Long id;
                 public GetFixedDepositAccountsPeriodType periodType;
                 @Schema(example = "181")
                 public Integer fromPeriod;
@@ -354,7 +354,7 @@ final class FixedDepositAccountsApiResourceSwagger {
                 private GetFixedDepositAccountsPeriodTypes() {}
 
                 @Schema(example = "0")
-                public Integer id;
+                public Long id;
                 @Schema(example = "interestChartPeriodType.days")
                 public String code;
                 @Schema(example = "Days")
@@ -362,11 +362,11 @@ final class FixedDepositAccountsApiResourceSwagger {
             }
 
             @Schema(example = "4")
-            public Integer id;
+            public Long id;
             @Schema(example = "[2013, 10, 2]")
             public LocalDate fromDate;
             @Schema(example = "5")
-            public Integer accountId;
+            public Long accountId;
             @Schema(example = "FD000023")
             public Long accountNumber;
             public Set<GetFixedDepositAccountsChartSlabs> chartSlabs;
@@ -403,21 +403,21 @@ final class FixedDepositAccountsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "FD000023")
         public Long accountNo;
         @Schema(example = "FD-23")
         public String externalId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "Sangamesh N")
         public String clientName;
         @Schema(example = "3")
-        public Integer savingsProductId;
+        public Long savingsProductId;
         @Schema(example = "FD01")
         public String savingsProductName;
         @Schema(example = "0")
-        public Integer fieldOfficerId;
+        public Long fieldOfficerId;
         public GetFixedDepositAccountsResponse.GetFixedDepositAccountsStatus status;
         public GetFixedDepositAccountsResponse.GetFixedDepositAccountsTimeline timeline;
         public GetFixedDepositAccountsAccountIdCurrency currency;
@@ -475,13 +475,13 @@ final class FixedDepositAccountsApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutFixedDepositAccountsChanges changes;
     }
 
@@ -497,13 +497,13 @@ final class FixedDepositAccountsApiResourceSwagger {
         private PostFixedDepositAccountsAccountIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeleteFixedDepositAccountsAccountIdResponse")
@@ -512,10 +512,10 @@ final class FixedDepositAccountsApiResourceSwagger {
         private DeleteFixedDepositAccountsAccountIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

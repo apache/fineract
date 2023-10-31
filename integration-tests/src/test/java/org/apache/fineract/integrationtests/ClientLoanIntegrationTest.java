@@ -6894,7 +6894,7 @@ public class ClientLoanIntegrationTest {
     }
 
     private PostClientsRequest createRandomClientWithDate(String date) {
-        return new PostClientsRequest().officeId(1).legalFormId(1).firstname(Utils.randomStringGenerator("", 5))
+        return new PostClientsRequest().officeId(1L).legalFormId(1L).firstname(Utils.randomStringGenerator("", 5))
                 .lastname(Utils.randomStringGenerator("", 5)).active(true).locale("en").activationDate(date).dateFormat(DATETIME_PATTERN);
     }
 
@@ -8036,7 +8036,7 @@ public class ClientLoanIntegrationTest {
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, REQUEST_SPEC, RESPONSE_SPEC);
     }
 
-    private PostLoansResponse applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(Integer clientId, Long loanProductId,
+    private PostLoansResponse applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(Long clientId, Long loanProductId,
             String loanDisbursementDate, String repaymentStrategyCode) {
         return LOAN_TRANSACTION_HELPER.applyLoan(new PostLoansRequest().clientId(clientId.longValue()).productId(loanProductId)
                 .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
@@ -8068,7 +8068,7 @@ public class ClientLoanIntegrationTest {
                 .maxInterestRatePerPeriod((double) 0)//
                 .interestRateFrequencyType(2)//
                 .repaymentEvery(30)//
-                .repaymentFrequencyType(0)//
+                .repaymentFrequencyType(0L)//
                 .amortizationType(1)//
                 .interestType(0)//
                 .isEqualAmortization(false)//

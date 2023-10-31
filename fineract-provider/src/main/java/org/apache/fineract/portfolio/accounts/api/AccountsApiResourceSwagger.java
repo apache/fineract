@@ -40,7 +40,7 @@ final class AccountsApiResourceSwagger {
             private GetAccountsTypeProductOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Share Product")
             public String name;
             @Schema(example = "SP")
@@ -50,7 +50,7 @@ final class AccountsApiResourceSwagger {
         }
 
         @Schema(example = "7")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "Client Name")
         public String clientName;
         public Set<GetAccountsTypeProductOptions> productOptions;
@@ -66,7 +66,7 @@ final class AccountsApiResourceSwagger {
             private GetAccountsStatus() {}
 
             @Schema(example = "300")
-            public Integer id;
+            public Long id;
             @Schema(example = "shareAccountStatusType.active")
             public String code;
             @Schema(example = "Active")
@@ -132,7 +132,7 @@ final class AccountsApiResourceSwagger {
             private GetAccountsSummary() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000002")
             public Long accountNo;
             @Schema(example = "1")
@@ -140,7 +140,7 @@ final class AccountsApiResourceSwagger {
             @Schema(example = "0")
             public Integer totalPendingForApprovalShares;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "Conflux Share Product")
             public String productName;
             public GetAccountsStatus status;
@@ -157,7 +157,7 @@ final class AccountsApiResourceSwagger {
                 private GetAccountsPurchasedSharesStatus() {}
 
                 @Schema(example = "300")
-                public Integer id;
+                public Long id;
                 @Schema(example = "purchasedSharesStatusType.approved")
                 public String code;
                 @Schema(example = "Approved")
@@ -169,7 +169,7 @@ final class AccountsApiResourceSwagger {
                 private GetAccountsPurchasedSharesType() {}
 
                 @Schema(example = "500")
-                public Integer id;
+                public Long id;
                 @Schema(example = "purchasedSharesType.purchased")
                 public String code;
                 @Schema(example = "Purchase")
@@ -177,9 +177,9 @@ final class AccountsApiResourceSwagger {
             }
 
             @Schema(example = "6")
-            public Integer id;
+            public Long id;
             @Schema(example = "2")
-            public Integer accountId;
+            public Long accountId;
             @Schema(example = "[2016, 4, 1]")
             public LocalDate purchasedDate;
             @Schema(example = "10")
@@ -201,7 +201,7 @@ final class AccountsApiResourceSwagger {
             private GetAccountsLockPeriodTypeEnum() {}
 
             @Schema(example = "0")
-            public Integer id;
+            public Long id;
             @Schema(example = "savings.lockin.sharePeriodFrequencyType.days")
             public String code;
             @Schema(example = "Days")
@@ -217,7 +217,7 @@ final class AccountsApiResourceSwagger {
                 private GetAccountsChargeTimeType() {}
 
                 @Schema(example = "13")
-                public Integer id;
+                public Long id;
                 @Schema(example = "chargeTimeType.activation")
                 public String code;
                 @Schema(example = "Share Account Activate")
@@ -229,7 +229,7 @@ final class AccountsApiResourceSwagger {
                 private GetAccountsChargeCalculationType() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "chargeCalculationType.flat")
                 public String code;
                 @Schema(example = "Flat")
@@ -255,11 +255,11 @@ final class AccountsApiResourceSwagger {
             }
 
             @Schema(example = "9")
-            public Integer id;
+            public Long id;
             @Schema(example = "20")
-            public Integer chargeId;
+            public Long chargeId;
             @Schema(example = "2")
-            public Integer accountId;
+            public Long accountId;
             @Schema(example = "Share Account Activation Flat")
             public String name;
             public GetAccountsChargeTimeType chargeTimeType;
@@ -286,17 +286,17 @@ final class AccountsApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer id;
+        public Long id;
         @Schema(example = "000000002")
         public Long accountNo;
         @Schema(example = "000000013")
         public Long savingsAccountNumber;
         @Schema(example = "7")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "Client_FirstName_2KX8C Client_LastName_NWNG")
         public String clientName;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "Share Product")
         public String productName;
         public GetAccountsStatus status;
@@ -305,7 +305,7 @@ final class AccountsApiResourceSwagger {
         public GetAccountsSummary summary;
         public Set<GetAccountsPurchasedShares> purchasedShares;
         @Schema(example = "13")
-        public Integer savingsAccountId;
+        public Long savingsAccountId;
         @Schema(example = "5")
         public Integer currentMarketPrice;
         @Schema(example = "1")
@@ -335,7 +335,7 @@ final class AccountsApiResourceSwagger {
                 private GetAccountsTypeStatus() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "shareAccountStatusType.submitted.and.pending.approval")
                 public String code;
                 @Schema(example = "Submitted and pending approval")
@@ -365,7 +365,7 @@ final class AccountsApiResourceSwagger {
                 private GetAccountsTypePurchasedShares() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "01 May 2013")
                 public String purchasedDate;
                 @Schema(example = "10")
@@ -382,15 +382,15 @@ final class AccountsApiResourceSwagger {
             }
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000001")
             public Long accountNo;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "Client Name")
             public String clientName;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "Share Product Name")
             public String productName;
             public GetAccountsTypeStatus status;
@@ -415,19 +415,19 @@ final class AccountsApiResourceSwagger {
             private PostAccountsCharges() {}
 
             @Schema(example = "20")
-            public Integer chargeId;
+            public Long chargeId;
             @Schema(example = "1")
             public Integer amount;
         }
 
         @Schema(example = "7")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "100")
         public Integer requestedShares;
         @Schema(example = "1")
-        public Integer externalId;
+        public String externalId;
         @Schema(example = "01 May 2016")
         public String submittedDate;
         @Schema(example = "1")
@@ -448,7 +448,7 @@ final class AccountsApiResourceSwagger {
         public String dateFormat;
         public Set<PostAccountsCharges> charges;
         @Schema(example = "13")
-        public Integer savingsAccountId;
+        public Long savingsAccountId;
     }
 
     @Schema(description = "PostAccountsTypeResponse")
@@ -457,7 +457,7 @@ final class AccountsApiResourceSwagger {
         private PostAccountsTypeResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PostAccountsTypeAccountIdRequest")
@@ -470,7 +470,7 @@ final class AccountsApiResourceSwagger {
             private PostAccountsRequestedShares() {}
 
             @Schema(example = "35")
-            public Integer id;
+            public Long id;
         }
 
         public Set<PostAccountsRequestedShares> requestedShares;
@@ -482,7 +482,7 @@ final class AccountsApiResourceSwagger {
         private PostAccountsTypeAccountIdResponse() {}
 
         @Schema(example = "5")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutAccountsTypeAccountIdRequest")
@@ -520,7 +520,7 @@ final class AccountsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutAccountsChanges changes;
     }
 }

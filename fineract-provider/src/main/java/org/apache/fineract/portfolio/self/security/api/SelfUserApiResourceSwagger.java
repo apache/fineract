@@ -52,9 +52,9 @@ final class SelfUserApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "6")
-        public Integer resourceId;
+        public Long resourceId;
         public PutSelfUserChanges changes;
     }
 }

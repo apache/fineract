@@ -31,13 +31,13 @@ public final class DelinquencyApiResourceSwagger {
         private GetDelinquencyRangesResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "Delinquent 1")
         public String classification;
         @Schema(example = "1")
-        public Long minimumAgeDays;
+        public Integer minimumAgeDays;
         @Schema(example = "3")
-        public Long maximumAgeDays;
+        public Integer maximumAgeDays;
     }
 
     @Schema(description = "GetDelinquencyBucketsResponse")
@@ -46,7 +46,7 @@ public final class DelinquencyApiResourceSwagger {
         private GetDelinquencyBucketsResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "Delinquent Bucket Set 1")
         public String name;
 
@@ -140,7 +140,7 @@ public final class DelinquencyApiResourceSwagger {
         private GetDelinquencyTagHistoryResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "10")
         public Long loanId;
         public GetDelinquencyRangesResponse delinquencyRange;
