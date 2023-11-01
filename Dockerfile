@@ -22,24 +22,24 @@ RUN apt-get update -qq && apt-get install -y wget
 COPY . fineract
 WORKDIR /fineract
 
-RUN ./gradlew -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
+RUN ./gradlew --no-daemon -q -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
-WORKDIR /fineract/target
-RUN jar -xf /fineract/fineract-provider/build/libs/fineract-provider.jar
+WORKDIR /fineract
+RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
 
 # We download separately a JDBC driver (which not allowed to be included in Apache binary distribution)
-WORKDIR /fineract/target/BOOT-INF/libs
+WORKDIR /fineract/BOOT-INF/lib
 RUN wget -q https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar
 
 # =========================================
 
 FROM azul/zulu-openjdk-alpine:17 AS fineract
 
-COPY --from=builder /fineract/target/BOOT-INF/lib /app/lib
-COPY --from=builder /fineract/target/META-INF /app/META-INF
-COPY --from=builder /fineract/target/BOOT-INF/classes /app
+COPY --from=builder /fineract/BOOT-INF/lib /app/lib
+COPY --from=builder /fineract/META-INF /app/META-INF
+COPY --from=builder /fineract/BOOT-INF/classes /app
 
-WORKDIR /
+WORKDIR /fineract
 
 COPY entrypoint.sh /entrypoint.sh
 
