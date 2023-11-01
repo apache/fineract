@@ -39,12 +39,12 @@ COPY --from=builder /fineract/BOOT-INF/lib /app/lib
 COPY --from=builder /fineract/META-INF /app/META-INF
 COPY --from=builder /fineract/BOOT-INF/classes /app
 
-WORKDIR /fineract
+#WORKDIR /fineract
 
-COPY entrypoint.sh /entrypoint.sh
+#COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod 775 /entrypoint.sh
+#RUN chmod 775 /entrypoint.sh
 
 EXPOSE 8443
 
-ENTRYPOINT ["/entrypoint.sh"]
+#ENTRYPOINT ["/entrypoint.sh"]
