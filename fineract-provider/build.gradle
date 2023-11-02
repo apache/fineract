@@ -143,7 +143,7 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
 import groovy.sql.Sql
 
 project.ext.mysqlUser='root'
-project.ext.mysqlPassword='mysql'
+project.ext.mysqlPassword=''
 project.ext.pgUser='root'
 project.ext.pgPassword='postgres'
 
@@ -225,6 +225,7 @@ bootRun {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
+        implementation 'mysql:mysql-connector-java:8.0.33'
     }
 }
 
