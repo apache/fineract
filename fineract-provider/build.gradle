@@ -143,7 +143,7 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
 import groovy.sql.Sql
 
 project.ext.mysqlUser='root'
-project.ext.mysqlPassword=''
+project.ext.mysqlPassword='mysql'
 project.ext.pgUser='root'
 project.ext.pgPassword='postgres'
 
@@ -153,7 +153,8 @@ configurations {
 dependencies {
     driver 'org.mariadb.jdbc:mariadb-java-client'
     driver 'org.postgresql:postgresql'
-    driver 'mysql:mysql-connector-java:8.0.33'
+//    driver 'mysql:mysql-connector-java:8.0.33'
+    driver 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.14.1'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -196,7 +197,7 @@ task dropPGDB {
 task createMySQLDB {
     description= "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
+        def sql = Sql.newInstance( 'jdbc:mysql://google/fineract_tenants?cloudSqlInstance=fineract-403411:europe-west2:fineract-db&socketFactory=com.google.cloud.sql.mysql.SocketFactory&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
         sql.execute( 'CREATE DATABASE '+"`$dbName` CHARACTER SET utf8mb4" )
     }
 }
