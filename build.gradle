@@ -101,22 +101,22 @@ Run as:
 gradle clean bootRun'''
 
 version = "0.0.0-SNAPSHOT"
-gitVersioning.apply {
-    refs {
-        considerTagsOnBranches = false
-
-        tag("(?<version>.*)") {
-            version = "\${ref.version}"
-        }
-
-        branch(".+") {
-            version = "\${describe.tag.version.major}.\${describe.tag.version.minor}.\${describe.tag.version.patch.next}-SNAPSHOT"
-        }
-    }
-    rev {
-        version = "\${commit}"
-    }
-}
+//gitVersioning.apply {
+//    refs {
+//        considerTagsOnBranches = true
+//
+//        tag("(?<version>.*)") {
+//            version = "\${ref.version}"
+//        }
+//
+//        branch(".+") {
+//            version = "\${describe.tag.version.major}.\${describe.tag.version.minor}.\${describe.tag.version.patch.next}-SNAPSHOT"
+//        }
+//    }
+//    rev {
+//        version = "\${commit}"
+//    }
+//}
 
 ext['groovy.version'] = '4.0.6'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.json".toString()
