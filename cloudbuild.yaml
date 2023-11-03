@@ -2,6 +2,8 @@ steps:
   # Build the Java project and create a JAR file.
   - name: 'gcr.io/cloud-builders/gradle'
     args: [ 'build' ]
+    gradle_version: '8.2'
+    jdk_version: '17'
 
   # Build a Docker image for the Spring Boot application.
   - name: 'gcr.io/cloud-builders/docker'
