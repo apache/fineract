@@ -1930,4 +1930,9 @@ public class LoanTransactionHelper extends IntegrationTest {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, transactionAmount, null), jsonAttributeToGetBack);
     }
+
+    public PostLoansLoanIdTransactionsResponse writeOffLoanAccount(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "writeoff"));
+    }
 }
