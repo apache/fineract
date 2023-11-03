@@ -1,6 +1,28 @@
 runtime: java
-env: flex
-
+api_version: '1.0'
+env: flexible
+threadsafe: true
 runtime_config:
-  operating_system: "ubuntu22"
   runtime_version: "17"
+automatic_scaling:
+  cool_down_period: 120s
+  min_num_instances: 2
+  max_num_instances: 3
+  cpu_utilization:
+    target_utilization: 0.5
+liveness_check:
+  initial_delay_sec: '300'
+  check_interval_sec: '30'
+  timeout_sec: '4'
+  failure_threshold: 4
+  success_threshold: 2
+readiness_check:
+  check_interval_sec: '5'
+  timeout_sec: '4'
+  failure_threshold: 2
+  success_threshold: 2
+  app_start_timeout_sec: '300'
+service_account: fineract-403411@appspot.gserviceaccount.com
+
+
+#entrypoint: java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider.jar
