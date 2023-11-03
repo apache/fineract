@@ -9,4 +9,4 @@ steps:
 
   # Push the Docker image to the Google Cloud Container Registry.
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'push', 'gcr.io/${PROJECT_ID}/${_IMAGE_NAME}' ]
+    args: [ 'push', 'gcr.io/${PROJECT_ID}/fineract' ]
