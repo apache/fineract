@@ -103,14 +103,14 @@ gradle clean bootRun'''
 version = "0.0.0-SNAPSHOT"
 gitVersioning.apply {
     refs {
-//        considerTagsOnBranches = false
+        considerTagsOnBranches = false
 
 //        tag("(?<version>.*)") {
 //            version = "\${ref.version}"
 //        }
 
         branch(".+") {
-            version = "\${describe.version.major}.\${describe.version.minor}.\${describe.version.patch.next}-SNAPSHOT"
+            version = "\${version.major}.\${version.minor}.\${version.patch.next}-SNAPSHOT"
         }
     }
     rev {
