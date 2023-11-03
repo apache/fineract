@@ -39,7 +39,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiConstants;
 import org.springframework.stereotype.Component;
@@ -50,8 +49,8 @@ import org.springframework.stereotype.Component;
  * Currently, validation of the passed in JSON is done before calling save or update method on the target resource (in
  * our case the loan Product)
  *
- * However, in the case of a loan product it would be difficult to validate the passed in JSON for valid
- * {@link LoanProduct} to {@link GLAccount} mappings during update because of the following scenario
+ * However, in the case of a loan product it would be difficult to validate the passed in JSON for valid LoanProduct to
+ * {@link GLAccount} mappings during update because of the following scenario
  *
  * The accounting rule type may be changed in the update command, so we would have to validate if all required account
  * heads for a particular account type have been passed in (would be different for CASH and Accrual based). However,
