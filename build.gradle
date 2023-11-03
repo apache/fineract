@@ -103,7 +103,7 @@ gradle clean bootRun'''
 version = "0.0.0-SNAPSHOT"
 gitVersioning.apply {
     refs {
-        considerTagsOnBranches = true
+        considerTagsOnBranches = false
 
         tag("(?<version>.*)") {
             version = "\${ref.version}"
