@@ -197,7 +197,7 @@ task dropPGDB {
 task createMySQLDB {
     description= "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql://google/fineract_tenants?cloudSqlInstance=fineract-403411:europe-west2:fineract-db&socketFactory=com.google.cloud.sql.mysql.SocketFactory&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
+        def sql = Sql.newInstance( 'jdbc:mysql://google/fineract_tenants?cloudSqlInstance=fineract-403411:europe-west2:fineract-db&socketFactory=com.google.cloud.sql.mysql.SocketFactory&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`', mysqlUser, mysqlPassword, 'com.google.cloud.sql.mysql.SocketFactory' )
         sql.execute( 'CREATE DATABASE '+"`$dbName` CHARACTER SET utf8mb4" )
     }
 }
