@@ -99,21 +99,23 @@ description = '''\
 Run as:
 gradle clean bootRun'''
 
-version = "0.0.0-SNAPSHOT"
+version = '0.0.0-SNAPSHOT'
+
 gitVersioning.apply {
     refs {
         considerTagsOnBranches = true
+        describeTagPattern = '.*(\\d+\\.\\d+\\.\\d+).*'
+        describeTagFirstParent = false
 
-        tag("(?<version>.*)") {
-            version = "\${ref.version}"
+        branch("\\d+\\.\\d+\\.\\d+") {
+            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
         }
-
-        branch(".+") {
-            version = "\${describe.tag.version.major}.\${describe.tag.version.minor}.\${describe.tag.version.patch.next}-SNAPSHOT"
+        branch("maintenance\\/\\d+\\.\\d+") {
+            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
         }
     }
     rev {
-        version = "\${commit}"
+        version = '${describe.tag.version.major}.${describe.tag.version.minor.next}.${describe.tag.version.patch}-SNAPSHOT'
     }
 }
 
@@ -693,7 +695,10 @@ configure(project.fineractCustomProjects) {
 
 configure(project.fineractPublishProjects) {
     apply plugin: 'maven-publish'
-    apply plugin: 'signing'
+
+    if (!project.hasProperty('noSign')) {
+        apply plugin: 'signing'
+    }
 
     publishing {
         publications {
@@ -747,8 +752,10 @@ configure(project.fineractPublishProjects) {
         }
     }
 
-    signing {
-        sign publishing.publications.mavenJava
+    if (!project.hasProperty('noSign')) {
+        signing {
+            sign publishing.publications.mavenJava
+        }
     }
 }
 
