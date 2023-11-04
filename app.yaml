@@ -2,6 +2,7 @@ runtime: java
 api_version: '1.0'
 env: flexible
 service: test
+image: europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract:latest
 threadsafe: true
 runtime_config:
   runtime_version: "17"
