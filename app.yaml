@@ -1,6 +1,7 @@
 runtime: java
 api_version: '1.0'
 env: flexible
+service: test
 threadsafe: true
 runtime_config:
   runtime_version: "17"
@@ -23,5 +24,4 @@ readiness_check:
   success_threshold: 2
   app_start_timeout_sec: '300'
 service_account: fineract-403411@appspot.gserviceaccount.com
-
-entrypoint: java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
+entrypoint: java -Dloader.path=. -jar fineract-provider-0.0.1-SNAPSHOT.jar
