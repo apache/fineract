@@ -5,8 +5,8 @@ steps:
 
   # Build a Docker image for the Spring Boot application.
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'eu.gcr.io/${PROJECT_ID}/fineract', '.' ]
+    args: [ 'build', '-t', 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract', '.' ]
 
   # Push the Docker image to the Google Cloud Container Registry.
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'push', 'eu.gcr.io/${PROJECT_ID}/fineract' ]
+    args: [ 'push', 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract' ]
