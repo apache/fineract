@@ -148,13 +148,13 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         final Map<String, Boolean> commandPermissions = permissionsCommand.getPermissions();
         final Map<String, Object> changes = new HashMap<>();
         final Map<String, Boolean> changedPermissions = new HashMap<>();
-        for (final String permissionCode : commandPermissions.keySet()) {
-            final boolean isSelected = commandPermissions.get(permissionCode).booleanValue();
+        for (Map.Entry<String, Boolean> entry : commandPermissions.entrySet()) {
+            final boolean isSelected = entry.getValue();
 
-            final Permission permission = findPermissionByCode(allPermissions, permissionCode);
+            final Permission permission = findPermissionByCode(allPermissions, entry.getKey());
             final boolean changed = role.updatePermission(permission, isSelected);
             if (changed) {
-                changedPermissions.put(permissionCode, isSelected);
+                changedPermissions.put(entry.getKey(), isSelected);
             }
         }
 

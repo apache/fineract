@@ -23,7 +23,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -42,7 +41,6 @@ public class RateAssembler {
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
             if (topLevelJsonElement.has(LoanProductConstants.RATES_PARAM_NAME)
                     && topLevelJsonElement.get(LoanProductConstants.RATES_PARAM_NAME).isJsonArray()) {

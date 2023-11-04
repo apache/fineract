@@ -30,7 +30,7 @@ asciidoctorj {
         generated: "${buildDir}/generated/asciidoc",
         imagesdir: "${projectDir}/src/docs/en/images",
         diagramsdir: "${projectDir}/src/docs/en/diagrams",
-        years: '2015-2022',
+        years: '2015-2024',
         revnumber: "${project.version}".toString(),
         rootdir: "${rootDir}".toString(),
         baseurl: 'fineract.apache.org',

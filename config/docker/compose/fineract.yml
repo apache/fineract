@@ -20,12 +20,13 @@ version: "3.8"
 
 services:
   fineract:
+    # user: "${FINERACT_USER}:${FINERACT_GROUP}"
     image: fineract:latest
     volumes:
-      - ../aws/etc/credentials:/etc/aws/credentials
+      - ${PWD}/config/docker/logback/logback-override.xml:/app/logback-override.xml
+      - ${PWD}/config/docker/aws/etc/credentials:/etc/aws/credentials:ro
+      - ${PWD}/build/fineract/logs:/var/logs/fineract:rw
     healthcheck:
-      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
-      timeout: 10s
-      retries: 10
-    env_file:
-      - ../env/fineract-common.env
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "localhost" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 1s
+      retries: 60

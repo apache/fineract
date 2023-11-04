@@ -37,7 +37,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -112,7 +111,7 @@ public class BatchApiResource {
         validateRequestMethodsAllowedOnInstanceType(requestList);
 
         // Gets back the consolidated BatchResponse from BatchApiservice
-        List<BatchResponse> result = new ArrayList<>();
+        List<BatchResponse> result;
 
         // If the request is to be handled as a Transaction. All requests will
         // be rolled back on error

@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.portfolio.account;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public enum PortfolioAccountType {
 
     INVALID(0, "accountType.invalid"), //
@@ -43,20 +40,9 @@ public enum PortfolioAccountType {
         return this.code;
     }
 
-    public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final PortfolioAccountType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
-    }
-
     public static PortfolioAccountType fromInt(final Integer type) {
 
-        PortfolioAccountType enumType = PortfolioAccountType.INVALID;
+        PortfolioAccountType enumType = INVALID;
         if (type != null) {
             switch (type) {
                 case 1:
@@ -65,16 +51,20 @@ public enum PortfolioAccountType {
                 case 2:
                     enumType = SAVINGS;
                 break;
+                default:
+                    enumType = INVALID;
             }
         }
         return enumType;
     }
 
+    // TODO: bad practice and unnecessary code! why not just use the enum values themselves!?!
     public boolean isSavingsAccount() {
-        return this.value.equals(2);
+        return this.equals(SAVINGS);
     }
 
+    // TODO: bad practice and unnecessary code! why not just use the enum values themselves!?!
     public boolean isLoanAccount() {
-        return this.value.equals(1);
+        return this.equals(LOAN);
     }
 }

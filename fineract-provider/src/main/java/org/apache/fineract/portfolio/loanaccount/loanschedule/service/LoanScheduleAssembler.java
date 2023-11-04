@@ -771,10 +771,9 @@ public class LoanScheduleAssembler {
                 graceApplicable = installment.getDueDate();
             }
         }
-        Collection<LocalDate> keySet = adjustDueDateVariations.keySet();
-        dueDates.addAll(keySet);
-        for (final LocalDate date : keySet) {
-            LocalDate removeDate = adjustDueDateVariations.get(date);
+        dueDates.addAll(adjustDueDateVariations.keySet());
+        for (Map.Entry<LocalDate, LocalDate> entry : adjustDueDateVariations.entrySet()) {
+            LocalDate removeDate = entry.getValue();
             if (removeDate != null) {
                 dueDates.remove(removeDate);
             }

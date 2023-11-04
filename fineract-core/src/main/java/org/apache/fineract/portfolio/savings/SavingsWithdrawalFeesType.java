@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public enum SavingsWithdrawalFeesType {
 
@@ -43,28 +42,23 @@ public enum SavingsWithdrawalFeesType {
         return this.code;
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final SavingsWithdrawalFeesType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 
-    public static SavingsWithdrawalFeesType fromInt(final Integer type) {
-
-        SavingsWithdrawalFeesType withdrawalFeeType = SavingsWithdrawalFeesType.INVALID;
-        switch (type) {
-            case 1:
-                withdrawalFeeType = FLAT;
-            break;
-            case 2:
-                withdrawalFeeType = PERCENT_OF_AMOUNT;
-            break;
+    public static SavingsWithdrawalFeesType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return withdrawalFeeType;
+
+        switch (v) {
+            case 1:
+                return FLAT;
+            case 2:
+                return PERCENT_OF_AMOUNT;
+            default:
+                return INVALID;
+        }
     }
 }

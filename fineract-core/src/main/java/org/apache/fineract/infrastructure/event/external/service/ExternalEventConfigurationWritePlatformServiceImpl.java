@@ -48,14 +48,15 @@ public class ExternalEventConfigurationWritePlatformServiceImpl implements Exter
         final Map<String, Object> changes = new HashMap<>();
         final Map<String, Boolean> changedConfigurations = new HashMap<>();
         final List<ExternalEventConfiguration> modifiedConfigurations = new ArrayList<>();
-        for (final String eventType : commandConfigurations.keySet()) {
+
+        for (Map.Entry<String, Boolean> entry : commandConfigurations.entrySet()) {
             final ExternalEventConfiguration configuration = repository
-                    .findExternalEventConfigurationByTypeWithNotFoundDetection(eventType);
-            final boolean canEnable = commandConfigurations.get(eventType).booleanValue();
-            configuration.setEnabled(canEnable);
-            changedConfigurations.put(eventType, canEnable);
+                    .findExternalEventConfigurationByTypeWithNotFoundDetection(entry.getKey());
+            configuration.setEnabled(entry.getValue());
+            changedConfigurations.put(entry.getKey(), entry.getValue());
             modifiedConfigurations.add(configuration);
         }
+
         if (!modifiedConfigurations.isEmpty()) {
             this.repository.saveAll(modifiedConfigurations);
         }

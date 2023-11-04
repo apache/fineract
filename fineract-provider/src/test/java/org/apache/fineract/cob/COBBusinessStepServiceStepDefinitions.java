@@ -26,10 +26,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Splitter;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.java8.En;
-import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -44,12 +43,12 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
-import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class COBBusinessStepServiceStepDefinitions implements En {
 
     private ApplicationContext applicationContext = mock(ApplicationContext.class);
@@ -68,10 +67,6 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private AbstractAuditableCustom outputItem = mock(AbstractAuditableCustom.class);
 
     private AbstractAuditableCustom resultItem;
-
-    private HashMap<MixTaxonomyData, BigDecimal> data = new HashMap<>();
-
-    private String result;
     private Class clazz;
     private String jobName;
     private BatchBusinessStep batchBusinessStep = mock(BatchBusinessStep.class);

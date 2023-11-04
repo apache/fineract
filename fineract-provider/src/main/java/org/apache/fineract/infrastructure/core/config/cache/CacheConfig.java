@@ -61,25 +61,53 @@ public class CacheConfig {
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(10000))
                         .withExpiry(ExpiryPolicyBuilder.noExpiration()).build());
 
-        cacheManager.createCache("users", defaultTemplate);
-        cacheManager.createCache("usersByUsername", defaultTemplate);
-        cacheManager.createCache("tenantsById", defaultTemplate);
-        cacheManager.createCache("offices", defaultTemplate);
-        cacheManager.createCache("officesForDropdown", defaultTemplate);
-        cacheManager.createCache("officesById", defaultTemplate);
-        cacheManager.createCache("charges", defaultTemplate);
-        cacheManager.createCache("funds", defaultTemplate);
-        cacheManager.createCache("code_values", defaultTemplate);
-        cacheManager.createCache("codes", defaultTemplate);
-        cacheManager.createCache("hooks", defaultTemplate);
-        cacheManager.createCache("tfConfig", defaultTemplate);
-        cacheManager.createCache(CONFIG_BY_NAME_CACHE_NAME, defaultTemplate);
+        if (cacheManager.getCache("users") == null) {
+            cacheManager.createCache("users", defaultTemplate);
+        }
+        if (cacheManager.getCache("usersByUsername") == null) {
+            cacheManager.createCache("usersByUsername", defaultTemplate);
+        }
+        if (cacheManager.getCache("tenantsById") == null) {
+            cacheManager.createCache("tenantsById", defaultTemplate);
+        }
+        if (cacheManager.getCache("offices") == null) {
+            cacheManager.createCache("offices", defaultTemplate);
+        }
+        if (cacheManager.getCache("officesForDropdown") == null) {
+            cacheManager.createCache("officesForDropdown", defaultTemplate);
+        }
+        if (cacheManager.getCache("officesById") == null) {
+            cacheManager.createCache("officesById", defaultTemplate);
+        }
+        if (cacheManager.getCache("charges") == null) {
+            cacheManager.createCache("charges", defaultTemplate);
+        }
+        if (cacheManager.getCache("funds") == null) {
+            cacheManager.createCache("funds", defaultTemplate);
+        }
+        if (cacheManager.getCache("code_values") == null) {
+            cacheManager.createCache("code_values", defaultTemplate);
+        }
+        if (cacheManager.getCache("codes") == null) {
+            cacheManager.createCache("codes", defaultTemplate);
+        }
+        if (cacheManager.getCache("hooks") == null) {
+            cacheManager.createCache("hooks", defaultTemplate);
+        }
+        if (cacheManager.getCache("tfConfig") == null) {
+            cacheManager.createCache("tfConfig", defaultTemplate);
+        }
+        if (cacheManager.getCache(CONFIG_BY_NAME_CACHE_NAME) == null) {
+            cacheManager.createCache(CONFIG_BY_NAME_CACHE_NAME, defaultTemplate);
+        }
 
         javax.cache.configuration.Configuration<Object, Object> accessTokenTemplate = Eh107Configuration.fromEhcacheCacheConfiguration(
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(10000))
                         .withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofHours(2))).build());
 
-        cacheManager.createCache("userTFAccessToken", accessTokenTemplate);
+        if (cacheManager.getCache("userTFAccessToken") == null) {
+            cacheManager.createCache("userTFAccessToken", accessTokenTemplate);
+        }
 
         return cacheManager;
     }

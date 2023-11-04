@@ -701,10 +701,6 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             } else if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
                 populateCreditDebitMaps(loanProductId, overPaymentAmount, paymentTypeId, CashAccountsForLoan.OVERPAYMENT.getValue(),
                         CashAccountsForLoan.GOODWILL_CREDIT.getValue(), accountMapForCredit, accountMapForDebit);
-            } else if (loanTransactionDTO.getTransactionType().isRepayment()) {
-                populateCreditDebitMaps(loanProductId, overPaymentAmount, paymentTypeId, CashAccountsForLoan.OVERPAYMENT.getValue(),
-                        CashAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);
-
             } else {
                 populateCreditDebitMaps(loanProductId, overPaymentAmount, paymentTypeId, CashAccountsForLoan.OVERPAYMENT.getValue(),
                         CashAccountsForLoan.FUND_SOURCE.getValue(), accountMapForCredit, accountMapForDebit);

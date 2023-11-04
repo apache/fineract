@@ -86,7 +86,7 @@ public class AccountingRuleApiResource {
                     "allowedCreditTagOptions", "allowedDebitTagOptions", "debitTags", "creditTags", "creditAccounts", "debitAccounts",
                     "allowMultipleCreditEntries", "allowMultipleDebitEntries", "tag"));
 
-    private final String resourceNameForPermission = "ACCOUNTINGRULE";
+    private static final String RESOURCE_NAME_FOR_PERMISSION = "ACCOUNTINGRULE";
 
     private final AccountingRuleReadPlatformService accountingRuleReadPlatformService;
     private final GLAccountReadPlatformService accountReadPlatformService;
@@ -107,7 +107,7 @@ public class AccountingRuleApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.GetAccountRulesTemplateResponse.class))) })
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         AccountingRuleData accountingRuleData = null;
         accountingRuleData = handleTemplate(accountingRuleData);
@@ -126,7 +126,7 @@ public class AccountingRuleApiResource {
     public String retrieveAllAccountingRules(@Context final UriInfo uriInfo) {
 
         final AppUser currentUser = this.context.authenticatedUser();
-        currentUser.validateHasReadPermission(this.resourceNameForPermission);
+        currentUser.validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
@@ -159,7 +159,7 @@ public class AccountingRuleApiResource {
             @PathParam("accountingRuleId") @Parameter(description = "accountingRuleId") final Long accountingRuleId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         AccountingRuleData accountingRuleData = this.accountingRuleReadPlatformService.retrieveAccountingRuleById(accountingRuleId);

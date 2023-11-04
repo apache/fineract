@@ -47,7 +47,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SchedulerJobListener implements JobListener {
 
-    private final String name = SchedulerServiceConstants.DEFAULT_LISTENER_NAME;
     private final SchedularWritePlatformService schedularService;
     private final AppUserRepositoryWrapper userRepository;
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
@@ -55,7 +54,7 @@ public class SchedulerJobListener implements JobListener {
 
     @Override
     public String getName() {
-        return this.name;
+        return SchedulerServiceConstants.DEFAULT_LISTENER_NAME;
     }
 
     @Override

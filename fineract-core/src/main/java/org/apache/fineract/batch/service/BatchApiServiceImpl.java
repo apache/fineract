@@ -23,6 +23,7 @@ import static org.apache.http.HttpStatus.SC_OK;
 
 import com.google.gson.Gson;
 import com.jayway.jsonpath.JsonPathException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.resilience4j.core.functions.Either;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -380,6 +381,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         return List.of(buildErrorResponse(requestId, statusCode, body, headers));
     }
 
+    @SuppressFBWarnings(value = "BX_UNBOXING_IMMEDIATELY_REBOXED", justification = "TODO: fix this!")
     private BatchResponse buildErrorResponse(Long requestId, Integer statusCode, String body, Set<Header> headers) {
         return new BatchResponse().setRequestId(requestId).setStatusCode(statusCode == null ? SC_INTERNAL_SERVER_ERROR : statusCode)
                 .setBody(body == null ? "Request with id " + requestId + " was erroneous!" : body).setHeaders(headers);

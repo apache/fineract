@@ -125,14 +125,16 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
 
     @Override
     public void updateLoanArrearsAgeingDetails(final Loan loan) {
-        int count = this.jdbcTemplate.queryForObject("select count(mla.loan_id) from m_loan_arrears_aging mla where mla.loan_id =?",
-                Integer.class, loan.getId());
-        String updateStatement = constructUpdateStatement(loan, count == 0);
-        if (updateStatement == null) {
-            String deletestatement = "DELETE FROM m_loan_arrears_aging WHERE  loan_id=?";
-            this.jdbcTemplate.update(deletestatement, loan.getId()); // NOSONAR
-        } else {
-            this.jdbcTemplate.update(updateStatement);
+        if (loan != null) {
+            int count = this.jdbcTemplate.queryForObject("select count(mla.loan_id) from m_loan_arrears_aging mla where mla.loan_id =?",
+                    Integer.class, loan.getId());
+            String updateStatement = constructUpdateStatement(loan, count == 0);
+            if (updateStatement == null) {
+                String deletestatement = "DELETE FROM m_loan_arrears_aging WHERE  loan_id=?";
+                this.jdbcTemplate.update(deletestatement, loan.getId()); // NOSONAR
+            } else {
+                this.jdbcTemplate.update(updateStatement);
+            }
         }
     }
 
