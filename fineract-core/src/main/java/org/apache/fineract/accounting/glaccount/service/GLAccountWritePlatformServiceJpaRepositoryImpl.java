@@ -170,8 +170,8 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     private void validateForAttachedProduct(Long glAccountId) {
         String sql = "select count(*) from acc_product_mapping acc where acc.gl_account_id = ?";
         try {
-            int count = this.jdbcTemplate.queryForObject(sql, Integer.class, glAccountId);
-            if (count > 0) {
+            Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class, glAccountId);
+            if (count == null || count > 0) {
                 throw new GLAccountDisableException();
             }
         } catch (EmptyResultDataAccessException e) {

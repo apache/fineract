@@ -43,31 +43,28 @@ public enum DepositAccountOnHoldTransactionType {
         return this.code;
     }
 
-    public static DepositAccountOnHoldTransactionType fromInt(final Integer transactionType) {
-
-        if (transactionType == null) {
-            return DepositAccountOnHoldTransactionType.INVALID;
+    public static DepositAccountOnHoldTransactionType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
 
-        DepositAccountOnHoldTransactionType savingsAccountTransactionType = DepositAccountOnHoldTransactionType.INVALID;
-        switch (transactionType) {
+        switch (v) {
             case 1:
-                savingsAccountTransactionType = DepositAccountOnHoldTransactionType.HOLD;
-            break;
+                return HOLD;
             case 2:
-                savingsAccountTransactionType = DepositAccountOnHoldTransactionType.RELEASE;
-            break;
-
+                return RELEASE;
+            default:
+                return INVALID;
         }
-        return savingsAccountTransactionType;
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isHold() {
-        return this.value.equals(DepositAccountOnHoldTransactionType.HOLD.getValue());
+        return this.equals(HOLD);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isRelease() {
-        return this.value.equals(DepositAccountOnHoldTransactionType.RELEASE.getValue());
+        return this.equals(RELEASE);
     }
-
 }

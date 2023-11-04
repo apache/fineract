@@ -25,6 +25,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.util.List;
 import javax.sql.DataSource;
 import liquibase.change.custom.CustomTaskChange;
+import okhttp3.OkHttpClient;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
@@ -187,5 +188,11 @@ public class TestConfiguration {
     @Bean
     public JobOperator jobOperator() {
         return mock(JobOperator.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public OkHttpClient okHttpClient() {
+        return mock(OkHttpClient.class, RETURNS_MOCKS);
     }
 }

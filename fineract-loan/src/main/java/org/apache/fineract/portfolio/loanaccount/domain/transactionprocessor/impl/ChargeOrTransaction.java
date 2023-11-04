@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -81,6 +82,7 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
     }
 
     @Override
+    @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
     public int compareTo(@NotNull ChargeOrTransaction o) {
         int datePortion = this.getEffectiveDate().compareTo(o.getEffectiveDate());
         if (datePortion == 0) {

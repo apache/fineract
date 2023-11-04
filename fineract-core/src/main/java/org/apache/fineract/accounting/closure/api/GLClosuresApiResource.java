@@ -70,7 +70,7 @@ public class GLClosuresApiResource {
             Arrays.asList("id", "officeId", "officeName", "closingDate", "deleted", "createdDate", "lastUpdatedDate", "createdByUserId",
                     "createdByUsername", "lastUpdatedByUserId", "lastUpdatedByUsername"));
 
-    private final String resourceNameForPermission = "GLCLOSURE";
+    private static final String RESOURCE_NAME_FOR_PERMISSION = "GLCLOSURE";
 
     private final PlatformSecurityContext context;
     private final GLClosureReadPlatformService glClosureReadPlatformService;
@@ -88,7 +88,7 @@ public class GLClosuresApiResource {
     public String retrieveAllClosures(@Context final UriInfo uriInfo,
             @QueryParam("officeId") @Parameter(name = "officeId") final Long officeId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         final List<GLClosureData> glClosureDatas = this.glClosureReadPlatformService.retrieveAllGLClosures(officeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -106,7 +106,7 @@ public class GLClosuresApiResource {
     public String retreiveClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 

@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public enum PeriodFrequencyType {
 
@@ -46,62 +45,59 @@ public enum PeriodFrequencyType {
         return this.code;
     }
 
-    public static PeriodFrequencyType fromInt(final Integer frequency) {
-        PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.INVALID;
-        if (frequency != null) {
-            switch (frequency) {
-                case 0:
-                    repaymentFrequencyType = PeriodFrequencyType.DAYS;
-                break;
-                case 1:
-                    repaymentFrequencyType = PeriodFrequencyType.WEEKS;
-                break;
-                case 2:
-                    repaymentFrequencyType = PeriodFrequencyType.MONTHS;
-                break;
-                case 3:
-                    repaymentFrequencyType = PeriodFrequencyType.YEARS;
-                break;
-                case 4:
-                    repaymentFrequencyType = PeriodFrequencyType.WHOLE_TERM;
-                break;
-            }
+    public static PeriodFrequencyType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return repaymentFrequencyType;
+
+        switch (v) {
+            case 0:
+                return DAYS;
+            case 1:
+                return WEEKS;
+            case 2:
+                return MONTHS;
+            case 3:
+                return YEARS;
+            case 4:
+                return WHOLE_TERM;
+            default:
+                return INVALID;
+        }
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isMonthly() {
-        return this.value.equals(PeriodFrequencyType.MONTHS.getValue());
+        return this.equals(MONTHS);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isYearly() {
-        return this.value.equals(PeriodFrequencyType.YEARS.getValue());
+        return this.equals(YEARS);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isWeekly() {
-        return this.value.equals(PeriodFrequencyType.WEEKS.getValue());
+        return this.equals(WEEKS);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isDaily() {
-        return this.value.equals(PeriodFrequencyType.DAYS.getValue());
+        return this.equals(DAYS);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isWholeTerm() {
-        return this.value.equals(PeriodFrequencyType.WHOLE_TERM.getValue());
+        return this.equals(WHOLE_TERM);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isInvalid() {
-        return this.value.equals(PeriodFrequencyType.INVALID.getValue());
+        return this.equals(INVALID);
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final PeriodFrequencyType enumType : values()) {
-            if (!enumType.isInvalid()) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 }

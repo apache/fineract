@@ -21,6 +21,8 @@ package org.apache.fineract.infrastructure.core.service.migration;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
@@ -42,6 +44,9 @@ public class TenantPasswordEncryptionTask implements CustomTaskChange, Applicati
 
     private static DatabasePasswordEncryptor databasePasswordEncryptor;
 
+    // NOTE: workaround for double execution bug; see: https://github.com/liquibase/liquibase/issues/3945
+    private Map<String, Boolean> done = new ConcurrentHashMap<>();
+
     @Override
     public void execute(Database database) throws CustomChangeException {
         JdbcConnection dbConn = (JdbcConnection) database.getConnection(); // autocommit is false
@@ -50,16 +55,18 @@ public class TenantPasswordEncryptionTask implements CustomTaskChange, Applicati
             try (ResultSet rs = selectStatement.executeQuery("SELECT id, schema_password FROM tenant_server_connections")) {
                 while (rs.next()) {
                     String id = rs.getString("id");
-                    String schemaPassword = rs.getString("schema_password");
-                    String encryptedPassword = TenantPasswordEncryptionTask.databasePasswordEncryptor.encrypt(schemaPassword);
+                    if (!Boolean.TRUE.equals(done.get(id))) {
+                        String schemaPassword = rs.getString("schema_password");
+                        String encryptedPassword = TenantPasswordEncryptionTask.databasePasswordEncryptor.encrypt(schemaPassword);
 
-                    String updateSql = String.format(
-                            "update tenant_server_connections set schema_password = '%s', master_password_hash = '%s' where id = %s",
-                            encryptedPassword, TenantPasswordEncryptionTask.databasePasswordEncryptor.getMasterPasswordHash(), id);
-                    updateStatement.execute(updateSql);
+                        String updateSql = String.format(
+                                "update tenant_server_connections set schema_password = '%s', master_password_hash = '%s' where id = %s",
+                                encryptedPassword, TenantPasswordEncryptionTask.databasePasswordEncryptor.getMasterPasswordHash(), id);
+                        updateStatement.execute(updateSql);
+                        done.put(id, true);
+                    }
                 }
             }
-
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }

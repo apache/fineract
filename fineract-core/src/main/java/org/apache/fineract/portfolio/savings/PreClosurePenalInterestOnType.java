@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * An enumeration of supported calendar periods used in savings.
@@ -45,41 +44,38 @@ public enum PreClosurePenalInterestOnType {
         return this.code;
     }
 
-    public static PreClosurePenalInterestOnType fromInt(final Integer type) {
-        PreClosurePenalInterestOnType penalInterestType = PreClosurePenalInterestOnType.INVALID;
-        if (type != null) {
-            switch (type) {
-                case 1:
-                    penalInterestType = PreClosurePenalInterestOnType.WHOLE_TERM;
-                break;
-                case 2:
-                    penalInterestType = PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL;
-                break;
-            }
+    public static PreClosurePenalInterestOnType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return penalInterestType;
+
+        switch (v) {
+            case 1:
+                return WHOLE_TERM;
+            case 2:
+                return TILL_PREMATURE_WITHDRAWAL;
+            default:
+                return INVALID;
+        }
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final PreClosurePenalInterestOnType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isInvalid() {
-        return this.value.equals(PreClosurePenalInterestOnType.INVALID.value);
+        return this.equals(INVALID);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isWholeTerm() {
-        return this.value.equals(PreClosurePenalInterestOnType.WHOLE_TERM.getValue());
+        return this.equals(WHOLE_TERM);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isTillPrematureWithdrawal() {
-        return this.value.equals(PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL.getValue());
+        return this.equals(TILL_PREMATURE_WITHDRAWAL);
     }
 }

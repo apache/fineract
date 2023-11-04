@@ -20,17 +20,17 @@ package org.apache.fineract.infrastructure.core;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.java8.En;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class MultiExceptionStepDefinitions implements En {
 
     private List<Throwable> exceptions = new ArrayList<>();
-
-    private MultiException multiException;
 
     public MultiExceptionStepDefinitions() {
         Given("/^A multi exception with exceptions (.*) and (.*)$/", (String exception1, String exception2) -> {

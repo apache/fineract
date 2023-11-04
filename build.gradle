@@ -1,4 +1,4 @@
-/**
+    /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -61,7 +61,7 @@ buildscript {
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
         classpath 'org.apache.commons:commons-lang3:3.14.0'
-        classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.11'
+        classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.19'
         classpath 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     }
 }
@@ -70,14 +70,14 @@ plugins {
     id 'me.qoomon.git-versioning' version '6.4.3'
     id "org.barfuin.gradle.taskinfo" version "2.1.0"
     id 'com.adarshr.test-logger' version '4.0.0'
-    id 'com.diffplug.spotless' version '6.22.0' apply false
+    id 'com.diffplug.spotless' version '6.23.3' apply false
     id 'org.nosphere.apache.rat' version '0.8.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.5' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
-    id 'org.springframework.boot' version '3.1.5' apply false
+    id 'org.springframework.boot' version '3.1.7' apply false
     id 'net.ltgt.errorprone' version '3.1.0' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.11' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.19' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
@@ -88,9 +88,11 @@ plugins {
     id 'com.google.cloud.tools.jib' version '3.4.0' apply false
     id 'org.sonarqube' version '4.4.1.3373'
     id 'com.github.andygoossens.modernizer' version '1.9.0' apply false
-    id 'com.github.spotbugs' version '5.0.14' apply false
+    // TODO: upgrade to 6.0.4
+    id 'com.github.spotbugs' version '5.0.15' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
+    id 'org.openapi.generator' version '7.2.0' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
@@ -119,7 +121,7 @@ gitVersioning.apply {
     }
 }
 
-ext['groovy.version'] = '4.0.6'
+ext['groovy.version'] = '4.0.17'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.json".toString()
 
 allprojects  {
@@ -143,7 +145,7 @@ allprojects  {
     spotless {
         format 'misc', {
             target '**/*.md', '**/*.properties', '**/.gitignore', '**/.openapi-generator-ignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
-            targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat', '**/licenses/**', '**/banner.txt', '.vscode/**'
+            targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat', '**/licenses/**', '**/banner.txt', '.vscode/**', '.profileconfig.json'
             indentWithSpaces(4)
             endWithNewline()
             trimTrailingWhitespace()
@@ -321,6 +323,15 @@ configure(project.fineractJavaProjects) {
     sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
     sourceSets.test.output.resourcesDir = sourceSets.test.java.classesDirectory
 
+    configurations.named('spotbugs').configure {
+        resolutionStrategy.eachDependency {
+            if (it.requested.group == 'org.ow2.asm') {
+                it.useVersion '9.5'
+                it.because "Asm 9.5 is required for JDK 21 support"
+            }
+        }
+    }
+
     configurations {
         implementation.setCanBeResolved(true)
         api.setCanBeResolved(true)
@@ -423,7 +434,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:10.12.5'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.12.7'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.1'
     }
 
@@ -445,7 +456,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.23.0"
+        errorprone "com.google.errorprone:error_prone_core:2.24.0"
     }
 
     tasks.withType(JavaCompile) {
@@ -600,7 +611,8 @@ configure(project.fineractJavaProjects) {
 
     // To generate an HTML report instead of XML
     spotbugs {
-        reportLevel = 'high'
+        // reportLevel = 'high'
+        // reportLevel = com.github.spotbugs.snom.Confidence.DEFAULT
         showProgress = false
         excludeFilter = file("$rootDir/config/spotbugs/exclude.xml")
     }

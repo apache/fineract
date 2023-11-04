@@ -105,7 +105,7 @@ public class LiquibaseStepDefinitions implements En {
         });
 
         Then("The database migration did not do anything", () -> {
-            verify(databaseStateVerifier).isLiquibaseDisabled();
+            assertThat(verify(databaseStateVerifier).isLiquibaseDisabled()).isFalse();
             verifyNoMoreInteractions(databaseStateVerifier);
             verifyNoInteractions(tenantDetailsService, tenantStoreDataSource, liquibaseFactory, tenantDataSourceFactory);
         });

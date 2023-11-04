@@ -1453,8 +1453,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult undoApplicationApproval(final Long loanId, final JsonCommand command) {
 
-        AppUser currentUser = getAppUserIfPresent();
-
         this.fromApiJsonDeserializer.validateForUndo(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);

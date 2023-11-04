@@ -85,7 +85,7 @@ public class GLAccountsApiResource {
             "allowedAssetsTagOptions", "allowedLiabilitiesTagOptions", "allowedEquityTagOptions", "allowedIncomeTagOptions",
             "allowedExpensesTagOptions", "creditAccounts", "debitAccounts"));
 
-    private final String resourceNameForPermission = "GLACCOUNT";
+    private static final String RESOURCE_NAME_FOR_PERMISSION = "GLACCOUNT";
 
     private final PlatformSecurityContext context;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
@@ -111,7 +111,7 @@ public class GLAccountsApiResource {
     public String retrieveNewAccountDetails(@Context final UriInfo uriInfo,
             @QueryParam("type") @Parameter(description = "type") final Integer type) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveNewGLAccountDetails(type);
         glAccountData = handleTemplate(glAccountData);
@@ -137,7 +137,7 @@ public class GLAccountsApiResource {
             @QueryParam("disabled") @Parameter(description = "disabled") final Boolean disabled,
             @QueryParam("fetchRunningBalance") @Parameter(description = "fetchRunningBalance") final boolean runningBalance) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(false, runningBalance);
         final List<GLAccountData> glAccountDatas = this.glAccountReadPlatformService.retrieveAllGLAccounts(type, searchParam, usage,
                 manualEntriesAllowed, disabled, associationParametersData);
@@ -159,7 +159,7 @@ public class GLAccountsApiResource {
             @Context final UriInfo uriInfo,
             @QueryParam("fetchRunningBalance") @Parameter(description = "fetchRunningBalance") final boolean runningBalance) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(false, runningBalance);

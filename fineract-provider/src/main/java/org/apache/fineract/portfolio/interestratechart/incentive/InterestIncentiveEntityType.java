@@ -18,10 +18,7 @@
  */
 package org.apache.fineract.portfolio.interestratechart.incentive;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 public enum InterestIncentiveEntityType {
 
@@ -32,17 +29,19 @@ public enum InterestIncentiveEntityType {
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, InterestIncentiveEntityType> intToEnumMap = new HashMap<>();
-
-    static {
-        for (final InterestIncentiveEntityType type : InterestIncentiveEntityType.values()) {
-            intToEnumMap.put(type.value, type);
+    public static InterestIncentiveEntityType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-    }
 
-    public static InterestIncentiveEntityType fromInt(final Integer ruleTypeValue) {
-        final InterestIncentiveEntityType type = intToEnumMap.get(ruleTypeValue);
-        return type;
+        switch (v) {
+            case 2:
+                return CUSTOMER;
+            case 3:
+                return ACCOUNT;
+            default:
+                return INVALID;
+        }
     }
 
     InterestIncentiveEntityType(final Integer value, final String code) {
@@ -64,21 +63,15 @@ public enum InterestIncentiveEntityType {
     }
 
     public boolean isCustomer() {
-        return InterestIncentiveEntityType.CUSTOMER.getValue().equals(this.value);
+        return CUSTOMER.equals(this);
     }
 
     public boolean isInvalid() {
-        return InterestIncentiveEntityType.INVALID.getValue().equals(this.value);
+        return INVALID.equals(this);
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final InterestIncentiveEntityType enumType : values()) {
-            if (!enumType.isInvalid()) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 }

@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * An enumeration of supported calendar periods used in savings.
@@ -45,32 +44,27 @@ public enum RecurringDepositType {
         return this.code;
     }
 
-    public static RecurringDepositType fromInt(final Integer type) {
-        RecurringDepositType rdType = RecurringDepositType.INVALID;
-        if (type != null) {
-            switch (type) {
-                case 1:
-                    rdType = RecurringDepositType.VOLUNTARY;
-                break;
-                case 2:
-                    rdType = RecurringDepositType.MANDATORY;
-                break;
-            }
+    public static RecurringDepositType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return rdType;
+
+        switch (v) {
+            case 1:
+                return VOLUNTARY;
+            case 2:
+                return MANDATORY;
+            default:
+                return INVALID;
+        }
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final RecurringDepositType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isInvalid() {
         return this.value.equals(RecurringDepositType.INVALID.value);
     }

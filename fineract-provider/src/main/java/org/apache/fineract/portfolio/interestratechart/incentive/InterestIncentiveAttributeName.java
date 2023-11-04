@@ -18,10 +18,7 @@
  */
 package org.apache.fineract.portfolio.interestratechart.incentive;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 public enum InterestIncentiveAttributeName {
 
@@ -34,17 +31,19 @@ public enum InterestIncentiveAttributeName {
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, InterestIncentiveAttributeName> intToEnumMap = new HashMap<>();
-
-    static {
-        for (final InterestIncentiveAttributeName type : InterestIncentiveAttributeName.values()) {
-            intToEnumMap.put(type.value, type);
+    public static InterestIncentiveAttributeName fromInt(final Integer value) {
+        switch (value) {
+            case 2:
+                return GENDER;
+            case 3:
+                return AGE;
+            case 4:
+                return CLIENT_TYPE;
+            case 5:
+                return CLIENT_CLASSIFICATION;
+            default:
+                return INVALID;
         }
-    }
-
-    public static InterestIncentiveAttributeName fromInt(final Integer ruleTypeValue) {
-        final InterestIncentiveAttributeName type = intToEnumMap.get(ruleTypeValue);
-        return type;
     }
 
     InterestIncentiveAttributeName(final Integer value, final String code) {
@@ -65,49 +64,45 @@ public enum InterestIncentiveAttributeName {
         return this.code;
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isGender() {
-        return InterestIncentiveAttributeName.GENDER.getValue().equals(this.value);
+        return GENDER.equals(this);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isAge() {
-        return InterestIncentiveAttributeName.AGE.getValue().equals(this.value);
+        return AGE.equals(this);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isClientType() {
-        return InterestIncentiveAttributeName.CLIENT_TYPE.getValue().equals(this.value);
+        return CLIENT_TYPE.equals(this);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isClientClassification() {
-        return InterestIncentiveAttributeName.CLIENT_CLASSIFICATION.getValue().equals(this.value);
+        return CLIENT_CLASSIFICATION.equals(this);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isInvalid() {
-        return InterestIncentiveAttributeName.INVALID.getValue().equals(this.value);
+        return INVALID.equals(this);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public static boolean isCodeValueAttribute(InterestIncentiveAttributeName attributeName) {
-        boolean isCodeValue = false;
         switch (attributeName) {
             case GENDER:
             case CLIENT_TYPE:
             case CLIENT_CLASSIFICATION:
-                isCodeValue = true;
-            break;
+                return true;
             default:
-            break;
+                return false;
         }
-        return isCodeValue;
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final InterestIncentiveAttributeName enumType : values()) {
-            if (!enumType.isInvalid()) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
-
 }

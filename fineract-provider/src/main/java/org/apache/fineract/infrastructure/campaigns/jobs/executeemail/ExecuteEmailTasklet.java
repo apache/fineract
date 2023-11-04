@@ -193,6 +193,8 @@ public class ExecuteEmailTasklet implements Tasklet {
                 case "environementUrl":
                     actualParams.put(entry.getKey(), entry.getKey());
                 break;
+                default:
+                    log.warn("Query parameter could not be mapped: {}", entry.getKey());
             }
         }
         return actualParams;

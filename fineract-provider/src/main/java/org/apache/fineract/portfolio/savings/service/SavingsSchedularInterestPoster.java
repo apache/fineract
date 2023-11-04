@@ -83,8 +83,8 @@ public class SavingsSchedularInterestPoster {
                 } catch (DataAccessException exception) {
                     log.error("Batch update failed due to DataAccessException", exception);
                     errors.add(exception);
-                } catch (NullPointerException exception) {
-                    log.error("Batch update failed due to NullPointerException", exception);
+                } catch (Exception exception) {
+                    log.error("Batch update failed", exception);
                     errors.add(exception);
                 }
             }

@@ -336,6 +336,12 @@ cucumber {
     tags = 'not @ignore'
     main = 'io.cucumber.core.cli.Main'
     shorten = 'argfile'
+    plugin = [
+        'pretty',
+        'html:build/reports/cucumber/report.html',
+        'json:build/reports/cucumber/report.json',
+        'junit:build/reports/cucumber/report.xml'
+    ]
 }
 
 tasks.jibDockerBuild.dependsOn(bootJar)

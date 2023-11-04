@@ -136,11 +136,19 @@ public enum JdbcJavaType {
         for (JdbcJavaType type : values()) {
             DialectType dialectType = type.getDialectType(dialect);
             if (dialectType.getNameResolved().equals(name)) {
+                // NOTE: make MySQL systems happy aka TINYINT vs BOOLEAN issue!
+                if (type.canBooleanType(dialect)) {
+                    return BOOLEAN;
+                }
                 return type;
             }
             if (dialectType.alterNames != null) {
                 for (String alterName : dialectType.alterNames) {
                     if (alterName.equals(name)) {
+                        // NOTE: make MySQL systems happy aka TINYINT vs BOOLEAN issue!
+                        if (type.canBooleanType(dialect)) {
+                            return BOOLEAN;
+                        }
                         return type;
                     }
                 }

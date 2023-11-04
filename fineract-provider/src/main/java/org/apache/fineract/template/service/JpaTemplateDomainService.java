@@ -81,7 +81,7 @@ public class JpaTemplateDomainService implements TemplateDomainService {
         template.setText(command.stringValueOfParameterNamed(PROPERTY_TEXT));
         template.setEntity(TemplateEntity.values()[command.integerValueSansLocaleOfParameterNamed(PROPERTY_ENTITY)]);
         final int templateTypeId = command.integerValueSansLocaleOfParameterNamed(PROPERTY_TYPE);
-        TemplateType type = null;
+        TemplateType type;
         switch (templateTypeId) {
             case 0:
                 type = TemplateType.DOCUMENT;
@@ -89,6 +89,8 @@ public class JpaTemplateDomainService implements TemplateDomainService {
             case 2:
                 type = TemplateType.SMS;
             break;
+            default:
+                type = null;
         }
         template.setType(type);
 

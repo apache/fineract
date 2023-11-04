@@ -38,6 +38,8 @@ public class FineractProperties {
 
     private String idempotencyKeyHeaderName;
 
+    private Boolean insecureHttpClient;
+
     private FineractTenantProperties tenant;
 
     private FineractModeProperties mode;

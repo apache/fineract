@@ -1,0 +1,32 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+version: "3.8"
+
+services:
+  fineract:
+    # user: "${FINERACT_USER}:${FINERACT_GROUP}"
+    image: fineract-custom:latest
+    volumes:
+      - ${PWD}/config/docker/logback/logback-override.xml:/app/logback-override.xml
+      - ${PWD}/config/docker/aws/etc/credentials:/etc/aws/credentials:ro
+      - ${PWD}/build/fineract/logs:/var/logs/fineract:rw
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "localhost" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 1s
+      retries: 60

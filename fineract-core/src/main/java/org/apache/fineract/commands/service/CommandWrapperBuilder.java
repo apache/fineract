@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.commands.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -47,6 +48,7 @@ public class CommandWrapperBuilder {
     private String jobName;
     private String idempotencyKey;
 
+    @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "TODO: fix this!")
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,

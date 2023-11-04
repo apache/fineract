@@ -371,7 +371,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private void registerDataTable(final String entityName, final String dataTableName, final String entitySubType, final Integer category,
             final String permissionsSql) {
-        EntityTables entityTable = resolveEntity(entityName);
+        resolveEntity(entityName);
         validateDatatableName(dataTableName);
         validateDataTableExists(dataTableName);
 
@@ -1294,16 +1294,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 List.of(entityTable.getForeignKeyColumnNameOnDatatable(), CREATEDAT_FIELD_NAME, UPDATEDAT_FIELD_NAME));
         LocalDateTime auditDateTime = DateUtils.getAuditLocalDateTime();
         ArrayList<Object> params = new ArrayList<>(List.of(appTableId, auditDateTime, auditDateTime));
-        for (String key : dataParams.keySet()) {
-            if (isTechnicalParam(key)) {
+        for (Map.Entry<String, String> entry : dataParams.entrySet()) {
+            if (isTechnicalParam(entry.getKey())) {
                 continue;
             }
-            ResultsetColumnHeaderData columnHeader = SearchUtil.validateToJdbcColumn(key, headersByName, false);
+            ResultsetColumnHeaderData columnHeader = SearchUtil.validateToJdbcColumn(entry.getKey(), headersByName, false);
             if (!isUserInsertable(entityTable, columnHeader)) {
                 continue;
             }
             insertColumns.add(columnHeader.getColumnName());
-            params.add(SearchUtil.parseJdbcColumnValue(columnHeader, dataParams.get(key), dateFormat, dateTimeFormat, locale, false,
+            params.add(SearchUtil.parseJdbcColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale, false,
                     sqlGenerator));
         }
         if (addScore) {
@@ -1403,17 +1403,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         ArrayList<String> updateColumns = new ArrayList<>(List.of(UPDATEDAT_FIELD_NAME));
         ArrayList<Object> params = new ArrayList<>(List.of(DateUtils.getAuditLocalDateTime()));
         final HashMap<String, Object> changes = new HashMap<>();
-        for (String key : dataParams.keySet()) {
-            if (isTechnicalParam(key)) {
+        for (Map.Entry<String, String> entry : dataParams.entrySet()) {
+            if (isTechnicalParam(entry.getKey())) {
                 continue;
             }
-            ResultsetColumnHeaderData columnHeader = SearchUtil.validateToJdbcColumn(key, headersByName, false);
+            ResultsetColumnHeaderData columnHeader = SearchUtil.validateToJdbcColumn(entry.getKey(), headersByName, false);
             if (!isUserUpdatable(entityTable, columnHeader)) {
                 continue;
             }
             String columnName = columnHeader.getColumnName();
             Object existingValue = valuesByHeader.get(columnHeader);
-            Object columnValue = SearchUtil.parseColumnValue(columnHeader, dataParams.get(key), dateFormat, dateTimeFormat, locale, false,
+            Object columnValue = SearchUtil.parseColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale, false,
                     sqlGenerator);
             if ((columnHeader.getColumnType().isDecimalType() && MathUtil.isEqualTo((BigDecimal) existingValue, (BigDecimal) columnValue))
                     || (existingValue == null ? columnValue == null : existingValue.equals(columnValue))) {

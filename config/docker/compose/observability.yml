@@ -31,31 +31,35 @@ version: "3.8"
 
 services:
   loki:
+    container_name: loki
     image: grafana/loki:2.9.2
     command: -config.file=/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
 
   prometheus:
+    container_name: prometheus
     image: prom/prometheus:v2.47.2
     command: '--config.file=/etc/prometheus/prometheus.yml'
     ports:
       - "9090:9090"
     volumes:
-      - ../prometheus/etc:/etc/prometheus
+      - ${PWD}/config/docker/prometheus/etc:/etc/prometheus
     logging: *default-logging
 
   grafana:
+    container_name: grafana
     image: grafana/grafana-oss:10.2.0
     ports:
       - "3000:3000"
     volumes:
-      - ../grafana/datasources:/etc/grafana/provisioning/datasources
-      - ../grafana/etc/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yaml
-      - ../grafana/dashboards:/var/lib/grafana/dashboards
+      - ${PWD}/config/docker/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ${PWD}/config/docker/grafana/etc/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ${PWD}/config/docker/grafana/dashboards:/var/lib/grafana/dashboards
     logging: *default-logging
 
   tempo:
+    container_name: tempo
     image: grafana/tempo:2.2.4
     # command: [ "--target=all", "--storage.trace.backend=local", "--storage.trace.local.path=/tmp/tempo", "--auth.enabled=false" ]
     command: [ "-config.file=/etc/tempo.yml" ]
@@ -67,6 +71,6 @@ services:
       - "4318:4318"   # otlp http
       - "9411:9411"   # zipkin
     volumes:
-      - ../tempo/etc/tempo.yml:/etc/tempo.yml
+      - ${PWD}/config/docker/tempo/etc/tempo.yml:/etc/tempo.yml
       - /tmp/tempo:/tmp/tempo
     logging: *default-logging

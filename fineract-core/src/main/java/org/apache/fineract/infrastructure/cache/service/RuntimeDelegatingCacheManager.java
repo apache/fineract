@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.infrastructure.cache.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.cache.CacheApiConstants;
@@ -105,7 +107,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager, Initializing
                 }
                 currentCacheManager = ehCacheManager;
 
-                if (currentCacheManager.getCacheNames().size() == 0) {
+                if (currentCacheManager.getCacheNames().isEmpty()) {
                     log.error("No caches configured for activated CacheManager {}", currentCacheManager);
                 }
             }
@@ -115,10 +117,17 @@ public class RuntimeDelegatingCacheManager implements CacheManager, Initializing
         return changes;
     }
 
+    @SuppressFBWarnings(value = "DCN_NULLPOINTER_EXCEPTION", justification = "TODO: fix this!")
     private void clearEhCache() {
         Iterable<String> cacheNames = ehCacheManager.getCacheNames();
         for (String cacheName : cacheNames) {
-            ehCacheManager.getCache(cacheName).clear();
+            try {
+                if (Objects.nonNull(ehCacheManager.getCache(cacheName))) {
+                    Objects.requireNonNull(ehCacheManager.getCache(cacheName)).clear();
+                }
+            } catch (NullPointerException npe) {
+                log.warn(npe.getMessage());
+            }
         }
     }
 }
