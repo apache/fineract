@@ -10,7 +10,7 @@ steps:
     id: BuildWithGradle
     entrypoint: "./gradlew"
     env:
-      - GRADLE_OPTS="-Djava.home=/usr/lib/jvm/java-11-openjdk-amd64"
+      - GRADLE_OPTS="-Djava.home=/usr/lib/jvm/java-17-openjdk-amd64"
     args:
 #      - './gradlew'
       - ':fineract-provider:jibDockerBuild'
