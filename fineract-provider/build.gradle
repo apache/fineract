@@ -256,7 +256,7 @@ jib {
     }
 
     to {
-        image = 'almbolonzi/fineract'
+        image = 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract:latest'
         tags = [
             "${project.version}",
             'latest'
