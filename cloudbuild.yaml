@@ -6,10 +6,14 @@ steps:
   # Build a Docker image for the Spring Boot application.
 #  - name: 'gcr.io/cloud-builders/docker'
 #    args: [ 'build', '-t', 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract', '.' ]
-  - name: 'Build Docker image'
-      args:
-        - ./gradlew :fineract-provider:jibDockerBuild -x test
-      entrypoint: [ "bash", "-c" ]
+  - name: 'gcr.io/cloud-builders/gradle'
+    args:
+#      - './gradlew'
+      - ':fineract-provider:jibDockerBuild'
+      - '-x'
+      - 'test'
+    env:
+      - GRADLE_OPTS: "-Djava.home=/usr/lib/jvm/java-17-openjdk-amd64"
 #    images:
 #      - "europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract:latest"
 
