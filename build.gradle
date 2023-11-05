@@ -53,7 +53,6 @@ buildscript {
     }
     repositories {
         maven { url 'https://plugins.gradle.org/m2/' }
-        google()
     }
 
     dependencies {
@@ -126,7 +125,6 @@ allprojects  {
 
     repositories {
         mavenCentral()
-        google()
     }
 
     apply plugin: 'com.adarshr.test-logger'
