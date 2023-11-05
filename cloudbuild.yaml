@@ -7,8 +7,8 @@ steps:
 #  - name: 'gcr.io/cloud-builders/docker'
 #    args: [ 'build', '-t', 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract', '.' ]
   - name: 'gcr.io/cloud-builders/gradle'
-    id: BuildWithGradle
-    entrypoint: "./gradlew"
+#    id: BuildWithGradle
+#    entrypoint: "./gradlew"
     env:
       - GRADLE_OPTS="-Djava.home=/usr/lib/jvm/java-17-openjdk-amd64"
     args:
