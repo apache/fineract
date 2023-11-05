@@ -7,11 +7,11 @@ steps:
 #  - name: 'gcr.io/cloud-builders/docker'
 #    args: [ 'build', '-t', 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract', '.' ]
   - name: 'gcr.io/cloud-builders/gradle'
-    args:
-      - './gradlew'
-      - ':fineract-provider:jibDockerBuild'
-      - '-x'
-      - 'test'
+    args: [ ':fineract-provider:jibDockerBuild -x test']
+#      - './gradlew'
+#      - ':fineract-provider:jibDockerBuild'
+#      - '-x'
+#      - 'test'
 #    images:
 #      - "europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract:latest"
 
