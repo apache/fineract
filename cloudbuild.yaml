@@ -13,7 +13,7 @@ steps:
       - '-x'
       - 'test'
     env:
-      - GRADLE_OPTS: "-Djava.home=/usr/lib/jvm/java-17-openjdk-amd64"
+      - GRADLE_OPTS: '-Djava.home=/usr/lib/jvm/java-17-openjdk-amd64'
 #    images:
 #      - "europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract:latest"
 
