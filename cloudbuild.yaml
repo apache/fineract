@@ -8,7 +8,7 @@ steps:
 #    args: [ 'build', '-t', 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract', '.' ]
   - name: 'gcr.io/cloud-builders/gradle'
     args:
-      - './gradlew'
+#      - './gradlew'
       - ':fineract-provider:jibDockerBuild'
       - '-x'
       - 'test'
