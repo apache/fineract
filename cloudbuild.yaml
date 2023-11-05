@@ -4,8 +4,16 @@ steps:
 #    args: [ 'clean', 'bootJar' ]
 
   # Build a Docker image for the Spring Boot application.
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract', '.' ]
+#  - name: 'gcr.io/cloud-builders/docker'
+#    args: [ 'build', '-t', 'europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract', '.' ]
+  - name: 'gcr.io/cloud-builders/gradle'
+    args:
+      - './gradlew'
+      - ':fineract-provider:jibDockerBuild'
+      - '-x'
+      - 'test'
+    images:
+      - "europe-docker.pkg.dev/${PROJECT_ID}/eu.gcr.io/fineract:latest"
 
   # Push the Docker image to the Google Cloud Container Registry.
   - name: 'gcr.io/cloud-builders/docker'
