@@ -24,8 +24,8 @@ WORKDIR /fineract
 
 RUN ./gradlew --no-daemon -q -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
-#WORKDIR /fineract
-#RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
+WORKDIR /fineract
+RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
 
 # We download separately a JDBC driver (which not allowed to be included in Apache binary distribution)
 WORKDIR /fineract/BOOT-INF/lib
