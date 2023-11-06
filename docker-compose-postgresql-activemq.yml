@@ -20,7 +20,7 @@
 version: '3.7'
 services:
   activemq:
-    image: rmohr/activemq:5.15.9-alpine
+    image: symptoma/activemq:5.18.3
     ports:
       - 6161:6161
       - 61616:61616
