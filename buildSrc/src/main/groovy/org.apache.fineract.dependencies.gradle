@@ -22,8 +22,11 @@ apply plugin: 'io.spring.dependency-management'
 // https://github.com/spring-gradle-plugins/dependency-management-plugin
 dependencyManagement {
     imports {
+        mavenBom 'io.micrometer:micrometer-bom:1.11.5'
         mavenBom 'org.springframework:spring-framework-bom:6.0.10'
         mavenBom 'org.springframework.boot:spring-boot-dependencies:3.1.1'
+        mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.0.3'
+        mavenBom 'io.opentelemetry:opentelemetry-bom:1.31.0'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.8.22'
         mavenBom 'org.junit:junit-bom:5.9.3'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.15.2'

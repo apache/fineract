@@ -191,7 +191,8 @@ Now to run a new Fineract instance you can simply:
 1. `git clone https://github.com/apache/fineract.git ; cd fineract`
 1. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
 1. `./gradlew :fineract-provider:jibDockerBuild -x test`
-1. `docker-compose up -d`
+1. install the Loki log driver with `docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions`
+1. `docker compose -f docker-compose-development.yml up -d`
 1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
 1. wait for https://localhost:8443/fineract-provider/actuator/health to return `{"status":"UP"}`
 1. you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise  you get a message that is rather misleading from the UI.
@@ -206,6 +207,13 @@ _(Note that in previous versions, the `mysqlserver` environment variable used at
 `docker run` time did something similar; this has changed in [FINERACT-773](https://issues.apache.org/jira/browse/FINERACT-773)),
 and the `mysqlserver` environment variable is now no longer supported.)_
 
+If you need the Java Flight Recorder image then copy the file from the running fineract-development container:
+
+```
+docker container cp fineract-development:/tmp/fineract.jfr /tmp
+```
+
+NOTE: Download Azul Mission Control from here https://www.azul.com/products/components/azul-mission-control/ to analyze the Java Flight Recorder file.
 
 Connection pool configuration
 =============================

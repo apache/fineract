@@ -46,6 +46,12 @@ dependencies {
             'org.springframework.integration:spring-integration-kafka',
             'org.springframework.kafka:spring-kafka',
 
+            'io.micrometer:micrometer-registry-prometheus',
+            'io.micrometer:micrometer-registry-otlp',
+            'io.micrometer:micrometer-registry-cloudwatch2',
+
+            'io.awspring.cloud:spring-cloud-aws-starter',
+
             'org.apache.avro:avro',
             'jakarta.ws.rs:jakarta.ws.rs-api',
             'org.glassfish.jersey.media:jersey-media-multipart',

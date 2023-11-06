@@ -19,21 +19,17 @@
 version: "3.8"
 
 services:
-
-  db:
-    extends:
-      file: ./config/docker/compose/mariadb.yml
-      service: mariadb
-
-  fineract:
-    extends:
-      file: ./config/docker/compose/fineract.yml
-      service: fineract
-    ports:
-      - "8443:8443"
-    depends_on:
-      db:
-        condition: service_healthy
+  mariadb:
+    image: mariadb:11.0
+    volumes:
+      - ../mysql/conf.d/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
+      - ../mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:Z,ro
+    restart: always
     env_file:
-      - ./config/docker/env/fineract-mariadb.env
-      - ./config/docker/env/fineract.env
+      - ../env/mysql.env
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "3306:3306"
