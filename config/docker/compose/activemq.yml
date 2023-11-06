@@ -19,21 +19,8 @@
 version: "3.8"
 
 services:
-
-  db:
-    extends:
-      file: ./config/docker/compose/mariadb.yml
-      service: mariadb
-
-  fineract:
-    extends:
-      file: ./config/docker/compose/fineract.yml
-      service: fineract
+  activemq:
+    image: symptoma/activemq:5.18.3
     ports:
-      - "8443:8443"
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file:
-      - ./config/docker/env/fineract-mariadb.env
-      - ./config/docker/env/fineract.env
+      - 6161:6161
+      - 61616:61616

@@ -16,24 +16,13 @@
 # under the License.
 #
 
-version: "3.8"
-
-services:
-
-  db:
-    extends:
-      file: ./config/docker/compose/mariadb.yml
-      service: mariadb
-
-  fineract:
-    extends:
-      file: ./config/docker/compose/fineract.yml
-      service: fineract
-    ports:
-      - "8443:8443"
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file:
-      - ./config/docker/env/fineract-mariadb.env
-      - ./config/docker/env/fineract.env
+x-logging: &default-logging
+  driver: loki
+  options:
+    loki-url: 'http://localhost:3100/api/prom/push'
+    loki-pipeline-stages: |
+      - multiline:
+          firstline: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+          max_wait_time: 3s
+      - regex:
+          expression: '^(?P<date>\d{4}-\d{2}-\d{2}) (?P<time>\d{2}:\d{2}:\d{2}.\d{3}) (?P<message>(?s:.*))$$'

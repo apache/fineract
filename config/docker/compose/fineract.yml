@@ -19,21 +19,13 @@
 version: "3.8"
 
 services:
-
-  db:
-    extends:
-      file: ./config/docker/compose/mariadb.yml
-      service: mariadb
-
   fineract:
-    extends:
-      file: ./config/docker/compose/fineract.yml
-      service: fineract
-    ports:
-      - "8443:8443"
-    depends_on:
-      db:
-        condition: service_healthy
+    image: fineract:latest
+    volumes:
+      - ../aws/etc/credentials:/etc/aws/credentials
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 10s
+      retries: 10
     env_file:
-      - ./config/docker/env/fineract-mariadb.env
-      - ./config/docker/env/fineract.env
+      - ../env/fineract-common.env

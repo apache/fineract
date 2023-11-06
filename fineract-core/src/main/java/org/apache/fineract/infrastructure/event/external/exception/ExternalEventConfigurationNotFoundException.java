@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.event.external.exception;
 public class ExternalEventConfigurationNotFoundException extends RuntimeException {
 
     public ExternalEventConfigurationNotFoundException() {
-        super("All external events are not configured");
+        super("No external events configured");
     }
 
     public ExternalEventConfigurationNotFoundException(final String externalEventType) {

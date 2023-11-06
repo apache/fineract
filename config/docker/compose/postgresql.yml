@@ -19,21 +19,16 @@
 version: "3.8"
 
 services:
-
-  db:
-    extends:
-      file: ./config/docker/compose/mariadb.yml
-      service: mariadb
-
-  fineract:
-    extends:
-      file: ./config/docker/compose/fineract.yml
-      service: fineract
-    ports:
-      - "8443:8443"
-    depends_on:
-      db:
-        condition: service_healthy
+  postgresql:
+    image: postgres:16.0
+    volumes:
+      - ../postgresql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/:Z,ro
+    restart: always
     env_file:
-      - ./config/docker/env/fineract-mariadb.env
-      - ./config/docker/env/fineract.env
+      - ../env/postgresql.env
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "5432:5432"

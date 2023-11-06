@@ -133,7 +133,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 () -> underTest.afterPropertiesSet());
 
         // then
-        String expectedMessage = "All external events are not configured";
+        String expectedMessage = "No external events configured";
         String actualMessage = exceptionThrown.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
