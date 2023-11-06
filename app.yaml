@@ -11,7 +11,7 @@ resources:
   disk_size_gb: 10
 automatic_scaling:
   #cool_down_period: 120s
-  min_num_instances: 2
+  min_num_instances: 1
   max_num_instances: 3
   cpu_utilization:
     target_utilization: 0.5
