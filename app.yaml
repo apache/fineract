@@ -1,7 +1,7 @@
 runtime: java
 api_version: '1.0'
 env: flexible
-service: test
+service: default
 threadsafe: true
 runtime_config:
   runtime_version: "17"
