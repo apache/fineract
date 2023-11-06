@@ -300,6 +300,8 @@ jib {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
+        implementation 'com.mysql:mysql-connector-j:8.2.0'
+        implementation 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.14.1'
     }
 
     pluginExtensions {
