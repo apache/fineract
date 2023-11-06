@@ -24,13 +24,13 @@ WORKDIR /fineract
 
 RUN ./gradlew --no-daemon -q -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
-WORKDIR /fineract
-RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
+#WORKDIR /fineract
+#RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
 
 # We download separately a JDBC driver (which not allowed to be included in Apache binary distribution)
 WORKDIR /fineract/BOOT-INF/lib
 #RUN wget -q https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar
-RUN wget -q https://storage.cloud.google.com/fineract-403411-java-lib/mysql-connector-j-8.2.0/mysql-connector-j-8.2.0.jar
+RUN wget -q https://storage.cloud.google.com/fineract-404214-java-lib/mysql-connector-j-8.2.0/mysql-connector-j-8.2.0.jar
 RUN wget -q https://storage.googleapis.com/cloud-sql-connectors-java/v1.13.1/mysql-socket-factory-1.13.1-jar-with-dependencies.jar
 
 # =========================================
@@ -48,5 +48,9 @@ COPY --from=builder /fineract/BOOT-INF/classes /app
 #RUN chmod 775 /entrypoint.sh
 
 EXPOSE 8443
+
+WORKDIR /fineract
+
+CMD ["java", "-Dloader.path=.", "-jar", "fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
 #ENTRYPOINT ["/entrypoint.sh"]
