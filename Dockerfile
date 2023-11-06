@@ -40,6 +40,7 @@ FROM azul/zulu-openjdk-alpine:17 AS fineract
 COPY --from=builder /fineract/BOOT-INF/lib /app/lib
 COPY --from=builder /fineract/META-INF /app/META-INF
 COPY --from=builder /fineract/BOOT-INF/classes /app
+COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 
 #WORKDIR /fineract
 
@@ -51,6 +52,6 @@ EXPOSE 8443
 
 WORKDIR /fineract
 
-CMD ["java", "-Dloader.path=.", "-jar", "fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
 #ENTRYPOINT ["/entrypoint.sh"]
