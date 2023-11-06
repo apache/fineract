@@ -256,7 +256,7 @@ jib {
     }
 
     to {
-        image = 'europe-west2-docker.pkg.dev/fineract-404214/fineract:latest'
+        image = 'europe-west2-docker.pkg.dev/fineract-404214/fineract/fineract:latest'
         tags = [
             "${project.version}",
             'latest'
