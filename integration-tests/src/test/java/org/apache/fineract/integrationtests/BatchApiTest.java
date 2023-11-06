@@ -33,7 +33,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -584,10 +583,10 @@ public class BatchApiTest {
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
         final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(10), "approve");
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
 
         final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(8), "disburse");
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
 
         final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
                 "associations=all");
@@ -1172,7 +1171,7 @@ public class BatchApiTest {
         final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
 
         // Create a disbursement request
-        final LocalDate disburseLoanDate = LocalDate.now(ZoneId.systemDefault()).minusDays(1);
+        final LocalDate disburseLoanDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(1);
         final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId,
                 disburseLoanDate);
 
@@ -1565,7 +1564,7 @@ public class BatchApiTest {
 
         // Create a disbursement request
         final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(1));
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(1));
 
         // Create a merchant issued refund request
         final BatchRequest merchantIssuedRefundRequest = BatchHelper.merchantIssuedRefundRequest(merchantIssuedRefundRequestId,
@@ -1712,7 +1711,7 @@ public class BatchApiTest {
 
         // Create a repayment request by external id
         final BatchRequest repaymentRequest = BatchHelper.createTransactionRequestByLoanExternalId(repayLoanRequestId,
-                getLoanBeforeTxnRequestId, "repayment", "500", LocalDate.now(ZoneId.systemDefault()));
+                getLoanBeforeTxnRequestId, "repayment", "500", LocalDate.now(Utils.getZoneIdOfTenant()));
 
         // Get loan transactions request
         final BatchRequest getLoanTransactionsRequestAfterTxn = BatchHelper.getLoanByIdRequest(getLoanAfterTxnRequestId, repayLoanRequestId,
@@ -2364,10 +2363,10 @@ public class BatchApiTest {
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
         final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(10), "approve");
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
 
         final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(8), "disburse");
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
 
         final BatchRequest updateLoanRequest = BatchHelper.modifyLoanByExternalIdRequest(updateLoanRequestId, approveLoanRequestId);
 
@@ -2430,10 +2429,10 @@ public class BatchApiTest {
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
         final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(10), "approve");
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
 
         final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(8), "disburse");
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
 
         final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
                 "associations=all");
@@ -2463,7 +2462,7 @@ public class BatchApiTest {
         br.setRequestId(1L);
         br.setRelativeUrl(String.format("loans/" + loanId + "/transactions?command=repayment"));
         br.setMethod("POST");
-        String dateString = LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody(String.format(
                 "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": \"500\"}",
                 dateString));
@@ -2511,10 +2510,10 @@ public class BatchApiTest {
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
         final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(10), "approve");
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
 
         final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(ZoneId.systemDefault()).minusDays(8), "disburse");
+                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
 
         final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
                 "associations=all");
@@ -2544,7 +2543,7 @@ public class BatchApiTest {
         br.setRequestId(1L);
         br.setRelativeUrl(String.format("v1/loans/" + loanId + "/transactions?command=repayment"));
         br.setMethod("POST");
-        String dateString = LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody(String.format(
                 "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": \"500\"}",
                 dateString));
