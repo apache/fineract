@@ -51,7 +51,7 @@ public class WorkingDays extends AbstractPersistableCustom {
 
     }
 
-    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments,
+    public WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments,
             final Boolean extendTermForRepaymentsOnHolidays) {
         this.recurrence = recurrence;
         this.repaymentReschedulingType = repaymentReschedulingType;
