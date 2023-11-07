@@ -28,6 +28,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -38,15 +39,19 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -76,6 +81,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
     private static AccountHelper accountHelper;
     private static Integer commonLoanProductId;
     private static PostClientsResponse client;
+    private static LoanRescheduleRequestHelper loanRescheduleRequestHelper;
 
     @BeforeAll
     public static void setup() {
@@ -88,6 +94,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
         businessDateHelper = new BusinessDateHelper();
         accountHelper = new AccountHelper(requestSpec, responseSpec);
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
+        loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
 
         final Account assetAccount = accountHelper.createAssetAccount();
         final Account incomeAccount = accountHelper.createIncomeAccount();
@@ -1718,7 +1725,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
     // UC101: Multiple disbursement test
     // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
     // 1. Disburse the loan
-    // 3. Pay over the down payment
+    // 2. Pay over the down payment
     // 3. Disburse again
     @Test
     public void uc101() {
@@ -1790,7 +1797,107 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             validateRepaymentPeriod(loanDetails, 3, 250.0, 50.0, 200.0, 50.0, 0.0);
             validateRepaymentPeriod(loanDetails, 4, 250.0, 0.0, 250.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 5, 250.0, 0.0, 250.0, 0.0, 0.0);
-            validateRepaymentPeriod(loanDetails, 6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 6, LocalDate.of(2023, 2, 22), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 100.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
+    // UC102: Multiple disbursement & reschedule test
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Disburse the loan (500)
+    // 2. Reschedule the 2nd period
+    // 3. Repayment (450)
+    // 3. Disburse again (250)
+    // 4. Reschedule the 3rd period to be later than the 2nd disbursement
+    @Test
+    public void uc102() {
+        try {
+
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.02.20").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            Integer localLoanProductId = createLoanProduct("500", "15", "4", false, assetAccount, incomeAccount, expenseAccount,
+                    overpaymentAccount);
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), localLoanProductId, 500L, 45, 15, 3, 0,
+                    "01 January 2023", "01 January 2023");
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 January 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 500.0, 0.0, 500.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 1, 1), 125.0, 0.0, 125.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 1, 16), 125.0, 0.0, 125.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 1, 31), 125.0, 0.0, 125.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 2, 15), 125.0, 0.0, 125.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanDetails.getId()).locale("en")
+                            .dateFormat(DATETIME_PATTERN).rescheduleReasonId(1L).rescheduleFromDate("16 January 2023")
+                            .adjustedDueDate("31 January 2023").submittedOnDate("16 January 2023"));
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().approvedOnDate("16 January 2023").locale("en").dateFormat(DATETIME_PATTERN));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 500.0, 0.0, 500.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 1, 1), 125.0, 0.0, 125.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 1, 31), 125.0, 0.0, 125.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 2, 15), 125.0, 0.0, 125.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 3, 2), 125.0, 0.0, 125.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 January 2023").locale("en").transactionAmount(350.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 150.0, 350.0, 150.0, 350.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 1, 1), 125.0, 125.0, 0.0, 0.0, 125.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 1, 31), 125.0, 125.0, 0.0, 125.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 2, 15), 125.0, 100.0, 25.0, 100.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 3, 2), 125.0, 0.0, 125.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("20 February 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(250.0)).locale("en"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 400.0, 350.0, 400.0, 350.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 1, 1), 125.0, 125.0, 0.0, 0.0, 125.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 1, 31), 125.0, 125.0, 0.0, 125.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 2, 15), 125.0, 100.0, 25.0, 100.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 2, 20), 62.5, 0.0, 62.5, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 3, 2), 312.5, 0.0, 312.5, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            rescheduleLoansResponse = loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+                    .loanId(loanDetails.getId()).locale("en").dateFormat(DATETIME_PATTERN).rescheduleReasonId(1L)
+                    .rescheduleFromDate("15 February 2023").adjustedDueDate("25 February 2023").submittedOnDate("15 February 2023"));
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().approvedOnDate("15 February 2023").locale("en").dateFormat(DATETIME_PATTERN));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 400.0, 350.0, 400.0, 350.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 1, 1), 125.0, 125.0, 0.0, 0.0, 125.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 1, 31), 125.0, 125.0, 0.0, 125.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 2, 20), 62.5, 0.0, 62.5, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 2, 25), 218.75, 100.0, 118.75, 100.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 3, 12), 218.75, 0.0, 218.75, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
@@ -1867,6 +1974,18 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
         return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
+    private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
+            double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
+        GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
+                .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
+        assertEquals(dueDate, period.getDueDate());
+        assertEquals(principalDue, period.getPrincipalDue());
+        assertEquals(principalPaid, period.getPrincipalPaid());
+        assertEquals(principalOutstanding, period.getPrincipalOutstanding());
+        assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
+        assertEquals(paidLate, period.getTotalPaidLateForPeriod());
+    }
+
     private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, double principalDue,
             double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
@@ -1878,12 +1997,13 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
         assertEquals(paidLate, period.getTotalPaidLateForPeriod());
     }
 
-    private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, double principalDue,
+    private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
             double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
             double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
             double paidInAdvance, double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
+        assertEquals(dueDate, period.getDueDate());
         assertEquals(principalDue, period.getPrincipalDue());
         assertEquals(principalPaid, period.getPrincipalPaid());
         assertEquals(principalOutstanding, period.getPrincipalOutstanding());

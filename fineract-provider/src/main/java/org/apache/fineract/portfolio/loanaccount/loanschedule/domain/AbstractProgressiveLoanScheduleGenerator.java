@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -117,25 +118,18 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
             isFirstRepayment = false;
             LocalDate scheduledDueDate = adjustedDateDetailsDTO.getChangedScheduleDate();
 
-            // this block is to generate the schedule till the specified
-            // date(used for calculating preclosure)
-            boolean isCompletePeriod = true;
-            if (scheduleParams.getScheduleTillDate() != null && !scheduledDueDate.isBefore(scheduleParams.getScheduleTillDate())) {
-                if (!scheduledDueDate.isEqual(scheduleParams.getScheduleTillDate())) {
-                    isCompletePeriod = false;
-                }
-                scheduledDueDate = scheduleParams.getScheduleTillDate();
-                isNextRepaymentAvailable = false;
-            }
+            // Loan Schedule Exceptions that need to be applied for Loan Account
+            LoanTermVariationParams termVariationParams = applyLoanTermVariations(loanApplicationTerms, scheduleParams, scheduledDueDate);
+            scheduledDueDate = termVariationParams.scheduledDueDate();
+
+            // Updates total days in term
+            scheduleParams
+                    .addLoanTermInDays(Math.toIntExact(ChronoUnit.DAYS.between(scheduleParams.getPeriodStartDate(), scheduledDueDate)));
 
             ScheduleCurrentPeriodParams currentPeriodParams = new ScheduleCurrentPeriodParams(currency, BigDecimal.ZERO);
 
             if (loanApplicationTerms.isMultiDisburseLoan()) {
                 processDisbursements(loanApplicationTerms, chargesDueAtTimeOfDisbursement, scheduleParams, periods, scheduledDueDate);
-            }
-
-            if (currentPeriodParams.isSkipCurrentLoop()) {
-                continue;
             }
 
             // 5 determine principal,interest of repayment period
@@ -178,7 +172,7 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
                     scheduleParams.getPeriodStartDate(), scheduledDueDate, currentPeriodParams.getPrincipalForThisPeriod(),
                     scheduleParams.getOutstandingBalance(), currentPeriodParams.getInterestForThisPeriod(),
                     currentPeriodParams.getFeeChargesForInstallment(), currentPeriodParams.getPenaltyChargesForInstallment(),
-                    totalInstallmentDue, !isCompletePeriod);
+                    totalInstallmentDue, false);
             if (principalInterestForThisPeriod.getRescheduleInterestPortion() != null) {
                 installment.setRescheduleInterestPortion(principalInterestForThisPeriod.getRescheduleInterestPortion().getAmount());
             }
@@ -190,7 +184,7 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
 
             periods.add(installment);
 
-            // Updates principal paid map with efective date for reducing
+            // Updates principal paid map with effective date for reducing
             // the amount from outstanding balance(interest calculation)
             updateAmountsWithEffectiveDate(loanApplicationTerms, holidayDetailDTO, scheduleParams, scheduledDueDate, currentPeriodParams,
                     installment);
@@ -229,7 +223,9 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
     public LoanScheduleDTO rescheduleNextInstallments(MathContext mc, LoanApplicationTerms loanApplicationTerms, Loan loan,
             HolidayDetailDTO holidayDetailDTO, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
             LocalDate rescheduleFrom) {
-        return null;
+
+        LoanScheduleModel model = generate(mc, loanApplicationTerms, loan.getActiveCharges(), holidayDetailDTO);
+        return LoanScheduleDTO.from(null, model);
     }
 
     @Override
@@ -625,5 +621,34 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
         // 'principalDue'
         scheduleParams
                 .reduceOutstandingBalance(currentPeriodParams.getPrincipalForThisPeriod().minus(currentPeriodParams.getReducedBalance()));
+    }
+
+    /**
+     * @param loanApplicationTerms
+     * @param scheduleParams
+     * @param scheduledDueDate
+     * @return
+     */
+    private LoanTermVariationParams applyLoanTermVariations(final LoanApplicationTerms loanApplicationTerms,
+            final LoanScheduleParams scheduleParams, final LocalDate scheduledDueDate) {
+        boolean skipPeriod = false;
+        boolean recalculateAmounts = false;
+        LocalDate modifiedScheduledDueDate = scheduledDueDate;
+        ArrayList<LoanTermVariationsData> variationsData = null;
+
+        // due date changes should be applied only for that dueDate
+        if (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(scheduledDueDate)) {
+            LoanTermVariationsData loanTermVariationsData = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
+            if (DateUtils.isEqual(modifiedScheduledDueDate, loanTermVariationsData.getTermVariationApplicableFrom())) {
+                modifiedScheduledDueDate = loanTermVariationsData.getDateValue();
+                if (!loanTermVariationsData.isSpecificToInstallment()) {
+                    scheduleParams.setActualRepaymentDate(modifiedScheduledDueDate);
+                    loanApplicationTerms.setNewScheduledDueDateStart(modifiedScheduledDueDate);
+                }
+                loanTermVariationsData.setProcessed(true);
+            }
+        }
+
+        return new LoanTermVariationParams(skipPeriod, recalculateAmounts, modifiedScheduledDueDate, variationsData);
     }
 }

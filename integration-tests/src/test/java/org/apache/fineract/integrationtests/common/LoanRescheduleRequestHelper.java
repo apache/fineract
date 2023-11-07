@@ -23,8 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansResponse;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 
-public class LoanRescheduleRequestHelper {
+public class LoanRescheduleRequestHelper extends IntegrationTest {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -69,5 +74,13 @@ public class LoanRescheduleRequestHelper {
 
         final Integer id = Utils.performServerGet(requestSpec, responseSpec, URL, "id");
         assertEquals(requestId, id, "ERROR IN CREATING LOAN RESCHEDULE REQUES");
+    }
+
+    public PostCreateRescheduleLoansResponse createLoanRescheduleRequest(PostCreateRescheduleLoansRequest request) {
+        return ok(fineract().rescheduleLoans.createLoanRescheduleRequest(request));
+    }
+
+    public PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
+        return ok(fineract().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "approve"));
     }
 }
