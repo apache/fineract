@@ -18,15 +18,36 @@
  */
 package org.apache.fineract.portfolio.calendar.service;
 
+import static org.apache.fineract.portfolio.calendar.service.CalendarUtils.FLOATING_TIMEZONE_PROPERTY_KEY;
+import static org.apache.fineract.portfolio.common.domain.PeriodFrequencyType.WEEKS;
+import static org.apache.fineract.util.TimeZoneConstants.ASIA_MANILA_ID;
+import static org.apache.fineract.util.TimeZoneConstants.EUROPE_BERLIN_ID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
+import java.util.Collection;
+import java.util.List;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.TimeZone;
+import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
+import net.fortuna.ical4j.model.parameter.Value;
+import org.apache.fineract.junit.context.WithTenantContext;
+import org.apache.fineract.junit.context.WithTenantContextExtension;
+import org.apache.fineract.junit.system.WithSystemProperty;
+import org.apache.fineract.junit.system.WithSystemPropertyExtension;
+import org.apache.fineract.junit.timezone.WithSystemTimeZone;
+import org.apache.fineract.junit.timezone.WithSystemTimeZoneExtension;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith({ WithSystemTimeZoneExtension.class, WithTenantContextExtension.class, WithSystemPropertyExtension.class })
 public class CalendarUtilsTest {
 
     @Test
@@ -120,7 +141,7 @@ public class CalendarUtilsTest {
         Temporal seedDate = LocalDate.of(2023, Month.JANUARY, 27);
 
         // when
-        Temporal adjustedDateWeekly = CalendarUtils.adjustDate(date, seedDate, PeriodFrequencyType.WEEKS);
+        Temporal adjustedDateWeekly = CalendarUtils.adjustDate(date, seedDate, WEEKS);
         // then
         assertEquals(30, adjustedDateWeekly.get(ChronoField.DAY_OF_MONTH));
 
@@ -134,6 +155,48 @@ public class CalendarUtilsTest {
         // then
         assertEquals(30, adjustedDateDaily.get(ChronoField.DAY_OF_MONTH));
 
+    }
+
+    @Test
+    @WithSystemTimeZone(ASIA_MANILA_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void testConvertToLocalDateListWorksForDifferentTimezones() throws ParseException {
+        // given
+        TimeZone timeZone = TimeZoneRegistryFactory.getInstance().createRegistry().getTimeZone("Asia/Manila");
+        DateList dates = new DateList(Value.DATE, timeZone);
+        dates.add(new Date("20231104", "yyyyMMdd"));
+
+        LocalDate seedDate = LocalDate.of(2023, 11, 4);
+
+        // when
+        Collection<LocalDate> result = CalendarUtils.convertToLocalDateList(dates, seedDate, WEEKS, false, 0);
+        // then
+        Collection<LocalDate> expected = List.of(LocalDate.of(2023, 11, 4));
+
+        assertThat(result).hasSize(1);
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void testConvertToLocalDateListWorksForSameTimezones() throws ParseException {
+        // given
+        TimeZone timeZone = TimeZoneRegistryFactory.getInstance().createRegistry().getTimeZone("Europe/Berlin");
+        DateList dates = new DateList(Value.DATE, timeZone);
+        dates.add(new Date("20231104", "yyyyMMdd"));
+
+        LocalDate seedDate = LocalDate.of(2023, 11, 4);
+
+        // when
+        Collection<LocalDate> result = CalendarUtils.convertToLocalDateList(dates, seedDate, WEEKS, false, 0);
+        // then
+        Collection<LocalDate> expected = List.of(LocalDate.of(2023, 11, 4));
+
+        assertThat(result).hasSize(1);
+        assertThat(result).isEqualTo(expected);
     }
 
 }

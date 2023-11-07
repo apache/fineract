@@ -33,7 +33,7 @@ public final class WorkingDaysUtil {
     public static LocalDate getOffSetDateIfNonWorkingDay(final LocalDate date, final LocalDate nextMeetingDate,
             final WorkingDays workingDays) {
 
-        // If date is not a non working day then return date.
+        // If date is a working day then return date.
         if (isWorkingDay(workingDays, date)) {
             return date;
         }

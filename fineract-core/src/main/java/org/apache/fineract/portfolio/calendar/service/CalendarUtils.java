@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.DateTime;
@@ -53,19 +54,18 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public final class CalendarUtils {
+
+    public static final String FLOATING_TIMEZONE_PROPERTY_KEY = "net.fortuna.ical4j.timezone.date.floating";
 
     private CalendarUtils() {
 
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(CalendarUtils.class);
-
     static {
-        System.setProperty("net.fortuna.ical4j.timezone.date.floating", "true");
+        System.setProperty(FLOATING_TIMEZONE_PROPERTY_KEY, "true");
     }
 
     public static LocalDateTime getNextRecurringDate(final String recurringRule, final LocalDateTime seedDate,
@@ -119,7 +119,7 @@ public final class CalendarUtils {
         try {
             formattedDate = new Date(seedDateStr, DateUtils.DEFAULT_DATETIME_FORMAT);
         } catch (final ParseException e) {
-            LOG.error("Invalid date: {}", seedDateStr, e);
+            log.error("Invalid date: {}", seedDateStr, e);
         }
         return formattedDate;
     }
@@ -170,15 +170,15 @@ public final class CalendarUtils {
                 numberOfDays);
     }
 
-    private static Collection<LocalDate> convertToLocalDateList(final DateList dates, final LocalDate seedDate,
+    static Collection<LocalDate> convertToLocalDateList(final DateList dates, final LocalDate seedDate,
             final PeriodFrequencyType frequencyType, boolean isSkippMeetingOnFirstDay, final Integer numberOfDays) {
         final Collection<LocalDate> recurringDates = new ArrayList<>();
 
-        for (@SuppressWarnings("rawtypes")
-        final Iterator iterator = dates.iterator(); iterator.hasNext();) {
-            final Date date = (Date) iterator.next();
-            recurringDates.add((LocalDate) adjustDate(LocalDate.ofInstant(date.toInstant(), DateUtils.getDateTimeZoneOfTenant()), seedDate,
-                    frequencyType));
+        for (final Date date : dates) {
+            LocalDateTime dateTimeInProperTz = getLocalDateTimeFromICal4JDate(date);
+            ZoneId tenantZoneId = DateUtils.getDateTimeZoneOfTenant();
+
+            recurringDates.add((LocalDate) adjustDate(dateTimeInProperTz.atZone(tenantZoneId).toLocalDate(), seedDate, frequencyType));
         }
 
         if (isSkippMeetingOnFirstDay) {
@@ -186,6 +186,12 @@ public final class CalendarUtils {
         }
 
         return recurringDates;
+    }
+
+    private static LocalDateTime getLocalDateTimeFromICal4JDate(Date date) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(date);
+        return LocalDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
     }
 
     private static Collection<LocalDate> skipMeetingOnFirstdayOfMonth(final Collection<LocalDate> recurringDates,
@@ -220,10 +226,10 @@ public final class CalendarUtils {
             return recur;
         } catch (final ParseException e) {
             // TODO Auto-generated catch block
-            LOG.error("Problem occurred in getICalRecur function", e);
+            log.error("Problem occurred in getICalRecur function", e);
         } catch (final ValidationException e) {
             // TODO Auto-generated catch block
-            LOG.error("Problem occurred in getICalRecur function", e);
+            log.error("Problem occurred in getICalRecur function", e);
         }
 
         return null;
