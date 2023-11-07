@@ -45,6 +45,8 @@ WORKDIR /fineract
 
 RUN wget -q https://storage.cloud.google.com/fineract-404214-cred/fineract-404214-208dae903126.json
 
+WORKDIR /
+
 CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306 -credential_file=fineract-404214-208dae903126.json
 
 # =========================================
