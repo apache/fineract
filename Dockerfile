@@ -41,8 +41,11 @@ WORKDIR /fineract/BOOT-INF/lib
 RUN wget -q https://storage.cloud.google.com/fineract-404214-java-lib/mysql-connector-j-8.2.0/mysql-connector-j-8.2.0.jar
 RUN wget -q https://storage.googleapis.com/cloud-sql-connectors-java/v1.13.1/mysql-socket-factory-1.13.1-jar-with-dependencies.jar
 
-CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306
-#-credential_file=./credential
+WORKDIR /fineract
+
+RUN wget -q https://storage.cloud.google.com/fineract-404214-cred/fineract-404214-208dae903126.json
+
+CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306 -credential_file=fineract-404214-208dae903126.json
 
 # =========================================
 
