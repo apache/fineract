@@ -17,7 +17,12 @@
 #
 FROM azul/zulu-openjdk-debian:17 AS builder
 
-RUN apt-get update -qq && apt-get install -y wget
+RUN apt-get update -qq && apt-get install -y wget cloud-sql-proxy
+
+ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
+ENV CLOUD_SQL_USER=root
+ENV CLOUD_SQL_PASSWORD=mysql
+ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 COPY . fineract
 WORKDIR /fineract
@@ -32,6 +37,8 @@ WORKDIR /fineract/BOOT-INF/lib
 #RUN wget -q https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar
 RUN wget -q https://storage.cloud.google.com/fineract-404214-java-lib/mysql-connector-j-8.2.0/mysql-connector-j-8.2.0.jar
 RUN wget -q https://storage.googleapis.com/cloud-sql-connectors-java/v1.13.1/mysql-socket-factory-1.13.1-jar-with-dependencies.jar
+
+RUN cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=$CLOUD_SQL_SOCKET
 
 # =========================================
 
@@ -48,6 +55,7 @@ COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 
 #RUN chmod 775 /entrypoint.sh
 
+EXPOSE 3306
 EXPOSE 8443
 
 WORKDIR /fineract
