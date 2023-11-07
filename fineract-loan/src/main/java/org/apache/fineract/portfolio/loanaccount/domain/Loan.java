@@ -5516,7 +5516,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         if (loanSchedule == null) {
             return;
         }
-        updateLoanSchedule(loanSchedule.getInstallments());
+        // Either the installments got recalculated or the model
+        if (loanSchedule.getInstallments() != null) {
+            updateLoanSchedule(loanSchedule.getInstallments());
+        } else {
+            updateLoanSchedule(loanSchedule.getLoanScheduleModel());
+        }
         this.interestRecalculatedOn = DateUtils.getBusinessLocalDate();
         LocalDate lastRepaymentDate = this.getLastRepaymentPeriodDueDate(true);
         Set<LoanCharge> charges = this.getActiveCharges();

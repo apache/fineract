@@ -443,7 +443,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final LoanScheduleDTO loanSchedule = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms, loan,
                     loanApplicationTerms.getHolidayDetailDTO(), loanRepaymentScheduleTransactionProcessor, rescheduleFromDate);
 
-            loan.updateLoanSchedule(loanSchedule.getInstallments());
+            // Either the installments got recalculated or the model
+            if (loanSchedule.getInstallments() != null) {
+                loan.updateLoanSchedule(loanSchedule.getInstallments());
+            } else {
+                loan.updateLoanSchedule(loanSchedule.getLoanScheduleModel());
+            }
             loan.recalculateAllCharges();
             ChangedTransactionDetail changedTransactionDetail = loan.processTransactions();
 
