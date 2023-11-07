@@ -35,18 +35,18 @@ RUN wget -q https://storage.googleapis.com/cloud-sql-connectors-java/v1.13.1/mys
 
 WORKDIR /fineract
 
-RUN wget -q https://storage.cloud.google.com/fineract-404214-cred/fineract-404214-208dae903126.json
-
 WORKDIR /root
 
 ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
-ENV CLOUD_SQL_USER=root
-ENV CLOUD_SQL_PASSWORD=mysql
+#ENV CLOUD_SQL_USER=root
+#ENV CLOUD_SQL_PASSWORD=mysql
 ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && \
                                                       mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy && \
                                                       chmod +x cloud_sql_proxy
+
+RUN wget -q https://storage.cloud.google.com/fineract-404214-cred/fineract-404214-208dae903126.json
 
 CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306 -credential_file=fineract-404214-208dae903126.json
 
