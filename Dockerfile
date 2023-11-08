@@ -35,7 +35,7 @@ RUN wget -q https://storage.googleapis.com/cloud-sql-connectors-java/v1.13.1/mys
 
 WORKDIR /fineract
 
-WORKDIR /root
+WORKDIR /var/lib/google/
 
 ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
 #ENV CLOUD_SQL_USER=root
