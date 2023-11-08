@@ -33,9 +33,9 @@ WORKDIR /fineract/BOOT-INF/lib
 RUN wget -q https://storage.cloud.google.com/fineract-404214-java-lib/mysql-connector-j-8.2.0/mysql-connector-j-8.2.0.jar
 RUN wget -q https://storage.googleapis.com/cloud-sql-connectors-java/v1.13.1/mysql-socket-factory-1.13.1-jar-with-dependencies.jar
 
-WORKDIR /fineract
+#WORKDIR /fineract
 
-RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
+#RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
 
 WORKDIR /root
 
@@ -52,9 +52,11 @@ COPY --from=builder /fineract/META-INF /app/META-INF
 COPY --from=builder /fineract/BOOT-INF/classes /app
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 COPY --from=builder /root/cloud_sql_proxy /var/lib/google
-COPY --from=builder /fineract/fineract-404214-1eefd4b3e75f.json /var/lib/google
+#COPY --from=builder /fineract/fineract-404214-1eefd4b3e75f.json /var/lib/google
 
-#WORKDIR /fineract
+WORKDIR /var/lib/google
+
+RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
 
 #COPY entrypoint.sh /entrypoint.sh
 
