@@ -27,7 +27,8 @@ RUN ./gradlew --no-daemon -q -x compileTestJava -x test -x spotlessJavaCheck -x 
 WORKDIR /fineract
 RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
 
-RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
+RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json . && \
+            mv fineract-404214-1eefd4b3e75f.json fineract.json
 
 # We download separately a JDBC driver (which not allowed to be included in Apache binary distribution)
 WORKDIR /fineract/BOOT-INF/lib
@@ -50,7 +51,7 @@ COPY --from=builder /fineract/META-INF /app/META-INF
 COPY --from=builder /fineract/BOOT-INF/classes /app
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 COPY --from=builder /root/cloud_sql_proxy /var/lib/google
-COPY --from=builder /fineract/fineract-404214-1eefd4b3e75f.json /app
+COPY --from=builder /fineract/fineract.json /app
 
 #COPY entrypoint.sh /entrypoint.sh
 
