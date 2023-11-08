@@ -65,7 +65,7 @@ ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 WORKDIR /var/lib/google
 
-CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:33062", "-credential_file=/app/fineract-404214-1eefd4b3e75f.json"]
+CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:33062", "-credential_file=/app/fineract.json"]
 
 EXPOSE 33062
 EXPOSE 8443
