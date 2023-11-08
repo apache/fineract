@@ -17,7 +17,7 @@
 #
 FROM azul/zulu-openjdk-debian:17 AS builder
 
-RUN apt-get update -qq && apt-get install -y wget && apt-get clean
+RUN apt-get update -qq && apt-get install -y wget gsutil && apt-get clean
 
 COPY . fineract
 WORKDIR /fineract
@@ -46,9 +46,9 @@ RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && \
                                                       mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy && \
                                                       chmod +x cloud_sql_proxy
 
-RUN wget -q https://storage.cloud.google.com/fineract-404214-cred/fineract-404214-208dae903126.json
+RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
 
-CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306 -credential_file=fineract-404214-208dae903126.json
+CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306 -credential_file=fineract-404214-1eefd4b3e75f.json
 
 # =========================================
 
