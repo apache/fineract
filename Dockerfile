@@ -51,7 +51,7 @@ COPY --from=builder /fineract/BOOT-INF/lib /app/lib
 COPY --from=builder /fineract/META-INF /app/META-INF
 COPY --from=builder /fineract/BOOT-INF/classes /app
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
-COPY --from=builder /root/cloud_sql_proxy /var/lib/google
+COPY --from=builder /root/cloud_sql_proxy /app
 COPY --from=builder /fineract/fineract.json /app
 
 #COPY entrypoint.sh /entrypoint.sh
@@ -63,9 +63,9 @@ ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
 #ENV CLOUD_SQL_PASSWORD=mysql
 ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
-WORKDIR /var/lib/google
+WORKDIR /app
 
-CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:33062", "-credential_file=/app/fineract.json"]
+CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:33062", "-credential_file=fineract.json"]
 
 EXPOSE 33062
 EXPOSE 8443
