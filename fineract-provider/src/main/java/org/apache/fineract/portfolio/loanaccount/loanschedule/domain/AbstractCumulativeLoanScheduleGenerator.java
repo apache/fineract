@@ -1004,10 +1004,16 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
 
                 BigDecimal downPaymentAmt = BigDecimal.ZERO;
                 if (loanApplicationTerms.isDownPaymentEnabled()) {
-                    final LoanScheduleModelDownPaymentPeriod downPaymentPeriod = createDownPaymentPeriod(loanApplicationTerms,
-                            scheduleParams, disburseDetail.getKey(), disburseDetail.getValue().getAmount());
-                    periods.add(downPaymentPeriod);
-                    downPaymentAmt = downPaymentPeriod.principalDue();
+                    // get list of disbursements done on same day and create down payment periods
+                    List<DisbursementData> disbursementsOnSameDate = loanApplicationTerms.getDisbursementDatas().stream()
+                            .filter(disbursementData -> DateUtils.isEqual(disbursementData.disbursementDate(), disburseDetail.getKey()))
+                            .toList();
+                    for (DisbursementData disbursementData : disbursementsOnSameDate) {
+                        final LoanScheduleModelDownPaymentPeriod downPaymentPeriod = createDownPaymentPeriod(loanApplicationTerms,
+                                scheduleParams, disbursementData.disbursementDate(), disbursementData.getPrincipal());
+                        periods.add(downPaymentPeriod);
+                        downPaymentAmt = downPaymentAmt.add(downPaymentPeriod.principalDue());
+                    }
                 }
                 // updates actual outstanding balance with new
                 // disbursement detail
