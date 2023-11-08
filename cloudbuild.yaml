@@ -4,7 +4,7 @@ steps:
 #    args: [ 'clean', 'bootJar' ]
 
   - name: 'gcr.io/cloud-builders/gsutil'
-    args: [ 'gsutil', 'cp', 'gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json', 'fineract.json' ]
+    args: [ 'cp', 'gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json', 'fineract.json' ]
 
   # Build a Docker image for the Spring Boot application.
   - name: 'gcr.io/cloud-builders/docker'
