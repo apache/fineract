@@ -35,20 +35,13 @@ RUN wget -q https://storage.googleapis.com/cloud-sql-connectors-java/v1.13.1/mys
 
 WORKDIR /fineract
 
-WORKDIR /var/lib/google/
-
-ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
-#ENV CLOUD_SQL_USER=root
-#ENV CLOUD_SQL_PASSWORD=mysql
-ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
+WORKDIR /root
 
 RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && \
                                                       mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy && \
                                                       chmod +x cloud_sql_proxy
 
 RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
-
-CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:33062 -credential_file=fineract-404214-1eefd4b3e75f.json
 
 # =========================================
 
@@ -58,12 +51,23 @@ COPY --from=builder /fineract/BOOT-INF/lib /app/lib
 COPY --from=builder /fineract/META-INF /app/META-INF
 COPY --from=builder /fineract/BOOT-INF/classes /app
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
+COPY --from=builder /root/cloud_sql_proxy /var/lib/google
+COPY --from=builder /root/fineract-404214-1eefd4b3e75f.json /var/lib/google
 
 #WORKDIR /fineract
 
 #COPY entrypoint.sh /entrypoint.sh
 
 #RUN chmod 775 /entrypoint.sh
+
+ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
+#ENV CLOUD_SQL_USER=root
+#ENV CLOUD_SQL_PASSWORD=mysql
+ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
+
+WORKDIR /var/lib/google
+
+CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:33062 -credential_file=fineract-404214-1eefd4b3e75f.json
 
 EXPOSE 33062
 EXPOSE 8443
