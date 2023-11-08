@@ -17,14 +17,14 @@
 #
 FROM azul/zulu-openjdk-debian:17 AS builder
 
-RUN apt-get update -qq && apt-get install -y wget gsutil && apt-get clean
+RUN apt-get update -qq && apt-get install -y wget && apt-get clean
 
 COPY . fineract
 
 WORKDIR /fineract
 
-RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json . && \
-            mv fineract-404214-1eefd4b3e75f.json fineract.json
+#RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json . && \
+#            mv fineract-404214-1eefd4b3e75f.json fineract.json
 
 RUN ./gradlew --no-daemon -q -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
