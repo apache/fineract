@@ -3,7 +3,7 @@ steps:
 #  - name: 'gcr.io/cloud-builders/gradle'
 #    args: [ 'clean', 'bootJar' ]
 
-  - name: 'Download-file-from-GCS'
+  - name: 'Download_file_from_GCS'
     args: [ 'gsutil', 'cp', 'gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json', 'fineract.json' ]
 
   # Build a Docker image for the Spring Boot application.
