@@ -35,13 +35,13 @@ RUN wget -q https://storage.googleapis.com/cloud-sql-connectors-java/v1.13.1/mys
 
 WORKDIR /fineract
 
+RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
+
 WORKDIR /root
 
 RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && \
                                                       mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy && \
                                                       chmod +x cloud_sql_proxy
-
-RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json /root/
 
 # =========================================
 
@@ -52,7 +52,7 @@ COPY --from=builder /fineract/META-INF /app/META-INF
 COPY --from=builder /fineract/BOOT-INF/classes /app
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 COPY --from=builder /root/cloud_sql_proxy /var/lib/google
-COPY --from=builder /root/fineract-404214-1eefd4b3e75f.json /var/lib/google
+COPY --from=builder /fineract/fineract-404214-1eefd4b3e75f.json /var/lib/google
 
 #WORKDIR /fineract
 
