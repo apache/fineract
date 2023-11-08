@@ -20,15 +20,16 @@ FROM azul/zulu-openjdk-debian:17 AS builder
 RUN apt-get update -qq && apt-get install -y wget gsutil && apt-get clean
 
 COPY . fineract
+
 WORKDIR /fineract
+
+RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json . && \
+            mv fineract-404214-1eefd4b3e75f.json fineract.json
 
 RUN ./gradlew --no-daemon -q -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
 WORKDIR /fineract
 RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
-
-RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json . && \
-            mv fineract-404214-1eefd4b3e75f.json fineract.json
 
 # We download separately a JDBC driver (which not allowed to be included in Apache binary distribution)
 WORKDIR /fineract/BOOT-INF/lib
