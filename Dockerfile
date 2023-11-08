@@ -48,7 +48,7 @@ RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && \
 
 RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
 
-CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306 -credential_file=fineract-404214-1eefd4b3e75f.json
+CMD ./cloud_sql_proxy -instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:33062 -credential_file=fineract-404214-1eefd4b3e75f.json
 
 # =========================================
 
@@ -65,7 +65,7 @@ COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 
 #RUN chmod 775 /entrypoint.sh
 
-EXPOSE 3306
+EXPOSE 33062
 EXPOSE 8443
 
 WORKDIR /fineract
