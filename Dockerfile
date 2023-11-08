@@ -54,6 +54,8 @@ COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 COPY --from=builder /root/cloud_sql_proxy /var/lib/google
 #COPY --from=builder /fineract/fineract-404214-1eefd4b3e75f.json /var/lib/google
 
+RUN mkdir /var/lib/google
+
 WORKDIR /var/lib/google
 
 RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json .
