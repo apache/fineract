@@ -37,8 +37,9 @@ public enum PaymentAllocationTransactionType {
     GOODWILL_CREDIT(LoanTransactionType.GOODWILL_CREDIT, "Goodwill credit"), //
     CHARGE_REFUND(LoanTransactionType.CHARGE_REFUND, "Charge refund"), //
     CHARGE_ADJUSTMENT(LoanTransactionType.CHARGE_ADJUSTMENT, "Charge adjustment"), //
-    WAIVE_INTEREST(LoanTransactionType.WAIVE_INTEREST, "Waive interest"), CHARGE_PAYMENT(LoanTransactionType.CHARGE_PAYMENT,
-            "Charge payment");//
+    WAIVE_INTEREST(LoanTransactionType.WAIVE_INTEREST, "Waive interest"), //
+    CHARGE_PAYMENT(LoanTransactionType.CHARGE_PAYMENT, "Charge payment"), //
+    REFUND_FOR_ACTIVE_LOAN(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, "Refund for active loan");
 
     private final LoanTransactionType loanTransactionType;
     private final String humanReadableName;
