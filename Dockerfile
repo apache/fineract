@@ -59,8 +59,8 @@ COPY --from=builder /fineract/fineract.json /app
 #RUN chmod 775 /entrypoint.sh
 
 ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
-#ENV CLOUD_SQL_USER=root
-#ENV CLOUD_SQL_PASSWORD=mysql
+ENV CLOUD_SQL_USER=root
+ENV CLOUD_SQL_PASSWORD=mysql
 ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 WORKDIR /app
