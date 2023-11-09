@@ -63,10 +63,10 @@ ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
 #ENV CLOUD_SQL_PASSWORD=mysql
 ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
-export fineract_tenants_driver=org.mariadb.jdbc.Driver
-export fineract_tenants_url=jdbc:mariadb://fineractmysql:3306/fineract_tenants
-export fineract_tenants_uid=root
-export fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+EXPORT fineract_tenants_driver=org.mariadb.jdbc.Driver
+EXPORT fineract_tenants_url=jdbc:mariadb://fineractmysql:3306/fineract_tenants
+EXPORT fineract_tenants_uid=root
+EXPORT fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
 
 WORKDIR /app
 
