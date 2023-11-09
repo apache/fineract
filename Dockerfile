@@ -63,6 +63,11 @@ ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
 #ENV CLOUD_SQL_PASSWORD=mysql
 ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
+export fineract_tenants_driver=org.mariadb.jdbc.Driver
+export fineract_tenants_url=jdbc:mariadb://fineractmysql:3306/fineract_tenants
+export fineract_tenants_uid=root
+export fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+
 WORKDIR /app
 
 CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=$CLOUD_SQL_SOCKET", "-credential_file=fineract.json"]
@@ -72,6 +77,6 @@ EXPOSE 8443
 
 WORKDIR /fineract
 
-CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-Dloader.path=/app/lib", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
 #ENTRYPOINT ["/entrypoint.sh"]
