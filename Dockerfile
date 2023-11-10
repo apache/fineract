@@ -72,7 +72,7 @@ ENV fineract_tenants_pwd=mysql
 ENV FINERACT_NODE_ID=1
 # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
 ENV FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=com.mysql.cj.jdbc.Driver
-ENV FINERACT_HIKARI_JDBC_URL=jdbc:mariadb://localhost:3306/fineract_tenants
+ENV FINERACT_HIKARI_JDBC_URL=jdbc:mysql://127.0.0.1:3306/fineract_tenants
 ENV FINERACT_HIKARI_USERNAME=root
 ENV FINERACT_HIKARI_PASSWORD=mysql
 # ... following variables are optional; "application.properties" contains reasonable defaults (same as here)
