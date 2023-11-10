@@ -64,7 +64,7 @@ ENV CLOUD_SQL_PASSWORD=mysql
 ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
-ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/
+ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/fineract_default
 ENV fineract_tenants_uid=root
 ENV fineract_tenants_pwd=mysql
 
