@@ -97,7 +97,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             this.context.authenticatedUser();
 
-            this.fromApiJsonDeserializer.validateForCreate(command.json());
+            this.fromApiJsonDeserializer.validateForCreate(command);
             validateInputDates(command);
 
             final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
@@ -172,7 +172,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final LoanProduct product = this.loanProductRepository.findById(loanProductId)
                     .orElseThrow(() -> new LoanProductNotFoundException(loanProductId));
 
-            this.fromApiJsonDeserializer.validateForUpdate(command.json(), product);
+            this.fromApiJsonDeserializer.validateForUpdate(command, product);
             validateInputDates(command);
 
             if (anyChangeInCriticalFloatingRateLinkedParams(command, product)

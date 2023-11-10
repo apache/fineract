@@ -31,15 +31,20 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Abs
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 
 /**
- * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the payment order of Interest first, then
- * principal, penalties and fees.
+ * Creocore style {@link LoanRepaymentScheduleTransactionProcessor}.
+ *
+ * For standard transactions, pays off components in order of interest, then principal.
+ *
+ * If a transaction results in an advance payment or over-payment for a given installment, the over paid amount is pay
+ * off on the principal component of subsequent installments.
+ *
+ * If the entire principal of an installment is paid in advance then the interest component is waived.
  */
-public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor
-        extends AbstractLoanRepaymentScheduleTransactionProcessor {
+public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
-    private static final String STRATEGY_CODE = "interest-principal-penalties-fees-order-strategy";
+    public static final String STRATEGY_CODE = "creocore-strategy";
 
-    private static final String STRATEGY_NAME = "Interest, Principal, Penalties, Fees Order";
+    public static final String STRATEGY_NAME = "Creocore Unique";
 
     @Override
     public String getCode() {
@@ -52,14 +57,13 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
     }
 
     /**
-     * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first, principal,
-     * penalties and charges.
+     * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @SuppressWarnings("unused")
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
         return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings,
                 charges);
@@ -72,7 +76,7 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
+            final Money transactionAmountUnprocessed, final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
             Set<LoanCharge> charges) {
 
         return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed,
@@ -85,7 +89,7 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
     @Override
     protected Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
@@ -107,7 +111,6 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
         } else if (loanTransaction.isInterestWaiver()) {
             interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         } else if (loanTransaction.isChargePayment()) {
             if (loanTransaction.isPenaltyPayment()) {
@@ -117,26 +120,24 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
                 feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
             }
-            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         } else {
-            interestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
-            transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-
-            principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
-            transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-
             penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
             feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
-            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+            interestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+
+            principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
         }
         if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
             transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
                     principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
+        loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         return transactionAmountRemaining;
     }
 
@@ -152,6 +153,14 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
         Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
         Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 
+        principalPortion = currentInstallment.unpayPrincipalComponent(transactionDate, transactionAmountRemaining);
+        transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+
+        if (transactionAmountRemaining.isGreaterThanZero()) {
+            interestPortion = currentInstallment.unpayInterestComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+        }
+
         if (transactionAmountRemaining.isGreaterThanZero()) {
             feeChargesPortion = currentInstallment.unpayFeeChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
@@ -161,27 +170,11 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
             penaltyChargesPortion = currentInstallment.unpayPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
         }
-
-        if (transactionAmountRemaining.isGreaterThanZero()) {
-            principalPortion = currentInstallment.unpayPrincipalComponent(transactionDate, transactionAmountRemaining);
-            transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-        }
-
-        if (transactionAmountRemaining.isGreaterThanZero()) {
-            interestPortion = currentInstallment.unpayInterestComponent(transactionDate, transactionAmountRemaining);
-            transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-        }
-
         loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
             transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
                     principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
         return transactionAmountRemaining;
-    }
-
-    @Override
-    public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
-        return true;
     }
 }

@@ -258,9 +258,10 @@ final class LoanProductsApiResourceSwagger {
 
         public AllowAttributeOverrides allowAttributeOverrides;
         public List<RateData> rates;
-
         @Schema(example = "CUMULATIVE")
         public String loanScheduleType;
+        @Schema(example = "HORIZONTAL")
+        public String loanScheduleProcessingType;
 
         static final class AllowAttributeOverrides {
 
@@ -282,8 +283,6 @@ final class LoanProductsApiResourceSwagger {
             public boolean graceOnPrincipalAndInterestPayment;
             @Schema(example = "true")
             public boolean graceOnArrearsAgeing;
-            @Schema(example = "CUMULATIVE")
-            public String loanScheduleType;
         }
 
         static final class ChargeData {
@@ -1043,6 +1042,8 @@ final class LoanProductsApiResourceSwagger {
         public List<EnumOptionData> advancedPaymentAllocationTransactionTypes;
         public List<EnumOptionData> advancedPaymentAllocationFutureInstallmentAllocationRules;
         public List<EnumOptionData> advancedPaymentAllocationTypes;
+        public List<EnumOptionData> loanScheduleTypeOptions;
+        public List<EnumOptionData> loanScheduleProcessingTypeOptions;
     }
 
     @Schema(description = "GetLoanProductsProductIdResponse")
@@ -1263,6 +1264,10 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanProductsRepaymentStartDateType repaymentStartDateType;
         @Schema(example = "false")
         public Boolean disableScheduleExtensionForDownPayment;
+        @Schema(example = "CUMULATIVE")
+        public EnumOptionData loanScheduleType;
+        @Schema(example = "HORIZONTAL")
+        public EnumOptionData loanScheduleProcessingType;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")

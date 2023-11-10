@@ -46,9 +46,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
  */
 public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
-    private static final String STRATEGY_CODE = "rbi-india-strategy";
+    public static final String STRATEGY_CODE = "rbi-india-strategy";
 
-    private static final String STRATEGY_NAME = "Overdue/Due Fee/Int,Principal";
+    public static final String STRATEGY_NAME = "Overdue/Due Fee/Int,Principal";
 
     @Override
     public String getCode() {
