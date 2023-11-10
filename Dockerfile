@@ -117,6 +117,6 @@ EXPOSE 8443
 
 WORKDIR /fineract
 
-CMD ["java", "-Dloader.path=/app/lib", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
 #ENTRYPOINT ["/entrypoint.sh"]
