@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service.database;
 
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
+import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrlGCP;
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -29,6 +30,7 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -83,7 +85,17 @@ public class DataSourcePerTenantServiceFactory {
             schemaConnectionParameters = StringUtils.defaultIfBlank(tenantConnection.getReadOnlySchemaConnectionParameters(),
                     schemaConnectionParameters);
         }
-        String jdbcUrl = toJdbcUrl(protocol, schemaServer, schemaPort, schemaName, schemaConnectionParameters);
+//        String jdbcUrl = toJdbcUrl(protocol, schemaServer, schemaPort, schemaName, schemaConnectionParameters);
+
+//        Environment environment = context.getEnvironment();
+        String jdbcUrl = toJdbcUrlGCP(protocol, schemaName, schemaConnectionParameters);
+//
+//        if (environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME") != null) {
+//            jdbcUrl = toJdbcUrlGCP(protocol, schemaName, schemaConnectionParameters);
+//        } else {
+//            jdbcUrl = toJdbcUrl(protocol, schemaServer, schemaPort, schemaName, schemaConnectionParameters);
+//        }
+
         log.debug("{}", jdbcUrl);
 
         HikariConfig config = new HikariConfig();

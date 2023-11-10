@@ -99,6 +99,8 @@ public class CompatibilityConfig {
                 environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES"));
         LOG.warn("- Env var 'FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION':  {}",
                 environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION"));
+        LOG.warn("- Env var 'FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME':  {}",
+                environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME"));
         LOG.warn("===============================================================================================\n");
     }
 
@@ -128,6 +130,8 @@ public class CompatibilityConfig {
     // These are the properties for the all Tenants DB; the same configuration is also (hard-coded) in the
     // TomcatJdbcDataSourcePerTenantService class -->
     private Properties dataSourceProperties() {
+        Environment environment = context.getEnvironment();
+
         Properties props = new Properties();
 
         props.setProperty("cachePrepStmts", "true");
@@ -145,6 +149,13 @@ public class CompatibilityConfig {
         // TODO FINERACT-890: <prop key="logger">com.mysql.cj.log.Slf4JLogger</prop>
         props.setProperty("logSlowQueries", "true");
         props.setProperty("dumpQueriesOnException", "true");
+
+        // gcp sql INSTANCE_CONNECTION_NAME
+        if (environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME") != null) {
+            props.setProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
+            props.setProperty("cloudSqlInstance", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME"));
+            props.setProperty("ipTypes", "PUBLIC,PRIVATE");
+        }
 
         return props;
     }

@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service.migration;
 
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
+import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrlGCP;
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
 
 import com.zaxxer.hikari.HikariDataSource;
@@ -64,8 +65,9 @@ public class TenantDataSourceFactory {
         dataSource.setUsername(tenantConnection.getSchemaUsername());
         dataSource.setPassword(databasePasswordEncryptor.decrypt(tenantConnection.getSchemaPassword()));
         String protocol = toProtocol(tenantDataSource);
-        String tenantJdbcUrl = toJdbcUrl(protocol, tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
-                tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+//        String tenantJdbcUrl = toJdbcUrl(protocol, tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
+//                tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+        String tenantJdbcUrl = toJdbcUrlGCP(protocol, tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
         LOG.debug("JDBC URL for tenant {} is {}", tenant.getTenantIdentifier(), tenantJdbcUrl);
         dataSource.setJdbcUrl(tenantJdbcUrl);
         return dataSource;
