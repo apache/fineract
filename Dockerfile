@@ -64,7 +64,7 @@ ENV CLOUD_SQL_PASSWORD=mysql
 ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
-ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/fineract_default
+ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/fineract_tenants
 ENV fineract_tenants_uid=root
 ENV fineract_tenants_pwd=mysql
 
@@ -97,16 +97,16 @@ ENV FINERACT_HIKARI_PASSWORD=mysql
 ENV FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME=fineract-404214:europe-west2:fineract-instance
 
 # NOTE: env vars prefixed "FINERACT_DEFAULT_TENANTDB_*" are used to create the default tenant database
-#ENV FINERACT_DEFAULT_TENANTDB_HOSTNAME=localhost
-#ENV FINERACT_DEFAULT_TENANTDB_PORT=3306
-#ENV FINERACT_DEFAULT_TENANTDB_UID=root
-#ENV FINERACT_DEFAULT_TENANTDB_PWD=mysql
-#ENV FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`
-#ENV FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata
-#ENV FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
-#ENV FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
-#ENV FINERACT_DEFAULT_TENANTDB_DESCRIPTION='Default Demo Tenant'
-#ENV JAVA_TOOL_OPTIONS="-Xmx1G"
+ENV FINERACT_DEFAULT_TENANTDB_HOSTNAME=127.0.0.1
+ENV FINERACT_DEFAULT_TENANTDB_PORT=3306
+ENV FINERACT_DEFAULT_TENANTDB_UID=root
+ENV FINERACT_DEFAULT_TENANTDB_PWD=mysql
+ENV FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`
+ENV FINERACT_DEFAULT_TENANTDB_TIMEZONE=Africa/Nairobi
+ENV FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
+ENV FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
+ENV FINERACT_DEFAULT_TENANTDB_DESCRIPTION='Default Demo Tenant'
+ENV JAVA_TOOL_OPTIONS="-Xmx1G"
 
 WORKDIR /app
 
