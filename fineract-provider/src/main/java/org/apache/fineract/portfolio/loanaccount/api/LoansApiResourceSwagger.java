@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger.GetDelinquencyRangesResponse;
 
 /**
@@ -1086,6 +1087,10 @@ final class LoansApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "false")
         public Boolean disableScheduleExtensionForDownPayment;
+        @Schema(example = "CUMULATIVE")
+        public EnumOptionData loanScheduleType;
+        @Schema(example = "HORIZONTAL")
+        public EnumOptionData loanScheduleProcessingType;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1169,6 +1174,10 @@ final class LoansApiResourceSwagger {
         public Integer graceOnInterestPayment;
         @Schema(example = "1")
         public Integer graceOnArrearsAgeing;
+        @Schema(example = "CUMULATIVE")
+        public String loanScheduleType;
+        @Schema(example = "HORIZONTAL")
+        public String loanScheduleProcessingType;
     }
 
     @Schema(description = "PostLoansResponse")
@@ -1312,6 +1321,10 @@ final class LoansApiResourceSwagger {
         public List<PutLoansLoanIdChanges> charges;
         public List<PutLoansLoanIdCollateral> collateral;
         public List<PutLoansLoanIdDisbursementData> disbursementData;
+        @Schema(example = "CUMULATIVE")
+        public String loanScheduleType;
+        @Schema(example = "HORIZONTAL")
+        public String loanScheduleProcessingType;
 
         static final class PutLoansLoanIdChanges {
 

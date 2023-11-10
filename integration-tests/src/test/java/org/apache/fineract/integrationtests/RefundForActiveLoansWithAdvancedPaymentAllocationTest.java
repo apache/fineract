@@ -54,6 +54,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -294,6 +296,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
                 .withEnableDownPayment(true, "25", true).withinterestRatePerPeriod("0").withInterestRateFrequencyTypeAsMonths()
                 .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.VERTICAL)
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
                 .addAdvancedPaymentAllocation(defaultAllocation).withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
                 .build(null);

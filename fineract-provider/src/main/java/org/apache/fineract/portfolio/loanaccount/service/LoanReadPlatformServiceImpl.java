@@ -123,6 +123,8 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFou
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanTransactionRelationMapper;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
@@ -696,7 +698,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " l.total_recovered_derived as totalRecovered, topuploan.account_no as closureLoanAccountNo, "
                     + " topup.topup_amount as topupAmount, l.last_closed_business_date as lastClosedBusinessDate,l.overpaidon_date as overpaidOnDate, "
                     + " l.is_charged_off as isChargedOff, l.charge_off_reason_cv_id as chargeOffReasonId, codec.code_value as chargeOffReason, l.charged_off_on_date as chargedOffOnDate, l.enable_down_payment as enableDownPayment, l.disbursed_amount_percentage_for_down_payment as disbursedAmountPercentageForDownPayment, l.enable_auto_repayment_for_down_payment as enableAutoRepaymentForDownPayment, l.disable_schedule_extension_for_down_payment as disableScheduleExtensionForDownPayment,"
-                    + " cobu.username as chargedOffByUsername, cobu.firstname as chargedOffByFirstname, cobu.lastname as chargedOffByLastname "
+                    + " cobu.username as chargedOffByUsername, cobu.firstname as chargedOffByFirstname, cobu.lastname as chargedOffByLastname, l.loan_schedule_type as loanScheduleType, l.loan_schedule_processing_type as loanScheduleProcessingType "
                     + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id join m_currency rc on rc."
@@ -1044,6 +1046,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final boolean enableAutoRepaymentForDownPayment = rs.getBoolean("enableAutoRepaymentForDownPayment");
             final boolean disableScheduleExtensionForDownPayment = rs.getBoolean("disableScheduleExtensionForDownPayment");
             final boolean enableInstallmentLevelDelinquency = rs.getBoolean("enableInstallmentLevelDelinquency");
+            final String loanScheduleTypeStr = rs.getString("loanScheduleType");
+            final LoanScheduleType loanScheduleType = LoanScheduleType.valueOf(loanScheduleTypeStr);
+            final String loanScheduleProcessingTypeStr = rs.getString("loanScheduleProcessingType");
+            final LoanScheduleProcessingType loanScheduleProcessingType = LoanScheduleProcessingType.valueOf(loanScheduleProcessingTypeStr);
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -1061,7 +1067,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization,
                     fixedPrincipalPercentagePerInstallment, delinquencyRange, disallowExpectedDisbursements, isFraud,
                     lastClosedBusinessDate, overpaidOnDate, isChargedOff, enableDownPayment, disbursedAmountPercentageForDownPayment,
-                    enableAutoRepaymentForDownPayment, disableScheduleExtensionForDownPayment, enableInstallmentLevelDelinquency);
+                    enableAutoRepaymentForDownPayment, disableScheduleExtensionForDownPayment, enableInstallmentLevelDelinquency,
+                    loanScheduleType.asEnumOptionData(), loanScheduleProcessingType.asEnumOptionData());
         }
     }
 
@@ -1552,7 +1559,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDaysOfWeekTypeOptions, repaymentStrategyOptions,
                 interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
-                fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions, loanCycleCounter, activeLoanOptions);
+                fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions, loanCycleCounter, activeLoanOptions,
+                LoanScheduleType.getValuesAsEnumOptionDataList(), LoanScheduleProcessingType.getValuesAsEnumOptionDataList());
     }
 
     @Override

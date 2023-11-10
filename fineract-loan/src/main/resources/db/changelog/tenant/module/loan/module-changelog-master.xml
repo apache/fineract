@@ -34,4 +34,5 @@
   <include relativeToChangelogFile="true" file="parts/1009_refactor_loan_Installment_delinquency_tag.xml"/>
   <include relativeToChangelogFile="true" file="parts/1010_introduce_loan_schedule_type_configuration.xml"/>
   <include relativeToChangelogFile="true" file="parts/1011_add_delinquency_actions_table.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1012_introduce_loan_schedule_processing_type_configuration.xml"/>
 </databaseChangeLog>

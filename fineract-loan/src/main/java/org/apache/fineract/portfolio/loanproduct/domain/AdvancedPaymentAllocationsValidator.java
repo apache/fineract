@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -69,6 +70,34 @@ public class AdvancedPaymentAllocationsValidator {
 
         if (!Arrays.equals(IntStream.rangeClosed(1, 12).boxed().toArray(), rules.stream().map(Pair::getLeft).toArray())) {
             raiseValidationError("advanced-payment-strategy.invalid.order", "The provided orders must be between 1 and 12");
+        }
+    }
+
+    public void checkGroupingOfAllocationRules(List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules) {
+        loanProductPaymentAllocationRules.forEach(paymentAllocationRule -> {
+            AtomicInteger pastDueRuleInteger = new AtomicInteger();
+            AtomicInteger dueRuleInteger = new AtomicInteger();
+            AtomicInteger inAdvanceRuleInteger = new AtomicInteger();
+            paymentAllocationRule.getAllocationTypes().forEach(paymentAllocationType -> {
+                validateAllocationType(paymentAllocationType, pastDueRuleInteger, dueRuleInteger, inAdvanceRuleInteger);
+            });
+        });
+    }
+
+    private void validateAllocationType(PaymentAllocationType paymentAllocationType, AtomicInteger pastDueRuleInteger,
+            AtomicInteger dueRuleInteger, AtomicInteger inAdvanceRuleInteger) {
+        switch (paymentAllocationType.getDueType()) {
+            case PAST_DUE -> validateDueType(pastDueRuleInteger, dueRuleInteger, inAdvanceRuleInteger);
+            case DUE -> validateDueType(dueRuleInteger, pastDueRuleInteger, inAdvanceRuleInteger);
+            case IN_ADVANCE -> validateDueType(inAdvanceRuleInteger, pastDueRuleInteger, dueRuleInteger);
+        }
+    }
+
+    private void validateDueType(AtomicInteger currentRuleInteger, AtomicInteger otherRule1Integer, AtomicInteger otherRule2Integer) {
+        currentRuleInteger.incrementAndGet();
+        if ((otherRule1Integer.get() > 0 && otherRule1Integer.get() < 4) || (otherRule2Integer.get() > 0 && otherRule2Integer.get() < 4)) {
+            raiseValidationError("mixed.due.type.allocation.rules.are.not.supported.with.horizontal.installment.processing",
+                    "Horizontal repayment schedule processing is not supporting mixed due type allocation rules!");
         }
     }
 

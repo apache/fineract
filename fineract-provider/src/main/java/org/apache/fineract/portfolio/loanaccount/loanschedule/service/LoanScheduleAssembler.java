@@ -98,6 +98,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplica
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.serialization.VariableLoanScheduleFromApiJsonValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeAssembler;
@@ -472,7 +473,17 @@ public class LoanScheduleAssembler {
                     .isDisableScheduleExtensionForDownPayment();
 
         }
+
         LoanScheduleType loanScheduleType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleType();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
+            LoanScheduleType.valueOf(this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element));
+        }
+        LoanScheduleProcessingType loanScheduleProcessingType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleProcessingType();
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
+            LoanScheduleProcessingType
+                    .valueOf(this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, element));
+        }
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -487,7 +498,7 @@ public class LoanScheduleAssembler {
                 allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
                 fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled,
                 disbursedAmountPercentageForDownPayment, isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate,
-                isScheduleExtensionForDownPaymentDisabled, loanScheduleType);
+                isScheduleExtensionForDownPaymentDisabled, loanScheduleType, loanScheduleProcessingType);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

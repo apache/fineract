@@ -43,6 +43,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRul
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.AfterAll;
@@ -182,6 +184,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Money overpaidAmount = Money.zero(currency);
         Money zero = Money.zero(currency);
         Loan loan = Mockito.mock(Loan.class);
+        LoanProductRelatedDetail loanProductRelatedDetail = Mockito.mock(LoanProductRelatedDetail.class);
         Money chargeAmountMoney = Money.of(currency, chargeAmount);
         BigDecimal transactionAmount = BigDecimal.valueOf(120.00);
         Money transactionAmountMoney = Money.of(currency, transactionAmount);
@@ -198,6 +201,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
         Mockito.when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
         Mockito.when(loanTransaction.getLoan()).thenReturn(loan);
+        Mockito.when(loanTransaction.getLoan().getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        Mockito.when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
         Mockito.when(loan.getDisbursementDate()).thenReturn(disbursementDate);
         Mockito.when(installment.isFirstPeriod()).thenReturn(true);
         Mockito.when(charge.isDueForCollectionFromIncludingAndUpToAndIncluding(disbursementDate, installment.getDueDate()))

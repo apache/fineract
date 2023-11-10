@@ -765,7 +765,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
     }
 
-    private void undoChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,
+    protected void undoChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,
             final Integer installmentNumber) {
 
         Money amountRemaining = feeCharges;

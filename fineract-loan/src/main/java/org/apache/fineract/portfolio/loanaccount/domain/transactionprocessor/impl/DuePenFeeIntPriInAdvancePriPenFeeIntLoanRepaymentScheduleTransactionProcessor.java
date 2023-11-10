@@ -33,19 +33,19 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Abs
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 
 /**
- * `First due/late penalty, interest, principal, fee, after in advance penalty, interest, principal, fee` style
+ * `First due/late charges, interest, principal, after in advance principal, charges, interest` style
  * {@link LoanRepaymentScheduleTransactionProcessor}.
  *
- * For ALL types of transactions, pays off components in order of: Due/late penalty, Due/late interest, Due/late
- * principal, Due/late fee, In advance penalty, In advance interest In advance principal, In advance fee
+ * For ALL types of transactions, pays off components in order of: Due/late penalty Due/late Fee Due/late interest
+ * Due/late principal In advance principal In advance penalty In advance fee In advance interest
  */
 @SuppressWarnings("unused")
-public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactionProcessor
+public class DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactionProcessor
         extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
-    private static final String STRATEGY_CODE = "due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy";
+    public static final String STRATEGY_CODE = "due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy";
 
-    private static final String STRATEGY_NAME = "Due penalty, interest, principal, fee, In advance penalty, interest, principal, fee";
+    public static final String STRATEGY_NAME = "Due penalty, fee, interest, principal, In advance principal, penalty, fee, interest";
 
     @Override
     public String getCode() {
@@ -62,12 +62,13 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
      */
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money inAdvancePayment,
+            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
 
-        final MonetaryCurrency currency = inAdvancePayment.getCurrency();
-        Money transactionAmountRemaining = inAdvancePayment;
+        final MonetaryCurrency currency = paymentInAdvance.getCurrency();
+        Money transactionAmountRemaining = paymentInAdvance;
         Money principalPortion = Money.zero(currency);
         Money interestPortion = Money.zero(currency);
         Money feeChargesPortion = Money.zero(currency);
@@ -97,7 +98,6 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
             }
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         } else {
-            // Due penalty, interest, principal, fee, In advance penalty, interest, principal, fee
             boolean ignoreDueDateCheck = false;
             boolean rerun = false;
 
@@ -129,17 +129,6 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
                 transactionAmountRemaining = transactionAmountRemaining.minus(subPenaltyPortion);
                 penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
 
-                Money subInterestPortion;
-                if (ignoreDueDateCheck || !DateUtils.isBefore(transactionDate, currentInstallment.getDueDate())) {
-                    subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
-                    transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
-                    interestPortion = interestPortion.add(subInterestPortion);
-
-                    Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
-                    transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
-                    principalPortion = principalPortion.add(subPrincipalPortion);
-                }
-
                 Money subFeePortion;
                 if (!ignoreDueDateCheck) {
                     if (calculatedFeeCharge.isGreaterThan(transactionAmountRemaining)) {
@@ -152,6 +141,16 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
                 transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
                 feeChargesPortion = feeChargesPortion.add(subFeePortion);
 
+                Money subInterestPortion;
+                if (ignoreDueDateCheck || !DateUtils.isBefore(transactionDate, currentInstallment.getDueDate())) {
+                    subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
+                    transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
+                    interestPortion = interestPortion.add(subInterestPortion);
+                }
+
+                Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
+                principalPortion = principalPortion.add(subPrincipalPortion);
                 // If the transactionAmountRemaining is greater than zero, rerun the allocation without due date check
                 // to distribute the in advance portions
                 if (transactionAmountRemaining.isGreaterThanZero()) {
@@ -173,11 +172,12 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
      */
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money latePayment,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
+            final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
+            Set<LoanCharge> charges) {
 
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, latePayment, transactionMappings,
-                charges);
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed,
+                transactionMappings, charges);
     }
 
     /**
@@ -185,13 +185,13 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
      */
     @Override
     protected Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money onTimePayment,
+            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
 
-        final MonetaryCurrency currency = onTimePayment.getCurrency();
-        Money transactionAmountRemaining = onTimePayment;
+        final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
+        Money transactionAmountRemaining = transactionAmountUnprocessed;
         Money principalPortion = Money.zero(currency);
         Money interestPortion = Money.zero(currency);
         Money feeChargesPortion = Money.zero(currency);
@@ -225,6 +225,10 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
             transactionAmountRemaining = transactionAmountRemaining.minus(subPenaltyPortion);
             penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
 
+            Money subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
+            feeChargesPortion = feeChargesPortion.add(subFeePortion);
+
             Money subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
             interestPortion = interestPortion.add(subInterestPortion);
@@ -232,10 +236,6 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
             Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
             principalPortion = principalPortion.add(subPrincipalPortion);
-
-            Money subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
-            transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
-            feeChargesPortion = feeChargesPortion.add(subFeePortion);
 
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }

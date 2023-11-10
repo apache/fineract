@@ -16,26 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.acme.fineract.loan.processor;
+package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor;
-import org.springframework.stereotype.Component;
+import java.util.Arrays;
+import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-@Component
-public class AcmeLoanRepaymentScheduleTransactionProcessor extends FineractStyleLoanRepaymentScheduleTransactionProcessor {
+@Getter
+@RequiredArgsConstructor
+public enum LoanScheduleProcessingType {
 
-    public static final String STRATEGY_CODE = "acme-standard-strategy";
+    HORIZONTAL("Horizontal"), VERTICAL("Vertical");
 
-    public static final String STRATEGY_NAME = "ACME Corp.: standard loan transaction processing strategy";
+    private final String humanReadableName;
 
-    @Override
-    public String getCode() {
-        return STRATEGY_CODE;
+    public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
+        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
     }
 
-    @Override
-    public String getName() {
-        return STRATEGY_NAME;
+    public EnumOptionData asEnumOptionData() {
+        return new EnumOptionData((long) this.ordinal(), this.name(), this.humanReadableName);
     }
-
 }

@@ -136,6 +136,8 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformService;
@@ -1060,8 +1062,8 @@ public class LoansApiResource {
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
                 loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
-                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled,
-                collectionData);
+                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled, collectionData,
+                LoanScheduleType.getValuesAsEnumOptionDataList(), LoanScheduleProcessingType.getValuesAsEnumOptionDataList());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
