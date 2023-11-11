@@ -114,9 +114,9 @@ WORKDIR /app
 
 #EXPOSE 3306
 
-WORKDIR /fineract
+#WORKDIR /fineract
 
-CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar", "--port=8080"]
+#CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
 EXPOSE 8080
 #ENTRYPOINT ["/entrypoint.sh"]
