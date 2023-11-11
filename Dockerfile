@@ -64,7 +64,7 @@ COPY --from=builder /fineract/fineract.json /app
 #ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
-ENV fineract_tenants_url=jdbc:mysql://34.105.179.216:3306/fineract_tenants
+ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/fineract_tenants
 ENV fineract_tenants_uid=root
 ENV fineract_tenants_pwd=mysql
 
@@ -72,7 +72,7 @@ ENV fineract_tenants_pwd=mysql
 ENV FINERACT_NODE_ID=1
 # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
 ENV FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=com.mysql.cj.jdbc.Driver
-ENV FINERACT_HIKARI_JDBC_URL=jdbc:mysql://34.105.179.216:3306/fineract_tenants
+ENV FINERACT_HIKARI_JDBC_URL=jdbc:mysql://127.0.0.1:3306/fineract_tenants
 ENV FINERACT_HIKARI_USERNAME=root
 ENV FINERACT_HIKARI_PASSWORD=mysql
 # ... following variables are optional; "application.properties" contains reasonable defaults (same as here)
@@ -97,7 +97,7 @@ ENV FINERACT_HIKARI_PASSWORD=mysql
 ENV FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME=fineract-404214:europe-west2:fineract-instance
 
 # NOTE: env vars prefixed "FINERACT_DEFAULT_TENANTDB_*" are used to create the default tenant database
-ENV FINERACT_DEFAULT_TENANTDB_HOSTNAME=34.105.179.216
+ENV FINERACT_DEFAULT_TENANTDB_HOSTNAME=127.0.0.1
 ENV FINERACT_DEFAULT_TENANTDB_PORT=3306
 ENV FINERACT_DEFAULT_TENANTDB_UID=root
 ENV FINERACT_DEFAULT_TENANTDB_PWD=mysql
@@ -110,13 +110,13 @@ ENV JAVA_TOOL_OPTIONS="-Xmx1G"
 
 WORKDIR /app
 
-#CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306", "-credential_file=fineract.json"]
+CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306", "-credential_file=fineract.json"]
 
-#EXPOSE 3306
+WORKDIR /fineract
 
-#WORKDIR /fineract
+ENTRYPOINT ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
-#CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
-
+EXPOSE 3306
 EXPOSE 8080
+
 #ENTRYPOINT ["/entrypoint.sh"]
