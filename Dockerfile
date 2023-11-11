@@ -112,11 +112,11 @@ WORKDIR /app
 
 CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306", "-credential_file=fineract.json"]
 
-EXPOSE 3306
-EXPOSE 8443
+#EXPOSE 3306
 
 WORKDIR /fineract
 
 CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
+EXPOSE 8080
 #ENTRYPOINT ["/entrypoint.sh"]
