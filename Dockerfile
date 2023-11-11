@@ -58,10 +58,10 @@ COPY --from=builder /fineract/fineract.json /app
 
 #RUN chmod 775 /entrypoint.sh
 
-ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
-ENV CLOUD_SQL_USER=root
-ENV CLOUD_SQL_PASSWORD=mysql
-ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
+#ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
+#ENV CLOUD_SQL_USER=root
+#ENV CLOUD_SQL_PASSWORD=mysql
+#ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
 ENV fineract_tenants_url=jdbc:mysql://34.105.179.216:3306/fineract_tenants
@@ -101,12 +101,12 @@ ENV FINERACT_DEFAULT_TENANTDB_HOSTNAME=34.105.179.216
 ENV FINERACT_DEFAULT_TENANTDB_PORT=3306
 ENV FINERACT_DEFAULT_TENANTDB_UID=root
 ENV FINERACT_DEFAULT_TENANTDB_PWD=mysql
-ENV FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`
+ENV FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=allowPublicKeyRetrieval=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`
 ENV FINERACT_DEFAULT_TENANTDB_TIMEZONE=Africa/Nairobi
 ENV FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
 ENV FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
 ENV FINERACT_DEFAULT_TENANTDB_DESCRIPTION='Default Demo Tenant'
-ENV JAVA_TOOL_OPTIONS="-Xmx4G"
+ENV JAVA_TOOL_OPTIONS="-Xmx1G"
 
 WORKDIR /app
 
