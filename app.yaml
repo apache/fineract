@@ -29,3 +29,4 @@ readiness_check:
   app_start_timeout_sec: '300'
 service_account: fineract-app-be@fineract-404214.iam.gserviceaccount.com
 #entrypoint: java -Dloader.path=. -jar fineract-provider-0.0.1-SNAPSHOT.jar
+entrypoint: ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar", "--port=8080"]

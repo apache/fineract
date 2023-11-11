@@ -116,7 +116,7 @@ CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:0.0.0.0:3306", "-c
 
 WORKDIR /fineract
 
-CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar", "--port=8080"]
 
-PORT 8080
+EXPOSE 8080
 #ENTRYPOINT ["/entrypoint.sh"]
