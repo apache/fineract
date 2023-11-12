@@ -116,7 +116,7 @@ WORKDIR /fineract
 
 ENTRYPOINT ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
-#EXPOSE 3306
+EXPOSE 3306
 EXPOSE 8080
 
 #ENTRYPOINT ["/entrypoint.sh"]
