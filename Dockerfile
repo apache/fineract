@@ -64,7 +64,7 @@ ENV CLOUD_SQL_PASSWORD=mysql
 ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
-ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/fineract_tenants
+ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/fineract_tenants?cloudSqlInstance=fineract-404214:europe-west2:fineract-instance&socketFactory=com.google.cloud.sql.mysql.SocketFactory
 ENV fineract_tenants_uid=root
 ENV fineract_tenants_pwd=mysql
 
@@ -72,7 +72,7 @@ ENV fineract_tenants_pwd=mysql
 ENV FINERACT_NODE_ID=1
 # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
 ENV FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=com.mysql.cj.jdbc.Driver
-ENV FINERACT_HIKARI_JDBC_URL=jdbc:mysql://127.0.0.1:3306/fineract_tenants
+ENV FINERACT_HIKARI_JDBC_URL=jdbc:mysql://127.0.0.1:3306/fineract_tenants?cloudSqlInstance=fineract-404214:europe-west2:fineract-instance&socketFactory=com.google.cloud.sql.mysql.SocketFactory
 ENV FINERACT_HIKARI_USERNAME=root
 ENV FINERACT_HIKARI_PASSWORD=mysql
 # ... following variables are optional; "application.properties" contains reasonable defaults (same as here)
@@ -101,7 +101,7 @@ ENV FINERACT_DEFAULT_TENANTDB_HOSTNAME=127.0.0.1
 ENV FINERACT_DEFAULT_TENANTDB_PORT=3306
 ENV FINERACT_DEFAULT_TENANTDB_UID=root
 ENV FINERACT_DEFAULT_TENANTDB_PWD=mysql
-ENV FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=allowPublicKeyRetrieval=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`
+ENV FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=cloudSqlInstance=fineract-404214:europe-west2:fineract-instance&socketFactory=com.google.cloud.sql.mysql.SocketFactory&allowPublicKeyRetrieval=true&serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=`-00:00`
 ENV FINERACT_DEFAULT_TENANTDB_TIMEZONE=Africa/Nairobi
 ENV FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
 ENV FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
