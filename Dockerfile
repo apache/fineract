@@ -108,9 +108,9 @@ ENV FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME=fineract-404214:europ
 #ENV FINERACT_DEFAULT_TENANTDB_DESCRIPTION='Default Demo Tenant'
 ENV JAVA_TOOL_OPTIONS="-Xmx4G"
 
-WORKDIR /app
+#WORKDIR /app
 
-CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:3306", "-credential_file=fineract.json"]
+#CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:3306", "-credential_file=fineract.json"]
 
 WORKDIR /fineract
 
