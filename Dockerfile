@@ -110,13 +110,13 @@ ENV JAVA_TOOL_OPTIONS="-Xmx4G"
 
 WORKDIR /app
 
-CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=tcp:3306", "-credential_file=fineract.json"]
+CMD ["./cloud_sql_proxy", "-instances=$CLOUD_SQL_INSTANCE=$CLOUD_SQL_SOCKET", "-credential_file=fineract.json"]
 
 WORKDIR /fineract
 
 ENTRYPOINT ["java", "-Dloader.path=.", "-jar", "/app/fineract-provider-0.0.1-SNAPSHOT.jar"]
 
-EXPOSE 3306
+#EXPOSE 3306
 EXPOSE 8080
 
 #ENTRYPOINT ["/entrypoint.sh"]
