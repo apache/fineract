@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@ConditionalOnExpression("#{ systemEnvironment['fineract_tenants_driver'] != null }")
+@ConditionalOnExpression("#{ systemEnvironment['FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME'] != null }")
 @Deprecated // NOTE: this will be removed in one of the next releases (probably around version 1.7.x or 1.8.x)
 public class CompatibilityConfig {
 
@@ -114,14 +114,14 @@ public class CompatibilityConfig {
         Environment environment = context.getEnvironment();
         HikariConfig hc = new HikariConfig();
 
-        hc.setDriverClassName(environment.getProperty("fineract_tenants_driver"));
-        hc.setJdbcUrl(environment.getProperty("fineract_tenants_url"));
-        hc.setUsername(environment.getProperty("fineract_tenants_uid"));
-        hc.setPassword(environment.getProperty("fineract_tenants_pwd"));
-        hc.setMinimumIdle(3);
-        hc.setMaximumPoolSize(10);
-        hc.setIdleTimeout(60000);
-        hc.setConnectionTestQuery("SELECT 1");
+        hc.setDriverClassName(environment.getProperty("FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME"));
+        hc.setJdbcUrl(environment.getProperty("FINERACT_HIKARI_JDBC_URL"));
+        hc.setUsername(environment.getProperty("FINERACT_HIKARI_USERNAME"));
+        hc.setPassword(environment.getProperty("FINERACT_HIKARI_PASSWORD"));
+        hc.setMinimumIdle(Integer.parseInt(environment.getProperty("FINERACT_HIKARI_MINIMUM_IDLE")));
+        hc.setMaximumPoolSize(Integer.parseInt(environment.getProperty("FINERACT_HIKARI_MAXIMUM_POOL_SIZE")));
+        hc.setIdleTimeout(Long.parseLong(environment.getProperty("FINERACT_HIKARI_IDLE_TIMEOUT")));
+        hc.setConnectionTestQuery(environment.getProperty("FINERACT_HIKARI_TEST_QUERY"));
         hc.setDataSourceProperties(dataSourceProperties());
 
         return hc;
@@ -134,28 +134,28 @@ public class CompatibilityConfig {
 
         Properties props = new Properties();
 
-        props.setProperty("cachePrepStmts", "true");
-        props.setProperty("prepStmtCacheSize", "250");
-        props.setProperty("prepStmtCacheSqlLimit", "2048");
-        props.setProperty("useServerPrepStmts", "true");
-        props.setProperty("useLocalSessionState", "true");
-        props.setProperty("rewriteBatchedStatements", "true");
-        props.setProperty("cacheResultSetMetadata", "true");
-        props.setProperty("cacheServerConfiguration", "true");
-        props.setProperty("elideSetAutoCommits", "true");
-        props.setProperty("maintainTimeStats", "false");
+        props.setProperty("cachePrepStmts", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS"));
+        props.setProperty("prepStmtCacheSize", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE"));
+        props.setProperty("prepStmtCacheSqlLimit", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT"));
+        props.setProperty("useServerPrepStmts", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS"));
+        props.setProperty("useLocalSessionState", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE"));
+        props.setProperty("rewriteBatchedStatements", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS"));
+        props.setProperty("cacheResultSetMetadata", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA"));
+        props.setProperty("cacheServerConfiguration", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION"));
+        props.setProperty("elideSetAutoCommits", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS"));
+        props.setProperty("maintainTimeStats", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS"));
+
+        // gcp sql INSTANCE_CONNECTION_NAME
+//        if (environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME") != null) {
+        props.setProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
+        props.setProperty("cloudSqlInstance", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME"));
+        props.setProperty("ipTypes", "PUBLIC,PRIVATE");
+//        }
 
         // https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj
         // TODO FINERACT-890: <prop key="logger">com.mysql.cj.log.Slf4JLogger</prop>
-        props.setProperty("logSlowQueries", "true");
-        props.setProperty("dumpQueriesOnException", "true");
-
-        // gcp sql INSTANCE_CONNECTION_NAME
-        if (environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME") != null) {
-            props.setProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
-            props.setProperty("cloudSqlInstance", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME"));
-            props.setProperty("ipTypes", "PUBLIC,PRIVATE");
-        }
+        props.setProperty("logSlowQueries", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES"));
+        props.setProperty("dumpQueriesOnException", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION"));
 
         return props;
     }

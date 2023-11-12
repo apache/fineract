@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnExpression("#{ systemEnvironment['fineract_tenants_driver'] == null }")
+@ConditionalOnExpression("#{ systemEnvironment['FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME'] == null }")
 public class HikariCpConfig {
 
     // TODO: we can get rid of this config class by defining "spring.hikariTenantDataSource.hikari.*" in
