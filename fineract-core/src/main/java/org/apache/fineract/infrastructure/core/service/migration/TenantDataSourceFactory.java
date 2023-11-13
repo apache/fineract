@@ -67,9 +67,7 @@ public class TenantDataSourceFactory {
         String protocol = toProtocol(tenantDataSource);
 //        String tenantJdbcUrl = toJdbcUrl(protocol, tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
 //                tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
-        String instance = "cloudSqlInstance=" + tenantDataSource.getDataSourceProperties().getProperty("cloudSqlInstance")
-                + "&socketFactory=" + tenantDataSource.getDataSourceProperties().getProperty("socketFactory");
-        String tenantJdbcUrl = toJdbcUrlGCP(protocol, tenantConnection.getSchemaName(), instance);
+        String tenantJdbcUrl = toJdbcUrlGCP(protocol, tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
         LOG.info("JDBC URL for tenant {} is {}", tenant.getTenantIdentifier(), tenantJdbcUrl);
         dataSource.setJdbcUrl(tenantJdbcUrl);
         return dataSource;
