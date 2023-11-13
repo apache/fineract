@@ -79,6 +79,7 @@ public abstract class BaseLoanIntegrationTest {
     protected final LoanProductHelper loanProductHelper = new LoanProductHelper();
     protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
     protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
+    protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
     // asset
     protected final Account loansReceivableAccount = accountHelper.createAssetAccount();
@@ -229,7 +230,6 @@ public abstract class BaseLoanIntegrationTest {
             assertNull(loanDetails.getTransactions(), "No transaction is expected");
         } else {
             Assertions.assertEquals(transactions.length, loanDetails.getTransactions().size());
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
             Arrays.stream(transactions).forEach(tr -> {
                 boolean found = loanDetails.getTransactions().stream()
                         .anyMatch(item -> Objects.equals(item.getAmount(), tr.amount) && Objects.equals(item.getType().getValue(), tr.type)
@@ -329,8 +329,13 @@ public abstract class BaseLoanIntegrationTest {
 
     protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
             int numberOfRepayments) {
-        PostLoansResponse postLoansResponse = loanTransactionHelper
-                .applyLoan(applyLoanRequest(clientId, loanProductId, loanDisbursementDate, amount, numberOfRepayments));
+        return applyAndApproveLoan(clientId, loanProductId, loanDisbursementDate, amount, numberOfRepayments, null);
+    }
+
+    protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
+            int numberOfRepayments, String externalId) {
+        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(
+                applyLoanRequest(clientId, loanProductId, loanDisbursementDate, amount, numberOfRepayments).externalId(externalId));
 
         PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
                 approveLoanRequest(amount));

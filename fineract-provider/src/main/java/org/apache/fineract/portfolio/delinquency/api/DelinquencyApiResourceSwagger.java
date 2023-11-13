@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.delinquency.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 public final class DelinquencyApiResourceSwagger {
 
@@ -148,6 +149,57 @@ public final class DelinquencyApiResourceSwagger {
         public LocalDate addedOnDate;
         @Schema(example = "2013,2,20")
         public LocalDate liftedOnDate;
+    }
+
+    @Schema(description = "GetDelinquencyActionsResponse")
+    public static final class GetDelinquencyActionsResponse {
+
+        private GetDelinquencyActionsResponse() {}
+
+        @Schema(example = "1")
+        public Long id;
+        @Schema(example = "pause")
+        public String action;
+        @Schema(example = "2013,1,2")
+        public LocalDate startDate;
+        @Schema(example = "2013,2,20")
+        public LocalDate endDate;
+        @Schema(example = "1")
+        public Long createdById;
+        @Schema(example = "1359463135000")
+        public OffsetDateTime createdOn;
+        @Schema(example = "1")
+        public Long updatedById;
+        @Schema(example = "1359463135000")
+        public OffsetDateTime lastModifiedOn;
+    }
+
+    @Schema(description = "PostLoansDelinquencyActionRequest")
+    public static final class PostLoansDelinquencyActionRequest {
+
+        @Schema(example = "pause")
+        public String action;
+        @Schema(example = "2013-01-02")
+        public String startDate;
+        @Schema(example = "2013-02-20")
+        public String endDate;
+        @Schema(example = "yyyy-MM-dd")
+        public String dateFormat;
+        @Schema(example = "en")
+        public String locale;
+    }
+
+    @Schema(description = "PostLoansDelinquencyActionResponse")
+    public static final class PostLoansDelinquencyActionResponse {
+
+        @Schema(example = "1")
+        public Long officeId;
+
+        @Schema(example = "1")
+        public Long clientId;
+
+        @Schema(example = "1")
+        public Long resourceId;
     }
 
 }

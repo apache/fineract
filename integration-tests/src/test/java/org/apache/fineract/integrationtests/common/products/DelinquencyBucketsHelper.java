@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
-import org.apache.fineract.client.models.GetLoansLoanIdCollectionData;
+import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
@@ -121,7 +121,7 @@ public class DelinquencyBucketsHelper {
 
     public static void evaluateLoanCollectionData(GetLoansLoanIdResponse getLoansLoanIdResponse, Integer pastDueDays,
             Double amountExpected) {
-        GetLoansLoanIdCollectionData getCollectionData = getLoansLoanIdResponse.getDelinquent();
+        GetLoansLoanIdDelinquencySummary getCollectionData = getLoansLoanIdResponse.getDelinquent();
         if (getCollectionData != null) {
             log.info("Loan Delinquency Data in Days {} and Amount {}", getCollectionData.getPastDueDays(),
                     getCollectionData.getDelinquentAmount());

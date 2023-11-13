@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.delinquency.domain;
 
 import java.time.LocalDate;
+import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,4 +37,7 @@ public interface LoanDelinquencyActionRepository
             + "    da.loan.id = :loan_id  order by da.createdDate desc")
     Page<LoanDelinquencyAction> getEffectiveDelinquencyActionForLoan(@Param("loan_id") Long loan_id,
             @Param("business_date") LocalDate business_date, Pageable page);
+
+    List<LoanDelinquencyAction> findByLoanOrderById(Loan loan);
+
 }

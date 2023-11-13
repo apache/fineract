@@ -964,9 +964,9 @@ final class LoansApiResourceSwagger {
             private String externalId;
         }
 
-        static final class GetLoansLoanIdCollectionData {
+        static final class GetLoansLoanIdDelinquencySummary {
 
-            private GetLoansLoanIdCollectionData() {}
+            private GetLoansLoanIdDelinquencySummary() {}
 
             @Schema(example = "100.000000")
             public Double availableDisbursementAmount;
@@ -989,6 +989,16 @@ final class LoansApiResourceSwagger {
             public LocalDate lastRepaymentDate;
             @Schema(example = "100.000000")
             public Double lastRepaymentAmount;
+
+            @Schema(example = "true")
+            public Boolean delinquencyCalculationPaused;
+
+            @Schema(example = "[2022, 07, 05]")
+            public LocalDate delinquencyPausePeriodStartDate;
+
+            @Schema(example = "[2022, 07, 10]")
+            public LocalDate delinquencyPausePeriodEndDate;
+
         }
 
         @Schema(example = "1")
@@ -1062,7 +1072,7 @@ final class LoansApiResourceSwagger {
         @Schema(description = "Set of GetLoansLoanIdDisbursementDetails")
         public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
         @Schema(description = "Delinquent data")
-        public GetLoansLoanIdCollectionData delinquent;
+        public GetLoansLoanIdDelinquencySummary delinquent;
         @Schema(description = "Set of charges")
         public List<GetLoansLoanIdLoanChargeData> charges;
         public GetDelinquencyRangesResponse delinquencyRange;

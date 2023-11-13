@@ -47,4 +47,6 @@ public interface DelinquencyWritePlatformService {
 
     void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData);
 
+    CommandProcessingResult createDelinquencyAction(Long loanId, JsonCommand command);
+
 }
