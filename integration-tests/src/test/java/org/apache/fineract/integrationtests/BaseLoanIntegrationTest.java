@@ -43,6 +43,7 @@ import lombok.ToString;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -183,6 +184,21 @@ public abstract class BaseLoanIntegrationTest {
                 .incomeFromChargeOffPenaltyAccountId(feeChargeOffAccount.getAccountID().longValue());
     }
 
+    protected PostLoanProductsRequest create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
+            int interestType, int amortizationType) {
+        return createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().multiDisburseLoan(false)//
+                .disallowExpectedDisbursements(false)//
+                .allowApprovedDisbursedAmountsOverApplied(false)//
+                .overAppliedCalculationType(null)//
+                .overAppliedNumber(null)//
+                .principal(1250.0)//
+                .numberOfRepayments(4)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
+                .interestType(interestType)//
+                .amortizationType(amortizationType);
+    }
+
     private static RequestSpecification createRequestSpecification() {
         RequestSpecification request = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         request.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -250,15 +266,35 @@ public abstract class BaseLoanIntegrationTest {
                 "Expected installments are not matching with the installments configured on the loan");
 
         for (int i = 1; i < installments.length; i++) {
+            GetLoansLoanIdRepaymentPeriod period = loanResponse.getRepaymentSchedule().getPeriods().get(i);
+            Double principalDue = period.getPrincipalDue();
+            Double amount = installments[i].principalAmount;
+
             if (installments[i].completed == null) { // this is for the disbursement
-                Assertions.assertEquals(installments[i].amount,
-                        loanResponse.getRepaymentSchedule().getPeriods().get(i).getPrincipalLoanBalanceOutstanding());
+                Assertions.assertEquals(amount, period.getPrincipalLoanBalanceOutstanding(),
+                        "%d. installment's principal due is different, expected: %.2f, actual: %.2f".formatted(i, amount,
+                                period.getPrincipalLoanBalanceOutstanding()));
             } else {
-                Assertions.assertEquals(installments[i].amount, loanResponse.getRepaymentSchedule().getPeriods().get(i).getPrincipalDue());
+                Assertions.assertEquals(amount, principalDue,
+                        "%d. installment's principal due is different, expected: %.2f, actual: %.2f".formatted(i, amount, principalDue));
+
+                Double interestAmount = installments[i].interestAmount;
+                Double interestDue = period.getInterestDue();
+                if (interestAmount != null) {
+                    Assertions.assertEquals(interestAmount, interestDue,
+                            "%d. installment's interest due is different, expected: %.2f, actual: %.2f".formatted(i, interestAmount,
+                                    interestDue));
+                }
+                Double outstandingAmount = installments[i].totalOutstandingAmount;
+                Double totalOutstanding = period.getTotalOutstandingForPeriod();
+                if (outstandingAmount != null) {
+                    Assertions.assertEquals(outstandingAmount, totalOutstanding,
+                            "%d. installment's total outstanding is different, expected: %.2f, actual: %.2f".formatted(i, outstandingAmount,
+                                    totalOutstanding));
+                }
             }
-            Assertions.assertEquals(installments[i].completed, loanResponse.getRepaymentSchedule().getPeriods().get(i).getComplete());
-            Assertions.assertEquals(LocalDate.parse(installments[i].dueDate, dateTimeFormatter),
-                    loanResponse.getRepaymentSchedule().getPeriods().get(i).getDueDate());
+            Assertions.assertEquals(installments[i].completed, period.getComplete());
+            Assertions.assertEquals(LocalDate.parse(installments[i].dueDate, dateTimeFormatter), period.getDueDate());
         }
     }
 
@@ -275,19 +311,29 @@ public abstract class BaseLoanIntegrationTest {
         }
     }
 
-    protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
+    protected PostLoansRequest applyLoanRequest(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
             int numberOfRepayments) {
-        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId)
-                .productId(loanProductId).expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
+        return new PostLoansRequest().clientId(clientId).productId(loanProductId).expectedDisbursementDate(loanDisbursementDate)
+                .dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY)
                 .locale("en").submittedOnDate(loanDisbursementDate).amortizationType(1).interestRatePerPeriod(0)
                 .interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0).repaymentEvery(30).repaymentFrequencyType(0)
                 .numberOfRepayments(numberOfRepayments).loanTermFrequency(numberOfRepayments * 30).loanTermFrequencyType(0)
-                .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)).principal(BigDecimal.valueOf(amount)).loanType("individual"));
+                .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)).principal(BigDecimal.valueOf(amount)).loanType("individual");
+    }
+
+    protected PostLoansLoanIdRequest approveLoanRequest(Double amount) {
+        return new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(amount)).dateFormat(DATETIME_PATTERN)
+                .approvedOnDate("01 January 2023").locale("en");
+    }
+
+    protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
+            int numberOfRepayments) {
+        PostLoansResponse postLoansResponse = loanTransactionHelper
+                .applyLoan(applyLoanRequest(clientId, loanProductId, loanDisbursementDate, amount, numberOfRepayments));
 
         PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(amount)).dateFormat(DATETIME_PATTERN)
-                        .approvedOnDate("01 January 2023").locale("en"));
+                approveLoanRequest(amount));
 
         return approvedLoanResult.getLoanId();
     }
@@ -302,16 +348,21 @@ public abstract class BaseLoanIntegrationTest {
                 .transactionDate(date).locale("en").transactionAmount(amount).externalId(firstRepaymentUUID));
     }
 
-    protected JournalEntry journalEntry(double amount, Account account, String type) {
-        return new JournalEntry(amount, account, type);
+    protected JournalEntry journalEntry(double principalAmount, Account account, String type) {
+        return new JournalEntry(principalAmount, account, type);
     }
 
-    protected Transaction transaction(double amount, String type, String date) {
-        return new Transaction(amount, type, date);
+    protected Transaction transaction(double principalAmount, String type, String date) {
+        return new Transaction(principalAmount, type, date);
     }
 
-    protected Installment installment(double amount, Boolean completed, String dueDate) {
-        return new Installment(amount, completed, dueDate);
+    protected Installment installment(double principalAmount, Boolean completed, String dueDate) {
+        return new Installment(principalAmount, null, null, completed, dueDate);
+    }
+
+    protected Installment installment(double principalAmount, double interestAmount, double totalOutstandingAmount, Boolean completed,
+            String dueDate) {
+        return new Installment(principalAmount, interestAmount, totalOutstandingAmount, completed, dueDate);
     }
 
     @ToString
@@ -336,8 +387,37 @@ public abstract class BaseLoanIntegrationTest {
     @AllArgsConstructor
     public static class Installment {
 
-        Double amount;
+        Double principalAmount;
+        Double interestAmount;
+        Double totalOutstandingAmount;
         Boolean completed;
         String dueDate;
+    }
+
+    public static class AmortizationType {
+
+        public static final Integer EQUAL_INSTALLMENTS = 1;
+    }
+
+    public static class InterestType {
+
+        public static final Integer DECLINING_BALANCE = 0;
+        public static final Integer FLAT = 1;
+    }
+
+    public static class RepaymentFrequencyType {
+
+        public static final Integer MONTHS = 2;
+    }
+
+    public static class InterestCalculationPeriodType {
+
+        public static final Integer SAME_AS_REPAYMENT_PERIOD = 1;
+    }
+
+    public static class InterestRateFrequencyType {
+
+        public static final Integer MONTHS = 2;
+        public static final Integer YEARS = 3;
     }
 }

@@ -867,6 +867,26 @@ public final class LoanApplicationTerms {
                 principalPerPeriod = this.principal.zero().plus(currentPeriodFixedPrincipalAmount);
 
             }
+
+            if (this.installmentAmountInMultiplesOf != null) {
+                Money roundedPrincipalPerPeriod = Money.roundToMultiplesOf(principalPerPeriod, this.installmentAmountInMultiplesOf);
+                if (interestForThisInstallment != null) {
+                    Money roundedInterestForThisInstallment = Money.roundToMultiplesOf(interestForThisInstallment,
+                            this.installmentAmountInMultiplesOf);
+
+                    /*
+                     * Thinking is
+                     *
+                     * principalPerPeriod 416.67 -> 417 interestForThisInstallment 12.50 -> 13
+                     *
+                     * Sum: 417 + 13 - 12.5 = 417.5 as principal so the total outstanding amount is in line with the
+                     * installmentAmountInMultiplesOf setting
+                     */
+                    principalPerPeriod = roundedPrincipalPerPeriod.add(roundedInterestForThisInstallment).minus(interestForThisInstallment);
+                } else {
+                    principalPerPeriod = roundedPrincipalPerPeriod;
+                }
+            }
         } else {
             principalPerPeriod = Money.of(this.getCurrency(), getFixedEmiAmount()).minus(interestForThisInstallment);
             return principalPerPeriod;
