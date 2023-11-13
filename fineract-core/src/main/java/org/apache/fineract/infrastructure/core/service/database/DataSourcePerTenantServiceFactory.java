@@ -96,7 +96,7 @@ public class DataSourcePerTenantServiceFactory {
 //            jdbcUrl = toJdbcUrl(protocol, schemaServer, schemaPort, schemaName, schemaConnectionParameters);
 //        }
 
-        log.debug("{}", jdbcUrl);
+        log.info("{}", jdbcUrl) ;
 
         HikariConfig config = new HikariConfig();
         config.setReadOnly(fineractProperties.getMode().isReadOnlyMode());
