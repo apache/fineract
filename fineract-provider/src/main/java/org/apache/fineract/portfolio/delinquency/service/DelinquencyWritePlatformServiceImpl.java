@@ -44,12 +44,15 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMapping
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTag;
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketAgesOverlapedException;
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyRangeInvalidAgesException;
+import org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
@@ -76,6 +79,8 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanDelinquencyDomainService loanDelinquencyDomainService;
     private final LoanInstallmentDelinquencyTagRepository loanInstallmentDelinquencyTagRepository;
+    private final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
+    private final DelinquencyActionParseAndValidator delinquencyActionParseAndValidator;
 
     @Override
     public CommandProcessingResult createDelinquencyRange(JsonCommand command) {
@@ -197,6 +202,28 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                 applyDelinquencyDetailsForLoanInstallments(loan, delinquencyBucket, installmentsCollectionData);
             }
         }
+    }
+
+    @Override
+    public CommandProcessingResult createDelinquencyAction(Long loanId, JsonCommand command) {
+        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        final List<LoanDelinquencyAction> savedDelinquencyList = loanDelinquencyActionRepository.findByLoanOrderById(loan);
+
+        LoanDelinquencyAction parsedDelinquencyAction = delinquencyActionParseAndValidator.validateAndParseUpdate(command, loan,
+                savedDelinquencyList, businessDate);
+
+        parsedDelinquencyAction.setLoan(loan);
+
+        LoanDelinquencyAction saved = loanDelinquencyActionRepository.saveAndFlush(parsedDelinquencyAction);
+
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
+                .withEntityId(saved.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .build();
     }
 
     @Override

@@ -18,24 +18,37 @@
  */
 package org.apache.fineract.portfolio.delinquency.service;
 
+import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.delinquency.data.LoanInstallmentDelinquencyTagData;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
+import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -55,6 +68,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     private final LoanRepository loanRepository;
     private final LoanDelinquencyDomainService loanDelinquencyDomainService;
     private final LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag;
+    private final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
 
     @Override
     public Collection<DelinquencyRangeData> retrieveAllDelinquencyRanges() {
@@ -124,14 +138,71 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
                 collectionData.setLastRepaymentDate(lastRepaymentTransaction.getTransactionDate());
                 collectionData.setLastRepaymentAmount(lastRepaymentTransaction.getAmount());
             }
+
+            enrichWithDelinquencyPausePeriodInfo(collectionData, retrieveLoanDelinquencyActions(loanId),
+                    ThreadLocalContextUtil.getBusinessDate());
         }
 
         return collectionData;
     }
 
+    void enrichWithDelinquencyPausePeriodInfo(CollectionData collectionData, Collection<LoanDelinquencyAction> delinquencyActions,
+            LocalDate businessDate) {
+        // partition them based on type
+        Map<DelinquencyAction, List<LoanDelinquencyAction>> partitioned = delinquencyActions.stream()
+                .collect(Collectors.groupingBy(LoanDelinquencyAction::getAction));
+
+        // add the possible resumes to it to create the effective pause periods
+        if (partitioned.containsKey(DelinquencyAction.PAUSE)) {
+            List<LoanDelinquencyActionData> effective = new ArrayList<>();
+            List<LoanDelinquencyAction> pauses = partitioned.get(DelinquencyAction.PAUSE);
+            for (LoanDelinquencyAction loanDelinquencyAction : pauses) {
+                Optional<LoanDelinquencyAction> resume = findMatchingResume(loanDelinquencyAction, partitioned.get(RESUME));
+                LoanDelinquencyActionData loanDelinquencyActionData = new LoanDelinquencyActionData(loanDelinquencyAction);
+                resume.ifPresent(r -> loanDelinquencyActionData.setEndDate(r.getStartDate()));
+                effective.add(loanDelinquencyActionData);
+            }
+
+            // order them by start date, filter out the future items
+            Optional<LoanDelinquencyActionData> last = effective.stream()
+                    .sorted(Comparator.comparing(LoanDelinquencyActionData::getStartDate))
+                    .filter(e -> !DateUtils.isAfter(e.getStartDate(), businessDate)) // keep only the present and the
+                                                                                     // past ones
+                    .reduce((first, second) -> second);
+
+            // enrich collectionData
+            last.ifPresent(action -> {
+                collectionData
+                        .setDelinquencyCalculationPaused(!action.startDate.isAfter(businessDate) && !businessDate.isAfter(action.endDate));
+                collectionData.setDelinquencyPausePeriodStartDate(action.getStartDate());
+                collectionData.setDelinquencyPausePeriodEndDate(action.getEndDate());
+            });
+        }
+    }
+
+    private Optional<LoanDelinquencyAction> findMatchingResume(LoanDelinquencyAction pause, List<LoanDelinquencyAction> resumes) {
+        if (resumes != null && resumes.size() > 0) {
+            for (LoanDelinquencyAction resume : resumes) {
+                if (!pause.getStartDate().isAfter(resume.getStartDate()) && !resume.getStartDate().isAfter(pause.getEndDate())) {
+                    return Optional.of(resume);
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     @Override
     public Collection<LoanInstallmentDelinquencyTagData> retrieveLoanInstallmentsCurrentDelinquencyTag(Long loanId) {
         return repositoryLoanInstallmentDelinquencyTag.findInstallmentDelinquencyTags(loanId);
+    }
+
+    @Override
+    public Collection<LoanDelinquencyAction> retrieveLoanDelinquencyActions(Long loanId) {
+        final Optional<Loan> optLoan = this.loanRepository.findById(loanId);
+        if (optLoan.isPresent()) {
+            return loanDelinquencyActionRepository.findByLoanOrderById(optLoan.get());
+        }
+        return List.of();
     }
 
 }
