@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 
 @Component
 public class TenantDataSourceFactory {
@@ -39,6 +41,9 @@ public class TenantDataSourceFactory {
     private static final Logger LOG = LoggerFactory.getLogger(TenantDataSourceFactory.class);
 
     private final HikariDataSource tenantDataSource;
+
+    @Autowired
+    ApplicationContext context;
 
     private final DatabasePasswordEncryptor databasePasswordEncryptor;
 
@@ -67,8 +72,9 @@ public class TenantDataSourceFactory {
         String protocol = toProtocol(tenantDataSource);
 //        String tenantJdbcUrl = toJdbcUrl(protocol, tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
 //                tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+        Environment environment = context.getEnvironment();
 
-        String tenantJdbcUrl = toJdbcUrlGCP(protocol, tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+        String tenantJdbcUrl = toJdbcUrlGCP(protocol, tenantConnection.getSchemaName(), environment.getProperty("FINERACT_DEFAULT_TENANTDB_CONN_PARAMS"));
         LOG.info("JDBC URL for tenant {} is {}", tenant.getTenantIdentifier(), tenantJdbcUrl);
         dataSource.setJdbcUrl(tenantJdbcUrl);
         return dataSource;
