@@ -149,7 +149,7 @@ public class CompatibilityConfig {
 //        if (environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME") != null) {
         props.setProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
         props.setProperty("cloudSqlInstance", environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME"));
-        props.setProperty("ipTypes", "PUBLIC,PRIVATE");
+        props.setProperty("ipTypes", "PUBLIC");
 //        }
 
         // https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj
