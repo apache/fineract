@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.core.domain;
 
 import java.io.Serializable;
-import java.sql.Connection;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
