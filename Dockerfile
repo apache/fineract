@@ -26,7 +26,7 @@ WORKDIR /fineract
 #RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json . && \
 #            mv fineract-404214-1eefd4b3e75f.json fineract.json
 
-RUN ./gradlew --no-daemon -q -x clean -x compileJava -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
+RUN ./gradlew --no-daemon -q -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
 WORKDIR /fineract
 RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
