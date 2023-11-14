@@ -26,7 +26,7 @@ WORKDIR /fineract
 #RUN gsutil cp gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json . && \
 #            mv fineract-404214-1eefd4b3e75f.json fineract.json
 
-RUN ./gradlew --no-daemon -q -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
+RUN ./gradlew --no-daemon -q -x clean -x compileJava -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
 WORKDIR /fineract
 RUN jar -xf fineract-provider/build/libs/fineract-provider-0.0.1-SNAPSHOT.jar
@@ -58,10 +58,10 @@ COPY --from=builder /fineract/fineract.json /app
 
 #RUN chmod 775 /entrypoint.sh
 
-ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
-ENV CLOUD_SQL_USER=root
-ENV CLOUD_SQL_PASSWORD=mysql
-ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
+#ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
+#ENV CLOUD_SQL_USER=root
+#ENV CLOUD_SQL_PASSWORD=mysql
+#ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
 
 #ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
 #ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/fineract_tenants
