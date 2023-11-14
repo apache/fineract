@@ -87,8 +87,8 @@ public class DataSourcePerTenantServiceFactory {
         }
 //        String jdbcUrl = toJdbcUrl(protocol, schemaServer, schemaPort, schemaName, schemaConnectionParameters);
 
-//        Environment environment = context.getEnvironment();
-        String jdbcUrl = toJdbcUrlGCP(protocol, schemaName, schemaConnectionParameters);
+        Environment environment = context.getEnvironment();
+        String jdbcUrl = toJdbcUrlGCP(protocol, schemaName, environment.getProperty("FINERACT_DEFAULT_TENANTDB_CONN_PARAMS"));
 //
 //        if (environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME") != null) {
 //            jdbcUrl = toJdbcUrlGCP(protocol, schemaName, schemaConnectionParameters);
