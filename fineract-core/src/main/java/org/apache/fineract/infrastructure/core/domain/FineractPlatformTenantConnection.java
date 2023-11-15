@@ -125,8 +125,8 @@ public class FineractPlatformTenantConnection implements Serializable {
         return sb.toString();
     }
 
-    public static String toJdbcUrlGCP(String protocol, String db, String parameters) {
-        StringBuilder sb = new StringBuilder(protocol).append("://google/").append(db);
+    public static String toJdbcUrlGCP(String protocol, String db, String parameters, String host) {
+        StringBuilder sb = new StringBuilder(protocol).append("://").append(host).append("/").append(db);
 
         if (!StringUtils.isEmpty(parameters)) {
             sb.append('?').append(parameters);

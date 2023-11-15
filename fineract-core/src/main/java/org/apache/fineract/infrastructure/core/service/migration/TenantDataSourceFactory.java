@@ -74,7 +74,8 @@ public class TenantDataSourceFactory {
 //                tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
         Environment environment = context.getEnvironment();
 
-        String tenantJdbcUrl = toJdbcUrlGCP(protocol, tenantConnection.getSchemaName(), environment.getProperty("FINERACT_DEFAULT_TENANTDB_CONN_PARAMS"));
+        String tenantJdbcUrl = toJdbcUrlGCP(protocol, tenantConnection.getSchemaName(),
+                environment.getProperty("FINERACT_DEFAULT_TENANTDB_CONN_PARAMS"), tenantConnection.getSchemaServer());
         LOG.info("JDBC URL for tenant {} is {}", tenant.getTenantIdentifier(), tenantJdbcUrl);
         dataSource.setJdbcUrl(tenantJdbcUrl);
         return dataSource;
