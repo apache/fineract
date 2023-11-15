@@ -12,5 +12,5 @@ steps:
 #    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/${PROJECT_ID}/fineract/fineract:latest', '.' ]
 
   # Push the Docker image to the Google Cloud Container Registry.
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'push', 'europe-west2-docker.pkg.dev/${PROJECT_ID}/fineract/fineract:latest' ]
+#  - name: 'gcr.io/cloud-builders/docker'
+#    args: [ 'push', 'europe-west2-docker.pkg.dev/${PROJECT_ID}/fineract/fineract:latest' ]
