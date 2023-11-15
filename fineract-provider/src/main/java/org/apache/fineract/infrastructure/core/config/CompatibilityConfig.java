@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@ConditionalOnExpression("#{ systemEnvironment['FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME'] != null }")
+//@ConditionalOnExpression("#{ systemEnvironment['FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME'] != null }")
 @Deprecated // NOTE: this will be removed in one of the next releases (probably around version 1.7.x or 1.8.x)
 public class CompatibilityConfig {
 
