@@ -1,14 +1,14 @@
 steps:
   # Build the Java project and create a JAR file.
-#  - name: 'gcr.io/cloud-builders/gradle'
-#    args: [ 'clean', 'bootJar' ]
+  - name: 'gcr.io/cloud-builders/gradle'
+    args: [ '-x compileTestJava', '-x test', '-x spotlessJavaCheck', '-x spotlessJava', 'jib' ]
 
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args: [ 'cp', 'gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json', 'fineract.json' ]
+#  - name: 'gcr.io/cloud-builders/gsutil'
+#    args: [ 'cp', 'gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json', 'fineract.json' ]
 
   # Build a Docker image for the Spring Boot application.
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/${PROJECT_ID}/fineract/fineract:latest', '.' ]
+#  - name: 'gcr.io/cloud-builders/docker'
+#    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/${PROJECT_ID}/fineract/fineract:latest', '.' ]
 
   # Push the Docker image to the Google Cloud Container Registry.
   - name: 'gcr.io/cloud-builders/docker'
