@@ -1,7 +1,7 @@
 steps:
   # Build the Java project and create a JAR file.
   - name: gradle:8.2-jdk17
-    entrypoint: gradle
+    entrypoint: gradlew
     args: [ '-x compileTestJava', '-x test', '-x spotlessJavaCheck', '-x spotlessJava', 'jib' ]
 
 #  - name: 'gcr.io/cloud-builders/gsutil'
