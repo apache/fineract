@@ -2,8 +2,7 @@ steps:
   # Build the Java project and create a JAR file.
   - name: 'gcr.io/cloud-builders/gradle'
     env:
-      - name: JRE_VERSION
-        value: '17'
+      - name: JRE_VERSION=17
     args:
       - './gradlew'
       - '--info'
