@@ -34,7 +34,7 @@ jib {
     }
 
     to {
-        image = 'fineract-custom'
+        image = 'europe-west2-docker.pkg.dev/fineract-404214/fineract/fineract-custom'
         tags = [
             "${project.version}",
             'latest'
