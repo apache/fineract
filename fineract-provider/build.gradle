@@ -24,7 +24,7 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
-apply plugin: 'com.google.cloud.tools.jib:2.10.1'
+apply plugin: 'com.google.cloud.tools.jib'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'se.thinkcode.cucumber-runner'
 
@@ -284,7 +284,7 @@ jib {
             '--add-opens=java.management/javax.management=ALL-UNNAMED',
             '--add-opens=java.naming/javax.naming=ALL-UNNAMED'
         ]
-        env = [
+        environment = [
                 {
                     name = 'FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME'
                     value = 'com.mysql.cj.jdbc.Driver'
