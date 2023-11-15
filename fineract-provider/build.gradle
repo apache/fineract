@@ -269,7 +269,7 @@ jib {
         mainClass = 'org.apache.fineract.ServerApplication'
         extraClasspath = ['/app/plugins/*']
         jvmFlags = [
-            '-Xms4G',
+            '-Xms6G',
             '-XshowSettings:vm',
             '-XX:+UseContainerSupport',
             '-XX:+UseStringDeduplication',
