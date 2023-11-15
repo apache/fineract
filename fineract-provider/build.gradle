@@ -285,7 +285,7 @@ jib {
             '--add-opens=java.naming/javax.naming=ALL-UNNAMED'
         ]
         environment = [
-                'FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=com.mysql.cj.jdbc.Driver'
+                FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME:'com.mysql.cj.jdbc.Driver'
         ]
         args = [
             '-Duser.home=/tmp',
