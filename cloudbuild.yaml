@@ -1,16 +1,8 @@
 steps:
   # Build the Java project and create a JAR file.
-  - name: 'gcr.io/cloud-builders/gradle'
-    env:
-      - name: JRE_VERSION=17
-    args:
-      - './gradlew'
-      - '--info'
-      - '-x compileTestJava'
-      - '-x test'
-      - '-x spotlessJavaCheck'
-      - '-x spotlessJava'
-      - 'jib'
+  - name: gradle:8.2-jdk17
+    entrypoint: gradle
+    args: [ '-x compileTestJava', '-x test', '-x spotlessJavaCheck', '-x spotlessJava', 'jib' ]
 
 #  - name: 'gcr.io/cloud-builders/gsutil'
 #    args: [ 'cp', 'gs://fineract-404214-cred/fineract-404214-1eefd4b3e75f.json', 'fineract.json' ]
