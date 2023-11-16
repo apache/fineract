@@ -313,8 +313,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (installmentAmountInMultiplesOf != null) {
             increasePrincipalBy = Money.roundToMultiplesOf(increasePrincipalBy, installmentAmountInMultiplesOf);
         }
-        Money remainingAmount = increasePrincipalBy.multiplyRetainScale(noCandidateRepaymentInstallments, mc.getRoundingMode())
-                .minus(amortizableAmount);
+        Money remainingAmount = amortizableAmount
+                .minus(increasePrincipalBy.multiplyRetainScale(noCandidateRepaymentInstallments, mc.getRoundingMode()));
 
         Money finalIncreasePrincipalBy = increasePrincipalBy;
         candidateRepaymentInstallments
