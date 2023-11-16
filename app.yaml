@@ -9,13 +9,6 @@ resources:
   cpu: 2
   memory_gb: 8
   disk_size_gb: 10
-handlers:
-  - url: /.*
-    secure: never
-    backend: http
-  - url: /.*
-    secure: always
-    backend: https
 automatic_scaling:
   #cool_down_period: 120s
   min_num_instances: 1
