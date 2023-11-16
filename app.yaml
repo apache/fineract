@@ -5,16 +5,14 @@ service: default
 threadsafe: true
 runtime_config:
   runtime_version: "17"
-#resources:
- # cpu: 2
- # memory_gb: 8
- # disk_size_gb: 20
+resources:
+  cpu: 2
+  memory_gb: 8
+  disk_size_gb: 10
 automatic_scaling:
   #cool_down_period: 120s
   min_num_instances: 1
   max_num_instances: 1
-  cpu: 2
-  memory: 8gb
 liveness_check:
   initial_delay_sec: '300'
   check_interval_sec: '30'
