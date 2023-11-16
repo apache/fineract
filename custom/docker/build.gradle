@@ -66,8 +66,8 @@ jib {
             '-Duser.timezone=UTC',
             '-Djava.security.egd=file:/dev/./urandom'
         ]
-        ports = ['8080/tcp']
-        labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
+        ports = ['8080/tcp', '8443/tcp']
+        labels = [maintainer: 'Alex Mbolonzi <almbolonzi@gmail.com>']
         user = 'nobody:nogroup'
     }
 
