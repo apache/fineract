@@ -3,8 +3,6 @@ api_version: '1.0'
 env: flexible
 service: default
 threadsafe: true
-runtime_config:
-  runtime_version: "17"
 #resources:
  # cpu: 2
  # memory_gb: 8
