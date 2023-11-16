@@ -9,6 +9,9 @@ resources:
   cpu: 2
   memory_gb: 8
   disk_size_gb: 10
+network:
+  forwarded_ports:
+    - 8080:8443
 automatic_scaling:
   #cool_down_period: 120s
   min_num_instances: 1
