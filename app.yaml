@@ -1,11 +1,7 @@
 runtime: java
 api_version: '1.0'
 env: flexible
-services:
-  service: default
-  handlers:
-      - url: /.*
-        proxy: backend
+service: default
 threadsafe: true
 runtime_config:
   runtime_version: "17"
@@ -13,10 +9,6 @@ resources:
   cpu: 2
   memory_gb: 8
   disk_size_gb: 10
-
-handlers:
-  backend:
-    url: https://${SERVICE_NAME}.appspot.com:8443/.*
 automatic_scaling:
   #cool_down_period: 120s
   min_num_instances: 1
