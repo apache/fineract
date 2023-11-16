@@ -11,8 +11,8 @@ resources:
   disk_size_gb: 10
 handlers:
   - url: /.*
-    secure: always
-    backend: https
+    secure: never
+    backend: http
   - url: /.*
     secure: always
     backend: https
