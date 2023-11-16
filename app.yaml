@@ -12,9 +12,9 @@ runtime_config:
 automatic_scaling:
   #cool_down_period: 120s
   min_num_instances: 1
-  max_num_instances: 3
-  cpu_utilization:
-    target_utilization: 0.5
+  max_num_instances: 1
+  cpu: 2
+  memory: 8gb
 liveness_check:
   initial_delay_sec: '300'
   check_interval_sec: '30'
