@@ -145,6 +145,8 @@ public class BatchApiServiceImpl implements BatchApiService {
                 } catch (RuntimeException ex) {
                     status.setRollbackOnly();
                     return buildErrorResponses(ex, responseList);
+                } finally {
+                    BatchRequestContextHolder.setEnclosingTransaction(Optional.empty());
                 }
             });
         } catch (TransactionException | NonTransientDataAccessException ex) {
@@ -329,7 +331,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         String body = null;
         Set<Header> headers = new HashSet<>();
         if (ex != null) {
-            ErrorInfo errorInfo = errorHandler.handle(errorHandler.getMappable(ex));
+            ErrorInfo errorInfo = errorHandler.handle(ErrorHandler.getMappable(ex));
             statusCode = errorInfo.getStatusCode();
             body = errorInfo.getMessage();
             headers = Optional.ofNullable(errorInfo.getHeaders()).orElse(new HashSet<>());
@@ -358,7 +360,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         String body = null;
         Set<Header> headers = new HashSet<>();
         if (ex != null) {
-            ErrorInfo errorInfo = errorHandler.handle(errorHandler.getMappable(ex));
+            ErrorInfo errorInfo = errorHandler.handle(ErrorHandler.getMappable(ex));
             statusCode = errorInfo.getStatusCode();
             body = errorInfo.getMessage();
             headers = Optional.ofNullable(errorInfo.getHeaders()).orElse(new HashSet<>());

@@ -26,7 +26,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,6 +37,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.batch.domain.Header;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -45,6 +48,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -60,13 +65,54 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public final class ErrorHandler {
 
+    private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder(true).create();
+
+    private enum PessimisticLockingFailureCode {
+
+        ROLLBACK("40"), // Transaction rollback
+        DEADLOCK("60"), // Oracle: deadlock
+        HY00("HY", "Lock wait timeout exceeded"), // MySql deadlock HY00
+        ;
+
+        private final String code;
+        private final String msg;
+
+        PessimisticLockingFailureCode(String code, String msg) {
+            this.code = code;
+            this.msg = msg;
+        }
+
+        PessimisticLockingFailureCode(String code) {
+            this(code, null);
+        }
+
+        private static Throwable match(Throwable t) {
+            Throwable rootCause = ExceptionUtils.getRootCause(t);
+            return rootCause instanceof SQLException sqle && Arrays.stream(values()).anyMatch(e -> e.matches(sqle)) ? rootCause : null;
+        }
+
+        private boolean matches(SQLException ex) {
+            return code.equals(getSqlClassCode(ex)) && (msg == null || ex.getMessage().contains(msg));
+        }
+
+        @Nullable
+        private static String getSqlClassCode(SQLException ex) {
+            String sqlState = ex.getSQLState();
+            if (sqlState == null) {
+                SQLException nestedEx = ex.getNextException();
+                if (nestedEx != null) {
+                    sqlState = nestedEx.getSQLState();
+                }
+            }
+            return sqlState != null && sqlState.length() > 2 ? sqlState.substring(0, 2) : sqlState;
+        }
+    }
+
     @Autowired
     private final ApplicationContext ctx;
 
     @Autowired
     private final DefaultExceptionMapper defaultExceptionMapper;
-
-    private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder(true).create();
 
     @NotNull
     public <T extends RuntimeException> ExceptionMapper<T> findMostSpecificExceptionHandler(T exception) {
@@ -120,8 +166,13 @@ public final class ErrorHandler {
         String msg = defaultMsg == null ? t.getMessage() : defaultMsg;
         String codePfx = "error.msg" + (param == null ? "" : ("." + param));
         Object[] args = defaultMsgArgs == null ? new Object[] { t } : defaultMsgArgs;
+
+        Throwable cause;
+        if ((cause = PessimisticLockingFailureCode.match(t)) != null) {
+            return new PessimisticLockingFailureException(msg, cause); // deadlock
+        }
         if (t instanceof NestedRuntimeException nre) {
-            Throwable cause = nre.getMostSpecificCause();
+            cause = nre.getMostSpecificCause();
             msg = defaultMsg == null ? cause.getMessage() : defaultMsg;
             if (nre instanceof NonTransientDataAccessException) {
                 msgCode = msgCode == null ? codePfx + ".data.integrity.issue" : msgCode;
@@ -150,7 +201,7 @@ public final class ErrorHandler {
         return new RuntimeException(msg, t);
     }
 
-    private <T> Set<T> createSet(T[] array) {
+    private static <T> Set<T> createSet(T[] array) {
         if (array == null) {
             return Set.of();
         } else {

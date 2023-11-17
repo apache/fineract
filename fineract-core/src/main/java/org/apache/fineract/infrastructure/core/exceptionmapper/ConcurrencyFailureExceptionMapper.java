@@ -44,11 +44,14 @@ public class ConcurrencyFailureExceptionMapper implements FineractExceptionMappe
     @Override
     public Response toResponse(final ConcurrencyFailureException exception) {
         log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
-        String type = "unknown";
-        String identifier = "unknown";
+        String type;
+        String identifier;
         if (exception instanceof ObjectOptimisticLockingFailureException olex) {
             type = olex.getPersistentClassName();
             identifier = olex.getIdentifier() == null ? null : String.valueOf(olex.getIdentifier());
+        } else {
+            type = "lock";
+            identifier = null;
         }
         final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.locked(type, identifier);
         return Response.status(SC_LOCKED).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
