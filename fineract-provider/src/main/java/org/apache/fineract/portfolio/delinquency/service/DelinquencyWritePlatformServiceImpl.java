@@ -502,6 +502,9 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                             installmentDelinquencyData.getDelinquentAmount());
                     loanInstallmentDelinquencyTagRepository.delete(previousInstallmentDelinquencyTag);
                     // event installment delinquency range change
+                } else {
+                    previousInstallmentDelinquencyTag.setOutstandingAmount(installmentDelinquencyData.getDelinquentAmount());
+                    installmentDelinquency = previousInstallmentDelinquencyTag;
                 }
             } else {
                 // add new range, first time delinquent

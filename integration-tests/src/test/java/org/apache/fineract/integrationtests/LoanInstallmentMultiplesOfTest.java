@@ -36,8 +36,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
 
-    private final ClientHelper clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-
     private static Stream<Arguments> interestTypes() {
         return Stream.of(Arguments.of(Named.of("DECLINING_BALANCE", InterestType.DECLINING_BALANCE)), //
                 Arguments.of(Named.of("FLAT", InterestType.FLAT)));

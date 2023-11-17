@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,10 +47,11 @@ public final class CollectionData {
     public boolean delinquencyCalculationPaused;
     public LocalDate delinquencyPausePeriodStartDate;
     public LocalDate delinquencyPausePeriodEndDate;
+    public Collection<InstallmentLevelDelinquency> installmentLevelDelinquency;
 
     public static CollectionData template() {
         final BigDecimal zero = BigDecimal.ZERO;
-        return new CollectionData(zero, 0L, null, 0L, null, zero, null, zero, null, zero, false, null, null);
+        return new CollectionData(zero, 0L, null, 0L, null, zero, null, zero, null, zero, false, null, null, null);
     }
 
 }

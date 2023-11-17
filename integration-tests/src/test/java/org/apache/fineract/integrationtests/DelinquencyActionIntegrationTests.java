@@ -51,7 +51,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE = new BigDecimal(25);
-    private final ClientHelper clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
 
     @Test
     public void testCreateAndReadPauseDelinquencyAction() {
