@@ -179,15 +179,13 @@ public class BatchApiTest {
      */
     @Test
     public void shouldRollBackAllTransactionsOnFailure() {
-
         // Create first client request
         final BatchRequest br1 = BatchHelper.createClientRequest(4713L, "TestExtId11");
 
         // Create second client request
         final BatchRequest br2 = BatchHelper.createClientRequest(4714L, "TestExtId12");
 
-        // Create third client request, having same externalID as second client,
-        // hence cause of error
+        // Create third client request, having same externalID as second client, hence cause of error
         final BatchRequest br3 = BatchHelper.createClientRequest(4715L, "TestExtId11");
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
@@ -200,14 +198,13 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        // Verifies that none of the client in BatchRequest is created on the
-        // server
-        BatchHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId11");
-        BatchHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId12");
+        // Verifies that none of the client in BatchRequest is created on the server
+        BatchHelper.verifyClientNotCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId11");
+        BatchHelper.verifyClientNotCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId12");
 
         // Asserts that all the transactions have been successfully rolled back
         Assertions.assertEquals(1, response.size());
-        Assertions.assertEquals(SC_FORBIDDEN, response.get(0).getStatusCode(), "Verify Status code 500");
+        Assertions.assertEquals(SC_FORBIDDEN, response.get(0).getStatusCode(), "Verify Status code 403");
     }
 
     /**

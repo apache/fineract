@@ -62,9 +62,6 @@ public class CommandSourceService {
     @NotNull
     private CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
-        if (initialCommandSource.getCommandJson() == null) {
-            initialCommandSource.setCommandJson("{}");
-        }
         return commandSourceRepository.saveAndFlush(initialCommandSource);
     }
 
@@ -84,19 +81,22 @@ public class CommandSourceService {
     }
 
     public ErrorInfo generateErrorInfo(Throwable t) {
-        return errorHandler.handle(errorHandler.getMappable(t));
+        return errorHandler.handle(ErrorHandler.getMappable(t));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CommandSource getCommandSource(Long commandSourceId) {
         return commandSourceRepository.findById(commandSourceId).orElseThrow(() -> new CommandNotFoundException(commandSourceId));
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public CommandSource findCommandSource(CommandWrapper wrapper, String idempotencyKey) {
         return commandSourceRepository.findByActionNameAndEntityNameAndIdempotencyKey(wrapper.actionName(), wrapper.entityName(),
                 idempotencyKey);
     }
 
-    private CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         CommandSource commandSourceResult;
         if (jsonCommand.commandId() != null) {
             commandSourceResult = commandSourceRepository.findById(jsonCommand.commandId())
@@ -104,6 +104,9 @@ public class CommandSourceService {
             commandSourceResult.markAsChecked(maker);
         } else {
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey, UNDER_PROCESSING.getValue());
+        }
+        if (commandSourceResult.getCommandJson() == null) {
+            commandSourceResult.setCommandJson("{}");
         }
         return commandSourceResult;
     }

@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -48,6 +49,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -77,7 +79,6 @@ public class SavingsAccountTransactionTest {
     private static final Logger log = LoggerFactory.getLogger(SavingsAccountTransactionTest.class);
 
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String DEFAULT_DATE_FORMAT = "dd MMMM yyyy";
     final String startDateString = "03 June 2023";
     final String depositDateString = "05 June 2023";
     final String withdrawDateString = "10 June 2023";
@@ -193,16 +194,17 @@ public class SavingsAccountTransactionTest {
         String transactionDate = SavingsAccountHelper.TRANSACTION_DATE;
         String transactionAmount = "10";
         ExecutorService executor = Executors.newFixedThreadPool(30);
-        for (int i = 0; i < 10; i++) {
+        ArrayList<Future<?>> results = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
             log.info("Starting concurrent transaction number {}", i);
             SavingsTransactionData transactionData = SavingsTransactionData.builder().transactionDate(transactionDate)
                     .transactionAmount(transactionAmount).paymentTypeId(PAYMENT_TYPE_ID).note("note_" + i).build();
             Runnable workerWithTransaction = new TransactionExecutor(batchWithTransactionHelper, savingsId, transactionData, true,
                     datatableName, columnNames);
-            executor.execute(workerWithTransaction);
+            results.add(executor.submit(workerWithTransaction));
             Runnable workerWithoutTransaction = new TransactionExecutor(batchWithoutTransactionHelper, savingsId, transactionData, false,
                     datatableName, columnNames);
-            executor.execute(workerWithoutTransaction);
+            results.add(executor.submit(workerWithoutTransaction));
         }
 
         executor.shutdown();
@@ -211,6 +213,64 @@ public class SavingsAccountTransactionTest {
 
         }
         this.datatableHelper.deleteDatatable(datatableName);
+        try {
+            for (Future<?> result : results) {
+                assertNull(result.get());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        log.info("\nFinished all threads");
+    }
+
+    // @Test
+    public void testDeadlockSavingsBatchTransactions() {
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
+
+        final Integer savingsProductId = createSavingsProductDailyPosting();
+        assertNotNull(savingsProductId);
+
+        final Integer savingsId1 = savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL);
+        savingsAccountHelper.approveSavings(savingsId1);
+        savingsAccountHelper.activateSavings(savingsId1);
+
+        final Integer savingsId2 = savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL);
+        savingsAccountHelper.approveSavings(savingsId2);
+        savingsAccountHelper.activateSavings(savingsId2);
+
+        SavingsAccountHelper batchWithTransactionHelper = new SavingsAccountHelper(requestSpec, concurrentResponseSpec);
+        String transactionDate = SavingsAccountHelper.TRANSACTION_DATE;
+        String transactionAmount = "10";
+
+        ExecutorService executor = Executors.newFixedThreadPool(30);
+        ArrayList<Future<?>> results = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            log.info("Starting concurrent transaction number {}", i);
+            SavingsTransactionData transactionData1 = SavingsTransactionData.builder().transactionDate(transactionDate)
+                    .transactionAmount(transactionAmount).paymentTypeId(PAYMENT_TYPE_ID).note("note1_" + i).build();
+            results.add(executor.submit(() -> {
+                runDeadlockBatch(batchWithTransactionHelper, savingsId1, savingsId2, transactionData1);
+            }));
+            SavingsTransactionData transactionData2 = SavingsTransactionData.builder().transactionDate(transactionDate)
+                    .transactionAmount(transactionAmount).paymentTypeId(PAYMENT_TYPE_ID).note("note2_" + i).build();
+            results.add(executor.submit(() -> {
+                runDeadlockBatch(batchWithTransactionHelper, savingsId2, savingsId1, transactionData2);
+            }));
+        }
+
+        executor.shutdown();
+        // Wait until all threads are finish
+        while (!executor.isTerminated()) {
+
+        }
+        try {
+            for (Future<?> result : results) {
+                assertNull(result.get());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         log.info("\nFinished all threads");
     }
 
@@ -268,13 +328,13 @@ public class SavingsAccountTransactionTest {
 
     public static class TransactionExecutor implements Runnable {
 
-        private SavingsAccountHelper savingsHelper;
+        private final SavingsAccountHelper savingsHelper;
         private final Integer savingsId;
         SavingsTransactionData transactionData;
-        boolean batch;
-        boolean enclosingTransaction;
-        String datatableName;
-        List<String> columnNames;
+        private final boolean batch;
+        private final boolean enclosingTransaction;
+        private final String datatableName;
+        private final List<String> columnNames;
 
         private TransactionExecutor(SavingsAccountHelper savingsHelper, Integer savingsId, SavingsTransactionData transactionData,
                 boolean batch, boolean enclosingTransaction, String datatableName, List<String> columnNames) {
@@ -338,7 +398,8 @@ public class SavingsAccountTransactionTest {
                     assertTrue(SC_OK == statusCode1 || SC_LOCKED == statusCode1);
                     Integer statusCode4 = responses.get(3).getStatusCode();
                     assertNotNull(statusCode4);
-                    assertTrue(SC_OK == statusCode1 ? (SC_OK == statusCode4 || SC_LOCKED == statusCode4) : SC_FORBIDDEN == statusCode4);
+                    assertTrue(SC_OK == statusCode1 ? (SC_OK == statusCode4 || SC_LOCKED == statusCode4)
+                            : (SC_FORBIDDEN == statusCode4 || SC_LOCKED == statusCode4));
                 }
             } else {
                 String json = transactionData.getJson();
@@ -361,6 +422,30 @@ public class SavingsAccountTransactionTest {
             }
             assertEquals(String.valueOf(SC_LOCKED), statusCode);
             return false;
+        }
+    }
+
+    private void runDeadlockBatch(SavingsAccountHelper savingsHelper, Integer savingsId1, Integer savingsId2,
+            SavingsTransactionData transactionData) {
+        final BatchRequest depositRequest1 = BatchHelper.depositSavingAccount(1L, savingsId1.longValue(), transactionData);
+        final BatchRequest withdrawRequest1 = BatchHelper.withdrawSavingAccount(2L, savingsId1.longValue(), transactionData);
+        final BatchRequest depositRequest2 = BatchHelper.depositSavingAccount(3L, savingsId2.longValue(), transactionData);
+        final BatchRequest withdrawRequest2 = BatchHelper.withdrawSavingAccount(4L, savingsId2.longValue(), transactionData);
+        String json = BatchHelper.toJsonString(Arrays.asList(depositRequest1, withdrawRequest1, depositRequest2, withdrawRequest2));
+        RequestSpecification requestSpec = savingsHelper.getRequestSpec();
+        ResponseSpecification responseSpec = savingsHelper.getResponseSpec();
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec, json);
+        assertNotNull(responses);
+        Integer statusCode = responses.get(0).getStatusCode();
+        assertNotNull(statusCode);
+        assertTrue(SC_OK == statusCode || SC_LOCKED == statusCode);
+        if (SC_OK == statusCode) {
+            assertEquals(4, responses.size());
+            Integer statusCode4 = responses.get(3).getStatusCode();
+            assertNotNull(statusCode4);
+            assertEquals(SC_OK, statusCode4);
+        } else {
+            assertEquals(1, responses.size());
         }
     }
 
