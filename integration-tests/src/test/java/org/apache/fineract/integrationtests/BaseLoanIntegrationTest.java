@@ -53,6 +53,7 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
+import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -78,6 +79,8 @@ public abstract class BaseLoanIntegrationTest {
     protected final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     protected final LoanProductHelper loanProductHelper = new LoanProductHelper();
     protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+    protected ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
+
     protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
     protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 

@@ -29,7 +29,9 @@ import io.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
@@ -87,11 +89,29 @@ public class DelinquencyBucketsHelper {
         return GSON.fromJson(response, DeleteDelinquencyBucketResponse.class);
     }
 
-    public static String getAsJSON(final ArrayList<Integer> rangeIds) {
+    public static String getAsJSON(final List<Integer> rangeIds) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", Utils.uniqueRandomStringGenerator("Delinquency_Bucket_", 4));
         map.put("ranges", rangeIds.toArray());
         return new Gson().toJson(map);
+    }
+
+    public static Integer createDelinquencyBucket(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            List<Pair<Integer, Integer>> ranges) {
+        List<Integer> rangeIds = ranges.stream().map(r -> createDelinquencyRange(requestSpec, responseSpec, r)).toList();
+        String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
+        PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
+                responseSpec, jsonBucket);
+        assertNotNull(delinquencyBucketResponse);
+        return delinquencyBucketResponse.getResourceId();
+    }
+
+    public static Integer createDelinquencyRange(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            Pair<Integer, Integer> range) {
+        String jsonRange = DelinquencyRangesHelper.getAsJSON(range.getLeft(), range.getRight());
+        PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
+                jsonRange);
+        return delinquencyRangeResponse.getResourceId();
     }
 
     public static Integer createDelinquencyBucket(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {

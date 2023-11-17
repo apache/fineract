@@ -999,6 +999,30 @@ final class LoansApiResourceSwagger {
             @Schema(example = "[2022, 07, 10]")
             public LocalDate delinquencyPausePeriodEndDate;
 
+            @Schema(description = "List of GetLoansLoanIdLoanInstallmentLevelDelinquency")
+            public List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquency;
+
+        }
+
+        static final class GetLoansLoanIdLoanInstallmentLevelDelinquency {
+
+            private GetLoansLoanIdLoanInstallmentLevelDelinquency() {}
+
+            @Schema(example = "112")
+            public Long rangeId;
+
+            @Schema(example = "Delinquency Range 3 to 5 days")
+            public String classification;
+
+            @Schema(example = "3")
+            public Integer minimumAgeDays;
+
+            @Schema(example = "5")
+            public Integer maximumAgeDays;
+
+            @Schema(example = "250.0")
+            public BigDecimal delinquentAmount;
+
         }
 
         @Schema(example = "1")
