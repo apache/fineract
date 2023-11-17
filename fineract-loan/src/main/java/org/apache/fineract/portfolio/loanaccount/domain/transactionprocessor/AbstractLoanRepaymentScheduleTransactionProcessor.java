@@ -726,6 +726,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         processCreditTransaction(loanTransaction, overpaidAmount, currency, installments);
     }
 
+    protected void handleCreditBalanceRefund(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        processCreditTransaction(loanTransaction, overpaidAmount, currency, installments);
+    }
+
     protected void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
