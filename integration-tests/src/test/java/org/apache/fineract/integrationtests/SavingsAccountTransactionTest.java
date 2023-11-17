@@ -20,8 +20,8 @@ package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper.PAYMENT_TYPE_ID;
 import static org.apache.fineract.integrationtests.common.system.DatatableHelper.addDatatableColumn;
+import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_FORBIDDEN;
-import static org.apache.http.HttpStatus.SC_LOCKED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -85,6 +86,7 @@ public class SavingsAccountTransactionTest {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification concurrentResponseSpec;
+    private ResponseSpecification deadlockResponseSpec;
     private RequestSpecification requestSpec;
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
@@ -96,7 +98,8 @@ public class SavingsAccountTransactionTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(SC_OK).build();
-        this.concurrentResponseSpec = new ResponseSpecBuilder().expectStatusCode(anyOf(is(SC_OK), is(SC_LOCKED))).build();
+        this.concurrentResponseSpec = new ResponseSpecBuilder().expectStatusCode(anyOf(is(SC_OK), is(SC_CONFLICT))).build();
+        this.deadlockResponseSpec = new ResponseSpecBuilder().expectStatusCode(anyOf(is(SC_OK), is(SC_CONFLICT), is(SC_FORBIDDEN))).build();
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
         this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
@@ -190,7 +193,7 @@ public class SavingsAccountTransactionTest {
 
         SavingsAccountHelper batchWithTransactionHelper = new SavingsAccountHelper(requestSpec, concurrentResponseSpec);
         SavingsAccountHelper batchWithoutTransactionHelper = new SavingsAccountHelper(requestSpec,
-                new ResponseSpecBuilder().expectStatusCode(anyOf(is(SC_OK), is(SC_LOCKED), is(SC_FORBIDDEN))).build());
+                new ResponseSpecBuilder().expectStatusCode(anyOf(is(SC_OK), is(SC_CONFLICT), is(SC_FORBIDDEN))).build());
         String transactionDate = SavingsAccountHelper.TRANSACTION_DATE;
         String transactionAmount = "10";
         ExecutorService executor = Executors.newFixedThreadPool(30);
@@ -223,7 +226,7 @@ public class SavingsAccountTransactionTest {
         log.info("\nFinished all threads");
     }
 
-    // @Test
+    @Test
     public void testDeadlockSavingsBatchTransactions() {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
@@ -239,7 +242,7 @@ public class SavingsAccountTransactionTest {
         savingsAccountHelper.approveSavings(savingsId2);
         savingsAccountHelper.activateSavings(savingsId2);
 
-        SavingsAccountHelper batchWithTransactionHelper = new SavingsAccountHelper(requestSpec, concurrentResponseSpec);
+        SavingsAccountHelper batchWithTransactionHelper = new SavingsAccountHelper(requestSpec, deadlockResponseSpec);
         String transactionDate = SavingsAccountHelper.TRANSACTION_DATE;
         String transactionAmount = "10";
 
@@ -293,11 +296,12 @@ public class SavingsAccountTransactionTest {
 
         assertEquals(transactionId, (Integer) transaction.get("id"), "Check Savings " + transactionType + " Transaction");
         LocalDate transactionDateFromResponse = extractLocalDate(transaction, "date");
-        assertTrue(DateUtils.isEqual(transactionDate, transactionDateFromResponse),
-                "Transaction Date check for Savings " + transactionType + " Transaction");
-        LocalDate submittedOnDate = extractLocalDate(transaction, "submittedOnDate");
-        assertTrue(DateUtils.isEqual(submittedOnDate, Utils.getLocalDateOfTenant()),
-                "Submitted On Date check for Savings " + transactionType + " Transaction");
+        assertTrue(DateUtils.isEqual(transactionDate, transactionDateFromResponse), "Transaction Date check for Savings " + transactionType
+                + " Transaction. Expected: " + transactionDate + ", current: " + transactionDateFromResponse);
+        LocalDate submittedOnDate = Utils.getLocalDateOfTenant();
+        LocalDate submittedOnDateFromResponse = extractLocalDate(transaction, "submittedOnDate");
+        assertTrue(DateUtils.isEqual(submittedOnDate, submittedOnDateFromResponse), "Submitted On Date check for Savings " + transactionType
+                + " Transaction. Expected: " + submittedOnDate + ", current: " + submittedOnDateFromResponse);
     }
 
     private LocalDate extractLocalDate(HashMap transactionMap, String fieldName) {
@@ -382,7 +386,7 @@ public class SavingsAccountTransactionTest {
                 if (enclosingTransaction) {
                     Integer statusCode1 = responses.get(0).getStatusCode();
                     assertNotNull(statusCode1);
-                    assertTrue(SC_OK == statusCode1 || SC_LOCKED == statusCode1);
+                    assertTrue(SC_OK == statusCode1 || SC_CONFLICT == statusCode1, "Status code: " + statusCode1);
                     if (SC_OK == statusCode1) {
                         assertEquals(4, responses.size());
                         Integer statusCode4 = responses.get(3).getStatusCode();
@@ -395,11 +399,11 @@ public class SavingsAccountTransactionTest {
                     assertEquals(4, responses.size());
                     Integer statusCode1 = responses.get(0).getStatusCode();
                     assertNotNull(statusCode1);
-                    assertTrue(SC_OK == statusCode1 || SC_LOCKED == statusCode1);
+                    assertTrue(SC_OK == statusCode1 || SC_CONFLICT == statusCode1, "Status code: " + statusCode1);
                     Integer statusCode4 = responses.get(3).getStatusCode();
                     assertNotNull(statusCode4);
-                    assertTrue(SC_OK == statusCode1 ? (SC_OK == statusCode4 || SC_LOCKED == statusCode4)
-                            : (SC_FORBIDDEN == statusCode4 || SC_LOCKED == statusCode4));
+                    assertTrue(SC_OK == statusCode1 ? (SC_OK == statusCode4 || SC_CONFLICT == statusCode4)
+                            : (SC_FORBIDDEN == statusCode4 || SC_CONFLICT == statusCode4), "Status code: " + statusCode4);
                 }
             } else {
                 String json = transactionData.getJson();
@@ -415,12 +419,12 @@ public class SavingsAccountTransactionTest {
         private static boolean checkConcurrentResponse(String response) {
             assertNotNull(response);
             JsonPath res = JsonPath.from(response);
-            String statusCode = (String) res.get("httpStatusCode");
+            String statusCode = res.get("httpStatusCode");
             if (statusCode == null) {
                 assertNotNull(res.get(CommonConstants.RESPONSE_RESOURCE_ID));
                 return true;
             }
-            assertEquals(String.valueOf(SC_LOCKED), statusCode);
+            assertEquals(String.valueOf(SC_CONFLICT), statusCode);
             return false;
         }
     }
@@ -436,9 +440,14 @@ public class SavingsAccountTransactionTest {
         ResponseSpecification responseSpec = savingsHelper.getResponseSpec();
         final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec, json);
         assertNotNull(responses);
-        Integer statusCode = responses.get(0).getStatusCode();
+        BatchResponse response1 = responses.get(0);
+        Integer statusCode = response1.getStatusCode();
+        String msg = Strings.nullToEmpty(response1.getBody());
         assertNotNull(statusCode);
-        assertTrue(SC_OK == statusCode || SC_LOCKED == statusCode);
+        assertTrue(
+                SC_OK == statusCode || SC_CONFLICT == statusCode
+                        || (SC_FORBIDDEN == statusCode && msg.contains("Cannot add or update a child row")),
+                "Status code: " + statusCode + ", message: " + msg);
         if (SC_OK == statusCode) {
             assertEquals(4, responses.size());
             Integer statusCode4 = responses.get(3).getStatusCode();
