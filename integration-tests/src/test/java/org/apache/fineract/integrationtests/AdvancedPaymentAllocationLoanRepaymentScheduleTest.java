@@ -71,7 +71,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -1545,7 +1544,6 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
     // 6. Merchant issued credit - reversal
     // 7. Payments
     @Test
-    @Disabled("Till the CBR support got implemented")
     public void uc24() {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
@@ -1624,20 +1622,20 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
                     new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("20 January 2023")
                             .transactionAmount(0.0).locale("en"));
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            validateLoanSummaryBalances(loanDetails, 400.0, 100.0, 400.0, 100.0, null);
-            validateRepaymentPeriod(loanDetails, 1, 125.0, 100.0, 25.0, 0.0, 100.0);
-            validateRepaymentPeriod(loanDetails, 2, 125.0, 0.0, 125.0, 0.0, 0.0);
-            validateRepaymentPeriod(loanDetails, 3, 125.0, 0.0, 125.0, 0.0, 0.0);
+            validateLoanSummaryBalances(loanDetails, 400.0, 175.0, 400.0, 175.0, null);
+            validateRepaymentPeriod(loanDetails, 1, 125.0, 125.0, 0.0, 0.0, 125.0);
+            validateRepaymentPeriod(loanDetails, 2, 125.0, 50.0, 75.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, 200.0, 0.0, 200.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 4, 125.0, 0.0, 125.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
             loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("31 January 2023").locale("en").transactionAmount(275.0));
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            validateLoanSummaryBalances(loanDetails, 125.0, 375.0, 125.0, 375.0, null);
+            validateLoanSummaryBalances(loanDetails, 125.0, 450.0, 125.0, 450.0, null);
             validateRepaymentPeriod(loanDetails, 1, 125.0, 125.0, 0.0, 0.0, 125.0);
-            validateRepaymentPeriod(loanDetails, 2, 125.0, 125.0, 0.0, 0.0, 125.0);
-            validateRepaymentPeriod(loanDetails, 3, 125.0, 125.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, 125.0, 125.0, 0.0, 0.0, 75.0);
+            validateRepaymentPeriod(loanDetails, 3, 200.0, 200.0, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 4, 125.0, 0.0, 125.0, 0.0, 0.0);
             validateLoanTransaction(loanDetails, 6, 275.0, 275.0, 0.0, 125.0);
             assertTrue(loanDetails.getStatus().getActive());
@@ -1645,12 +1643,12 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
             loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("15 February 2023").locale("en").transactionAmount(125.0));
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            validateLoanSummaryBalances(loanDetails, 0.0, 500.0, 0.0, 500.0, null);
+            validateLoanSummaryBalances(loanDetails, 0.0, 575.0, 0.0, 575.0, null);
             validateRepaymentPeriod(loanDetails, 1, 125.0, 125.0, 0.0, 0.0, 125.0);
-            validateRepaymentPeriod(loanDetails, 2, 125.0, 125.0, 0.0, 0.0, 125.0);
-            validateRepaymentPeriod(loanDetails, 3, 125.0, 125.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, 125.0, 125.0, 0.0, 0.0, 75.0);
+            validateRepaymentPeriod(loanDetails, 3, 200.0, 200.0, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 4, 125.0, 125.0, 0.0, 0.0, 0.0);
-            validateLoanTransaction(loanDetails, 5, 125.0, 125.0, 0.0, 0.0);
+            validateLoanTransaction(loanDetails, 7, 125.0, 125.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);

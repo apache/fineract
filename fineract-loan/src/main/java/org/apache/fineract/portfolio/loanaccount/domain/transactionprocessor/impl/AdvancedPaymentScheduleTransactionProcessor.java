@@ -150,6 +150,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case WRITEOFF -> handleWriteOff(loanTransaction, currency, installments);
             case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, currency, installments, charges);
             case CHARGEBACK -> handleChargeback(loanTransaction, currency, overpaidAmount, installments);
+            case CREDIT_BALANCE_REFUND -> handleCreditBalanceRefund(loanTransaction, currency, overpaidAmount, installments);
             case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
                     WAIVE_INTEREST, RECOVERY_REPAYMENT ->
                 handleRepayment(loanTransaction, currency, installments, charges);
