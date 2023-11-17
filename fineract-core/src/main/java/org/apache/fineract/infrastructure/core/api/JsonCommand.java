@@ -32,11 +32,13 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
@@ -268,27 +270,11 @@ public final class JsonCommand {
     }
 
     private boolean differenceExists(final TemporalAccessor baseValue, final TemporalAccessor workingCopyValue) {
-        boolean differenceExists = false;
-
-        if (baseValue != null) {
-            differenceExists = !baseValue.equals(workingCopyValue);
-        } else {
-            differenceExists = workingCopyValue != null;
-        }
-
-        return differenceExists;
+        return !Objects.equals(baseValue, workingCopyValue);
     }
 
     private boolean differenceExists(final String baseValue, final String workingCopyValue) {
-        boolean differenceExists = false;
-
-        if (StringUtils.isNotBlank(baseValue)) {
-            differenceExists = !baseValue.equals(workingCopyValue);
-        } else {
-            differenceExists = StringUtils.isNotBlank(workingCopyValue);
-        }
-
-        return differenceExists;
+        return !Objects.equals(baseValue, workingCopyValue);
     }
 
     private boolean differenceExists(final String[] baseValue, final String[] workingCopyValue) {
@@ -298,47 +284,15 @@ public final class JsonCommand {
     }
 
     private boolean differenceExists(final Number baseValue, final Number workingCopyValue) {
-        boolean differenceExists = false;
-
-        if (baseValue != null) {
-            if (workingCopyValue != null) {
-                differenceExists = !baseValue.equals(workingCopyValue);
-            } else {
-                differenceExists = true;
-            }
-        } else {
-            differenceExists = workingCopyValue != null;
-        }
-
-        return differenceExists;
+        return !Objects.equals(baseValue, workingCopyValue);
     }
 
     private boolean differenceExists(final BigDecimal baseValue, final BigDecimal workingCopyValue) {
-        boolean differenceExists = false;
-
-        if (baseValue != null) {
-            if (workingCopyValue != null) {
-                differenceExists = baseValue.compareTo(workingCopyValue) != 0;
-            } else {
-                differenceExists = true;
-            }
-        } else {
-            differenceExists = workingCopyValue != null;
-        }
-
-        return differenceExists;
+        return !MathUtil.isEqualTo(baseValue, workingCopyValue);
     }
 
     private boolean differenceExists(final Boolean baseValue, final Boolean workingCopyValue) {
-        boolean differenceExists = false;
-
-        if (baseValue != null) {
-            differenceExists = !baseValue.equals(workingCopyValue);
-        } else {
-            differenceExists = workingCopyValue != null;
-        }
-
-        return differenceExists;
+        return !Objects.equals(baseValue, workingCopyValue);
     }
 
     public boolean parameterExists(final String parameterName) {
