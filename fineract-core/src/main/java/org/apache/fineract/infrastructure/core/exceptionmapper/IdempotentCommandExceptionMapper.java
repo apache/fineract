@@ -19,10 +19,11 @@
 package org.apache.fineract.infrastructure.core.exceptionmapper;
 
 import static org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER;
+import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+import static org.apache.http.HttpStatus.SC_OK;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
@@ -46,18 +47,18 @@ public class IdempotentCommandExceptionMapper implements FineractExceptionMapper
     @Override
     public Response toResponse(final AbstractIdempotentCommandException exception) {
         log.warn("Processing {} request: {}", exception.getClass().getName(), exception.getMessage());
-        Status status = null;
+        Integer status = null;
         if (exception instanceof IdempotentCommandProcessSucceedException pse) {
             Integer statusCode = pse.getStatusCode();
-            status = statusCode == null ? Status.OK : Status.fromStatusCode(statusCode);
+            status = statusCode == null ? SC_OK : statusCode;
         }
         if (exception instanceof IdempotentCommandProcessUnderProcessingException) {
-            status = Status.CONFLICT;
+            status = 425;
         } else if (exception instanceof IdempotentCommandProcessFailedException pfe) {
-            status = Status.fromStatusCode(pfe.getStatusCode());
+            status = pfe.getStatusCode();
         }
         if (status == null) {
-            status = Status.INTERNAL_SERVER_ERROR;
+            status = SC_INTERNAL_SERVER_ERROR;
         }
         return Response.status(status).entity(exception.getResponse()).header(IDEMPOTENT_CACHE_HEADER, "true")
                 .type(MediaType.APPLICATION_JSON).build();
