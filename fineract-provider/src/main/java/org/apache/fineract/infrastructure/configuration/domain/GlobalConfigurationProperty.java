@@ -64,10 +64,9 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
     private boolean isTrapDoor;
 
     public Map<String, Object> update(final JsonCommand command) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
-        if (this.isTrapDoor == true) {
+        if (this.isTrapDoor) {
             throw new GlobalConfigurationPropertyCannotBeModfied(this.getId());
         }
 
@@ -109,7 +108,6 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
         }
 
         return actualChanges;
-
     }
 
     public static GlobalConfigurationProperty newSurveyConfiguration(final String name) {
@@ -120,6 +118,5 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
         return new GlobalConfigurationPropertyData().setName(getName()).setEnabled(isEnabled()).setValue(getValue())
                 .setDateValue(getDateValue()).setStringValue(getStringValue()).setId(this.getId()).setDescription(this.description)
                 .setTrapDoor(this.isTrapDoor);
-
     }
 }

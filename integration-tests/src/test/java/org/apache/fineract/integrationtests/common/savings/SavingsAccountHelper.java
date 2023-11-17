@@ -122,30 +122,35 @@ public class SavingsAccountHelper extends IntegrationTest {
         return sdf.format(calendar.getTime());
     }
 
-    public Integer applyForSavingsApplication(final Integer id, final Integer savingsProductID, final String accountType) {
-        return applyForSavingsApplicationOnDate(id, savingsProductID, accountType, CREATED_DATE);
+    public Integer applyForSavingsApplication(final Integer clientOrGroupId, final Integer savingsProductID, final String accountType) {
+        return applyForSavingsApplicationOnDate(clientOrGroupId, savingsProductID, accountType, CREATED_DATE);
     }
 
-    public Integer applyForSavingsApplicationOnDate(final Integer id, final Integer savingsProductID, final String accountType,
+    public Integer applyForSavingsApplicationOnDate(final Integer clientOrGroupId, final Integer savingsProductID, final String accountType,
             final String submittedOnDate) {
-        return applyForSavingsApplicationOnDate(id, savingsProductID, accountType, null, false, submittedOnDate);
+        return applyForSavingsApplicationOnDate(clientOrGroupId, savingsProductID, accountType, null, false, submittedOnDate);
     }
 
-    public Integer applyForSavingsApplicationWithExternalId(final Integer id, final Integer savingsProductID, final String accountType,
-            String externalId, boolean withdrawalFeeForTransfers) {
-        return applyForSavingsApplicationOnDate(id, savingsProductID, accountType, externalId, withdrawalFeeForTransfers, CREATED_DATE);
+    public Integer applyForSavingsApplicationWithExternalId(final Integer clientOrGroupId, final Integer savingsProductID,
+            final String accountType, String externalId, boolean withdrawalFeeForTransfers) {
+        return applyForSavingsApplicationOnDate(clientOrGroupId, savingsProductID, accountType, externalId, withdrawalFeeForTransfers,
+                CREATED_DATE);
     }
 
-    public Integer applyForSavingsApplicationOnDate(final Integer id, final Integer savingsProductID, final String accountType,
+    public Integer applyForSavingsApplicationOnDate(final Integer clientOrGroupId, final Integer savingsProductID, final String accountType,
             String externalId, boolean withdrawalFeeForTransfers, final String submittedOnDate) {
-        LOG.info("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withExternalId(externalId) //
                 .withWithdrawalFeeForTransfers(withdrawalFeeForTransfers) //
                 .withSubmittedOnDate(submittedOnDate) //
-                .build(id.toString(), savingsProductID.toString(), accountType);
+                .build(clientOrGroupId.toString(), savingsProductID.toString(), accountType);
+        return applyForSavingsApplicationOnDate(savingsApplicationJSON);
+    }
+
+    public Integer applyForSavingsApplicationOnDate(String savingsApplicationJson) {
+        LOG.info("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
-                savingsApplicationJSON, "savingsId");
+                savingsApplicationJson, "savingsId");
     }
 
     public Integer applyForSavingsApplicationWithDatatables(final Integer id, final Integer savingsProductID, final String accountType,
@@ -921,6 +926,13 @@ public class SavingsAccountHelper extends IntegrationTest {
         final String GSIM_URL = "/fineract-provider/api/v1/savingsaccounts/gsim/" + gsimID + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, GSIM_URL,
                 updateGsimJSON(clientID.toString(), groupID.toString(), productID.toString()), "");
+    }
+
+    public HashMap getTransactionDetails(Integer savingsId, Integer transactionId) {
+        LOG.info("--------------------------------- GET savings transaction details -------------------------------");
+        final String url = "/fineract-provider/api/v1/savingsaccounts/" + savingsId + "/transactions/" + transactionId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
 }
