@@ -181,7 +181,7 @@ dependencyManagement {
 
         dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.12.0'
 
-        dependency ('org.apache.activemq:activemq-client-jakarta:5.18.2') {
+        dependency ('org.apache.activemq:activemq-client-jakarta:6.0.0') {
             exclude 'javax.annotation:javax.annotation-api'
         }
 
