@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.delinquency.validator;
 
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
+import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.ACTION;
+import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.END_DATE;
+import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.START_DATE;
 
 import com.google.gson.JsonElement;
 import jakarta.validation.constraints.NotNull;
@@ -54,6 +57,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         LoanDelinquencyAction parsedDelinquencyAction = parseCommand(command);
         validateLoanIsActive(loan);
         if (DelinquencyAction.PAUSE.equals(parsedDelinquencyAction.getAction())) {
+            validateBothStartAndEndDatesAreProvided(parsedDelinquencyAction);
             validatePauseStartAndEndDate(parsedDelinquencyAction, businessDate);
             validatePauseShallNotOverlap(parsedDelinquencyAction, effectiveDelinquencyList);
         } else if (DelinquencyAction.RESUME.equals(parsedDelinquencyAction.getAction())) {
@@ -62,6 +66,16 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
             validateResumeShouldBeOnActivePause(parsedDelinquencyAction, effectiveDelinquencyList);
         }
         return parsedDelinquencyAction;
+    }
+
+    private void validateBothStartAndEndDatesAreProvided(LoanDelinquencyAction parsedDelinquencyAction) {
+        if (parsedDelinquencyAction.getStartDate() == null) {
+            raiseValidationError("loan-delinquency-action-pause-startDate-cannot-be-blank", "The parameter `startDate` is mandatory",
+                    START_DATE);
+        }
+        if (parsedDelinquencyAction.getEndDate() == null) {
+            raiseValidationError("loan-delinquency-action-pause-endDate-cannot-be-blank", "The parameter `endDate` is mandatory", END_DATE);
+        }
     }
 
     private List<LoanDelinquencyActionData> calculateEffectiveDelinquencyList(List<LoanDelinquencyAction> savedDelinquencyActions) {
@@ -106,14 +120,18 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
     private void validateResumeNoEndDate(LoanDelinquencyAction parsedDelinquencyAction) {
         if (parsedDelinquencyAction.getEndDate() != null) {
             raiseValidationError("loan-delinquency-action-resume-should-have-no-end-date",
-                    "Resume Delinquency action can not have end date");
+                    "Resume Delinquency action can not have end date", END_DATE);
         }
     }
 
     private void validateResumeStartDate(LoanDelinquencyAction parsedDelinquencyAction, LocalDate businessDate) {
+        if (parsedDelinquencyAction.getStartDate() == null) {
+            raiseValidationError("loan-delinquency-action-resume-startDate-cannot-be-blank", "The parameter `startDate` is mandatory",
+                    START_DATE);
+        }
         if (!parsedDelinquencyAction.getStartDate().equals(businessDate)) {
             raiseValidationError("loan-delinquency-action-invalid-start-date",
-                    "Start date of the Resume Delinquency action must be the current business date");
+                    "Start date of the Resume Delinquency action must be the current business date", START_DATE);
         }
     }
 
@@ -124,7 +142,8 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         }
 
         if (businessDate.isAfter(parsedDelinquencyAction.getStartDate())) {
-            raiseValidationError("loan-delinquency-action-invalid-start-date", "Start date of pause period must be in the future");
+            raiseValidationError("loan-delinquency-action-invalid-start-date", "Start date of pause period must be in the future",
+                    START_DATE);
         }
     }
 
@@ -167,22 +186,21 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         } else if ("resume".equalsIgnoreCase(actionString)) {
             return DelinquencyAction.RESUME;
         } else {
-            throw new PlatformApiDataValidationException(List.of(ApiParameterError.generalError("loan-delinquency-action-invalid-action",
-                    "Invalid Delinquency Action: " + actionString)));
+            throw new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError("loan-delinquency-action-invalid-action",
+                    "Invalid Delinquency Action: " + actionString, ACTION)));
         }
     }
 
     private void validateActionString(String actionString) {
         if (StringUtils.isEmpty(actionString)) {
-            raiseValidationError("loan-delinquency-action-missing-action", "Delinquency Action must not be null or empty");
+            raiseValidationError("loan-delinquency-action-missing-action", "Delinquency Action must not be null or empty", ACTION);
         }
     }
 
     private LocalDate extractStartDate(JsonElement json) {
         String dateFormat = jsonHelper.extractStringNamed(DelinquencyActionParameters.DATE_FORMAT, json);
         String locale = jsonHelper.extractStringNamed(DelinquencyActionParameters.LOCALE, json);
-        return jsonHelper.extractLocalDateNamed(DelinquencyActionParameters.START_DATE, json, dateFormat,
-                JsonParserHelper.localeFromString(locale));
+        return jsonHelper.extractLocalDateNamed(START_DATE, json, dateFormat, JsonParserHelper.localeFromString(locale));
     }
 
     private LocalDate extractEndDate(JsonElement json) {
@@ -194,6 +212,11 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
 
     private void raiseValidationError(String globalisationMessageCode, String msg) throws PlatformApiDataValidationException {
         throw new PlatformApiDataValidationException(List.of(ApiParameterError.generalError(globalisationMessageCode, msg)));
+    }
+
+    private void raiseValidationError(String globalisationMessageCode, String msg, String fieldName)
+            throws PlatformApiDataValidationException {
+        throw new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError(globalisationMessageCode, msg, fieldName)));
     }
 
 }
