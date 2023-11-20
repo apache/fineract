@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -44,6 +45,7 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -78,7 +80,7 @@ class DelinquencyActionParseAndValidatorTest {
 
         LoanDelinquencyAction parsedDelinquencyAction = underTest.validateAndParseUpdate(command, loan,
                 List.of(loanDelinquencyAction(PAUSE, "05 September 2022", "15 September 2022")), localDate("09 September 2022"));
-        Assertions.assertEquals(DelinquencyAction.RESUME, parsedDelinquencyAction.getAction());
+        Assertions.assertEquals(RESUME, parsedDelinquencyAction.getAction());
         Assertions.assertEquals(localDate("09 September 2022"), parsedDelinquencyAction.getStartDate());
         Assertions.assertNull(parsedDelinquencyAction.getEndDate());
     }
@@ -249,14 +251,40 @@ class DelinquencyActionParseAndValidatorTest {
                 () -> underTest.validateAndParseUpdate(command, loan, List.of(), localDate("09 September 2022")));
     }
 
+    @Test
+    public void testStartDateOrEndDateIsMissingForPause() {
+        Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
+
+        assertPlatformValidationException("The parameter `startDate` is mandatory",
+                "loan-delinquency-action-pause-startDate-cannot-be-blank",
+                () -> underTest.validateAndParseUpdate(delinquencyAction("pause", null, "09 September 2022"), loan, List.of(),
+                        localDate("09 September 2022")));
+
+        assertPlatformValidationException("The parameter `endDate` is mandatory", "loan-delinquency-action-pause-endDate-cannot-be-blank",
+                () -> underTest.validateAndParseUpdate(delinquencyAction("pause", "09 September 2022", null), loan, List.of(),
+                        localDate("09 September 2022")));
+    }
+
+    @Test
+    public void testStartDateIsMissingForResume() {
+        Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
+
+        assertPlatformValidationException("The parameter `startDate` is mandatory",
+                "loan-delinquency-action-resume-startDate-cannot-be-blank", () -> underTest
+                        .validateAndParseUpdate(delinquencyAction("resume", null, null), loan, List.of(), localDate("09 September 2022")));
+    }
+
     @NotNull
-    private JsonCommand delinquencyAction(String action, String startDate, String endDate) throws JsonProcessingException {
+    private JsonCommand delinquencyAction(@Nullable String action, @Nullable String startDate, @Nullable String endDate)
+            throws JsonProcessingException {
         Map<String, Object> map = new HashMap<>();
-        map.put(ACTION, action);
+        Optional.ofNullable(action).ifPresent(a -> map.put(ACTION, a));
         map.put(DATE_FORMAT, "dd MMMM yyyy");
         map.put(LOCALE, "en");
-        map.put(START_DATE, startDate);
-        map.put(END_DATE, endDate);
+        Optional.ofNullable(startDate).ifPresent(sd -> map.put(START_DATE, sd));
+        Optional.ofNullable(endDate).ifPresent(ed -> map.put(END_DATE, ed));
         return createJsonCommand(map);
     }
 
