@@ -50,6 +50,13 @@
                 "null",
                 "string"
             ]
+        },
+        {
+            "name": "installmentDelinquencyBuckets",
+            "type": {
+                "type": "array",
+                "items": "org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1"
+            }
         }
     ]
 }

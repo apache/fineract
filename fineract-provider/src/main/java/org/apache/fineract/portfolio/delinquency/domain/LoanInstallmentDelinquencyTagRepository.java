@@ -38,7 +38,7 @@ public interface LoanInstallmentDelinquencyTagRepository
     List<LoanInstallmentDelinquencyTag> findByLoanId(@Param("loanId") Long loanId);
 
     // Fetching Installment Delinquency range and outstanding amount
-    @Query("select i.delinquencyRange, i.outstandingAmount from LoanInstallmentDelinquencyTag i where i.loan.id = :loanId")
+    @Query("select i.installment.id, i.delinquencyRange, i.outstandingAmount from LoanInstallmentDelinquencyTag i where i.loan.id = :loanId")
     List<LoanInstallmentDelinquencyTagData> findInstallmentDelinquencyTags(@Param("loanId") Long loanId);
 
     @Modifying(flushAutomatically = true)
