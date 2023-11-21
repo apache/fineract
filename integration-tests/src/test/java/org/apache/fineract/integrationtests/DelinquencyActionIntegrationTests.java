@@ -29,12 +29,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.GetDelinquencyActionsResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdDelinquencyPausePeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -172,26 +174,29 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
                     .dateFormat(DATETIME_PATTERN).locale("en"));
 
             // Validate Loan Delinquency Pause Period on Loan
-            validateLoanDelinquencyPausePerios(loanId, "10 January 2023", "15 January 2023", true);
+            validateLoanDelinquencyPausePeriods(loanId, pausePeriods("10 January 2023", "15 January 2023", true));
 
             // Create a Resume for the Loan for the current business date, it is still expected to be in pause
             loanTransactionHelper.createLoanDelinquencyAction(loanId, RESUME, "14 January 2023");
 
             // Validate Loan Delinquency Pause Period on Loan
-            validateLoanDelinquencyPausePerios(loanId, "10 January 2023", "14 January 2023", true);
+            validateLoanDelinquencyPausePeriods(loanId, pausePeriods("10 January 2023", "14 January 2023", true));
 
             // Update business date to 15 January 2023
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("15 January 2023")
                     .dateFormat(DATETIME_PATTERN).locale("en"));
 
             // Validate Loan Delinquency Pause Period on Loan
-            validateLoanDelinquencyPausePerios(loanId, "10 January 2023", "14 January 2023", false);
+            validateLoanDelinquencyPausePeriods(loanId, pausePeriods("10 January 2023", "14 January 2023", false));
 
             // Create a new pause action for the future
             loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "20 January 2023", "25 January 2023");
 
             // Validate Loan Delinquency Pause Period on Loan
-            validateLoanDelinquencyPausePerios(loanId, "10 January 2023", "14 January 2023", false);
+            validateLoanDelinquencyPausePeriods(loanId, //
+                    pausePeriods("10 January 2023", "14 January 2023", false), //
+                    pausePeriods("20 January 2023", "25 January 2023", false) //
+            );
         });
     }
 
@@ -217,13 +222,22 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
         });
     }
 
-    private void validateLoanDelinquencyPausePerios(Long loanId, String expectedStart, String expectedEnd, Boolean expectedPauseState) {
+    private void validateLoanDelinquencyPausePeriods(Long loanId, GetLoansLoanIdDelinquencyPausePeriod... pausePeriods) {
         GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         Assertions.assertNotNull(loan.getDelinquent());
-        Assertions.assertEquals(expectedPauseState, loan.getDelinquent().getDelinquencyCalculationPaused());
-        Assertions.assertEquals(LocalDate.parse(expectedStart, dateTimeFormatter),
-                loan.getDelinquent().getDelinquencyPausePeriodStartDate());
-        Assertions.assertEquals(LocalDate.parse(expectedEnd, dateTimeFormatter), loan.getDelinquent().getDelinquencyPausePeriodEndDate());
+        if (pausePeriods.length > 0) {
+            Assertions.assertEquals(Arrays.asList(pausePeriods), loan.getDelinquent().getDelinquencyPausePeriods());
+        } else {
+            Assertions.assertNull(loan.getDelinquent().getDelinquencyPausePeriods());
+        }
+    }
+
+    private GetLoansLoanIdDelinquencyPausePeriod pausePeriods(String startDate, String endDate, boolean active) {
+        GetLoansLoanIdDelinquencyPausePeriod pausePeriod = new GetLoansLoanIdDelinquencyPausePeriod();
+        pausePeriod.setActive(active);
+        pausePeriod.setPausePeriodStart(LocalDate.parse(startDate, dateTimeFormatter));
+        pausePeriod.setPausePeriodEnd(LocalDate.parse(endDate, dateTimeFormatter));
+        return pausePeriod;
     }
 
     private Long createLoanProductWith25PctDownPayment(boolean autoDownPaymentEnabled, boolean multiDisburseEnabled) {

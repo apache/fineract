@@ -990,17 +990,24 @@ final class LoansApiResourceSwagger {
             @Schema(example = "100.000000")
             public Double lastRepaymentAmount;
 
-            @Schema(example = "true")
-            public Boolean delinquencyCalculationPaused;
-
-            @Schema(example = "[2022, 07, 05]")
-            public LocalDate delinquencyPausePeriodStartDate;
-
-            @Schema(example = "[2022, 07, 10]")
-            public LocalDate delinquencyPausePeriodEndDate;
+            @Schema(description = "List of GetLoansLoanIdDelinquencyPausePeriod")
+            public List<GetLoansLoanIdDelinquencyPausePeriod> delinquencyPausePeriods;
 
             @Schema(description = "List of GetLoansLoanIdLoanInstallmentLevelDelinquency")
             public List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquency;
+
+        }
+
+        static final class GetLoansLoanIdDelinquencyPausePeriod {
+
+            @Schema(example = "true")
+            public Boolean active;
+
+            @Schema(example = "[2022, 07, 05]")
+            public LocalDate pausePeriodStart;
+
+            @Schema(example = "[2022, 07, 10]")
+            public LocalDate pausePeriodEnd;
 
         }
 

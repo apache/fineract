@@ -1,0 +1,31 @@
+{
+    "name": "DelinquencyPausePeriodV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "active",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "pausePeriodStart",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "pausePeriodEnd",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

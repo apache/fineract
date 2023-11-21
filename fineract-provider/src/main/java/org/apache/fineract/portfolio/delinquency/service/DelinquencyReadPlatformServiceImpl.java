@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
@@ -52,6 +51,7 @@ import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
+import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.apache.fineract.portfolio.loanaccount.data.InstallmentLevelDelinquency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -205,21 +205,18 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
                 effective.add(loanDelinquencyActionData);
             }
 
-            // order them by start date, filter out the future items
-            Optional<LoanDelinquencyActionData> last = effective.stream()
-                    .sorted(Comparator.comparing(LoanDelinquencyActionData::getStartDate))
-                    .filter(e -> !DateUtils.isAfter(e.getStartDate(), businessDate)) // keep only the present and the
-                                                                                     // past ones
-                    .reduce((first, second) -> second);
-
-            // enrich collectionData
-            last.ifPresent(action -> {
-                collectionData
-                        .setDelinquencyCalculationPaused(!action.startDate.isAfter(businessDate) && !businessDate.isAfter(action.endDate));
-                collectionData.setDelinquencyPausePeriodStartDate(action.getStartDate());
-                collectionData.setDelinquencyPausePeriodEndDate(action.getEndDate());
-            });
+            // order them by start date, and convert to DelinquencyPausePeriod objects
+            List<DelinquencyPausePeriod> result = effective.stream() //
+                    .sorted(Comparator.comparing(LoanDelinquencyActionData::getStartDate)) //
+                    .map(lda -> toDelinquencyPausePeriod(businessDate, lda)).toList(); //
+            collectionData.setDelinquencyPausePeriods(result);
         }
+    }
+
+    @NotNull
+    private static DelinquencyPausePeriod toDelinquencyPausePeriod(LocalDate businessDate, LoanDelinquencyActionData lda) {
+        return new DelinquencyPausePeriod(!lda.getStartDate().isAfter(businessDate) && !businessDate.isAfter(lda.getEndDate()),
+                lda.getStartDate(), lda.getEndDate());
     }
 
     private Optional<LoanDelinquencyAction> findMatchingResume(LoanDelinquencyAction pause, List<LoanDelinquencyAction> resumes) {

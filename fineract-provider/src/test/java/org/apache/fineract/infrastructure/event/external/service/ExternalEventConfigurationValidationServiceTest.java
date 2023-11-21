@@ -97,7 +97,8 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "LoanAccountsStayedLockedBusinessEvent", "MockBusinessEvent", "LoanChargeOffPreBusinessEvent",
                 "LoanChargeOffPostBusinessEvent", "LoanUndoChargeOffBusinessEvent", "LoanAccrualTransactionCreatedBusinessEvent",
                 "LoanRescheduledDueAdjustScheduleBusinessEvent", "LoanOwnershipTransferBusinessEvent", "LoanAccountSnapshotBusinessEvent",
-                "LoanTransactionDownPaymentPostBusinessEvent", "LoanTransactionDownPaymentPreBusinessEvent");
+                "LoanTransactionDownPaymentPostBusinessEvent", "LoanTransactionDownPaymentPreBusinessEvent",
+                "LoanAccountDelinquencyPauseChangedBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays
                 .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
@@ -176,7 +177,8 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "LoanAccountsStayedLockedBusinessEvent", "LoanChargeOffPreBusinessEvent", "LoanChargeOffPostBusinessEvent",
                 "LoanUndoChargeOffBusinessEvent", "LoanAccrualTransactionCreatedBusinessEvent",
                 "LoanRescheduledDueAdjustScheduleBusinessEvent", "LoanOwnershipTransferBusinessEvent", "LoanAccountSnapshotBusinessEvent",
-                "LoanTransactionDownPaymentPostBusinessEvent", "LoanTransactionDownPaymentPreBusinessEvent");
+                "LoanTransactionDownPaymentPostBusinessEvent", "LoanTransactionDownPaymentPreBusinessEvent",
+                "LoanAccountDelinquencyPauseChangedBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays
                 .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
