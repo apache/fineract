@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.useradministration.api;
+package org.apache.fineract.infrastructure.security.exception;
 
-public final class AppUserApiConstant {
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-    private AppUserApiConstant() {
+public class RestrictReuseOfPasswordException extends AbstractPlatformDomainRuleException {
 
+    public RestrictReuseOfPasswordException() {
+        super("error.msg.restrict.reuse.password.value.must.be.greater.than.zero",
+                "For enabling 'Restrict-re-use-of-password' configuration , the value (number of previous password/s to reuse) must be set to a number greater than 0.");
     }
-
-    public static final String RESTRICT_RE_USE_OF_PASSWORD = "Restrict-re-use-of-password";
 
 }

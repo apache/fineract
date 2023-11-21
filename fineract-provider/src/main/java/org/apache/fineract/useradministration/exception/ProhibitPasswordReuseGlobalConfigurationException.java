@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.useradministration.api;
+package org.apache.fineract.useradministration.exception;
 
-public final class AppUserApiConstant {
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
-    private AppUserApiConstant() {
+public class ProhibitPasswordReuseGlobalConfigurationException extends PlatformApiDataValidationException {
 
+    public ProhibitPasswordReuseGlobalConfigurationException() {
+        super("error.msg.Restrict-re-use-of-password.is.disabled.contact.system.admin.to.enable.it",
+                "Reset Password is terminated. Please reach-out to your admin to enable [Restrict-re-use-of-password] in global configuration",
+                null);
     }
-
-    public static final String RESTRICT_RE_USE_OF_PASSWORD = "Restrict-re-use-of-password";
-
 }

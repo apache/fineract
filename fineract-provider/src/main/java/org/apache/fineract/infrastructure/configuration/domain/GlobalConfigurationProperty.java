@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigur
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.security.exception.ForcePasswordResetException;
+import org.apache.fineract.infrastructure.security.exception.RestrictReuseOfPasswordException;
 
 @Entity
 @Table(name = "c_configuration")
@@ -106,7 +107,13 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
                 throw new ForcePasswordResetException();
             }
         }
-
+        final String restrictReUseOfPasswordPropertyName = "Restrict-re-use-of-password";
+        if (this.name.equalsIgnoreCase(restrictReUseOfPasswordPropertyName)) {
+            if ((this.enabled == true && command.hasParameter(valueParamName) && (this.value == 0))
+                    || (this.enabled == true && !command.hasParameter(valueParamName) && (previousValue == 0))) {
+                throw new RestrictReuseOfPasswordException();
+            }
+        }
         return actualChanges;
     }
 
