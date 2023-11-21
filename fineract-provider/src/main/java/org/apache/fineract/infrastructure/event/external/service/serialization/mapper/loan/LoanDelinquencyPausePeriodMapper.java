@@ -18,24 +18,14 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
 
-import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
+import org.apache.fineract.avro.loan.v1.DelinquencyPausePeriodV1;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
-import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
-@Mapper(config = AvroMapperConfig.class, uses = { LoanTransactionDataMapper.class, LoanChargeDataMapper.class,
-        LoanDelinquencyPausePeriodMapper.class })
-public interface LoanAccountDataMapper {
+@Mapper(config = AvroMapperConfig.class)
+public interface LoanDelinquencyPausePeriodMapper {
 
-    // TODO: avoid prefix "is" in class attributes; I would recommend to fix this also in the Avro structures
-    @Mapping(source = "loanProductLinkedToFloatingRate", target = "isLoanProductLinkedToFloatingRate")
-    @Mapping(source = "floatingInterestRate", target = "isFloatingInterestRate")
-    @Mapping(source = "topup", target = "isTopup")
-    @Mapping(source = "interestRecalculationEnabled", target = "isInterestRecalculationEnabled")
-    @Mapping(target = "externalOwnerId", ignore = true)
-    @Mapping(target = "settlementDate", ignore = true)
-    @Mapping(target = "purchasePriceRatio", ignore = true)
-    LoanAccountDataV1 map(LoanAccountData source);
+    DelinquencyPausePeriodV1 map(DelinquencyPausePeriod source);
 
 }

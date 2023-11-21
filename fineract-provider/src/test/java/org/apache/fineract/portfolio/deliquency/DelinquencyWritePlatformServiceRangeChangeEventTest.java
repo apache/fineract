@@ -127,7 +127,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         LoanScheduleDelinquencyData loanScheduleDelinquencyData = new LoanScheduleDelinquencyData(1L, overDueSinceDate, 1L,
                 loanForProcessing);
         CollectionData collectionData = new CollectionData(BigDecimal.ZERO, 2L, null, 2L, overDueSinceDate, BigDecimal.ZERO, null, null,
-                null, null, false, null, null, null);
+                null, null, null, null);
 
         Map<Long, CollectionData> installmentsCollection = new HashMap<>();
 
@@ -239,10 +239,10 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         LoanScheduleDelinquencyData loanScheduleDelinquencyData = new LoanScheduleDelinquencyData(1L, overDueSinceDate, 1L,
                 loanForProcessing);
         CollectionData collectionData = new CollectionData(BigDecimal.ZERO, 2L, null, 2L, overDueSinceDate, BigDecimal.ZERO, null, null,
-                null, null, false, null, null, null);
+                null, null, null, null);
 
         CollectionData installmentCollectionData = new CollectionData(BigDecimal.ZERO, 2L, null, 2L, overDueSinceDate,
-                installmentPrincipalAmount, null, null, null, null, false, null, null, null);
+                installmentPrincipalAmount, null, null, null, null, null, null);
 
         Map<Long, CollectionData> installmentsCollection = new HashMap<>();
         installmentsCollection.put(1L, installmentCollectionData);
@@ -305,10 +305,10 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         LoanScheduleDelinquencyData loanScheduleDelinquencyData = new LoanScheduleDelinquencyData(1L, overDueSinceDate, 1L,
                 loanForProcessing);
         CollectionData collectionData = new CollectionData(BigDecimal.ZERO, 29L, null, 29L, overDueSinceDate, BigDecimal.ZERO, null, null,
-                null, null, false, null, null, null);
+                null, null, null, null);
 
         CollectionData installmentCollectionData = new CollectionData(BigDecimal.ZERO, 29L, null, 29L, overDueSinceDate,
-                installmentPrincipalAmount, null, null, null, null, false, null, null, null);
+                installmentPrincipalAmount, null, null, null, null, null, null);
 
         Map<Long, CollectionData> installmentsCollection = new HashMap<>();
         installmentsCollection.put(1L, installmentCollectionData);

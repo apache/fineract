@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountDelinquencyPauseChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinquencyRangeChangeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiConstants;
@@ -62,6 +63,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -205,6 +207,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     }
 
     @Override
+    @Transactional
     public CommandProcessingResult createDelinquencyAction(Long loanId, JsonCommand command) {
         final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
@@ -216,7 +219,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         parsedDelinquencyAction.setLoan(loan);
 
         LoanDelinquencyAction saved = loanDelinquencyActionRepository.saveAndFlush(parsedDelinquencyAction);
-
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountDelinquencyPauseChangedBusinessEvent(loan));
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withEntityId(saved.getId()) //
                 .withOfficeId(loan.getOfficeId()) //

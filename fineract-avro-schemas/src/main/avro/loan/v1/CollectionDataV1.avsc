@@ -82,6 +82,17 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "delinquencyPausePeriods",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.DelinquencyPausePeriodV1"
+                }
+            ]
         }
     ]
 }

@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
@@ -35,6 +36,7 @@ import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
+import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -85,10 +87,7 @@ class DelinquencyReadPlatformServiceImplTest {
         // when
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 12));
 
-        // then
-        Assertions.assertFalse(collectionData.isDelinquencyCalculationPaused());
-        Assertions.assertNull(collectionData.getDelinquencyPausePeriodStartDate());
-        Assertions.assertNull(collectionData.getDelinquencyPausePeriodEndDate());
+        Assertions.assertNull(collectionData.getDelinquencyPausePeriods());
     }
 
     @Test
@@ -104,9 +103,11 @@ class DelinquencyReadPlatformServiceImplTest {
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 12));
 
         // then
-        Assertions.assertTrue(collectionData.isDelinquencyCalculationPaused());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 12), collectionData.getDelinquencyPausePeriodStartDate());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 13), collectionData.getDelinquencyPausePeriodEndDate());
+        verifyPausePeriods(collectionData, //
+                pausePeriod(false, "2023-01-10", "2023-01-11"), //
+                pausePeriod(true, "2023-01-12", "2023-01-13"), //
+                pausePeriod(false, "2023-01-15", "2023-01-20") //
+        );
     }
 
     @Test
@@ -121,10 +122,11 @@ class DelinquencyReadPlatformServiceImplTest {
         // when
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 13));
 
-        // then
-        Assertions.assertTrue(collectionData.isDelinquencyCalculationPaused());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 12), collectionData.getDelinquencyPausePeriodStartDate());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 13), collectionData.getDelinquencyPausePeriodEndDate());
+        verifyPausePeriods(collectionData, //
+                pausePeriod(false, "2023-01-10", "2023-01-11"), //
+                pausePeriod(true, "2023-01-12", "2023-01-13"), //
+                pausePeriod(false, "2023-01-15", "2023-01-20") //
+        );
     }
 
     @Test
@@ -139,10 +141,11 @@ class DelinquencyReadPlatformServiceImplTest {
         // when
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 13));
 
-        // then
-        Assertions.assertTrue(collectionData.isDelinquencyCalculationPaused());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 12), collectionData.getDelinquencyPausePeriodStartDate());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 14), collectionData.getDelinquencyPausePeriodEndDate());
+        verifyPausePeriods(collectionData, //
+                pausePeriod(false, "2023-01-10", "2023-01-11"), //
+                pausePeriod(true, "2023-01-12", "2023-01-14"), //
+                pausePeriod(false, "2023-01-15", "2023-01-20") //
+        );
     }
 
     @Test
@@ -158,9 +161,11 @@ class DelinquencyReadPlatformServiceImplTest {
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 12));
 
         // then
-        Assertions.assertFalse(collectionData.isDelinquencyCalculationPaused());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 10), collectionData.getDelinquencyPausePeriodStartDate());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 11), collectionData.getDelinquencyPausePeriodEndDate());
+        verifyPausePeriods(collectionData, //
+                pausePeriod(false, "2023-01-10", "2023-01-11"), //
+                pausePeriod(false, "2023-01-13", "2023-01-14"), //
+                pausePeriod(false, "2023-01-15", "2023-01-20") //
+        );
     }
 
     @Test
@@ -177,9 +182,11 @@ class DelinquencyReadPlatformServiceImplTest {
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 12));
 
         // then
-        Assertions.assertFalse(collectionData.isDelinquencyCalculationPaused());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 10), collectionData.getDelinquencyPausePeriodStartDate());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 11), collectionData.getDelinquencyPausePeriodEndDate());
+        verifyPausePeriods(collectionData, //
+                pausePeriod(false, "2023-01-10", "2023-01-11"), //
+                pausePeriod(false, "2023-01-13", "2023-01-14"), //
+                pausePeriod(false, "2023-01-15", "2023-01-20") //
+        );
     }
 
     @Test
@@ -196,9 +203,23 @@ class DelinquencyReadPlatformServiceImplTest {
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 11));
 
         // then
-        Assertions.assertTrue(collectionData.isDelinquencyCalculationPaused());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 10), collectionData.getDelinquencyPausePeriodStartDate());
-        Assertions.assertEquals(LocalDate.of(2023, JANUARY, 11), collectionData.getDelinquencyPausePeriodEndDate());
+        verifyPausePeriods(collectionData, //
+                pausePeriod(true, "2023-01-10", "2023-01-11"), //
+                pausePeriod(false, "2023-01-13", "2023-01-14"), //
+                pausePeriod(false, "2023-01-15", "2023-01-20") //
+        );
+    }
+
+    private void verifyPausePeriods(CollectionData collectionData, DelinquencyPausePeriod... pausePeriods) {
+        if (pausePeriods.length > 0) {
+            Assertions.assertEquals(Arrays.asList(pausePeriods), collectionData.getDelinquencyPausePeriods());
+        } else {
+            Assertions.assertNull(collectionData.getDelinquencyPausePeriods());
+        }
+    }
+
+    private DelinquencyPausePeriod pausePeriod(boolean active, String startDate, String endDate) {
+        return new DelinquencyPausePeriod(active, LocalDate.parse(startDate), LocalDate.parse(endDate));
     }
 
 }

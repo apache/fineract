@@ -18,38 +18,19 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collection;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @AllArgsConstructor
 @ToString
 @Getter
-@Setter
-public final class CollectionData {
+@EqualsAndHashCode
+public class DelinquencyPausePeriod {
 
-    private BigDecimal availableDisbursementAmount;
-    private Long pastDueDays;
-    private LocalDate nextPaymentDueDate;
-    private Long delinquentDays;
-    private LocalDate delinquentDate;
-    private BigDecimal delinquentAmount;
-    private LocalDate lastPaymentDate;
-    private BigDecimal lastPaymentAmount;
-
-    private LocalDate lastRepaymentDate;
-    private BigDecimal lastRepaymentAmount;
-
-    public Collection<DelinquencyPausePeriod> delinquencyPausePeriods;
-    public Collection<InstallmentLevelDelinquency> installmentLevelDelinquency;
-
-    public static CollectionData template() {
-        final BigDecimal zero = BigDecimal.ZERO;
-        return new CollectionData(zero, 0L, null, 0L, null, zero, null, zero, null, zero, null, null);
-    }
-
+    private boolean active;
+    private LocalDate pausePeriodStart;
+    private LocalDate pausePeriodEnd;
 }
