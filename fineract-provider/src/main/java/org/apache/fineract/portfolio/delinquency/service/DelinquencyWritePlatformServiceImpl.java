@@ -175,12 +175,13 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
             final CollectionData collectionData = loanDelinquencyData.getLoanCollectionData();
             // loan installments delinquent data
             final Map<Long, CollectionData> installmentsCollectionData = loanDelinquencyData.getLoanInstallmentsCollectionData();
-            // delinquency for loan
-            changes = lookUpDelinquencyRange(loan, delinquencyBucket, collectionData.getDelinquentDays());
             // delinquency for installments
             if (installmentsCollectionData.size() > 0) {
                 applyDelinquencyDetailsForLoanInstallments(loan, delinquencyBucket, installmentsCollectionData);
             }
+            // delinquency for loan
+            changes = lookUpDelinquencyRange(loan, delinquencyBucket, collectionData.getDelinquentDays());
+
         }
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId())
                 .withEntityExternalId(loan.getExternalId()).with(changes).build();
@@ -196,13 +197,13 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
             final CollectionData collectionData = loanDelinquentData.getLoanCollectionData();
             // loan installments delinquent data
             final Map<Long, CollectionData> installmentsCollectionData = loanDelinquentData.getLoanInstallmentsCollectionData();
-            log.debug("Delinquency {}", collectionData);
-            // delinquency for loan
-            lookUpDelinquencyRange(loan, delinquencyBucket, collectionData.getDelinquentDays());
             // delinquency for installments
             if (installmentsCollectionData.size() > 0) {
                 applyDelinquencyDetailsForLoanInstallments(loan, delinquencyBucket, installmentsCollectionData);
             }
+            log.debug("Delinquency {}", collectionData);
+            // delinquency for loan
+            lookUpDelinquencyRange(loan, delinquencyBucket, collectionData.getDelinquentDays());
         }
     }
 
@@ -231,10 +232,10 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
     @Override
     public void removeDelinquencyTagToLoan(final Loan loan) {
-        setLoanDelinquencyTag(loan, null);
         if (loan.isEnableInstallmentLevelDelinquency()) {
             cleanLoanInstallmentsDelinquencyTags(loan);
         }
+        setLoanDelinquencyTag(loan, null);
     }
 
     @Override
