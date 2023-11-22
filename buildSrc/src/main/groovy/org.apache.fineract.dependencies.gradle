@@ -126,7 +126,7 @@ dependencyManagement {
 
         dependency 'io.github.classgraph:classgraph:4.8.165'
         dependency 'org.awaitility:awaitility:4.2.0'
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.8.1'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.7.3'
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.15.0'
         dependency 'org.webjars:webjars-locator-core:0.55'
