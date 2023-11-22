@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.account.AccountDetailConstants;
 import org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants;
+import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,12 +47,13 @@ public class AccountTransfersDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator;
-    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(AccountDetailConstants.localeParamName,
-            AccountDetailConstants.dateFormatParamName, AccountDetailConstants.fromOfficeIdParamName,
-            AccountDetailConstants.fromClientIdParamName, AccountDetailConstants.fromAccountTypeParamName,
-            AccountDetailConstants.fromAccountIdParamName, AccountDetailConstants.toOfficeIdParamName,
-            AccountDetailConstants.toClientIdParamName, AccountDetailConstants.toAccountTypeParamName,
-            AccountDetailConstants.toAccountIdParamName, AccountTransfersApiConstants.transferDateParamName,
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName,
+            AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName,
+            AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.fromAccountIdParamName,
+            AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName,
+            AccountDetailConstants.toAccountTypeParamName, AccountDetailConstants.toAccountIdParamName,
+            AccountTransfersApiConstants.transferDateParamName, PaymentDetailConstants.paymentTypeParamName,
             AccountTransfersApiConstants.transferAmountParamName, AccountTransfersApiConstants.transferDescriptionParamName));
 
     @Autowired
@@ -69,7 +71,8 @@ public class AccountTransfersDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

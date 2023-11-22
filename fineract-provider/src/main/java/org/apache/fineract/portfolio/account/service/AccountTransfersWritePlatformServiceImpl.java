@@ -29,8 +29,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -55,6 +57,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceA
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
 import org.apache.fineract.portfolio.savings.domain.GSIMRepositoy;
 import org.apache.fineract.portfolio.savings.domain.GroupSavingsIndividualMonitoring;
@@ -82,6 +85,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final LoanReadPlatformService loanReadPlatformService;
     private final GSIMRepositoy gsimRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
 
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
@@ -90,7 +94,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
-            final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService) {
+            final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService,
+            final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -101,6 +106,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.accountTransferDetailRepository = accountTransferDetailRepository;
         this.loanReadPlatformService = loanReadPlatformService;
+        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
         this.gsimRepository = gsimRepository;
         this.configurationDomainService = configurationDomainService;
     }
@@ -124,7 +130,9 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final Integer toAccountTypeId = command.integerValueSansLocaleOfParameterNamed(toAccountTypeParamName);
         final PortfolioAccountType toAccountType = PortfolioAccountType.fromInt(toAccountTypeId);
 
-        final PaymentDetail paymentDetail = null;
+        Map<String, Object> changes = new HashMap<>();
+        final PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+
         Long fromSavingsAccountId = null;
         Long transferDetailId = null;
         boolean isInterestTransfer = false;
@@ -556,7 +564,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder().withEntityId(transferTransactionId);
 
         // if (fromAccountType.isSavingsAccount()) {
-
         builder.withSavingsId(toSavingsAccountId);
         // }
 

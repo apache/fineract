@@ -170,6 +170,8 @@ final class AccountTransfersApiResourceSwagger {
         public Float transferAmount;
         @Schema(example = "A description of the transfer")
         public String transferDescription;
+        @Schema(example = "1")
+        public Integer paymentType;
     }
 
     @Schema(description = "PostAccountTransfersResponse")

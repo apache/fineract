@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -35,6 +37,7 @@ public class SavingsAccountTransactionDTO {
     private final Long savingsAccountId;
     private final AppUser appUser;
     private final Integer depositAccountType;
+    private final Set<Charge> allCharges;
 
     public SavingsAccountTransactionDTO(final DateTimeFormatter formatter, final LocalDate transactionDate,
             final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final LocalDateTime createdDate, final AppUser appUser,
@@ -47,6 +50,21 @@ public class SavingsAccountTransactionDTO {
         this.savingsAccountId = null;
         this.appUser = appUser;
         this.depositAccountType = depositAccountType;
+        this.allCharges = null;
+    }
+
+    public SavingsAccountTransactionDTO(final DateTimeFormatter formatter, final LocalDate transactionDate,
+            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final LocalDateTime createdDate,
+            final AppUser appUser, final Integer depositAccountType, Set<Charge> allCharges) {
+        this.formatter = formatter;
+        this.transactionDate = transactionDate;
+        this.transactionAmount = transactionAmount;
+        this.paymentDetail = paymentDetail;
+        this.createdDate = createdDate;
+        this.savingsAccountId = null;
+        this.appUser = appUser;
+        this.depositAccountType = depositAccountType;
+        this.allCharges = allCharges;
     }
 
     /**
@@ -70,6 +88,7 @@ public class SavingsAccountTransactionDTO {
         this.savingsAccountId = savingsAccountId;
         this.appUser = appUser;
         this.depositAccountType = depositAccountType;
+        this.allCharges = null;
     }
 
     public DateTimeFormatter getFormatter() {

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.charge.domain;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.fineract.portfolio.charge.exception.ChargeIsNotActiveException;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +27,14 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link ChargeRepository} that is responsible for checking if {@link Charge} is returned when using
- * <code>findOne</code> repository method and throwing an appropriate not found exception.
+ * Wrapper for {@link ChargeRepository} that is responsible for checking if
+ * {@link Charge} is returned when using <code>findOne</code> repository method
+ * and throwing an appropriate not found exception.
  * </p>
  *
  * <p>
- * This is to avoid need for checking and throwing in multiple areas of code base where {@link ChargeRepository} is
- * required.
+ * This is to avoid need for checking and throwing in multiple areas of code
+ * base where {@link ChargeRepository} is required.
  * </p>
  */
 @Service
@@ -55,5 +58,9 @@ public class ChargeRepositoryWrapper {
         }
 
         return chargeDefinition;
+    }
+
+    public Set<Charge> getAll() {
+        return new HashSet<>(this.repository.findAll());
     }
 }

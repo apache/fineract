@@ -1298,7 +1298,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
         return transaction;
     }
-
+    
     public BigDecimal calculateWithdrawalFee(final BigDecimal transactionAmount) {
         BigDecimal result = BigDecimal.ZERO;
         if (isWithdrawalFeeApplicableForTransfer()) {
@@ -1311,12 +1311,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return result;
     }
 
-    private void payWithdrawalFee(final BigDecimal transactionAmount, final LocalDate transactionDate, final AppUser user,
-            final PaymentDetail paymentDetail, final boolean backdatedTxnsAllowedTill, final String refNo) {
+    private void payWithdrawalFee(
+            final BigDecimal transactionAmount,
+            final LocalDate transactionDate,
+            final AppUser user,
+            final PaymentDetail paymentDetail, 
+            final boolean backdatedTxnsAllowedTill, 
+            final String refNo) {
         for (SavingsAccountCharge charge : this.charges()) {
-
+            
             if (charge.isWithdrawalFee() && charge.isActive()) {
-
                 if (charge.getFreeWithdrawalCount() == null) {
                     charge.setFreeWithdrawalCount(0);
                 }
