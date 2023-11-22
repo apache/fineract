@@ -40,7 +40,6 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsDepositBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
-import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -63,7 +62,6 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     private final ConfigurationDomainService configurationDomainService;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
-    private final ChargeRepositoryWrapper chargeRepository;
 
     @Autowired
     public SavingsAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
@@ -82,7 +80,6 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.context = context;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
-        this.chargeRepository = chargeRepository;
     }
 
     @Transactional
@@ -113,11 +110,10 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         }
 
         Integer accountType = null;
-        Set<Charge> allCharges = chargeRepository.getAll();
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(
                 fmt, transactionDate, transactionAmount,
-                paymentDetail, DateUtils.getLocalDateTimeOfSystem(), 
-                user, accountType, allCharges);
+                paymentDetail, DateUtils.getLocalDateTimeOfSystem(),
+                user, accountType);
         UUID refNo = UUID.randomUUID();
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, transactionBooleanValues.isApplyWithdrawFee(),
                 backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo.toString());
