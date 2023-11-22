@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
@@ -2522,6 +2523,445 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
         }
     }
 
+    // UC112: Advanced payment allocation, horizontal repayment processing
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Disburse the loan (1000)
+    // 2. Add charge after maturity date
+    // 3. Pay 1st installment
+    // 4. Pay 2nd installment
+    // 5. Add charge to 3rd installment
+    // 6. Add charge to 4th installment
+    // 7. Do goodwill credit (in advance payment)
+    @Test
+    public void uc112() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.09.01").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            Integer localLoanProductId = createLoanProduct("1000", "15", "3", true, "25", false, LoanScheduleType.PROGRESSIVE,
+                    LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), localLoanProductId,
+                    BigDecimal.valueOf(1000.0), 45, 15, 3, 0, "01 September 2023", "01 September 2023");
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 September 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 September 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            // Add Charge Penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("01 September 2023").locale("en").transactionAmount(250.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 770.0, 250.0, 750.0, 250.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.09.16").dateFormat("yyyy.MM.dd").locale("en"));
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(250.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 520.0, 500.0, 500.0, 500.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+
+            loanTransactionHelper.makeGoodwillCredit(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(50.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 510.0, 550.0, 490.0, 510.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 10.0, 240.0, 0.0, 0.0, 0.0, 20.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 30.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 20.0, 0.0, 0.0, 0.0,
+                    0.0, 20.0, 0.0);
+
+            validateLoanCharge(loanDetails, 0, LocalDate.of(2023, 9, 17), 20.0, 0.0, 20.0);
+            validateLoanCharge(loanDetails, 1, LocalDate.of(2023, 10, 16), 20.0, 20.0, 0.0);
+            validateLoanCharge(loanDetails, 2, LocalDate.of(2023, 10, 17), 20.0, 20.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
+    // UC113: Advanced payment allocation, vertical repayment processing
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Disburse the loan (1000)
+    // 2. Add charge after maturity date
+    // 3. Pay 1st installment
+    // 4. Pay 2nd installment
+    // 5. Add charge to 3rd installment
+    // 6. Add charge to 4th installment
+    // 7. Do goodwill credit (in advance payment)
+    @Test
+    public void uc113() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.09.01").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            Integer localLoanProductId = createLoanProduct("1000", "15", "3", true, "25", false, LoanScheduleType.PROGRESSIVE,
+                    LoanScheduleProcessingType.VERTICAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), localLoanProductId,
+                    BigDecimal.valueOf(1000.0), 45, 15, 3, 0, "01 September 2023", "01 September 2023");
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 September 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 September 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            // Add Charge Penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("01 September 2023").locale("en").transactionAmount(250.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 770.0, 250.0, 750.0, 250.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.09.16").dateFormat("yyyy.MM.dd").locale("en"));
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(250.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 520.0, 500.0, 500.0, 500.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+
+            loanTransactionHelper.makeGoodwillCredit(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(50.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 510.0, 550.0, 500.0, 500.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0, 0.0, 20.0, 10.0, 10.0, 0.0, 0.0,
+                    0.0, 10.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0, 0.0, 20.0, 20.0, 0.0, 0.0, 0.0,
+                    0.0, 20.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 20.0, 0.0, 0.0, 0.0,
+                    0.0, 20.0, 0.0);
+            validateLoanCharge(loanDetails, 0, LocalDate.of(2023, 9, 17), 20.0, 10.0, 10.0);
+            validateLoanCharge(loanDetails, 1, LocalDate.of(2023, 10, 16), 20.0, 20.0, 0.0);
+            validateLoanCharge(loanDetails, 2, LocalDate.of(2023, 10, 17), 20.0, 20.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
+    // UC114: Advanced payment allocation, horizontal repayment processing
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Disburse the loan (1000)
+    // 2. Add charge after maturity date
+    // 3. Pay 1st installment
+    // 4. Pay 2nd installment
+    // 5. Add charge to 3rd installment
+    // 6. Add charge to 4th installment
+    // 7. Do merchant issued refund (in advance payment)
+    @Test
+    public void uc114() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.09.01").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            Integer localLoanProductId = createLoanProduct("1000", "15", "3", true, "25", false, LoanScheduleType.PROGRESSIVE,
+                    LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), localLoanProductId,
+                    BigDecimal.valueOf(1000.0), 45, 15, 3, 0, "01 September 2023", "01 September 2023");
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 September 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 September 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            // Add Charge Penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("01 September 2023").locale("en").transactionAmount(250.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 770.0, 250.0, 750.0, 250.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.09.16").dateFormat("yyyy.MM.dd").locale("en"));
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(250.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 520.0, 500.0, 500.0, 500.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+
+            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(30.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 530.0, 530.0, 500.0, 500.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0, 0.0, 20.0, 10.0, 10.0, 0.0, 0.0,
+                    0.0, 10.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0, 0.0, 20.0, 10.0, 10.0, 0.0,
+                    0.0, 0.0, 10.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 10.0, 10.0, 0.0, 0.0,
+                    0.0, 10.0, 0.0);
+            validateLoanCharge(loanDetails, 0, LocalDate.of(2023, 9, 17), 20.0, 10.0, 10.0);
+            validateLoanCharge(loanDetails, 1, LocalDate.of(2023, 10, 16), 20.0, 10.0, 10.0);
+            validateLoanCharge(loanDetails, 2, LocalDate.of(2023, 10, 17), 20.0, 10.0, 10.0);
+            assertTrue(loanDetails.getStatus().getActive());
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
+    // UC115: Advanced payment allocation, vertical repayment processing
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Disburse the loan (1000)
+    // 2. Add charge after maturity date
+    // 3. Pay 1st installment
+    // 4. Pay 2nd installment
+    // 5. Add charge to 3rd installment
+    // 6. Add charge to 4th installment
+    // 7. Do merchant issued refund (in advance payment)
+    @Test
+    public void uc115() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.09.01").dateFormat("yyyy.MM.dd").locale("en"));
+
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            Integer localLoanProductId = createLoanProduct("1000", "15", "3", true, "25", false, LoanScheduleType.PROGRESSIVE,
+                    LoanScheduleProcessingType.VERTICAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), localLoanProductId,
+                    BigDecimal.valueOf(1000.0), 45, 15, 3, 0, "01 September 2023", "01 September 2023");
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 September 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 September 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            // Add Charge Penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("01 September 2023").locale("en").transactionAmount(250.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 770.0, 250.0, 750.0, 250.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("2023.09.16").dateFormat("yyyy.MM.dd").locale("en"));
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(250.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 520.0, 500.0, 500.0, 500.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(30.0));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 530.0, 530.0, 500.0, 500.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 9, 1), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 9, 16), 250.0, 250.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 10, 1), 250.0, 0.0, 250.0, 0.0, 0.0, 0.0, 20.0, 10.0, 10.0, 0.0, 0.0,
+                    0.0, 10.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 10, 16), 250.0, 0.0, 250.0, 0.0, 0.0, 0.0, 20.0, 10.0, 10.0, 0.0,
+                    0.0, 0.0, 10.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 10.0, 10.0, 0.0, 0.0,
+                    0.0, 10.0, 0.0);
+            validateLoanCharge(loanDetails, 0, LocalDate.of(2023, 9, 17), 20.0, 10.0, 10.0);
+            validateLoanCharge(loanDetails, 1, LocalDate.of(2023, 10, 16), 20.0, 10.0, 10.0);
+            validateLoanCharge(loanDetails, 2, LocalDate.of(2023, 10, 17), 20.0, 10.0, 10.0);
+            assertTrue(loanDetails.getStatus().getActive());
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
     private static void validateLoanSummaryBalances(GetLoansLoanIdResponse loanDetails, Double totalOutstanding, Double totalRepayment,
             Double principalOutstanding, Double principalPaid, Double totalOverpaid) {
         assertEquals(totalOutstanding, loanDetails.getSummary().getTotalOutstanding());
@@ -2722,5 +3162,14 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest {
         assertEquals(principalPortion, loanDetails.getTransactions().get(index).getPrincipalPortion());
         assertEquals(overPaidPortion, loanDetails.getTransactions().get(index).getOverpaymentPortion());
         assertEquals(loanBalance, loanDetails.getTransactions().get(index).getOutstandingLoanBalance());
+    }
+
+    private void validateLoanCharge(GetLoansLoanIdResponse loanDetails, int index, LocalDate dueDate, double charged, double paid,
+            double outstanding) {
+        GetLoansLoanIdLoanChargeData chargeData = loanDetails.getCharges().get(index);
+        assertEquals(dueDate, chargeData.getDueDate());
+        assertEquals(charged, chargeData.getAmount());
+        assertEquals(paid, chargeData.getAmountPaid());
+        assertEquals(outstanding, chargeData.getAmountOutstanding());
     }
 }

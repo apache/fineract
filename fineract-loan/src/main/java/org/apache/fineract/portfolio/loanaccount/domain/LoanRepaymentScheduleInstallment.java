@@ -960,15 +960,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.additional = true;
     }
 
-    public boolean isFirstPeriod() {
-        return (this.installmentNumber == 1);
-    }
-
-    public boolean isInPeriod(LocalDate date) {
-        return (isFirstPeriod() ? !DateUtils.isBefore(date, getFromDate()) : DateUtils.isAfter(date, getFromDate()))
-                && !DateUtils.isAfter(date, getDueDate());
-    }
-
     public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
         return this.loanTransactionToRepaymentScheduleMappings;
     }

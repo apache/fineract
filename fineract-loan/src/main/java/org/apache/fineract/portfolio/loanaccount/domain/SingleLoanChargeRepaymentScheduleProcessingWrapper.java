@@ -42,13 +42,11 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
             totalPrincipal = totalPrincipal.plus(installment.getPrincipal(currency));
         }
         LocalDate startDate = disbursementDate;
+        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(repaymentPeriods);
         for (final LoanRepaymentScheduleInstallment period : repaymentPeriods) {
 
             if (!period.isDownPayment()) {
-
-                boolean isFirstNonDownPaymentPeriod = repaymentPeriods.stream()
-                        .filter(repaymentPeriod -> repaymentPeriod.getInstallmentNumber() < period.getInstallmentNumber())
-                        .allMatch(LoanRepaymentScheduleInstallment::isDownPayment);
+                boolean isFirstNonDownPaymentPeriod = period.getInstallmentNumber().equals(firstNormalInstallmentNumber);
 
                 final Money feeChargesDueForRepaymentPeriod = feeChargesDueWithin(startDate, period.getDueDate(), loanCharge, currency,
                         period, totalPrincipal, totalInterest, !period.isRecalculatedInterestComponent(), isFirstNonDownPaymentPeriod);

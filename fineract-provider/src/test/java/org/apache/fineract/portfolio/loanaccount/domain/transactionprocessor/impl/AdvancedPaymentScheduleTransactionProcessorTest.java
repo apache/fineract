@@ -109,7 +109,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
         Mockito.when(loanTransaction.getLoan()).thenReturn(loan);
         Mockito.when(loan.getDisbursementDate()).thenReturn(disbursementDate);
-        Mockito.when(installment.isFirstPeriod()).thenReturn(true);
         Mockito.when(charge.isDueForCollectionFromIncludingAndUpToAndIncluding(disbursementDate, installment.getDueDate()))
                 .thenReturn(true);
         Mockito.when(installment.getInstallmentNumber()).thenReturn(1);
@@ -154,7 +153,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
         Mockito.when(loanTransaction.getLoan()).thenReturn(loan);
         Mockito.when(loan.getDisbursementDate()).thenReturn(disbursementDate);
-        Mockito.when(installment.isFirstPeriod()).thenReturn(true);
         Mockito.when(charge.isDueForCollectionFromIncludingAndUpToAndIncluding(disbursementDate, installment.getDueDate()))
                 .thenReturn(true);
         Mockito.when(installment.getInstallmentNumber()).thenReturn(1);
@@ -204,7 +202,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(loanTransaction.getLoan().getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         Mockito.when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
         Mockito.when(loan.getDisbursementDate()).thenReturn(disbursementDate);
-        Mockito.when(installment.isFirstPeriod()).thenReturn(true);
         Mockito.when(charge.isDueForCollectionFromIncludingAndUpToAndIncluding(disbursementDate, installment.getDueDate()))
                 .thenReturn(true);
         Mockito.when(installment.getInstallmentNumber()).thenReturn(1);

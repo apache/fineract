@@ -102,9 +102,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     }
                 }
                 LocalDate startDate = disbursementDate;
+                int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
+                    boolean isFirstPeriod = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
                     for (final LoanCharge loanCharge : transferCharges) {
-                        boolean isDue = installment.isFirstPeriod()
+                        boolean isDue = isFirstPeriod
                                 ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(startDate, installment.getDueDate())
                                 : loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate());
                         if (isDue) {
@@ -635,15 +637,15 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return penaltyCharges;
     }
 
-    protected void updateChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,
+    protected void updateChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money chargeAmount, final Set<LoanCharge> charges,
             final Integer installmentNumber) {
 
-        Money amountRemaining = feeCharges;
+        Money amountRemaining = chargeAmount;
         while (amountRemaining.isGreaterThanZero()) {
-            final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges, feeCharges.getCurrency());
-            Money feeAmount = feeCharges.zero();
+            final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges, chargeAmount.getCurrency());
+            Money feeAmount = chargeAmount.zero();
             if (loanTransaction.isChargePayment()) {
-                feeAmount = feeCharges;
+                feeAmount = chargeAmount;
             }
             if (unpaidCharge == null) {
                 break; // All are trache charges
@@ -667,6 +669,18 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
         }
 
+    }
+
+    public interface ChargesPaidByFunction {
+
+        void accept(LoanTransaction loanTransaction, Money feeCharges, Set<LoanCharge> charges, Integer installmentNumber);
+    }
+
+    public ChargesPaidByFunction getChargesPaymentFunction(LoanRepaymentScheduleInstallment.PaymentAction action) {
+        return switch (action) {
+            case PAY -> this::updateChargesPaidAmountBy;
+            case UNPAY -> this::undoChargesPaidAmountBy;
+        };
     }
 
     protected LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges, final MonetaryCurrency currency) {
@@ -770,15 +784,15 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
     }
 
-    protected void undoChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,
+    protected void undoChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money chargeAmount, final Set<LoanCharge> charges,
             final Integer installmentNumber) {
 
-        Money amountRemaining = feeCharges;
+        Money amountRemaining = chargeAmount;
         while (amountRemaining.isGreaterThanZero()) {
-            final LoanCharge paidCharge = findLatestPaidChargeFromUnOrderedSet(charges, feeCharges.getCurrency());
+            final LoanCharge paidCharge = findLatestPaidChargeFromUnOrderedSet(charges, chargeAmount.getCurrency());
 
             if (paidCharge != null) {
-                Money feeAmount = feeCharges.zero();
+                Money feeAmount = chargeAmount.zero();
 
                 final Money amountDeductedTowardsCharge = paidCharge.undoPaidOrPartiallyAmountBy(amountRemaining, installmentNumber,
                         feeAmount);

@@ -41,6 +41,14 @@ public class ChargeOrTransactionTest {
     }
 
     @Test
+    public void testCompareToEqualBackdatedCharge() {
+        ChargeOrTransaction charge = createCharge("2023-10-16", "2023-10-17", "2023-10-17T10:15:30+01:00");
+        ChargeOrTransaction transaction = createTransaction("2023-10-16", "2023-10-17", "2023-10-17T10:15:30+01:00");
+        Assertions.assertTrue(charge.compareTo(transaction) == 0);
+        Assertions.assertTrue(transaction.compareTo(charge) == 0);
+    }
+
+    @Test
     public void testCompareToCreatedDateTime() {
         ChargeOrTransaction charge = createCharge("2023-10-17", "2023-10-17", "2023-10-17T10:15:31+01:00");
         ChargeOrTransaction transaction = createTransaction("2023-10-17", "2023-10-17", "2023-10-17T10:15:30+01:00");
@@ -77,10 +85,22 @@ public class ChargeOrTransactionTest {
     }
 
     @Test
-    public void testComparatorOnSameDay() {
+    public void testComparatorOnSameDayBackdatedCharge() {
         ChargeOrTransaction cot1 = createCharge("2023-10-17", "2023-10-19", "2023-10-19T10:15:31+01:00");
         ChargeOrTransaction cot2 = createTransaction("2023-10-17", "2023-10-19", "2023-10-19T10:15:33+01:00");
         ChargeOrTransaction cot3 = createCharge("2023-10-17", "2023-10-19", "2023-10-19T10:15:32+01:00");
+        Collection<List<ChargeOrTransaction>> permutations = Collections2.permutations(List.of(cot1, cot2, cot3));
+        List<ChargeOrTransaction> expected = List.of(cot1, cot3, cot2);
+        for (List<ChargeOrTransaction> permutation : permutations) {
+            Assertions.assertEquals(expected, permutation.stream().sorted().toList());
+        }
+    }
+
+    @Test
+    public void testComparatorOnSameDay() {
+        ChargeOrTransaction cot1 = createCharge("2023-10-24", "2023-10-19", "2023-10-19T10:15:31+01:00");
+        ChargeOrTransaction cot2 = createTransaction("2023-10-19", "2023-10-19", "2023-10-19T10:15:33+01:00");
+        ChargeOrTransaction cot3 = createCharge("2023-10-24", "2023-10-19", "2023-10-19T10:15:32+01:00");
         Collection<List<ChargeOrTransaction>> permutations = Collections2.permutations(List.of(cot1, cot2, cot3));
         List<ChargeOrTransaction> expected = List.of(cot1, cot3, cot2);
         for (List<ChargeOrTransaction> permutation : permutations) {

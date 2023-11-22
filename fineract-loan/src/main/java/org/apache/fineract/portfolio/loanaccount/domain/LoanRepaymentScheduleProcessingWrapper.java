@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -43,13 +44,14 @@ public class LoanRepaymentScheduleProcessingWrapper {
             totalPrincipal = totalPrincipal.plus(installment.getPrincipal(currency));
         }
         LocalDate startDate = disbursementDate;
+        LoanRepaymentScheduleInstallment firstNormalPeriod = repaymentPeriods.stream()
+                .sorted(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber))
+                .filter(repaymentPeriod -> !repaymentPeriod.isDownPayment()).findFirst().orElseThrow();
         for (final LoanRepaymentScheduleInstallment period : repaymentPeriods) {
 
             if (!period.isDownPayment()) {
 
-                boolean isFirstNonDownPaymentPeriod = repaymentPeriods.stream()
-                        .filter(repaymentPeriod -> repaymentPeriod.getInstallmentNumber() < period.getInstallmentNumber())
-                        .allMatch(LoanRepaymentScheduleInstallment::isDownPayment);
+                boolean isFirstNonDownPaymentPeriod = period.equals(firstNormalPeriod);
 
                 final Money feeChargesDueForRepaymentPeriod = cumulativeFeeChargesDueWithin(startDate, period.getDueDate(), loanCharges,
                         currency, period, totalPrincipal, totalInterest, !period.isRecalculatedInterestComponent(),
@@ -233,6 +235,20 @@ public class LoanRepaymentScheduleProcessingWrapper {
             amount = amount.add(period.getPrincipal(monetaryCurrency).getAmount());
         }
         return amount;
+    }
+
+    public static int fetchFirstNormalInstallmentNumber(List<LoanRepaymentScheduleInstallment> installments) {
+        return installments.stream().sorted(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber))
+                .filter(repaymentPeriod -> !repaymentPeriod.isDownPayment()).findFirst().orElseThrow().getInstallmentNumber();
+    }
+
+    public static boolean isInPeriod(LocalDate transactionDate, LoanRepaymentScheduleInstallment targetInstallment,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        int firstPeriod = fetchFirstNormalInstallmentNumber(installments);
+        return (targetInstallment.getInstallmentNumber().equals(firstPeriod)
+                ? !DateUtils.isBefore(transactionDate, targetInstallment.getFromDate())
+                : DateUtils.isAfter(transactionDate, targetInstallment.getFromDate()))
+                && !DateUtils.isAfter(transactionDate, targetInstallment.getDueDate());
     }
 
 }
