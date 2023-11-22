@@ -44,12 +44,20 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
 
     private LocalDate getEffectiveDate() {
         if (loanCharge.isPresent()) {
-            return loanCharge.get().getDueDate();
+            if (isBackdatedCharge()) {
+                return loanCharge.get().getDueDate();
+            } else {
+                return loanCharge.get().getSubmittedOnDate();
+            }
         } else if (loanTransaction.isPresent()) {
             return loanTransaction.get().getTransactionDate();
         } else {
             throw new RuntimeException("Either charge or transaction should be present");
         }
+    }
+
+    private boolean isBackdatedCharge() {
+        return loanCharge.get().getDueDate().isBefore(loanCharge.get().getSubmittedOnDate());
     }
 
     private LocalDate getSubmittedOnDate() {
