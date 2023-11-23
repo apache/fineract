@@ -21,6 +21,7 @@ package org.apache.fineract.commands.service;
 import com.google.gson.JsonElement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -45,6 +46,11 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private final FromJsonHelper fromApiJsonHelper;
     private final CommandProcessingService processAndLogCommandService;
     private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
+
+    @Override
+    public void logFailedBatchRequestWithEnclosingTransaction(final CommandWrapper commandRequest, final BatchResponse failedBatchResult) {
+        this.processAndLogCommandService.logFailedBatchRequestWithEnclosingTransaction(commandRequest, failedBatchResult);
+    }
 
     @Override
     public CommandProcessingResult logCommandSource(final CommandWrapper wrapper) {

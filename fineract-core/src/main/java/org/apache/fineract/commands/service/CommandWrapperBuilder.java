@@ -3653,4 +3653,11 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions?command=downPayment";
         return this;
     }
+
+    public CommandWrapperBuilder batchRequestWithEnclosingTransaction() {
+        this.actionName = "LOG_FAILED";
+        this.entityName = "BATCH";
+        this.href = "/batches?enclosingTransaction=true";
+        return this;
+    }
 }

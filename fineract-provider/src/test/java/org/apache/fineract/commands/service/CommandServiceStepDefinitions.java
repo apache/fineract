@@ -29,6 +29,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
@@ -131,6 +132,9 @@ public class CommandServiceStepDefinitions implements En {
 
             return this.processAndLogCommandService.executeCommand(wrapper, command, true);
         }
+
+        @Override
+        public void logFailedBatchRequestWithEnclosingTransaction(CommandWrapper commandRequest, BatchResponse failedBatchResult) {}
 
         @Override
         public CommandProcessingResult approveEntry(Long id) {

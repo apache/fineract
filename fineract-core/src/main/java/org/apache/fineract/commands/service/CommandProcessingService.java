@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.commands.service;
 
+import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -29,6 +30,8 @@ public interface CommandProcessingService {
     CommandProcessingResult executeCommand(CommandWrapper wrapper, JsonCommand command, boolean isApprovedByChecker);
 
     CommandProcessingResult logCommand(CommandSource commandSourceResult);
+
+    void logFailedBatchRequestWithEnclosingTransaction(CommandWrapper commandRequest, BatchResponse failedBatchResult);
 
     boolean validateCommand(CommandWrapper commandWrapper, AppUser user);
 

@@ -45,10 +45,14 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.serialization.BatchRequestJsonHelper;
 import org.apache.fineract.batch.service.BatchApiService;
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.exception.InvalidInstanceTypeMethodException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
@@ -81,6 +85,7 @@ public class BatchApiResource {
     private final BatchApiService service;
     private final BatchRequestJsonHelper batchRequestJsonHelper;
     private final FineractProperties fineractProperties;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     /**
      * Rest assured POST method to get {@link BatchRequest} and returns back the consolidated {@link BatchResponse}
@@ -118,6 +123,11 @@ public class BatchApiResource {
         // be rolled back on error
         if (enclosingTransaction) {
             result = service.handleBatchRequestsWithEnclosingTransaction(requestList, uriInfo);
+            if (result.get(0).getStatusCode() != HttpStatus.SC_OK) {
+                final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonRequestString);
+                final CommandWrapper commandRequest = builder.batchRequestWithEnclosingTransaction().build();
+                this.commandsSourceWritePlatformService.logFailedBatchRequestWithEnclosingTransaction(commandRequest, result.get(0));
+            }
         } else {
             result = service.handleBatchRequestsWithoutEnclosingTransaction(requestList, uriInfo);
         }

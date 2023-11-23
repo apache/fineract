@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
@@ -193,6 +194,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     private void setIdempotencyKeyStoreFlag(boolean flag) {
         fineractRequestContextHolder.setAttribute(IDEMPOTENCY_KEY_STORE_FLAG, flag);
+    }
+
+    @Override
+    public void logFailedBatchRequestWithEnclosingTransaction(final CommandWrapper commandRequest, final BatchResponse failedBatchResult) {
+        final AppUser user = context.authenticatedUser(commandRequest);
+        final CommandSource commandSource = CommandSource.fullEntryForBatchFailed(commandRequest, failedBatchResult, user,
+                idempotencyKeyGenerator.create());
+        commandSourceService.saveResultSameTransaction(commandSource);
     }
 
     @Transactional

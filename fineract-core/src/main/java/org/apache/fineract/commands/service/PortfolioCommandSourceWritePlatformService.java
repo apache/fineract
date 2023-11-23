@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.commands.service;
 
+import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface PortfolioCommandSourceWritePlatformService {
 
     CommandProcessingResult logCommandSource(CommandWrapper commandRequest);
+
+    void logFailedBatchRequestWithEnclosingTransaction(CommandWrapper commandRequest, BatchResponse failedBatchResult);
 
     CommandProcessingResult approveEntry(Long id);
 

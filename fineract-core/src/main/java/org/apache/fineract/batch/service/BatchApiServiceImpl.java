@@ -126,18 +126,18 @@ public class BatchApiServiceImpl implements BatchApiService {
      *            the enclosing supplier of the command
      * @param transactionConfigurator
      *            consumer to configure the transaction behavior and isolation
-     * @param isEnclosingTransaction
+     * @param enclosingTransaction
      *            a boolean parameter that indicates whether the current operation is part of an enclosing transaction
      * @return
      */
     private List<BatchResponse> callInTransaction(Consumer<TransactionTemplate> transactionConfigurator,
-            Supplier<List<BatchResponse>> request, final boolean isEnclosingTransaction) {
+            Supplier<List<BatchResponse>> request, final boolean enclosingTransaction) {
         List<BatchResponse> responseList = new ArrayList<>();
         try {
             TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
             transactionConfigurator.accept(transactionTemplate);
             return transactionTemplate.execute(status -> {
-                if (isEnclosingTransaction) {
+                if (enclosingTransaction) {
                     BatchRequestContextHolder.setEnclosingTransaction(Optional.of(status));
                 }
                 try {

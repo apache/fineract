@@ -24,6 +24,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
+import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -151,6 +152,14 @@ public class CommandSource extends AbstractPersistableCustom {
         commandSource.transactionId = command.getTransactionId();
         commandSource.creditBureauId = command.getCreditBureauId();
         commandSource.organisationCreditBureauId = command.getOrganisationCreditBureauId();
+        return commandSource;
+    }
+
+    public static CommandSource fullEntryForBatchFailed(final CommandWrapper wrapper, final BatchResponse result, final AppUser maker,
+            String idempotencyKey) {
+        CommandSource commandSource = new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), null, null,
+                result.getBody(), maker, idempotencyKey, result.getStatusCode());
+        commandSource.officeId = wrapper.getOfficeId();
         return commandSource;
     }
 
