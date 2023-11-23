@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceA
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
 import org.apache.fineract.portfolio.savings.domain.GSIMRepositoy;
 import org.apache.fineract.portfolio.savings.domain.GroupSavingsIndividualMonitoring;
@@ -88,6 +89,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final ConfigurationDomainService configurationDomainService;
     private final ExternalIdFactory externalIdFactory;
     private final FineractProperties fineractProperties;
+    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+
 
     @Transactional
     @Override
