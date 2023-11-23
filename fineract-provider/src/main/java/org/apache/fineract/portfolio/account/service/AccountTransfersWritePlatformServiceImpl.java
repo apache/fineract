@@ -31,8 +31,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -91,7 +93,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final FineractProperties fineractProperties;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
 
-
     @Transactional
     @Override
     public CommandProcessingResult create(final JsonCommand command) {
@@ -111,7 +112,9 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final Integer toAccountTypeId = command.integerValueSansLocaleOfParameterNamed(toAccountTypeParamName);
         final PortfolioAccountType toAccountType = PortfolioAccountType.fromInt(toAccountTypeId);
 
-        final PaymentDetail paymentDetail = null;
+        Map<String, Object> changes = new HashMap<>();
+        final PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+
         Long fromSavingsAccountId = null;
         Long transferDetailId = null;
         boolean isInterestTransfer = false;
@@ -565,7 +568,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder().withEntityId(transferTransactionId);
 
         // if (fromAccountType.isSavingsAccount()) {
-
         builder.withSavingsId(toSavingsAccountId);
         // }
 
