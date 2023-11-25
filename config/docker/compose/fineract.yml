@@ -20,7 +20,7 @@ version: "3.8"
 
 services:
   fineract:
-    image: fineract:latest
+    image: openmf/fineract:latest
     volumes:
       - ../aws/etc/credentials:/etc/aws/credentials
     healthcheck:
