@@ -43,7 +43,7 @@ public class ExternalAssetOwnerLoanStatusChangePlatformServiceImpl implements Ex
                 new ExternalAssetOwnerLoanStatusChangedListener());
     }
 
-    private class ExternalAssetOwnerLoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
+    private final class ExternalAssetOwnerLoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {

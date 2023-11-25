@@ -55,7 +55,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
                 new SendEmailOnLoanRepayment());
     }
 
-    private class SendEmailOnLoanRepayment implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
+    private final class SendEmailOnLoanRepayment implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
@@ -68,7 +68,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
         }
     }
 
-    private class SendEmailOnLoanRejected implements BusinessEventListener<LoanRejectedBusinessEvent> {
+    private final class SendEmailOnLoanRejected implements BusinessEventListener<LoanRejectedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanRejectedBusinessEvent event) {
@@ -81,7 +81,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
         }
     }
 
-    private class SendEmailOnLoanApproved implements BusinessEventListener<LoanApprovedBusinessEvent> {
+    private final class SendEmailOnLoanApproved implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanApprovedBusinessEvent event) {

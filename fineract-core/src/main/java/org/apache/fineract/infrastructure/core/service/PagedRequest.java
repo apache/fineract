@@ -54,7 +54,7 @@ public class PagedRequest<T> {
 
     @Data
     @SuppressWarnings({ "unused" })
-    private static class SortOrder {
+    private static final class SortOrder {
 
         private Sort.Direction direction;
         private String property;

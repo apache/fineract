@@ -382,7 +382,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         return smsParams;
     }
 
-    private class SendSmsOnLoanApproved implements BusinessEventListener<LoanApprovedBusinessEvent> {
+    private final class SendSmsOnLoanApproved implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanApprovedBusinessEvent event) {
@@ -391,7 +391,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class SendSmsOnLoanRejected implements BusinessEventListener<LoanRejectedBusinessEvent> {
+    private final class SendSmsOnLoanRejected implements BusinessEventListener<LoanRejectedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanRejectedBusinessEvent event) {
@@ -400,7 +400,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class SendSmsOnLoanRepayment implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
+    private final class SendSmsOnLoanRepayment implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
@@ -408,7 +408,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class ClientActivatedListener implements BusinessEventListener<ClientActivateBusinessEvent> {
+    private final class ClientActivatedListener implements BusinessEventListener<ClientActivateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(ClientActivateBusinessEvent event) {
@@ -416,7 +416,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class ClientRejectedListener implements BusinessEventListener<ClientRejectBusinessEvent> {
+    private final class ClientRejectedListener implements BusinessEventListener<ClientRejectBusinessEvent> {
 
         @Override
         public void onBusinessEvent(ClientRejectBusinessEvent event) {
@@ -424,7 +424,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class SavingsAccountActivatedListener implements BusinessEventListener<SavingsActivateBusinessEvent> {
+    private final class SavingsAccountActivatedListener implements BusinessEventListener<SavingsActivateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsActivateBusinessEvent event) {
@@ -432,7 +432,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class SavingsAccountRejectedListener implements BusinessEventListener<SavingsRejectBusinessEvent> {
+    private final class SavingsAccountRejectedListener implements BusinessEventListener<SavingsRejectBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsRejectBusinessEvent event) {
@@ -440,7 +440,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class DepositSavingsAccountTransactionListener implements BusinessEventListener<SavingsDepositBusinessEvent> {
+    private final class DepositSavingsAccountTransactionListener implements BusinessEventListener<SavingsDepositBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsDepositBusinessEvent event) {
@@ -448,7 +448,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class NonDepositSavingsAccountTransactionListener implements BusinessEventListener<SavingsWithdrawalBusinessEvent> {
+    private final class NonDepositSavingsAccountTransactionListener implements BusinessEventListener<SavingsWithdrawalBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsWithdrawalBusinessEvent event) {

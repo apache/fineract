@@ -210,7 +210,7 @@ class BusinessEventNotifierServiceImplTest {
         return (BusinessEventListener<MockBusinessEvent>) mock(BusinessEventListener.class);
     }
 
-    private static class MockBusinessEvent implements BusinessEvent<Object> {
+    private static final class MockBusinessEvent implements BusinessEvent<Object> {
 
         @Override
         public Object get() {
