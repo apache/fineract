@@ -203,7 +203,7 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
-        dependency ('org.liquibase:liquibase-core:4.25.0') {
+        dependency ('org.liquibase:liquibase-core:4.23.0') {
             exclude 'javax.xml.bind:jaxb-api'
         }
 
