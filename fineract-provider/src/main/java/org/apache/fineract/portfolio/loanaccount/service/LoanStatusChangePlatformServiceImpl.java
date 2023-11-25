@@ -39,7 +39,7 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
         businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class, new LoanStatusChangedListener());
     }
 
-    private class LoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
+    private final class LoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {

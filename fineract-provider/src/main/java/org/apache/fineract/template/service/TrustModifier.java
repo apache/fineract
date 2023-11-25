@@ -75,7 +75,7 @@ public final class TrustModifier {
         }
     }
 
-    private static class AlwaysTrustManager implements X509TrustManager {
+    private static final class AlwaysTrustManager implements X509TrustManager {
 
         @Override
         public void checkClientTrusted(final X509Certificate[] arg0, final String arg1) throws CertificateException {}// NOSONAR

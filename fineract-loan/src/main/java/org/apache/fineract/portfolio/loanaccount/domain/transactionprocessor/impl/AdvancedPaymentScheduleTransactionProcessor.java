@@ -910,7 +910,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     @AllArgsConstructor
     @Getter
     @Setter
-    private static class Balances {
+    private static final class Balances {
 
         private Money aggregatedPrincipalPortion;
         private Money aggregatedFeeChargesPortion;
