@@ -65,6 +65,7 @@ import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamE
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -190,7 +191,8 @@ public class RecurringDepositAccountsApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
 
-        if (!(is(chargeStatus, "all") || is(chargeStatus, "active") || is(chargeStatus, "inactive"))) {
+        if (!(CommandParameterUtil.is(chargeStatus, "all") || CommandParameterUtil.is(chargeStatus, "active")
+                || CommandParameterUtil.is(chargeStatus, "inactive"))) {
             throw new UnrecognizedQueryParamException("status", chargeStatus, new Object[] { "all", "active", "inactive" });
         }
 
@@ -314,38 +316,41 @@ public class RecurringDepositAccountsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
 
         CommandProcessingResult result = null;
-        if (is(commandParam, "reject")) {
+        if (CommandParameterUtil.is(commandParam, "reject")) {
             final CommandWrapper commandRequest = builder.rejectRecurringDepositAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrawnByApplicant")) {
+        } else if (CommandParameterUtil.is(commandParam, "withdrawnByApplicant")) {
             final CommandWrapper commandRequest = builder.withdrawRecurringDepositAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "approve")) {
+        } else if (CommandParameterUtil.is(commandParam, "approve")) {
             final CommandWrapper commandRequest = builder.approveRecurringDepositAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "undoapproval")) {
+        } else if (CommandParameterUtil.is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoRecurringDepositAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "activate")) {
+        } else if (CommandParameterUtil.is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.recurringDepositAccountActivation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "calculateInterest")) {
+        } else if (CommandParameterUtil.is(commandParam, "calculateInterest")) {
             final CommandWrapper commandRequest = builder.withNoJsonBody().recurringDepositAccountInterestCalculation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, DepositsApiConstants.UPDATE_DEPOSIT_AMOUNT)) {
+        } else if (CommandParameterUtil.is(commandParam, DepositsApiConstants.UPDATE_DEPOSIT_AMOUNT)) {
             final CommandWrapper commandRequest = builder.updateDepositAmountForRecurringDepositAccount(accountId)
                     .withJson(apiRequestBodyAsJson).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "postInterest")) {
+        } else if (CommandParameterUtil.is(commandParam, "deposit")) {
+            final CommandWrapper commandRequest = builder.recurringAccountDeposit(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (CommandParameterUtil.is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.recurringDepositAccountInterestPosting(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "close")) {
+        } else if (CommandParameterUtil.is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeRecurringDepositAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "prematureClose")) {
+        } else if (CommandParameterUtil.is(commandParam, "prematureClose")) {
             final CommandWrapper commandRequest = builder.prematureCloseRecurringDepositAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "calculatePrematureAmount")) {
+        } else if (CommandParameterUtil.is(commandParam, "calculatePrematureAmount")) {
             final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
             final DepositAccountData account = this.accountPreMatureCalculationPlatformService.calculatePreMatureAmount(accountId, query,
@@ -357,15 +362,11 @@ public class RecurringDepositAccountsApiResource {
 
         if (result == null) {
             throw new UnrecognizedQueryParamException("command", commandParam,
-                    new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
+                    new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest", "deposit",
                             "postInterest", "close", "prematureClose", "calculatePrematureAmount" });
         }
 
         return this.toApiJsonSerializer.serialize(result);
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
     @DELETE
@@ -393,7 +394,7 @@ public class RecurringDepositAccountsApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         DepositAccountData account = null;
-        if (is(commandParam, "close")) {
+        if (CommandParameterUtil.is(commandParam, "close")) {
             account = this.depositAccountReadPlatformService.retrieveOneWithClosureTemplate(DepositAccountType.RECURRING_DEPOSIT,
                     accountId);
 

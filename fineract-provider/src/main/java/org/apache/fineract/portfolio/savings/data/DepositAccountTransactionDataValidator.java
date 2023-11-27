@@ -64,7 +64,7 @@ public class DepositAccountTransactionDataValidator {
     private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, transactionDateParamName,
                     transactionAmountParamName, paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
-                    routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+                    routingCodeParamName, receiptNumberParamName, bankNumberParamName, DepositsApiConstants.noteParamName));
 
     private static final Set<String> DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
