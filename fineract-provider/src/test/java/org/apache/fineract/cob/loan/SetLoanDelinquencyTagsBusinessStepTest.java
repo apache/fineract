@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -41,6 +42,9 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,6 +65,12 @@ public class SetLoanDelinquencyTagsBusinessStepTest {
      */
     @Mock
     private LoanAccountDomainService loanAccountDomainService;
+    @Mock
+    private DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    @Mock
+    private DelinquencyReadPlatformService delinquencyReadPlatformService;
+    @Mock
+    private BusinessEventNotifierService businessEventNotifierService;
 
     /**
      * The class under test.
@@ -84,9 +94,10 @@ public class SetLoanDelinquencyTagsBusinessStepTest {
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
-        ThreadLocalContextUtil
-                .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
-        underTest = new SetLoanDelinquencyTagsBusinessStep(loanAccountDomainService);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()),
+                BusinessDateType.COB_DATE, LocalDate.now(ZoneId.systemDefault()))));
+        underTest = new SetLoanDelinquencyTagsBusinessStep(loanAccountDomainService, delinquencyEffectivePauseHelper,
+                delinquencyReadPlatformService, businessEventNotifierService);
     }
 
     /**
@@ -98,14 +109,14 @@ public class SetLoanDelinquencyTagsBusinessStepTest {
     @Test
     public void testExecuteSuccessScenario() throws Exception {
         // given
-        doNothing().when(loanAccountDomainService).setLoanDelinquencyTag(any(Loan.class), any(LocalDate.class));
+        doNothing().when(loanAccountDomainService).setLoanDelinquencyTag(any(Loan.class), any(LocalDate.class), anyList());
         Loan loanForProcessing = createLoan();
 
         // when
         Loan processedLoan = underTest.execute(loanForProcessing);
 
         // then
-        verify(loanAccountDomainService).setLoanDelinquencyTag(any(Loan.class), any(LocalDate.class));
+        verify(loanAccountDomainService).setLoanDelinquencyTag(any(Loan.class), any(LocalDate.class), anyList());
         assertEquals(processedLoan, loanForProcessing);
     }
 
@@ -137,14 +148,15 @@ public class SetLoanDelinquencyTagsBusinessStepTest {
     @Test
     public void testExecuteWhenSetLoanDelinquencyTagFails() throws Exception {
         // given
-        doThrow(new RuntimeException()).when(loanAccountDomainService).setLoanDelinquencyTag(any(Loan.class), any(LocalDate.class));
+        doThrow(new RuntimeException()).when(loanAccountDomainService).setLoanDelinquencyTag(any(Loan.class), any(LocalDate.class),
+                anyList());
         Loan loanForProcessing = createLoan();
 
         // when
         final Throwable thrownException = assertThrows(RuntimeException.class, () -> underTest.execute(loanForProcessing));
 
         // then
-        verify(loanAccountDomainService).setLoanDelinquencyTag(any(Loan.class), any(LocalDate.class));
+        verify(loanAccountDomainService).setLoanDelinquencyTag(any(Loan.class), any(LocalDate.class), anyList());
         assertTrue(thrownException.getClass().isAssignableFrom(RuntimeException.class));
     }
 

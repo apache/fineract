@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.delinquency.validator;
 
-import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
 import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.ACTION;
 import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.END_DATE;
 import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.START_DATE;
@@ -26,11 +25,7 @@ import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyAct
 import com.google.gson.JsonElement;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -42,6 +37,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.validator.ParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.stereotype.Component;
 
@@ -50,10 +46,12 @@ import org.springframework.stereotype.Component;
 public class DelinquencyActionParseAndValidator extends ParseAndValidator {
 
     private final FromJsonHelper jsonHelper;
+    private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
 
     public LoanDelinquencyAction validateAndParseUpdate(@NotNull final JsonCommand command, Loan loan,
             List<LoanDelinquencyAction> savedDelinquencyActions, LocalDate businessDate) {
-        List<LoanDelinquencyActionData> effectiveDelinquencyList = calculateEffectiveDelinquencyList(savedDelinquencyActions);
+        List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
+                .calculateEffectiveDelinquencyList(savedDelinquencyActions);
         LoanDelinquencyAction parsedDelinquencyAction = parseCommand(command);
         validateLoanIsActive(loan);
         if (DelinquencyAction.PAUSE.equals(parsedDelinquencyAction.getAction())) {
@@ -76,34 +74,6 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         if (parsedDelinquencyAction.getEndDate() == null) {
             raiseValidationError("loan-delinquency-action-pause-endDate-cannot-be-blank", "The parameter `endDate` is mandatory", END_DATE);
         }
-    }
-
-    private List<LoanDelinquencyActionData> calculateEffectiveDelinquencyList(List<LoanDelinquencyAction> savedDelinquencyActions) {
-        // partition them based on type
-        Map<DelinquencyAction, List<LoanDelinquencyAction>> partitioned = savedDelinquencyActions.stream()
-                .collect(Collectors.groupingBy(LoanDelinquencyAction::getAction));
-        List<LoanDelinquencyActionData> effective = new ArrayList<>();
-        List<LoanDelinquencyAction> pauses = partitioned.get(DelinquencyAction.PAUSE);
-        if (pauses != null && pauses.size() > 0) {
-            for (LoanDelinquencyAction loanDelinquencyAction : pauses) {
-                Optional<LoanDelinquencyAction> resume = findMatchingResume(loanDelinquencyAction, partitioned.get(RESUME));
-                LoanDelinquencyActionData loanDelinquencyActionData = new LoanDelinquencyActionData(loanDelinquencyAction);
-                resume.ifPresent(r -> loanDelinquencyActionData.setEndDate(r.getStartDate()));
-                effective.add(loanDelinquencyActionData);
-            }
-        }
-        return effective;
-    }
-
-    private Optional<LoanDelinquencyAction> findMatchingResume(LoanDelinquencyAction pause, List<LoanDelinquencyAction> resumes) {
-        if (resumes != null && resumes.size() > 0) {
-            for (LoanDelinquencyAction resume : resumes) {
-                if (!pause.getStartDate().isAfter(resume.getStartDate()) && !resume.getStartDate().isAfter(pause.getEndDate())) {
-                    return Optional.of(resume);
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     private void validateResumeShouldBeOnActivePause(LoanDelinquencyAction parsedDelinquencyAction,

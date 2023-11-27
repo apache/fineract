@@ -16,25 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.delinquency.service;
+package org.apache.fineract.portfolio.delinquency.helper;
 
+import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
-import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-public interface LoanDelinquencyDomainService {
+public interface DelinquencyEffectivePauseHelper {
 
-    /**
-     * This method is to calculate the Overdue date and other properties, If the loan is overdue or If there is some
-     * Charge back transaction
-     *
-     * @param loan
-     * @param effectiveDelinquencyList
-     */
-    CollectionData getOverdueCollectionData(Loan loan, List<LoanDelinquencyActionData> effectiveDelinquencyList);
+    List<LoanDelinquencyActionData> calculateEffectiveDelinquencyList(List<LoanDelinquencyAction> savedDelinquencyActions);
 
-    LoanDelinquencyData getLoanDelinquencyData(Loan loan, List<LoanDelinquencyActionData> effectiveDelinquencyList);
-
+    Long getPausedDaysBeforeDate(List<LoanDelinquencyActionData> effectiveDelinquencyList, LocalDate date);
 }
