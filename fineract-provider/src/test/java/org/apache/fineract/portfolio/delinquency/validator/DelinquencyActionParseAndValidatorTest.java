@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +55,9 @@ import org.mockito.Mockito;
 class DelinquencyActionParseAndValidatorTest {
 
     private final FromJsonHelper fromJsonHelper = new FromJsonHelper();
-    private final DelinquencyActionParseAndValidator underTest = new DelinquencyActionParseAndValidator(fromJsonHelper);
+    private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper = Mockito.mock(DelinquencyEffectivePauseHelper.class);
+    private final DelinquencyActionParseAndValidator underTest = new DelinquencyActionParseAndValidator(fromJsonHelper,
+            delinquencyEffectivePauseHelper);
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
     @Test
@@ -77,9 +80,12 @@ class DelinquencyActionParseAndValidatorTest {
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
         JsonCommand command = delinquencyAction("resume", "09 September 2022", null);
+        List<LoanDelinquencyAction> existing = List.of(loanDelinquencyAction(PAUSE, "05 September 2022", "15 September 2022"));
+        List<LoanDelinquencyActionData> effectiveList = List.of(loanDelinquencyActionData(existing.get(0)));
+        Mockito.when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(existing)).thenReturn(effectiveList);
 
-        LoanDelinquencyAction parsedDelinquencyAction = underTest.validateAndParseUpdate(command, loan,
-                List.of(loanDelinquencyAction(PAUSE, "05 September 2022", "15 September 2022")), localDate("09 September 2022"));
+        LoanDelinquencyAction parsedDelinquencyAction = underTest.validateAndParseUpdate(command, loan, existing,
+                localDate("09 September 2022"));
         Assertions.assertEquals(RESUME, parsedDelinquencyAction.getAction());
         Assertions.assertEquals(localDate("09 September 2022"), parsedDelinquencyAction.getStartDate());
         Assertions.assertNull(parsedDelinquencyAction.getEndDate());
@@ -92,6 +98,8 @@ class DelinquencyActionParseAndValidatorTest {
 
         List<LoanDelinquencyAction> existing = List.of(loanDelinquencyAction(PAUSE, "14 September 2022", "22 September 2022"));
         JsonCommand command = delinquencyAction("pause", "09 September 2022", "15 September 2022");
+        List<LoanDelinquencyActionData> effectiveList = List.of(loanDelinquencyActionData(existing.get(0)));
+        Mockito.when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(existing)).thenReturn(effectiveList);
 
         assertPlatformValidationException("Delinquency pause period cannot overlap with another pause period",
                 "loan-delinquency-action-overlapping",
@@ -105,6 +113,8 @@ class DelinquencyActionParseAndValidatorTest {
 
         List<LoanDelinquencyAction> existing = List.of(loanDelinquencyAction(PAUSE, "14 September 2022", "22 September 2022"));
         JsonCommand command = delinquencyAction("pause", "15 September 2022", "23 September 2022");
+        List<LoanDelinquencyActionData> effectiveList = List.of(loanDelinquencyActionData(existing.get(0)));
+        Mockito.when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(existing)).thenReturn(effectiveList);
 
         assertPlatformValidationException("Delinquency pause period cannot overlap with another pause period",
                 "loan-delinquency-action-overlapping",
@@ -118,6 +128,8 @@ class DelinquencyActionParseAndValidatorTest {
 
         List<LoanDelinquencyAction> existing = List.of(loanDelinquencyAction(PAUSE, "15 September 2022", "22 September 2022"));
         JsonCommand command = delinquencyAction("pause", "13 September 2022", "20 September 2022");
+        List<LoanDelinquencyActionData> effectiveList = List.of(loanDelinquencyActionData(existing.get(0)));
+        Mockito.when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(existing)).thenReturn(effectiveList);
 
         assertPlatformValidationException("Delinquency pause period cannot overlap with another pause period",
                 "loan-delinquency-action-overlapping",
@@ -337,6 +349,10 @@ class DelinquencyActionParseAndValidatorTest {
 
     private LoanDelinquencyAction loanDelinquencyAction(DelinquencyAction action, String startTime, String endTime) {
         return new LoanDelinquencyAction(null, action, localDate(startTime), localDate(endTime));
+    }
+
+    private LoanDelinquencyActionData loanDelinquencyActionData(LoanDelinquencyAction loanDelinquencyAction) {
+        return new LoanDelinquencyActionData(loanDelinquencyAction);
     }
 
     private LoanDelinquencyAction loanDelinquencyAction(DelinquencyAction action, String startTime) {

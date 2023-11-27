@@ -27,7 +27,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
+import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -45,6 +49,8 @@ public class SetLoanDelinquencyTagsTasklet implements Tasklet {
     private final DelinquencyWritePlatformService delinquencyWritePlatformService;
     private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -80,12 +86,18 @@ public class SetLoanDelinquencyTagsTasklet implements Tasklet {
         log.debug("Were found {} items", loanScheduleDelinquencyData.size());
         for (LoanScheduleDelinquencyData loanDelinquencyData : loanScheduleDelinquencyData) {
             // Set the data used by Delinquency Classification method
-            loanDelinquencyData = this.delinquencyWritePlatformService.calculateDelinquencyData(loanDelinquencyData);
+            List<LoanDelinquencyAction> savedDelinquencyList = delinquencyReadPlatformService
+                    .retrieveLoanDelinquencyActions(loanDelinquencyData.getLoanId());
+            List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
+                    .calculateEffectiveDelinquencyList(savedDelinquencyList);
+
+            loanDelinquencyData = this.delinquencyWritePlatformService.calculateDelinquencyData(loanDelinquencyData,
+                    effectiveDelinquencyList);
             log.debug("Processing Loan {} with {} overdue days since date {}", loanDelinquencyData.getLoanId(),
                     loanDelinquencyData.getOverdueDays(), loanDelinquencyData.getOverdueSinceDate());
             // Set or Unset the Delinquency Classification Tag
             if (loanDelinquencyData.getOverdueDays() > 0) {
-                this.delinquencyWritePlatformService.applyDelinquencyTagToLoan(loanDelinquencyData);
+                this.delinquencyWritePlatformService.applyDelinquencyTagToLoan(loanDelinquencyData, effectiveDelinquencyList);
             } else {
                 this.delinquencyWritePlatformService.removeDelinquencyTagToLoan(loanDelinquencyData.getLoan());
             }
