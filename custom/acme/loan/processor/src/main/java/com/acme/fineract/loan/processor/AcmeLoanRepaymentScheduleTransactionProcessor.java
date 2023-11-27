@@ -24,9 +24,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class AcmeLoanRepaymentScheduleTransactionProcessor extends FineractStyleLoanRepaymentScheduleTransactionProcessor {
 
-    private static final String STRATEGY_CODE = "acme-standard-strategy";
+    public static final String STRATEGY_CODE = "acme-standard-strategy";
 
-    private static final String STRATEGY_NAME = "ACME Corp.: standard loan transaction processing strategy";
+    public static final String STRATEGY_NAME = "ACME Corp.: standard loan transaction processing strategy";
 
     @Override
     public String getCode() {

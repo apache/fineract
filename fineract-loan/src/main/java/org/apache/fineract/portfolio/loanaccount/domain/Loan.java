@@ -779,14 +779,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 .determineProcessor(this.transactionProcessingStrategyCode);
         final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<>();
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
+        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper
+                .fetchFirstNormalInstallmentNumber(repaymentScheduleInstallments);
         for (final LoanRepaymentScheduleInstallment installment : installments) {
-            boolean isDue = installment.isFirstPeriod()
+            boolean isFirstNormalInstallment = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber)
                     ? charge.isDueForCollectionFromIncludingAndUpToAndIncluding(installment.getFromDate(), installment.getDueDate())
                     : charge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), installment.getDueDate());
-            if (installmentNumber == null && isDue) {
+            if (installmentNumber == null && isFirstNormalInstallment) {
                 chargePaymentInstallments.add(installment);
                 break;
-            } else if (installmentNumber != null && installment.getInstallmentNumber().equals(installmentNumber)) {
+            } else if (installment.getInstallmentNumber().equals(installmentNumber)) {
                 chargePaymentInstallments.add(installment);
                 break;
             }
@@ -1347,7 +1349,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 LocalDate transactionDateForRange = isBasedOnSubmittedOnDate
                         ? loanTransaction.getLoanChargesPaid().stream().findFirst().get().getLoanCharge().getDueDate()
                         : loanTransaction.getTransactionDate();
-                if (installment.isInPeriod(transactionDateForRange)) {
+                boolean isInPeriod = LoanRepaymentScheduleProcessingWrapper.isInPeriod(transactionDateForRange, installment, installments);
+                if (isInPeriod) {
                     interest = interest.plus(loanTransaction.getInterestPortion(getCurrency()));
                     fee = fee.plus(loanTransaction.getFeeChargesPortion(getCurrency()));
                     penality = penality.plus(loanTransaction.getPenaltyChargesPortion(getCurrency()));
@@ -5516,7 +5519,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         if (loanSchedule == null) {
             return;
         }
-        updateLoanSchedule(loanSchedule.getInstallments());
+        // Either the installments got recalculated or the model
+        if (loanSchedule.getInstallments() != null) {
+            updateLoanSchedule(loanSchedule.getInstallments());
+        } else {
+            updateLoanSchedule(loanSchedule.getLoanScheduleModel());
+        }
         this.interestRecalculatedOn = DateUtils.getBusinessLocalDate();
         LocalDate lastRepaymentDate = this.getLastRepaymentPeriodDueDate(true);
         Set<LoanCharge> charges = this.getActiveCharges();
@@ -6636,13 +6644,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         Money paidFromFutureInstallments = Money.zero(currency);
         Money fee = Money.zero(currency);
         Money penalty = Money.zero(currency);
+        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper
+                .fetchFirstNormalInstallmentNumber(repaymentScheduleInstallments);
+
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            boolean isFirstNormalInstallment = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
             if (!DateUtils.isBefore(paymentDate, installment.getDueDate())) {
                 interest = interest.plus(installment.getInterestOutstanding(currency));
                 penalty = penalty.plus(installment.getPenaltyChargesOutstanding(currency));
                 fee = fee.plus(installment.getFeeChargesOutstanding(currency));
             } else if (DateUtils.isAfter(paymentDate, installment.getFromDate())) {
-                Money[] balancesForCurrentPeroid = fetchInterestFeeAndPenaltyTillDate(paymentDate, currency, installment);
+                Money[] balancesForCurrentPeroid = fetchInterestFeeAndPenaltyTillDate(paymentDate, currency, installment,
+                        isFirstNormalInstallment);
                 if (balancesForCurrentPeroid[0].isGreaterThan(balancesForCurrentPeroid[5])) {
                     interest = interest.plus(balancesForCurrentPeroid[0]).minus(balancesForCurrentPeroid[5]);
                 } else {
@@ -6675,7 +6688,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private Money[] fetchInterestFeeAndPenaltyTillDate(final LocalDate paymentDate, final MonetaryCurrency currency,
-            final LoanRepaymentScheduleInstallment installment) {
+            final LoanRepaymentScheduleInstallment installment, boolean isFirstNormalInstallment) {
         Money penaltyForCurrentPeriod = Money.zero(getCurrency());
         Money penaltyAccoutedForCurrentPeriod = Money.zero(getCurrency());
         Money feeForCurrentPeriod = Money.zero(getCurrency());
@@ -6689,7 +6702,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         interestAccountedForCurrentPeriod = installment.getInterestWaived(getCurrency()).plus(installment.getInterestPaid(getCurrency()));
         for (LoanCharge loanCharge : this.charges) {
             if (loanCharge.isActive() && !loanCharge.isDueAtDisbursement()) {
-                boolean isDue = installment.isFirstPeriod()
+                boolean isDue = isFirstNormalInstallment
                         ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(installment.getFromDate(), paymentDate)
                         : loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), paymentDate);
                 if (isDue) {
@@ -6729,7 +6742,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         Money[] balances = new Money[3];
         final MonetaryCurrency currency = getCurrency();
         balances[0] = balances[1] = balances[2] = Money.zero(currency);
+        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper
+                .fetchFirstNormalInstallmentNumber(repaymentScheduleInstallments);
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            boolean isFirstNormalInstallment = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
             if (DateUtils.isEqual(paymentDate, installment.getDueDate())) {
                 Money interest = installment.getInterestCharged(currency);
                 Money fee = installment.getFeeChargesCharged(currency);
@@ -6740,7 +6756,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 break;
             } else if (DateUtils.isAfter(paymentDate, installment.getFromDate())
                     && DateUtils.isBefore(paymentDate, installment.getDueDate())) {
-                balances = fetchInterestFeeAndPenaltyTillDate(paymentDate, currency, installment);
+                balances = fetchInterestFeeAndPenaltyTillDate(paymentDate, currency, installment, isFirstNormalInstallment);
                 break;
             }
         }

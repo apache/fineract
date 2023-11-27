@@ -148,4 +148,5 @@
     <include file="parts/0126_add_loan_product_installment_level_delinquency.xml" relativeToChangelogFile="true" />
     <include file="parts/0127_client_name_length.xml" relativeToChangelogFile="true" />
     <include file="parts/0128_savings_audit.xml" relativeToChangelogFile="true" />
+    <include file="parts/0129_transaction_summary_with_asset_owner_report_overpaid_amount.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

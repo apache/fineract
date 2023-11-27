@@ -49,13 +49,18 @@ import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollatera
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollateralQuantity;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollaterals;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsValidator;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.springframework.stereotype.Component;
@@ -99,7 +104,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.applicationId, // glim specific
             LoanApiConstants.lastApplication, // glim specific
             LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
-            LoanApiConstants.DISALLOW_EXPECTED_DISBURSEMENTS, LoanApiConstants.FRAUD_ATTRIBUTE_NAME));
+            LoanApiConstants.DISALLOW_EXPECTED_DISBURSEMENTS, LoanApiConstants.FRAUD_ATTRIBUTE_NAME,
+            LoanProductConstants.LOAN_SCHEDULE_TYPE, LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -107,6 +113,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
     private final LoanChargeApiJsonValidator loanChargeApiJsonValidator;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
+    private final AdvancedPaymentAllocationsValidator advancedPaymentAllocationsValidator;
 
     public void validateForCreate(final String json, final boolean isMeetingMandatoryForJLGLoans, final LoanProduct loanProduct) {
         if (StringUtils.isBlank(json)) {
@@ -543,6 +550,33 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
+
+        final String loanScheduleType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).value(loanScheduleType).ignoreIfNull()
+                .isOneOfEnumValues(LoanScheduleType.class);
+
+        String loanScheduleProcessingType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleProcessingType().name();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, element)) {
+            loanScheduleProcessingType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).value(loanScheduleProcessingType)
+                    .isOneOfEnumValues(LoanScheduleProcessingType.class);
+        }
+        if (LoanScheduleProcessingType.VERTICAL.equals(LoanScheduleProcessingType.valueOf(loanScheduleProcessingType))
+                && !AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+                        .equals(transactionProcessingStrategy)) {
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).failWithCode(
+                    "supported.only.with.advanced.payment.allocation.strategy",
+                    "Vertical repayment schedule processing is only available with `Advanced payment allocation` strategy");
+        }
+
+        List<LoanProductPaymentAllocationRule> allocationRules = loanProduct.getPaymentAllocationRules();
+
+        if (LoanScheduleProcessingType.HORIZONTAL.name().equals(loanScheduleProcessingType)
+                && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategy)) {
+            advancedPaymentAllocationsValidator.checkGroupingOfAllocationRules(allocationRules);
+        }
+
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -625,9 +659,10 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .integerGreaterThanZero();
         }
 
+        String transactionProcessingStrategy = existingLoanApplication.getTransactionProcessingStrategyCode();
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final String transactionProcessingStrategy = this.fromApiJsonHelper
+            transactionProcessingStrategy = this.fromApiJsonHelper
                     .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
             baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName)
                     .value(transactionProcessingStrategy).notNull();
@@ -1048,6 +1083,34 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
         validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
+            final String loanScheduleType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).value(loanScheduleType).ignoreIfNull()
+                    .isOneOfEnumValues(LoanScheduleType.class);
+
+        }
+        String loanScheduleProcessingType = existingLoanApplication.getLoanRepaymentScheduleDetail().getLoanScheduleProcessingType().name();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, element)) {
+            loanScheduleProcessingType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).value(loanScheduleProcessingType)
+                    .ignoreIfNull().isOneOfEnumValues(LoanScheduleProcessingType.class);
+        }
+        if (LoanScheduleProcessingType.VERTICAL.equals(LoanScheduleProcessingType.valueOf(loanScheduleProcessingType))
+                && !AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+                        .equals(transactionProcessingStrategy)) {
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).failWithCode(
+                    "supported.only.with.advanced.payment.allocation.strategy",
+                    "Vertical repayment schedule processing is only available with `Advanced payment allocation` strategy");
+        }
+
+        List<LoanProductPaymentAllocationRule> allocationRules = loanProduct.getPaymentAllocationRules();
+
+        if (LoanScheduleProcessingType.HORIZONTAL.name().equals(loanScheduleProcessingType)
+                && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategy)) {
+            advancedPaymentAllocationsValidator.checkGroupingOfAllocationRules(allocationRules);
+        }
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",

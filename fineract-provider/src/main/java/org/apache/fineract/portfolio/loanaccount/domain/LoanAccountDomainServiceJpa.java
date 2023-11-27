@@ -612,15 +612,17 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         CurrencyData currencyData = applicationCurrency.toData();
         Set<LoanCharge> loanCharges = loan.getActiveCharges();
+        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
 
         for (LoanRepaymentScheduleInstallment installment : installments) {
             if (DateUtils.isAfter(installment.getDueDate(), loan.getMaturityDate())) {
                 accruedTill = DateUtils.getBusinessLocalDate();
             }
             if (!isOrganisationDateEnabled || DateUtils.isBefore(organisationStartDate, installment.getDueDate())) {
+                boolean isFirstNormalInstallment = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
                 generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualList, loanId, officeId, accrualStartDate,
                         repaymentFrequency, repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges,
-                        installment);
+                        installment, isFirstNormalInstallment);
             }
         }
 
@@ -639,7 +641,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas, final Long loanId, Long officeId,
             final LocalDate accrualStartDate, final PeriodFrequencyType repaymentFrequency, final Integer repayEvery,
             final LocalDate interestCalculatedFrom, final Long loanProductId, final MonetaryCurrency currency,
-            final CurrencyData currencyData, final Set<LoanCharge> loanCharges, final LoanRepaymentScheduleInstallment installment) {
+            final CurrencyData currencyData, final Set<LoanCharge> loanCharges, final LoanRepaymentScheduleInstallment installment,
+            boolean isFirstNormalInstallment) {
 
         if (!DateUtils.isBefore(accruedTill, installment.getDueDate()) || (DateUtils.isAfter(accruedTill, installment.getFromDate())
                 && !DateUtils.isAfter(accruedTill, installment.getDueDate()))) {
@@ -651,7 +654,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
 
             for (final LoanCharge loanCharge : loanCharges) {
-                boolean isDue = installment.isFirstPeriod()
+                boolean isDue = isFirstNormalInstallment
                         ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(installment.getFromDate(), chargesTillDate)
                         : loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), chargesTillDate);
                 if (isDue) {

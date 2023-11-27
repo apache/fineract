@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -35,50 +37,32 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartAssembler;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.DepositProductDataValidator;
 import org.apache.fineract.portfolio.savings.domain.DepositProductAssembler;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implements RecurringDepositProductWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositProductWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final RecurringDepositProductRepository recurringDepositProductRepository;
     private final DepositProductDataValidator fromApiJsonDataValidator;
     private final DepositProductAssembler depositProductAssembler;
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
     private final InterestRateChartAssembler chartAssembler;
-
-    @Autowired
-    public RecurringDepositProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final RecurringDepositProductRepository recurringDepositProductRepository,
-            final DepositProductDataValidator fromApiJsonDataValidator, final DepositProductAssembler depositProductAssembler,
-            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            final InterestRateChartAssembler chartAssembler) {
-        this.context = context;
-        this.recurringDepositProductRepository = recurringDepositProductRepository;
-        this.fromApiJsonDataValidator = fromApiJsonDataValidator;
-        this.depositProductAssembler = depositProductAssembler;
-
-        this.accountMappingWritePlatformService = accountMappingWritePlatformService;
-        this.chartAssembler = chartAssembler;
-    }
 
     @Transactional
     @Override
@@ -102,8 +86,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleDataIntegrityIssues(command, throwable, dve);
+            handleDataIntegrityIssues(command, ExceptionUtils.getRootCause(dve.getCause()), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -162,8 +145,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleDataIntegrityIssues(command, throwable, dve);
+            handleDataIntegrityIssues(command, ExceptionUtils.getRootCause(dve.getCause()), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -187,25 +169,28 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
-
-        if (realCause.getMessage().contains("sp_unq_name")) {
-
+        String msgCode = "error.msg." + SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
+        String msg = "Unknown data integrity issue with recurring deposit product.";
+        String param = null;
+        Object[] msgArgs;
+        Throwable checkEx = realCause == null ? dae : realCause;
+        if (checkEx.getMessage().contains("sp_unq_name")) {
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name",
-                    "Recurring Deposit product with name `" + name + "` already exists", "name", name);
-        } else if (realCause.getMessage().contains("sp_unq_short_name")) {
-
+            msgCode += ".duplicate.name";
+            msg = "Recurring Deposit product with name `" + name + "` already exists";
+            param = "name";
+            msgArgs = new Object[] { name, dae };
+        } else if (checkEx.getMessage().contains("sp_unq_short_name")) {
             final String shortName = command.stringValueOfParameterNamed("shortName");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name",
-                    "Recurring Deposit product with short name `" + shortName + "` already exists", "shortName", shortName);
+            msgCode += ".duplicate.short.name";
+            msg = "Recurring Deposit product with short name `" + shortName + "` already exists";
+            param = "shortName";
+            msgArgs = new Object[] { shortName, dae };
+        } else {
+            msgCode += ".unknown.data.integrity.issue";
+            msgArgs = new Object[] { dae };
         }
-
-        logAsErrorUnexpectedDataIntegrityException(dae);
-        throw new PlatformDataIntegrityException("error.msg.savingsproduct.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
-
-    private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        LOG.error("Error occured.", dae);
+        log.error("Error occured.", dae);
+        throw ErrorHandler.getMappable(dae, msgCode, msg, param, msgArgs);
     }
 }

@@ -38,7 +38,7 @@ public final class NotesApiResourceSwagger {
             private GetNotesNoteType() {}
 
             @Schema(example = "100")
-            public Integer id;
+            public Long id;
             @Schema(example = "noteType.client")
             public String code;
             @Schema(example = "Client note")
@@ -46,20 +46,20 @@ public final class NotesApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         public GetNotesNoteType noteType;
         @Schema(example = "First note edited")
         public String note;
         @Schema(example = "1")
-        public Integer createdById;
+        public Long createdById;
         @Schema(example = "mifos")
         public String createdByUsername;
         @Schema(example = "1342498505000")
         public ZonedDateTime createdOn;
         @Schema(example = "1")
-        public Integer updatedById;
+        public Long updatedById;
         @Schema(example = "mifos")
         public String updatedByUsername;
         @Schema(example = "1342498517000")
@@ -72,20 +72,20 @@ public final class NotesApiResourceSwagger {
         private GetResourceTypeResourceIdNotesNoteIdResponse() {}
 
         @Schema(example = "76")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         public GetResourceTypeResourceIdNotesResponse.GetNotesNoteType noteType;
         @Schema(example = "a note about the client")
         public String note;
         @Schema(example = "1")
-        public Integer createdById;
+        public Long createdById;
         @Schema(example = "mifos")
         public String createdByUsername;
         @Schema(example = "1359463135000")
         public ZonedDateTime createdOn;
         @Schema(example = "1")
-        public Integer updatedById;
+        public Long updatedById;
         @Schema(example = "mifos")
         public String updatedByUsername;
         @Schema(example = "1359463135000")
@@ -107,9 +107,9 @@ public final class NotesApiResourceSwagger {
         private PostResourceTypeResourceIdNotesResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "76")
         public Integer resourceId;
     }
@@ -137,9 +137,9 @@ public final class NotesApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "76")
         public Integer resourceId;
         public PutNotesChanges changes;

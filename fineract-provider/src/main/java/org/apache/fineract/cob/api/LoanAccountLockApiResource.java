@@ -35,6 +35,7 @@ import jakarta.ws.rs.core.UriInfo;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.data.LoanAccountLockResponseDTO;
@@ -64,8 +65,10 @@ public class LoanAccountLockApiResource {
     @Operation(summary = "List locked loan accounts", description = "Returns the locked loan IDs")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanAccountLockApiResourceSwagger.GetLoanAccountLockResponse.class))) })
-    public String retrieveLockedAccounts(@Context final UriInfo uriInfo, @QueryParam("page") Integer page,
-            @QueryParam("limit") Integer limit) {
+    public String retrieveLockedAccounts(@Context final UriInfo uriInfo, @QueryParam("page") Integer pageParam,
+            @QueryParam("limit") Integer limitParam) {
+        int page = Objects.requireNonNullElse(pageParam, 0);
+        int limit = Objects.requireNonNullElse(limitParam, 50);
 
         List<LoanAccountLock> lockedLoanAccounts = loanAccountLockService.getLockedLoanAccountByPage(page, limit);
         LoanAccountLockResponseDTO response = new LoanAccountLockResponseDTO();

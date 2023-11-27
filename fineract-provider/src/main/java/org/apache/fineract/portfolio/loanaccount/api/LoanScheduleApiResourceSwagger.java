@@ -48,7 +48,7 @@ final class LoanScheduleApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         public PostLoanChanges changes;
     }
 }

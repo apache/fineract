@@ -26,6 +26,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
@@ -90,27 +91,17 @@ public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePl
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("unq_name")) {
-
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.floatingrates.duplicate.name",
                     "Floating Rate with name `" + name + "` already exists", "name", name);
         }
-
         if (realCause.getMessage().contains("unq_rate_period")) {
             throw new PlatformDataIntegrityException("error.msg.floatingrates.duplicate.active.fromdate",
                     "Attempt to add multiple floating rate periods with same fromdate", "fromdate", "");
         }
-
-        logAsErrorUnexpectedDataIntegrityException(dve);
-        throw new PlatformDataIntegrityException("error.msg.floatingrates.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
-
-    private void logAsErrorUnexpectedDataIntegrityException(Exception dve) {
         log.error("Error occured.", dve);
-
+        throw ErrorHandler.getMappable(dve, "error.msg.floatingrates.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
-
 }

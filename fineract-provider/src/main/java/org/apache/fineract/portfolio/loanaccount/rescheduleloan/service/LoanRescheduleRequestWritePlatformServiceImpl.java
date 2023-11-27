@@ -39,9 +39,9 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRescheduledDueAdjustScheduleBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -443,7 +443,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final LoanScheduleDTO loanSchedule = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms, loan,
                     loanApplicationTerms.getHolidayDetailDTO(), loanRepaymentScheduleTransactionProcessor, rescheduleFromDate);
 
-            loan.updateLoanSchedule(loanSchedule.getInstallments());
+            // Either the installments got recalculated or the model
+            if (loanSchedule.getInstallments() != null) {
+                loan.updateLoanSchedule(loanSchedule.getInstallments());
+            } else {
+                loan.updateLoanSchedule(loanSchedule.getLoanScheduleModel());
+            }
             loan.recalculateAllCharges();
             ChangedTransactionDetail changedTransactionDetail = loan.processTransactions();
 
@@ -580,11 +585,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      *
      **/
     private void handleDataIntegrityViolation(final NonTransientDataAccessException dve) {
-
         LOG.error("Error occured.", dve);
-
-        throw new PlatformDataIntegrityException("error.msg.loan.reschedule.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.loan.reschedule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
-
 }

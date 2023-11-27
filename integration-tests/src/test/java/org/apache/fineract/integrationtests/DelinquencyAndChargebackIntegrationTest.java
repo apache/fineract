@@ -108,7 +108,7 @@ public class DelinquencyAndChargebackIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), loanProductTestBuilder);
+                    Math.toIntExact(delinquencyBucket.getId()), loanProductTestBuilder);
             assertNotNull(getLoanProductsProductResponse);
 
             // Older date to have more than one overdue installment
@@ -228,7 +228,7 @@ public class DelinquencyAndChargebackIntegrationTest {
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), loanProductTestBuilder);
+                    Math.toIntExact(delinquencyBucket.getId()), loanProductTestBuilder);
             assertNotNull(getLoanProductsProductResponse);
 
             // Older date to have more than one overdue installment

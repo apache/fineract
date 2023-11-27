@@ -3654,6 +3654,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createDelinquencyAction(final Long loanId) {
+        this.actionName = "CREATE";
+        this.entityName = "DELINQUENCY_ACTION";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/delinquency-action";
+        return this;
+    }
+
     public CommandWrapperBuilder batchRequestWithEnclosingTransaction() {
         this.actionName = "LOG_FAILED";
         this.entityName = "BATCH";

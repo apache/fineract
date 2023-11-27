@@ -19,16 +19,15 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import java.math.BigDecimal;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.savings.domain.GSIMRepositoy;
 import org.apache.fineract.portfolio.savings.domain.GroupSavingsIndividualMonitoring;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 @Transactional
 public class GroupSavingsIndividualMonitoringWritePlatformServiceImpl implements GroupSavingsIndividualMonitoringWritePlatformService {
 
@@ -37,14 +36,6 @@ public class GroupSavingsIndividualMonitoringWritePlatformServiceImpl implements
     private final GSIMRepositoy gsimAccountRepository;
 
     private final LoanRepository loanRepository;
-
-    @Autowired
-    public GroupSavingsIndividualMonitoringWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final GSIMRepositoy gsimAccountRepository, final LoanRepository loanRepository) {
-        this.context = context;
-        this.gsimAccountRepository = gsimAccountRepository;
-        this.loanRepository = loanRepository;
-    }
 
     @Override
     public GroupSavingsIndividualMonitoring addGSIMAccountInfo(String accountNumber, Group group, BigDecimal parentDeposit,

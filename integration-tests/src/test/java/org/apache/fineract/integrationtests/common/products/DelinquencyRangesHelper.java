@@ -83,7 +83,7 @@ public class DelinquencyRangesHelper {
         return GSON.fromJson(response, DeleteDelinquencyRangeResponse.class);
     }
 
-    public static String getAsJSON(int minimumAgeDays, int maximumAgeDays) {
+    public static String getAsJSON(Integer minimumAgeDays, Integer maximumAgeDays) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("classification", Utils.uniqueRandomStringGenerator("Delinquency__" + minimumAgeDays + "_" + maximumAgeDays + "__", 4));
         map.put("minimumAgeDays", minimumAgeDays);

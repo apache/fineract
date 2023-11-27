@@ -61,7 +61,7 @@ public class ApplicationCurrency extends AbstractPersistableCustom {
                 currency.displaySymbol);
     }
 
-    private ApplicationCurrency(final String code, final String name, final int decimalPlaces, final Integer inMultiplesOf,
+    public ApplicationCurrency(final String code, final String name, final int decimalPlaces, final Integer inMultiplesOf,
             final String nameCode, final String displaySymbol) {
         this.code = code;
         this.name = name;

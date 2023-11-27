@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.interestratechart.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.util.Set;
 
 /**
@@ -42,7 +43,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
                 private GetInterestRateChartsChartIdChartSlabsEntityType() {}
 
                 @Schema(example = "2")
-                public Integer id;
+                public Long id;
                 @Schema(example = "InterestIncentiveEntityType.customer")
                 public Integer code;
                 @Schema(example = "Customer")
@@ -54,7 +55,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
                 private GetInterestRateChartsChartIdChartSlabsAttributeName() {}
 
                 @Schema(example = "2")
-                public Integer id;
+                public Long id;
                 @Schema(example = "InterestIncentiveAttributeName.gender")
                 public Integer code;
                 @Schema(example = "Gender")
@@ -66,7 +67,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
                 private GetInterestRateChartsChartIdChartSlabsConditionType() {}
 
                 @Schema(example = "2")
-                public Integer id;
+                public Long id;
                 @Schema(example = "incentiveConditionType.equal")
                 public Integer code;
                 @Schema(example = "equal")
@@ -78,7 +79,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
                 private GetInterestRateChartsChartIdChartSlabsIncentiveType() {}
 
                 @Schema(example = "3")
-                public Integer id;
+                public Long id;
                 @Schema(example = "InterestIncentiveType.incentive")
                 public Integer code;
                 @Schema(example = "Incentive")
@@ -86,7 +87,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
             }
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             public GetInterestRateChartsChartIdChartSlabsEntityType entityType;
             public GetInterestRateChartsChartIdChartSlabsAttributeName attributeName;
             public GetInterestRateChartsChartIdChartSlabsConditionType conditionType;
@@ -100,7 +101,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "5% interest from 1 day till 180 days of deposit")
         public String description;
         public InterestRateChartsApiResourceSwagger.GetInterestRateChartsTemplateResponse.GetInterestRateChartsTemplatePeriodTypes periodTypes;
@@ -130,11 +131,11 @@ final class InterestRateChartSlabsApiResourceSwagger {
             @Schema(example = "2")
             public Integer conditionType;
             @Schema(example = "11")
-            public Integer attributeValue;
+            public String attributeValue;
             @Schema(example = "2")
             public Integer incentiveType;
             @Schema(example = "-1")
-            public Float amount;
+            public BigDecimal amount;
         }
 
         @Schema(example = "0")
@@ -158,7 +159,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
         private PostInterestRateChartsChartIdChartSlabsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutInterestRateChartsChartIdChartSlabsChartSlabIdRequest")
@@ -178,7 +179,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
         private PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutInterestRateChartsChartIdChartSlabsChartSlabIdRequest changes;
     }
 
@@ -188,6 +189,6 @@ final class InterestRateChartSlabsApiResourceSwagger {
         private DeleteInterestRateChartsChartIdChartSlabsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

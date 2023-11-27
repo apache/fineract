@@ -45,13 +45,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetDelinquencyActionsResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
-import org.apache.fineract.client.models.GetLoansLoanIdCollectionData;
+import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
 import org.apache.fineract.client.models.GetLoansLoanIdDisbursementDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
@@ -63,6 +64,8 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionId
 import org.apache.fineract.client.models.GetPaymentTypesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansDelinquencyActionRequest;
+import org.apache.fineract.client.models.PostLoansDelinquencyActionResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
@@ -88,6 +91,7 @@ import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -277,6 +281,32 @@ public class LoanTransactionHelper extends IntegrationTest {
 
         }.getType();
         return GSON.fromJson(response, delinquencyTagsListType);
+    }
+
+    public List<GetDelinquencyActionsResponse> getLoanDelinquencyActions(final Long loanID) {
+        return ok(fineract().loans.getLoanDelinquencyActions(loanID));
+    }
+
+    public List<GetDelinquencyActionsResponse> getLoanDelinquencyActions(String externalId) {
+        return ok(fineract().loans.getLoanDelinquencyActions1(externalId));
+    }
+
+    public PostLoansDelinquencyActionResponse createLoanDelinquencyAction(final Long loanid, DelinquencyAction action, String startDate,
+            String endDate) {
+        PostLoansDelinquencyActionRequest postLoansDelinquencyAction = new PostLoansDelinquencyActionRequest().action(action.name())
+                .startDate(startDate).endDate(endDate).locale("en").dateFormat("dd MMMM yyyy");
+        return ok(fineract().loans.createLoanDelinquencyAction(loanid, postLoansDelinquencyAction));
+    }
+
+    public PostLoansDelinquencyActionResponse createLoanDelinquencyAction(String externalId, DelinquencyAction action, String startDate,
+            String endDate) {
+        PostLoansDelinquencyActionRequest postLoansDelinquencyAction = new PostLoansDelinquencyActionRequest().action(action.name())
+                .startDate(startDate).endDate(endDate).locale("en").dateFormat("dd MMMM yyyy");
+        return ok(fineract().loans.createLoanDelinquencyAction1(externalId, postLoansDelinquencyAction));
+    }
+
+    public PostLoansDelinquencyActionResponse createLoanDelinquencyAction(final Long loanid, DelinquencyAction action, String startDate) {
+        return createLoanDelinquencyAction(loanid, action, startDate, null);
     }
 
     public Object getLoanProductDetail(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -1638,7 +1668,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public void printDelinquencyData(GetLoansLoanIdResponse getLoansLoanIdResponse) {
-        GetLoansLoanIdCollectionData getLoansLoanIdCollectionData = getLoansLoanIdResponse.getDelinquent();
+        GetLoansLoanIdDelinquencySummary getLoansLoanIdCollectionData = getLoansLoanIdResponse.getDelinquent();
         if (getLoansLoanIdCollectionData != null) {
             log.info("Loan Delinquency {}", getLoansLoanIdCollectionData.toString());
         }
@@ -1929,5 +1959,10 @@ public class LoanTransactionHelper extends IntegrationTest {
             final String jsonAttributeToGetBack) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, transactionAmount, null), jsonAttributeToGetBack);
+    }
+
+    public PostLoansLoanIdTransactionsResponse writeOffLoanAccount(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "writeoff"));
     }
 }

@@ -21,13 +21,13 @@ package org.apache.fineract.commands.service;
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.UNDER_PROCESSING;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -62,9 +62,6 @@ public class CommandSourceService {
     @NotNull
     private CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
-        if (initialCommandSource.getCommandJson() == null) {
-            initialCommandSource.setCommandJson("{}");
-        }
         return commandSourceRepository.saveAndFlush(initialCommandSource);
     }
 
@@ -84,19 +81,22 @@ public class CommandSourceService {
     }
 
     public ErrorInfo generateErrorInfo(Throwable t) {
-        return errorHandler.handle(errorHandler.getMappable(t));
+        return errorHandler.handle(ErrorHandler.getMappable(t));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CommandSource getCommandSource(Long commandSourceId) {
         return commandSourceRepository.findById(commandSourceId).orElseThrow(() -> new CommandNotFoundException(commandSourceId));
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public CommandSource findCommandSource(CommandWrapper wrapper, String idempotencyKey) {
         return commandSourceRepository.findByActionNameAndEntityNameAndIdempotencyKey(wrapper.actionName(), wrapper.entityName(),
                 idempotencyKey);
     }
 
-    private CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         CommandSource commandSourceResult;
         if (jsonCommand.commandId() != null) {
             commandSourceResult = commandSourceRepository.findById(jsonCommand.commandId())
@@ -104,6 +104,9 @@ public class CommandSourceService {
             commandSourceResult.markAsChecked(maker);
         } else {
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey, UNDER_PROCESSING.getValue());
+        }
+        if (commandSourceResult.getCommandJson() == null) {
+            commandSourceResult.setCommandJson("{}");
         }
         return commandSourceResult;
     }

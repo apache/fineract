@@ -18,6 +18,25 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.util.Arrays;
+import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
+@Getter
+@RequiredArgsConstructor
 public enum LoanScheduleType {
-    CUMULATIVE, PROGRESSIVE
+
+    CUMULATIVE("Cumulative"), PROGRESSIVE("Progressive");
+
+    private final String humanReadableName;
+
+    public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
+        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+    }
+
+    public EnumOptionData asEnumOptionData() {
+        return new EnumOptionData((long) this.ordinal(), this.name(), this.humanReadableName);
+    }
 }

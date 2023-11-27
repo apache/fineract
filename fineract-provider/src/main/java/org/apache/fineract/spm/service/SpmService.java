@@ -23,6 +23,7 @@ import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -125,17 +126,14 @@ public class SpmService {
     }
 
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve, String key) {
-
         if (realCause.getMessage().contains("m_survey_scorecards")) {
             throw new PlatformDataIntegrityException("error.msg.survey.cannot.be.modified.as.used.in.client.survey",
                     "Survey can not be edited as it is already used in client survey", "name", key);
         }
-
         if (realCause.getMessage().contains("key")) {
             throw new PlatformDataIntegrityException("error.msg.survey.duplicate.key", "Survey with key already exists", "name", key);
         }
-
-        throw new PlatformDataIntegrityException("error.msg.survey.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.survey.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 
 public class LoanProductTestBuilder {
@@ -152,7 +153,8 @@ public class LoanProductTestBuilder {
     private boolean enableAutoRepaymentForDownPayment = false;
     private Integer repaymentStartDateType = null;
     private boolean disableScheduleExtensionForDownPayment = false;
-    private LoanScheduleType loanScheduleType = LoanScheduleType.CUMULATIVE;
+    private String loanScheduleType = LoanScheduleType.CUMULATIVE.name();
+    private String loanScheduleProcessingType = LoanScheduleProcessingType.HORIZONTAL.name();
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -310,6 +312,7 @@ public class LoanProductTestBuilder {
             map.put("disableScheduleExtensionForDownPayment", disableScheduleExtensionForDownPayment);
         }
         map.put("loanScheduleType", loanScheduleType);
+        map.put("loanScheduleProcessingType", loanScheduleProcessingType);
 
         return map;
     }
@@ -751,7 +754,12 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withLoanScheduleType(LoanScheduleType loanScheduleType) {
-        this.loanScheduleType = loanScheduleType;
+        this.loanScheduleType = loanScheduleType.name();
+        return this;
+    }
+
+    public LoanProductTestBuilder withLoanScheduleProcessingType(LoanScheduleProcessingType loanScheduleProcessingType) {
+        this.loanScheduleProcessingType = loanScheduleProcessingType.name();
         return this;
     }
 }

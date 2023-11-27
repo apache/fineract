@@ -112,9 +112,9 @@ final class ClientCollateralManagementApiResourceSwagger {
         private PostClientCollateralResponse() {}
 
         @Schema(example = "14")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
 
     }
 
@@ -136,9 +136,9 @@ final class ClientCollateralManagementApiResourceSwagger {
         private PutClientCollateralResponse() {}
 
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         public PutClientCollateralRequest changes;
     }
 
@@ -148,7 +148,7 @@ final class ClientCollateralManagementApiResourceSwagger {
         private DeleteClientCollateralResponse() {}
 
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
 
     }
 

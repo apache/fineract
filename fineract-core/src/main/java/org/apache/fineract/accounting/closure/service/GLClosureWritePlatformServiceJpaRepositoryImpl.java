@@ -35,7 +35,7 @@ import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFrom
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -143,7 +143,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
         }
 
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.glClosure.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.glClosure.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Closure: " + realCause.getMessage());
     }
 }

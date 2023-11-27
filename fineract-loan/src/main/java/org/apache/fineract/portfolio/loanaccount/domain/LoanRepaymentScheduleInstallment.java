@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 
 @Entity
@@ -422,6 +423,24 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public void resetChargesCharged() {
         this.feeChargesCharged = null;
         this.penaltyCharges = null;
+    }
+
+    public interface PaymentFunction {
+
+        Money accept(LocalDate transactionDate, Money transactionAmountRemaining);
+    }
+
+    public PaymentFunction getPaymentFunction(AllocationType allocationType, PaymentAction action) {
+        return switch (allocationType) {
+            case PENALTY -> PaymentAction.PAY.equals(action) ? this::payPenaltyChargesComponent
+                    : PaymentAction.UNPAY.equals(action) ? this::unpayPenaltyChargesComponent : null;
+            case FEE -> PaymentAction.PAY.equals(action) ? this::payFeeChargesComponent
+                    : PaymentAction.UNPAY.equals(action) ? this::unpayFeeChargesComponent : null;
+            case INTEREST -> PaymentAction.PAY.equals(action) ? this::payInterestComponent
+                    : PaymentAction.UNPAY.equals(action) ? this::unpayInterestComponent : null;
+            case PRINCIPAL -> PaymentAction.PAY.equals(action) ? this::payPrincipalComponent
+                    : PaymentAction.UNPAY.equals(action) ? this::unpayPrincipalComponent : null;
+        };
     }
 
     public Money payPenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
@@ -941,15 +960,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.additional = true;
     }
 
-    public boolean isFirstPeriod() {
-        return (this.installmentNumber == 1);
-    }
-
-    public boolean isInPeriod(LocalDate date) {
-        return (isFirstPeriod() ? !DateUtils.isBefore(date, getFromDate()) : DateUtils.isAfter(date, getFromDate()))
-                && !DateUtils.isAfter(date, getDueDate());
-    }
-
     public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
         return this.loanTransactionToRepaymentScheduleMappings;
     }
@@ -966,5 +976,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public void resetPrincipalDue() {
         this.principal = null;
+    }
+
+    public enum PaymentAction {
+        PAY, UNPAY
     }
 }

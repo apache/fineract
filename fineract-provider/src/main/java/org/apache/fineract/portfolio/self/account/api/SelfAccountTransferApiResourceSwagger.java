@@ -39,7 +39,7 @@ final class SelfAccountTransferApiResourceSwagger {
             private GetAccountOptions() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "accountType.savings")
             public String code;
             @Schema(example = "Savings Account")
@@ -53,16 +53,16 @@ final class SelfAccountTransferApiResourceSwagger {
             private GetFromAccountOptions() {}
 
             @Schema(example = "2")
-            public Integer accountId;
+            public Long accountId;
             @Schema(example = "00000001")
             public Integer accountNo;
             public GetAccountTransferTemplateResponse.GetAccountOptions accountType;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "ABC")
             public String clientName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "HEAD OFFICE")
             public String officeName;
 
@@ -75,16 +75,16 @@ final class SelfAccountTransferApiResourceSwagger {
             private GetToAccountOptions() {}
 
             @Schema(example = "2")
-            public Integer accountId;
+            public Long accountId;
             @Schema(example = "00000001")
             public Integer accountNo;
             public GetAccountTransferTemplateResponse.GetAccountOptions accountType;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "ABC")
             public String clientName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "HEAD OFFICE")
             public String officeName;
 
@@ -133,8 +133,8 @@ final class SelfAccountTransferApiResourceSwagger {
         private PostNewTransferResponse() {}
 
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

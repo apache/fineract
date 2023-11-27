@@ -393,7 +393,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class RefundEventListener implements BusinessEventListener<LoanRefundPostBusinessEvent> {
+    private final class RefundEventListener implements BusinessEventListener<LoanRefundPostBusinessEvent> {
 
         @SuppressWarnings("unused")
         @Override
@@ -404,7 +404,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class AdjustTransactionBusinessEventEventListener implements BusinessEventListener<LoanAdjustTransactionBusinessEvent> {
+    private final class AdjustTransactionBusinessEventEventListener implements BusinessEventListener<LoanAdjustTransactionBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanAdjustTransactionBusinessEvent event) {
@@ -417,7 +417,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class MakeRepaymentEventListener implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
+    private final class MakeRepaymentEventListener implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
@@ -427,7 +427,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class UndoWrittenOffEventListener implements BusinessEventListener<LoanUndoWrittenOffBusinessEvent> {
+    private final class UndoWrittenOffEventListener implements BusinessEventListener<LoanUndoWrittenOffBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanUndoWrittenOffBusinessEvent event) {
@@ -437,7 +437,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class WaiveInterestEventListener implements BusinessEventListener<LoanWaiveInterestBusinessEvent> {
+    private final class WaiveInterestEventListener implements BusinessEventListener<LoanWaiveInterestBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanWaiveInterestBusinessEvent event) {
@@ -447,7 +447,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class LoanForeClosureEventListener implements BusinessEventListener<LoanForeClosurePostBusinessEvent> {
+    private final class LoanForeClosureEventListener implements BusinessEventListener<LoanForeClosurePostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanForeClosurePostBusinessEvent event) {
@@ -457,7 +457,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class LoanChargePaymentEventListener implements BusinessEventListener<LoanChargePaymentPostBusinessEvent> {
+    private final class LoanChargePaymentEventListener implements BusinessEventListener<LoanChargePaymentPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanChargePaymentPostBusinessEvent event) {
@@ -467,7 +467,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class AddChargeEventListener implements BusinessEventListener<LoanAddChargeBusinessEvent> {
+    private final class AddChargeEventListener implements BusinessEventListener<LoanAddChargeBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanAddChargeBusinessEvent event) {
@@ -477,7 +477,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class WaiveChargeEventListener implements BusinessEventListener<LoanWaiveChargeBusinessEvent> {
+    private final class WaiveChargeEventListener implements BusinessEventListener<LoanWaiveChargeBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanWaiveChargeBusinessEvent event) {
@@ -487,7 +487,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class ApplyOverdueChargeEventListener implements BusinessEventListener<LoanApplyOverdueChargeBusinessEvent> {
+    private final class ApplyOverdueChargeEventListener implements BusinessEventListener<LoanApplyOverdueChargeBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanApplyOverdueChargeBusinessEvent event) {
@@ -496,7 +496,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class DisbursementEventListener implements BusinessEventListener<LoanDisbursalBusinessEvent> {
+    private final class DisbursementEventListener implements BusinessEventListener<LoanDisbursalBusinessEvent> {
 
         @SuppressWarnings("unused")
         @Override
@@ -506,7 +506,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class GoodwillCreditEventListener implements BusinessEventListener<LoanTransactionGoodwillCreditPostBusinessEvent> {
+    private final class GoodwillCreditEventListener implements BusinessEventListener<LoanTransactionGoodwillCreditPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanTransactionGoodwillCreditPostBusinessEvent event) {
@@ -516,7 +516,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class PaymentRefundEventListener implements BusinessEventListener<LoanTransactionPayoutRefundPostBusinessEvent> {
+    private final class PaymentRefundEventListener implements BusinessEventListener<LoanTransactionPayoutRefundPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanTransactionPayoutRefundPostBusinessEvent event) {
@@ -526,7 +526,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class LoanBalanceChangedEventListener implements BusinessEventListener<LoanBalanceChangedBusinessEvent> {
+    private final class LoanBalanceChangedEventListener implements BusinessEventListener<LoanBalanceChangedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanBalanceChangedBusinessEvent event) {

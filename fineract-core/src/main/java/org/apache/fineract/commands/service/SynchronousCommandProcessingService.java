@@ -20,7 +20,6 @@ package org.apache.fineract.commands.service;
 
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.ERROR;
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.PROCESSED;
-import static org.apache.fineract.commands.domain.CommandProcessingResultType.UNDER_PROCESSING;
 import static org.apache.http.HttpStatus.SC_OK;
 
 import com.google.gson.Gson;
@@ -33,7 +32,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
@@ -48,6 +46,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessFailedException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessSucceedException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
@@ -108,9 +107,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         boolean sameTransaction = BatchRequestContextHolder.getEnclosingTransaction().isPresent();
         if (commandSource == null) {
             AppUser user = context.authenticatedUser(wrapper);
-            commandSource = sameTransaction ? commandSourceService.saveInitialSameTransaction(wrapper, command, user, idempotencyKey)
-                    : commandSourceService.saveInitialNewTransaction(wrapper, command, user, idempotencyKey);
-            storeCommandIdInContext(commandSource); // Store command id as a request attribute
+            if (sameTransaction) {
+                commandSource = commandSourceService.getInitialCommandSource(wrapper, command, user, idempotencyKey);
+            } else {
+                commandSource = commandSourceService.saveInitialNewTransaction(wrapper, command, user, idempotencyKey);
+                storeCommandIdInContext(commandSource); // Store command id as a request attribute
+            }
         }
         setIdempotencyKeyStoreFlag(true);
 
@@ -118,19 +120,21 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         try {
             result = findCommandHandler(wrapper).processCommand(command);
         } catch (Throwable t) { // NOSONAR
-            ErrorInfo errorInfo = commandSourceService.generateErrorInfo(t);
+            RuntimeException mappable = ErrorHandler.getMappable(t);
+            ErrorInfo errorInfo = commandSourceService.generateErrorInfo(mappable);
             commandSource.setResultStatusCode(errorInfo.getStatusCode());
             commandSource.setResult(errorInfo.getMessage());
             commandSource.setStatus(ERROR);
-            commandSource = sameTransaction ? commandSourceService.saveResultSameTransaction(commandSource)
-                    : commandSourceService.saveResultNewTransaction(commandSource);
-            publishHookErrorEvent(wrapper, command, errorInfo);
-            throw t;
+            if (!sameTransaction) { // TODO: temporary solution
+                commandSource = commandSourceService.saveResultNewTransaction(commandSource);
+            }
+            publishHookErrorEvent(wrapper, command, errorInfo); // TODO must be performed in a new transaction
+            throw mappable;
         }
 
         commandSource.updateForAudit(result);
-        commandSource.setResult(toApiJsonSerializer.serializeResult(result));
         commandSource.setResultStatusCode(SC_OK);
+        commandSource.setResult(toApiJsonSerializer.serializeResult(result));
         commandSource.setStatus(PROCESSED);
 
         boolean isRollback = !isApprovedByChecker && (result.isRollbackTransaction()
@@ -142,6 +146,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         commandSource = sameTransaction ? commandSourceService.saveResultSameTransaction(commandSource)
                 : commandSourceService.saveResultNewTransaction(commandSource);
+        if (sameTransaction) {
+            storeCommandIdInContext(commandSource); // Store command id as a request attribute
+        }
 
         if (isRollback) {
             /*
@@ -150,14 +157,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
              * when checker approves the transaction
              */
             commandSource.setTransactionId(command.getTransactionId());
-            // TODO: this should be removed together with lines 133-135
+            // TODO: this should be removed together with lines 147-149
             commandSource.setCommandJson(command.json()); // Set back CommandSource json data
             throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSource);
         }
 
         result.setRollbackTransaction(null);
-        publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, result);
-
+        publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, result); // TODO must be performed in a
+                                                                                       // new transaction
         return result;
     }
 
@@ -222,7 +229,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         if (e instanceof RollbackTransactionAsCommandIsNotApprovedByCheckerException ex) {
             return logCommand(ex.getCommandSourceResult());
         }
-        throw errorHandler.getMappable(e);
+        throw ErrorHandler.getMappable(e);
     }
 
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {

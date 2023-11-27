@@ -413,15 +413,15 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
 
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse chargeRefundResult = loanTransactionHelper.makeChargeRefund(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en").loanChargeId(penalty1LoanChargeId)
-                        .transactionAmount(1.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en")
+                        .loanChargeId(Long.valueOf(penalty1LoanChargeId)).transactionAmount(1.0));
         assertNotNull(chargeRefundResult.getResourceExternalId());
 
         // Check whether the provided external id was retrieved
         transactionExternalIdStr = UUID.randomUUID().toString();
         final PostLoansLoanIdTransactionsResponse chargeRefundResultWithExternalId = loanTransactionHelper
                 .makeChargeRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en")
-                        .loanChargeId(penalty1LoanChargeId).transactionAmount(1.0).externalId(transactionExternalIdStr));
+                        .loanChargeId(Long.valueOf(penalty1LoanChargeId)).transactionAmount(1.0).externalId(transactionExternalIdStr));
         assertEquals(transactionExternalIdStr, chargeRefundResultWithExternalId.getResourceExternalId());
 
         response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);

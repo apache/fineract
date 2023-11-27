@@ -42,7 +42,7 @@ import org.springframework.context.annotation.Import;
 public class ServerApplication extends SpringBootServletInitializer {
 
     @Import({ FineractWebApplicationConfiguration.class, FineractLiquibaseOnlyApplicationConfiguration.class })
-    private static class Configuration {}
+    private static final class Configuration {}
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {

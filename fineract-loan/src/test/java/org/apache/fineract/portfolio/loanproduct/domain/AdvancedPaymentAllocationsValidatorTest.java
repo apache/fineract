@@ -143,9 +143,35 @@ class AdvancedPaymentAllocationsValidatorTest {
                 () -> underTest.validate(List.of(lppr1, lppr2), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
     }
 
+    @Test
+    public void checkGroupingOfAllocationRulesGoodOrder() {
+        List<LoanProductPaymentAllocationRule> allocationRules1 = List.of(createLoanProductAllocationRule1());
+        Assertions.assertDoesNotThrow(() -> underTest.checkGroupingOfAllocationRules(allocationRules1));
+
+        List<LoanProductPaymentAllocationRule> allocationRules2 = List.of(createLoanProductAllocationRule4());
+        Assertions.assertDoesNotThrow(() -> underTest.checkGroupingOfAllocationRules(allocationRules2));
+    }
+
+    @Test
+    public void checkGroupingOfAllocationRulesWrongOrder() {
+        List<LoanProductPaymentAllocationRule> allocationRules = List.of(createLoanProductAllocationRule3());
+        assertPlatformValidationException("Horizontal repayment schedule processing is not supporting mixed due type allocation rules!",
+                "mixed.due.type.allocation.rules.are.not.supported.with.horizontal.installment.processing",
+                () -> underTest.checkGroupingOfAllocationRules(allocationRules));
+    }
+
     private void assertPlatformValidationException(String message, String code, Executable executable) {
         PlatformApiDataValidationException validationException = assertThrows(PlatformApiDataValidationException.class, executable);
         assertPlatformException(message, code, validationException);
+    }
+
+    @NotNull
+    private static LoanProductPaymentAllocationRule createLoanProductAllocationRule1() {
+        LoanProductPaymentAllocationRule lppr1 = new LoanProductPaymentAllocationRule();
+        lppr1.setTransactionType(DEFAULT);
+        lppr1.setFutureInstallmentAllocationRule(LAST_INSTALLMENT);
+        lppr1.setAllocationTypes(EnumSet.allOf(PaymentAllocationType.class).stream().toList());
+        return lppr1;
     }
 
     @NotNull
@@ -160,20 +186,36 @@ class AdvancedPaymentAllocationsValidatorTest {
     }
 
     @NotNull
-    private static LoanProductPaymentAllocationRule createLoanProductAllocationRule1() {
-        LoanProductPaymentAllocationRule lppr1 = new LoanProductPaymentAllocationRule();
-        lppr1.setTransactionType(DEFAULT);
-        lppr1.setFutureInstallmentAllocationRule(LAST_INSTALLMENT);
-        lppr1.setAllocationTypes(EnumSet.allOf(PaymentAllocationType.class).stream().toList());
-        return lppr1;
+    private static LoanProductPaymentAllocationRule createLoanProductAllocationRule3() {
+        LoanProductPaymentAllocationRule lppr = new LoanProductPaymentAllocationRule();
+        lppr.setTransactionType(REPAYMENT);
+        lppr.setFutureInstallmentAllocationRule(LAST_INSTALLMENT);
+        ArrayList<PaymentAllocationType> allocationTypes = new ArrayList<>(EnumSet.allOf(PaymentAllocationType.class).stream().toList());
+        Collections.swap(allocationTypes, 0, 4);
+        Collections.swap(allocationTypes, 3, 8);
+        Collections.swap(allocationTypes, 7, 11);
+        lppr.setAllocationTypes(allocationTypes);
+        return lppr;
+    }
+
+    @NotNull
+    private static LoanProductPaymentAllocationRule createLoanProductAllocationRule4() {
+        LoanProductPaymentAllocationRule lppr = new LoanProductPaymentAllocationRule();
+        lppr.setTransactionType(DEFAULT);
+        lppr.setFutureInstallmentAllocationRule(LAST_INSTALLMENT);
+        ArrayList<PaymentAllocationType> allocationTypes = new ArrayList<>(EnumSet.allOf(PaymentAllocationType.class).stream().toList());
+        Collections.swap(allocationTypes, 0, 4);
+        Collections.swap(allocationTypes, 1, 5);
+        Collections.swap(allocationTypes, 2, 6);
+        Collections.swap(allocationTypes, 3, 7);
+        lppr.setAllocationTypes(allocationTypes);
+        return lppr;
     }
 
     @NotNull
     private static List<Pair<Integer, PaymentAllocationType>> createPaymentAllocationTypeList() {
         AtomicInteger i = new AtomicInteger(1);
-        List<Pair<Integer, PaymentAllocationType>> list = EnumSet.allOf(PaymentAllocationType.class).stream()
-                .map(p -> Pair.of(i.getAndIncrement(), p)).toList();
-        return list;
+        return EnumSet.allOf(PaymentAllocationType.class).stream().map(p -> Pair.of(i.getAndIncrement(), p)).toList();
     }
 
     private void assertPlatformException(String expectedMessage, String expectedCode,

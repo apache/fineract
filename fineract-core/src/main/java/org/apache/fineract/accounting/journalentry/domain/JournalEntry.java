@@ -107,7 +107,7 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
         //
     }
 
-    public JournalEntry(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount, final String currencyCode,
+    protected JournalEntry(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount, final String currencyCode,
             final String transactionId, final boolean manualEntry, final LocalDate transactionDate, final Integer type,
             final BigDecimal amount, final String description, final Integer entityType, final Long entityId, final String referenceNumber,
             final Long loanTransactionId, final Long savingsTransactionId, final Long clientTransactionId, final Long shareTransactionId) {

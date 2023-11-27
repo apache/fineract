@@ -45,7 +45,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -86,7 +86,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport);
                 generateCsvFileBuffer(result, out);
             } catch (final Exception e) {
-                throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage(), e);
+                throw ErrorHandler.getMappable(e);
             }
         };
     }
@@ -255,7 +255,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             return genaratePdf;
         } catch (final Exception e) {
             log.error("error.msg.reporting.error:", e);
-            throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage(), e);
+            throw ErrorHandler.getMappable(e);
         }
     }
 

@@ -29,11 +29,13 @@ import io.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
-import org.apache.fineract.client.models.GetLoansLoanIdCollectionData;
+import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
@@ -87,11 +89,29 @@ public class DelinquencyBucketsHelper {
         return GSON.fromJson(response, DeleteDelinquencyBucketResponse.class);
     }
 
-    public static String getAsJSON(final ArrayList<Integer> rangeIds) {
+    public static String getAsJSON(final List<Integer> rangeIds) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", Utils.uniqueRandomStringGenerator("Delinquency_Bucket_", 4));
         map.put("ranges", rangeIds.toArray());
         return new Gson().toJson(map);
+    }
+
+    public static Integer createDelinquencyBucket(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            List<Pair<Integer, Integer>> ranges) {
+        List<Integer> rangeIds = ranges.stream().map(r -> createDelinquencyRange(requestSpec, responseSpec, r)).toList();
+        String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
+        PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
+                responseSpec, jsonBucket);
+        assertNotNull(delinquencyBucketResponse);
+        return delinquencyBucketResponse.getResourceId();
+    }
+
+    public static Integer createDelinquencyRange(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            Pair<Integer, Integer> range) {
+        String jsonRange = DelinquencyRangesHelper.getAsJSON(range.getLeft(), range.getRight());
+        PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
+                jsonRange);
+        return delinquencyRangeResponse.getResourceId();
     }
 
     public static Integer createDelinquencyBucket(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
@@ -121,7 +141,7 @@ public class DelinquencyBucketsHelper {
 
     public static void evaluateLoanCollectionData(GetLoansLoanIdResponse getLoansLoanIdResponse, Integer pastDueDays,
             Double amountExpected) {
-        GetLoansLoanIdCollectionData getCollectionData = getLoansLoanIdResponse.getDelinquent();
+        GetLoansLoanIdDelinquencySummary getCollectionData = getLoansLoanIdResponse.getDelinquent();
         if (getCollectionData != null) {
             log.info("Loan Delinquency Data in Days {} and Amount {}", getCollectionData.getPastDueDays(),
                     getCollectionData.getDelinquentAmount());

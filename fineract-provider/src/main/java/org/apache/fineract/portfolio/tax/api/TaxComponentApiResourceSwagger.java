@@ -64,7 +64,7 @@ final class TaxComponentApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "tax component 1")
         public String name;
         @Schema(example = "10.000000")

@@ -23,155 +23,41 @@ services:
     image: 'bitnami/kafka:3.5.1-debian-11-r7'
     ports:
       - '9092:9092'
-    environment:
-      - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=controller,broker
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-  # Backend service
-  fineractpostgresql:
-    image: postgres:16.0
-    volumes:
-      - ./fineract-db/docker/postgresql:/docker-entrypoint-initdb.d/:Z,ro
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
-      FINERACT_DB_USER: postgres
-      FINERACT_DB_PASS: skdcnwauicn2ucnaecasdsajdnizucawencascdca
-      FINERACT_TENANTS_DB_NAME: fineract_tenants
-      FINERACT_TENANT_DEFAULT_DB_NAME: fineract_default
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
-      timeout: 10s
-      retries: 10
-    ports:
-      - "5432:5432"
+    env_file:
+      - ./config/docker/env/kafka-server.env
+
+  db:
+    extends:
+      file: ./config/docker/compose/postgresql.yml
+      service: postgresql
+
   fineract-manager:
-    image: fineract:latest
-    volumes:
-      - ./fineract-provider/build/data:/data
-    healthcheck:
-      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
-      timeout: 10s
-      retries: 10
+    extends:
+      file: ./config/docker/compose/fineract.yml
+      service: fineract
     ports:
-      - 8443:8443
+      - "8443:8443"
     depends_on:
-      fineractpostgresql:
+      db:
         condition: service_healthy
-    environment:
-      - FINERACT_NODE_ID=1
-      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.postgresql.Driver
-      - FINERACT_HIKARI_JDBC_URL=jdbc:postgresql://fineractpostgresql:5432/fineract_tenants
-      - FINERACT_HIKARI_USERNAME=postgres
-      - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
-      - FINERACT_HIKARI_MINIMUM_IDLE=3
-      - FINERACT_HIKARI_MAXIMUM_POOL_SIZE=10
-      - FINERACT_HIKARI_IDLE_TIMEOUT=60000
-      - FINERACT_HIKARI_CONNECTION_TIMEOUT=20000
-      - FINERACT_HIKARI_TEST_QUERY=SELECT 1
-      - FINERACT_HIKARI_AUTO_COMMIT=true
-      - FINERACT_SERVER_SSL_ENABLED=true
-      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS=true
-      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE=250
-      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT=2048
-      - FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS=true
-      - FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE=true
-      - FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS=true
-      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA=true
-      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION=true
-      - FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS=true
-      - FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS=false
-      - FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES=true
-      - FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION=true
-      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractpostgresql
-      - FINERACT_DEFAULT_TENANTDB_PORT=5432
-      - FINERACT_DEFAULT_TENANTDB_UID=postgres
-      - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
-      - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
-      - FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata
-      - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
-      - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
-      - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
-      - JAVA_TOOL_OPTIONS="-Xmx1G"
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_JMS_ENABLED=false
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_SPRING_EVENTS_ENABLED=false
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ENABLED=true
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_NAME=job-topic
-      - FINERACT_MODE_BATCH_MANAGER_ENABLED=true
-      - FINERACT_MODE_BATCH_WORKER_ENABLED=false
-      - LOAN_COB_CHUNK_SIZE=10
-      - LOAN_COB_PARTITION_SIZE=10
-      - FINERACT_EXTERNAL_EVENTS_ENABLED=true
-      - FINERACT_EXTERNAL_EVENTS_KAFKA_ENABLED=true
-      - FINERACT_EXTERNAL_EVENTS_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_NAME=external-events
-      - SPRING_PROFILES_ACTIVE=test,diagnostics
+    env_file:
+      - ./config/docker/env/fineract-postgresql.env
+      - ./config/docker/env/fineract-manager.env
+      - ./config/docker/env/kafka-client.env
+
   fineract-worker:
-    image: fineract:latest
-    volumes:
-      - ./fineract-provider/build/data:/data
+    extends:
+      file: ./config/docker/compose/fineract.yml
+      service: fineract
     deploy:
       mode: replicated
       replicas: 2
-    healthcheck:
-      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
-      timeout: 10s
-      retries: 10
     ports:
       - "8444-8445:8443"
     depends_on:
-      fineractpostgresql:
+      db:
         condition: service_healthy
-    environment:
-      - FINERACT_NODE_ID=1
-      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.postgresql.Driver
-      - FINERACT_HIKARI_JDBC_URL=jdbc:postgresql://fineractpostgresql:5432/fineract_tenants
-      - FINERACT_HIKARI_USERNAME=postgres
-      - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
-      - FINERACT_HIKARI_MINIMUM_IDLE=3
-      - FINERACT_HIKARI_MAXIMUM_POOL_SIZE=10
-      - FINERACT_HIKARI_IDLE_TIMEOUT=60000
-      - FINERACT_HIKARI_CONNECTION_TIMEOUT=20000
-      - FINERACT_HIKARI_TEST_QUERY=SELECT 1
-      - FINERACT_HIKARI_AUTO_COMMIT=true
-      - FINERACT_SERVER_SSL_ENABLED=true
-      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS=true
-      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE=250
-      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT=2048
-      - FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS=true
-      - FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE=true
-      - FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS=true
-      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA=true
-      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION=true
-      - FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS=true
-      - FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS=false
-      - FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES=true
-      - FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION=true
-      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractpostgresql
-      - FINERACT_DEFAULT_TENANTDB_PORT=5432
-      - FINERACT_DEFAULT_TENANTDB_UID=postgres
-      - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
-      - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
-      - FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata
-      - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
-      - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
-      - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
-      - JAVA_TOOL_OPTIONS="-Xmx1G"
-      - FINERACT_MODE_BATCH_MANAGER_ENABLED=false
-      - FINERACT_MODE_BATCH_WORKER_ENABLED=true
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_JMS_ENABLED=false
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_SPRING_EVENTS_ENABLED=false
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ENABLED=true
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_NAME=job-topic
-      - FINERACT_EXTERNAL_EVENTS_ENABLED=true
-      - FINERACT_EXTERNAL_EVENTS_KAFKA_ENABLED=true
-      - FINERACT_EXTERNAL_EVENTS_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_NAME=external-events
-      - SPRING_PROFILES_ACTIVE=test,diagnostics
+    env_file:
+      - ./config/docker/env/fineract-postgresql.env
+      - ./config/docker/env/fineract-worker.env
+      - ./config/docker/env/kafka-client.env

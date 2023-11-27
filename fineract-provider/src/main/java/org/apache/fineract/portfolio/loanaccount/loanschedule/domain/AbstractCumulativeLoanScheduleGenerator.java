@@ -132,10 +132,10 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                 loanApplicationTerms.getLoanCalendar(), loanApplicationTerms.getHolidayDetailDTO(), loanApplicationTerms);
 
         if (!scheduleParams.isPartialUpdate()) {
-            BigDecimal downPaymentAmount = BigDecimal.ZERO;
+            Money downPaymentAmount = Money.zero(currency);
             if (loanApplicationTerms.isDownPaymentEnabled()) {
-                downPaymentAmount = MathUtil.percentageOf(scheduleParams.getOutstandingBalance().getAmount(),
-                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19);
+                downPaymentAmount = Money.of(currency, MathUtil.percentageOf(scheduleParams.getOutstandingBalance().getAmount(),
+                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19));
                 if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
                     downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount,
                             loanApplicationTerms.getInstallmentAmountInMultiplesOf());
@@ -143,27 +143,27 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
 
             }
             Money calculatedAmortizableAmount = loanApplicationTerms.getPrincipal().minus(downPaymentAmount);
-            scheduleParams.reduceOutstandingBalance(Money.of(currency, downPaymentAmount));
+            scheduleParams.reduceOutstandingBalance(downPaymentAmount);
             // Set Fixed Principal Amount
             updateAmortization(mc, loanApplicationTerms, scheduleParams.getPeriodNumber(), calculatedAmortizableAmount);
 
             if (loanApplicationTerms.isMultiDisburseLoan()) {
                 /* fetches the first tranche amount and also updates other tranche details to map */
-                BigDecimal disburseAmt = getDisbursementAmount(loanApplicationTerms, scheduleParams.getPeriodStartDate(),
-                        scheduleParams.getDisburseDetailMap(), scheduleParams.applyInterestRecalculation());
-                BigDecimal downPaymentAmt = BigDecimal.ZERO;
+                Money disburseAmt = Money.of(currency, getDisbursementAmount(loanApplicationTerms, scheduleParams.getPeriodStartDate(),
+                        scheduleParams.getDisburseDetailMap(), scheduleParams.applyInterestRecalculation()));
+                Money downPaymentAmt = Money.zero(currency);
                 if (loanApplicationTerms.isDownPaymentEnabled()) {
-                    downPaymentAmt = MathUtil.percentageOf(disburseAmt, loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(),
-                            19);
+                    downPaymentAmt = Money.of(currency, MathUtil.percentageOf(disburseAmt.getAmount(),
+                            loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19));
                     if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
                         downPaymentAmt = Money.roundToMultiplesOf(downPaymentAmt, loanApplicationTerms.getInstallmentAmountInMultiplesOf());
                     }
                 }
-                BigDecimal remainingPrincipalAmt = disburseAmt.subtract(downPaymentAmt);
-                scheduleParams.setPrincipalToBeScheduled(Money.of(currency, remainingPrincipalAmt));
-                loanApplicationTerms.setPrincipal(loanApplicationTerms.getPrincipal().zero().plus(remainingPrincipalAmt));
-                scheduleParams.setOutstandingBalance(Money.of(currency, remainingPrincipalAmt));
-                scheduleParams.setOutstandingBalanceAsPerRest(Money.of(currency, remainingPrincipalAmt));
+                Money remainingPrincipalAmt = disburseAmt.minus(downPaymentAmt);
+                scheduleParams.setPrincipalToBeScheduled(remainingPrincipalAmt);
+                loanApplicationTerms.setPrincipal(remainingPrincipalAmt);
+                scheduleParams.setOutstandingBalance(remainingPrincipalAmt);
+                scheduleParams.setOutstandingBalanceAsPerRest(remainingPrincipalAmt);
             }
         }
 
@@ -1004,10 +1004,16 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
 
                 BigDecimal downPaymentAmt = BigDecimal.ZERO;
                 if (loanApplicationTerms.isDownPaymentEnabled()) {
-                    final LoanScheduleModelDownPaymentPeriod downPaymentPeriod = createDownPaymentPeriod(loanApplicationTerms,
-                            scheduleParams, disburseDetail.getKey(), disburseDetail.getValue().getAmount());
-                    periods.add(downPaymentPeriod);
-                    downPaymentAmt = downPaymentPeriod.principalDue();
+                    // get list of disbursements done on same day and create down payment periods
+                    List<DisbursementData> disbursementsOnSameDate = loanApplicationTerms.getDisbursementDatas().stream()
+                            .filter(disbursementData -> DateUtils.isEqual(disbursementData.disbursementDate(), disburseDetail.getKey()))
+                            .toList();
+                    for (DisbursementData disbursementData : disbursementsOnSameDate) {
+                        final LoanScheduleModelDownPaymentPeriod downPaymentPeriod = createDownPaymentPeriod(loanApplicationTerms,
+                                scheduleParams, disbursementData.disbursementDate(), disbursementData.getPrincipal());
+                        periods.add(downPaymentPeriod);
+                        downPaymentAmt = downPaymentAmt.add(downPaymentPeriod.principalDue());
+                    }
                 }
                 // updates actual outstanding balance with new
                 // disbursement detail
@@ -2007,19 +2013,18 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
 
     private LoanScheduleModelDownPaymentPeriod createDownPaymentPeriod(LoanApplicationTerms loanApplicationTerms,
             LoanScheduleParams scheduleParams, LocalDate date, BigDecimal periodBaseAmount) {
-        BigDecimal downPaymentAmount = MathUtil.percentageOf(periodBaseAmount,
-                loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19);
+        Money downPaymentAmount = Money.of(loanApplicationTerms.getCurrency(),
+                MathUtil.percentageOf(periodBaseAmount, loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19));
         if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
             downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, loanApplicationTerms.getInstallmentAmountInMultiplesOf());
         }
-        Money downPayment = Money.of(loanApplicationTerms.getCurrency(), downPaymentAmount);
         LoanScheduleModelDownPaymentPeriod installment = LoanScheduleModelDownPaymentPeriod
-                .downPayment(scheduleParams.getInstalmentNumber(), date, downPayment, scheduleParams.getOutstandingBalance());
+                .downPayment(scheduleParams.getInstalmentNumber(), date, downPaymentAmount, scheduleParams.getOutstandingBalance());
 
         addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), installment);
 
         scheduleParams.incrementInstalmentNumber();
-        scheduleParams.addTotalRepaymentExpected(downPayment);
+        scheduleParams.addTotalRepaymentExpected(downPaymentAmount);
 
         return installment;
     }
@@ -2230,14 +2235,14 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
             LocalDate periodStartDate = RepaymentStartDateType.DISBURSEMENT_DATE.equals(loanApplicationTerms.getRepaymentStartDateType())
                     ? loanApplicationTerms.getExpectedDisbursementDate()
                     : loanApplicationTerms.getSubmittedOnDate();
-            BigDecimal downPaymentAmount = BigDecimal.ZERO;
+            Money downPaymentAmount = Money.zero(currency);
             if (loanApplicationTerms.isDownPaymentEnabled()) {
-                double downPaymentAmt = MathUtil.percentageOf(loanScheduleParams.getOutstandingBalance().getAmount(),
-                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19).doubleValue();
+                downPaymentAmount = Money.of(currency, MathUtil.percentageOf(loanScheduleParams.getOutstandingBalance().getAmount(),
+                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19));
                 if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
-                    downPaymentAmt = Money.roundToMultiplesOf(downPaymentAmt, loanApplicationTerms.getInstallmentAmountInMultiplesOf());
+                    downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount,
+                            loanApplicationTerms.getInstallmentAmountInMultiplesOf());
                 }
-                downPaymentAmount = BigDecimal.valueOf(downPaymentAmt);
             }
             Money calculatedAmortizableAmount = principalToBeScheduled.minus(downPaymentAmount);
             loanScheduleParams.setOutstandingBalance(calculatedAmortizableAmount);

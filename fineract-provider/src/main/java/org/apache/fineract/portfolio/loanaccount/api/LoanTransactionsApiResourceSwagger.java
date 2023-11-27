@@ -276,7 +276,7 @@ final class LoanTransactionsApiResourceSwagger {
         @Schema(example = "ban123")
         public String bankNumber;
         @Schema(example = "3")
-        public Integer loanChargeId;
+        public Long loanChargeId;
         @Schema(example = "28 June 2022")
         public String dueDate;
         @Schema(example = "1")

@@ -98,7 +98,7 @@ public class JerseyJacksonObjectArgumentHandler<T> implements MessageBodyReader<
     }
 
     @RequiredArgsConstructor
-    private static class SimpleHttpOutputMessage implements HttpOutputMessage {
+    private static final class SimpleHttpOutputMessage implements HttpOutputMessage {
 
         private final OutputStream outputStream;
         private final HttpHeaders headers;

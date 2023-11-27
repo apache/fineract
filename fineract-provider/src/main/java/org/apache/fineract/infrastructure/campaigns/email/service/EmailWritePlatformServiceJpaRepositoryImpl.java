@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageRep
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,14 +120,13 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
      */
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final Throwable realCause,
             final NonTransientDataAccessException dve) {
-
         if (realCause.getMessage().contains("email_address")) {
             throw new PlatformDataIntegrityException("error.msg.email.no.email.address.exists",
                     "The group, client or staff provided has no email address.", "id");
         }
 
         LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.email.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.email.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

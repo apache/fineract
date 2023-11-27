@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.gcm.service;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;
@@ -77,13 +78,11 @@ public class DeviceRegistrationWritePlatformServiceImpl implements DeviceRegistr
     }
 
     private void handleDataIntegrityIssues(final String registrationId, final Throwable realCause) {
-
         if (realCause.getMessage().contains("registration_key")) {
             throw new PlatformDataIntegrityException("error.msg.duplicate.device.registration.id",
                     "Registration id : " + registrationId + " already exist.", "name", registrationId);
         }
-
-        throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(realCause, "error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 

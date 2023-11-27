@@ -222,8 +222,9 @@ public class ClientTest {
         long postalCode = 1000L;
 
         // when
-        PostClientsAddressRequest addressRequest = new PostClientsAddressRequest().postalCode(postalCode).city(city).countryId(countryId)
-                .stateProvinceId(stateId).addressTypeId(addressTypeId.longValue()).isActive(addressIsActive);
+        PostClientsAddressRequest addressRequest = new PostClientsAddressRequest().postalCode(postalCode).city(city)
+                .countryId(Long.valueOf(countryId)).stateProvinceId(Long.valueOf(stateId)).addressTypeId(addressTypeId.longValue())
+                .isActive(addressIsActive);
         PostClientsRequest request = ClientHelper.defaultClientCreationRequest().address(List.of(addressRequest));
         final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, request);
 
@@ -254,7 +255,7 @@ public class ClientTest {
         final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, clientRequest);
         // when
         PostClientClientIdAddressesRequest request = new PostClientClientIdAddressesRequest().postalCode(postalCode).city(city)
-                .countryId(countryId).stateProvinceId(stateId).isActive(addressIsActive);
+                .countryId(Long.valueOf(countryId)).stateProvinceId(Long.valueOf(stateId)).isActive(addressIsActive);
         PostClientClientIdAddressesResponse response = ClientHelper.createClientAddress(requestSpec, responseSpec, clientId.longValue(),
                 addressTypeId, request);
         // then
@@ -276,7 +277,7 @@ public class ClientTest {
         String lastName = Utils.randomStringGenerator("LN", 48);
         String fullName = firstName + ' ' + middleName + ' ' + lastName;
 
-        PostClientsRequest request = new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON).firstname(firstName)
+        PostClientsRequest request = new PostClientsRequest().officeId(1L).legalFormId(LEGALFORM_ID_PERSON).firstname(firstName)
                 .middlename(middleName).lastname(lastName).externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT)
                 .locale("en").active(true).activationDate(DEFAULT_DATE);
         Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, request);
@@ -286,7 +287,7 @@ public class ClientTest {
         assertNotNull(client);
         assertEquals(fullName, client.getDisplayName());
 
-        request = new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON).fullname(fullName)
+        request = new PostClientsRequest().officeId(1L).legalFormId(LEGALFORM_ID_PERSON).fullname(fullName)
                 .externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
                 .activationDate(DEFAULT_DATE);
         clientId = ClientHelper.createClient(requestSpec, responseSpec, request);

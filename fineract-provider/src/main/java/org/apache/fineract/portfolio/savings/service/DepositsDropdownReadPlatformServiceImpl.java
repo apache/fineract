@@ -20,12 +20,12 @@ package org.apache.fineract.portfolio.savings.service;
 
 import java.util.Arrays;
 import java.util.Collection;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
-import org.springframework.stereotype.Service;
 
-@Service
+@NoArgsConstructor
 public class DepositsDropdownReadPlatformServiceImpl implements DepositsDropdownReadPlatformService {
 
     @Override

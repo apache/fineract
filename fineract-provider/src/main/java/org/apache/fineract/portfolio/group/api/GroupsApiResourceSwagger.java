@@ -39,7 +39,7 @@ final class GroupsApiResourceSwagger {
             private GetGroupsTemplateOfficeOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Head Office")
             public String name;
             @Schema(example = "Head Office")
@@ -51,7 +51,7 @@ final class GroupsApiResourceSwagger {
             private GetGroupsTemplateStaffOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "C, Mike")
             public String displayName;
         }
@@ -61,11 +61,11 @@ final class GroupsApiResourceSwagger {
             private GetGroupsTemplateClientOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "Petra Yton")
             public String displayName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
         }
@@ -106,7 +106,7 @@ final class GroupsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         public Set<GetGroupsTemplateOfficeOptions> officeOptions;
         public Set<GetGroupsTemplateStaffOptions> staffOptions;
         public Set<GetGroupsTemplateClientOptions> clientOptions;
@@ -127,7 +127,7 @@ final class GroupsApiResourceSwagger {
                 private GetGroupsStatus() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "clientStatusType.pending")
                 public String code;
                 @Schema(example = "Pending")
@@ -135,14 +135,14 @@ final class GroupsApiResourceSwagger {
             }
 
             @Schema(example = "4")
-            public Integer id;
+            public Long id;
             @Schema(example = "AnotherGroup")
             public String name;
             public GetGroupsStatus status;
             @Schema(example = "false")
             public Boolean active;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
             @Schema(example = ".4.")
@@ -174,13 +174,13 @@ final class GroupsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "First Group")
         public String name;
         @Schema(example = "000-1A")
         public String externalId;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "Head Office")
         public String officeName;
         @Schema(example = ".1.")
@@ -194,7 +194,7 @@ final class GroupsApiResourceSwagger {
         private PostGroupsRequest() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "Pending Group")
         public String name;
         @Schema(example = "false")
@@ -207,11 +207,11 @@ final class GroupsApiResourceSwagger {
         private PostGroupsResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "2")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "2")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeleteGroupsGroupIdResponse")
@@ -220,11 +220,11 @@ final class GroupsApiResourceSwagger {
         private DeleteGroupsGroupIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "2")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "2")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PostGroupsGroupIdCommandUnassignStaffRequest")
@@ -233,7 +233,7 @@ final class GroupsApiResourceSwagger {
         private PostGroupsGroupIdCommandUnassignStaffRequest() {}
 
         @Schema(example = "1")
-        public Integer staffId;
+        public Long staffId;
     }
 
     @Schema(description = "PostGroupsGroupIdCommandUnassignStaffResponse")
@@ -247,11 +247,11 @@ final class GroupsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PostGroupsGroupIdCommandUnassignStaffChanges changes;
     }
 
@@ -278,11 +278,11 @@ final class GroupsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutGroupsGroupIdChanges changes;
     }
 
@@ -300,7 +300,7 @@ final class GroupsApiResourceSwagger {
                 private GetGroupsGroupIdAccountsStatus() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "loanStatusType.submitted.and.pending.approval")
                 public String code;
                 @Schema(example = "Submitted and pending approval")
@@ -328,7 +328,7 @@ final class GroupsApiResourceSwagger {
                 private GetGroupsGroupIdAccountsLoanType() {}
 
                 @Schema(example = "2")
-                public Integer id;
+                public Long id;
                 @Schema(example = "accountType.group")
                 public String code;
                 @Schema(example = "Group")
@@ -336,11 +336,11 @@ final class GroupsApiResourceSwagger {
             }
 
             @Schema(example = "3")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000003")
             public Long accountNo;
             @Schema(example = "3")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "daily product")
             public String productName;
             public GetGroupsGroupIdAccountsStatus status;
@@ -356,7 +356,7 @@ final class GroupsApiResourceSwagger {
                 private GetGroupsGroupIdAccountsSavingStatus() {}
 
                 @Schema(example = "100")
-                public Integer id;
+                public Long id;
                 @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
                 @Schema(example = "Submitted and pending approval")
@@ -398,7 +398,7 @@ final class GroupsApiResourceSwagger {
                 private GetGroupsGroupIdAccountsSavingAccountType() {}
 
                 @Schema(example = "2")
-                public Integer id;
+                public Long id;
                 @Schema(example = "accountType.group")
                 public String code;
                 @Schema(example = "Group")
@@ -406,11 +406,11 @@ final class GroupsApiResourceSwagger {
             }
 
             @Schema(example = "9")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000009")
             public Long accountNo;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "p_sav")
             public String productName;
             public GetGroupsGroupIdAccountsSavingStatus status;
@@ -427,7 +427,7 @@ final class GroupsApiResourceSwagger {
                 private GetGroupsGroupIdAccountsMemberLoanStatus() {}
 
                 @Schema(example = "200")
-                public Integer id;
+                public Long id;
                 @Schema(example = "loanStatusType.approved")
                 public String code;
                 @Schema(example = "Approved")
@@ -455,7 +455,7 @@ final class GroupsApiResourceSwagger {
                 private GetGroupsGroupIdAccountsMemberLoanType() {}
 
                 @Schema(example = "3")
-                public Integer id;
+                public Long id;
                 @Schema(example = "accountType.jlg")
                 public String code;
                 @Schema(example = "JLG")
@@ -463,11 +463,11 @@ final class GroupsApiResourceSwagger {
             }
 
             @Schema(example = "4")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000004")
             public Long accountNo;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "testLoan")
             public String productName;
             public GetGroupsGroupIdAccountsMemberLoanStatus status;
@@ -479,11 +479,11 @@ final class GroupsApiResourceSwagger {
             private GetGroupsGroupIdAccountsMemberSavingsAccounts() {}
 
             @Schema(example = "3")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000003")
             public Long accountNo;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "p_sav")
             public String productName;
             public GetGroupsGroupIdAccountsSavingAccounts.GetGroupsGroupIdAccountsSavingStatus status;
@@ -507,11 +507,11 @@ final class GroupsApiResourceSwagger {
             private PostGroupsGroupIdClients() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
         }
 
         @Schema(example = "2")
-        public Integer destinationGroupId;
+        public Long destinationGroupId;
         public Set<PostGroupsGroupIdClients> clients;
     }
 
@@ -521,6 +521,6 @@ final class GroupsApiResourceSwagger {
         private PostGroupsGroupIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

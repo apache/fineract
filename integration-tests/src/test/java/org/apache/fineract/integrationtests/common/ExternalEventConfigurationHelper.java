@@ -490,6 +490,11 @@ public class ExternalEventConfigurationHelper {
         loanTransactionDownPaymentPostBusinessEvent.put("enabled", false);
         defaults.add(loanTransactionDownPaymentPostBusinessEvent);
 
+        Map<String, Object> loanAccountDelinquencyPauseChangedBusinessEvent = new HashMap<>();
+        loanAccountDelinquencyPauseChangedBusinessEvent.put("type", "LoanAccountDelinquencyPauseChangedBusinessEvent");
+        loanAccountDelinquencyPauseChangedBusinessEvent.put("enabled", false);
+        defaults.add(loanAccountDelinquencyPauseChangedBusinessEvent);
+
         return defaults;
 
     }

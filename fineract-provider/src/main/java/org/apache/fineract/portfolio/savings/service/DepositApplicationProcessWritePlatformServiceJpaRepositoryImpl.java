@@ -32,6 +32,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -43,9 +45,9 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.FixedDepositAccountCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.RecurringDepositAccountCreateBusinessEvent;
@@ -92,17 +94,12 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
+@Slf4j
 public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl implements DepositApplicationProcessWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingAccountRepository;
@@ -125,67 +122,33 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
 
-    @Autowired
-    public DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingsAccountRepositoryWrapper savingAccountRepository, final DepositAccountAssembler depositAccountAssembler,
-            final DepositAccountDataValidator depositAccountDataValidator, final AccountNumberGenerator accountNumberGenerator,
-            final ClientRepositoryWrapper clientRepository, final GroupRepository groupRepository,
-            final SavingsProductRepository savingsProductRepository, final NoteRepository noteRepository,
-            final StaffRepositoryWrapper staffRepository,
-            final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
-            final SavingsAccountChargeAssembler savingsAccountChargeAssembler,
-            final FixedDepositAccountRepository fixedDepositAccountRepository,
-            final RecurringDepositAccountRepository recurringDepositAccountRepository,
-            final AccountAssociationsRepository accountAssociationsRepository, final FromJsonHelper fromJsonHelper,
-            final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
-        this.context = context;
-        this.savingAccountRepository = savingAccountRepository;
-        this.depositAccountAssembler = depositAccountAssembler;
-        this.accountNumberGenerator = accountNumberGenerator;
-        this.depositAccountDataValidator = depositAccountDataValidator;
-        this.clientRepository = clientRepository;
-        this.groupRepository = groupRepository;
-        this.savingsProductRepository = savingsProductRepository;
-        this.noteRepository = noteRepository;
-        this.staffRepository = staffRepository;
-        this.savingsAccountApplicationTransitionApiJsonValidator = savingsAccountApplicationTransitionApiJsonValidator;
-        this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
-        this.fixedDepositAccountRepository = fixedDepositAccountRepository;
-        this.recurringDepositAccountRepository = recurringDepositAccountRepository;
-        this.accountAssociationsRepository = accountAssociationsRepository;
-        this.fromJsonHelper = fromJsonHelper;
-        this.calendarInstanceRepository = calendarInstanceRepository;
-        this.configurationDomainService = configurationDomainService;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
-        this.businessEventNotifierService = businessEventNotifierService;
-    }
-
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
-        final StringBuilder errorCodeBuilder = new StringBuilder("error.msg.").append(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        if (realCause.getMessage().contains("'sa_account_no_UNIQUE'")) {
+        String msgCode = "error.msg." + SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+        String msg = "Unknown data integrity issue with savings account.";
+        String param = null;
+        Object[] msgArgs;
+        Throwable checkEx = realCause == null ? dve : realCause;
+        if (checkEx.getMessage().contains("sa_account_no_UNIQUE")) {
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
-            errorCodeBuilder.append(".duplicate.accountNo");
-            throw new PlatformDataIntegrityException(errorCodeBuilder.toString(),
-                    "Savings account with accountNo " + accountNo + " already exists", "accountNo", accountNo);
-
-        } else if (realCause.getMessage().contains("sa_external_id_UNIQUE")) {
-
+            msgCode += ".duplicate.accountNo";
+            msg = "Savings account with accountNo " + accountNo + " already exists";
+            param = "accountNo";
+            msgArgs = new Object[] { accountNo, dve };
+        } else if (checkEx.getMessage().contains("sa_external_id_UNIQUE")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
-            errorCodeBuilder.append(".duplicate.externalId");
-            throw new PlatformDataIntegrityException(errorCodeBuilder.toString(),
-                    "Savings account with externalId " + externalId + " already exists", "externalId", externalId);
+            msgCode += ".duplicate.externalId";
+            msg = "Savings account with externalId " + externalId + " already exists";
+            param = "externalId";
+            msgArgs = new Object[] { externalId, dve };
+        } else {
+            msgCode += ".unknown.data.integrity.issue";
+            msgArgs = new Object[] { dve };
         }
-
-        errorCodeBuilder.append(".unknown.data.integrity.issue");
-        LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException(errorCodeBuilder.toString(), "Unknown data integrity issue with savings account.");
+        log.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, msgCode, msg, param, msgArgs);
     }
 
     @Transactional

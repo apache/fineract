@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exceptionmapper.DefaultExceptionMapper;
 import org.apache.fineract.infrastructure.core.exceptionmapper.FineractExceptionMapper;
 import org.junit.jupiter.api.Assertions;

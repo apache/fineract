@@ -47,6 +47,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -624,7 +625,6 @@ public class InteropServiceImpl implements InteropService {
      */
     private void handleInteropDataIntegrityIssues(InteropIdentifierType idType, String accountId, final Throwable realCause,
             final Exception dve) {
-
         if (realCause.getMessage().contains("uk_interop_identifier_account")) {
             throw new PlatformDataIntegrityException("error.msg.interop.duplicate.account.identifier",
                     "Account identifier of type `" + idType.name() + "' already exists for account with externalId `" + accountId + "`",
@@ -632,8 +632,8 @@ public class InteropServiceImpl implements InteropService {
         }
 
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.interop.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        throw ErrorHandler.getMappable(dve, "error.msg.interop.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
     @NotNull

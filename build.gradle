@@ -19,7 +19,7 @@
 // TODO: this is work in progress, please follow FINERACT-1171
 buildscript {
     ext {
-        jacocoVersion = '0.8.10'
+        jacocoVersion = '0.8.11'
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.9.3'
         oltuVersion = '1.0.1'
@@ -60,22 +60,22 @@ buildscript {
         classpath 'org.eclipse.persistence:eclipselink:4.0.0'
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
-        classpath 'org.apache.commons:commons-lang3:3.12.0'
+        classpath 'org.apache.commons:commons-lang3:3.14.0'
         classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.11'
         classpath 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     }
 }
 
 plugins {
-    id 'me.qoomon.git-versioning' version '6.4.2'
+    id 'me.qoomon.git-versioning' version '6.4.3'
     id "org.barfuin.gradle.taskinfo" version "2.1.0"
     id 'com.adarshr.test-logger' version '4.0.0'
-    id 'com.diffplug.spotless' version '6.19.0' apply false
-    id 'org.nosphere.apache.rat' version '0.8.0' apply false
+    id 'com.diffplug.spotless' version '6.22.0' apply false
+    id 'org.nosphere.apache.rat' version '0.8.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.5' apply false
-    id 'org.zeroturnaround.gradle.jrebel' version '1.1.12' apply false
-    id 'org.springframework.boot' version '3.1.1' apply false
+    id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
+    id 'org.springframework.boot' version '3.1.5' apply false
     id 'net.ltgt.errorprone' version '3.1.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.11' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
@@ -85,12 +85,12 @@ plugins {
     id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
-    id 'com.google.cloud.tools.jib' version '3.3.2' apply false
+    id 'com.google.cloud.tools.jib' version '3.4.0' apply false
     id 'org.sonarqube' version '4.4.1.3373'
-    id 'com.github.andygoossens.modernizer' version '1.8.0' apply false
+    id 'com.github.andygoossens.modernizer' version '1.9.0' apply false
     id 'com.github.spotbugs' version '5.0.14' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
-    id "com.github.davidmc24.gradle.plugin.avro-base" version "1.7.1" apply false
+    id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
@@ -99,21 +99,23 @@ description = '''\
 Run as:
 gradle clean bootRun'''
 
-version = "0.0.0-SNAPSHOT"
+version = '0.0.0-SNAPSHOT'
+
 gitVersioning.apply {
     refs {
         considerTagsOnBranches = true
+        describeTagPattern = '.*(\\d+\\.\\d+\\.\\d+).*'
+        describeTagFirstParent = false
 
-        tag("(?<version>.*)") {
-            version = "\${ref.version}"
+        branch("\\d+\\.\\d+\\.\\d+") {
+            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
         }
-
-        branch(".+") {
-            version = "\${describe.tag.version.major}.\${describe.tag.version.minor}.\${describe.tag.version.patch.next}-SNAPSHOT"
+        branch("maintenance\\/\\d+\\.\\d+") {
+            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
         }
     }
     rev {
-        version = "\${commit}"
+        version = '${describe.tag.version.major}.${describe.tag.version.minor.next}.${describe.tag.version.patch}-SNAPSHOT'
     }
 }
 
@@ -421,7 +423,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:10.12.1'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.12.5'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.1'
     }
 
@@ -443,7 +445,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.20.0"
+        errorprone "com.google.errorprone:error_prone_core:2.23.0"
     }
 
     tasks.withType(JavaCompile) {
@@ -693,7 +695,10 @@ configure(project.fineractCustomProjects) {
 
 configure(project.fineractPublishProjects) {
     apply plugin: 'maven-publish'
-    apply plugin: 'signing'
+
+    if (!project.hasProperty('noSign')) {
+        apply plugin: 'signing'
+    }
 
     publishing {
         publications {
@@ -747,8 +752,10 @@ configure(project.fineractPublishProjects) {
         }
     }
 
-    signing {
-        sign publishing.publications.mavenJava
+    if (!project.hasProperty('noSign')) {
+        signing {
+            sign publishing.publications.mavenJava
+        }
     }
 }
 

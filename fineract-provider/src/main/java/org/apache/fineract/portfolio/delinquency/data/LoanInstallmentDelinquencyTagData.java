@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 
 public interface LoanInstallmentDelinquencyTagData {
 
+    Long getId();
+
     InstallmentDelinquencyRange getDelinquencyRange();
 
     BigDecimal getOutstandingAmount();

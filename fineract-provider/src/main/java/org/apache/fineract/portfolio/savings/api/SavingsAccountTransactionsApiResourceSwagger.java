@@ -216,13 +216,13 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         private PostSavingsAccountTransactionsResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PostSavingsAccountBulkReversalTransactionsRequest")

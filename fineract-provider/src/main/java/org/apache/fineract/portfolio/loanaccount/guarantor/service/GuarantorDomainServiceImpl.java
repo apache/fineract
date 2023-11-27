@@ -518,7 +518,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ValidateOnBusinessEvent implements BusinessEventListener<LoanApprovedBusinessEvent> {
+    private final class ValidateOnBusinessEvent implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanApprovedBusinessEvent event) {
@@ -527,7 +527,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class HoldFundsOnBusinessEvent implements BusinessEventListener<LoanApprovedBusinessEvent> {
+    private final class HoldFundsOnBusinessEvent implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanApprovedBusinessEvent event) {
@@ -536,7 +536,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReleaseFundsOnBusinessEvent implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
+    private final class ReleaseFundsOnBusinessEvent implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
@@ -549,7 +549,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReverseFundsOnBusinessEvent implements BusinessEventListener<LoanUndoWrittenOffBusinessEvent> {
+    private final class ReverseFundsOnBusinessEvent implements BusinessEventListener<LoanUndoWrittenOffBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanUndoWrittenOffBusinessEvent event) {
@@ -560,7 +560,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class AdjustFundsOnBusinessEvent implements BusinessEventListener<LoanAdjustTransactionBusinessEvent> {
+    private final class AdjustFundsOnBusinessEvent implements BusinessEventListener<LoanAdjustTransactionBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanAdjustTransactionBusinessEvent event) {
@@ -578,7 +578,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReverseAllFundsOnBusinessEvent implements BusinessEventListener<LoanUndoDisbursalBusinessEvent> {
+    private final class ReverseAllFundsOnBusinessEvent implements BusinessEventListener<LoanUndoDisbursalBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanUndoDisbursalBusinessEvent event) {
@@ -588,7 +588,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class UndoAllFundTransactions implements BusinessEventListener<LoanUndoApprovalBusinessEvent> {
+    private final class UndoAllFundTransactions implements BusinessEventListener<LoanUndoApprovalBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanUndoApprovalBusinessEvent event) {
@@ -597,7 +597,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReleaseAllFunds implements BusinessEventListener<LoanWrittenOffPostBusinessEvent> {
+    private final class ReleaseAllFunds implements BusinessEventListener<LoanWrittenOffPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanWrittenOffPostBusinessEvent event) {

@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
@@ -171,12 +172,8 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
                     "EntityMapping from " + fromId + " to " + toId + " already exist");
         }
 
-        logAsErrorUnexpectedDataIntegrityException(dve);
-        throw new PlatformDataIntegrityException("error.msg.entity.mapping", "Unknown data integrity issue with resource.");
-    }
-
-    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
         LOG.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.entity.mapping", "Unknown data integrity issue with resource.");
     }
 
     /*
@@ -186,5 +183,4 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
      * @Override public CommandProcessingResult removeEntityAccess(String entityType, Long entityId, Long accessType,
      * String secondEntityType, Long secondEntityId) { // TODO Auto-generated method stub return null; }
      */
-
 }
