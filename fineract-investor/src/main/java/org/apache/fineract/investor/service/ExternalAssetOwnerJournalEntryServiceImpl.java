@@ -50,7 +50,7 @@ public class ExternalAssetOwnerJournalEntryServiceImpl implements ExternalAssetO
                 new HandleLoanJournalEntryCreatedBusinessEvent());
     }
 
-    private class HandleLoanJournalEntryCreatedBusinessEvent implements BusinessEventListener<LoanJournalEntryCreatedBusinessEvent> {
+    private final class HandleLoanJournalEntryCreatedBusinessEvent implements BusinessEventListener<LoanJournalEntryCreatedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanJournalEntryCreatedBusinessEvent event) {

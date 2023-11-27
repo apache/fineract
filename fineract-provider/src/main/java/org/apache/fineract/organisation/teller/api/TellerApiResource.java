@@ -403,7 +403,7 @@ public class TellerApiResource {
         return this.jsonSerializer.serialize(journals);
     }
 
-    private static class CashiersForTeller {
+    private static final class CashiersForTeller {
 
         public Long tellerId;
         public String tellerName;
