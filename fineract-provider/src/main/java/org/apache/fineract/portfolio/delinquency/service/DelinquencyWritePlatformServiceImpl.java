@@ -398,6 +398,11 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                 loanDelinquencyTagPrev.setLiftedOnDate(transactionDate);
                 loanDelinquencyTagHistory.add(loanDelinquencyTagPrev);
                 changes.put("previous", loanDelinquencyTagPrev.getDelinquencyRange());
+                // event when loan goes out of delinquency we do not calculate at
+                // installment level and remove all installment tags, so event needs to raised here.
+                if (loan.isEnableInstallmentLevelDelinquency()) {
+                    businessEventNotifierService.notifyPostBusinessEvent(new LoanDelinquencyRangeChangeBusinessEvent(loan));
+                }
             }
         } else {
             if (optLoanDelinquencyTag.isPresent()) {
@@ -422,7 +427,11 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         }
         if (loanDelinquencyTagHistory.size() > 0) {
             this.loanDelinquencyTagRepository.saveAllAndFlush(loanDelinquencyTagHistory);
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanDelinquencyRangeChangeBusinessEvent(loan));
+            // if installment level delinquency is enabled event will be raised at installment level calculation, no
+            // need to raise the event here
+            if (!loan.isEnableInstallmentLevelDelinquency()) {
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanDelinquencyRangeChangeBusinessEvent(loan));
+            }
         }
         return changes;
     }
@@ -441,20 +450,29 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
     private void applyDelinquencyDetailsForLoanInstallments(final Loan loan, final DelinquencyBucket delinquencyBucket,
             final Map<Long, CollectionData> installmentsCollectionData) {
+        boolean isDelinquencyRangeChangedForAnyOfInstallment = false;
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             if (installmentsCollectionData.containsKey(installment.getId())) {
-                setInstallmentDelinquencyDetails(loan, installment, delinquencyBucket, installmentsCollectionData.get(installment.getId()));
+                boolean isDelinquencySetForInstallment = setInstallmentDelinquencyDetails(loan, installment, delinquencyBucket,
+                        installmentsCollectionData.get(installment.getId()));
+                isDelinquencyRangeChangedForAnyOfInstallment = isDelinquencyRangeChangedForAnyOfInstallment
+                        || isDelinquencySetForInstallment;
             }
         }
         // remove tags for non existing installments that got deleted due to re-schedule
         removeDelinquencyTagsForNonExistingInstallments(loan.getId());
+        // raise event if there is any change at installment level delinquency
+        if (isDelinquencyRangeChangedForAnyOfInstallment) {
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanDelinquencyRangeChangeBusinessEvent(loan));
+        }
+
     }
 
-    private void setInstallmentDelinquencyDetails(final Loan loan, final LoanRepaymentScheduleInstallment installment,
+    private boolean setInstallmentDelinquencyDetails(final Loan loan, final LoanRepaymentScheduleInstallment installment,
             final DelinquencyBucket delinquencyBucket, final CollectionData installmentDelinquencyData) {
         DelinquencyRange delinquencyRangeForInstallment = getInstallmentDelinquencyRange(delinquencyBucket,
                 installmentDelinquencyData.getDelinquentDays());
-        setDelinquencyDetailsForInstallment(loan, installment, installmentDelinquencyData, delinquencyRangeForInstallment);
+        return setDelinquencyDetailsForInstallment(loan, installment, installmentDelinquencyData, delinquencyRangeForInstallment);
     }
 
     private DelinquencyRange getInstallmentDelinquencyRange(final DelinquencyBucket delinquencyBucket, Long overDueDays) {
@@ -480,10 +498,11 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         return delinquencyRangeForInstallment;
     }
 
-    private void setDelinquencyDetailsForInstallment(final Loan loan, final LoanRepaymentScheduleInstallment installment,
+    private boolean setDelinquencyDetailsForInstallment(final Loan loan, final LoanRepaymentScheduleInstallment installment,
             CollectionData installmentDelinquencyData, final DelinquencyRange delinquencyRangeForInstallment) {
         List<LoanInstallmentDelinquencyTag> installmentDelinquencyTags = new ArrayList<>();
         LocalDate delinquencyCalculationDate = DateUtils.getBusinessLocalDate();
+        boolean isDelinquencyRangeChanged = false;
 
         LoanInstallmentDelinquencyTag previousInstallmentDelinquencyTag = loanInstallmentDelinquencyTagRepository
                 .findByLoanAndInstallment(loan, installment).orElse(null);
@@ -494,6 +513,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
             if (previousInstallmentDelinquencyTag != null) {
                 // event installment out of delinquency
                 loanInstallmentDelinquencyTagRepository.delete(previousInstallmentDelinquencyTag);
+                isDelinquencyRangeChanged = true;
             }
         } else {
             LoanInstallmentDelinquencyTag installmentDelinquency = null;
@@ -506,6 +526,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                             installmentDelinquencyData.getDelinquentAmount());
                     loanInstallmentDelinquencyTagRepository.delete(previousInstallmentDelinquencyTag);
                     // event installment delinquency range change
+                    isDelinquencyRangeChanged = true;
                 } else {
                     previousInstallmentDelinquencyTag.setOutstandingAmount(installmentDelinquencyData.getDelinquentAmount());
                     installmentDelinquency = previousInstallmentDelinquencyTag;
@@ -516,6 +537,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                         delinquencyCalculationDate, null, installmentDelinquencyData.getDelinquentDate(),
                         installmentDelinquencyData.getDelinquentAmount());
                 // event installment delinquent
+                isDelinquencyRangeChanged = true;
             }
 
             if (installmentDelinquency != null) {
@@ -527,7 +549,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         if (installmentDelinquencyTags.size() > 0) {
             loanInstallmentDelinquencyTagRepository.saveAllAndFlush(installmentDelinquencyTags);
         }
-
+        return isDelinquencyRangeChanged;
     }
 
     private void cleanLoanInstallmentsDelinquencyTags(Loan loan) {
