@@ -2426,7 +2426,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     @SuppressWarnings("unused")
-    private void fallbackRecalculateInterest(Throwable t) {
+    public void fallbackRecalculateInterest(Throwable t) {
         // NOTE: allow caller to catch the exceptions
         // NOTE: wrap throwable only if really necessary
         throw errorHandler.getMappable(t, null, null, "loan.recalculateinterest");

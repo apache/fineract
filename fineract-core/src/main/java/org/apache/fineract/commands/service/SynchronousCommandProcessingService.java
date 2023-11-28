@@ -215,7 +215,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     }
 
     @SuppressWarnings("unused")
-    private CommandProcessingResult fallbackExecuteCommand(Exception e) {
+    public CommandProcessingResult fallbackExecuteCommand(Exception e) {
         if (e instanceof RollbackTransactionAsCommandIsNotApprovedByCheckerException ex) {
             return logCommand(ex.getCommandSourceResult());
         }
