@@ -1436,6 +1436,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     this.charges);
             updateLoanOutstandingBalances();
         }
+
     }
 
     public void updateLoanSummaryAndStatus() {
