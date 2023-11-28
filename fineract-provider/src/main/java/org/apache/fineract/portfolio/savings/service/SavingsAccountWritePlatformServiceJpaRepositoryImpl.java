@@ -1378,8 +1378,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @SuppressWarnings("unused")
-    private SavingsAccountData fallbackPostInterest(SavingsAccountData savingsAccountData, boolean postInterestAs,
-            LocalDate transactionDate, boolean backdatedTxnsAllowedTill, Throwable t) {
+    public SavingsAccountData fallbackPostInterest(SavingsAccountData savingsAccountData, boolean postInterestAs, LocalDate transactionDate,
+            boolean backdatedTxnsAllowedTill, Throwable t) {
         // NOTE: allow caller to catch the exceptions
         // NOTE: wrap throwable only if really necessary
         throw errorHandler.getMappable(t, null, null, "savings.postinterest");
