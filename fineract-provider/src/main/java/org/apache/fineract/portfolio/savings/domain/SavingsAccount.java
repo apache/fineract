@@ -3713,14 +3713,14 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
     public void validateForAccountBlock() {
         final SavingsAccountSubStatusEnum currentSubStatus = SavingsAccountSubStatusEnum.fromInt(this.getSubStatus());
         if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus)) {
-            throw new SavingsAccountBlockedException(this.getId());
+            throw new SavingsAccountBlockedException(getAccountNumber());
         }
     }
 
     public void validateForDebitBlock() {
         final SavingsAccountSubStatusEnum currentSubStatus = SavingsAccountSubStatusEnum.fromInt(this.getSubStatus());
         if (SavingsAccountSubStatusEnum.BLOCK_DEBIT.hasStateOf(currentSubStatus)) {
-            throw new SavingsAccountDebitsBlockedException(this.getId());
+            throw new SavingsAccountDebitsBlockedException(getAccountNumber());
         }
     }
 

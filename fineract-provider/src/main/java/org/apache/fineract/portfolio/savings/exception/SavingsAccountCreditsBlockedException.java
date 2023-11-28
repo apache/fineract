@@ -26,4 +26,10 @@ public class SavingsAccountCreditsBlockedException extends AbstractPlatformDomai
         super("error.msg.savings.account.credit.transaction.not.allowed",
                 "Any Credit transactions to " + accountId + " is not allowed, since the account is blocked for credits", accountId);
     }
+
+    public SavingsAccountCreditsBlockedException(final String accountNo) {
+        super("error.msg.savings.account.credit.transaction.not.allowed",
+                "Any Credit transactions to {" + accountNo + "} is not allowed, since the account is blocked for credits", accountNo);
+    }
+
 }

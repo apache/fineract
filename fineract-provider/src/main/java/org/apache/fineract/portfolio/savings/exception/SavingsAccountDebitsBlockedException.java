@@ -27,4 +27,9 @@ public class SavingsAccountDebitsBlockedException extends AbstractPlatformDomain
                 "Any debit transactions from " + accountId + " is not allowed, since the account is blocked for debits", accountId);
     }
 
+    public SavingsAccountDebitsBlockedException(final String accountNo) {
+        super("error.msg.savings.account.debit.transaction.not.allowed",
+                "Any debit transactions from {" + accountNo + "} is not allowed, since the account is blocked for debits", accountNo);
+    }
+
 }
