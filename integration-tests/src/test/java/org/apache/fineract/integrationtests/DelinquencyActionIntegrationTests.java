@@ -95,7 +95,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             String externalId = UUID.randomUUID().toString();
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1500.0, 2, externalId);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1500.0, 2, req -> req.externalId(externalId));
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
