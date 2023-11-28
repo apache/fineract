@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 
 /**
  * Immutable data object representing disbursement information.
@@ -89,14 +90,23 @@ public final class DisbursementData implements Comparable<DisbursementData> {
         return DateUtils.compare(obj.expectedDisbursementDate, this.expectedDisbursementDate);
     }
 
-    public boolean isDueForDisbursement(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
+    public boolean isDueForDisbursement(LoanScheduleType loanScheduleType, final LocalDate fromDate, final LocalDate toDate) {
         final LocalDate dueDate = disbursementDate();
-        return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, dueDate);
+        return switch (loanScheduleType) {
+            case CUMULATIVE -> occursOnDayFromAndUpToAndIncluding(fromDate, toDate, dueDate);
+            case PROGRESSIVE -> occursOnDayFromAndIncludingAndUpTo(fromDate, toDate, dueDate);
+        };
     }
 
     private boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,
             final LocalDate target) {
         return DateUtils.isAfter(target, fromNotInclusive) && !DateUtils.isAfter(target, upToAndInclusive);
+    }
+
+    private boolean occursOnDayFromAndIncludingAndUpTo(final LocalDate fromInclusive, final LocalDate upToNotInclusive,
+            final LocalDate target) {
+        return (DateUtils.isEqual(target, fromInclusive) || DateUtils.isAfter(target, fromInclusive))
+                && DateUtils.isBefore(target, upToNotInclusive);
     }
 
     public BigDecimal getWaivedChargeAmount() {

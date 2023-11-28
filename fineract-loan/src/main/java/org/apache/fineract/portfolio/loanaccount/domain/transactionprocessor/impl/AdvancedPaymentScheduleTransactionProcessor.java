@@ -282,7 +282,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             List<LoanRepaymentScheduleInstallment> installments) {
         final MathContext mc = MoneyHelper.getMathContext();
         List<LoanRepaymentScheduleInstallment> candidateRepaymentInstallments = installments.stream().filter(
-                i -> !i.getDueDate().isBefore(disbursementTransaction.getTransactionDate()) && !i.isDownPayment() && !i.isAdditional())
+                i -> i.getDueDate().isAfter(disbursementTransaction.getTransactionDate()) && !i.isDownPayment() && !i.isAdditional())
                 .toList();
         int noCandidateRepaymentInstallments = candidateRepaymentInstallments.size();
         LoanProductRelatedDetail loanProductRelatedDetail = disbursementTransaction.getLoan().getLoanRepaymentScheduleDetail();

@@ -20,13 +20,9 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -47,21 +43,30 @@ public class ProgressiveLoanScheduleGenerator extends AbstractProgressiveLoanSch
     }
 
     @Override
-    public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(PaymentPeriodsInOneYearCalculator calculator,
-            BigDecimal interestCalculationGraceOnRepaymentPeriodFraction, Money totalCumulativePrincipal, Money totalCumulativeInterest,
-            Money totalInterestDueForLoan, Money cumulatingInterestPaymentDueToGrace, Money outstandingBalance,
-            LoanApplicationTerms loanApplicationTerms, int periodNumber, MathContext mc, TreeMap<LocalDate, Money> principalVariation,
-            Map<LocalDate, Money> compoundingMap, LocalDate periodStartDate, LocalDate periodEndDate,
-            Collection<LoanTermVariationsData> termVariations) {
+    public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(LoanApplicationTerms loanApplicationTerms,
+            LoanScheduleParams loanScheduleParams, MathContext mc) {
         // TODO: handle interest calculation
-        Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, outstandingBalance,
-                periodNumber, mc, Money.zero(loanApplicationTerms.getCurrency()));
-        final Money totalCumulativePrincipalToDate = totalCumulativePrincipal.plus(principalForThisInstallment);
+        int periodNumber = loanScheduleParams.getPeriodNumber();
+        BigDecimal fixedEMIAmount = loanApplicationTerms.getFixedEmiAmount();
+        Money calculatedPrincipal;
+        if (fixedEMIAmount == null) {
+            int noRemainingPeriod = loanApplicationTerms.getActualNoOfRepaymnets() - periodNumber + 1;
+            calculatedPrincipal = loanScheduleParams.getOutstandingBalance().dividedBy(noRemainingPeriod, mc.getRoundingMode());
+            if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
+                calculatedPrincipal = Money.roundToMultiplesOf(calculatedPrincipal,
+                        loanApplicationTerms.getInstallmentAmountInMultiplesOf());
+            }
+            loanApplicationTerms.setFixedEmiAmount(calculatedPrincipal.getAmount());
+        } else {
+            calculatedPrincipal = Money.of(loanApplicationTerms.getCurrency(), fixedEMIAmount);
+        }
         // adjust if needed
-        principalForThisInstallment = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisInstallment,
-                totalCumulativePrincipalToDate, periodNumber);
+        if (periodNumber == loanApplicationTerms.getActualNoOfRepaymnets()) {
+            Money remainingAmount = loanScheduleParams.getOutstandingBalance().minus(calculatedPrincipal);
+            calculatedPrincipal = calculatedPrincipal.plus(remainingAmount);
+        }
 
-        return new PrincipalInterest(principalForThisInstallment, Money.zero(loanApplicationTerms.getCurrency()),
+        return new PrincipalInterest(calculatedPrincipal, Money.zero(loanApplicationTerms.getCurrency()),
                 Money.zero(loanApplicationTerms.getCurrency()));
     }
 }

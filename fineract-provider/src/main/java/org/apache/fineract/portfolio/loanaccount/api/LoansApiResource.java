@@ -47,7 +47,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -953,7 +952,7 @@ public class LoansApiResource {
                                 loanBasicDetails.getFeeChargesAtDisbursementCharged());
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(resolvedLoanId, repaymentScheduleRelatedData,
                         disbursementData, loanBasicDetails.isInterestRecalculationEnabled(),
-                        loanBasicDetails.getSummary() != null ? loanBasicDetails.getSummary().getFeeChargesPaid() : BigDecimal.ZERO);
+                        LoanScheduleType.fromEnumOptionData(loanBasicDetails.getLoanScheduleType()));
 
                 if (associationParameters.contains(DataTableApiConstant.futureScheduleAssociateParamName)
                         && loanBasicDetails.isInterestRecalculationEnabled()) {
@@ -965,8 +964,9 @@ public class LoansApiResource {
                         && loanBasicDetails.isInterestRecalculationEnabled()
                         && LoanStatus.fromInt(loanBasicDetails.getStatus().getId().intValue()).isActive()) {
                     mandatoryResponseParameters.add(DataTableApiConstant.originalScheduleAssociateParamName);
-                    LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService
-                            .retrieveRepaymentArchiveSchedule(resolvedLoanId, repaymentScheduleRelatedData, disbursementData);
+                    LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService.retrieveRepaymentArchiveSchedule(
+                            resolvedLoanId, repaymentScheduleRelatedData, disbursementData,
+                            LoanScheduleType.fromEnumOptionData(loanBasicDetails.getLoanScheduleType()));
                     loanBasicDetails = LoanAccountData.withOriginalSchedule(loanBasicDetails, loanScheduleData);
                 }
             }

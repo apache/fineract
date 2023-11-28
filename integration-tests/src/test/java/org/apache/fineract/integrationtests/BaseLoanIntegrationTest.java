@@ -498,4 +498,9 @@ public abstract class BaseLoanIntegrationTest {
         public static final Integer MONTHS = 2;
         public static final Integer YEARS = 3;
     }
+
+    public void updateBusinessDate(String date) {
+        businessDateHelper.updateBusinessDate(
+                new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date).dateFormat(DATETIME_PATTERN).locale("en"));
+    }
 }
