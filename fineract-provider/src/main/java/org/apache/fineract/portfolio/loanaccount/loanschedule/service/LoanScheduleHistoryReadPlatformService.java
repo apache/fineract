@@ -23,13 +23,14 @@ import java.util.Map;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 
 public interface LoanScheduleHistoryReadPlatformService {
 
     Integer fetchCurrentVersionNumber(Long loanId);
 
     LoanScheduleData retrieveRepaymentArchiveSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
-            Collection<DisbursementData> disbursementData);
+            Collection<DisbursementData> disbursementData, LoanScheduleType loanScheduleType);
 
     Map<String, Object> fetchOldAuditDates(Long id);
 }

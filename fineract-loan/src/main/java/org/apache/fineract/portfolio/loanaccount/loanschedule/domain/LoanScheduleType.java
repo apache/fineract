@@ -39,4 +39,11 @@ public enum LoanScheduleType {
     public EnumOptionData asEnumOptionData() {
         return new EnumOptionData((long) this.ordinal(), this.name(), this.humanReadableName);
     }
+
+    public static LoanScheduleType fromEnumOptionData(EnumOptionData enumOptionData) {
+        if (enumOptionData == null) {
+            return null;
+        }
+        return valueOf(enumOptionData.getCode());
+    }
 }
