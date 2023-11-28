@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -139,7 +140,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             chargeOrTransaction.getLoanCharge()
                     .ifPresent(loanCharge -> processSingleCharge(loanCharge, currency, installments, disbursementDate));
         }
-        reprocessInstallments(installments, currency);
+        List<LoanTransaction> txs = chargeOrTransactions.stream().map(ChargeOrTransaction::getLoanTransaction).filter(Optional::isPresent)
+                .map(Optional::get).toList();
+        reprocessInstallments(disbursementDate, txs, installments, currency);
         return changedTransactionDetail;
     }
 
