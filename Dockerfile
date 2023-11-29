@@ -54,20 +54,6 @@ COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 COPY --from=builder /root/cloud_sql_proxy /app
 COPY --from=builder /fineract/fineract.json /app
 
-#COPY entrypoint.sh /entrypoint.sh
-
-#RUN chmod 775 /entrypoint.sh
-
-#ENV CLOUD_SQL_INSTANCE=fineract-404214:europe-west2:fineract-instance
-#ENV CLOUD_SQL_USER=root
-#ENV CLOUD_SQL_PASSWORD=mysql
-#ENV CLOUD_SQL_SOCKET=/cloudsql/$CLOUD_SQL_INSTANCE
-
-#ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
-#ENV fineract_tenants_url=jdbc:mysql://127.0.0.1:3306/fineract_tenants
-#ENV fineract_tenants_uid=root
-#ENV fineract_tenants_pwd=mysql
-
 # NOTE: node aware scheduler
 ENV FINERACT_NODE_ID=1
 # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
