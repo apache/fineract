@@ -34,6 +34,8 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -139,7 +141,8 @@ public class LoanProductUpdateApiTest {
         String loanProductCreateJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .addAdvancedPaymentAllocation(advancedPaymentData).build();
+                .addAdvancedPaymentAllocation(advancedPaymentData).withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL).build();
         return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductCreateJSON);
 
     }
@@ -149,7 +152,8 @@ public class LoanProductUpdateApiTest {
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsDays().withAllowPartialPeriodInterestCalculation(false)
-                .addAdvancedPaymentAllocation(advancedPaymentData).build();
+                .addAdvancedPaymentAllocation(advancedPaymentData).withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL).build();
         return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductCreateJSON);
 
     }

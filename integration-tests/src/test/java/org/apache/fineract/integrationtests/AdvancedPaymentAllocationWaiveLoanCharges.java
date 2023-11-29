@@ -35,6 +35,8 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -53,7 +55,9 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             Long loanProductId = createLoanProductWithAdvancedAllocation();
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0, 1,
-                    (req) -> req.setTransactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+                    (req) -> req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
+                            .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()));
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
             // Add Penalty
@@ -85,7 +89,9 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             Long loanProductId = createLoanProductWithAdvancedAllocation();
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0, 1,
-                    (req) -> req.setTransactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+                    (req) -> req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
+                            .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()));
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
             // Add Penalty
@@ -117,8 +123,10 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             Long loanProductId = createLoanProductWithAdvancedAllocation();
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0, 1,
-                    (req) -> req.setTransactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
-            // Disburse Loan
+                    (req) -> req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
+                            .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())); // Disburse
+                                                                                                            // Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
 
             // set business date to
@@ -180,7 +188,9 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
 
     protected Long createLoanProductWithAdvancedAllocation() {
         PostLoanProductsRequest req = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
-        req.setTransactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+        req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
+                .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString());
         req.addPaymentAllocationItem(createDefaultPaymentAllocationWithMixedGrouping());
         PostLoanProductsResponse loanProduct = loanTransactionHelper.createLoanProduct(req);
         return loanProduct.getResourceId();

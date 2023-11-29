@@ -41,7 +41,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
@@ -137,7 +136,6 @@ public class LoanScheduleAssembler {
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
     private final VariableLoanScheduleFromApiJsonValidator variableLoanScheduleFromApiJsonValidator;
     private final CalendarInstanceRepository calendarInstanceRepository;
-    private final PlatformSecurityContext context;
     private final LoanUtilService loanUtilService;
 
     @Autowired
@@ -150,8 +148,7 @@ public class LoanScheduleAssembler {
             final WorkingDaysRepositoryWrapper workingDaysRepository,
             final FloatingRatesReadPlatformService floatingRatesReadPlatformService,
             final VariableLoanScheduleFromApiJsonValidator variableLoanScheduleFromApiJsonValidator,
-            final CalendarInstanceRepository calendarInstanceRepository, final PlatformSecurityContext context,
-            final LoanUtilService loanUtilService) {
+            final CalendarInstanceRepository calendarInstanceRepository, final LoanUtilService loanUtilService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -167,7 +164,6 @@ public class LoanScheduleAssembler {
         this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
         this.variableLoanScheduleFromApiJsonValidator = variableLoanScheduleFromApiJsonValidator;
         this.calendarInstanceRepository = calendarInstanceRepository;
-        this.context = context;
         this.loanUtilService = loanUtilService;
     }
 

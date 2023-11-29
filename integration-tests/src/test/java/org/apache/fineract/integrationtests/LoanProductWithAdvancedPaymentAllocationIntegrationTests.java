@@ -44,6 +44,8 @@ import org.apache.fineract.integrationtests.common.accounting.FinancialActivityA
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -238,7 +240,9 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
                 .withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).addAdvancedPaymentAllocation(advancedPaymentData).build();
+                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).addAdvancedPaymentAllocation(advancedPaymentData)
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL)
+                .build();
     }
 
     private PutLoanProductsProductIdRequest updateLoanProductRequest(AdvancedPaymentData... advancedPaymentData) {

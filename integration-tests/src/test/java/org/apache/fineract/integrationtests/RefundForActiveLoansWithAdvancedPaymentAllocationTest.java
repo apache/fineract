@@ -498,8 +498,9 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
                 .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                 .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(loanScheduleProcessingType)
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
-                .addAdvancedPaymentAllocation(defaultAllocation).withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
-                .build(null);
+                .addAdvancedPaymentAllocation(defaultAllocation).withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL).withDaysInMonth("30").withDaysInYear("365")
+                .withMoratorium("0", "0").build(null);
         return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 

@@ -69,6 +69,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -431,7 +433,9 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
                 .interestType(0)//
                 .isEqualAmortization(false)//
                 .interestCalculationPeriodType(1)//
-                .transactionProcessingStrategyCode("mifos-standard-strategy").daysInYearType(1)//
+                .transactionProcessingStrategyCode("mifos-standard-strategy")//
+                .loanScheduleType(LoanScheduleType.CUMULATIVE.toString())//
+                .daysInYearType(1)//
                 .daysInMonthType(1)//
                 .canDefineInstallmentAmount(true)//
                 .graceOnArrearsAgeing(3)//
@@ -494,6 +498,8 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
             loanProductsRequest //
                     .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")//
+                    .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())//
+                    .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())//
                     .addPaymentAllocationItem(defaultAllocation);
         }
 

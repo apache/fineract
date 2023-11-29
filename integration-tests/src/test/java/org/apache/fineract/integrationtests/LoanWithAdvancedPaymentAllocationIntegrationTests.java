@@ -44,6 +44,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -132,7 +134,9 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
                 .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                 .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).addAdvancedPaymentAllocation(advancedPaymentData).build();
+                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).addAdvancedPaymentAllocation(advancedPaymentData)
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL)
+                .build();
         return loanProductJSON;
     }
 
@@ -152,6 +156,8 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
                 .withInterestTypeAsDecliningBalance() //
                 .withSubmittedOnDate(operationDate) //
                 .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY) //
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
+                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
                 .build(clientId, loanProductId, null);
         return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
