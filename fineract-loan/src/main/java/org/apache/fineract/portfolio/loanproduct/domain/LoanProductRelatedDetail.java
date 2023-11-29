@@ -352,6 +352,21 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
         }
 
+        final String loanScheduleTypeParamName = LoanProductConstants.LOAN_SCHEDULE_TYPE;
+        if (command.isChangeInStringParameterNamed(loanScheduleTypeParamName, loanScheduleType.toString())) {
+            LoanScheduleType newLoanScheduleType = LoanScheduleType.valueOf(command.stringValueOfParameterNamed(loanScheduleTypeParamName));
+            actualChanges.put(loanScheduleTypeParamName, newLoanScheduleType);
+            loanScheduleType = newLoanScheduleType;
+        }
+
+        final String loanScheduleProcessingTypeParamName = LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE;
+        if (command.isChangeInStringParameterNamed(loanScheduleProcessingTypeParamName, loanScheduleProcessingType.toString())) {
+            LoanScheduleProcessingType newLoanScheduleProcessingType = LoanScheduleProcessingType
+                    .valueOf(command.stringValueOfParameterNamed(loanScheduleProcessingTypeParamName));
+            actualChanges.put(loanScheduleProcessingTypeParamName, newLoanScheduleProcessingType);
+            loanScheduleProcessingType = newLoanScheduleProcessingType;
+        }
+
         final Map<String, Object> loanApplicationAttributeChanges = updateLoanApplicationAttributes(command, aprCalculator);
 
         actualChanges.putAll(loanApplicationAttributeChanges);

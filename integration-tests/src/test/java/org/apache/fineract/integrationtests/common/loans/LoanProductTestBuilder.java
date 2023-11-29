@@ -203,6 +203,9 @@ public class LoanProductTestBuilder {
         map.put("maxPrincipal", this.maxPrincipal);
         map.put("isEqualAmortization", this.isEqualAmortization);
         map.put("overdueDaysForNPA", this.overdueDaysForNPA);
+        map.put("loanScheduleType", loanScheduleType);
+        map.put("loanScheduleProcessingType", loanScheduleProcessingType);
+
         if (this.minimumDaysBetweenDisbursalAndFirstRepayment != null) {
             map.put("minimumDaysBetweenDisbursalAndFirstRepayment", this.minimumDaysBetweenDisbursalAndFirstRepayment);
         }
@@ -312,8 +315,6 @@ public class LoanProductTestBuilder {
         if (disableScheduleExtensionForDownPayment) {
             map.put("disableScheduleExtensionForDownPayment", disableScheduleExtensionForDownPayment);
         }
-        map.put("loanScheduleType", loanScheduleType);
-        map.put("loanScheduleProcessingType", loanScheduleProcessingType);
 
         return map;
     }

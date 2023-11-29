@@ -59,6 +59,8 @@ public class LoanApplicationTestBuilder {
     private String amortizationType = EQUAL_PRINCIPAL_PAYMENTS;
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private String transactionProcessingCode = DEFAULT_STRATEGY;
+    private String loanScheduleProcessingType = null;
+    private String loanScheduleType = null;
     private String expectedDisbursmentDate = "";
     private String submittedOnDate = "";
     private String loanType = "individual";
@@ -157,6 +159,14 @@ public class LoanApplicationTestBuilder {
         map.put("loanType", this.loanType);
         map.put("collateral", this.collaterals);
         map.put("interestChargedFromDate", this.interestChargedFromDate);
+
+        if (loanScheduleType != null) {
+            map.put("loanScheduleType", this.loanScheduleType);
+        }
+
+        if (loanScheduleProcessingType != null) {
+            map.put("loanScheduleProcessingType", this.loanScheduleProcessingType);
+        }
 
         if (this.externalId != null) {
             map.put("externalId", this.externalId);
@@ -354,6 +364,16 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withRepaymentStrategy(final String transactionProcessingStrategyCode) {
         this.transactionProcessingCode = transactionProcessingStrategyCode;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withLoanScheduleType(final String loanScheduleType) {
+        this.loanScheduleType = loanScheduleType;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withLoanScheduleProcessingType(final String loanScheduleProcessingType) {
+        this.loanScheduleProcessingType = loanScheduleProcessingType;
         return this;
     }
 

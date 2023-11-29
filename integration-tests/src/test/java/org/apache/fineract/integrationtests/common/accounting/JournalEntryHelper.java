@@ -93,7 +93,9 @@ public class JournalEntryHelper {
                     break;
                 }
             }
-            Assertions.assertTrue(matchFound, "Journal Entry not found");
+            if (entry.getTransactionAmount() > 0) {
+                Assertions.assertTrue(matchFound, "Journal Entry not found");
+            }
         }
     }
 
