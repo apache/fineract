@@ -162,11 +162,38 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         }
     }
 
-    private boolean isOverlapping(LoanDelinquencyAction parsedDelinquencyAction, LoanDelinquencyActionData ldad) {
-        return ((!parsedDelinquencyAction.getStartDate().isAfter(ldad.getStartDate())
-                && !ldad.getStartDate().isAfter(parsedDelinquencyAction.getEndDate()))
-                || (!parsedDelinquencyAction.getStartDate().isAfter(ldad.getEndDate())
-                        && !ldad.getEndDate().isAfter(parsedDelinquencyAction.getEndDate())));
+    /**
+     * <pre>
+     *  we have an overlap when
+     *  (parsed.endDate &gt; existing.startDate AND parsed.endDate &lt; existing.endDate)
+     *
+     *  existing       |------------|
+     *  parsed               |----------------|
+     *
+     *  we also  have an overlap when
+     *  (parsed.startDate &gt; existing.startDate AND parsed.startDate &lt; existing.endDate)
+     *
+     *  existing            |------------|
+     *  parsed    |----------------|
+     *
+     *  There is no overlap like when they are right after each other:
+     *
+     *  existing  |------------|
+     *  parsed                 |----------------|
+     *
+     *  or
+     *
+     *  existing               |------------|
+     *  parsed   |-------------|
+     * </pre>
+     *
+     * @param parsed
+     * @param existing
+     * @return
+     */
+    private boolean isOverlapping(LoanDelinquencyAction parsed, LoanDelinquencyActionData existing) {
+        return (parsed.getEndDate().isAfter(existing.getStartDate()) && parsed.getEndDate().isBefore(existing.getEndDate()))
+                || (parsed.getStartDate().isAfter(existing.getStartDate()) && parsed.getStartDate().isBefore(existing.getEndDate()));
     }
 
     @org.jetbrains.annotations.NotNull
