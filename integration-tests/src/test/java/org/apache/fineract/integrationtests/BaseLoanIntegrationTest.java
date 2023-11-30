@@ -271,7 +271,7 @@ public abstract class BaseLoanIntegrationTest {
                 .transactionAmount(amount).locale("en"));
     }
 
-    protected void verifyJournalEntries(Long loanId, JournalEntry... entries) {
+    protected void verifyJournalEntries(Long loanId, Journal... entries) {
         GetJournalEntriesTransactionIdResponse journalEntriesForLoan = journalEntryHelper.getJournalEntriesForLoan(loanId);
         Assertions.assertEquals(entries.length, journalEntriesForLoan.getPageItems().size());
         Arrays.stream(entries).forEach(journalEntry -> {
@@ -405,8 +405,8 @@ public abstract class BaseLoanIntegrationTest {
                 new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date).dateFormat(DATETIME_PATTERN).locale("en"));
     }
 
-    protected JournalEntry journalEntry(double principalAmount, Account account, String type) {
-        return new JournalEntry(principalAmount, account, type);
+    protected Journal journalEntry(double principalAmount, Account account, String type) {
+        return new Journal(principalAmount, account, type);
     }
 
     protected Transaction transaction(double principalAmount, String type, String date) {
@@ -454,7 +454,7 @@ public abstract class BaseLoanIntegrationTest {
 
     @ToString
     @AllArgsConstructor
-    public static class JournalEntry {
+    public static class Journal {
 
         Double amount;
         Account account;
