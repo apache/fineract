@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -42,7 +43,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -68,6 +71,10 @@ import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDep
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.common.shares.ShareAccountHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareAccountTransactionHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareProductHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareProductTransactionHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -341,7 +348,7 @@ public class AccountingScenarioIntegrationTest {
 
         this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId, false);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsID);
-        Assertions.assertEquals(1, chargesPendingState.size());
+        assertEquals(1, chargesPendingState.size());
         HashMap savingsChargeForPay = chargesPendingState.get(0);
         HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsID, (Integer) savingsChargeForPay.get("id"));
         Float chargeAmount = (Float) paidCharge.get("amount");
@@ -1113,6 +1120,73 @@ public class AccountingScenarioIntegrationTest {
 
     private LocalDate getDateAsLocalDate(String dateAsString) {
         return LocalDate.parse(dateAsString, Utils.dateFormatter);
+    }
+
+    @Test
+    public void checkAccountingWithSharingFlow() {
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account equityAccount = this.accountHelper.createEquityAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+
+        final Integer shareProductID = createSharesProduct(assetAccount, incomeAccount, equityAccount, liabilityAccount);
+
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        Assertions.assertNotNull(clientID);
+        final Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientID, "1000");
+        Assertions.assertNotNull(savingsAccountId);
+        final Integer shareAccountId = createShareAccount(clientID, shareProductID, savingsAccountId);
+        Assertions.assertNotNull(shareAccountId);
+        final Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        Assertions.assertNotNull(shareAccountData);
+        // Approve share Account
+        final Map<String, Object> approveMap = new HashMap<>();
+        approveMap.put("note", "Share Account Approval Note");
+        approveMap.put("dateFormat", "dd MMMM yyyy");
+        approveMap.put("approvedDate", "01 Jan 2016");
+        approveMap.put("locale", "en");
+        final String approve = new Gson().toJson(approveMap);
+        ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
+        // Activate Share Account
+        final Map<String, Object> activateMap = new HashMap<>();
+        activateMap.put("dateFormat", "dd MMMM yyyy");
+        activateMap.put("activatedDate", "01 Jan 2016");
+        activateMap.put("locale", "en");
+        final String activateJson = new Gson().toJson(activateMap);
+        ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
+
+        // Checking sharing entries.
+        final JournalEntry[] assetAccountEntry = { new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liabilityAccountEntry = { new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] checkJournalEntryForEquityAccount = {
+                new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "01 Jan 2016", assetAccountEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, "01 Jan 2016", liabilityAccountEntry);
+        this.journalEntryHelper.checkJournalEntryForEquityAccount(equityAccount, "01 Jan 2016", checkJournalEntryForEquityAccount);
+
+        final String transactionId = this.journalEntryHelper.getJournalEntryTransactionIdByAccount(assetAccount, "01 Jan 2016",
+                assetAccountEntry);
+        Assertions.assertNotEquals("", transactionId);
+
+        final GetJournalEntriesTransactionIdResponse journalEntriesTransactionIdResponse = this.journalEntryHelper
+                .getJournalEntries(transactionId);
+        Assertions.assertNotNull(journalEntriesTransactionIdResponse);
+    }
+
+    public static Integer createSharesProduct(final Account... accounts) {
+        LOG.info("------------------------------CREATING NEW SHARE PRODUCT ---------------------------------------");
+        final String shareProductJSON = new ShareProductHelper().withCashBasedAccounting(accounts).build();
+        return ShareProductTransactionHelper.createShareProduct(shareProductJSON, requestSpec, responseSpec);
+    }
+
+    private Integer createShareAccount(final Integer clientId, final Integer productId, final Integer savingsAccountId) {
+        final String shareAccountJSON = new ShareAccountHelper().withClientId(String.valueOf(clientId))
+                .withProductId(String.valueOf(productId)).withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId))
+                .withSubmittedDate("01 Jan 2016").withApplicationDate("01 Jan 2016").withRequestedShares("100").build();
+        return ShareAccountTransactionHelper.createShareAccount(shareAccountJSON, requestSpec, responseSpec);
     }
 
 }

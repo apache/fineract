@@ -61,6 +61,10 @@ public class JournalEntryHelper {
         checkJournalEntry(null, liabilityAccount, date, accountEntries);
     }
 
+    public void checkJournalEntryForEquityAccount(final Account equityAccount, final String date, final JournalEntry... accountEntries) {
+        checkJournalEntry(null, equityAccount, date, accountEntries);
+    }
+
     public void checkJournalEntryForLiabilityAccount(final Integer officeId, final Account liabilityAccount, final String date,
             final JournalEntry... accountEntries) {
         checkJournalEntry(officeId, liabilityAccount, date, accountEntries);
@@ -70,6 +74,10 @@ public class JournalEntryHelper {
         ArrayList<HashMap> transactions = getJournalEntriesByTransactionId(transactionId);
         assertTrue(transactions.isEmpty(), "Tranasactions are is not empty");
 
+    }
+
+    public String getJournalEntryTransactionIdByAccount(final Account account, final String date, final JournalEntry... accountEntries) {
+        return getJournalEntryTransactionId(account, date, accountEntries);
     }
 
     private void checkJournalEntry(final Integer officeId, final Account account, final String date, final JournalEntry... accountEntries) {
@@ -87,6 +95,22 @@ public class JournalEntryHelper {
             }
             Assertions.assertTrue(matchFound, "Journal Entry not found");
         }
+    }
+
+    private String getJournalEntryTransactionId(final Account account, final String date, final JournalEntry... accountEntries) {
+        final String url = createURLForGettingAccountEntries(account, date, null);
+        final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
+
+        for (JournalEntry entry : accountEntries) {
+            for (HashMap map : response) {
+                final HashMap entryType = (HashMap) map.get("entryType");
+                if (entry.getTransactionType().equals(entryType.get("value")) && entry.getTransactionAmount().equals(map.get("amount"))) {
+                    return map.get("transactionId").toString();
+                }
+            }
+        }
+
+        return "";
     }
 
     private String createURLForGettingAccountEntries(final Account account, final String date, final Integer officeId) {
