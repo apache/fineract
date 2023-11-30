@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 
 public interface LoanReadPlatformService {
 
@@ -51,7 +51,7 @@ public interface LoanReadPlatformService {
     LoanAccountData fetchRepaymentScheduleData(LoanAccountData accountData);
 
     LoanScheduleData retrieveRepaymentSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData,
-            Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges);
+            Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, LoanScheduleType loanScheduleType);
 
     Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 

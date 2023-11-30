@@ -157,6 +157,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 handleRepayment(loanTransaction, currency, installments, charges);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, currency, installments);
             case CHARGE_PAYMENT -> handleChargePayment(loanTransaction, currency, installments, charges);
+            case WAIVE_CHARGES -> log.debug("WAIVE_CHARGES transaction will not be processed.");
             // TODO: Cover rest of the transaction types
             default -> {
                 log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
@@ -224,7 +225,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             ChangedTransactionDetail changedTransactionDetail) {
         if (loanTransaction.getId() == null) {
             processLatestTransaction(loanTransaction, currency, installments, charges, Money.zero(currency));
-            loanTransaction.adjustInterestComponent(currency);
+            if (loanTransaction.isInterestWaiver()) {
+                loanTransaction.adjustInterestComponent(currency);
+            }
         } else {
             /*
              * For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties) has
@@ -235,7 +238,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             // Reset derived component of new loan transaction and
             // re-process transaction
             processLatestTransaction(newLoanTransaction, currency, installments, charges, Money.zero(currency));
-            newLoanTransaction.adjustInterestComponent(currency);
+            if (loanTransaction.isInterestWaiver()) {
+                newLoanTransaction.adjustInterestComponent(currency);
+            }
             /*
              * Check if the transaction amounts have changed. If so, reverse the original transaction and update
              * changedTransactionDetail accordingly
@@ -277,7 +282,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             List<LoanRepaymentScheduleInstallment> installments) {
         final MathContext mc = MoneyHelper.getMathContext();
         List<LoanRepaymentScheduleInstallment> candidateRepaymentInstallments = installments.stream().filter(
-                i -> !i.getDueDate().isBefore(disbursementTransaction.getTransactionDate()) && !i.isDownPayment() && !i.isAdditional())
+                i -> i.getDueDate().isAfter(disbursementTransaction.getTransactionDate()) && !i.isDownPayment() && !i.isAdditional())
                 .toList();
         int noCandidateRepaymentInstallments = candidateRepaymentInstallments.size();
         LoanProductRelatedDetail loanProductRelatedDetail = disbursementTransaction.getLoan().getLoanRepaymentScheduleDetail();

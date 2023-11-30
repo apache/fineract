@@ -37,6 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLo
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -68,7 +69,8 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
     @Override
     public LoanScheduleData retrieveRepaymentArchiveSchedule(final Long loanId,
-            final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData) {
+            final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
+            LoanScheduleType loanScheduleType) {
 
         try {
             this.context.authenticatedUser();
@@ -77,7 +79,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                 return null;
             }
             final LoanScheduleArchiveResultSetExtractor fullResultsetExtractor = new LoanScheduleArchiveResultSetExtractor(
-                    repaymentScheduleRelatedLoanData, disbursementData);
+                    repaymentScheduleRelatedLoanData, disbursementData, loanScheduleType);
             final String sql = "select " + fullResultsetExtractor.schema()
                     + " where ls.loan_id = ? and ls.version = ? order by ls.loan_id, ls.installment";
 
@@ -99,17 +101,19 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         private final DisbursementData disbursement;
         private final BigDecimal totalFeeChargesDueAtDisbursement;
         private final Collection<DisbursementData> disbursementData;
+        private final LoanScheduleType loanScheduleType;
         private LocalDate lastDueDate;
         private BigDecimal outstandingLoanPrincipalBalance;
 
         LoanScheduleArchiveResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
-                Collection<DisbursementData> disbursementData) {
+                Collection<DisbursementData> disbursementData, LoanScheduleType loanScheduleType) {
             this.currency = repaymentScheduleRelatedLoanData.getCurrency();
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
             this.totalFeeChargesDueAtDisbursement = repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement();
             this.lastDueDate = this.disbursement.disbursementDate();
             this.outstandingLoanPrincipalBalance = this.disbursement.getPrincipal();
             this.disbursementData = disbursementData;
+            this.loanScheduleType = loanScheduleType;
         }
 
         public String schema() {
@@ -163,7 +167,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                                     data.getPrincipal(), this.totalFeeChargesDueAtDisbursement, data.isDisbursed());
                             periods.add(periodData);
                             this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.getPrincipal());
-                        } else if (data.isDueForDisbursement(fromDate, dueDate)
+                        } else if (data.isDueForDisbursement(loanScheduleType, fromDate, dueDate)
                                 && this.outstandingLoanPrincipalBalance.compareTo(BigDecimal.ZERO) > 0) {
                             principal = principal.add(data.getPrincipal());
                             final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(),

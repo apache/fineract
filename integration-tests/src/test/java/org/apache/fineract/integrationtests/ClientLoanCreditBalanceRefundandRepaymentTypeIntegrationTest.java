@@ -62,7 +62,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 @ExtendWith(LoanTestLifecycleExtension.class)
 @Slf4j
-public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
+public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpec403;
@@ -251,7 +251,56 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
             totalOverpaidAtEnd = floatZero;
         }
         assertEquals(totalOverpaidAtEnd, floatZero);
+    }
 
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void refundAcceptedOnTheCurrentBusinessDate(LoanProductTestBuilder loanProductTestBuilder) {
+        runAt("09 January 2022", () -> {
+            disburseLoanOfAccountingRule(ACCRUAL_PERIODIC, loanProductTestBuilder);
+            HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
+            LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
+
+            final Float totalOverpaid = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
+                    disbursedLoanID, "totalOverpaid");
+
+            final String creditBalanceRefundDate = "09 January 2022";
+            final String externalId = null;
+            loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, totalOverpaid, externalId, disbursedLoanID, null);
+            loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
+                    "status");
+            LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+
+            final Float floatZero = 0.0f;
+            Float totalOverpaidAtEnd = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
+                    disbursedLoanID, "totalOverpaid");
+            if (totalOverpaidAtEnd == null) {
+                totalOverpaidAtEnd = floatZero;
+            }
+            assertEquals(totalOverpaidAtEnd, floatZero);
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("loanProductFactory")
+    public void refundCannotBeDuneForFutureDate(LoanProductTestBuilder loanProductTestBuilder) {
+        runAt("06 January 2022", () -> {
+            disburseLoanOfAccountingRule(ACCRUAL_PERIODIC, loanProductTestBuilder);
+            HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
+            LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
+
+            final Float totalOverpaid = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
+                    disbursedLoanID, "totalOverpaid");
+
+            final String creditBalanceRefundDate = "09 January 2022";
+            final String externalId = null;
+
+            ArrayList<HashMap> cbrErrors = (ArrayList<HashMap>) loanTransactionHelperValidationError.creditBalanceRefund(
+                    creditBalanceRefundDate, totalOverpaid, externalId, disbursedLoanID, CommonConstants.RESPONSE_ERROR);
+
+            assertEquals("error.msg.transaction.date.cannot.be.in.the.future",
+                    cbrErrors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        });
     }
 
     @ParameterizedTest

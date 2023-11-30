@@ -124,7 +124,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
         try {
 
             // Set business date
-            LocalDate businessDate = LocalDate.of(2023, 03, 3);
+            LocalDate businessDate = LocalDate.of(2023, 3, 3);
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
@@ -169,25 +169,25 @@ public class LoanProductRepaymentStartDateConfigurationTest {
 
             // first period [2023-03-03 to 2023-04-03]
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 03, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 04, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
+            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
             assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
 
             // second period [2023-04-03 to 2023-05-03]
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 04, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 05, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
+            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
             assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
 
             // third period [2023-05-03 to 2023-06-03]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 05, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 06, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
+            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
+            assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
             assertEquals(333.34, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
 
             // first disbursement on a future date (7 March 2023)
 
-            LocalDate disbursementDate = LocalDate.of(2023, 03, 7);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 7);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
@@ -208,25 +208,25 @@ public class LoanProductRepaymentStartDateConfigurationTest {
 
             // first period [2023-03-03 to 2023-04-03]
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 03, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 04, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
+            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
             assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
 
             // second period [2023-04-03 to 2023-05-03]
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 04, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 05, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
+            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
             assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
 
             // third period [2023-05-03 to 2023-06-03]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 05, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 06, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
+            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
+            assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
             assertEquals(166.66, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
 
             // second disbursement next month (7 April 2023)
 
-            disbursementDate = LocalDate.of(2023, 04, 7);
+            disbursementDate = LocalDate.of(2023, 4, 7);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
@@ -248,20 +248,20 @@ public class LoanProductRepaymentStartDateConfigurationTest {
 
             // first period [2023-03-03 to 2023-04-03]
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 03, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 04, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
+            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
             assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
 
             // second period [2023-04-03 to 2023-05-03]
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 04, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 05, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
+            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
             assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
 
             // third period [2023-05-03 to 2023-06-03]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
-            assertEquals(LocalDate.of(2023, 05, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
-            assertEquals(LocalDate.of(2023, 06, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
+            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
+            assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
             assertEquals(500.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
 
         } finally {
@@ -278,7 +278,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
         try {
 
             // Set business date
-            LocalDate businessDate = LocalDate.of(2023, 03, 3);
+            LocalDate businessDate = LocalDate.of(2023, 3, 3);
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
@@ -324,25 +324,25 @@ public class LoanProductRepaymentStartDateConfigurationTest {
 
             // first period [2023-03-07 to 2023-04-07]
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 03, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 04, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
+            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
             assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
 
             // second period [2023-04-07 to 2023-05-07]
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 04, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 05, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
+            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
             assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
 
             // third period [2023-05-07 to 2023-06-07]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 05, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 06, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
+            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
+            assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
             assertEquals(333.34, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
 
             // first disbursement (7 March 2023)
 
-            LocalDate disbursementDate = LocalDate.of(2023, 03, 7);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 7);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
@@ -364,25 +364,25 @@ public class LoanProductRepaymentStartDateConfigurationTest {
 
             // first period [2023-03-07 to 2023-04-07]
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 03, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 04, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
+            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
             assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
 
             // second period [2023-04-07 to 2023-05-07]
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 04, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 05, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
+            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
             assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
 
             // third period [2023-05-07 to 2023-06-07]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 05, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 06, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
+            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
+            assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
             assertEquals(166.66, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
 
             // second disbursement next month (7 April 2023)
 
-            disbursementDate = LocalDate.of(2023, 04, 7);
+            disbursementDate = LocalDate.of(2023, 4, 7);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
@@ -405,20 +405,20 @@ public class LoanProductRepaymentStartDateConfigurationTest {
 
             // first period [2023-03-07 to 2023-04-07]
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 03, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 04, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
+            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
             assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
 
             // second period [2023-04-07 to 2023-05-07]
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 04, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 05, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
+            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
             assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
 
             // third period [2023-05-07 to 2023-06-07]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
-            assertEquals(LocalDate.of(2023, 05, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
-            assertEquals(LocalDate.of(2023, 06, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
+            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
+            assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
             assertEquals(333.34, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
 
         } finally {
