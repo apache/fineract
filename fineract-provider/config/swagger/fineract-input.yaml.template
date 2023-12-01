@@ -14,17 +14,17 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 servers:
-  - url: /fineract-provider/api/v1
+  - url: /fineract-provider/api
   - url: https://demo.fineract.dev/fineract-provider/api/v1
 components:
   securitySchemes:
     basicAuth:
       type: http
       scheme: basic
-    tenantid:        
+    tenantid:
       type: apiKey
-      in: header       
-      name: fineract-platform-tenantid 
+      in: header
+      name: fineract-platform-tenantid
 security:
   - basicAuth: []
     tenantid: []
