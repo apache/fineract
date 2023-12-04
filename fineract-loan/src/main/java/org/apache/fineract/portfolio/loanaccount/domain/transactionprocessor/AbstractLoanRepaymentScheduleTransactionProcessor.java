@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -199,7 +200,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 recalculateChargeOffTransaction(changedTransactionDetail, loanTransaction, currency, installments);
             }
         }
-        reprocessInstallments(installments, currency);
+        reprocessInstallments(disbursementDate, transactionsToBeProcessed, installments, currency);
         return changedTransactionDetail;
     }
 
@@ -385,11 +386,28 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
     }
 
-    protected void reprocessInstallments(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency) {
+    protected void reprocessInstallments(LocalDate disbursementDate, List<LoanTransaction> transactions,
+            List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency) {
         LoanRepaymentScheduleInstallment lastInstallment = installments.get(installments.size() - 1);
         if (lastInstallment.isAdditional() && lastInstallment.getDue(currency).isZero()) {
             installments.remove(lastInstallment);
         }
+
+        if (isNotObligationsMet(lastInstallment) || isObligationsMetOnDisbursementDate(disbursementDate, lastInstallment)) {
+            Optional<LoanTransaction> optWaiverTx = transactions.stream().filter(lt -> {
+                LocalDate fromDate = lastInstallment.getFromDate();
+                return lt.getTransactionDate().isAfter(fromDate);
+            }).filter(LoanTransaction::isChargesWaiver).max(Comparator.comparing(LoanTransaction::getTransactionDate));
+            if (optWaiverTx.isPresent()) {
+                LoanTransaction waiverTx = optWaiverTx.get();
+                LocalDate waiverTxDate = waiverTx.getTransactionDate();
+                if (isNotObligationsMet(lastInstallment) || isTransactionAfterObligationsMetOnDate(waiverTxDate, lastInstallment)) {
+                    lastInstallment.updateObligationMet(true);
+                    lastInstallment.updateObligationMetOnDate(waiverTxDate);
+                }
+            }
+        }
+
         // TODO: rewrite and handle it at the proper place when disbursement handling got fixed
         for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
             if (loanRepaymentScheduleInstallment.getTotalOutstanding(currency).isGreaterThanZero()) {
@@ -397,6 +415,20 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 loanRepaymentScheduleInstallment.updateObligationMetOnDate(null);
             }
         }
+    }
+
+    private boolean isTransactionAfterObligationsMetOnDate(LocalDate waiverTxDate, LoanRepaymentScheduleInstallment lastInstallment) {
+        return lastInstallment.getObligationsMetOnDate() != null && lastInstallment.getObligationsMetOnDate().isBefore(waiverTxDate);
+    }
+
+    private boolean isObligationsMetOnDisbursementDate(LocalDate disbursementDate,
+            LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
+        return loanRepaymentScheduleInstallment.isObligationsMet()
+                && disbursementDate.equals(loanRepaymentScheduleInstallment.getObligationsMetOnDate());
+    }
+
+    private boolean isNotObligationsMet(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
+        return !loanRepaymentScheduleInstallment.isObligationsMet() && loanRepaymentScheduleInstallment.getObligationsMetOnDate() == null;
     }
 
     private void recalculateCreditTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
