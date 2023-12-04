@@ -243,6 +243,7 @@ public class LoansApiResource {
     private static final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId",
             "parentLoanAccountNo", "parentPrincipalAmount", "childLoanAccountNo", "childPrincipalAmount", "clientName"));
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
+    private static final String RESOURCE_NAME_FOR_DELINQUENCY_ACTION_PERMISSIONS = "DELINQUENCY_ACTION";
 
     private final PlatformSecurityContext context;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -1222,7 +1223,7 @@ public class LoansApiResource {
     }
 
     private String createLoanDelinquencyAction(Long loanId, ExternalId loanExternalId, String apiRequestBodyAsJson) {
-        context.authenticatedUser().validateHasUpdatePermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        context.authenticatedUser().validateHasCreatePermission(RESOURCE_NAME_FOR_DELINQUENCY_ACTION_PERMISSIONS);
         Long resolvedLoanId = getResolvedLoanId(loanId, loanExternalId);
 
         CommandWrapperBuilder builder = new CommandWrapperBuilder().createDelinquencyAction(resolvedLoanId);
