@@ -95,11 +95,11 @@ public class SmsApiResource {
     public String retrieveAllSmsByStatus(@PathParam("campaignId") final Long campaignId, @Context final UriInfo uriInfo,
             @QueryParam("status") final Long status, @QueryParam("fromDate") final DateParam fromDateParam,
             @QueryParam("toDate") final DateParam toDateParam, @QueryParam("locale") final String locale,
-            @QueryParam("dateFormat") final String rawDateFormat, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
+            @QueryParam("dateFormat") final String rawDateFormat, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder) {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+        final SearchParameters searchParameters = SearchParameters.forSMSCampaign(offset, limit, orderBy, sortOrder);
 
         final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
 

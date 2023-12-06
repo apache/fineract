@@ -169,7 +169,6 @@ public class StandingInstructionApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.class))) })
     public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("sqlSearch") @Parameter(description = "sqlSearch") final String sqlSearch,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
@@ -183,8 +182,7 @@ public class StandingInstructionApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
-        final SearchParameters searchParameters = SearchParameters.forAccountTransfer(sqlSearch, externalId, offset, limit, orderBy,
-                sortOrder);
+        final SearchParameters searchParameters = SearchParameters.forAccountTransfer(externalId, offset, limit, orderBy, sortOrder);
 
         final LocalDate startDateRange = null;
         final LocalDate endDateRange = null;
@@ -206,8 +204,7 @@ public class StandingInstructionApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.GetStandingInstructionsStandingInstructionIdResponse.class))) })
     public String retrieveOne(
             @PathParam("standingInstructionId") @Parameter(description = "standingInstructionId") final Long standingInstructionId,
-            @Context final UriInfo uriInfo, @QueryParam("sqlSearch") @Parameter(description = "sqlSearch") final String sqlSearch,
-            @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
+            @Context final UriInfo uriInfo, @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
@@ -216,8 +213,7 @@ public class StandingInstructionApiResource {
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
         StandingInstructionData standingInstructionData = this.standingInstructionReadPlatformService.retrieveOne(standingInstructionId);
-        final SearchParameters searchParameters = SearchParameters.forAccountTransfer(sqlSearch, externalId, offset, limit, orderBy,
-                sortOrder);
+        final SearchParameters searchParameters = SearchParameters.forAccountTransfer(externalId, offset, limit, orderBy, sortOrder);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         Page<AccountTransferData> transfers = null;
         if (!associationParameters.isEmpty()) {
