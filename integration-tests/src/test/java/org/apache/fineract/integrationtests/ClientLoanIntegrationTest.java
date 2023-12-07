@@ -8041,9 +8041,9 @@ public class ClientLoanIntegrationTest {
         return LOAN_TRANSACTION_HELPER.applyLoan(new PostLoansRequest().clientId(clientId.longValue()).productId(loanProductId)
                 .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(repaymentStrategyCode).locale("en").submittedOnDate(loanDisbursementDate)
-                .amortizationType(1).interestRatePerPeriod(0).interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0)
-                .repaymentEvery(30).repaymentFrequencyType(0).numberOfRepayments(1).loanTermFrequency(30).loanTermFrequencyType(0)
-                .principal(BigDecimal.valueOf(1000.0)).loanType("individual"));
+                .amortizationType(1).interestRatePerPeriod(BigDecimal.ZERO).interestCalculationPeriodType(1).interestType(0)
+                .repaymentFrequencyType(0).repaymentEvery(30).repaymentFrequencyType(0).numberOfRepayments(1).loanTermFrequency(30)
+                .loanTermFrequencyType(0).principal(BigDecimal.valueOf(1000.0)).loanType("individual"));
     }
 
     private PostLoanProductsRequest createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() {

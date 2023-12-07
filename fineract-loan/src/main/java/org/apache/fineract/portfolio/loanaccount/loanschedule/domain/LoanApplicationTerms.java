@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -212,6 +213,7 @@ public final class LoanApplicationTerms {
     private LocalDate newScheduledDueDateStart;
     private boolean isDownPaymentEnabled;
     private BigDecimal disbursedAmountPercentageForDownPayment;
+    private Money downPaymentAmount;
     private boolean isAutoRepaymentForDownPaymentEnabled;
 
     private RepaymentStartDateType repaymentStartDateType;
@@ -450,6 +452,15 @@ public final class LoanApplicationTerms {
         this.isPrincipalCompoundingDisabledForOverdueLoans = isPrincipalCompoundingDisabledForOverdueLoans;
         this.isDownPaymentEnabled = isDownPaymentEnabled;
         this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
+        this.downPaymentAmount = Money.zero(getCurrency());
+        if (isDownPaymentEnabled) {
+            this.downPaymentAmount = Money.of(getCurrency(),
+                    MathUtil.percentageOf(getPrincipal().getAmount(), getDisbursedAmountPercentageForDownPayment(), 19));
+            if (getInstallmentAmountInMultiplesOf() != null) {
+                downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, getInstallmentAmountInMultiplesOf());
+            }
+        }
+
         this.isAutoRepaymentForDownPaymentEnabled = isAutoRepaymentForDownPaymentEnabled;
         this.repaymentStartDateType = repaymentStartDateType;
         this.submittedOnDate = submittedOnDate;
@@ -1816,5 +1827,9 @@ public final class LoanApplicationTerms {
 
     public LoanScheduleType getLoanScheduleType() {
         return loanScheduleType;
+    }
+
+    public Money getDownPaymentAmount() {
+        return downPaymentAmount;
     }
 }
