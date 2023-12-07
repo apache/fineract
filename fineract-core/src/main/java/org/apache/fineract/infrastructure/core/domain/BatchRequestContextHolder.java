@@ -27,15 +27,16 @@ public final class BatchRequestContextHolder {
 
     private BatchRequestContextHolder() {}
 
-    private static final ThreadLocal<Map<String, Object>> batchAttributes = new NamedThreadLocal<>("BatchAttributesForProcessing");
+    private static final ThreadLocal<Map<String, Object>> batchAttributes = new NamedThreadLocal<>("batchAttributes");
 
-    private static final ThreadLocal<Optional<TransactionStatus>> enclosingTransaction = new NamedThreadLocal<>("EnclosingTransaction") {
+    private static final ThreadLocal<Optional<TransactionStatus>> batchTransaction = new NamedThreadLocal<>("batchTransaction") {
 
         @Override
         protected Optional<TransactionStatus> initialValue() {
             return Optional.empty();
         }
     };
+    private static final ThreadLocal<Boolean> isEnclosingTransaction = new NamedThreadLocal<>("isEnclosingTransaction");
 
     /**
      * True if the batch attributes are set
@@ -47,12 +48,12 @@ public final class BatchRequestContextHolder {
     }
 
     /**
-     * True if the batch attributes are set and the enclosing transaction is set to true
+     * Returns the batch attributes for the current thread.
      *
-     * @return
+     * @return the batch attributes for the current thread, cna be null
      */
-    public static Optional<TransactionStatus> getEnclosingTransaction() {
-        return enclosingTransaction.get();
+    public static Map<String, Object> getRequestAttributes() {
+        return batchAttributes.get();
     }
 
     /**
@@ -66,15 +67,6 @@ public final class BatchRequestContextHolder {
     }
 
     /**
-     * Returns the batch attributes for the current thread.
-     *
-     * @return the batch attributes for the current thread, cna be null
-     */
-    public static Map<String, Object> getRequestAttributes() {
-        return batchAttributes.get();
-    }
-
-    /**
      * Reset the batch attributes for the current thread.
      */
     public static void resetRequestAttributes() {
@@ -82,11 +74,66 @@ public final class BatchRequestContextHolder {
     }
 
     /**
-     * Set the enclosing transaction flag for the current thread.
+     * True if the batch attributes are set and the enclosing transaction is set to true
+     *
+     * @return
+     */
+    public static boolean isEnclosingTransaction() {
+        return Boolean.TRUE.equals(isEnclosingTransaction.get());
+    }
+
+    /**
+     * Set the isEnclosingTransaction flag for the current thread.
+     *
+     * @param isEnclosingTransaction
+     */
+    public static void setIsEnclosingTransaction(boolean isEnclosingTransaction) {
+        BatchRequestContextHolder.isEnclosingTransaction.set(isEnclosingTransaction);
+    }
+
+    public static void resetIsEnclosingTransaction() {
+        isEnclosingTransaction.remove();
+    }
+
+    /**
+     * Return the transaction
+     *
+     * @return
+     */
+    public static Optional<TransactionStatus> getTransaction() {
+        return batchTransaction.get();
+    }
+
+    /**
+     * Return the enclosing transaction
+     *
+     * @return
+     */
+    public static Optional<TransactionStatus> getEnclosingTransaction() {
+        return isEnclosingTransaction() ? getTransaction() : Optional.empty();
+    }
+
+    /**
+     * Set the transaction for the current thread.
      *
      * @param enclosingTransaction
      */
-    public static void setEnclosingTransaction(Optional<TransactionStatus> enclosingTransaction) {
-        BatchRequestContextHolder.enclosingTransaction.set(enclosingTransaction);
+    public static void setTransaction(TransactionStatus enclosingTransaction) {
+        batchTransaction.set(Optional.ofNullable(enclosingTransaction));
+    }
+
+    /**
+     * Set the enclosing transaction for the current thread.
+     *
+     * @param enclosingTransaction
+     */
+    public static void setEnclosingTransaction(TransactionStatus enclosingTransaction) {
+        if (isEnclosingTransaction()) {
+            setTransaction(enclosingTransaction);
+        }
+    }
+
+    public static void resetTransaction() {
+        batchTransaction.set(Optional.empty());
     }
 }

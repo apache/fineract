@@ -122,7 +122,11 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
         });
 
         When("ApplyLoanLockTasklet.execute method executed", () -> {
-            resultItem = applyLoanLockTasklet.execute(stepContribution, null);
+            try {
+                resultItem = applyLoanLockTasklet.execute(stepContribution, null);
+            } finally {
+                ThreadLocalContextUtil.reset();
+            }
         });
 
         Then("ApplyLoanLockTasklet.execute result should match", () -> {

@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.investor.enricher.LoanAccountDataV1Enricher;
 import org.apache.fineract.investor.enricher.LoanChargeDataV1Enricher;
 import org.apache.fineract.investor.enricher.LoanTransactionDataV1Enricher;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,6 +65,11 @@ public class EnricherTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, ACTUAL_DATE)));
 
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test
@@ -178,5 +184,4 @@ public class EnricherTest {
         assertEquals(PURCHASE_PRICE_RATIO, data.getPurchasePriceRatio());
 
     }
-
 }

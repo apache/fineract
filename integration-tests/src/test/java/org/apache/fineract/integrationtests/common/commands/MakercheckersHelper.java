@@ -23,8 +23,9 @@ import com.linecorp.armeria.internal.shaded.guava.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import org.apache.fineract.client.models.GetMakerCheckerResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -32,7 +33,7 @@ public class MakercheckersHelper {
 
     private static final Gson GSON = new JSON().getGson();
 
-    private static final String MAKERCHECKER_URL = "/fineract-provider/api/v1/makercheckers?" + Utils.TENANT_IDENTIFIER;
+    private static final String MAKERCHECKER_URL = "/fineract-provider/api/v1/makercheckers";
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -42,10 +43,25 @@ public class MakercheckersHelper {
         this.responseSpec = responseSpec;
     }
 
-    public ArrayList<GetMakerCheckerResponse> getMakerCheckerList() {
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, MAKERCHECKER_URL);
-        Type makerCheckerList = new TypeToken<ArrayList<GetMakerCheckerResponse>>() {}.getType();
+    public List<Map<String, Object>> getMakerCheckerList(Map<String, String> queryParams) {
+        StringBuilder url = new StringBuilder(MAKERCHECKER_URL).append("?").append(Utils.TENANT_IDENTIFIER);
+        if (queryParams != null) {
+            for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+                url.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+            }
+        }
+        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url.toString());
+        Type makerCheckerList = new TypeToken<List<Map<String, Object>>>() {}.getType();
         return GSON.fromJson(response, makerCheckerList);
     }
 
+    public void approveMakerCheckerEntry(Long auditId) {
+        approveMakerCheckerEntry(this.requestSpec, this.responseSpec, auditId);
+    }
+
+    public static HashMap<?, ?> approveMakerCheckerEntry(RequestSpecification requestSpec, ResponseSpecification responseSpec,
+            Long auditId) {
+        String url = MAKERCHECKER_URL + "/" + auditId + "?command=approve&" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, url, "", "");
+    }
 }

@@ -119,8 +119,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        Assertions.assertEquals(52, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(52, actualGlobalConfigurations.size());
+        Assertions.assertEquals(53, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(53, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -571,8 +571,15 @@ public class GlobalConfigurationHelper {
         assetExternalizationOfNonActiveLoans.put("value", 0);
         assetExternalizationOfNonActiveLoans.put("enabled", true);
         assetExternalizationOfNonActiveLoans.put("trapDoor", false);
-        assetExternalizationOfNonActiveLoans.put("string_value", "due-date");
         defaults.add(assetExternalizationOfNonActiveLoans);
+
+        HashMap<String, Object> enableSameMakerChecker = new HashMap<>();
+        enableSameMakerChecker.put("id", 58);
+        enableSameMakerChecker.put("name", "enable-same-maker-checker");
+        enableSameMakerChecker.put("value", 0);
+        enableSameMakerChecker.put("enabled", false);
+        enableSameMakerChecker.put("trapDoor", false);
+        defaults.add(enableSameMakerChecker);
 
         return defaults;
     }

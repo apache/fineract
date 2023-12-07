@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -72,6 +73,11 @@ class InlineLoanCOBExecutorServiceImplTest {
     private FineractProperties.FineractApiProperties fineractApiProperties;
     @Mock
     private FineractProperties.FineractBodyItemSizeLimitProperties fineractBodyItemSizeLimitProperties;
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
 
     @Test
     void shouldExceptionThrownIfLoanIsAlreadyLocked() {
