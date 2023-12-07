@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -432,8 +431,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
              * loanTermVariation.setApplicableFromDate(adjustedDate); } } }
              */
 
-            final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-            final MathContext mathContext = new MathContext(8, roundingMode);
+            final MathContext mathContext = MoneyHelper.getMathContext();
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.loanRepaymentScheduleTransactionProcessorFactory
                     .determineProcessor(loan.transactionProcessingStrategy());
             final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),

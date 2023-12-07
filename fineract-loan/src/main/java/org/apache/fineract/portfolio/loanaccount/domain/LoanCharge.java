@@ -565,7 +565,7 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom {
         BigDecimal percentageOf = BigDecimal.ZERO;
 
         if (isGreaterThanZero(value)) {
-            final MathContext mc = new MathContext(8, MoneyHelper.getRoundingMode());
+            final MathContext mc = MoneyHelper.getMathContext();
             final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100L), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
