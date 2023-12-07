@@ -30,6 +30,11 @@ public class UnsupportedCommandException extends RuntimeException {
         this.unsupportedCommandName = unsupportedCommandName;
     }
 
+    public UnsupportedCommandException(final String unsupportedCommandName, String message) {
+        super(message);
+        this.unsupportedCommandName = unsupportedCommandName;
+    }
+
     public String getUnsupportedCommandName() {
         return this.unsupportedCommandName;
     }

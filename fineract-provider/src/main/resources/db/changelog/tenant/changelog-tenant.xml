@@ -150,4 +150,5 @@
     <include file="parts/0128_savings_audit.xml" relativeToChangelogFile="true" />
     <include file="parts/0129_transaction_summary_with_asset_owner_report_overpaid_amount.xml" relativeToChangelogFile="true" />
     <include file="parts/0130_add_create_delinquency_action_permission.xml" relativeToChangelogFile="true" />
+    <include file="parts/0131_add_configuration_maker_checker.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

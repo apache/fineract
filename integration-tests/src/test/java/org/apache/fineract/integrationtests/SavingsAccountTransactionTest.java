@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.common.CommonConstants.RESPONSE_RESOURCE_ID;
 import static org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper.PAYMENT_TYPE_ID;
 import static org.apache.fineract.integrationtests.common.system.DatatableHelper.addDatatableColumn;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
@@ -60,7 +61,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
@@ -118,7 +118,7 @@ public class SavingsAccountTransactionTest {
             final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDateString);
             assertNotNull(clientID);
 
-            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDateString);
+            final Integer savingsId = createApproveActivateSavingsAccountDailyPosting(clientID, startDateString);
             assertNotNull(savingsId);
 
             performSavingsTransaction(savingsId, "100", depositDate, true);
@@ -176,7 +176,7 @@ public class SavingsAccountTransactionTest {
 
         // creating datatable for client entity
         final HashMap<String, Object> columnMap = new HashMap<>();
-        String datatableName = Utils.uniqueRandomStringGenerator("savings_transaction" + "_", 5).toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator("dt_savings_transaction_", 5).toLowerCase();
         columnMap.put("datatableName", datatableName);
         columnMap.put("apptableName", "m_savings_account_transaction");
         columnMap.put("multiRow", false);
@@ -284,10 +284,9 @@ public class SavingsAccountTransactionTest {
     private void performSavingsTransaction(Integer savingsId, String amount, LocalDate transactionDate, boolean isDeposit) {
         String transactionType = isDeposit ? "Deposit" : "Withdrawal";
         Integer transactionId = isDeposit
-                ? (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, amount, depositDateString,
-                        CommonConstants.RESPONSE_RESOURCE_ID)
+                ? (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, amount, depositDateString, RESPONSE_RESOURCE_ID)
                 : (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, amount, withdrawDateString,
-                        CommonConstants.RESPONSE_RESOURCE_ID);
+                        RESPONSE_RESOURCE_ID);
 
         assertNotNull(transactionId);
 
@@ -311,17 +310,10 @@ public class SavingsAccountTransactionTest {
         return extractedDate;
     }
 
-    private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
+    private Integer createApproveActivateSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
         final Integer savingsProductID = createSavingsProductDailyPosting();
         assertNotNull(savingsProductID);
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL, startDate);
-        assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-        return savingsId;
+        return savingsAccountHelper.createApproveActivateSavingsAccount(clientID, savingsProductID, startDate);
     }
 
     private Integer createSavingsProductDailyPosting() {
@@ -382,28 +374,31 @@ public class SavingsAccountTransactionTest {
                 final List<BatchResponse> responses = enclosingTransaction
                         ? BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec, json)
                         : BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec, json);
-                assertNotNull(responses);
+                assertNotNull(responses, "Responses");
                 if (enclosingTransaction) {
                     Integer statusCode1 = responses.get(0).getStatusCode();
-                    assertNotNull(statusCode1);
+                    assertNotNull(statusCode1, "First enlosingTransaction response status code");
                     assertTrue(SC_OK == statusCode1 || SC_CONFLICT == statusCode1, "Status code: " + statusCode1);
                     if (SC_OK == statusCode1) {
-                        assertEquals(4, responses.size());
+                        assertEquals(4, responses.size(), "Response size for enlosingTransaction OK response");
                         Integer statusCode4 = responses.get(3).getStatusCode();
-                        assertNotNull(statusCode4);
-                        assertEquals(SC_OK, statusCode4);
+                        assertNotNull(statusCode4, "Last enlosingTransaction OK response status code");
+                        assertEquals(SC_OK, statusCode4, "Last enlosingTransaction OK response status code");
                     } else {
-                        assertEquals(1, responses.size());
+                        assertEquals(1, responses.size(), "Response size for enlosingTransaction failed response");
                     }
                 } else {
-                    assertEquals(4, responses.size());
+                    assertEquals(4, responses.size(), "Response size for without-enlosingTransaction response");
                     Integer statusCode1 = responses.get(0).getStatusCode();
-                    assertNotNull(statusCode1);
-                    assertTrue(SC_OK == statusCode1 || SC_CONFLICT == statusCode1, "Status code: " + statusCode1);
+                    assertNotNull(statusCode1, "First without-enlosingTransaction response status code");
+                    assertTrue(SC_OK == statusCode1 || SC_CONFLICT == statusCode1,
+                            "First without-enlosingTransaction response status code: " + statusCode1);
                     Integer statusCode4 = responses.get(3).getStatusCode();
-                    assertNotNull(statusCode4);
-                    assertTrue(SC_OK == statusCode1 ? (SC_OK == statusCode4 || SC_CONFLICT == statusCode4)
-                            : (SC_FORBIDDEN == statusCode4 || SC_CONFLICT == statusCode4), "Status code: " + statusCode4);
+                    assertNotNull(statusCode4, "Last without-enlosingTransaction response status code");
+                    assertTrue(
+                            SC_OK == statusCode1 ? (SC_OK == statusCode4 || SC_CONFLICT == statusCode4)
+                                    : (SC_FORBIDDEN == statusCode4 || SC_CONFLICT == statusCode4),
+                            "Last without-enlosingTransaction response status code: " + statusCode4);
                 }
             } else {
                 String json = transactionData.getJson();
@@ -417,14 +412,14 @@ public class SavingsAccountTransactionTest {
         }
 
         private static boolean checkConcurrentResponse(String response) {
-            assertNotNull(response);
+            assertNotNull(response, "Single response");
             JsonPath res = JsonPath.from(response);
             String statusCode = res.get("httpStatusCode");
             if (statusCode == null) {
-                assertNotNull(res.get(CommonConstants.RESPONSE_RESOURCE_ID));
+                assertNotNull(res.get(RESPONSE_RESOURCE_ID), "Single response " + RESPONSE_RESOURCE_ID);
                 return true;
             }
-            assertEquals(String.valueOf(SC_CONFLICT), statusCode);
+            assertEquals(String.valueOf(SC_CONFLICT), statusCode, "Single response status code");
             return false;
         }
     }
@@ -439,22 +434,22 @@ public class SavingsAccountTransactionTest {
         RequestSpecification requestSpec = savingsHelper.getRequestSpec();
         ResponseSpecification responseSpec = savingsHelper.getResponseSpec();
         final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec, json);
-        assertNotNull(responses);
+        assertNotNull(responses, "Responses");
         BatchResponse response1 = responses.get(0);
         Integer statusCode = response1.getStatusCode();
         String msg = Strings.nullToEmpty(response1.getBody());
-        assertNotNull(statusCode);
+        assertNotNull(statusCode, "First response status code");
         assertTrue(
                 SC_OK == statusCode || SC_CONFLICT == statusCode
                         || (SC_FORBIDDEN == statusCode && msg.contains("Cannot add or update a child row")),
                 "Status code: " + statusCode + ", message: " + msg);
         if (SC_OK == statusCode) {
-            assertEquals(4, responses.size());
+            assertEquals(4, responses.size(), "Response size for OK response");
             Integer statusCode4 = responses.get(3).getStatusCode();
-            assertNotNull(statusCode4);
-            assertEquals(SC_OK, statusCode4);
+            assertNotNull(statusCode4, "Last OK response status code");
+            assertEquals(SC_OK, statusCode4, "Last OK response status code");
         } else {
-            assertEquals(1, responses.size());
+            assertEquals(1, responses.size(), "Response size for failed response");
         }
     }
 

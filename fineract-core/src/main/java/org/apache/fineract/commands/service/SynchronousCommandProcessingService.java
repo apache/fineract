@@ -35,14 +35,12 @@ import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.commands.provider.CommandHandlerProvider;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -58,7 +56,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -76,9 +73,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final ConfigurationDomainService configurationDomainService;
     private final CommandHandlerProvider commandHandlerProvider;
     private final IdempotencyKeyResolver idempotencyKeyResolver;
-    private final IdempotencyKeyGenerator idempotencyKeyGenerator;
     private final CommandSourceService commandSourceService;
-    private final ErrorHandler errorHandler;
 
     private final FineractRequestContextHolder fineractRequestContextHolder;
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
@@ -92,10 +87,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         Long commandId = (Long) fineractRequestContextHolder.getAttribute(COMMAND_SOURCE_ID, null);
         boolean isRetry = commandId != null;
+        boolean isEnclosingTransaction = BatchRequestContextHolder.isEnclosingTransaction();
 
         CommandSource commandSource = null;
         String idempotencyKey;
         if (isRetry) {
+            commandSource = commandSourceService.getCommandSource(commandId);
+            idempotencyKey = commandSource.getIdempotencyKey();
+        } else if ((commandId = command.commandId()) != null) { // action on the command itself
             commandSource = commandSourceService.getCommandSource(commandId);
             idempotencyKey = commandSource.getIdempotencyKey();
         } else {
@@ -103,62 +102,53 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
         exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey, isRetry);
 
-        boolean sameTransaction = BatchRequestContextHolder.getEnclosingTransaction().isPresent();
+        AppUser user = context.authenticatedUser(wrapper);
         if (commandSource == null) {
-            AppUser user = context.authenticatedUser(wrapper);
-            if (sameTransaction) {
+            if (isEnclosingTransaction) {
                 commandSource = commandSourceService.getInitialCommandSource(wrapper, command, user, idempotencyKey);
             } else {
                 commandSource = commandSourceService.saveInitialNewTransaction(wrapper, command, user, idempotencyKey);
-                storeCommandIdInContext(commandSource); // Store command id as a request attribute
+                commandId = commandSource.getId();
             }
+        }
+        if (commandId != null) {
+            storeCommandIdInContext(commandSource); // Store command id as a request attribute
+        }
+
+        boolean isMakerChecker = configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
+        if (isApprovedByChecker || (isMakerChecker && user.isCheckerSuperUser())) {
+            commandSource.markAsChecked(user);
         }
         setIdempotencyKeyStoreFlag(true);
 
         final CommandProcessingResult result;
         try {
-            result = findCommandHandler(wrapper).processCommand(command);
+            result = commandSourceService.processCommand(findCommandHandler(wrapper), command, commandSource, user, isApprovedByChecker,
+                    isMakerChecker);
         } catch (Throwable t) { // NOSONAR
             RuntimeException mappable = ErrorHandler.getMappable(t);
             ErrorInfo errorInfo = commandSourceService.generateErrorInfo(mappable);
-            commandSource.setResultStatusCode(errorInfo.getStatusCode());
+            Integer statusCode = errorInfo.getStatusCode();
+            commandSource.setResultStatusCode(statusCode);
             commandSource.setResult(errorInfo.getMessage());
-            commandSource.setStatus(ERROR);
-            if (!sameTransaction) { // TODO: temporary solution
+            if (statusCode != SC_OK) {
+                commandSource.setStatus(ERROR);
+            }
+            if (!isEnclosingTransaction) { // TODO: temporary solution
                 commandSource = commandSourceService.saveResultNewTransaction(commandSource);
             }
-            publishHookErrorEvent(wrapper, command, errorInfo); // TODO must be performed in a new transaction
+            // must not throw any exception; must persist in new transaction as the current transaction was already
+            // marked as rollback
+            publishHookErrorEvent(wrapper, command, errorInfo);
             throw mappable;
         }
 
-        commandSource.updateForAudit(result);
         commandSource.setResultStatusCode(SC_OK);
+        commandSource.updateForAudit(result);
         commandSource.setResult(toApiJsonSerializer.serializeResult(result));
         commandSource.setStatus(PROCESSED);
-
-        boolean isRollback = !isApprovedByChecker && (result.isRollbackTransaction()
-                || configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName()));
-        // TODO: this should be removed, can not override audit information (and maker-checker does not work)
-        if (!isRollback && result.hasChanges()) {
-            commandSource.setCommandJson(toApiJsonSerializer.serializeResult(result.getChanges()));
-        }
-
         commandSource = commandSourceService.saveResultSameTransaction(commandSource);
-        if (sameTransaction) {
-            storeCommandIdInContext(commandSource); // Store command id as a request attribute
-        }
-
-        if (isRollback) {
-            /*
-             * JournalEntry will generate a new transactionId every time. Updating the transactionId with old
-             * transactionId, because as there are no entries are created with new transactionId, will throw an error
-             * when checker approves the transaction
-             */
-            commandSource.setTransactionId(command.getTransactionId());
-            // TODO: this should be removed together with lines 147-149
-            commandSource.setCommandJson(command.json()); // Set back CommandSource json data
-            throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSource);
-        }
+        storeCommandIdInContext(commandSource); // Store command id as a request attribute
 
         result.setRollbackTransaction(null);
         publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, result); // TODO must be performed in a
@@ -201,24 +191,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         fineractRequestContextHolder.setAttribute(IDEMPOTENCY_KEY_STORE_FLAG, flag);
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult logCommand(CommandSource commandSource) {
-        commandSource.markAsAwaitingApproval();
-        if (commandSource.getIdempotencyKey() == null) {
-            commandSource.setIdempotencyKey(idempotencyKeyGenerator.create());
-        }
-        commandSource = commandSourceService.saveResultSameTransaction(commandSource);
-
-        return new CommandProcessingResultBuilder().withCommandId(commandSource.getId()).withEntityId(commandSource.getResourceId())
-                .build();
-    }
-
     @SuppressWarnings("unused")
     public CommandProcessingResult fallbackExecuteCommand(Exception e) {
-        if (e instanceof RollbackTransactionAsCommandIsNotApprovedByCheckerException ex) {
-            return logCommand(ex.getCommandSourceResult());
-        }
         throw ErrorHandler.getMappable(e);
     }
 
@@ -281,10 +255,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     }
 
     @Override
-    public boolean validateCommand(final CommandWrapper commandWrapper, final AppUser user) {
-        boolean rollbackTransaction = configurationDomainService.isMakerCheckerEnabledForTask(commandWrapper.taskPermissionName());
+    public boolean validateRollbackCommand(final CommandWrapper commandWrapper, final AppUser user) {
         user.validateHasPermissionTo(commandWrapper.getTaskPermissionName());
-        return rollbackTransaction;
+        boolean isMakerChecker = configurationDomainService.isMakerCheckerEnabledForTask(commandWrapper.taskPermissionName());
+        return isMakerChecker && !user.isCheckerSuperUser();
     }
 
     private void publishHookEvent(final String entityName, final String actionName, JsonCommand command, final Object result) {

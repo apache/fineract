@@ -181,8 +181,8 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
                     new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en"));
 
-            final float feePortion = 50.0f;
-            final float penaltyPortion = 100.0f;
+            final double feePortion = 50.0d;
+            final double penaltyPortion = 100.0d;
 
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
@@ -209,8 +209,8 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
             assertEquals(feePortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding());
             assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesDue());
             assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding());
-            assertEquals(400.0f, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
-            assertEquals(400.0f, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
+            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
+            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
             assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
 
             scheduleJobHelper.executeAndAwaitJob(jobName);
@@ -218,11 +218,11 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().size());
             assertEquals(feePortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesDue());
-            assertEquals(0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding());
+            assertEquals(0.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding());
             assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesDue());
-            assertEquals(0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding());
-            assertEquals(400, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
-            assertEquals(250, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
+            assertEquals(0.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding());
+            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
+            assertEquals(250.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
             assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +73,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
             return thisTask.hasMakerCheckerEnabled();
         }
         return false;
+    }
+
+    @Override
+    public boolean isSameMakerCheckerEnabled() {
+        return getGlobalConfigurationPropertyData("enable-same-maker-checker").isEnabled();
     }
 
     @Override
@@ -379,18 +385,14 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.getValue();
     }
 
+    @NotNull
     private GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
         return globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName).toData();
     }
 
     @Override
     public boolean isSubRatesEnabled() {
-        GlobalConfigurationPropertyData configuration = getGlobalConfigurationPropertyData("sub-rates");
-        if (configuration == null) {
-            return false;
-        } else {
-            return configuration.isEnabled();
-        }
+        return getGlobalConfigurationPropertyData("sub-rates").isEnabled();
     }
 
     @Override

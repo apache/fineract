@@ -202,6 +202,14 @@ public class CommandSource extends AbstractPersistableCustom {
         this.commandAsJson = json;
     }
 
+    public AppUser getMaker() {
+        return maker;
+    }
+
+    public AppUser getChecker() {
+        return checker;
+    }
+
     public String getActionName() {
         return this.actionName;
     }

@@ -67,8 +67,6 @@ public class SynchronousCommandProcessingServiceTest {
     @Mock
     private IdempotencyKeyResolver idempotencyKeyResolver;
     @Mock
-    private IdempotencyKeyGenerator idempotencyKeyGenerator;
-    @Mock
     private CommandSourceService commandSourceService;
 
     @Spy
@@ -93,19 +91,21 @@ public class SynchronousCommandProcessingServiceTest {
         when(commandWrapper.isNoteResource()).thenReturn(false);
         when(commandWrapper.isSurveyResource()).thenReturn(false);
         when(commandWrapper.isLoanDisburseDetailResource()).thenReturn(false);
-        JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
 
-        NewCommandSourceHandler newCommandSourceHandler = Mockito.mock(NewCommandSourceHandler.class);
+        long commandId = 1L;
+        JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
+        when(jsonCommand.commandId()).thenReturn(commandId);
+
+        NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
         CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
         when(commandProcessingResult.isRollbackTransaction()).thenReturn(false);
-        when(newCommandSourceHandler.processCommand(jsonCommand)).thenReturn(commandProcessingResult);
-        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(newCommandSourceHandler);
+        when(commandHandler.processCommand(jsonCommand)).thenReturn(commandProcessingResult);
+        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(commandHandler);
 
         when(configurationDomainService.isMakerCheckerEnabledForTask(Mockito.any())).thenReturn(false);
         String idk = "idk";
         when(idempotencyKeyResolver.resolve(commandWrapper)).thenReturn(idk);
         CommandSource commandSource = Mockito.mock(CommandSource.class);
-        long commandId = 1L;
         when(commandSource.getId()).thenReturn(commandId);
         when(commandSourceService.findCommandSource(commandWrapper, idk)).thenReturn(null);
         when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
@@ -116,9 +116,12 @@ public class SynchronousCommandProcessingServiceTest {
         when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.PROCESSED.getValue());
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
+        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false, false))
+                .thenReturn(commandProcessingResult);
+
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
 
-        verify(commandSourceService).saveInitialNewTransaction(commandWrapper, jsonCommand, appUser, idk);
+        verify(commandSourceService).getCommandSource(commandId);
         assertEquals(CommandProcessingResultType.PROCESSED.getValue(), commandSource.getStatus());
         verify(commandSourceService).saveResultSameTransaction(commandSource);
 
@@ -133,19 +136,21 @@ public class SynchronousCommandProcessingServiceTest {
         when(commandWrapper.isSurveyResource()).thenReturn(false);
         when(commandWrapper.isLoanDisburseDetailResource()).thenReturn(false);
         JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
+        Long commandId = jsonCommand.commandId();
 
-        NewCommandSourceHandler newCommandSourceHandler = Mockito.mock(NewCommandSourceHandler.class);
+        NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
         CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
         CommandSource commandSource = Mockito.mock(CommandSource.class);
         when(commandProcessingResult.isRollbackTransaction()).thenReturn(false);
         RuntimeException runtimeException = new RuntimeException("foo");
-        when(newCommandSourceHandler.processCommand(jsonCommand)).thenThrow(runtimeException);
-        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(newCommandSourceHandler);
+        when(commandHandler.processCommand(jsonCommand)).thenThrow(runtimeException);
+        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(commandHandler);
 
         when(configurationDomainService.isMakerCheckerEnabledForTask(Mockito.any())).thenReturn(false);
         String idk = "idk";
         when(idempotencyKeyResolver.resolve(commandWrapper)).thenReturn(idk);
         when(commandSourceService.findCommandSource(commandWrapper, idk)).thenReturn(null);
+        when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
@@ -155,11 +160,14 @@ public class SynchronousCommandProcessingServiceTest {
 
         when(commandSourceService.findCommandSource(commandWrapper, idk)).thenReturn(initialCommandSource);
 
+        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false, false))
+                .thenThrow(runtimeException);
+
         Assertions.assertThrows(RuntimeException.class, () -> {
             underTest.executeCommand(commandWrapper, jsonCommand, false);
         });
 
-        verify(commandSourceService).saveInitialNewTransaction(commandWrapper, jsonCommand, appUser, idk);
+        verify(commandSourceService).getCommandSource(commandId);
         verify(commandSourceService).generateErrorInfo(runtimeException);
     }
 }

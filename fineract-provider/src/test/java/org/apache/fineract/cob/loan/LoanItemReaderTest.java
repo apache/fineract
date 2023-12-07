@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,6 +73,11 @@ class LoanItemReaderTest {
 
     @Mock
     private Loan loan;
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
 
     @Test
     public void testLoanItemReaderSimple() throws Exception {
@@ -163,5 +169,4 @@ class LoanItemReaderTest {
 
         Mockito.verifyNoMoreInteractions(loanRepository);
     }
-
 }

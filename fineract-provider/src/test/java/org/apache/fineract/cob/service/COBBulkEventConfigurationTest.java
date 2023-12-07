@@ -85,7 +85,7 @@ public class COBBulkEventConfigurationTest {
 
     @AfterEach
     public void tearDown() {
-        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        ThreadLocalContextUtil.reset();
     }
 
     @Test
