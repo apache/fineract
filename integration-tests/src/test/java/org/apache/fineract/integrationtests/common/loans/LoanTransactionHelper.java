@@ -1965,4 +1965,10 @@ public class LoanTransactionHelper extends IntegrationTest {
             final PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "writeoff"));
     }
+
+    public Object addChargesForLoanWithError(final Integer loanId, final String request, final String jsonAttributeToGetBack) {
+        log.info("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
+        final String ADD_CHARGES_URL = LOAN_ACCOUNT_URL + "/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, jsonAttributeToGetBack);
+    }
 }
