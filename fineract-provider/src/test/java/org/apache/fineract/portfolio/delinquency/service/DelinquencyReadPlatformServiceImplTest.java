@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.delinquency.service;
 
 import static java.time.Month.JANUARY;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
-import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -35,6 +34,7 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquen
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
+import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -82,22 +82,25 @@ class DelinquencyReadPlatformServiceImplTest {
     public void testNoEnrichmentWhenThereIsNoDelinquencyAction() {
         // given
         CollectionData collectionData = CollectionData.template();
-        Collection<LoanDelinquencyAction> delinquencyActions = List.of();
+        Collection<LoanDelinquencyActionData> delinquencyActions = List.of();
 
         // when
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 12));
 
-        Assertions.assertNull(collectionData.getDelinquencyPausePeriods());
+        Assertions.assertTrue(collectionData.getDelinquencyPausePeriods().isEmpty());
     }
 
     @Test
     public void testMultiplePausesWithoutResumeActionCurrentlyInPauseFirstDay() {
         // given
         CollectionData collectionData = CollectionData.template();
-        Collection<LoanDelinquencyAction> delinquencyActions = List.of(
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 11)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 12), LocalDate.of(2023, JANUARY, 13)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20)));
+        Collection<LoanDelinquencyActionData> delinquencyActions = List.of(
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 11))),
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 12), LocalDate.of(2023, JANUARY, 13))),
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20))));
 
         // when
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 12));
@@ -114,10 +117,13 @@ class DelinquencyReadPlatformServiceImplTest {
     public void testMultiplePausesWithoutResumeActionCurrentlyInPauseLastDay() {
         // given
         CollectionData collectionData = CollectionData.template();
-        Collection<LoanDelinquencyAction> delinquencyActions = List.of(
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 11)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 12), LocalDate.of(2023, JANUARY, 13)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20)));
+        Collection<LoanDelinquencyActionData> delinquencyActions = List.of(
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 11))),
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 12), LocalDate.of(2023, JANUARY, 13))),
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20))));
 
         // when
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 13));
@@ -133,10 +139,13 @@ class DelinquencyReadPlatformServiceImplTest {
     public void testMultiplePausesWithoutResumeActionCurrentBusinessDateBetweenStartAndEndDate() {
         // given
         CollectionData collectionData = CollectionData.template();
-        Collection<LoanDelinquencyAction> delinquencyActions = List.of(
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 11)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 12), LocalDate.of(2023, JANUARY, 14)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20)));
+        Collection<LoanDelinquencyActionData> delinquencyActions = List.of(
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 11))),
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 12), LocalDate.of(2023, JANUARY, 14))),
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20))));
 
         // when
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 13));
@@ -152,10 +161,13 @@ class DelinquencyReadPlatformServiceImplTest {
     public void testMultiplePausesWithoutResumeCurrentBusinessDateIsNotOverlappingWithAnyOfThePauses() {
         // given
         CollectionData collectionData = CollectionData.template();
-        Collection<LoanDelinquencyAction> delinquencyActions = List.of(
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 11)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 13), LocalDate.of(2023, JANUARY, 14)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20)));
+        Collection<LoanDelinquencyActionData> delinquencyActions = List.of(
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 11))),
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 13), LocalDate.of(2023, JANUARY, 14))),
+                new LoanDelinquencyActionData(
+                        new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20))));
 
         // when
         underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 12));
@@ -163,48 +175,6 @@ class DelinquencyReadPlatformServiceImplTest {
         // then
         verifyPausePeriods(collectionData, //
                 pausePeriod(false, "2023-01-10", "2023-01-11"), //
-                pausePeriod(false, "2023-01-13", "2023-01-14"), //
-                pausePeriod(false, "2023-01-15", "2023-01-20") //
-        );
-    }
-
-    @Test
-    public void testResumeIsAppliedToOneOfThePauseNotActive() {
-        // given
-        CollectionData collectionData = CollectionData.template();
-        Collection<LoanDelinquencyAction> delinquencyActions = List.of(
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 20)),
-                new LoanDelinquencyAction(null, RESUME, LocalDate.of(2023, JANUARY, 11), null),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 13), LocalDate.of(2023, JANUARY, 14)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20)));
-
-        // when
-        underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 12));
-
-        // then
-        verifyPausePeriods(collectionData, //
-                pausePeriod(false, "2023-01-10", "2023-01-11"), //
-                pausePeriod(false, "2023-01-13", "2023-01-14"), //
-                pausePeriod(false, "2023-01-15", "2023-01-20") //
-        );
-    }
-
-    @Test
-    public void testResumeIsAppliedToOneOfThePauseActive() {
-        // given
-        CollectionData collectionData = CollectionData.template();
-        Collection<LoanDelinquencyAction> delinquencyActions = List.of(
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 10), LocalDate.of(2023, JANUARY, 20)),
-                new LoanDelinquencyAction(null, RESUME, LocalDate.of(2023, JANUARY, 11), null),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 13), LocalDate.of(2023, JANUARY, 14)),
-                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, JANUARY, 15), LocalDate.of(2023, JANUARY, 20)));
-
-        // when
-        underTest.enrichWithDelinquencyPausePeriodInfo(collectionData, delinquencyActions, LocalDate.of(2023, JANUARY, 11));
-
-        // then
-        verifyPausePeriods(collectionData, //
-                pausePeriod(true, "2023-01-10", "2023-01-11"), //
                 pausePeriod(false, "2023-01-13", "2023-01-14"), //
                 pausePeriod(false, "2023-01-15", "2023-01-20") //
         );

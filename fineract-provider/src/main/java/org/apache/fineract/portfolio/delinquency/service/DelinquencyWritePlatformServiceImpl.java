@@ -53,9 +53,11 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquen
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketAgesOverlapedException;
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyRangeInvalidAgesException;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
+import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
@@ -81,8 +83,10 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanDelinquencyDomainService loanDelinquencyDomainService;
     private final LoanInstallmentDelinquencyTagRepository loanInstallmentDelinquencyTagRepository;
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
     private final DelinquencyActionParseAndValidator delinquencyActionParseAndValidator;
+    private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
 
     @Override
     public CommandProcessingResult createDelinquencyRange(JsonCommand command) {
@@ -153,12 +157,13 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     }
 
     @Override
-    public LoanScheduleDelinquencyData calculateDelinquencyData(LoanScheduleDelinquencyData loanScheduleDelinquencyData) {
+    public LoanScheduleDelinquencyData calculateDelinquencyData(LoanScheduleDelinquencyData loanScheduleDelinquencyData,
+            List<LoanDelinquencyActionData> effectiveDelinquencyList) {
         Loan loan = loanScheduleDelinquencyData.getLoan();
         if (loan == null) {
             loan = this.loanRepository.findOneWithNotFoundDetection(loanScheduleDelinquencyData.getLoanId());
         }
-        final CollectionData collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan);
+        final CollectionData collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
         log.debug("Delinquency {}", collectionData);
         return new LoanScheduleDelinquencyData(loan.getId(), collectionData.getDelinquentDate(), collectionData.getDelinquentDays(), loan);
     }
@@ -168,9 +173,14 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         Map<String, Object> changes = new HashMap<>();
 
         final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
+        final List<LoanDelinquencyAction> savedDelinquencyList = delinquencyReadPlatformService
+                .retrieveLoanDelinquencyActions(loan.getId());
+        List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
+                .calculateEffectiveDelinquencyList(savedDelinquencyList);
         final DelinquencyBucket delinquencyBucket = loan.getLoanProduct().getDelinquencyBucket();
         if (delinquencyBucket != null) {
-            final LoanDelinquencyData loanDelinquencyData = loanDelinquencyDomainService.getLoanDelinquencyData(loan);
+            final LoanDelinquencyData loanDelinquencyData = loanDelinquencyDomainService.getLoanDelinquencyData(loan,
+                    effectiveDelinquencyList);
             // loan delinquent data
             final CollectionData collectionData = loanDelinquencyData.getLoanCollectionData();
             // loan installments delinquent data
@@ -188,11 +198,13 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     }
 
     @Override
-    public void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData) {
+    public void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData,
+            List<LoanDelinquencyActionData> effectiveDelinquencyList) {
         final Loan loan = loanDelinquencyData.getLoan();
         if (loan.hasDelinquencyBucket()) {
             final DelinquencyBucket delinquencyBucket = loan.getLoanProduct().getDelinquencyBucket();
-            final LoanDelinquencyData loanDelinquentData = loanDelinquencyDomainService.getLoanDelinquencyData(loan);
+            final LoanDelinquencyData loanDelinquentData = loanDelinquencyDomainService.getLoanDelinquencyData(loan,
+                    effectiveDelinquencyList);
             // loan delinquent data
             final CollectionData collectionData = loanDelinquentData.getLoanCollectionData();
             // loan installments delinquent data
@@ -212,7 +224,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     public CommandProcessingResult createDelinquencyAction(Long loanId, JsonCommand command) {
         final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        final List<LoanDelinquencyAction> savedDelinquencyList = loanDelinquencyActionRepository.findByLoanOrderById(loan);
+        final List<LoanDelinquencyAction> savedDelinquencyList = delinquencyReadPlatformService.retrieveLoanDelinquencyActions(loanId);
 
         LoanDelinquencyAction parsedDelinquencyAction = delinquencyActionParseAndValidator.validateAndParseUpdate(command, loan,
                 savedDelinquencyList, businessDate);
