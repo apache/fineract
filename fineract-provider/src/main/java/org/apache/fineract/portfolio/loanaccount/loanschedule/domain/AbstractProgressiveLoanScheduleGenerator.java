@@ -188,10 +188,11 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
         final BigDecimal totalOutstanding = BigDecimal.ZERO;
 
         return LoanScheduleModel.from(periods, applicationCurrency, scheduleParams.getLoanTermInDays(),
-                scheduleParams.getPrincipalToBeScheduled(), scheduleParams.getTotalCumulativePrincipal().getAmount(), totalPrincipalPaid,
-                scheduleParams.getTotalCumulativeInterest().getAmount(), scheduleParams.getTotalFeeChargesCharged().getAmount(),
-                scheduleParams.getTotalPenaltyChargesCharged().getAmount(), scheduleParams.getTotalRepaymentExpected().getAmount(),
-                totalOutstanding);
+                scheduleParams.getPrincipalToBeScheduled().plus(loanApplicationTerms.getDownPaymentAmount()),
+                scheduleParams.getTotalCumulativePrincipal().plus(loanApplicationTerms.getDownPaymentAmount()).getAmount(),
+                totalPrincipalPaid, scheduleParams.getTotalCumulativeInterest().getAmount(),
+                scheduleParams.getTotalFeeChargesCharged().getAmount(), scheduleParams.getTotalPenaltyChargesCharged().getAmount(),
+                scheduleParams.getTotalRepaymentExpected().getAmount(), totalOutstanding);
     }
 
     @Override

@@ -128,14 +128,14 @@ public abstract class BaseLoanIntegrationTest {
                 .useBorrowerCycle(false)//
                 .minPrincipal(100.0)//
                 .principal(1000.0)//
-                .maxPrincipal(10000.0)//
+                .maxPrincipal(100000.0)//
                 .minNumberOfRepayments(1)//
                 .numberOfRepayments(1)//
                 .maxNumberOfRepayments(30)//
                 .isLinkedToFloatingInterestRates(false)//
                 .minInterestRatePerPeriod((double) 0)//
                 .interestRatePerPeriod((double) 0)//
-                .maxInterestRatePerPeriod((double) 0)//
+                .maxInterestRatePerPeriod((double) 100)//
                 .interestRateFrequencyType(2)//
                 .repaymentEvery(30)//
                 .repaymentFrequencyType(0L)//
@@ -412,8 +412,8 @@ public abstract class BaseLoanIntegrationTest {
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId).productId(loanProductId)
                 .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY)
-                .locale("en").submittedOnDate(loanDisbursementDate).amortizationType(1).interestRatePerPeriod(0)
-                .interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0).repaymentEvery(30).repaymentFrequencyType(0)
+                .locale("en").submittedOnDate(loanDisbursementDate).amortizationType(1).interestRatePerPeriod(BigDecimal.ZERO)
+                .interestCalculationPeriodType(1).interestType(0).repaymentEvery(30).repaymentFrequencyType(0)
                 .numberOfRepayments(numberOfRepayments).loanTermFrequency(numberOfRepayments * 30).loanTermFrequencyType(0)
                 .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)).principal(BigDecimal.valueOf(amount)).loanType("individual");
         if (customizer != null) {
@@ -422,9 +422,9 @@ public abstract class BaseLoanIntegrationTest {
         return postLoansRequest;
     }
 
-    protected PostLoansLoanIdRequest approveLoanRequest(Double amount) {
+    protected PostLoansLoanIdRequest approveLoanRequest(Double amount, String approvalDate) {
         return new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(amount)).dateFormat(DATETIME_PATTERN)
-                .approvedOnDate("01 January 2023").locale("en");
+                .approvedOnDate(approvalDate).locale("en");
     }
 
     protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
@@ -438,7 +438,7 @@ public abstract class BaseLoanIntegrationTest {
                 .applyLoan(applyLoanRequest(clientId, loanProductId, loanDisbursementDate, amount, numberOfRepayments, customizer));
 
         PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                approveLoanRequest(amount));
+                approveLoanRequest(amount, loanDisbursementDate));
 
         return approvedLoanResult.getLoanId();
     }

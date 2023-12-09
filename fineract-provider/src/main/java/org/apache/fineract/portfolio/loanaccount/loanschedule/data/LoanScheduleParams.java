@@ -180,7 +180,7 @@ public final class LoanScheduleParams {
         final Money principalToBeScheduled = null;
         final Money outstandingBalance = null;
         final Money outstandingBalanceAsPerRest = null;
-        final List<LoanRepaymentScheduleInstallment> installments = null;
+        final List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
         final boolean partialUpdate = false;
         final int loanTermInDays = 0;
         final Money totalOutstandingInterestPaymentDueToGrace = null;
@@ -266,6 +266,10 @@ public final class LoanScheduleParams {
         return this.periodNumber;
     }
 
+    public void setPeriodNumber(int periodNumber) {
+        this.periodNumber = periodNumber;
+    }
+
     public int getInstalmentNumber() {
         return this.instalmentNumber;
     }
@@ -274,12 +278,20 @@ public final class LoanScheduleParams {
         return this.actualRepaymentDate;
     }
 
+    public void setActualRepaymentDate(LocalDate actualRepaymentDate) {
+        this.actualRepaymentDate = actualRepaymentDate;
+    }
+
     public Money getTotalCumulativePrincipal() {
         return this.totalCumulativePrincipal;
     }
 
     public void addTotalCumulativePrincipal(final Money totalCumulativePrincipal) {
-        this.totalCumulativePrincipal = this.totalCumulativePrincipal.plus(totalCumulativePrincipal);
+        if (this.totalCumulativePrincipal != null) {
+            this.totalCumulativePrincipal = this.totalCumulativePrincipal.plus(totalCumulativePrincipal);
+        } else {
+            this.totalCumulativePrincipal = totalCumulativePrincipal;
+        }
     }
 
     public Money getTotalCumulativeInterest() {
@@ -287,7 +299,11 @@ public final class LoanScheduleParams {
     }
 
     public void addTotalCumulativeInterest(final Money totalCumulativeInterest) {
-        this.totalCumulativeInterest = this.totalCumulativeInterest.plus(totalCumulativeInterest);
+        if (this.totalCumulativeInterest != null) {
+            this.totalCumulativeInterest = this.totalCumulativeInterest.plus(totalCumulativeInterest);
+        } else {
+            this.totalCumulativeInterest = totalCumulativeInterest;
+        }
     }
 
     public Money getTotalFeeChargesCharged() {
@@ -295,7 +311,11 @@ public final class LoanScheduleParams {
     }
 
     public void addTotalFeeChargesCharged(final Money totalFeeChargesCharged) {
-        this.totalFeeChargesCharged = this.totalFeeChargesCharged.plus(totalFeeChargesCharged);
+        if (this.totalFeeChargesCharged != null) {
+            this.totalFeeChargesCharged = this.totalFeeChargesCharged.plus(totalFeeChargesCharged);
+        } else {
+            this.totalFeeChargesCharged = totalFeeChargesCharged;
+        }
     }
 
     public Money getTotalPenaltyChargesCharged() {
@@ -303,7 +323,11 @@ public final class LoanScheduleParams {
     }
 
     public void addTotalPenaltyChargesCharged(final Money totalPenaltyChargesCharged) {
-        this.totalPenaltyChargesCharged = this.totalPenaltyChargesCharged.plus(totalPenaltyChargesCharged);
+        if (this.totalPenaltyChargesCharged != null) {
+            this.totalPenaltyChargesCharged = this.totalPenaltyChargesCharged.plus(totalPenaltyChargesCharged);
+        } else {
+            this.totalPenaltyChargesCharged = totalPenaltyChargesCharged;
+        }
     }
 
     public Money getTotalRepaymentExpected() {
@@ -311,11 +335,19 @@ public final class LoanScheduleParams {
     }
 
     public void addTotalRepaymentExpected(final Money totalRepaymentExpected) {
-        this.totalRepaymentExpected = this.totalRepaymentExpected.plus(totalRepaymentExpected);
+        if (this.totalRepaymentExpected != null) {
+            this.totalRepaymentExpected = this.totalRepaymentExpected.plus(totalRepaymentExpected);
+        } else {
+            this.totalRepaymentExpected = totalRepaymentExpected;
+        }
     }
 
     public Money getReducePrincipal() {
         return this.reducePrincipal;
+    }
+
+    public void setReducePrincipal(Money reducePrincipal) {
+        this.reducePrincipal = reducePrincipal;
     }
 
     public Map<LocalDate, Money> getPrincipalPortionMap() {
@@ -338,8 +370,16 @@ public final class LoanScheduleParams {
         return this.outstandingBalance;
     }
 
+    public void setOutstandingBalance(Money outstandingBalance) {
+        this.outstandingBalance = outstandingBalance;
+    }
+
     public Money getOutstandingBalanceAsPerRest() {
         return this.outstandingBalanceAsPerRest;
+    }
+
+    public void setOutstandingBalanceAsPerRest(Money outstandingBalanceAsPerRest) {
+        this.outstandingBalanceAsPerRest = outstandingBalanceAsPerRest;
     }
 
     public List<LoanRepaymentScheduleInstallment> getInstallments() {
@@ -366,12 +406,16 @@ public final class LoanScheduleParams {
         return this.periodStartDate;
     }
 
+    public void setPeriodStartDate(LocalDate periodStartDate) {
+        this.periodStartDate = periodStartDate;
+    }
+
     public Money getPrincipalToBeScheduled() {
         return this.principalToBeScheduled;
     }
 
-    public void setPeriodNumber(int periodNumber) {
-        this.periodNumber = periodNumber;
+    public void setPrincipalToBeScheduled(Money principalToBeScheduled) {
+        this.principalToBeScheduled = principalToBeScheduled;
     }
 
     public void incrementPeriodNumber() {
@@ -382,56 +426,54 @@ public final class LoanScheduleParams {
         this.instalmentNumber++;
     }
 
-    public void setPeriodStartDate(LocalDate periodStartDate) {
-        this.periodStartDate = periodStartDate;
-    }
-
-    public void setActualRepaymentDate(LocalDate actualRepaymentDate) {
-        this.actualRepaymentDate = actualRepaymentDate;
-    }
-
-    public void setReducePrincipal(Money reducePrincipal) {
-        this.reducePrincipal = reducePrincipal;
-    }
-
     public void addReducePrincipal(Money reducePrincipal) {
-        this.reducePrincipal = this.reducePrincipal.plus(reducePrincipal);
+        if (this.reducePrincipal != null) {
+            this.reducePrincipal = this.reducePrincipal.plus(reducePrincipal);
+        } else {
+            this.reducePrincipal = reducePrincipal;
+        }
     }
 
     public void reduceReducePrincipal(Money reducePrincipal) {
-        this.reducePrincipal = this.reducePrincipal.minus(reducePrincipal);
-    }
-
-    public void setPrincipalToBeScheduled(Money principalToBeScheduled) {
-        this.principalToBeScheduled = principalToBeScheduled;
+        if (this.reducePrincipal != null) {
+            this.reducePrincipal = this.reducePrincipal.minus(reducePrincipal);
+        }
     }
 
     public void addPrincipalToBeScheduled(Money principalToBeScheduled) {
-        this.principalToBeScheduled = this.principalToBeScheduled.plus(principalToBeScheduled);
-    }
-
-    public void setOutstandingBalance(Money outstandingBalance) {
-        this.outstandingBalance = outstandingBalance;
+        if (this.principalToBeScheduled != null) {
+            this.principalToBeScheduled = this.principalToBeScheduled.plus(principalToBeScheduled);
+        } else {
+            this.principalToBeScheduled = principalToBeScheduled;
+        }
     }
 
     public void addOutstandingBalance(Money outstandingBalance) {
-        this.outstandingBalance = this.outstandingBalance.plus(outstandingBalance);
+        if (this.outstandingBalance != null) {
+            this.outstandingBalance = this.outstandingBalance.plus(outstandingBalance);
+        } else {
+            this.outstandingBalance = outstandingBalance;
+        }
     }
 
     public void reduceOutstandingBalance(Money outstandingBalance) {
-        this.outstandingBalance = this.outstandingBalance.minus(outstandingBalance);
-    }
-
-    public void setOutstandingBalanceAsPerRest(Money outstandingBalanceAsPerRest) {
-        this.outstandingBalanceAsPerRest = outstandingBalanceAsPerRest;
+        if (this.outstandingBalance != null) {
+            this.outstandingBalance = this.outstandingBalance.minus(outstandingBalance);
+        }
     }
 
     public void addOutstandingBalanceAsPerRest(Money outstandingBalanceAsPerRest) {
-        this.outstandingBalanceAsPerRest = this.outstandingBalanceAsPerRest.plus(outstandingBalanceAsPerRest);
+        if (this.outstandingBalanceAsPerRest != null) {
+            this.outstandingBalanceAsPerRest = this.outstandingBalanceAsPerRest.plus(outstandingBalanceAsPerRest);
+        } else {
+            this.outstandingBalanceAsPerRest = outstandingBalanceAsPerRest;
+        }
     }
 
     public void reduceOutstandingBalanceAsPerRest(Money outstandingBalanceAsPerRest) {
-        this.outstandingBalanceAsPerRest = this.outstandingBalanceAsPerRest.minus(outstandingBalanceAsPerRest);
+        if (this.outstandingBalanceAsPerRest != null) {
+            this.outstandingBalanceAsPerRest = this.outstandingBalanceAsPerRest.minus(outstandingBalanceAsPerRest);
+        }
     }
 
     public int getLoanTermInDays() {
@@ -466,16 +508,22 @@ public final class LoanScheduleParams {
         return this.unCompoundedAmount;
     }
 
+    public void setUnCompoundedAmount(Money unCompoundedAmount) {
+        this.unCompoundedAmount = unCompoundedAmount;
+    }
+
     public void addUnCompoundedAmount(Money unCompoundedAmount) {
-        this.unCompoundedAmount = this.unCompoundedAmount.plus(unCompoundedAmount);
+        if (this.unCompoundedAmount != null) {
+            this.unCompoundedAmount = this.unCompoundedAmount.plus(unCompoundedAmount);
+        } else {
+            this.unCompoundedAmount = unCompoundedAmount;
+        }
     }
 
     public void minusUnCompoundedAmount(Money unCompoundedAmount) {
-        this.unCompoundedAmount = this.unCompoundedAmount.minus(unCompoundedAmount);
-    }
-
-    public void setUnCompoundedAmount(Money unCompoundedAmount) {
-        this.unCompoundedAmount = unCompoundedAmount;
+        if (this.unCompoundedAmount != null) {
+            this.unCompoundedAmount = this.unCompoundedAmount.minus(unCompoundedAmount);
+        }
     }
 
     public boolean isFirstPeriod() {

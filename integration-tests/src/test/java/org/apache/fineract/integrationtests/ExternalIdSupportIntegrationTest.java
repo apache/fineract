@@ -935,10 +935,11 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                     "modify",
                     new PutLoansLoanIdRequest().submittedOnDate("31 August 2022").dateFormat("dd MMMM yyyy").locale("en")
                             .loanType("individual").productId(loanProductID.longValue()).clientId(client.getClientId()).interestType(0)
-                            .interestCalculationPeriodType(1).interestRatePerPeriod(0).isEqualAmortization(false).loanTermFrequency(30)
-                            .loanTermFrequencyType(0).maxOutstandingLoanBalance(10000L).numberOfRepayments(1).principal(10000L)
-                            .repaymentEvery(30).repaymentFrequencyType(0).transactionProcessingStrategyCode("mifos-standard-strategy")
-                            .expectedDisbursementDate("2 September 2022").amortizationType(1));
+                            .interestCalculationPeriodType(1).interestRatePerPeriod(BigDecimal.ZERO).isEqualAmortization(false)
+                            .loanTermFrequency(30).loanTermFrequencyType(0).maxOutstandingLoanBalance(10000L).numberOfRepayments(1)
+                            .principal(10000L).repaymentEvery(30).repaymentFrequencyType(0)
+                            .transactionProcessingStrategyCode("mifos-standard-strategy").expectedDisbursementDate("2 September 2022")
+                            .amortizationType(1));
 
             assertEquals(loanExternalIdStr2, modifyLoanApplicationResult.getResourceExternalId());
             DeleteLoansLoanIdResponse deleteLoanApplicationResult = this.loanTransactionHelper.deleteLoanApplication(loanExternalIdStr2);

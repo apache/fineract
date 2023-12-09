@@ -71,7 +71,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
             PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
 
             PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount));
+                    approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
 
@@ -130,12 +130,12 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
                     .interestType(interestType)//
                     .amortizationType(amortizationType)//
                     .interestCalculationPeriodType(SAME_AS_REPAYMENT_PERIOD)//
-                    .interestRatePerPeriod(12);
+                    .interestRatePerPeriod(BigDecimal.valueOf(12));
 
             PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
 
             PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount));
+                    approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
 
@@ -193,12 +193,12 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
                     .interestType(interestType)//
                     .amortizationType(amortizationType)//
                     .interestCalculationPeriodType(SAME_AS_REPAYMENT_PERIOD)//
-                    .interestRatePerPeriod(12);
+                    .interestRatePerPeriod(BigDecimal.valueOf(12));
 
             PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
 
             PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount));
+                    approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
 

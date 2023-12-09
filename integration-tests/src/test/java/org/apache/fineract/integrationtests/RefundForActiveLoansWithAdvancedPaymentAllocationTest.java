@@ -104,8 +104,8 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
             Integer loanProductId = createLoanProduct("1000", "30", "4", LoanScheduleProcessingType.VERTICAL, assetAccount, incomeAccount,
                     expenseAccount, overpaymentAccount);
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), loanProductId, 1000L, 90, 30, 3, 0,
-                    "01 January 2023", "01 January 2023");
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), loanProductId, 1000L, 90, 30, 3,
+                    BigDecimal.ZERO, "01 January 2023", "01 January 2023");
 
             int loanId = loanResponse.getLoanId().intValue();
 
@@ -303,8 +303,8 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
             Integer loanProductId = createLoanProduct("1000", "30", "4", LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount,
                     expenseAccount, overpaymentAccount);
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), loanProductId, 1000L, 90, 30, 3, 0,
-                    "01 January 2023", "01 January 2023");
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), loanProductId, 1000L, 90, 30, 3,
+                    BigDecimal.ZERO, "01 January 2023", "01 January 2023");
 
             int loanId = loanResponse.getLoanId().intValue();
 
@@ -529,7 +529,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final Long principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final int interestRate,
+            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
             final String expectedDisbursementDate, final String submittedOnDate) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
