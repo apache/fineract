@@ -27,7 +27,16 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.GetUsersUserIdResponse;
+import org.apache.fineract.client.models.PostUsersRequest;
+import org.apache.fineract.client.models.PostUsersResponse;
+import org.apache.fineract.client.models.PutUsersUserIdRequest;
+import org.apache.fineract.client.models.PutUsersUserIdResponse;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
@@ -40,7 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserAdministrationTest {
+public class UserAdministrationTest extends IntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
     private ResponseSpecification responseSpec;
@@ -171,4 +180,67 @@ public class UserAdministrationTest {
 
         final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId, "systemtest", "errors");
     }
+
+    @Test
+    public void testApplicationUserCanChangeOwnPassword() {
+        // Admin creates a new user with an empty role
+        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        String originalPassword = "aA1qwerty56";
+        String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
+                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
+                .email("whatever@mifos.org").password(originalPassword).repeatPassword(originalPassword).sendPasswordToEmail(false)
+                .officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+
+        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        Long userId = userCreationResponse.getResourceId();
+        Assertions.assertNotNull(userId);
+
+        // User updates its own password
+        String updatedPassword = "aA1qwerty56!";
+        PutUsersUserIdResponse putUsersUserIdResponse = ok(newFineract(simpleUsername, originalPassword).users.update26(userId,
+                new PutUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
+        Assertions.assertNotNull(putUsersUserIdResponse.getResourceId());
+
+        // From then on the originalPassword is not working anymore
+        CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
+            ok(newFineract(simpleUsername, originalPassword).users.retrieveOne31(userId));
+        });
+        Assertions.assertEquals(401, callFailedRuntimeException.getResponse().raw().code());
+        Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("Unauthorized"));
+
+        // The update password is still working perfectly
+        GetUsersUserIdResponse ok = ok(newFineract(simpleUsername, updatedPassword).users.retrieveOne31(userId));
+    }
+
+    @Test
+    public void testApplicationUserShallNotBeAbleToChangeItsOwnRoles() {
+        // Admin creates a new user with one role assigned
+        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        String password = "aA1qwerty56";
+        String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
+                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
+                .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
+                .officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+
+        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        Long userId = userCreationResponse.getResourceId();
+        Assertions.assertNotNull(userId);
+
+        // Admin creates a second role
+        Integer roleId2 = RolesHelper.createRole(requestSpec, responseSpec);
+
+        // User tries to update it's own roles
+        CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
+            ok(newFineract(simpleUsername, password).users.update26(userId,
+                    new PutUsersUserIdRequest().roles(List.of(Long.valueOf(roleId2)))));
+        });
+
+        Assertions.assertEquals(400, callFailedRuntimeException.getResponse().raw().code());
+        Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("not.enough.permission.to.update.fields"));
+    }
+
 }
