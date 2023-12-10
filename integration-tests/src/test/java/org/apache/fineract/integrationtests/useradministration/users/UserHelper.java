@@ -149,7 +149,7 @@ public final class UserHelper {
             PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
                     .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
                     .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
-                    .roles(List.of(simpleRoleId)).officeId(headOffice.getId());
+                    .roles(List.of(Long.valueOf(simpleRoleId))).officeId(headOffice.getId());
 
             PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
             Assertions.assertNotNull(userCreationResponse.getResourceId());
