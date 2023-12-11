@@ -60,6 +60,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
@@ -126,7 +127,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultSche
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeApiJsonValidator;
 import org.apache.fineract.portfolio.loanproduct.data.LoanOverdueDTO;
-import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
