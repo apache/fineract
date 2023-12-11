@@ -99,7 +99,7 @@ dependencies {
             'io.github.resilience4j:resilience4j-spring-boot2',
             )
 
-    implementation ('software.amazon.msk:aws-msk-iam-auth:2.0.0') {
+    implementation ('software.amazon.msk:aws-msk-iam-auth:2.0.1') {
         exclude group: 'commons-logging'
     }
 
