@@ -46,7 +46,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
@@ -126,10 +125,6 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     @Column(name = "reason_for_block", nullable = true)
     private String reasonForBlock;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "savings_account_transaction_id", referencedColumnName = "id")
-    private List<Note> notes = new ArrayList<>();
 
     @Column(name = "is_reversal", nullable = false)
     private boolean reversalTransaction;
@@ -426,10 +421,6 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     public List<SavingsAccountTransactionTaxDetails> getTaxDetails() {
         return this.taxDetails;
-    }
-
-    public List<Note> getNotes() {
-        return notes;
     }
 
     public Integer getTypeOf() {
