@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiConstants;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappings;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappingsRepository;
@@ -230,8 +231,12 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                 savedDelinquencyList, businessDate);
 
         parsedDelinquencyAction.setLoan(loan);
-
         LoanDelinquencyAction saved = loanDelinquencyActionRepository.saveAndFlush(parsedDelinquencyAction);
+        // if backdated pause recalculate delinquency data
+        if (DateUtils.isBefore(parsedDelinquencyAction.getStartDate(), businessDate)
+                && DelinquencyAction.PAUSE.equals(parsedDelinquencyAction.getAction())) {
+            recalculateLoanDelinquencyData(loan);
+        }
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountDelinquencyPauseChangedBusinessEvent(loan));
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withEntityId(saved.getId()) //
@@ -240,6 +245,21 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .build();
+    }
+
+    private void recalculateLoanDelinquencyData(Loan loan) {
+        List<LoanDelinquencyAction> savedDelinquencyList = delinquencyReadPlatformService.retrieveLoanDelinquencyActions(loan.getId());
+        List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
+                .calculateEffectiveDelinquencyList(savedDelinquencyList);
+
+        CollectionData loanDelinquencyData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
+        LoanScheduleDelinquencyData loanScheduleDelinquencyData = new LoanScheduleDelinquencyData(loan.getId(),
+                loanDelinquencyData.getDelinquentDate(), loanDelinquencyData.getDelinquentDays(), loan);
+        if (loanScheduleDelinquencyData.getOverdueDays() > 0) {
+            applyDelinquencyTagToLoan(loanScheduleDelinquencyData, effectiveDelinquencyList);
+        } else {
+            removeDelinquencyTagToLoan(loan);
+        }
     }
 
     @Override
