@@ -61,6 +61,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         } else if (DelinquencyAction.RESUME.equals(parsedDelinquencyAction.getAction())) {
             validateResumeStartDate(parsedDelinquencyAction, businessDate);
             validateResumeNoEndDate(parsedDelinquencyAction);
+            validateResumeDoesNotExist(parsedDelinquencyAction, savedDelinquencyActions);
             validateResumeShouldBeOnActivePause(parsedDelinquencyAction, effectiveDelinquencyList);
         }
         return parsedDelinquencyAction;
@@ -84,6 +85,17 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         if (!match) {
             raiseValidationError("loan-delinquency-action-resume-should-be-on-pause",
                     "Resume Delinquency Action can only be created during an active pause");
+        }
+    }
+
+    private void validateResumeDoesNotExist(LoanDelinquencyAction parsedDelinquencyAction,
+            List<LoanDelinquencyAction> savedDelinquencyActions) {
+        boolean match = savedDelinquencyActions.stream() //
+                .filter(action -> DelinquencyAction.RESUME.equals(action.getAction())) //
+                .anyMatch(action -> parsedDelinquencyAction.getStartDate().isEqual(action.getStartDate()));
+        if (match) {
+            raiseValidationError("loan-delinquency-action-resume-should-be-unique",
+                    "There is an existing Resume Delinquency Action on this date");
         }
     }
 
@@ -163,7 +175,8 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
      */
     private boolean isOverlapping(LoanDelinquencyAction parsed, LoanDelinquencyActionData existing) {
         return (parsed.getEndDate().isAfter(existing.getStartDate()) && parsed.getEndDate().isBefore(existing.getEndDate()))
-                || (parsed.getStartDate().isAfter(existing.getStartDate()) && parsed.getStartDate().isBefore(existing.getEndDate()));
+                || (parsed.getStartDate().isAfter(existing.getStartDate()) && parsed.getStartDate().isBefore(existing.getEndDate()))
+                || (parsed.getStartDate().isEqual(existing.getStartDate()) && parsed.getEndDate().isEqual(existing.getEndDate()));
     }
 
     @org.jetbrains.annotations.NotNull

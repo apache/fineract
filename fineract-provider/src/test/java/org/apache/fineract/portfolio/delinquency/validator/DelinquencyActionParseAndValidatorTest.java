@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -137,6 +138,21 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
+    public void testNewPauseIsOverlappingWithExistingPauseBecauseSameDates() throws JsonProcessingException {
+        Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
+
+        List<LoanDelinquencyAction> existing = List.of(loanDelinquencyAction(PAUSE, "15 September 2022", "22 September 2022"));
+        JsonCommand command = delinquencyAction("pause", "15 September 2022", "22 September 2022");
+        List<LoanDelinquencyActionData> effectiveList = List.of(loanDelinquencyActionData(existing.get(0)));
+        Mockito.when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(existing)).thenReturn(effectiveList);
+
+        assertPlatformValidationException("Delinquency pause period cannot overlap with another pause period",
+                "loan-delinquency-action-overlapping",
+                () -> underTest.validateAndParseUpdate(command, loan, existing, localDate("09 September 2022")));
+    }
+
+    @Test
     public void testNewPauseIsNotOverlappingBecauseThereWasAResume() throws JsonProcessingException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
@@ -212,6 +228,32 @@ class DelinquencyActionParseAndValidatorTest {
         assertPlatformValidationException("Start date of the Resume Delinquency action must be the current business date",
                 "loan-delinquency-action-invalid-start-date",
                 () -> underTest.validateAndParseUpdate(command, loan, List.of(), localDate("10 September 2022")));
+    }
+
+    @Test
+    public void testValidationErrorResumeOnExistingResumeDate() throws JsonProcessingException {
+        Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
+
+        JsonCommand command = delinquencyAction("resume", "09 September 2022", null);
+        List<LoanDelinquencyAction> existing = List.of(loanDelinquencyAction(PAUSE, "05 September 2022", "15 September 2022"));
+        List<LoanDelinquencyActionData> effectiveList = List.of(loanDelinquencyActionData(existing.get(0)));
+        Mockito.when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(existing)).thenReturn(effectiveList);
+
+        LoanDelinquencyAction parsedDelinquencyAction = underTest.validateAndParseUpdate(command, loan, existing,
+                localDate("09 September 2022"));
+        Assertions.assertEquals(RESUME, parsedDelinquencyAction.getAction());
+        Assertions.assertEquals(localDate("09 September 2022"), parsedDelinquencyAction.getStartDate());
+        Assertions.assertNull(parsedDelinquencyAction.getEndDate());
+
+        List<LoanDelinquencyAction> existing2 = List.of(loanDelinquencyAction(PAUSE, "05 September 2022", "15 September 2022"),
+                loanDelinquencyAction(RESUME, "09 September 2022", null));
+
+        JsonCommand command2 = delinquencyAction("resume", "09 September 2022", null);
+
+        assertPlatformValidationException("There is an existing Resume Delinquency Action on this date",
+                "loan-delinquency-action-resume-should-be-unique",
+                () -> underTest.validateAndParseUpdate(command2, loan, existing2, localDate("09 September 2022")));
     }
 
     @Test
@@ -348,7 +390,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     private LoanDelinquencyAction loanDelinquencyAction(DelinquencyAction action, String startTime, String endTime) {
-        return new LoanDelinquencyAction(null, action, localDate(startTime), localDate(endTime));
+        return new LoanDelinquencyAction(null, action, localDate(startTime), Objects.isNull(endTime) ? null : localDate(endTime));
     }
 
     private LoanDelinquencyActionData loanDelinquencyActionData(LoanDelinquencyAction loanDelinquencyAction) {
