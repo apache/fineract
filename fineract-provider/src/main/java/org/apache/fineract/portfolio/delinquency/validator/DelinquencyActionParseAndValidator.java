@@ -56,7 +56,8 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         validateLoanIsActive(loan);
         if (DelinquencyAction.PAUSE.equals(parsedDelinquencyAction.getAction())) {
             validateBothStartAndEndDatesAreProvided(parsedDelinquencyAction);
-            validatePauseStartAndEndDate(parsedDelinquencyAction, businessDate);
+            validatePauseStartAndEndDate(parsedDelinquencyAction);
+            validatePauseStartDateNotBeforeDisbursementDate(parsedDelinquencyAction, loan.getDisbursementDate());
             validatePauseShallNotOverlap(parsedDelinquencyAction, effectiveDelinquencyList);
         } else if (DelinquencyAction.RESUME.equals(parsedDelinquencyAction.getAction())) {
             validateResumeStartDate(parsedDelinquencyAction, businessDate);
@@ -117,15 +118,18 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         }
     }
 
-    private void validatePauseStartAndEndDate(LoanDelinquencyAction parsedDelinquencyAction, LocalDate businessDate) {
+    private void validatePauseStartAndEndDate(LoanDelinquencyAction parsedDelinquencyAction) {
         if (parsedDelinquencyAction.getStartDate().equals(parsedDelinquencyAction.getEndDate())) {
             raiseValidationError("loan-delinquency-action-invalid-start-date-and-end-date",
                     "Delinquency pause period must be at least one day");
         }
+    }
 
-        if (businessDate.isAfter(parsedDelinquencyAction.getStartDate())) {
-            raiseValidationError("loan-delinquency-action-invalid-start-date", "Start date of pause period must be in the future",
-                    START_DATE);
+    private void validatePauseStartDateNotBeforeDisbursementDate(LoanDelinquencyAction parsedDelinquencyAction,
+            LocalDate firstDisbursalDate) {
+        if (firstDisbursalDate.isAfter(parsedDelinquencyAction.getStartDate())) {
+            raiseValidationError("loan-delinquency-action-invalid-start-date",
+                    "Start date of pause period must be after first disbursal date", START_DATE);
         }
     }
 
