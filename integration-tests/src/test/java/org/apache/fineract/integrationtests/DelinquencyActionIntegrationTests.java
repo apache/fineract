@@ -222,6 +222,31 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
         });
     }
 
+    @Test
+    public void testValidationErrorIsThrownWhenCreatingActionThatOverlaps() {
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product
+            Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1500.0, 2);
+
+            // Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
+
+            // Create Delinquency Pause for the Loan
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "01 January 2023", "15 January 2023");
+
+            // Create overlapping Delinquency Pause for the Loan
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "01 January 2023", "15 January 2023"));
+            assertTrue(exception.getMessage().contains("Delinquency pause period cannot overlap with another pause period"));
+        });
+    }
+
     private void validateLoanDelinquencyPausePeriods(Long loanId, GetLoansLoanIdDelinquencyPausePeriod... pausePeriods) {
         GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         Assertions.assertNotNull(loan.getDelinquent());
