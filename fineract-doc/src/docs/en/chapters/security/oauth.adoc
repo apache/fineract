@@ -51,6 +51,8 @@ curl --location --request POST \
 --data-urlencode 'client_secret=<enter the client secret from credentials tab>'
 ----
 
+Before making calls to the fineract api, ensure that you set the property spring.security.oauth2.resourceserver.jwt.issuer-uri within application.properties to the issuer url of the keyclock server, which generated the token. After changing the property, you may have to rebuild. Alternatively, you can expose a docker variable through that file, so you could dynamically pass new issuer url to the docker image.
+
 The reply should contain a field 'access_token'. Copy the field's value and use it in the API call below:
 
 == Invoke APIs and pass `Authorization: bearer ...` header
