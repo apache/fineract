@@ -36,8 +36,6 @@ import org.quartz.JobKey;
 import org.quartz.JobListener;
 import org.quartz.Trigger;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +50,6 @@ public class SchedulerJobListener implements JobListener {
     private final String name = SchedulerServiceConstants.DEFAULT_LISTENER_NAME;
     private final SchedularWritePlatformService schedularService;
     private final AppUserRepositoryWrapper userRepository;
-    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
     private int stackTraceLevel = 0;
 
@@ -64,8 +61,7 @@ public class SchedulerJobListener implements JobListener {
     @Override
     public void jobToBeExecuted(@SuppressWarnings("unused") final JobExecutionContext context) {
         AppUser user = this.userRepository.fetchSystemUser();
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
-                authoritiesMapper.mapAuthorities(user.getAuthorities()));
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
         HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
