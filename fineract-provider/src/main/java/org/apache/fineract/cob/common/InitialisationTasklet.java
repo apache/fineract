@@ -36,7 +36,6 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @Slf4j
@@ -49,8 +48,7 @@ public class InitialisationTasklet implements Tasklet {
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
         HashMap<BusinessDateType, LocalDate> businessDates = ThreadLocalContextUtil.getBusinessDates();
         AppUser user = userRepository.fetchSystemUser();
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
-                new NullAuthoritiesMapper().mapAuthorities(user.getAuthorities()));
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
         ThreadLocalContextUtil.setActionContext(ActionContext.COB);
         String businessDateString = Objects.requireNonNull((String) chunkContext.getStepContext().getStepExecution().getJobExecution()
