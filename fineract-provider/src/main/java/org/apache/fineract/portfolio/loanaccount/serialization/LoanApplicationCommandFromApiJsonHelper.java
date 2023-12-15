@@ -396,6 +396,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName)
                 .value(transactionProcessingStrategy).notNull();
+
+        if (!AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+                .equals(loanProduct.getTransactionProcessingStrategyCode())
+                && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategy)) {
+            baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName).failWithCode(
+                    "strategy.cannot.be.advanced.payment.allocation.if.not.configured",
+                    "Loan transaction processing strategy cannot be Advanced Payment Allocation Strategy if it's not configured on loan product");
+        }
         // Validating whether the processor is existing
         loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(transactionProcessingStrategy);
 
@@ -668,6 +676,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .value(transactionProcessingStrategy).notNull();
             // Validating whether the processor is existing
             loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(transactionProcessingStrategy);
+        }
+
+        if (!AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+                .equals(loanProduct.getTransactionProcessingStrategyCode())
+                && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategy)) {
+            baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName).failWithCode(
+                    "strategy.cannot.be.advanced.payment.allocation.if.not.configured",
+                    "Loan transaction processing strategy cannot be Advanced Payment Allocation Strategy if it's not configured on loan product");
         }
 
         BigDecimal principal = null;
