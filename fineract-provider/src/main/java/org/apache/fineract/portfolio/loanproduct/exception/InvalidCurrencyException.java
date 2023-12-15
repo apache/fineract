@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.exception;
+package org.apache.fineract.portfolio.loanproduct.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 

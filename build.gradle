@@ -31,7 +31,6 @@ buildscript {
                 'fineract-provider',
                 'fineract-investor',
                 'fineract-loan',
-                'fineract-savings',
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
@@ -47,8 +46,7 @@ buildscript {
                 'fineract-core',
                 'fineract-provider',
                 'fineract-investor',
-                'fineract-loan',
-                'fineract-savings'
+                'fineract-loan'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
