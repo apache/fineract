@@ -157,12 +157,13 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer implements Busine
                             .build();
 
                     // get list of charges for installments in same range
-                    List<LoanCharge> chargesForInstallmentsInSameRange = loan.getLoanCharges().stream()
-                            .filter(loanCharge -> !loanCharge.isPaid() && delinquentInstallmentsInSameRange.stream().anyMatch(
-                                    installmentForCharge -> (DateUtils.isAfter(loanCharge.getDueDate(), installmentForCharge.getFromDate())
-                                            || DateUtils.isEqual(loanCharge.getDueDate(), installmentForCharge.getFromDate()))
-                                            && (DateUtils.isBefore(loanCharge.getDueDate(), installmentForCharge.getDueDate())
-                                                    || DateUtils.isEqual(loanCharge.getDueDate(), installmentForCharge.getDueDate()))))
+                    List<LoanCharge> chargesForInstallmentsInSameRange = loan.getLoanCharges().stream().filter(loanCharge -> !loanCharge
+                            .isPaid()
+                            && delinquentInstallmentsInSameRange.stream().anyMatch(installmentForCharge -> (DateUtils
+                                    .isAfter(loanCharge.getEffectiveDueDate(), installmentForCharge.getFromDate())
+                                    || DateUtils.isEqual(loanCharge.getEffectiveDueDate(), installmentForCharge.getFromDate()))
+                                    && (DateUtils.isBefore(loanCharge.getEffectiveDueDate(), installmentForCharge.getDueDate())
+                                            || DateUtils.isEqual(loanCharge.getEffectiveDueDate(), installmentForCharge.getDueDate()))))
                             .toList();
 
                     List<LoanChargeDataRangeViewV1> charges = new ArrayList<>();

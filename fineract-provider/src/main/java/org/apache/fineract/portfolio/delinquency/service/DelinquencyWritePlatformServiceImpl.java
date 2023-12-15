@@ -236,6 +236,10 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         if (DateUtils.isBefore(parsedDelinquencyAction.getStartDate(), businessDate)
                 && DelinquencyAction.PAUSE.equals(parsedDelinquencyAction.getAction())) {
             recalculateLoanDelinquencyData(loan);
+            // if pause end date is after current business date, loan delinquency pause flag is changed, emit event
+            if (DateUtils.isAfter(parsedDelinquencyAction.getEndDate(), businessDate)) {
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanDelinquencyRangeChangeBusinessEvent(loan));
+            }
         }
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountDelinquencyPauseChangedBusinessEvent(loan));
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
