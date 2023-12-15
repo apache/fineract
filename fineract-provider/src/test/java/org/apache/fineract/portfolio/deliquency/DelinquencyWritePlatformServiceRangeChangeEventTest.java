@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyIterable;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,23 +40,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountDelinquencyPauseChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinquencyRangeChangeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappingsRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTag;
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainService;
+import org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
@@ -100,6 +110,14 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
     private LoanDelinquencyDomainService loanDelinquencyDomainService;
     @Mock
     private LoanInstallmentDelinquencyTagRepository loanInstallmentDelinquencyTagRepository;
+    @Mock
+    private DelinquencyReadPlatformService delinquencyReadPlatformService;
+    @Mock
+    private DelinquencyActionParseAndValidator delinquencyActionParseAndValidator;
+    @Mock
+    private LoanDelinquencyActionRepository loanDelinquencyActionRepository;
+    @Mock
+    private DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
 
     @InjectMocks
     private DelinquencyWritePlatformServiceImpl underTest;
@@ -498,4 +516,103 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         assertEquals(loanForProcessing, loanPayloadForEvent);
 
     }
+
+    @Test
+    public void givenLoanAccountWhenBackdatedPauseActionThenLoanDelinquencyPauseChangeBusinessEventIsRaisedTest() {
+        ArgumentCaptor<LoanAccountDelinquencyPauseChangedBusinessEvent> loanDelinquencyPauseChangeEvent = ArgumentCaptor
+                .forClass(LoanAccountDelinquencyPauseChangedBusinessEvent.class);
+        // given
+        Loan loanForProcessing = Mockito.mock(Loan.class);
+        loanForProcessing.setId(1L);
+
+        JsonCommand command = Mockito.mock(JsonCommand.class);
+
+        // Pause period
+        LocalDate startDate = DateUtils.getBusinessLocalDate().minusDays(8);
+        LocalDate endDate = DateUtils.getBusinessLocalDate().minusDays(1);
+
+        List<LoanDelinquencyAction> delinquencyActions = new ArrayList<>();
+        List<LoanDelinquencyActionData> effectiveDelinquency = new ArrayList<>();
+        CollectionData loanCollectionData = CollectionData.template();
+
+        when(loanRepository.findOneWithNotFoundDetection(anyLong())).thenReturn(loanForProcessing);
+
+        when(delinquencyReadPlatformService.retrieveLoanDelinquencyActions(anyLong())).thenReturn(delinquencyActions);
+        LoanDelinquencyAction backdatedPauseAction = Mockito.mock(LoanDelinquencyAction.class);
+        backdatedPauseAction.setId(1L);
+
+        when(delinquencyActionParseAndValidator.validateAndParseUpdate(command, loanForProcessing, delinquencyActions,
+                DateUtils.getBusinessLocalDate())).thenReturn(backdatedPauseAction);
+        when(backdatedPauseAction.getStartDate()).thenReturn(startDate);
+        when(backdatedPauseAction.getEndDate()).thenReturn(endDate);
+        when(backdatedPauseAction.getAction()).thenReturn(DelinquencyAction.PAUSE);
+
+        when(loanDelinquencyActionRepository.saveAndFlush(backdatedPauseAction)).thenReturn(backdatedPauseAction);
+
+        when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(delinquencyActions)).thenReturn(effectiveDelinquency);
+        when(loanDelinquencyDomainService.getOverdueCollectionData(any(), anyList())).thenReturn(loanCollectionData);
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+
+        // when
+        underTest.createDelinquencyAction(loanForProcessing.getId(), command);
+
+        // then
+        // verify event is raised
+        verify(businessEventNotifierService, times(1)).notifyPostBusinessEvent(loanDelinquencyPauseChangeEvent.capture());
+
+        Loan loanPayloadForEvent = loanDelinquencyPauseChangeEvent.getValue().get();
+        assertEquals(loanForProcessing, loanPayloadForEvent);
+
+        // verify no range change event for pause flag change as both start and end date are backdated
+        verify(businessEventNotifierService, times(0)).notifyPostBusinessEvent(any(LoanDelinquencyRangeChangeBusinessEvent.class));
+
+    }
+
+    @Test
+    public void givenLoanAccountWhenBackdatedPauseActionThenLoanDelinquencyRangeChangeBusinessEventIsRaisedIfPauseFlagChangeTest() {
+        ArgumentCaptor<LoanDelinquencyRangeChangeBusinessEvent> loanDelinquencyRangeChangeEvent = ArgumentCaptor
+                .forClass(LoanDelinquencyRangeChangeBusinessEvent.class);
+        // given
+        Loan loanForProcessing = Mockito.mock(Loan.class);
+        loanForProcessing.setId(1L);
+
+        JsonCommand command = Mockito.mock(JsonCommand.class);
+
+        // Pause period
+        LocalDate startDate = DateUtils.getBusinessLocalDate().minusDays(2);
+        LocalDate endDate = DateUtils.getBusinessLocalDate().plusDays(10);
+
+        List<LoanDelinquencyAction> delinquencyActions = new ArrayList<>();
+        List<LoanDelinquencyActionData> effectiveDelinquency = new ArrayList<>();
+        CollectionData loanCollectionData = CollectionData.template();
+
+        when(loanRepository.findOneWithNotFoundDetection(anyLong())).thenReturn(loanForProcessing);
+
+        when(delinquencyReadPlatformService.retrieveLoanDelinquencyActions(anyLong())).thenReturn(delinquencyActions);
+        LoanDelinquencyAction backdatedPauseAction = Mockito.mock(LoanDelinquencyAction.class);
+        backdatedPauseAction.setId(1L);
+
+        when(delinquencyActionParseAndValidator.validateAndParseUpdate(command, loanForProcessing, delinquencyActions,
+                DateUtils.getBusinessLocalDate())).thenReturn(backdatedPauseAction);
+        when(backdatedPauseAction.getStartDate()).thenReturn(startDate);
+        when(backdatedPauseAction.getEndDate()).thenReturn(endDate);
+        when(backdatedPauseAction.getAction()).thenReturn(DelinquencyAction.PAUSE);
+
+        when(loanDelinquencyActionRepository.saveAndFlush(backdatedPauseAction)).thenReturn(backdatedPauseAction);
+
+        when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(delinquencyActions)).thenReturn(effectiveDelinquency);
+        when(loanDelinquencyDomainService.getOverdueCollectionData(any(), anyList())).thenReturn(loanCollectionData);
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+
+        // when
+        underTest.createDelinquencyAction(loanForProcessing.getId(), command);
+
+        // then
+        // verify event is raised
+        verify(businessEventNotifierService, times(1)).notifyPostBusinessEvent(loanDelinquencyRangeChangeEvent.capture());
+
+        Loan loanPayloadForEvent = loanDelinquencyRangeChangeEvent.getValue().get();
+        assertEquals(loanForProcessing, loanPayloadForEvent);
+    }
+
 }
