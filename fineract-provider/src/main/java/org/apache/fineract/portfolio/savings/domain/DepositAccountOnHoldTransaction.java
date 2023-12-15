@@ -20,10 +20,12 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.infrastructure.core.service.DateUtils.getSystemZoneId;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,6 +35,7 @@ import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingTransaction;
 import org.apache.fineract.portfolio.savings.DepositAccountOnHoldTransactionType;
 
 @Entity
@@ -58,6 +61,9 @@ public class DepositAccountOnHoldTransaction extends AbstractAuditableWithUTCDat
     @Deprecated
     @Column(name = "created_date", nullable = true)
     private LocalDateTime createdDateToRemove;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "depositAccountOnHoldTransaction", optional = true, orphanRemoval = true)
+    private GuarantorFundingTransaction guarantorFundingTransaction;
 
     protected DepositAccountOnHoldTransaction() {}
 
