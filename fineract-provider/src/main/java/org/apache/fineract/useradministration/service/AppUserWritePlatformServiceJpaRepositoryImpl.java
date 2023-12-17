@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.useradministration.service;
 
+import static org.apache.fineract.useradministration.service.AppUserConstants.CLIENTS;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import jakarta.persistence.PersistenceException;
@@ -112,8 +114,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             Collection<Client> clients;
             if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
                     && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
-                    && command.hasParameter(AppUserConstants.CLIENTS)) {
-                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+                    && command.hasParameter(CLIENTS)) {
+                JsonArray clientsArray = command.arrayOfParameterNamed(CLIENTS);
                 Collection<Long> clientIds = new HashSet<>();
                 for (JsonElement clientElement : clientsArray) {
                     clientIds.add(clientElement.getAsLong());
@@ -159,7 +161,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         try {
             this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
 
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            this.fromApiJsonDeserializer.validateForUpdate(command.json(), this.context.authenticatedUser());
 
             final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -171,8 +173,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
             }
 
-            if (isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)) {
-                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+            if (isSelfServiceUser && command.hasParameter(CLIENTS)) {
+                JsonArray clientsArray = command.arrayOfParameterNamed(CLIENTS);
                 Collection<Long> clientIds = new HashSet<>();
                 for (JsonElement clientElement : clientsArray) {
                     clientIds.add(clientElement.getAsLong());

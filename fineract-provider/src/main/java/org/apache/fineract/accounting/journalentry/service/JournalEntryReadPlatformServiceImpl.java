@@ -201,8 +201,11 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     noteData = new NoteData(noteId, null, null, null, null, null, null, null, note, null, null, null, null, null, null);
                 }
                 Long transaction = null;
-                if (entityType != null) {
-                    transaction = Long.parseLong(transactionId.substring(1).trim());
+                if (entityType != null && transactionId != null) {
+                    String numericPart = transactionId.replaceAll("[^\\d]", "");
+                    if (!numericPart.isEmpty()) {
+                        transaction = Long.parseLong(numericPart);
+                    }
                 }
 
                 TransactionTypeEnumData transactionTypeEnumData = null;

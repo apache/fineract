@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,7 @@ public class ShareProductHelper {
 
     private List<Map<String, String>> charges = null;
     private List<Map<String, String>> marketPrices = null;
+    private Account[] accountList = null;
 
     public String build() {
         final HashMap<String, Object> map = new HashMap<>();
@@ -93,6 +95,10 @@ public class ShareProductHelper {
             map.put("marketPricePeriods", marketPrices);
         }
 
+        if (this.accountingRule.equals(CASH_BASED)) {
+            map.putAll(getAccountMappingForCashBased());
+        }
+
         String shareProductCreateJson = new Gson().toJson(map);
         LOG.info("{}", shareProductCreateJson);
         return shareProductCreateJson;
@@ -100,6 +106,12 @@ public class ShareProductHelper {
 
     public ShareProductHelper withCashBasedAccounting() {
         this.accountingRule = CASH_BASED;
+        return this;
+    }
+
+    public ShareProductHelper withCashBasedAccounting(final Account[] account_list) {
+        this.accountingRule = CASH_BASED;
+        this.accountList = account_list;
         return this;
     }
 
@@ -196,5 +208,30 @@ public class ShareProductHelper {
         // ArrayList<Map<String, String>> marketPrices = (ArrayList<Map<String,
         // String>>)shareProductData.get("marketPricePeriods") ;
 
+    }
+
+    private Map<String, String> getAccountMappingForCashBased() {
+        final Map<String, String> map = new HashMap<>();
+        if (accountList != null) {
+            for (int i = 0; i < this.accountList.length; i++) {
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("shareReferenceId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("shareSuspenseId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.EQUITY)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("shareEquityId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.INCOME)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("incomeFromFeeAccountId", ID);
+                }
+            }
+        }
+        return map;
     }
 }

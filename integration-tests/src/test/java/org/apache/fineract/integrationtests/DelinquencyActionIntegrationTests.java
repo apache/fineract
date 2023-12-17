@@ -22,6 +22,7 @@ import static java.lang.Boolean.TRUE;
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -32,11 +33,14 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.GetDelinquencyActionsResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencyPausePeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdLoanInstallmentLevelDelinquency;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -44,6 +48,7 @@ import org.apache.fineract.client.models.PostLoansDelinquencyActionResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
+import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -201,7 +206,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
     }
 
     @Test
-    public void testValidationErrorIsThrownWhenCreatingActionInThePast() {
+    public void testValidationErrorIsThrownWhenCreatingPauseActionWithBackdatedStartDateBeforeDisbursement() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -215,10 +220,105 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
 
-            // Create Delinquency Pause for the Loan in the past
+            // Create Delinquency Pause for the Loan before disbursement date
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "05 December 2022", "15 January 2023"));
-            assertTrue(exception.getMessage().contains("Start date of pause period must be in the future"));
+            assertTrue(exception.getMessage().contains("Start date of pause period must be after first disbursal date"));
+        });
+    }
+
+    @Test
+    public void testCreateAndVerifyBackdatedPauseDelinquencyAction() {
+        runAt("30 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product
+            Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "25 December 2022", 1500.0, 3,
+                    req -> req.submittedOnDate("25 December 2022"));
+
+            // Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "25 December 2022");
+
+            // Create Delinquency Pause for the Loan in the past
+            PostLoansDelinquencyActionResponse response = loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE,
+                    "28 January 2023", "15 February 2023");
+
+            List<GetDelinquencyActionsResponse> loanDelinquencyActions = loanTransactionHelper.getLoanDelinquencyActions(loanId);
+            Assertions.assertNotNull(loanDelinquencyActions);
+            Assertions.assertEquals(1, loanDelinquencyActions.size());
+            Assertions.assertEquals("PAUSE", loanDelinquencyActions.get(0).getAction());
+            Assertions.assertEquals(LocalDate.parse("28 January 2023", dateTimeFormatter), loanDelinquencyActions.get(0).getStartDate());
+            Assertions.assertEquals(LocalDate.parse("15 February 2023", dateTimeFormatter), loanDelinquencyActions.get(0).getEndDate());
+
+            // Validate Active Delinquency Pause Period on Loan
+            validateLoanDelinquencyPausePeriods(loanId, pausePeriods("28 January 2023", "15 February 2023", true));
+        });
+    }
+
+    @Test
+    public void testVerifyLoanDelinquencyRecalculationForBackdatedPauseDelinquencyAction() {
+        runAt("30 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true);
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "25 December 2022", 1500.0, 3,
+                    req -> req.submittedOnDate("25 December 2022"));
+
+            // Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "25 December 2022");
+
+            // Loan delinquency data before backdated pause
+            verifyLoanDelinquencyData(loanId, 6, new InstallmentDelinquencyData(4, 10, BigDecimal.valueOf(250.0)));
+
+            // Create Delinquency Pause for the Loan in the past
+            PostLoansDelinquencyActionResponse response = loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE,
+                    "27 January 2023", "15 February 2023");
+
+            List<GetDelinquencyActionsResponse> loanDelinquencyActions = loanTransactionHelper.getLoanDelinquencyActions(loanId);
+            Assertions.assertNotNull(loanDelinquencyActions);
+            Assertions.assertEquals(1, loanDelinquencyActions.size());
+            Assertions.assertEquals("PAUSE", loanDelinquencyActions.get(0).getAction());
+            Assertions.assertEquals(LocalDate.parse("27 January 2023", dateTimeFormatter), loanDelinquencyActions.get(0).getStartDate());
+            Assertions.assertEquals(LocalDate.parse("15 February 2023", dateTimeFormatter), loanDelinquencyActions.get(0).getEndDate());
+
+            // Loan delinquency data calculation after backdated pause
+            verifyLoanDelinquencyData(loanId, 3, new InstallmentDelinquencyData(1, 3, BigDecimal.valueOf(250.0)));
+
+            // Validate Active Delinquency Pause Period on Loan
+            validateLoanDelinquencyPausePeriods(loanId, pausePeriods("27 January 2023", "15 February 2023", true));
+        });
+    }
+
+    @Test
+    public void testValidationErrorIsThrownWhenCreatingActionThatOverlaps() {
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product
+            Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1500.0, 2);
+
+            // Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
+
+            // Create Delinquency Pause for the Loan
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "01 January 2023", "15 January 2023");
+
+            // Create overlapping Delinquency Pause for the Loan
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "01 January 2023", "15 January 2023"));
+            assertTrue(exception.getMessage().contains("Delinquency pause period cannot overlap with another pause period"));
         });
     }
 
@@ -238,6 +338,24 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
         pausePeriod.setPausePeriodStart(LocalDate.parse(startDate, dateTimeFormatter));
         pausePeriod.setPausePeriodEnd(LocalDate.parse(endDate, dateTimeFormatter));
         return pausePeriod;
+    }
+
+    private void verifyLoanDelinquencyData(Long loanId, Integer loanLevelDelinquentDays,
+            InstallmentDelinquencyData... expectedInstallmentLevelInstallmentDelinquencyData) {
+        GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+        Assertions.assertNotNull(loan.getDelinquent());
+        List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquency = loan.getDelinquent()
+                .getInstallmentLevelDelinquency();
+
+        assertThat(loan.getDelinquent().getDelinquentDays()).isEqualTo(loanLevelDelinquentDays);
+
+        assertThat(installmentLevelDelinquency.get(0).getMaximumAgeDays())
+                .isEqualTo(expectedInstallmentLevelInstallmentDelinquencyData[0].maxAgeDays);
+        assertThat(installmentLevelDelinquency.get(0).getMinimumAgeDays())
+                .isEqualTo(expectedInstallmentLevelInstallmentDelinquencyData[0].minAgeDays);
+        assertThat(installmentLevelDelinquency.get(0).getDelinquentAmount())
+                .isEqualByComparingTo(expectedInstallmentLevelInstallmentDelinquencyData[0].delinquentAmount);
+
     }
 
     private Long createLoanProductWith25PctDownPayment(boolean autoDownPaymentEnabled, boolean multiDisburseEnabled) {
@@ -267,6 +385,47 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
         assertEquals(autoDownPaymentEnabled, getLoanProductsProductIdResponse.getEnableAutoRepaymentForDownPayment());
         assertEquals(multiDisburseEnabled, getLoanProductsProductIdResponse.getMultiDisburseLoan());
         return loanProductId;
+    }
+
+    private Long createLoanProductWith25PctDownPaymentAndDelinquencyBucket(boolean autoDownPaymentEnabled, boolean multiDisburseEnabled,
+            boolean installmentLevelDelinquencyEnabled) {
+        // Create DelinquencyBuckets
+        Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+                Pair.of(1, 3), //
+                Pair.of(4, 10), //
+                Pair.of(11, 60), //
+                Pair.of(61, null)//
+        ));
+        PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
+        product.setDelinquencyBucketId(delinquencyBucketId.longValue());
+        product.setMultiDisburseLoan(multiDisburseEnabled);
+        product.setEnableDownPayment(true);
+
+        product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE);
+        product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);
+        product.setEnableInstallmentLevelDelinquency(installmentLevelDelinquencyEnabled);
+
+        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+                .retrieveLoanProductById(loanProductResponse.getResourceId());
+
+        Long loanProductId = loanProductResponse.getResourceId();
+
+        assertEquals(TRUE, getLoanProductsProductIdResponse.getEnableDownPayment());
+        assertNotNull(getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment());
+        assertEquals(0, getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment().compareTo(DOWN_PAYMENT_PERCENTAGE));
+        assertEquals(autoDownPaymentEnabled, getLoanProductsProductIdResponse.getEnableAutoRepaymentForDownPayment());
+        assertEquals(multiDisburseEnabled, getLoanProductsProductIdResponse.getMultiDisburseLoan());
+        return loanProductId;
+
+    }
+
+    @AllArgsConstructor
+    public static class InstallmentDelinquencyData {
+
+        Integer minAgeDays;
+        Integer maxAgeDays;
+        BigDecimal delinquentAmount;
     }
 
 }

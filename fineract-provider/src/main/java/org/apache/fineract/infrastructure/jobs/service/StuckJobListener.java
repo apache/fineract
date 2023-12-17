@@ -30,12 +30,15 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.apache.fineract.infrastructure.event.external.service.JdbcTemplateFactory;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
-import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameProvider;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,10 +49,10 @@ public class StuckJobListener implements ApplicationListener<ContextRefreshedEve
     private final JobExecutionRepository jobExecutionRepository;
     private final JdbcTemplateFactory jdbcTemplateFactory;
     private final TenantDetailsService tenantDetailsService;
-    private final JobNameProvider jobNameProvider;
     private final JobRegistry jobRegistry;
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
     private final StuckJobExecutorService stuckJobExecutorService;
+    private final AppUserRepositoryWrapper userRepository;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -64,6 +67,10 @@ public class StuckJobListener implements ApplicationListener<ContextRefreshedEve
                         HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
                         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
                         ThreadLocalContextUtil.setBusinessDates(businessDates);
+                        AppUser user = userRepository.fetchSystemUser();
+                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
+                                user.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(auth);
                         stuckJobNames.forEach(stuckJobExecutorService::resumeStuckJob);
                     } catch (Exception e) {
                         throw new RuntimeException("Error while trying to restart stuck jobs", e);

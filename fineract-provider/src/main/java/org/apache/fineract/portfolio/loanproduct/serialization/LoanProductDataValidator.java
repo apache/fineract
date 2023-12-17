@@ -343,8 +343,8 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element)) {
             final Long delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
                     element);
-            baseDataValidator.reset().parameter(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME).value(delinquencyBucketId).notNull()
-                    .integerGreaterThanZero();
+            baseDataValidator.reset().parameter(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME).value(delinquencyBucketId)
+                    .ignoreIfNull().integerGreaterThanZero();
         }
 
         // grace validation

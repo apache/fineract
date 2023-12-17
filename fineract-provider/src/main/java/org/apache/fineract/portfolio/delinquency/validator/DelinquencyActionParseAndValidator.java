@@ -56,11 +56,13 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         validateLoanIsActive(loan);
         if (DelinquencyAction.PAUSE.equals(parsedDelinquencyAction.getAction())) {
             validateBothStartAndEndDatesAreProvided(parsedDelinquencyAction);
-            validatePauseStartAndEndDate(parsedDelinquencyAction, businessDate);
+            validatePauseStartAndEndDate(parsedDelinquencyAction);
+            validatePauseStartDateNotBeforeDisbursementDate(parsedDelinquencyAction, loan.getDisbursementDate());
             validatePauseShallNotOverlap(parsedDelinquencyAction, effectiveDelinquencyList);
         } else if (DelinquencyAction.RESUME.equals(parsedDelinquencyAction.getAction())) {
             validateResumeStartDate(parsedDelinquencyAction, businessDate);
             validateResumeNoEndDate(parsedDelinquencyAction);
+            validateResumeDoesNotExist(parsedDelinquencyAction, savedDelinquencyActions);
             validateResumeShouldBeOnActivePause(parsedDelinquencyAction, effectiveDelinquencyList);
         }
         return parsedDelinquencyAction;
@@ -87,6 +89,17 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         }
     }
 
+    private void validateResumeDoesNotExist(LoanDelinquencyAction parsedDelinquencyAction,
+            List<LoanDelinquencyAction> savedDelinquencyActions) {
+        boolean match = savedDelinquencyActions.stream() //
+                .filter(action -> DelinquencyAction.RESUME.equals(action.getAction())) //
+                .anyMatch(action -> parsedDelinquencyAction.getStartDate().isEqual(action.getStartDate()));
+        if (match) {
+            raiseValidationError("loan-delinquency-action-resume-should-be-unique",
+                    "There is an existing Resume Delinquency Action on this date");
+        }
+    }
+
     private void validateResumeNoEndDate(LoanDelinquencyAction parsedDelinquencyAction) {
         if (parsedDelinquencyAction.getEndDate() != null) {
             raiseValidationError("loan-delinquency-action-resume-should-have-no-end-date",
@@ -105,15 +118,18 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         }
     }
 
-    private void validatePauseStartAndEndDate(LoanDelinquencyAction parsedDelinquencyAction, LocalDate businessDate) {
+    private void validatePauseStartAndEndDate(LoanDelinquencyAction parsedDelinquencyAction) {
         if (parsedDelinquencyAction.getStartDate().equals(parsedDelinquencyAction.getEndDate())) {
             raiseValidationError("loan-delinquency-action-invalid-start-date-and-end-date",
                     "Delinquency pause period must be at least one day");
         }
+    }
 
-        if (businessDate.isAfter(parsedDelinquencyAction.getStartDate())) {
-            raiseValidationError("loan-delinquency-action-invalid-start-date", "Start date of pause period must be in the future",
-                    START_DATE);
+    private void validatePauseStartDateNotBeforeDisbursementDate(LoanDelinquencyAction parsedDelinquencyAction,
+            LocalDate firstDisbursalDate) {
+        if (firstDisbursalDate.isAfter(parsedDelinquencyAction.getStartDate())) {
+            raiseValidationError("loan-delinquency-action-invalid-start-date",
+                    "Start date of pause period must be after first disbursal date", START_DATE);
         }
     }
 
@@ -163,7 +179,8 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
      */
     private boolean isOverlapping(LoanDelinquencyAction parsed, LoanDelinquencyActionData existing) {
         return (parsed.getEndDate().isAfter(existing.getStartDate()) && parsed.getEndDate().isBefore(existing.getEndDate()))
-                || (parsed.getStartDate().isAfter(existing.getStartDate()) && parsed.getStartDate().isBefore(existing.getEndDate()));
+                || (parsed.getStartDate().isAfter(existing.getStartDate()) && parsed.getStartDate().isBefore(existing.getEndDate()))
+                || (parsed.getStartDate().isEqual(existing.getStartDate()) && parsed.getEndDate().isEqual(existing.getEndDate()));
     }
 
     @org.jetbrains.annotations.NotNull
