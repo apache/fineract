@@ -129,7 +129,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
                 loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
             }
 
-            if (!DateUtils.isBefore(oldDueDate, holiday.getFromDate())&&!DateUtils.isAfter(oldDueDate, holiday.getToDate())) {
+            if (!DateUtils.isBefore(oldDueDate, holiday.getFromDate()) && !DateUtils.isAfter(oldDueDate, holiday.getToDate())) {
                 // FIXME: AA do we need to apply non-working days.
                 // Assuming holiday's repayment reschedule to date cannot be
                 // created on a non-working day.
