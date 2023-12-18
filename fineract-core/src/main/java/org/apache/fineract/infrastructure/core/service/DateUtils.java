@@ -352,6 +352,24 @@ public final class DateUtils {
         return dateTime == null ? null : dateTime.format(getDateTimeFormatter(format, locale));
     }
 
+    /**
+     * Checks if a specific date falls within a given range (inclusive).
+     *
+     * @param targetDate
+     *            the date to be checked
+     * @param startDate
+     *            the start date of the range
+     * @param endDate
+     *            the end date of the range
+     * @return true if targetDate is within range or equal to start/end dates, otherwise false
+     */
+    public static boolean isDateWithinRange(LocalDate targetDate, LocalDate startDate, LocalDate endDate) {
+        if (targetDate == null || startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
+        return !targetDate.isBefore(startDate) && !targetDate.isAfter(endDate);
+    }
+
     @NotNull
     private static DateTimeFormatter getDateFormatter(String format, Locale locale) {
         DateTimeFormatter formatter = DEFAULT_DATE_FORMATTER;

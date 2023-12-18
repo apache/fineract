@@ -358,4 +358,42 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         }
         return adjustedDate;
     }
+
+    public LocalDate generateNextRepaymentDateWhenHolidayApply(final LocalDate lastRepaymentDate,
+            final LoanApplicationTerms loanApplicationTerms) {
+        LocalDate seedDate;
+        String reccuringString;
+        Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
+        LocalDate dueRepaymentPeriodDate = lastRepaymentDate;
+        dueRepaymentPeriodDate = (LocalDate) CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
+                loanApplicationTerms.getRepaymentPeriodFrequencyType());
+        if (currentCalendar != null) {
+            // If we have currentCalendar object, this means there is a
+            // calendar associated with
+            // the loan, and we should use it in order to calculate next
+            // repayment
+
+            CalendarHistory calendarHistory = null;
+            CalendarHistoryDataWrapper calendarHistoryDataWrapper = loanApplicationTerms.getCalendarHistoryDataWrapper();
+            if (calendarHistoryDataWrapper != null) {
+                calendarHistory = loanApplicationTerms.getCalendarHistoryDataWrapper().getCalendarHistory(dueRepaymentPeriodDate);
+            }
+
+            // get the start date from the calendar history
+            if (calendarHistory == null) {
+                seedDate = currentCalendar.getStartDateLocalDate();
+                reccuringString = currentCalendar.getRecurrence();
+            } else {
+                seedDate = calendarHistory.getStartDate();
+                reccuringString = calendarHistory.getRecurrence();
+            }
+
+            dueRepaymentPeriodDate = CalendarUtils.getNextRepaymentMeetingDate(reccuringString, seedDate, lastRepaymentDate,
+                    loanApplicationTerms.getRepaymentEvery(),
+                    CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(loanApplicationTerms.getLoanTermPeriodFrequencyType()),
+                    loanApplicationTerms.isSkipRepaymentOnFirstDayofMonth(), loanApplicationTerms.getNumberOfdays());
+        }
+
+        return dueRepaymentPeriodDate;
+    }
 }
