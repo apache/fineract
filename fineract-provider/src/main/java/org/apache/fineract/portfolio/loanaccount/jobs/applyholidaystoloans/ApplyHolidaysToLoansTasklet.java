@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.applyholidaystoloans;
 
+import static org.apache.fineract.infrastructure.core.service.DateUtils.isDateWithinRange;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,13 +131,13 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
                 loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
             }
 
-            if (!DateUtils.isBefore(oldDueDate, holiday.getFromDate())) {
+            if (isDateWithinRange(oldDueDate, holiday.getFromDate(), holiday.getToDate())) {
                 // FIXME: AA do we need to apply non-working days.
                 // Assuming holiday's repayment reschedule to date cannot be
                 // created on a non-working day.
 
-                adjustedRescheduleToDate = scheduledDateGenerator.generateNextRepaymentDate(adjustedRescheduleToDate, loanApplicationTerms,
-                        false);
+                adjustedRescheduleToDate = scheduledDateGenerator.generateNextRepaymentDateWhenHolidayApply(adjustedRescheduleToDate,
+                        loanApplicationTerms);
                 loanRepaymentScheduleInstallment.updateDueDate(adjustedRescheduleToDate);
             }
             tmpFromDate = loanRepaymentScheduleInstallment.getDueDate();
