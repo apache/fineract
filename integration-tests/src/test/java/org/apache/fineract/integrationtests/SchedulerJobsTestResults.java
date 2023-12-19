@@ -339,41 +339,67 @@ public class SchedulerJobsTestResults {
 
         HashMap holidayData = HolidayHelper.getHolidayById(requestSpec, responseSpec, holidayId.toString());
         ArrayList<Integer> repaymentsRescheduledDate = (ArrayList<Integer>) holidayData.get("repaymentsRescheduledTo");
+        Assertions.assertNotNull(repaymentsRescheduledDate);
 
         // Loan Repayment Schedule Before Apply Holidays To Loans
-        LinkedHashMap repaymentScheduleHashMap = JsonPath.from(loanDetails).get("repaymentSchedule");
-        ArrayList<LinkedHashMap> periods = (ArrayList<LinkedHashMap>) repaymentScheduleHashMap.get("periods");
+        final LinkedHashMap repaymentScheduleHashMapBeforeHolidaysApply = JsonPath.from(loanDetails).get("repaymentSchedule");
+        final ArrayList<LinkedHashMap> periodsBeforeHolidaysApply = (ArrayList<LinkedHashMap>) repaymentScheduleHashMapBeforeHolidaysApply
+                .get("periods");
 
-        for (LinkedHashMap period : periods) {
-            ArrayList<Integer> fromDate = (ArrayList<Integer>) period.get("fromDate");
-            if (fromDate != null && Objects.equals(fromDate.get(1), repaymentsRescheduledDate.get(1))) {
-                Assertions.assertNotEquals(repaymentsRescheduledDate.get(2), fromDate.get(2),
-                        "Verifying Repayment Rescheduled Day before Running Apply Holidays to Loans Scheduler Job");
+        for (LinkedHashMap period : periodsBeforeHolidaysApply) {
+            final ArrayList<Integer> fromDate = (ArrayList<Integer>) period.get("fromDate");
+            if (fromDate != null) {
+                final Integer fromDateMonth = fromDate.get(1);
+                final Integer repaymentsRescheduledDateMonth = repaymentsRescheduledDate.get(1);
+                if (Objects.equals(fromDateMonth, repaymentsRescheduledDateMonth)) {
+                    final Integer repaymentsRescheduledDateDay = repaymentsRescheduledDate.get(2);
+                    final Integer fromDateDay = fromDate.get(2);
+                    Assertions.assertNotEquals(repaymentsRescheduledDateDay, fromDateDay,
+                            "Verifying Repayment Rescheduled Day before Running Apply Holidays to Loans Scheduler Job");
+                }
             }
         }
 
-        String JobName = "Apply Holidays To Loans";
+        String jobName = "Apply Holidays To Loans";
 
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(jobName);
 
         // Loan Repayment Schedule After Apply Holidays To Loans
         loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        repaymentScheduleHashMap = JsonPath.from(loanDetails).get("repaymentSchedule");
-        periods = (ArrayList<LinkedHashMap>) repaymentScheduleHashMap.get("periods");
+        final LinkedHashMap repaymentScheduleHashMapAfterHolidaysApply = JsonPath.from(loanDetails).get("repaymentSchedule");
+        final ArrayList<LinkedHashMap> periodsAfterHolidaysApply = (ArrayList<LinkedHashMap>) repaymentScheduleHashMapAfterHolidaysApply
+                .get("periods");
         ArrayList<Integer> dateToApplyHolidays = null;
 
-        for (LinkedHashMap period : periods) {
-            ArrayList<Integer> fromDate = (ArrayList<Integer>) period.get("fromDate");
-            if (fromDate != null && Objects.equals(fromDate.get(1), repaymentsRescheduledDate.get(1))) {
-                dateToApplyHolidays = fromDate;
+        for (LinkedHashMap periodBefore : periodsBeforeHolidaysApply) {
+            for (LinkedHashMap periodAfter : periodsAfterHolidaysApply) {
+                final ArrayList<Integer> fromDateBefore = (ArrayList<Integer>) periodBefore.get("fromDate");
+                final ArrayList<Integer> fromDateAfter = (ArrayList<Integer>) periodAfter.get("fromDate");
+
+                if (fromDateBefore != null && fromDateAfter != null) {
+                    final Integer fromDateMonthBefore = fromDateBefore.get(1);
+                    final Integer fromDateMonthAfter = fromDateAfter.get(1);
+                    final Integer repaymentsRescheduledDateMonth = repaymentsRescheduledDate.get(1);
+
+                    if (Objects.equals(fromDateMonthAfter, repaymentsRescheduledDateMonth)) {
+                        dateToApplyHolidays = fromDateAfter;
+                    } else if (Objects.equals(fromDateMonthAfter, fromDateMonthBefore)) {
+                        assertEqualDay(fromDateBefore, fromDateAfter,
+                                "Verifying Repayment Scheduled Days Before And After Running Apply Holidays to Loans Scheduler Job Are Equals");
+                    }
+                }
             }
         }
 
         Assertions.assertNotNull(dateToApplyHolidays);
-        Assertions.assertEquals(repaymentsRescheduledDate.get(0), dateToApplyHolidays.get(0),
-                "Verifying Repayment Rescheduled Year after Running Apply Holidays to Loans Scheduler Job");
-        Assertions.assertEquals(repaymentsRescheduledDate.get(2), dateToApplyHolidays.get(2),
+        assertEqualDay(repaymentsRescheduledDate, dateToApplyHolidays,
                 "Verifying Repayment Rescheduled Day after Running Apply Holidays to Loans Scheduler Job");
+    }
+
+    private void assertEqualDay(ArrayList<Integer> fromDateBefore, ArrayList<Integer> fromDateAfter, String message) {
+        Integer fromDateDayBefore = fromDateBefore.get(2);
+        Integer fromDateDayAfter = fromDateAfter.get(2);
+        Assertions.assertEquals(fromDateDayBefore, fromDateDayAfter, message);
     }
 
     @Test
