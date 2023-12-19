@@ -88,7 +88,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
                 applyHolidayToRepaymentScheduleDates(loan, holiday);
             }
             loanRepositoryWrapper.save(loans);
-            holiday.isProcessed();
+            holiday.setProcessed(true);
         }
         holidayRepository.save(holidays);
         return RepeatStatus.FINISHED;
