@@ -49,6 +49,7 @@ war {
 
 dependencies {
     implementation project(':fineract-core')
+    implementation project(':fineract-accounting')
     implementation project(':fineract-investor')
     implementation project(':fineract-loan')
     implementation project(':fineract-provider')

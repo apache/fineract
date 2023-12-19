@@ -28,6 +28,7 @@ buildscript {
             [
                 'fineract-api',
                 'fineract-core',
+                'fineract-accounting',
                 'fineract-provider',
                 'fineract-investor',
                 'fineract-loan',
@@ -45,6 +46,7 @@ buildscript {
                 'fineract-api',
                 'fineract-client',
                 'fineract-core',
+                'fineract-accounting',
                 'fineract-provider',
                 'fineract-investor',
                 'fineract-loan',

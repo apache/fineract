@@ -23,6 +23,7 @@ dependencies {
     tomcat 'org.apache.tomcat:tomcat:10.1.18@zip'
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
             project(path: ':fineract-core', configuration: 'runtimeElements'),
+            project(path: ':fineract-accounting', configuration: 'runtimeElements'),
             project(path: ':fineract-investor', configuration: 'runtimeElements'),
             project(path: ':fineract-loan', configuration: 'runtimeElements'),
             project(path: ':fineract-savings', configuration: 'runtimeElements'),

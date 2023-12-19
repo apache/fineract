@@ -25,6 +25,7 @@ dependencies {
     }
 
     implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-investor'))
     implementation(project(path: ':fineract-loan'))
     implementation(project(path: ':fineract-savings'))
