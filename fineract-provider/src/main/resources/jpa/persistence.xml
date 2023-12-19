@@ -136,6 +136,9 @@
         <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction</class>
         <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionTaxDetails</class>
         <class>org.apache.fineract.portfolio.savings.domain.SavingsOfficerAssignmentHistory</class>
+        <!-- Fineract Accounting module -->
+        <class>org.apache.fineract.accounting.rule.domain.AccountingRule</class>
+        <class>org.apache.fineract.accounting.rule.domain.AccountingTagRule</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
