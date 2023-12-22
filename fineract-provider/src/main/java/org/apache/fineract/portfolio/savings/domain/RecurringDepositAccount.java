@@ -826,6 +826,10 @@ public class RecurringDepositAccount extends SavingsAccount {
         return actualChanges;
     }
 
+    public Map<String, Object> undoActivate() {
+        return super.undoActivate();
+    }
+
     protected List<SavingsAccountTransaction> sortTransactions(final List<SavingsAccountTransaction> transactions) {
         final List<SavingsAccountTransaction> listOfTransactionsSorted = new ArrayList<>();
         listOfTransactionsSorted.addAll(transactions);

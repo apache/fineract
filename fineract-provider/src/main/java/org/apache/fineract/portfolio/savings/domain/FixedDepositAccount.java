@@ -679,20 +679,11 @@ public class FixedDepositAccount extends SavingsAccount {
 
     @Override
     public Map<String, Object> activate(final AppUser currentUser, final JsonCommand command) {
-        final Map<String, Object> actualChanges = super.activate(currentUser, command);
+        return super.activate(currentUser, command);
+    }
 
-        // if (isAccountLocked(calculateMaturityDate())) {
-        // final List<ApiParameterError> dataValidationErrors = new
-        // ArrayList<ApiParameterError>();
-        // final DataValidatorBuilder baseDataValidator = new
-        // DataValidatorBuilder(dataValidationErrors)
-        // .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
-        // baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("deposit.period.must.be.greater.than.lock.in.period",
-        // "Deposit period must be greater than account lock-in period.");
-        // if (!dataValidationErrors.isEmpty()) { throw new
-        // PlatformApiDataValidationException(dataValidationErrors); }
-        // }
-        return actualChanges;
+    public Map<String, Object> undoActivate() {
+        return super.undoActivate();
     }
 
     private LocalDate depositStartDate() {

@@ -234,10 +234,10 @@ public class SavingsConfiguration {
     ) {
         return new DepositAccountWritePlatformServiceJpaRepositoryImpl(context, savingAccountRepositoryWrapper,
                 savingsAccountTransactionRepository, depositAccountAssembler, depositAccountTransactionDataValidator,
-                savingsAccountChargeDataValidator, paymentDetailWritePlatformService, applicationCurrencyRepositoryWrapper,
+                savingsAccountChargeDataValidator, paymentDetailWritePlatformService, 
                 journalEntryWritePlatformService, depositAccountDomainService, noteRepository, accountTransfersReadPlatformService,
                 chargeRepository, savingsAccountChargeRepository, accountAssociationsReadPlatformService,
-                accountTransfersWritePlatformService, depositAccountReadPlatformService, calendarInstanceRepository,
+                accountTransfersWritePlatformService, calendarInstanceRepository,
                 configurationDomainService, holidayRepository, workingDaysRepository, depositAccountOnHoldTransactionRepository);
     }
 

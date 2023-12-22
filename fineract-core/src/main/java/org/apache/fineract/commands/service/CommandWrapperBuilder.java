@@ -2391,6 +2391,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder fixedDepositAccountUndoActivation(final Long accountId) {
+        this.actionName = "UNDO_ACTIVATE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=undoactivate";
+        return this;
+    }
+
     public CommandWrapperBuilder closeFixedDepositAccount(final Long accountId) {
         this.actionName = "CLOSE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2551,6 +2560,15 @@ public class CommandWrapperBuilder {
         this.savingsId = accountId;
         this.entityId = accountId;
         this.href = "/recurringdepositaccounts/" + accountId + "?command=activate";
+        return this;
+    }
+
+    public CommandWrapperBuilder recurringDepositAccountUndoActivation(final Long accountId) {
+        this.actionName = "UNDO_ACTIVATE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=undoactivate";
         return this;
     }
 

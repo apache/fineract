@@ -2387,7 +2387,49 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         }
     }
 
-    public void undoSavingsTransaction(final Long transactionId) {
+    protected Map<String, Object> undoActivate() {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(depositAccountType().resourceName() + SavingsApiConstants.undoActivateAction);
+
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.active.state");
+
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();;
+
+        this.status = SavingsAccountStatusType.APPROVED.getValue();
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
+
+        this.rejectedOnDate = null;
+        this.rejectedBy = null;
+        this.withdrawnOnDate = null;
+        this.withdrawnBy = null;
+        this.closedOnDate = null;
+        this.closedBy = null;
+        this.activatedOnDate = null;
+        this.activatedBy = null;
+        this.lockedInUntilDate = null;
+
+        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNOD_ACTIVATE, businessDate);
+
+        // Undo Transactions
+        for (SavingsAccountTransaction transaction: getTransactions()) {
+            undoTransaction(transaction);
+        }
+
+        return actualChanges;
+    }
+
+    protected void undoSavingsTransaction(final Long transactionId) {
 
         SavingsAccountTransaction transactionToUndo = null;
         for (final SavingsAccountTransaction transaction : this.savingsAccountTransactions) {

@@ -66,6 +66,7 @@ import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamE
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
@@ -335,35 +336,28 @@ public class FixedDepositAccountsApiResource {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
 
-        CommandProcessingResult result = null;
-        if (is(commandParam, "reject")) {
-            final CommandWrapper commandRequest = builder.rejectFixedDepositAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrawnByApplicant")) {
-            final CommandWrapper commandRequest = builder.withdrawFixedDepositAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "approve")) {
-            final CommandWrapper commandRequest = builder.approveFixedDepositAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "undoapproval")) {
-            final CommandWrapper commandRequest = builder.undoFixedDepositAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "activate")) {
-            final CommandWrapper commandRequest = builder.fixedDepositAccountActivation(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "calculateInterest")) {
-            final CommandWrapper commandRequest = builder.withNoJsonBody().fixedDepositAccountInterestCalculation(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "postInterest")) {
-            final CommandWrapper commandRequest = builder.fixedDepositAccountInterestPosting(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "close")) {
-            final CommandWrapper commandRequest = builder.closeFixedDepositAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "prematureClose")) {
-            final CommandWrapper commandRequest = builder.prematureCloseFixedDepositAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "calculatePrematureAmount")) {
+        CommandWrapper commandRequest = null;
+        if (CommandParameterUtil.is(commandParam, "reject")) {
+            commandRequest = builder.rejectFixedDepositAccountApplication(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "withdrawnByApplicant")) {
+            commandRequest = builder.withdrawFixedDepositAccountApplication(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "approve")) {
+            commandRequest = builder.approveFixedDepositAccountApplication(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "undoapproval")) {
+            commandRequest = builder.undoFixedDepositAccountApplication(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "activate")) {
+            commandRequest = builder.fixedDepositAccountActivation(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "undoactivate")) {
+            commandRequest = builder.fixedDepositAccountUndoActivation(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "calculateInterest")) {
+            commandRequest = builder.withNoJsonBody().fixedDepositAccountInterestCalculation(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "postInterest")) {
+            commandRequest = builder.fixedDepositAccountInterestPosting(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "close")) {
+            commandRequest = builder.closeFixedDepositAccount(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "prematureClose")) {
+            commandRequest = builder.prematureCloseFixedDepositAccount(accountId).build();
+        } else if (CommandParameterUtil.is(commandParam, "calculatePrematureAmount")) {
             final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
             final DepositAccountData account = this.accountPreMatureCalculationPlatformService.calculatePreMatureAmount(accountId, query,
@@ -373,12 +367,13 @@ public class FixedDepositAccountsApiResource {
                     DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS);
         }
 
-        if (result == null) {
+        if (commandRequest == null) {
             throw new UnrecognizedQueryParamException("command", commandParam,
-                    new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest", "close", "prematureClose", "calculatePrematureAmount" });
+                    new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "undoactivate",
+                            "calculateInterest", "postInterest", "close", "prematureClose", "calculatePrematureAmount" });
         }
 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
     }
 

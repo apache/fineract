@@ -28,6 +28,7 @@ public enum SavingsEvent {
     SAVINGS_APPLICATION_APPROVED("application.approval"), //
     SAVINGS_APPLICATION_APPROVAL_UNDO("application.approval.undo"), //
     SAVINGS_ACTIVATE("activate"), //
+    SAVINGS_UNOD_ACTIVATE("activate.undo"), //
     SAVINGS_DEPOSIT("deposit"), //
     SAVINGS_WITHDRAWAL("withdraw"), //
     SAVINGS_POST_INTEREST("interest.post"), //
