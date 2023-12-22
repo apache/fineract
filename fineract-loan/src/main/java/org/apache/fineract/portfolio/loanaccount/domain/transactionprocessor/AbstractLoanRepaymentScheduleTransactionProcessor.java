@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract implementation of {@link LoanRepaymentScheduleTransactionProcessor} which is more convenient for concrete
@@ -78,6 +79,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 }
             }
         }
+        addChargeOnlyRepaymentInstallmentIfRequired(charges, installments);
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetDerivedComponents();
@@ -870,5 +872,45 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
 
         return latestPaidCharge;
+    }
+
+    protected void addChargeOnlyRepaymentInstallmentIfRequired(Set<LoanCharge> charges,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        if (!CollectionUtils.isEmpty(charges) && !CollectionUtils.isEmpty(installments)) {
+            LoanRepaymentScheduleInstallment latestRepaymentScheduleInstalment = installments.get(installments.size() - 1);
+            LocalDate installmentDueDate = null;
+
+            LoanCharge latestCharge = getLatestLoanChargeWithSpecificDueDate(charges);
+            if (latestCharge != null
+                    && DateUtils.isAfter(latestCharge.getEffectiveDueDate(), latestRepaymentScheduleInstalment.getDueDate())) {
+                installmentDueDate = latestCharge.getEffectiveDueDate();
+            }
+
+            if (installmentDueDate != null) {
+                if (latestRepaymentScheduleInstalment.isAdditional()) {
+                    latestRepaymentScheduleInstalment.updateDueDate(installmentDueDate);
+                } else {
+                    Loan loan = latestCharge.getLoan();
+                    final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan,
+                            (installments.size() + 1), latestRepaymentScheduleInstalment.getDueDate(), installmentDueDate, BigDecimal.ZERO,
+                            BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null);
+                    installment.markAsAdditional();
+                    loan.addLoanRepaymentScheduleInstallment(installment);
+
+                }
+            }
+        }
+    }
+
+    private LoanCharge getLatestLoanChargeWithSpecificDueDate(Set<LoanCharge> charges) {
+        LoanCharge latestCharge = null;
+        List<LoanCharge> chargesWithSpecificDueDate = new ArrayList<>();
+        chargesWithSpecificDueDate.addAll(charges.stream().filter(charge -> charge.isSpecifiedDueDate()).toList());
+        if (!CollectionUtils.isEmpty(chargesWithSpecificDueDate)) {
+            Collections.sort(chargesWithSpecificDueDate,
+                    (charge1, charge2) -> DateUtils.compare(charge1.getEffectiveDueDate(), charge2.getEffectiveDueDate()));
+            latestCharge = chargesWithSpecificDueDate.get(chargesWithSpecificDueDate.size() - 1);
+        }
+        return latestCharge;
     }
 }

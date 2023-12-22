@@ -126,6 +126,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
         }
 
+        addChargeOnlyRepaymentInstallmentIfRequired(charges, installments);
+
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetBalances();
             currentInstallment.updateDerivedFields(currency, disbursementDate);
