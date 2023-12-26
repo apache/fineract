@@ -104,10 +104,11 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
         }
 
         if (isRepaymentScheduleAdjustmentNeeded(adjustedRescheduleToDate)) {
-            if(isResheduleToNextRepaymentDate){
+            if (isResheduleToNextRepaymentDate) {
                 adjustAllRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
-            }else adjustRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
-
+            } else {
+                adjustRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
+            }
             businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueHolidayBusinessEvent(loan));
         }
     }
@@ -179,6 +180,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
             tmpFromDate = loanRepaymentScheduleInstallment.getDueDate();
         }
     }
+
     private LocalDate getNextRepaymentDate(Loan loan, Holiday holiday) {
         LocalDate adjustedRescheduleToDate = null;
         final LocalDate rescheduleToDate = holiday.getToDate();
