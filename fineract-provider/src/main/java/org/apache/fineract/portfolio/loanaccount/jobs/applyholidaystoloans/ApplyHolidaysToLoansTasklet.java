@@ -106,9 +106,9 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
         if (isRepaymentScheduleAdjustmentNeeded(adjustedRescheduleToDate)) {
             if (isResheduleToNextRepaymentDate) {
                 adjustAllRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
-            } else
+            } else {
                 adjustRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
-
+            }
             businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueHolidayBusinessEvent(loan));
         }
     }
