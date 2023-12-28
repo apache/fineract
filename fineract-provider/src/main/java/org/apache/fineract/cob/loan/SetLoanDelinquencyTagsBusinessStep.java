@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -97,9 +96,9 @@ public class SetLoanDelinquencyTagsBusinessStep implements LoanCOBBusinessStep {
     }
 
     private boolean isDelinquencyOnPause(Loan loan, List<LoanDelinquencyActionData> effectiveDelinquencyList) {
-        LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
-        boolean isPaused = isPausedOnDate(cobBusinessDate, effectiveDelinquencyList);
-        boolean wasPausedOneDayBefore = isPausedOnDate(cobBusinessDate.minusDays(1), effectiveDelinquencyList);
+        LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        boolean isPaused = isPausedOnDate(businessDate, effectiveDelinquencyList);
+        boolean wasPausedOneDayBefore = isPausedOnDate(businessDate.minusDays(1), effectiveDelinquencyList);
         if ((isPaused && !wasPausedOneDayBefore) || (!isPaused && wasPausedOneDayBefore)) {
             businessEventNotifierService.notifyPostBusinessEvent(new LoanDelinquencyRangeChangeBusinessEvent(loan));
         }
