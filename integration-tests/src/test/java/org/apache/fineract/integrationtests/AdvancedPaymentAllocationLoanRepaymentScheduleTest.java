@@ -2171,7 +2171,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
-    // UC109: Advanced payment allocation, cumulative loan schedule handling, rounding test
+    // UC109: Advanced payment allocation, progressive loan schedule handling, rounding test
     // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
     // 1. Create a Loan product, 1000 principal, across 3 installment
     // 2. Submit the loan, and check the generated repayment schedule
@@ -2183,7 +2183,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             final Account incomeAccount = accountHelper.createIncomeAccount();
             final Account expenseAccount = accountHelper.createExpenseAccount();
             final Account overpaymentAccount = accountHelper.createLiabilityAccount();
-            Integer localLoanProductId = createLoanProduct("1000", "15", "3", false, null, false, LoanScheduleType.CUMULATIVE,
+            Integer localLoanProductId = createLoanProduct("1000", "15", "3", false, null, false, LoanScheduleType.PROGRESSIVE,
                     LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
             assertNotNull(localLoanProductId);
 
@@ -2310,7 +2310,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
-    // UC111: Advanced payment allocation, cumulative loan schedule handling, rounding test
+    // UC111: Advanced payment allocation, progressive loan schedule handling, rounding test
     // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
     // 1. Create a Loan product, 40.50 principal, across 4 installment (1 down payment, 3 normal installment)
     // 2. Submit the loan, and check the generated repayment schedule
@@ -2322,7 +2322,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             final Account incomeAccount = accountHelper.createIncomeAccount();
             final Account expenseAccount = accountHelper.createExpenseAccount();
             final Account overpaymentAccount = accountHelper.createLiabilityAccount();
-            Integer localLoanProductId = createLoanProduct("40.50", "15", "3", true, "25", false, LoanScheduleType.CUMULATIVE,
+            Integer localLoanProductId = createLoanProduct("40.50", "15", "3", true, "25", false, LoanScheduleType.PROGRESSIVE,
                     LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
             assertNotNull(localLoanProductId);
 
@@ -3009,6 +3009,27 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             validatePeriod(loanDetails, 6, LocalDate.of(2023, 2, 15), null, 0.0, 350.0, 0.0, 350.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                     0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
+    // UC119: Advanced payment allocation with Loan Schedule as Cumulative
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc., but the loan schedule as Cumulative -> expect validation error
+    @Test
+    public void uc119() {
+        runAt("02 February 2023", () -> {
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            AdvancedPaymentData defaultPaymentAllocation = createDefaultPaymentAllocation();
+
+            ArrayList<HashMap<String, Object>> loanProductErrorData = createLoanProductGetError("500", "15", "4", false,
+                    LoanScheduleType.CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, defaultPaymentAllocation, assetAccount,
+                    incomeAccount, expenseAccount, overpaymentAccount);
+            assertNotNull(loanProductErrorData);
+            assertEquals("validation.msg.loanproduct.loanScheduleProcessingType.supported.only.for.progressive.loan.schedule.type",
+                    loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
         });
     }
 

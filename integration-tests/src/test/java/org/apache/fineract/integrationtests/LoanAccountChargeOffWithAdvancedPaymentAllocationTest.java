@@ -71,6 +71,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -675,6 +677,8 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
                 .isEqualAmortization(false)//
                 .interestCalculationPeriodType(1)//
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")//
+                .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())//
+                .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())//
                 .addPaymentAllocationItem(defaultAllocation)//
                 .daysInYearType(1)//
                 .daysInMonthType(1)//

@@ -66,6 +66,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -270,8 +272,9 @@ public class UndoRepaymentWithDownPaymentIntegrationTest {
                 .interestType(0)//
                 .isEqualAmortization(false)//
                 .interestCalculationPeriodType(1)//
+                .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())//
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")//
-                .addPaymentAllocationItem(defaultAllocation)//
+                .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()).addPaymentAllocationItem(defaultAllocation)//
                 .daysInYearType(1)//
                 .daysInMonthType(1)//
                 .canDefineInstallmentAmount(true)//
