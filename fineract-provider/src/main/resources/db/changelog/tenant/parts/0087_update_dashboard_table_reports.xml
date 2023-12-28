@@ -75,7 +75,7 @@
             FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
                 LEFT JOIN m_loan ln on cl.id = ln.client_id
             WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
-                AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 DAY) AND DATE(NOW()- INTERVAL '1 DAY'))
+                AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 DAY) AND DATE(NOW()- INTERVAL 1 DAY))
             GROUP BY days
             "/>
             <where>id='152' AND report_name = 'LoanTrendsByDay'</where>
