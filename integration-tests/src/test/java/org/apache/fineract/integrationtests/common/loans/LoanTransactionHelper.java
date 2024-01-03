@@ -1819,6 +1819,10 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loans.calculateLoanScheduleOrSubmitLoanApplication(request, null));
     }
 
+    public void applyLoanWithError(PostLoansRequest request, Integer httpStatus) {
+        assertThat(fineract().loans.calculateLoanScheduleOrSubmitLoanApplication(request, null)).hasHttpStatus(httpStatus);
+    }
+
     public PostLoansLoanIdResponse approveLoan(String loanExternalId, PostLoansLoanIdRequest request) {
         return ok(fineract().loans.stateTransitions1(loanExternalId, request, "approve"));
     }
