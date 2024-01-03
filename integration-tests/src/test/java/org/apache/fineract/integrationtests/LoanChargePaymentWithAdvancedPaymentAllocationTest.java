@@ -130,14 +130,26 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
                     CommonConstants.RESPONSE_RESOURCE_ID);
             Assertions.assertNotNull(financialActivityAccountId);
         } else {
+            boolean existFinancialActivity = false;
             for (HashMap financialActivity : financialActivities) {
                 HashMap financialActivityData = (HashMap) financialActivity.get("financialActivityData");
                 if (financialActivityData.get("id").equals(FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID)) {
                     HashMap glAccountData = (HashMap) financialActivity.get("glAccountData");
                     liabilityTransferAccount = new Account((Integer) glAccountData.get("id"), Account.AccountType.LIABILITY);
                     financialActivityAccountId = (Integer) financialActivity.get("id");
+                    existFinancialActivity = true;
                     break;
                 }
+            }
+            if (!existFinancialActivity) {
+                liabilityTransferAccount = accountHelper.createLiabilityAccount();
+                Assertions.assertNotNull(liabilityTransferAccount);
+
+                /*** Create A Financial Activity to Account Mapping **/
+                financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
+                        LIABILITY_TRANSFER.getValue(), liabilityTransferAccount.getAccountID(), responseSpec,
+                        CommonConstants.RESPONSE_RESOURCE_ID);
+                Assertions.assertNotNull(financialActivityAccountId);
             }
         }
     }
@@ -275,7 +287,6 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
                 .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
                 .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()).locale("en").submittedOnDate(submittedOnDate)
                 .amortizationType(1).interestRatePerPeriod(interestRate).interestCalculationPeriodType(1).interestType(0)
                 .repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery).repaymentFrequencyType(0)
@@ -302,7 +313,6 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
                 .withRepaymentFrequencyTypeAsDays() //
                 .withInterestRatePerPeriod("0") //
                 .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
                 .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //

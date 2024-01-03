@@ -1215,8 +1215,6 @@ final class LoansApiResourceSwagger {
         public Integer graceOnInterestPayment;
         @Schema(example = "1")
         public Integer graceOnArrearsAgeing;
-        @Schema(example = "CUMULATIVE")
-        public String loanScheduleType;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
     }
@@ -1362,8 +1360,6 @@ final class LoansApiResourceSwagger {
         public List<PutLoansLoanIdChanges> charges;
         public List<PutLoansLoanIdCollateral> collateral;
         public List<PutLoansLoanIdDisbursementData> disbursementData;
-        @Schema(example = "CUMULATIVE")
-        public String loanScheduleType;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
 

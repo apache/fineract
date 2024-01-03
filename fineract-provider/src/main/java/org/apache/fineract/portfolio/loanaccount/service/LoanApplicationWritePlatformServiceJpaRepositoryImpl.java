@@ -116,12 +116,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
@@ -689,7 +691,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult modifyApplication(final Long loanId, final JsonCommand command) {
 
         try {
-            AppUser currentUser = getAppUserIfPresent();
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) {
                 throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(loanId);
@@ -938,8 +939,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey(strategyCodeParamName)) {
                 final String strategy = command.stringValueOfParameterNamed(strategyCodeParamName);
 
-                existingLoanApplication.updateTransactionProcessingStrategy(strategy,
-                        this.loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(strategy).getName());
+                final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                        .determineProcessor(strategy);
+                validateTransactionProcessingStrategy(existingLoanApplication.getLoanProductRelatedDetail().getLoanScheduleType(),
+                        loanRepaymentScheduleTransactionProcessor.getCode());
+
+                existingLoanApplication.updateTransactionProcessingStrategy(strategy, loanRepaymentScheduleTransactionProcessor.getName());
             }
 
             /**
@@ -1700,6 +1705,24 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 throw new NotOfficeSpecificProductException(productId, officeId);
             }
 
+        }
+    }
+
+    private void validateTransactionProcessingStrategy(final LoanScheduleType loanScheduleType, final String loanRepaymentStrategy) {
+        // PROGRESSIVE: Repayment strategy MUST be only "advanced payment allocation"
+        if (loanScheduleType.equals(LoanScheduleType.PROGRESSIVE)) {
+            if (!loanRepaymentStrategy.equals(LoanProductConstants.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)) {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.loan.repayment.strategy.can.not.be.different.than.advanced.payment.allocation",
+                        "Loan repayment strategy can not be different than Advanced Payment Allocation");
+            }
+            // CUMULATIVE: Repayment strategy CANNOT be "advanced payment allocation"
+        } else if (loanScheduleType.equals(LoanScheduleType.CUMULATIVE)) {
+            if (loanRepaymentStrategy.equals(LoanProductConstants.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)) {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.loan.repayment.strategy.can.not.be.equal.to.advanced.payment.allocation",
+                        "Loan repayment strategy can not be equal to Advanced Payment Allocation");
+            }
         }
     }
 
