@@ -73,8 +73,8 @@ class EmailService {
             if(params.bcc) {
                 msg.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(params.bcc))
             }
-            msg.setSubject(params.subject)
-            msg.setText(params.message);
+            msg.setSubject(params.subject, "UTF-8")
+            msg.setText(params.message, "UTF-8");
 
             Transport.send(msg);
 
