@@ -109,7 +109,7 @@ gitVersioning.apply {
         describeTagPattern = '.*(\\d+\\.\\d+\\.\\d+).*'
         describeTagFirstParent = false
 
-        branch("\\d+\\.\\d+\\.\\d+") {
+        branch("release\\/\\d+\\.\\d+\\.\\d+") {
             version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
         }
         branch("maintenance\\/\\d+\\.\\d+") {
