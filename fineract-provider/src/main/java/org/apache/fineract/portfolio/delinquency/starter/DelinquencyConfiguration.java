@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.delinquency.starter;
 
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappingsRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
@@ -57,10 +58,11 @@ public class DelinquencyConfiguration {
             LoanDelinquencyDomainService loanDelinquencyDomainService,
             LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag,
             LoanDelinquencyActionRepository loanDelinquencyActionRepository,
-            DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper) {
+            DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper, ConfigurationDomainService configurationDomainService) {
         return new DelinquencyReadPlatformServiceImpl(repositoryRange, repositoryBucket, repositoryLoanDelinquencyTagHistory, mapperRange,
                 mapperBucket, mapperLoanDelinquencyTagHistory, loanRepository, loanDelinquencyDomainService,
-                repositoryLoanInstallmentDelinquencyTag, loanDelinquencyActionRepository, delinquencyEffectivePauseHelper);
+                repositoryLoanInstallmentDelinquencyTag, loanDelinquencyActionRepository, delinquencyEffectivePauseHelper,
+                configurationDomainService);
     }
 
     @Bean
