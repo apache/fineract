@@ -190,6 +190,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public static final String WRITTEN_OFF_ON_DATE = "writtenOffOnDate";
     public static final String FEE = "fee";
     public static final String PENALTIES = "penalties";
+    public static final String EARLIEST_UNPAID_DATE = "earliest-unpaid-date";
+    public static final String NEXT_UNPAID_DUE_DATE = "next-unpaid-due-date";
     /** Disable optimistic locking till batch jobs failures can be fixed **/
     @Version
     int version;
@@ -3624,7 +3626,40 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return isChronologicallyLatestRepaymentOrWaiver;
     }
 
-    public LocalDate possibleNextRepaymentDate() {
+    public LocalDate possibleNextRepaymentDate(final String nextPaymentDueDateConfig) {
+        LocalDate nextPossibleRepaymentDate = null;
+        if (EARLIEST_UNPAID_DATE.equalsIgnoreCase(nextPaymentDueDateConfig)) {
+            nextPossibleRepaymentDate = getEarliestUnpaidInstallmentDate();
+        } else if (NEXT_UNPAID_DUE_DATE.equalsIgnoreCase(nextPaymentDueDateConfig)) {
+            nextPossibleRepaymentDate = getNextUnpaidInstallmentDueDate();
+        }
+        return nextPossibleRepaymentDate;
+    }
+
+    private LocalDate getNextUnpaidInstallmentDueDate() {
+        LocalDate nextUnpaidInstallmentDate = null;
+        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
+        LocalDate currentBusinessDate = DateUtils.getBusinessLocalDate();
+        LocalDate expectedMaturityDate = determineExpectedMaturityDate();
+
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            boolean isCurrentDateBeforeInstallmentAndLoanPeriod = DateUtils.isBefore(currentBusinessDate, installment.getDueDate())
+                    && DateUtils.isBefore(currentBusinessDate, expectedMaturityDate);
+            if (installment.isDownPayment()) {
+                isCurrentDateBeforeInstallmentAndLoanPeriod = DateUtils.isEqual(currentBusinessDate, installment.getDueDate())
+                        && DateUtils.isBefore(currentBusinessDate, expectedMaturityDate);
+            }
+            if (isCurrentDateBeforeInstallmentAndLoanPeriod) {
+                if (installment.isNotFullyPaidOff()) {
+                    nextUnpaidInstallmentDate = installment.getDueDate();
+                    break;
+                }
+            }
+        }
+        return nextUnpaidInstallmentDate;
+    }
+
+    private LocalDate getEarliestUnpaidInstallmentDate() {
         LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
