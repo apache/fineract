@@ -91,9 +91,7 @@ public enum JavaType {
     OBJECT(Object.class), //
     ;
 
-    public static final JavaType[] VALUES = values();
-
-    private static final Map<Class<?>, JavaType> BY_TYPE = Arrays.stream(VALUES).filter(e -> e.type != null)
+    private static final Map<Class<?>, JavaType> BY_TYPE = Arrays.stream(values()).filter(e -> e.type != null)
             .collect(Collectors.toMap(JavaType::getTypeClass, v -> v));
 
     private final Class<?> type;
@@ -244,9 +242,9 @@ public enum JavaType {
         // have to do this first to catch custom collection and map types;
         // on resolve we figure out if these custom types are
         // persistence-capable
-        for (Class<?> aType : BY_TYPE.keySet()) {
-            if (aType.isAssignableFrom(type)) {
-                return BY_TYPE.get(aType);
+        for (Map.Entry<Class<?>, JavaType> entry : BY_TYPE.entrySet()) {
+            if (entry.getKey().isAssignableFrom(type)) {
+                return entry.getValue();
             }
         }
 

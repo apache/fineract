@@ -48,44 +48,48 @@ public enum DepositAccountType {
         return this.code;
     }
 
-    public static DepositAccountType fromInt(final Integer transactionType) {
-
-        if (transactionType == null) {
-            return DepositAccountType.INVALID;
+    public static DepositAccountType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
 
-        DepositAccountType depositAccountType = DepositAccountType.INVALID;
-        switch (transactionType) {
+        switch (v) {
             case 100:
-                depositAccountType = DepositAccountType.SAVINGS_DEPOSIT;
-            break;
+                return SAVINGS_DEPOSIT;
             case 200:
-                depositAccountType = DepositAccountType.FIXED_DEPOSIT;
-            break;
+                return FIXED_DEPOSIT;
             case 300:
-                depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
-            break;
+                return RECURRING_DEPOSIT;
             case 400:
-                depositAccountType = DepositAccountType.CURRENT_DEPOSIT;
-            break;
+                return CURRENT_DEPOSIT;
+            default:
+                return INVALID;
         }
-        return depositAccountType;
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isSavingsDeposit() {
-        return this.value.equals(DepositAccountType.SAVINGS_DEPOSIT.getValue());
+        return this.equals(SAVINGS_DEPOSIT);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isFixedDeposit() {
-        return this.value.equals(DepositAccountType.FIXED_DEPOSIT.getValue());
+        return this.equals(FIXED_DEPOSIT);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isRecurringDeposit() {
-        return this.value.equals(DepositAccountType.RECURRING_DEPOSIT.getValue());
+        return this.equals(RECURRING_DEPOSIT);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isCurrentDeposit() {
-        return this.value.equals(DepositAccountType.CURRENT_DEPOSIT.getValue());
+        return this.equals(CURRENT_DEPOSIT);
+    }
+
+    // TODO: why not just use the enum values... just more boilerplate code here!!
+    public boolean isInvalid() {
+        return this.equals(INVALID);
     }
 
     @Override
@@ -94,28 +98,15 @@ public enum DepositAccountType {
     }
 
     public String resourceName() {
-
-        String resourceName;
-
         switch (this) {
             case FIXED_DEPOSIT:
-                resourceName = DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME;
-            break;
+                return DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME;
             case RECURRING_DEPOSIT:
-                resourceName = DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME;
-            break;
+                return DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME;
             case SAVINGS_DEPOSIT:
-                resourceName = DepositsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
-            break;
+                return DepositsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
             default:
-                resourceName = "INVALID";
-            break;
+                return "INVALID";
         }
-
-        return resourceName;
-    }
-
-    public boolean isInvalid() {
-        return this.value.equals(DepositAccountType.INVALID.value);
     }
 }

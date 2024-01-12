@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
@@ -41,6 +42,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,6 +54,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 class InlineLoanCOBExecutorServiceImplTest {
 
     @InjectMocks
@@ -70,6 +73,11 @@ class InlineLoanCOBExecutorServiceImplTest {
     private FineractProperties.FineractApiProperties fineractApiProperties;
     @Mock
     private FineractProperties.FineractBodyItemSizeLimitProperties fineractBodyItemSizeLimitProperties;
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
 
     @Test
     void shouldExceptionThrownIfLoanIsAlreadyLocked() {

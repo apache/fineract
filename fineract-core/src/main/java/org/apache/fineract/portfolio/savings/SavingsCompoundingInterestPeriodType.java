@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * <p>
@@ -28,18 +27,15 @@ import java.util.List;
  */
 public enum SavingsCompoundingInterestPeriodType {
 
-    INVALID(0, "savingsCompoundingInterestPeriodType.invalid"), //
-    DAILY(1, "savingsCompoundingInterestPeriodType.daily"), //
-    // WEEKLY(2, "savingsCompoundingInterestPeriodType.weekly"), //
-    // BIWEEKLY(3, "savingsCompoundingInterestPeriodType.biweekly"), //
+    INVALID(0, "savingsCompoundingInterestPeriodType.invalid"), DAILY(1, "savingsCompoundingInterestPeriodType.daily"),
+    // WEEKLY(2, "savingsCompoundingInterestPeriodType.weekly"),
+    // BIWEEKLY(3, "savingsCompoundingInterestPeriodType.biweekly"),
     MONTHLY(4, "savingsCompoundingInterestPeriodType.monthly"),
 
-    QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), //
-    BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), //
-    ANNUAL(7, "savingsCompoundingInterestPeriodType.annual"); //
+    QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), ANNUAL(7,
+            "savingsCompoundingInterestPeriodType.annual");
 
-    // NO_COMPOUNDING_SIMPLE_INTEREST(8,
-    // "savingsCompoundingInterestPeriodType.nocompounding");
+    // NO_COMPOUNDING_SIMPLE_INTEREST(8, "savingsCompoundingInterestPeriodType.nocompounding");
 
     private final Integer value;
     private final String code;
@@ -57,50 +53,35 @@ public enum SavingsCompoundingInterestPeriodType {
         return this.code;
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final SavingsCompoundingInterestPeriodType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 
-    public static SavingsCompoundingInterestPeriodType fromInt(final Integer type) {
-        SavingsCompoundingInterestPeriodType repaymentFrequencyType = SavingsCompoundingInterestPeriodType.INVALID;
-        if (type != null) {
-            switch (type) {
-                case 1:
-                    repaymentFrequencyType = SavingsCompoundingInterestPeriodType.DAILY;
-                break;
-                case 2:
-                // repaymentFrequencyType =
-                // SavingsCompoundingInterestPeriodType.WEEKLY;
-                break;
-                case 3:
-                // repaymentFrequencyType =
-                // SavingsCompoundingInterestPeriodType.BIWEEKLY;
-                break;
-                case 4:
-                    repaymentFrequencyType = SavingsCompoundingInterestPeriodType.MONTHLY;
-                break;
-                case 5:
-                    repaymentFrequencyType = SavingsCompoundingInterestPeriodType.QUATERLY;
-                break;
-                case 6:
-                    repaymentFrequencyType = SavingsCompoundingInterestPeriodType.BI_ANNUAL;
-                break;
-                case 7:
-                    repaymentFrequencyType = SavingsCompoundingInterestPeriodType.ANNUAL;
-                break;
-                case 8:
-                // repaymentFrequencyType =
-                // SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST;
-                break;
-            }
+    public static SavingsCompoundingInterestPeriodType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return repaymentFrequencyType;
+
+        switch (v) {
+            case 1:
+                return DAILY;
+            // case 2:
+            // return WEEKLY;
+            // case 3:
+            // return BIWEEKLY;
+            case 4:
+                return MONTHLY;
+            case 5:
+                return QUATERLY;
+            case 6:
+                return BI_ANNUAL;
+            case 7:
+                return ANNUAL;
+            // case 8:
+            // return NO_COMPOUNDING_SIMPLE_INTEREST;
+            default:
+                return INVALID;
+        }
     }
 }

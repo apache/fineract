@@ -272,12 +272,14 @@ public final class CalendarUtils {
 
             humanReadable += " on ";
             final WeekDayList weekDayList = recur.getDayList();
+            StringBuilder sb = new StringBuilder();
 
             for (@SuppressWarnings("rawtypes")
             final Iterator iterator = weekDayList.iterator(); iterator.hasNext();) {
                 final WeekDay weekDay = (WeekDay) iterator.next();
-                humanReadable += DayNameEnum.from(weekDay.getDay().name()).getCode();
+                sb.append(DayNameEnum.from(weekDay.getDay().name()).getCode());
             }
+            humanReadable += sb.toString();
 
         } else if (recur.getFrequency().equals(Recur.Frequency.MONTHLY)) {
             NumberList nthDays = recur.getSetPosList();
@@ -684,13 +686,15 @@ public final class CalendarUtils {
      * @return
      */
     public static String getSqlCalendarTypeOptionsInString(final List<Integer> calendarTypeOptions) {
-        String sqlCalendarTypeOptions = "";
-        final int size = calendarTypeOptions.size();
-        for (int i = 0; i < size - 1; i++) {
-            sqlCalendarTypeOptions += calendarTypeOptions.get(i).toString() + ",";
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < calendarTypeOptions.size() - 1; i++) {
+            sb.append(calendarTypeOptions.get(i).toString() + ",");
         }
-        sqlCalendarTypeOptions += calendarTypeOptions.get(size - 1).toString();
-        return sqlCalendarTypeOptions;
+
+        sb.append(calendarTypeOptions.get(calendarTypeOptions.size() - 1).toString());
+
+        return sb.toString();
     }
 
     public static LocalDate getRecentEligibleMeetingDate(final String recurringRule, final LocalDate seedDate,

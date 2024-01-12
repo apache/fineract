@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -109,8 +110,10 @@ public class DelinquencyBucketsIntegrationTest {
         // then
         assertNotNull(delinquencyRangeResponse01);
         assertNotNull(ranges);
-        assertEquals(1, ranges.get(0).getMinimumAgeDays(), "Expected Min Age Days to 1");
-        assertEquals(3, ranges.get(0).getMaximumAgeDays(), "Expected Max Age Days to 3");
+        assertFalse(ranges.isEmpty());
+        GetDelinquencyRangesResponse range = ranges.get(ranges.size() - 1);
+        assertEquals(1, range.getMinimumAgeDays(), "Expected Min Age Days to 1");
+        assertEquals(3, range.getMaximumAgeDays(), "Expected Max Age Days to 3");
     }
 
     @Test

@@ -21,7 +21,6 @@ dependencies {
     // only handles javax annotations, not jakarta ones
     implementation 'jakarta.annotation:jakarta.annotation-api:1.3.5'
 
-
     implementation(
             'io.swagger.core.v3:swagger-annotations-jakarta',
             'com.squareup.retrofit2:retrofit',
@@ -31,6 +30,8 @@ dependencies {
             'com.squareup.retrofit2:converter-gson',
             'io.gsonfire:gson-fire',
             'com.google.code.findbugs:jsr305',
+            'com.github.spotbugs:spotbugs-annotations',
+            'com.squareup.okhttp3:okhttp',
             'com.squareup.okhttp3:logging-interceptor',
             )
 

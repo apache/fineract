@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * The interest posting period is the span of time at the end of which savings earned but not yet credited/posted in a
@@ -49,38 +48,29 @@ public enum SavingsPostingInterestPeriodType {
         return this.code;
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final SavingsPostingInterestPeriodType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 
-    public static SavingsPostingInterestPeriodType fromInt(final Integer type) {
-        SavingsPostingInterestPeriodType repaymentFrequencyType = SavingsPostingInterestPeriodType.INVALID;
-        if (type != null) {
-            switch (type) {
-                case 1:
-                    repaymentFrequencyType = SavingsPostingInterestPeriodType.DAILY;
-                break;
-                case 4:
-                    repaymentFrequencyType = SavingsPostingInterestPeriodType.MONTHLY;
-                break;
-                case 5:
-                    repaymentFrequencyType = SavingsPostingInterestPeriodType.QUATERLY;
-                break;
-                case 6:
-                    repaymentFrequencyType = SavingsPostingInterestPeriodType.BIANNUAL;
-                break;
-                case 7:
-                    repaymentFrequencyType = SavingsPostingInterestPeriodType.ANNUAL;
-                break;
-            }
+    public static SavingsPostingInterestPeriodType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return repaymentFrequencyType;
+
+        switch (v) {
+            case 1:
+                return DAILY;
+            case 4:
+                return MONTHLY;
+            case 5:
+                return QUATERLY;
+            case 6:
+                return BIANNUAL;
+            case 7:
+                return ANNUAL;
+            default:
+                return INVALID;
+        }
     }
 }

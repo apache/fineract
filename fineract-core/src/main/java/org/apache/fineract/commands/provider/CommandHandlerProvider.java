@@ -65,7 +65,11 @@ public class CommandHandlerProvider implements ApplicationContextAware, Initiali
                 log.debug("Register command handler '{}' ...", commandHandlerName);
                 final CommandType commandType = applicationContext.findAnnotationOnBean(commandHandlerName, CommandType.class);
                 try {
-                    registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
+                    if (commandType != null) {
+                        registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
+                    } else {
+                        log.error("Unable to register command handler '{}'!", commandHandlerName);
+                    }
                 } catch (final Throwable th) {
                     log.error("Unable to register command handler '{}'!", commandHandlerName, th);
                 }

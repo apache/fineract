@@ -45,7 +45,7 @@ public class PaginationHelper {
 
         // determine how many rows are available
         final String sqlCountRows = sqlGenerator.countLastExecutedQueryResult(sqlFetchRows);
-        final int totalFilteredRecords;
+        final Integer totalFilteredRecords;
         if (databaseTypeResolver.isMySQL()) {
             totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class); // NOSONAR
         } else {

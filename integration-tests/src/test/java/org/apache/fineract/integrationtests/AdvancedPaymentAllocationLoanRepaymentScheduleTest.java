@@ -3033,6 +3033,63 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC120: Advanced payment allocation with auto down payment and multiple disbursement on the first day
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc., and auto down payment
+    // 2. Submit Loan and approve
+    // 3. Disburse only 100 from 1000
+    // 4. Disburse again on the same day but now 901
+    @Test
+    public void uc120() {
+        runAt("22 November 2023", () -> {
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            Integer localLoanProductId = createLoanProduct("1000", "15", "3", true, "25", true, LoanScheduleType.PROGRESSIVE,
+                    LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), localLoanProductId,
+                    BigDecimal.valueOf(1000.0), 45, 15, 3, BigDecimal.ZERO, "22 November 2023", "01 January 2023");
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("22 November 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("22 November 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 75.0, 25.0, 75.0, 25.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 11, 22), 25.0, 25.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 12, 7), 25.0, 0.0, 25.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 12, 22), 25.0, 0.0, 25.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2024, 1, 6), 25.0, 0.0, 25.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("22 November 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(901.0)).locale("en"));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 750.75, 250.25, 750.75, 250.25, null);
+            validatePeriod(loanDetails, 0, LocalDate.of(2023, 11, 22), null, 100.0, null, null, null, 0.0, 0.0, null, null, null, null,
+                    null, null, null, null, null);
+            validatePeriod(loanDetails, 1, LocalDate.of(2023, 11, 22), null, 901.0, null, null, null, 0.0, 0.0, null, null, null, null,
+                    null, null, null, null, null);
+            validatePeriod(loanDetails, 2, LocalDate.of(2023, 11, 22), LocalDate.of(2023, 11, 22), 976.0, 25.0, 25.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            validatePeriod(loanDetails, 3, LocalDate.of(2023, 11, 22), LocalDate.of(2023, 11, 22), 750.75, 225.25, 225.25, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            validatePeriod(loanDetails, 4, LocalDate.of(2023, 12, 7), null, 500.50, 250.25, 0.0, 250.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0);
+            validatePeriod(loanDetails, 5, LocalDate.of(2023, 12, 22), null, 250.25, 250.25, 0.0, 250.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0);
+            validatePeriod(loanDetails, 6, LocalDate.of(2024, 1, 6), null, 0.0, 250.25, 0.0, 250.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
     private static void validateLoanSummaryBalances(GetLoansLoanIdResponse loanDetails, Double totalOutstanding, Double totalRepayment,
             Double principalOutstanding, Double principalPaid, Double totalOverpaid) {
         assertEquals(totalOutstanding, loanDetails.getSummary().getTotalOutstanding());

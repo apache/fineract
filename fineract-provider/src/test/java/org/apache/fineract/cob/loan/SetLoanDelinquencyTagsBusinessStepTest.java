@@ -47,6 +47,7 @@ import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePaus
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -98,6 +99,11 @@ public class SetLoanDelinquencyTagsBusinessStepTest {
                 BusinessDateType.COB_DATE, LocalDate.now(ZoneId.systemDefault()))));
         underTest = new SetLoanDelinquencyTagsBusinessStep(loanAccountDomainService, delinquencyEffectivePauseHelper,
                 delinquencyReadPlatformService, businessEventNotifierService);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     /**

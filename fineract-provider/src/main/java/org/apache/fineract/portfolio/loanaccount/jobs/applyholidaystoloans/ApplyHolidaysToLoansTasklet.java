@@ -96,6 +96,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
 
     public void applyHolidayToRepaymentScheduleDates(Loan loan, Holiday holiday) {
         LocalDate adjustedRescheduleToDate = null;
+        boolean isResheduleToNextRepaymentDate = holiday.getReScheduleType().isResheduleToNextRepaymentDate();
         if (holiday.getReScheduleType().isResheduleToNextRepaymentDate()) {
             adjustedRescheduleToDate = getNextRepaymentDate(loan, holiday);
         } else {
@@ -103,7 +104,11 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
         }
 
         if (isRepaymentScheduleAdjustmentNeeded(adjustedRescheduleToDate)) {
-            adjustRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
+            if (isResheduleToNextRepaymentDate) {
+                adjustAllRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
+            } else {
+                adjustRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
+            }
             businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueHolidayBusinessEvent(loan));
         }
     }
@@ -138,6 +143,38 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
 
                 adjustedRescheduleToDate = scheduledDateGenerator.generateNextRepaymentDateWhenHolidayApply(adjustedRescheduleToDate,
                         loanApplicationTerms);
+                loanRepaymentScheduleInstallment.updateDueDate(adjustedRescheduleToDate);
+            }
+            tmpFromDate = loanRepaymentScheduleInstallment.getDueDate();
+        }
+    }
+
+    private void adjustAllRepaymentSchedules(Loan loan, Holiday holiday, LocalDate adjustedRescheduleToDate) {
+        final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+        ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, holiday.getFromDate());
+        final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+
+        // first repayment's from date is same as disbursement date.
+        LocalDate tmpFromDate = loan.getDisbursementDate();
+
+        // Loop through all loanRepayments
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+        for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
+            final LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
+
+            // update from date if it's not same as previous installment's due
+            // date.
+            if (!DateUtils.isEqual(tmpFromDate, loanRepaymentScheduleInstallment.getFromDate())) {
+                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
+            }
+
+            if (!DateUtils.isBefore(oldDueDate, holiday.getFromDate())) {
+                // FIXME: AA do we need to apply non-working days.
+                // Assuming holiday's repayment reschedule to date cannot be
+                // created on a non-working day.
+
+                adjustedRescheduleToDate = scheduledDateGenerator.generateNextRepaymentDate(adjustedRescheduleToDate, loanApplicationTerms,
+                        false);
                 loanRepaymentScheduleInstallment.updateDueDate(adjustedRescheduleToDate);
             }
             tmpFromDate = loanRepaymentScheduleInstallment.getDueDate();

@@ -57,6 +57,7 @@ import org.apache.fineract.infrastructure.event.external.service.support.ByteBuf
 import org.apache.fineract.investor.enricher.LoanAccountDataV1Enricher;
 import org.apache.fineract.investor.enricher.LoanTransactionAdjustmentDataV1Enricher;
 import org.apache.fineract.investor.enricher.LoanTransactionDataV1Enricher;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -108,6 +109,11 @@ class ExternalEventServiceTest {
         ThreadLocalContextUtil.setTenant(tenant);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test

@@ -23,6 +23,7 @@ import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrl
 import jakarta.ws.rs.core.UriInfo;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Component;
  * raised by {@link DatatablesApiResource} and map those errors to appropriate status codes in BatchResponse.
  */
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class GetDatatableEntryByQueryCommandStrategy implements CommandStrategy {
 
@@ -81,6 +83,7 @@ public class GetDatatableEntryByQueryCommandStrategy implements CommandStrategy 
                     case "columnFilter" -> columnFilter = entry.getValue();
                     case "valueFilter" -> valueFilter = entry.getValue();
                     case "resultColumns" -> resultColumns = entry.getValue();
+                    default -> log.warn("Query parameter could not be mapped: {}", entry.getKey());
                 }
             }
         }

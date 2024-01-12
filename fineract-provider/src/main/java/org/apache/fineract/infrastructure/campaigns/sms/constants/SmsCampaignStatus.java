@@ -34,20 +34,16 @@ public enum SmsCampaignStatus {
     }
 
     public static SmsCampaignStatus fromInt(final Integer statusValue) {
-
-        SmsCampaignStatus enumeration = SmsCampaignStatus.INVALID;
         switch (statusValue) {
             case 100:
-                enumeration = SmsCampaignStatus.PENDING;
-            break;
+                return PENDING;
             case 300:
-                enumeration = SmsCampaignStatus.ACTIVE;
-            break;
+                return ACTIVE;
             case 600:
-                enumeration = SmsCampaignStatus.CLOSED;
-            break;
+                return CLOSED;
+            default:
+                return INVALID;
         }
-        return enumeration;
     }
 
     public Integer getValue() {
@@ -58,15 +54,18 @@ public enum SmsCampaignStatus {
         return code;
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isActive() {
-        return this.value.equals(SmsCampaignStatus.ACTIVE.getValue());
+        return this.equals(ACTIVE);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isPending() {
-        return this.value.equals(SmsCampaignStatus.PENDING.getValue());
+        return this.equals(PENDING);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isClosed() {
-        return this.value.equals(SmsCampaignStatus.CLOSED.getValue());
+        return this.equals(CLOSED);
     }
 }

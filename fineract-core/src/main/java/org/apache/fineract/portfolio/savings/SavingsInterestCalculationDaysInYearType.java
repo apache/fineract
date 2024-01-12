@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  *
@@ -51,29 +50,23 @@ public enum SavingsInterestCalculationDaysInYearType {
         return this.code;
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final SavingsInterestCalculationDaysInYearType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 
-    public static SavingsInterestCalculationDaysInYearType fromInt(final Integer type) {
-        SavingsInterestCalculationDaysInYearType repaymentFrequencyType = SavingsInterestCalculationDaysInYearType.INVALID;
-        if (type != null) {
-            switch (type) {
-                case 360:
-                    repaymentFrequencyType = SavingsInterestCalculationDaysInYearType.DAYS_360;
-                break;
-                case 365:
-                    repaymentFrequencyType = SavingsInterestCalculationDaysInYearType.DAYS_365;
-                break;
-            }
+    public static SavingsInterestCalculationDaysInYearType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return repaymentFrequencyType;
+
+        switch (v) {
+            case 360:
+                return DAYS_360;
+            case 365:
+                return DAYS_365;
+            default:
+                return INVALID;
+        }
     }
 }

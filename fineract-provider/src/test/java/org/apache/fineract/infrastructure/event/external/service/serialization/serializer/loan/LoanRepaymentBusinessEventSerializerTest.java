@@ -53,7 +53,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCalculateRepaymentPastDueService;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,6 +90,7 @@ public class LoanRepaymentBusinessEventSerializerTest {
 
     @AfterEach
     public void reset() {
+        ThreadLocalContextUtil.reset();
         moneyHelper.close();
     }
 
@@ -153,7 +153,6 @@ public class LoanRepaymentBusinessEventSerializerTest {
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
 
@@ -183,5 +182,4 @@ public class LoanRepaymentBusinessEventSerializerTest {
         AvroRuntimeException exceptionThrown = assertThrows(AvroRuntimeException.class, () -> serializer.toAvroDTO(event));
         assertTrue(exceptionThrown.getMessage().contains("does not accept null values"));
     }
-
 }

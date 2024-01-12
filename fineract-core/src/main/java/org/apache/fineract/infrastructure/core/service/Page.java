@@ -23,10 +23,10 @@ import java.util.List;
 
 public class Page<E> implements Serializable {
 
-    private final int totalFilteredRecords;
+    private final Integer totalFilteredRecords;
     private final List<E> pageItems;
 
-    public Page(final List<E> pageItems, final int totalFilteredRecords) {
+    public Page(final List<E> pageItems, final Integer totalFilteredRecords) {
         this.pageItems = pageItems;
         this.totalFilteredRecords = totalFilteredRecords;
     }

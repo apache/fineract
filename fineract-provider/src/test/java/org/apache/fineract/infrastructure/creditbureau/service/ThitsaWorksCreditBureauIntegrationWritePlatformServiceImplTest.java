@@ -32,8 +32,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonParser;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneId;
@@ -71,14 +73,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
 
     @Spy
     private FromJsonHelper fromJsonHelper = new FromJsonHelper();
 
-    @Spy
-    private CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer = new CreditBureauTokenCommandFromApiJsonDeserializer(
-            fromJsonHelper);
     @Mock
     private OkHttpClient okHttpClient;
 
@@ -86,10 +86,13 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
     private CreditBureauConfigurationRepositoryWrapper configurationRepositoryWrapper;
 
     @Mock
+    private TokenRepositoryWrapper tokenRepositoryWrapper;
+
+    @Mock
     private PlatformSecurityContext platformSecurityContext;
 
     @Mock
-    private TokenRepositoryWrapper tokenRepositoryWrapper;
+    private CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -261,7 +264,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         String jsonResponse = createResponseObjectArrayData(() -> "UPLOADED", data -> data);
 
         Path temp = Files.createTempFile("upload_test" + System.currentTimeMillis(), ".data");
-        Files.writeString(temp, "test");
+        Files.writeString(temp, "test", StandardCharsets.UTF_8);
 
         mockOkHttpCall(request -> {
             assertEquals(request.header("Authorization"), "Bearer AccessToken");
@@ -474,7 +477,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         String jsonResponse = createResponseObjectArrayData(() -> "ADD_CREDIT_RESPONSE", data -> data);
 
         Path temp = Files.createTempFile("add_credit_report" + System.currentTimeMillis(), ".data");
-        Files.writeString(temp, "test");
+        Files.writeString(temp, "test", StandardCharsets.UTF_8);
 
         mockOkHttpCall(request -> {
             if (request.url().host().equals("addcredit.report.url")) {

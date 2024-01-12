@@ -51,9 +51,7 @@ public enum SavingsAccountTransactionType {
     AMOUNT_HOLD(20, "savingsAccountTransactionType.onHold", TransactionEntryType.DEBIT), //
     AMOUNT_RELEASE(21, "savingsAccountTransactionType.release", TransactionEntryType.CREDIT); //
 
-    public static final SavingsAccountTransactionType[] VALUES = values();
-
-    private static final Map<Integer, SavingsAccountTransactionType> BY_ID = Arrays.stream(VALUES)
+    private static final Map<Integer, SavingsAccountTransactionType> BY_ID = Arrays.stream(values())
             .collect(Collectors.toMap(SavingsAccountTransactionType::getValue, v -> v));
 
     private final int value;
@@ -195,6 +193,6 @@ public enum SavingsAccountTransactionType {
 
     @NotNull
     public static List<SavingsAccountTransactionType> getFiltered(Predicate<SavingsAccountTransactionType> filter) {
-        return Arrays.stream(VALUES).filter(filter).toList();
+        return Arrays.stream(values()).filter(filter).toList();
     }
 }

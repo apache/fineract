@@ -58,10 +58,9 @@ public class KafkaExternalEventProducer implements ExternalEventProducer {
         List<CompletableFuture<SendResult<Long, byte[]>>> sendResults = new ArrayList<>();
         measure(() -> {
             Set<Long> keys = partitions.keySet();
-            for (Long key : keys) {
-                List<byte[]> messages = partitions.get(key);
-                for (byte[] message : messages) {
-                    sendResults.add(externalEventsKafkaTemplate.send(topicName, key, message));
+            for (Map.Entry<Long, List<byte[]>> entry : partitions.entrySet()) {
+                for (byte[] message : entry.getValue()) {
+                    sendResults.add(externalEventsKafkaTemplate.send(topicName, entry.getKey(), message));
                 }
             }
 

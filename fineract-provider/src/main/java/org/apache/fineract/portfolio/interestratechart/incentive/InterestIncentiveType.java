@@ -18,10 +18,7 @@
  */
 package org.apache.fineract.portfolio.interestratechart.incentive;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 public enum InterestIncentiveType {
 
@@ -32,17 +29,19 @@ public enum InterestIncentiveType {
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, InterestIncentiveType> intToEnumMap = new HashMap<>();
-
-    static {
-        for (final InterestIncentiveType type : InterestIncentiveType.values()) {
-            intToEnumMap.put(type.value, type);
+    public static InterestIncentiveType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-    }
 
-    public static InterestIncentiveType fromInt(final Integer ruleTypeValue) {
-        final InterestIncentiveType type = intToEnumMap.get(ruleTypeValue);
-        return type;
+        switch (v) {
+            case 2:
+                return FIXED;
+            case 3:
+                return INCENTIVE;
+            default:
+                return INVALID;
+        }
     }
 
     InterestIncentiveType(final Integer value, final String code) {
@@ -63,27 +62,23 @@ public enum InterestIncentiveType {
         return this.code;
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isIncentive() {
-        return InterestIncentiveType.INCENTIVE.getValue().equals(this.value);
+        return INCENTIVE.equals(this);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isFixed() {
-        return InterestIncentiveType.FIXED.getValue().equals(this.value);
+        return FIXED.equals(this);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isInvalid() {
-        return InterestIncentiveType.INVALID.getValue().equals(this.value);
+        return INVALID.equals(this);
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final InterestIncentiveType enumType : values()) {
-            if (!enumType.isInvalid()) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
-
 }

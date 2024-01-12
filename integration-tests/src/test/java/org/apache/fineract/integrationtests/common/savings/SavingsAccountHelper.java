@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common.savings;
 
 import static org.apache.fineract.integrationtests.common.Utils.DEFAULT_TENANT;
 import static org.apache.fineract.integrationtests.common.Utils.TENANT_PARAM_NAME;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -172,6 +173,16 @@ public class SavingsAccountHelper extends IntegrationTest {
                 .build(id.toString(), savingsProductID.toString(), accountType);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, responseAttribute);
+    }
+
+    public Integer createApproveActivateSavingsAccount(final Integer clientId, Integer savingsProductId, final String startDate) {
+        final Integer savingsId = applyForSavingsApplicationOnDate(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL, startDate);
+        assertNotNull(savingsId);
+        HashMap savingsStatusHashMap = approveSavingsOnDate(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsStatusHashMap = activateSavingsAccount(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        return savingsId;
     }
 
     public HashMap updateSavingsAccount(final Integer id, final Integer savingsProductID, final Integer savingsId,

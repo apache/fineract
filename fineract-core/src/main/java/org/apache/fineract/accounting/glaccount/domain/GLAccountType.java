@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.accounting.glaccount.domain;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum GLAccountType {
@@ -43,7 +41,6 @@ public enum GLAccountType {
         return this.code;
     }
 
-    private static final Map<Integer, GLAccountType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
 
@@ -53,7 +50,6 @@ public enum GLAccountType {
             if (i == 0) {
                 minValue = type.value;
             }
-            intToEnumMap.put(type.value, type);
             if (minValue >= type.value) {
                 minValue = type.value;
             }
@@ -86,9 +82,25 @@ public enum GLAccountType {
         }
     }
 
-    public static GLAccountType fromInt(final int i) {
-        final GLAccountType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
+    public static GLAccountType fromInt(final Integer v) {
+        if (v == null) {
+            return null;
+        }
+
+        switch (v) {
+            case 1:
+                return ASSET;
+            case 2:
+                return LIABILITY;
+            case 3:
+                return EQUITY;
+            case 4:
+                return INCOME;
+            case 5:
+                return EXPENSE;
+            default:
+                return null;
+        }
     }
 
     public static int getMinValue() {

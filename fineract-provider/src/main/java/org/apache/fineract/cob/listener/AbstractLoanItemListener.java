@@ -68,9 +68,12 @@ public abstract class AbstractLoanItemListener {
 
     @OnReadError
     public void onReadError(Exception e) {
-        LoanReadException ee = (LoanReadException) e;
-        log.warn("Error was triggered during reading of Loan (id={}) due to: {}", ee.getId(), ThrowableSerialization.serialize(e));
-        updateAccountLockWithError(List.of(ee.getId()), "Loan (id: %d) reading is failed", e);
+        if (e instanceof LoanReadException ee) {
+            log.warn("Error was triggered during reading of Loan (id={}) due to: {}", ee.getId(), ThrowableSerialization.serialize(e));
+            updateAccountLockWithError(List.of(ee.getId()), "Loan (id: %d) reading is failed", e);
+        } else {
+            log.error("Could not handle read error", e);
+        }
     }
 
     @OnProcessError

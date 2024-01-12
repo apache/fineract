@@ -37,7 +37,7 @@ public class PagedRequest<T> {
     private int page;
     private int size = DEFAULT_PAGE_SIZE;
 
-    private List<SortOrder> sorts = new ArrayList<>();
+    private final List<SortOrder> sorts = new ArrayList<>();
 
     public Optional<T> getRequest() {
         return Optional.ofNullable(request);

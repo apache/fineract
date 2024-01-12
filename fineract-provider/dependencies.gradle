@@ -18,6 +18,12 @@
  */
 
 dependencies {
+    modules {
+        module("io.swagger.core.v3:swagger-annotations") {
+            replacedBy("io.swagger.core.v3:swagger-annotations-jakarta")
+        }
+    }
+
     implementation(project(path: ':fineract-core'))
     implementation(project(path: ':fineract-investor'))
     implementation(project(path: ':fineract-loan'))
@@ -96,14 +102,14 @@ dependencies {
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot2',
+            'io.github.resilience4j:resilience4j-spring-boot3',
             )
 
-    implementation ('software.amazon.msk:aws-msk-iam-auth:2.0.0') {
+    implementation ('software.amazon.msk:aws-msk-iam-auth:2.0.2') {
         exclude group: 'commons-logging'
     }
 
-    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.11'
+    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.19'
 
     implementation ('org.apache.commons:commons-email') {
         exclude group: 'com.sun.mail', module: 'javax.mail'
@@ -122,7 +128,7 @@ dependencies {
     implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
         exclude group: 'jakarta.activation'
     }
-    implementation ('org.apache.activemq:activemq-client') {
+    implementation ('org.apache.activemq:activemq-client-jakarta') {
         exclude group: 'org.apache.geronimo.specs'
         exclude group: 'javax.annotation', module: 'javax.annotation-api'
     }

@@ -75,7 +75,7 @@ public class SetLoanDelinquencyTagsTasklet implements Tasklet {
             loanScheduleDelinquencyData = this.loanRepaymentScheduleInstallmentRepository
                     .fetchLoanScheduleDataByDueDateAndObligationsMet(LoanStatus.ACTIVE.getValue(), businessDate, false, processedLoans);
         }
-        processedLoans = applyDelinquencyTagToLoans(loanScheduleDelinquencyData);
+        applyDelinquencyTagToLoans(loanScheduleDelinquencyData);
 
         return RepeatStatus.FINISHED;
     }

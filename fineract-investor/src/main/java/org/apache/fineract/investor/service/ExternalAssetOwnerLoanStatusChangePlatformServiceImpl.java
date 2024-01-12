@@ -21,7 +21,6 @@ package org.apache.fineract.investor.service;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
-import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -39,19 +38,12 @@ public class ExternalAssetOwnerLoanStatusChangePlatformServiceImpl implements Ex
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class,
-                new ExternalAssetOwnerLoanStatusChangedListener());
-    }
-
-    private final class ExternalAssetOwnerLoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
-
-        @Override
-        public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {
+        businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class, event -> {
             final Loan loan = event.get();
             if (configurationReadPlatformService.retrieveGlobalConfiguration(ASSET_EXTERNALIZATION_OF_NON_ACTIVE_LOANS).isEnabled()
                     && (loan.isClosed() || loan.getStatus().isOverpaid())) {
                 loanAccountOwnerTransferService.handleLoanClosedOrOverpaid(loan);
             }
-        }
+        });
     }
 }

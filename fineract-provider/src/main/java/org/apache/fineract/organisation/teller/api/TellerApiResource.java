@@ -308,8 +308,10 @@ public class TellerApiResource {
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
-        final TellerData teller = this.readPlatformService.findTeller(tellerId);
-        final CashierData cashier = this.readPlatformService.findCashier(cashierId);
+        // TODO: can we remove these 2 calls? we don't use the results, but left it here in case something is done in
+        // the functions
+        this.readPlatformService.findTeller(tellerId);
+        this.readPlatformService.findCashier(cashierId);
 
         final LocalDate fromDate = null;
         final LocalDate toDate = null;
@@ -334,8 +336,10 @@ public class TellerApiResource {
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
-        final TellerData teller = this.readPlatformService.findTeller(tellerId);
-        final CashierData cashier = this.readPlatformService.findCashier(cashierId);
+        // TODO: can we remove these 2 calls? we don't use the results, but left it here in case something is done in
+        // the functions
+        this.readPlatformService.findTeller(tellerId);
+        this.readPlatformService.findCashier(cashierId);
 
         final LocalDate fromDate = null;
         final LocalDate toDate = null;

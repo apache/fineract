@@ -20,12 +20,12 @@ version: "3.8"
 
 services:
   postgresql:
-    image: postgres:16.0
+    image: postgres:16.1
     volumes:
-      - ../postgresql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/:Z,ro
+      - ${PWD}/config/docker/postgresql/docker-entrypoint-initdb.d/01-init.sh:/docker-entrypoint-initdb.d/01-init.sh:Z,ro
     restart: always
     env_file:
-      - ../env/postgresql.env
+      - ${PWD}/config/docker/env/postgresql.env
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
       timeout: 10s

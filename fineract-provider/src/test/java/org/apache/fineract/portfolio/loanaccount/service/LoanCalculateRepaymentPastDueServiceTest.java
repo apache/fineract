@@ -69,6 +69,7 @@ public class LoanCalculateRepaymentPastDueServiceTest {
 
     @AfterEach
     public void reset() {
+        ThreadLocalContextUtil.reset();
         moneyHelper.close();
     }
 

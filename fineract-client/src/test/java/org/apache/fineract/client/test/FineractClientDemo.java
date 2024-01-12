@@ -22,6 +22,8 @@ import java.util.List;
 import org.apache.fineract.client.models.RetrieveOneResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.FineractClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Demo code which is included in the fineract-doc/src/docs/en/05_client.adoc.
@@ -33,12 +35,15 @@ import org.apache.fineract.client.util.FineractClient;
  */
 public class FineractClientDemo {
 
+    private static final Logger log = LoggerFactory.getLogger(FineractClientDemo.class);
+
     void demoClient() {
         // tag::documentation[]
         FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
                 .basicAuth("mifos", "password").build();
         List<RetrieveOneResponse> staff = Calls.ok(fineract.staff.retrieveAll16(1L, true, false, "ACTIVE"));
         String name = staff.get(0).getDisplayName();
+        log.info("Display name: {}", name);
         // end::documentation[]
     }
 

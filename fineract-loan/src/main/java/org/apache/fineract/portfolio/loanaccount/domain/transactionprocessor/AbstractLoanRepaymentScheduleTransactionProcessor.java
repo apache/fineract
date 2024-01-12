@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -688,7 +689,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 if (loanTransaction.isChargePayment()) {
                     for (final LoanChargePaidBy chargePaidBy : chargesPaidBies) {
                         LoanCharge loanCharge = chargePaidBy.getLoanCharge();
-                        if (loanCharge.getId().equals(unpaidCharge.getId())) {
+                        if (loanCharge != null && Objects.equals(loanCharge.getId(), unpaidCharge.getId())) {
                             chargePaidBy.setAmount(amountPaidTowardsCharge.getAmount());
                         }
                     }
