@@ -23,19 +23,19 @@ apply plugin: 'io.spring.dependency-management'
 dependencyManagement {
     imports {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
-        mavenBom 'org.slf4j:slf4j-bom:2.0.10'
-        mavenBom 'io.micrometer:micrometer-bom:1.12.1'
-        mavenBom 'org.springframework:spring-framework-bom:6.1.2'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.1.7'
-        mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.0.4'
-        mavenBom 'io.opentelemetry:opentelemetry-bom:1.33.0'
+        mavenBom 'org.slf4j:slf4j-bom:2.0.11'
+        mavenBom 'io.micrometer:micrometer-bom:1.12.2'
+        mavenBom 'org.springframework:spring-framework-bom:6.1.3'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.2.1'
+        mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0'
+        mavenBom 'io.opentelemetry:opentelemetry-bom:1.34.1'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.9.22'
         mavenBom 'org.junit:junit-bom:5.10.1'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.16.1'
         mavenBom 'io.cucumber:cucumber-bom:7.15.0'
         mavenBom 'io.netty:netty-bom:4.1.104.Final'
-        mavenBom 'org.mockito:mockito-bom:5.8.0'
-        mavenBom 'software.amazon.awssdk:bom:2.22.9'
+        mavenBom 'org.mockito:mockito-bom:5.9.0'
+        mavenBom 'software.amazon.awssdk:bom:2.23.3'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
     }
 
@@ -56,13 +56,13 @@ dependencyManagement {
         dependency 'com.google.code.gson:gson:2.10.1'
         dependency 'com.google.truth:truth:1.2.0'
         dependency 'com.google.truth.extensions:truth-java8-extension:1.2.0'
-        dependency 'com.google.googlejavaformat:google-java-format:1.19.1'
+        dependency 'com.google.googlejavaformat:google-java-format:1.19.2'
         dependency ('org.apache.commons:commons-email:1.6.0') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'javax.activation:activation'
         }
         dependency 'commons-io:commons-io:2.15.1'
-        dependency 'com.github.librepdf:openpdf:1.3.35'
+        dependency 'com.github.librepdf:openpdf:1.3.36'
         dependency ('org.mnode.ical4j:ical4j:3.2.14') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'org.codehaus.groovy:groovy'
@@ -119,12 +119,12 @@ dependencyManagement {
         dependency 'org.glassfish.jersey.media:jersey-media-multipart:3.1.5'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
         dependency 'org.apache.bval:org.apache.bval.bundle:3.0.0'
-        dependency 'joda-time:joda-time:2.12.5'
+        dependency 'joda-time:joda-time:2.12.6'
 
         dependency 'io.github.classgraph:classgraph:4.8.165'
         dependency 'org.awaitility:awaitility:4.2.0'
         // TODO: upgrade to 4.8.3
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.7.3'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.8.3'
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.15.0'
         dependency 'org.webjars:webjars-locator-core:0.55'
@@ -236,7 +236,7 @@ dependencyManagement {
 
         dependency 'org.postgresql:postgresql:42.7.1'
 
-        dependency 'org.assertj:assertj-core:3.25.0'
+        dependency 'org.assertj:assertj-core:3.25.1'
 
         dependency 'org.apache.commons:commons-math3:3.6.1'
 
