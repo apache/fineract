@@ -1074,10 +1074,17 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
     private void createJournalEntriesForCreditBalanceRefund(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
             final Office office) {
+        final boolean isMarkedChargeOff = loanDTO.isMarkedAsChargeOff();
+        createJournalEntriesForLoanCreditBalanceRefund(loanDTO, loanTransactionDTO, office, isMarkedChargeOff);
+    }
+
+    private void createJournalEntriesForLoanCreditBalanceRefund(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office, boolean isMarkedChargeOff) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
         final String currencyCode = loanDTO.getCurrencyCode();
+        final boolean isMarkedFraud = loanDTO.isMarkedAsFraud();
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
@@ -1093,17 +1100,35 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalAmount = totalAmount.add(principalAmount);
-            journalAmountHolders.add(new JournalAmountHolder(AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(), principalAmount));
+            journalAmountHolders
+                    .add(new JournalAmountHolder(determineAccrualAccount(isMarkedChargeOff, isMarkedFraud, false), principalAmount));
         }
         if (overpaymentAmount != null && overpaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalAmount = totalAmount.add(overpaymentAmount);
-            journalAmountHolders.add(new JournalAmountHolder(AccrualAccountsForLoan.OVERPAYMENT.getValue(), overpaymentAmount));
+            journalAmountHolders
+                    .add(new JournalAmountHolder(determineAccrualAccount(isMarkedChargeOff, isMarkedFraud, true), overpaymentAmount));
         }
 
         JournalAmountHolder totalAmountHolder = new JournalAmountHolder(AccrualAccountsForLoan.FUND_SOURCE.getValue(), totalAmount);
         helper.createSplitJournalEntriesAndReversalsForLoan(office, currencyCode, journalAmountHolders, totalAmountHolder, loanProductId,
                 paymentTypeId, loanId, transactionId, transactionDate, isReversal);
 
+    }
+
+    private Integer determineAccrualAccount(boolean isMarkedChargeOff, boolean isMarkedFraud, boolean isOverpayment) {
+        if (isMarkedChargeOff) {
+            if (isMarkedFraud) {
+                return AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue();
+            } else {
+                return AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue();
+            }
+        } else {
+            if (isOverpayment) {
+                return AccrualAccountsForLoan.OVERPAYMENT.getValue();
+            } else {
+                return AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue();
+            }
+        }
     }
 
     private void createJournalEntriesForRefundForActiveLoan(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
