@@ -264,10 +264,22 @@ public class SavingsAccountHelper extends IntegrationTest {
                 IS_BLOCK);
     }
 
+    public HashMap activateSavings(final Integer savingsID, final String activationDate) {
+        LOG.info("---------------------------------- ACTIVATING SAVINGS APPLICATION ----------------------------------");
+        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID),
+                getActivatedSavingsAsJSONOnDate(activationDate), IS_BLOCK);
+    }
+
     public HashMap closeSavingsAccount(final Integer savingsID, String withdrawBalance) {
         LOG.info("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingApplicationActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
                 getCloseAccountJSON(withdrawBalance, LAST_TRANSACTION_DATE), IS_BLOCK);
+    }
+
+    public HashMap closeSavingsAccountOnDate(final Integer savingsID, String withdrawBalance, final String closedOnDate) {
+        LOG.info("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
+        return performSavingApplicationActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
+                getCloseAccountJSON(withdrawBalance, closedOnDate), IS_BLOCK);
     }
 
     public Object deleteSavingsApplication(final Integer savingsId, final String jsonAttributeToGetBack) {
@@ -366,6 +378,13 @@ public class SavingsAccountHelper extends IntegrationTest {
     public Integer addChargesForSavingsWithDueDate(final Integer savingsId, final Integer chargeId, String addDueDate, Integer amount) {
         return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
                 getPeriodChargeRequestJSONWithDueDate(chargeId, addDueDate, amount), CommonConstants.RESPONSE_RESOURCE_ID);
+    }
+
+    public Integer addChargesForSavingsWithDueDateAndFeeOnMonthDay(final Integer savingsId, final Integer chargeId, String addDueDate,
+            Integer amount, String feeOnMonthDay) {
+        return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
+                getPeriodChargeRequestJSONWithDueDateAndFeeOnMonthDay(chargeId, addDueDate, amount, feeOnMonthDay),
+                CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer payCharge(final Integer chargeId, final Integer savingsId, String amount, String dueDate) {
@@ -488,6 +507,16 @@ public class SavingsAccountHelper extends IntegrationTest {
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activatedOnDate", TRANSACTION_DATE);
+        String savingsAccountActivateJson = new Gson().toJson(map);
+        LOG.info(savingsAccountActivateJson);
+        return savingsAccountActivateJson;
+    }
+
+    private String getActivatedSavingsAsJSONOnDate(final String activationDate) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
+        map.put("activatedOnDate", activationDate);
         String savingsAccountActivateJson = new Gson().toJson(map);
         LOG.info(savingsAccountActivateJson);
         return savingsAccountActivateJson;
@@ -754,6 +783,20 @@ public class SavingsAccountHelper extends IntegrationTest {
         map.put("chargeId", chargeId);
         map.put("amount", amount);
         map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", "dd MMMM yyy");
+        map.put("dueDate", addDueDate);
+        String json = new Gson().toJson(map);
+        return json;
+    }
+
+    private String getPeriodChargeRequestJSONWithDueDateAndFeeOnMonthDay(Integer chargeId, String addDueDate, Integer amount,
+            String feeOnMonthDay) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("chargeId", chargeId);
+        map.put("amount", amount);
+        map.put("feeOnMonthDay", feeOnMonthDay);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("monthDayFormat", "dd MMMM");
         map.put("dateFormat", "dd MMMM yyy");
         map.put("dueDate", addDueDate);
         String json = new Gson().toJson(map);
