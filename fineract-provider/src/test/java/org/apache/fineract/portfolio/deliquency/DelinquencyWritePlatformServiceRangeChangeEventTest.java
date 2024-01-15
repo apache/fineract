@@ -24,6 +24,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,6 +64,7 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquen
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
 import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformServiceHelper;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainService;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParseAndValidator;
@@ -81,7 +84,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -120,7 +123,8 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
     @Mock
     private DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
 
-    @InjectMocks
+    private DelinquencyWritePlatformServiceHelper delinquencyWritePlatformServiceHelper;
+
     private DelinquencyWritePlatformServiceImpl underTest;
 
     @BeforeEach
@@ -129,6 +133,14 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
+
+        delinquencyWritePlatformServiceHelper = Mockito.spy(new DelinquencyWritePlatformServiceHelper(businessEventNotifierService,
+                loanDelinquencyTagRepository, repositoryRange, loanInstallmentDelinquencyTagRepository));
+        underTest = new DelinquencyWritePlatformServiceImpl(dataValidatorBucket, dataValidatorRange, repositoryRange, repositoryBucket,
+                repositoryBucketMappings, loanDelinquencyTagRepository, loanRepository, loanProductRepository, loanDelinquencyDomainService,
+                loanInstallmentDelinquencyTagRepository, delinquencyReadPlatformService, loanDelinquencyActionRepository,
+                delinquencyActionParseAndValidator, delinquencyEffectivePauseHelper, businessEventNotifierService,
+                delinquencyWritePlatformServiceHelper);
     }
 
     @AfterEach
@@ -178,6 +190,68 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         verify(businessEventNotifierService, times(1)).notifyPostBusinessEvent(loanDeliquencyRangeChangeEvent.capture());
         Loan loanPayloadForEvent = loanDeliquencyRangeChangeEvent.getValue().get();
         assertEquals(loanForProcessing, loanPayloadForEvent);
+    }
+
+    @Test
+    public void test_ApplyDelinquencyTagToLoan_ExecutesDelinquencyApplication_InTheRightOrder() {
+        // given
+        final List<LoanDelinquencyActionData> effectiveDelinquencyList = Collections.emptyList();
+        Loan loanForProcessing = Mockito.mock(Loan.class);
+        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
+        DelinquencyRange range1 = DelinquencyRange.instance("Range1", 1, 2);
+        range1.setId(1L);
+        DelinquencyRange range2 = DelinquencyRange.instance("Range30", 3, 30);
+        range2.setId(2L);
+        List<DelinquencyRange> listDelinquencyRanges = Arrays.asList(range1, range2);
+        DelinquencyBucket delinquencyBucket = new DelinquencyBucket("test Bucket");
+        delinquencyBucket.setRanges(listDelinquencyRanges);
+
+        final Long daysDiff = 2L;
+        final LocalDate fromDate = DateUtils.getBusinessLocalDate().minusMonths(1).minusDays(daysDiff);
+        final LocalDate dueDate = DateUtils.getBusinessLocalDate().minusDays(daysDiff);
+        final BigDecimal installmentPrincipalAmount = BigDecimal.valueOf(100);
+        final BigDecimal zeroAmount = BigDecimal.ZERO;
+
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1, fromDate, dueDate,
+                installmentPrincipalAmount, zeroAmount, zeroAmount, zeroAmount, false, new HashSet<>(), zeroAmount);
+        installment.setId(1L);
+
+        List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = Arrays.asList(installment);
+
+        LocalDate overDueSinceDate = DateUtils.getBusinessLocalDate().minusDays(2);
+        LoanScheduleDelinquencyData loanScheduleDelinquencyData = new LoanScheduleDelinquencyData(1L, overDueSinceDate, 1L,
+                loanForProcessing);
+        CollectionData collectionData = new CollectionData(BigDecimal.ZERO, 2L, null, 2L, overDueSinceDate, BigDecimal.ZERO, null, null,
+                null, null, null, null);
+
+        CollectionData installmentCollectionData = new CollectionData(BigDecimal.ZERO, 2L, null, 2L, overDueSinceDate,
+                installmentPrincipalAmount, null, null, null, null, null, null);
+
+        Map<Long, CollectionData> installmentsCollection = new HashMap<>();
+        installmentsCollection.put(1L, installmentCollectionData);
+
+        LoanDelinquencyData loanDelinquencyData = new LoanDelinquencyData(collectionData, installmentsCollection);
+
+        when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
+        when(loanProduct.getDelinquencyBucket()).thenReturn(delinquencyBucket);
+        when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
+        when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
+        when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(true);
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyDomainService.getLoanDelinquencyData(loanForProcessing, effectiveDelinquencyList))
+                .thenReturn(loanDelinquencyData);
+        when(loanInstallmentDelinquencyTagRepository.findByLoanAndInstallment(loanForProcessing, repaymentScheduleInstallments.get(0)))
+                .thenReturn(Optional.empty());
+
+        // when
+        underTest.applyDelinquencyTagToLoan(loanScheduleDelinquencyData, effectiveDelinquencyList);
+
+        // then
+        InOrder inOrder = inOrder(delinquencyWritePlatformServiceHelper);
+        inOrder.verify(delinquencyWritePlatformServiceHelper).applyDelinquencyForLoan(eq(loanForProcessing), eq(delinquencyBucket),
+                anyLong());
+        inOrder.verify(delinquencyWritePlatformServiceHelper).applyDelinquencyForLoanInstallments(eq(loanForProcessing),
+                eq(delinquencyBucket), eq(installmentsCollection));
     }
 
     @Test
