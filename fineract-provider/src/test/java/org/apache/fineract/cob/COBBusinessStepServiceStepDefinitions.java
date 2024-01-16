@@ -72,6 +72,7 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private BatchBusinessStep batchBusinessStep = mock(BatchBusinessStep.class);
     private Set<BusinessStepNameAndOrder> resultSet;
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW")
     public COBBusinessStepServiceStepDefinitions() throws Exception {
         businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository, applicationContext, beanFactory,
                 businessEventNotifierService, configurationDomainService, reloaderService);

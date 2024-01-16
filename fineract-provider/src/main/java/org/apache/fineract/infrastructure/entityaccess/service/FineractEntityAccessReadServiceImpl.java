@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -132,6 +133,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         return entityAccessData;
     }
 
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     private String getSQLForRetriveEntityAccessFor() {
         StringBuilder str = new StringBuilder("select  eem.rel_id as relId,eem.from_id as fromId, ");
         str.append("eem.to_id as toId, eem.start_date as startDate, eem.end_date as endDate ");

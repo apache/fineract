@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.instancemode.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -48,6 +49,7 @@ public class InstanceModeApiResource implements InitializingBean {
     private final FineractProperties fineractProperties;
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void afterPropertiesSet() throws Exception {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -63,6 +65,7 @@ public class InstanceModeApiResource implements InitializingBean {
     @Operation(summary = "Changes the Fineract instance mode", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InstanceModeApiResourceSwagger.ChangeInstanceModeRequest.class)))
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public Response changeMode(InstanceModeApiResourceSwagger.ChangeInstanceModeRequest request) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");

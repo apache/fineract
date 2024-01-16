@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -54,6 +55,7 @@ public class InternalCOBApiResource implements InitializingBean {
     private final ToApiJsonSerializer<List> toApiJsonSerializerForList;
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void afterPropertiesSet() throws Exception {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");

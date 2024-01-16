@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.classpath;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.java8.En;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ResourceList;
@@ -38,6 +39,7 @@ public class ClasspathDuplicatesStepDefinitions implements En {
 
     private ClassGraph classGraph;
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW")
     public ClasspathDuplicatesStepDefinitions() {
         // tag::given[]
         Given("A class graph", () -> {
