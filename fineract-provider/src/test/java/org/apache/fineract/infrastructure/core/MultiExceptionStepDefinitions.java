@@ -32,6 +32,7 @@ public class MultiExceptionStepDefinitions implements En {
 
     private List<Throwable> exceptions = new ArrayList<>();
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW")
     public MultiExceptionStepDefinitions() {
         Given("/^A multi exception with exceptions (.*) and (.*)$/", (String exception1, String exception2) -> {
             if (!StringUtils.isBlank(exception1)) {

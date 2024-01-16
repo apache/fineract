@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -50,6 +51,7 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
     private final LoanAccountLockRepository loanAccountLockRepository;
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void afterPropertiesSet() throws Exception {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -65,6 +67,7 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
     @Path("{loanId}/place-lock/{lockOwner}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public Response placeLockOnLoanAccount(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
             @PathParam("lockOwner") String lockOwner, @RequestBody(required = false) String error) {
         log.warn("------------------------------------------------------------");

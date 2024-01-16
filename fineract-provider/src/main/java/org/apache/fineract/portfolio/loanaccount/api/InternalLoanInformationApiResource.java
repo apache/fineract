@@ -23,6 +23,7 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY;
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -64,6 +65,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     private final AdvancedPaymentDataMapper advancedPaymentDataMapper;
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void afterPropertiesSet() {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -79,6 +81,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     @Path("{loanId}/audit")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public String getLoanAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -98,6 +101,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     @Path("{loanId}/transaction/{transactionId}/audit")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public String getLoanTransactionAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
             @PathParam("transactionId") Long transactionId) {
         log.warn("------------------------------------------------------------");
@@ -118,6 +122,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     @Path("status/{statusId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public String getLoansByStatus(@Context final UriInfo uriInfo, @PathParam("statusId") Integer statusId) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -134,6 +139,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     @Path("{loanId}/advanced-payment-allocation-rules")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public List<AdvancedPaymentData> getAdvancedPaymentAllocationRulesOfLoan(@Context final UriInfo uriInfo,
             @PathParam("loanId") Long loanId) {
         log.warn("------------------------------------------------------------");

@@ -126,7 +126,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager, Initializing
                     Objects.requireNonNull(ehCacheManager.getCache(cacheName)).clear();
                 }
             } catch (NullPointerException npe) {
-                log.warn(npe.getMessage());
+                log.warn("NullPointerException occurred", npe);
             }
         }
     }

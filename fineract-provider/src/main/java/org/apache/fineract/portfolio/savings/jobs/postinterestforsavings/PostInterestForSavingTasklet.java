@@ -52,13 +52,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class PostInterestForSavingTasklet implements Tasklet {
 
+    private static final int QUEUE_SIZE = 1;
+
     private final SavingsAccountReadPlatformService savingAccountReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
     private final ApplicationContext applicationContext;
     @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
     private final ThreadPoolTaskExecutor taskExecutor;
-    private final int queueSize = 1;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -122,7 +123,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
                 maxId = Math.max(maxSavingsIdInList, queue.element().get(queue.element().size() - 1).getId());
             }
 
-            while (queue.size() <= queueSize) {
+            while (queue.size() <= QUEUE_SIZE) {
                 log.debug("Fetching while threads are running!");
                 List<SavingsAccountData> savingsAccountDataList = Collections.synchronizedList(this.savingAccountReadPlatformService
                         .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
@@ -166,7 +167,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
             maxId = Math.max(maxSavingsIdInList, queue.element().get(queue.element().size() - 1).getId());
         }
 
-        while (queue.size() <= queueSize) {
+        while (queue.size() <= QUEUE_SIZE) {
             log.debug("Fetching while threads are running!..:: this is not supposed to run........");
             savingsAccounts = Collections.synchronizedList(this.savingAccountReadPlatformService
                     .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
