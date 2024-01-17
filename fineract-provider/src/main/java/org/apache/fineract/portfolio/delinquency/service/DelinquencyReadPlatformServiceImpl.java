@@ -126,6 +126,11 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         if (optLoan.isPresent()) {
             final Loan loan = optLoan.get();
 
+            // If the Loan is not Active yet, return template data
+            if (loan.isSubmittedAndPendingApproval() || loan.isApproved()) {
+                return CollectionData.template();
+            }
+
             final List<LoanDelinquencyAction> savedDelinquencyList = retrieveLoanDelinquencyActions(loanId);
             List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
                     .calculateEffectiveDelinquencyList(savedDelinquencyList);
