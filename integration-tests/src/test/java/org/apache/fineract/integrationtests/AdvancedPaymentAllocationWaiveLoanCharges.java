@@ -56,7 +56,6 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0, 1,
                     (req) -> req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
                             .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()));
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
@@ -90,7 +89,6 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0, 1,
                     (req) -> req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
                             .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()));
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
@@ -124,7 +122,6 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0, 1,
                     (req) -> req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
                             .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())); // Disburse
                                                                                                             // Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2023");
@@ -188,8 +185,7 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
 
     protected Long createLoanProductWithAdvancedAllocation() {
         PostLoanProductsRequest req = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
-        req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
+        req.transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY).loanScheduleType(LoanScheduleType.PROGRESSIVE.name())
                 .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString());
         req.addPaymentAllocationItem(createDefaultPaymentAllocationWithMixedGrouping());
         PostLoanProductsResponse loanProduct = loanTransactionHelper.createLoanProduct(req);

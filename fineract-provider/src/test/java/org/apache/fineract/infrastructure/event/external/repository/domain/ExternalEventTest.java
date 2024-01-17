@@ -26,9 +26,15 @@ import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class ExternalEventTest {
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
 
     @Test
     public void testConstructorWorks() {
@@ -56,6 +62,5 @@ class ExternalEventTest {
         assertThat(result.getBusinessDate()).isEqualTo(currentBusinessDate);
         assertThat(result.getCreatedAt()).isNotNull();
         assertThat(result.getSentAt()).isNull();
-
     }
 }

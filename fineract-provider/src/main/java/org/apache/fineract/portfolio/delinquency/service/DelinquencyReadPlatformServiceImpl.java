@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
@@ -70,6 +71,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     private final LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag;
     private final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     public Collection<DelinquencyRangeData> retrieveAllDelinquencyRanges() {
@@ -128,9 +130,11 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
                     .calculateEffectiveDelinquencyList(savedDelinquencyList);
 
+            final String nextPaymentDueDateConfig = configurationDomainService.getNextPaymentDateConfigForLoan();
+
             collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
             collectionData.setAvailableDisbursementAmount(loan.getApprovedPrincipal().subtract(loan.getDisbursedAmount()));
-            collectionData.setNextPaymentDueDate(loan.possibleNextRepaymentDate());
+            collectionData.setNextPaymentDueDate(loan.possibleNextRepaymentDate(nextPaymentDueDateConfig));
 
             final LoanTransaction lastPayment = loan.getLastPaymentTransaction();
             if (lastPayment != null) {

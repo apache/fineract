@@ -764,4 +764,9 @@ public class LoanProductTestBuilder {
         this.loanScheduleProcessingType = loanScheduleProcessingType.name();
         return this;
     }
+
+    public String getTransactionProcessingStrategyCode() {
+        return transactionProcessingStrategyCode;
+    }
+
 }

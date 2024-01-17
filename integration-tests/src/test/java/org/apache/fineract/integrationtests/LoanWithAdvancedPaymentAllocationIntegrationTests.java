@@ -154,7 +154,6 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
                 .withInterestTypeAsDecliningBalance() //
                 .withSubmittedOnDate(operationDate) //
                 .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY) //
-                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
                 .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
                 .build(clientId, loanProductId, null);
         return loanTransactionHelper.getLoanId(loanApplicationJSON);
