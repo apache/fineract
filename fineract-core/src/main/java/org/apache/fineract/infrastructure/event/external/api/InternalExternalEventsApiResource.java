@@ -16,40 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.api;
+package org.apache.fineract.infrastructure.event.external.api;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.cob.domain.LoanAccountLock;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.domain.LockOwner;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.event.external.service.InternalExternalEventService;
+import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Profile(FineractProfiles.TEST)
 @Component
-@Path("/v1/internal/loans")
+@Path("/v1/internal/externalevents")
 @RequiredArgsConstructor
 @Slf4j
-public class InternalLoanAccountLockApiResource implements InitializingBean {
+public class InternalExternalEventsApiResource implements InitializingBean {
 
-    private final LoanAccountLockRepository loanAccountLockRepository;
+    private final InternalExternalEventService internalExternalEventService;
+    private final DefaultToApiJsonSerializer<List<ExternalEventDTO>> jsonSerializer;
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -61,30 +57,24 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
         log.warn("DO NOT USE THIS IN PRODUCTION!");
         log.warn("                                                            ");
         log.warn("------------------------------------------------------------");
-
     }
 
-    @POST
-    @Path("{loanId}/place-lock/{lockOwner}")
+    @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
-    public Response placeLockOnLoanAccount(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
-            @PathParam("lockOwner") String lockOwner, @RequestBody(required = false) String error) {
-        log.warn("------------------------------------------------------------");
-        log.warn("                                                            ");
-        log.warn("Placing lock on loan: {}", loanId);
-        log.warn("                                                            ");
-        log.warn("------------------------------------------------------------");
+    public String getAllExternalEvents(@QueryParam("idempotencyKey") final String idempotencyKey, @QueryParam("type") final String type,
+            @QueryParam("category") final String category, @QueryParam("aggregateRootId") final Long aggregateRootId) {
+        log.debug("getAllExternalEvents called with params idempotencyKey:{}, type:{}, category:{}, aggregateRootId:{}  ", idempotencyKey,
+                type, category, aggregateRootId);
+        List<ExternalEventDTO> allExternalEvents = internalExternalEventService.getAllExternalEvents(idempotencyKey, type, category,
+                aggregateRootId);
+        return jsonSerializer.serialize(allExternalEvents);
+    }
 
-        LoanAccountLock loanAccountLock = new LoanAccountLock(loanId, LockOwner.valueOf(lockOwner),
-                ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
-
-        if (StringUtils.isNotBlank(error)) {
-            loanAccountLock.setError(error, error);
-        }
-        loanAccountLockRepository.save(loanAccountLock);
-        return Response.status(Response.Status.ACCEPTED).build();
+    @DELETE
+    public void deleteAllExternalEvents() {
+        log.debug("deleteAllExternalEvents called");
+        internalExternalEventService.deleteAllExternalEvents();
     }
 
 }
