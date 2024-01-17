@@ -16,14 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.boot;
+package org.apache.fineract.infrastructure.event.external.service.validation;
 
-public final class FineractProfiles {
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 
-    public static final String LIQUIBASE_ONLY = "liquibase-only";
-    public static final String DIAGNOSTICS = "diagnostics";
+@Getter
+@AllArgsConstructor
+@ToString
+public class ExternalEventDTO {
 
-    public static final String TEST = "test";
-
-    private FineractProfiles() {}
+    private final Long eventId;
+    private final String type;
+    private final String category;
+    private final OffsetDateTime createdAt;
+    private final Map<String, Object> payLoad;
+    private final LocalDate businessDate;
+    private final String schema;
+    private final Long aggregateRootId;
 }

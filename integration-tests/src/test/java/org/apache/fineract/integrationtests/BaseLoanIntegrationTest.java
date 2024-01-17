@@ -74,6 +74,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -86,7 +88,7 @@ public abstract class BaseLoanIntegrationTest {
 
     protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
 
-    protected final ResponseSpecification responseSpec = createResponseSpecification(200);
+    protected final ResponseSpecification responseSpec = createResponseSpecification(Matchers.is(200));
     protected final RequestSpecification requestSpec = createRequestSpecification();
 
     protected final AccountHelper accountHelper = new AccountHelper(requestSpec, responseSpec);
@@ -261,8 +263,8 @@ public abstract class BaseLoanIntegrationTest {
         return request;
     }
 
-    private static ResponseSpecification createResponseSpecification(int statusCode) {
-        return new ResponseSpecBuilder().expectStatusCode(statusCode).build();
+    protected static ResponseSpecification createResponseSpecification(Matcher<Integer> statusCodeMatcher) {
+        return new ResponseSpecBuilder().expectStatusCode(statusCodeMatcher).build();
     }
 
     protected void verifyUndoLastDisbursalShallFail(Long loanId, String expectedError) {
