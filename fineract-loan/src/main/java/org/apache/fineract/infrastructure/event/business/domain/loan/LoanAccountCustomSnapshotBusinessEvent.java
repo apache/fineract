@@ -16,14 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.boot;
+package org.apache.fineract.infrastructure.event.business.domain.loan;
 
-public final class FineractProfiles {
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-    public static final String LIQUIBASE_ONLY = "liquibase-only";
-    public static final String DIAGNOSTICS = "diagnostics";
+public class LoanAccountCustomSnapshotBusinessEvent extends LoanBusinessEvent {
 
-    public static final String TEST = "test";
+    private static final String TYPE = "LoanAccountCustomSnapshotBusinessEvent";
 
-    private FineractProfiles() {}
+    public LoanAccountCustomSnapshotBusinessEvent(Loan value) {
+        super(value);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }
