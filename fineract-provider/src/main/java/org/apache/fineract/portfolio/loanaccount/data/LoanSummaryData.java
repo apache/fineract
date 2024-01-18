@@ -180,7 +180,7 @@ public class LoanSummaryData {
                     loanTransactions);
             totalCreditBalanceRefundReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.CREDIT_BALANCE_REFUND,
                     loanTransactions);
-            totalRepaymentTransaction = computeTotalAmountForNonReversedTransactions(LoanTransactionType.REPAYMENT, loanTransactions);
+            totalRepaymentTransaction = computeTotalRepaymentTransactionAmount(loanTransactions);
             totalRepaymentTransactionReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.REPAYMENT, loanTransactions);
         }
 
@@ -226,5 +226,13 @@ public class LoanSummaryData {
         return loanTransactions.stream().filter(
                 transaction -> transaction.getType().getCode().equals(transactionType.getCode()) && transaction.getReversedOnDate() == null)
                 .map(txn -> txn.getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static BigDecimal computeTotalRepaymentTransactionAmount(Collection<LoanTransactionData> loanTransactions) {
+        BigDecimal totalRepaymentTransaction = computeTotalAmountForNonReversedTransactions(LoanTransactionType.REPAYMENT,
+                loanTransactions);
+        BigDecimal totalDownPaymentTransaction = computeTotalAmountForNonReversedTransactions(LoanTransactionType.DOWN_PAYMENT,
+                loanTransactions);
+        return totalRepaymentTransaction.add(totalDownPaymentTransaction);
     }
 }
