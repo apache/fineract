@@ -22,7 +22,6 @@ import static java.util.Arrays.asList;
 import static org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer.DATATABLE_NAME_REGEX_PATTERN;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.BIGINT;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.DATETIME;
-import static org.apache.fineract.infrastructure.core.service.database.SqlOperator.EQ;
 import static org.apache.fineract.infrastructure.core.service.database.SqlOperator.IN;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_AFTER;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_CODE;
@@ -217,9 +216,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         ResultsetColumnHeaderData column = SearchUtil.validateToJdbcColumn(columnName, headersByName, false);
 
         Object columnValue = SearchUtil.parseJdbcColumnValue(column, columnValueString, null, null, null, false, sqlGenerator);
+
         String sql = sqlGenerator.buildSelect(selectColumns, null, false) + " " + sqlGenerator.buildFrom(datatable, null, false) + " WHERE "
-                + EQ.formatPlaceholder(sqlGenerator, column.getColumnName(), 1, null);
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, columnValue); // NOSONAR
+                + column.getColumnName() + " = ?";
+
+        PreparedStatement pstmt = jdbcTemplate.getDataSource().getConnection().prepareStatement(sql);
+        pstmt.setObject(1, columnValue);
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(pstmt);
 
         List<JsonObject> results = new ArrayList<>();
         while (rowSet.next()) {
