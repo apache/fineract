@@ -144,7 +144,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                 if (unprocessed.isGreaterThanZero()) {
                     onLoanOverpayment(loanTransaction, unprocessed);
-                    loanTransaction.updateOverPayments(unprocessed);
+                    loanTransaction.setOverPayments(unprocessed);
                 }
 
             } else {
@@ -152,6 +152,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
         }
 
+        MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(currency));
         for (final LoanTransaction loanTransaction : transactionsToBeProcessed) {
             // TODO: analyze and remove this
             if (!loanTransaction.getTypeOf().equals(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN)) {
@@ -163,7 +164,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
-                    processLatestTransaction(loanTransaction, currency, installments, charges, null);
+                    processLatestTransaction(loanTransaction, currency, installments, charges, overpaymentHolder);
                     loanTransaction.adjustInterestComponent(currency);
                 } else {
                     /**
@@ -174,7 +175,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                     // Reset derived component of new loan transaction and
                     // re-process transaction
-                    processLatestTransaction(newLoanTransaction, currency, installments, charges, null);
+                    processLatestTransaction(newLoanTransaction, currency, installments, charges, overpaymentHolder);
                     newLoanTransaction.adjustInterestComponent(currency);
                     /**
                      * Check if the transaction amounts have changed. If so, reverse the original transaction and update
@@ -195,9 +196,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 loanTransaction.resetDerivedComponents();
                 handleRefund(loanTransaction, currency, installments, charges);
             } else if (loanTransaction.isCreditBalanceRefund()) {
-                recalculateCreditTransaction(changedTransactionDetail, loanTransaction, currency, installments, transactionsToBeProcessed);
+                recalculateCreditTransaction(changedTransactionDetail, loanTransaction, currency, installments, transactionsToBeProcessed,
+                        overpaymentHolder);
             } else if (loanTransaction.isChargeback()) {
-                recalculateCreditTransaction(changedTransactionDetail, loanTransaction, currency, installments, transactionsToBeProcessed);
+                recalculateCreditTransaction(changedTransactionDetail, loanTransaction, currency, installments, transactionsToBeProcessed,
+                        overpaymentHolder);
                 reprocessChargebackTransactionRelation(changedTransactionDetail, transactionsToBeProcessed);
             } else if (loanTransaction.isChargeOff()) {
                 recalculateChargeOffTransaction(changedTransactionDetail, loanTransaction, currency, installments);
@@ -209,11 +212,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     @Override
     public void processLatestTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, Money overpaidAmount) {
+            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, MoneyHolder overpaymentHolder) {
         switch (loanTransaction.getTypeOf()) {
             case WRITEOFF -> handleWriteOff(loanTransaction, currency, installments);
             case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, currency, installments, charges);
-            case CHARGEBACK -> handleChargeback(loanTransaction, currency, overpaidAmount, installments);
+            case CHARGEBACK -> handleChargeback(loanTransaction, currency, installments, overpaymentHolder);
             default -> {
                 Money transactionAmountUnprocessed = handleTransactionAndCharges(loanTransaction, currency, installments, charges, null,
                         false);
@@ -223,8 +226,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                                 transactionAmountUnprocessed.zero(), transactionAmountUnprocessed.zero());
                     } else {
                         onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
-                        loanTransaction.updateOverPayments(transactionAmountUnprocessed);
+                        loanTransaction.setOverPayments(transactionAmountUnprocessed);
                     }
+                    overpaymentHolder.setMoneyObject(transactionAmountUnprocessed);
+                } else {
+                    overpaymentHolder.setMoneyObject(Money.zero(currency));
                 }
             }
         }
@@ -435,17 +441,15 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     private void recalculateCreditTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
-            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
-            List<LoanTransaction> transactionsToBeProcessed) {
+            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, List<LoanTransaction> transactionsToBeProcessed,
+            MoneyHolder overpaymentHolder) {
         // pass through for new transactions
         if (loanTransaction.getId() == null) {
             return;
         }
         final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
 
-        List<LoanTransaction> mergedList = getMergedTransactionList(transactionsToBeProcessed, changedTransactionDetail);
-        Money overpaidAmount = calculateOverpaidAmount(loanTransaction, mergedList, installments, currency);
-        processCreditTransaction(newLoanTransaction, overpaidAmount, currency, installments);
+        processCreditTransaction(newLoanTransaction, overpaymentHolder, currency, installments);
         if (!LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
             createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
         }
@@ -470,40 +474,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     }
 
-    private Money calculateOverpaidAmount(LoanTransaction loanTransaction, List<LoanTransaction> transactions,
-            List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency) {
-        Money totalPaidInRepayments = Money.zero(currency);
-
-        Money cumulativeTotalPaidOnInstallments = Money.zero(currency);
-        for (final LoanRepaymentScheduleInstallment scheduledRepayment : installments) {
-            cumulativeTotalPaidOnInstallments = cumulativeTotalPaidOnInstallments
-                    .plus(scheduledRepayment.getPrincipalCompleted(currency).plus(scheduledRepayment.getInterestPaid(currency)))
-                    .plus(scheduledRepayment.getFeeChargesPaid(currency)).plus(scheduledRepayment.getPenaltyChargesPaid(currency));
-        }
-
-        for (final LoanTransaction transaction : transactions) {
-            if (transaction.isReversed()) {
-                continue;
-            }
-            if (transaction.equals(loanTransaction)) {
-                // We want to process only the transactions prior to the actual one
-                break;
-            }
-            if (transaction.isRefund() || transaction.isRefundForActiveLoan()) {
-                totalPaidInRepayments = totalPaidInRepayments.minus(transaction.getAmount(currency));
-            } else if (transaction.isCreditBalanceRefund() || transaction.isChargeback()) {
-                totalPaidInRepayments = totalPaidInRepayments.minus(transaction.getOverPaymentPortion(currency));
-            } else if (transaction.isRepaymentLikeType()) {
-                totalPaidInRepayments = totalPaidInRepayments.plus(transaction.getAmount(currency));
-            }
-        }
-
-        // if total paid in transactions higher than repayment schedule then
-        // theres an overpayment.
-        return MathUtil.negativeToZero(totalPaidInRepayments.minus(cumulativeTotalPaidOnInstallments));
-    }
-
-    private void processCreditTransaction(LoanTransaction loanTransaction, Money overpaidAmount, MonetaryCurrency currency,
+    private void processCreditTransaction(LoanTransaction loanTransaction, MoneyHolder overpaymentHolder, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments) {
         loanTransaction.resetDerivedComponents();
         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
@@ -511,9 +482,10 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         installments.sort(byDate);
         final Money zeroMoney = Money.zero(currency);
         Money transactionAmount = loanTransaction.getAmount(currency);
-        Money principalPortion = MathUtil.negativeToZero(loanTransaction.getAmount(currency).minus(overpaidAmount));
+        Money principalPortion = MathUtil.negativeToZero(loanTransaction.getAmount(currency).minus(overpaymentHolder.getMoneyObject()));
         Money repaidAmount = MathUtil.negativeToZero(transactionAmount.minus(principalPortion));
-        loanTransaction.updateOverPayments(repaidAmount);
+        loanTransaction.setOverPayments(repaidAmount);
+        overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().minus(repaidAmount));
         loanTransaction.updateComponents(principalPortion, zeroMoney, zeroMoney, zeroMoney);
 
         if (principalPortion.isGreaterThanZero()) {
@@ -770,14 +742,14 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
     }
 
-    protected void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
-            List<LoanRepaymentScheduleInstallment> installments) {
-        processCreditTransaction(loanTransaction, overpaidAmount, currency, installments);
+    protected void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, MoneyHolder overpaidAmountHolder) {
+        processCreditTransaction(loanTransaction, overpaidAmountHolder, currency, installments);
     }
 
-    protected void handleCreditBalanceRefund(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
-            List<LoanRepaymentScheduleInstallment> installments) {
-        processCreditTransaction(loanTransaction, overpaidAmount, currency, installments);
+    protected void handleCreditBalanceRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, MoneyHolder overpaidAmountHolder) {
+        processCreditTransaction(loanTransaction, overpaidAmountHolder, currency, installments);
     }
 
     protected void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,

@@ -54,7 +54,6 @@ import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHe
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -65,7 +64,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
 
     private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecErr400;
     private ResponseSpecification responseSpecErr503;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
@@ -77,13 +75,11 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
         this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
     }
 
-    @Disabled("Issue with Chargeback and Adv Pment Alloc")
     @ParameterizedTest
     @MethodSource("loanProductFactory")
     public void loanTransactionChargebackForPaymentTypeRepaymentTransactionTest(LoanProductTestBuilder loanProductTestBuilder) {
