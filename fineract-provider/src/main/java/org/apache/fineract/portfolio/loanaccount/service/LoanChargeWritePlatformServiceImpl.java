@@ -114,6 +114,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationT
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InstallmentNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
@@ -832,7 +833,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
         loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanChargeAdjustmentTransaction, loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), loan.getTotalOverpaidAsMoney());
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()));
 
         loan.addLoanTransaction(loanChargeAdjustmentTransaction);
         loan.updateLoanSummaryAndStatus();

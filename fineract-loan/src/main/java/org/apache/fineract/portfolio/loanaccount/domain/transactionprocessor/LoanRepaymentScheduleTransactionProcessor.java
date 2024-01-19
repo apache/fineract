@@ -41,7 +41,7 @@ public interface LoanRepaymentScheduleTransactionProcessor {
      * schedule.
      */
     void processLatestTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, Money overpaidAmount);
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, MoneyHolder overpaymentHolder);
 
     /**
      * Provides support for passing all {@link LoanTransaction}'s so it will completely re-process the entire loan

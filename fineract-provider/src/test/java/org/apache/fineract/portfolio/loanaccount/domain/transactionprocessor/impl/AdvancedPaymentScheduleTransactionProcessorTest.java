@@ -43,6 +43,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRul
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
@@ -121,7 +122,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(1), refEq(zero))).thenReturn(chargeAmountMoney);
         Mockito.when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
-        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge), overpaidAmount);
+        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge),
+                new MoneyHolder(overpaidAmount));
 
         Mockito.verify(installment, Mockito.times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, Mockito.times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -165,7 +167,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(charge.updatePaidAmountBy(refEq(transactionAmountMoney), eq(1), refEq(zero))).thenReturn(transactionAmountMoney);
         Mockito.when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
-        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge), overpaidAmount);
+        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge),
+                new MoneyHolder(overpaidAmount));
 
         Mockito.verify(installment, Mockito.times(1)).payFeeChargesComponent(eq(transactionDate), eq(transactionAmountMoney));
         Mockito.verify(loanTransaction, Mockito.times(1)).updateComponents(refEq(zero), refEq(zero), refEq(transactionAmountMoney),
@@ -218,7 +221,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(loanPaymentAllocationRule.getAllocationTypes()).thenReturn(List.of(PaymentAllocationType.DUE_PRINCIPAL));
         Mockito.when(loanTransaction.isOn(eq(transactionDate))).thenReturn(true);
 
-        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge), overpaidAmount);
+        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge),
+                new MoneyHolder(overpaidAmount));
 
         Mockito.verify(installment, Mockito.times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, Mockito.times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
