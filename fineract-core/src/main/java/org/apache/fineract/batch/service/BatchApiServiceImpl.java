@@ -148,6 +148,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                     responseList.addAll(request.get());
                     return responseList;
                 } catch (BatchExecutionException ex) {
+                    log.error("Exception during the batch request processing", ex);
                     responseList.add(buildErrorResponse(ex.getCause(), ex.getRequest()));
                     return responseList;
                 } finally {
