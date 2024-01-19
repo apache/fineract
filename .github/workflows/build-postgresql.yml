@@ -89,7 +89,7 @@ jobs:
 
       - name: Archive test results
         if: always()
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # tag=v3
+        uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # tag=v3
         with:
           name: test-results
           path: |
@@ -100,7 +100,7 @@ jobs:
 
       - name: Archive server logs
         if: always()
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # tag=v3
+        uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # tag=v3
         with:
           name: server-logs
           path: |
