@@ -36,6 +36,7 @@ public interface LoanAccountDataMapper {
     @Mapping(target = "externalOwnerId", ignore = true)
     @Mapping(target = "settlementDate", ignore = true)
     @Mapping(target = "purchasePriceRatio", ignore = true)
+    @Mapping(target = "delinquent.installmentDelinquencyBuckets", ignore = true)
     LoanAccountDataV1 map(LoanAccountData source);
 
 }
