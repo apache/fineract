@@ -93,6 +93,17 @@
                     "items": "org.apache.fineract.avro.loan.v1.DelinquencyPausePeriodV1"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "installmentDelinquencyBuckets",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1"
+                }
+            ]
         }
     ]
 }

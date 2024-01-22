@@ -116,7 +116,8 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         // given
         LoanDelinquencyRangeChangeBusinessEventSerializer serializer = new LoanDelinquencyRangeChangeBusinessEventSerializer(
                 loanReadPlatformService, new LoanDelinquencyRangeDataMapperImpl(), loanChargeReadPlatformService,
-                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(null, null, null), new CurrencyDataMapperImpl(), mapper);
+                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(null, null, null), new CurrencyDataMapperImpl(), mapper,
+                new LoanInstallmentLevelDelinquencyEventProducer(delinquencyReadPlatformService, new CurrencyDataMapperImpl()));
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanAccountData loanAccountData = mock(LoanAccountData.class);
@@ -180,7 +181,8 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         // given
         LoanDelinquencyRangeChangeBusinessEventSerializer serializer = new LoanDelinquencyRangeChangeBusinessEventSerializer(
                 loanReadPlatformService, new LoanDelinquencyRangeDataMapperImpl(), loanChargeReadPlatformService,
-                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(null, null, null), new CurrencyDataMapperImpl(), mapper);
+                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(null, null, null), new CurrencyDataMapperImpl(), mapper,
+                new LoanInstallmentLevelDelinquencyEventProducer(delinquencyReadPlatformService, new CurrencyDataMapperImpl()));
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanAccountData loanAccountData = mock(LoanAccountData.class);
