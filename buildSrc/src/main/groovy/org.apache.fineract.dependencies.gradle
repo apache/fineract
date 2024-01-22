@@ -26,16 +26,16 @@ dependencyManagement {
         mavenBom 'org.slf4j:slf4j-bom:2.0.11'
         mavenBom 'io.micrometer:micrometer-bom:1.12.2'
         mavenBom 'org.springframework:spring-framework-bom:6.1.3'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.2.1'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.2.2'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.34.1'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.9.22'
         mavenBom 'org.junit:junit-bom:5.10.1'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.16.1'
         mavenBom 'io.cucumber:cucumber-bom:7.15.0'
-        mavenBom 'io.netty:netty-bom:4.1.104.Final'
+        mavenBom 'io.netty:netty-bom:4.1.106.Final'
         mavenBom 'org.mockito:mockito-bom:5.9.0'
-        mavenBom 'software.amazon.awssdk:bom:2.23.3'
+        mavenBom 'software.amazon.awssdk:bom:2.23.7'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
     }
 
@@ -54,15 +54,15 @@ dependencyManagement {
         dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.0'
         dependency 'com.google.guava:guava:32.0.0-jre'
         dependency 'com.google.code.gson:gson:2.10.1'
-        dependency 'com.google.truth:truth:1.2.0'
-        dependency 'com.google.truth.extensions:truth-java8-extension:1.2.0'
+        dependency 'com.google.truth:truth:1.3.0'
+        dependency 'com.google.truth.extensions:truth-java8-extension:1.3.0'
         dependency 'com.google.googlejavaformat:google-java-format:1.19.2'
         dependency ('org.apache.commons:commons-email:1.6.0') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'javax.activation:activation'
         }
         dependency 'commons-io:commons-io:2.15.1'
-        dependency 'com.github.librepdf:openpdf:1.3.36'
+        dependency 'com.github.librepdf:openpdf:1.3.39'
         dependency ('org.mnode.ical4j:ical4j:3.2.14') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'org.codehaus.groovy:groovy'
@@ -71,7 +71,7 @@ dependencyManagement {
         dependency 'org.quartz-scheduler:quartz:2.3.2'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.11'
-        dependency 'com.jayway.jsonpath:json-path:2.8.0'
+        dependency 'com.jayway.jsonpath:json-path:2.9.0'
         dependency 'org.apache.tika:tika-core:2.9.1'
         dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.1') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
@@ -171,7 +171,7 @@ dependencyManagement {
             exclude 'io.swagger.core.v3:swagger-core'
         }
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.15.1'
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.15.2'
 
         dependency ('org.apache.activemq:activemq-client:6.0.1') {
             exclude 'javax.annotation:javax.annotation-api'
@@ -198,7 +198,7 @@ dependencyManagement {
         dependency ('org.liquibase:liquibase-core:4.25.1') {
             exclude 'javax.xml.bind:jaxb-api'
         }
-        dependency 'org.liquibase.ext:liquibase-postgresql:4.25.1'
+        dependency 'org.liquibase.ext:liquibase-postgresql:4.25.1.1'
 
         dependency ('org.dom4j:dom4j:2.1.4') {
             exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
@@ -221,8 +221,8 @@ dependencyManagement {
             entry 'json-path'
             entry 'xml-path'
         }
-        dependency 'org.apache.groovy:groovy-xml:4.0.17'
-        dependency 'org.apache.groovy:groovy-json:4.0.17'
+        dependency 'org.apache.groovy:groovy-xml:4.0.18'
+        dependency 'org.apache.groovy:groovy-json:4.0.18'
 
         dependency 'org.mapstruct:mapstruct:1.5.5.Final'
         dependency 'org.mapstruct:mapstruct-processor:1.5.5.Final'
