@@ -170,8 +170,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT,
             LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE,
-            LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY,
-            LoanProductConstants.LOAN_SCHEDULE_TYPE, LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE));
+            LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.LOAN_SCHEDULE_TYPE,
+            LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -764,7 +764,6 @@ public final class LoanProductDataValidator {
                     .validateForBooleanValue();
             validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
             validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
-            validateScheduleExtensionForDownPayment(enableDownPayment, baseDataValidator, element, null);
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element)) {
@@ -819,41 +818,6 @@ public final class LoanProductDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-
-    private void validateScheduleExtensionForDownPayment(Boolean enableDownPayment, DataValidatorBuilder baseDataValidator,
-            JsonElement element, final LoanProduct loanProduct) {
-
-        Boolean multiDisburseLoan = null;
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, element)) {
-            multiDisburseLoan = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME,
-                    element);
-        } else if (loanProduct != null) {
-            multiDisburseLoan = loanProduct.isMultiDisburseLoan();
-        }
-
-        if (multiDisburseLoan != null && multiDisburseLoan) {
-            if (enableDownPayment) {
-                if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, element)) {
-                    final Boolean disableScheduleExtensionForDownPayment = this.fromApiJsonHelper
-                            .extractBooleanNamed(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, element);
-                    baseDataValidator.reset().parameter(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT)
-                            .value(disableScheduleExtensionForDownPayment).ignoreIfNull().validateForBooleanValue();
-                }
-            } else {
-                if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, element)) {
-                    baseDataValidator.reset().parameter(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT).failWithCode(
-                            "supported.only.for.multi.disburse.loan.with.enable.down.payment.true",
-                            "Disable repayment schedule extension for down-payment is supported only for multi disburse loan with enable down-payment true");
-                }
-            }
-        } else {
-            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, element)) {
-                baseDataValidator.reset().parameter(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT).failWithCode(
-                        "supported.only.for.multi.disburse.loan.with.enable.down.payment.true",
-                        "Disable repayment schedule extension for down-payment is supported only for multi disburse loan with enable down-payment true");
-            }
-        }
     }
 
     private void validateAutoRepaymentForDownPayment(Boolean enableDownPayment, DataValidatorBuilder baseDataValidator,
@@ -1777,7 +1741,6 @@ public final class LoanProductDataValidator {
                     .validateForBooleanValue();
             validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
             validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
-            validateScheduleExtensionForDownPayment(enableDownPayment, baseDataValidator, element, loanProduct);
         }
 
         Integer repaymentStartDateType = loanProduct.getRepaymentStartDateType().getValue();

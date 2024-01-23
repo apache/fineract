@@ -262,7 +262,6 @@ public class LoanAccountData {
     private Boolean enableDownPayment;
     private BigDecimal disbursedAmountPercentageForDownPayment;
     private Boolean enableAutoRepaymentForDownPayment;
-    private Boolean disableScheduleExtensionForDownPayment;
 
     private EnumOptionData loanScheduleType;
     private EnumOptionData loanScheduleProcessingType;
@@ -680,8 +679,8 @@ public class LoanAccountData {
             final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud,
             LocalDate lastClosedBusinessDate, LocalDate overpaidOnDate, final boolean chargedOff, final boolean enableDownPayment,
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment,
-            final boolean disableScheduleExtensionForDownPayment, final boolean enableInstallmentLevelDelinquency,
-            final EnumOptionData loanScheduleType, final EnumOptionData loanScheduleProcessingType) {
+            final boolean enableInstallmentLevelDelinquency, final EnumOptionData loanScheduleType,
+            final EnumOptionData loanScheduleProcessingType) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -724,7 +723,6 @@ public class LoanAccountData {
                 .setLastClosedBusinessDate(lastClosedBusinessDate).setOverpaidOnDate(overpaidOnDate).setChargedOff(chargedOff)
                 .setEnableDownPayment(enableDownPayment).setDisbursedAmountPercentageForDownPayment(disbursedAmountPercentageForDownPayment)
                 .setEnableAutoRepaymentForDownPayment(enableAutoRepaymentForDownPayment)
-                .setDisableScheduleExtensionForDownPayment(disableScheduleExtensionForDownPayment)
                 .setEnableInstallmentLevelDelinquency(enableInstallmentLevelDelinquency).setLoanScheduleType(loanScheduleType)
                 .setLoanScheduleProcessingType(loanScheduleProcessingType);
     }
@@ -815,7 +813,6 @@ public class LoanAccountData {
                 .setChargedOff(acc.chargedOff).setEnableDownPayment(acc.enableDownPayment)
                 .setDisbursedAmountPercentageForDownPayment(acc.disbursedAmountPercentageForDownPayment)
                 .setEnableAutoRepaymentForDownPayment(acc.enableAutoRepaymentForDownPayment)
-                .setDisableScheduleExtensionForDownPayment(acc.disableScheduleExtensionForDownPayment)
                 .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency).setLoanScheduleType(acc.loanScheduleType)
                 .setLoanScheduleProcessingType(acc.loanScheduleProcessingType).setLoanScheduleTypeOptions(loanScheduleTypeOptions)
                 .setLoanScheduleProcessingTypeOptions(loanScheduleProcessingTypeOptions);

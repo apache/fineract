@@ -166,8 +166,6 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "1")
         public Integer repaymentStartDateType;
-        @Schema(example = "false")
-        public Boolean disableScheduleExtensionForDownPayment;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -1262,8 +1260,6 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
         public GetLoanProductsRepaymentStartDateType repaymentStartDateType;
-        @Schema(example = "false")
-        public Boolean disableScheduleExtensionForDownPayment;
         @Schema(example = "CUMULATIVE")
         public EnumOptionData loanScheduleType;
         @Schema(example = "HORIZONTAL")
@@ -1400,8 +1396,6 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "1")
         public Integer repaymentStartDateType;
-        @Schema(example = "false")
-        public Boolean disableScheduleExtensionForDownPayment;
 
         // Interest Recalculation
         @Schema(example = "false")
