@@ -84,6 +84,7 @@ public class LoanApplicationTestBuilder {
     private String interestChargedFromDate;
     private String linkAccountId;
     private String inArrearsTolerance;
+    private boolean createStandingInstructionAtDisbursement = false;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -202,6 +203,10 @@ public class LoanApplicationTestBuilder {
 
         if (datatables != null) {
             map.put("datatables", this.datatables);
+        }
+
+        if (createStandingInstructionAtDisbursement == true) {
+            map.put("createStandingInstructionAtDisbursement", true);
         }
         LOG.info("Loan Application request : {} ", map);
         return new Gson().toJson(map);
@@ -428,6 +433,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withInArrearsTolerance(String amount) {
         this.inArrearsTolerance = amount;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withCreateStandingInstructionAtDisbursement() {
+        this.createStandingInstructionAtDisbursement = true;
         return this;
     }
 }
