@@ -19,23 +19,35 @@
 package org.apache.fineract.integrationtests.useradministration.roles;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.PutPermissionsRequest;
+import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.useradministration.data.PermissionData;
 
-public final class RolesHelper {
+public final class RolesHelper extends IntegrationTest {
 
     public static final long SUPER_USER_ROLE_ID = 1L; // This is hardcoded into the initial Liquibase migration
 
-    private RolesHelper() {
+    public RolesHelper() {
 
     }
 
     private static final String CREATE_ROLE_URL = "/fineract-provider/api/v1/roles?" + Utils.TENANT_IDENTIFIER;
     private static final String ROLE_URL = "/fineract-provider/api/v1/roles";
+    private static final String PERMISSIONS_URL = "/fineract-provider/api/v1/permissions";
     private static final String DISABLE_ROLE_COMMAND = "disable";
     private static final String ENABLE_ROLE_COMMAND = "enable";
+
+    private static final Gson GSON = new JSON().getGson();
 
     public static Integer createRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_ROLE_URL, getTestCreateRoleAsJSON(), "resourceId");
@@ -70,13 +82,25 @@ public final class RolesHelper {
     }
 
     public static String addPermissionsToRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer roleId, final HashMap<String, Boolean> permissionMap) {
+            final Integer roleId, final Map<String, Boolean> permissionMap) {
         return Utils.performServerPut(requestSpec, responseSpec, ROLE_URL + "/" + roleId + "/permissions?" + Utils.TENANT_IDENTIFIER,
                 getAddPermissionsToRoleJSON(permissionMap));
     }
 
-    private static String getAddPermissionsToRoleJSON(HashMap<String, Boolean> permissionMap) {
-        final HashMap<String, HashMap<String, Boolean>> map = new HashMap<>();
+    public static List<PermissionData> getPermissions(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            boolean makerCheckerable) {
+        String response = Utils.performServerGet(requestSpec, responseSpec,
+                PERMISSIONS_URL + "?" + makerCheckerable + "=" + makerCheckerable);
+        final Type listType = new TypeToken<List<PermissionData>>() {}.getType();
+        return GSON.fromJson(response, listType);
+    }
+
+    public CommandProcessingResult updatePermissions(PutPermissionsRequest request) {
+        return ok(fineract().permissions.updatePermissionsDetails(request));
+    }
+
+    private static String getAddPermissionsToRoleJSON(Map<String, Boolean> permissionMap) {
+        final HashMap<String, Map<String, Boolean>> map = new HashMap<>();
         map.put("permissions", permissionMap);
         return new Gson().toJson(map);
     }
@@ -84,5 +108,4 @@ public final class RolesHelper {
     private static String createRoleOperationURL(final String command, final Integer roleId) {
         return ROLE_URL + "/" + roleId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
-
 }

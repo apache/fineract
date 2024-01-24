@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.SingleLoanChargeRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanproduct.domain.DueType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
@@ -126,6 +127,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
         }
 
+        addChargeOnlyRepaymentInstallmentIfRequired(charges, installments);
+
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetBalances();
             currentInstallment.updateDerivedFields(currency, disbursementDate);
@@ -134,9 +137,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         List<ChargeOrTransaction> chargeOrTransactions = createSortedChargesAndTransactionsList(loanTransactions, charges);
 
         final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
+        MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(currency));
         for (final ChargeOrTransaction chargeOrTransaction : chargeOrTransactions) {
             chargeOrTransaction.getLoanTransaction().ifPresent(loanTransaction -> processSingleTransaction(loanTransaction, currency,
-                    installments, charges, changedTransactionDetail));
+                    installments, charges, changedTransactionDetail, overpaymentHolder));
             chargeOrTransaction.getLoanCharge()
                     .ifPresent(loanCharge -> processSingleCharge(loanCharge, currency, installments, disbursementDate));
         }
@@ -148,18 +152,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     @Override
     public void processLatestTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, Money overpaidAmount) {
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, MoneyHolder overpaymentHolder) {
         switch (loanTransaction.getTypeOf()) {
             case DISBURSEMENT -> handleDisbursement(loanTransaction, currency, installments);
             case WRITEOFF -> handleWriteOff(loanTransaction, currency, installments);
             case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, currency, installments, charges);
-            case CHARGEBACK -> handleChargeback(loanTransaction, currency, overpaidAmount, installments);
-            case CREDIT_BALANCE_REFUND -> handleCreditBalanceRefund(loanTransaction, currency, overpaidAmount, installments);
+            case CHARGEBACK -> handleChargeback(loanTransaction, currency, installments, overpaymentHolder);
+            case CREDIT_BALANCE_REFUND -> handleCreditBalanceRefund(loanTransaction, currency, installments, overpaymentHolder);
             case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
                     WAIVE_INTEREST, RECOVERY_REPAYMENT ->
-                handleRepayment(loanTransaction, currency, installments, charges);
+                handleRepayment(loanTransaction, currency, installments, charges, overpaymentHolder);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, currency, installments);
-            case CHARGE_PAYMENT -> handleChargePayment(loanTransaction, currency, installments, charges);
+            case CHARGE_PAYMENT -> handleChargePayment(loanTransaction, currency, installments, charges, overpaymentHolder);
             case WAIVE_CHARGES -> log.debug("WAIVE_CHARGES transaction will not be processed.");
             // TODO: Cover rest of the transaction types
             default -> {
@@ -224,10 +228,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void processSingleTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges,
-            ChangedTransactionDetail changedTransactionDetail) {
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, ChangedTransactionDetail changedTransactionDetail,
+            MoneyHolder overpaymentHolder) {
         if (loanTransaction.getId() == null) {
-            processLatestTransaction(loanTransaction, currency, installments, charges, Money.zero(currency));
+            processLatestTransaction(loanTransaction, currency, installments, charges, overpaymentHolder);
             if (loanTransaction.isInterestWaiver()) {
                 loanTransaction.adjustInterestComponent(currency);
             }
@@ -240,7 +244,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
             // Reset derived component of new loan transaction and
             // re-process transaction
-            processLatestTransaction(newLoanTransaction, currency, installments, charges, Money.zero(currency));
+            processLatestTransaction(newLoanTransaction, currency, installments, charges, overpaymentHolder);
             if (loanTransaction.isInterestWaiver()) {
                 newLoanTransaction.adjustInterestComponent(currency);
             }
@@ -320,12 +324,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void handleRepayment(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, MoneyHolder overpaymentHolder) {
         if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
             loanTransaction.resetDerivedComponents();
         }
         Money transactionAmountUnprocessed = loanTransaction.getAmount(currency);
-        processTransaction(loanTransaction, currency, installments, transactionAmountUnprocessed, charges);
+        processTransaction(loanTransaction, currency, installments, transactionAmountUnprocessed, charges, overpaymentHolder);
     }
 
     private LoanTransactionToRepaymentScheduleMapping getTransactionMapping(
@@ -397,10 +401,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         loanTransactionToRepaymentScheduleMapping.setComponents(aggregatedPrincipal, aggregatedInterest, aggregatedFee, aggregatedPenalty);
     }
 
-    private void handleOverpayment(Money overpaymentPortion, LoanTransaction loanTransaction) {
+    private void handleOverpayment(Money overpaymentPortion, LoanTransaction loanTransaction, MoneyHolder overpaymentHolder) {
         if (overpaymentPortion.isGreaterThanZero()) {
             onLoanOverpayment(loanTransaction, overpaymentPortion);
-            loanTransaction.updateOverPayments(overpaymentPortion);
+            overpaymentHolder.setMoneyObject(overpaymentPortion);
+            loanTransaction.setOverPayments(overpaymentPortion);
+        } else {
+            overpaymentHolder.setMoneyObject(overpaymentPortion.zero());
         }
     }
 
@@ -425,7 +432,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void handleChargePayment(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, MoneyHolder overpaymentHolder) {
         Money zero = Money.zero(currency);
         Money feeChargesPortion = zero;
         Money penaltyChargesPortion = zero;
@@ -471,7 +478,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
 
         if (unprocessed.isGreaterThanZero()) {
-            processTransaction(loanTransaction, currency, installments, unprocessed, charges);
+            processTransaction(loanTransaction, currency, installments, unprocessed, charges, overpaymentHolder);
         }
     }
 
@@ -656,7 +663,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void processTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Money transactionAmountUnprocessed, Set<LoanCharge> charges) {
+            List<LoanRepaymentScheduleInstallment> installments, Money transactionAmountUnprocessed, Set<LoanCharge> charges,
+            MoneyHolder overpaymentHolder) {
         Money zero = Money.zero(currency);
         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
 
@@ -681,7 +689,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 balances.getAggregatedFeeChargesPortion(), balances.getAggregatedPenaltyChargesPortion());
         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
 
-        handleOverpayment(transactionAmountUnprocessed, loanTransaction);
+        handleOverpayment(transactionAmountUnprocessed, loanTransaction, overpaymentHolder);
     }
 
     private Money processPeriodsHorizontally(LoanTransaction loanTransaction, MonetaryCurrency currency,

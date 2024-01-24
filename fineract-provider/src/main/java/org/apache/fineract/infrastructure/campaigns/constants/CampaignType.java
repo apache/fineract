@@ -41,19 +41,20 @@ public enum CampaignType {
     }
 
     public static CampaignType fromInt(final Integer typeValue) {
-        CampaignType type = null;
+        if (typeValue == null) {
+            return INVALID;
+        }
+
         switch (typeValue) {
             case 0:
-                type = INVALID;
-            break;
+                return INVALID;
             case 1:
-                type = SMS;
-            break;
+                return SMS;
             case 2:
-                type = NOTIFICATION;
-            break;
+                return NOTIFICATION;
+            default:
+                return INVALID;
         }
-        return type;
     }
 
     public static EnumOptionData campaignType(final Integer campaignTypeId) {
@@ -61,28 +62,22 @@ public enum CampaignType {
     }
 
     public static EnumOptionData campaignType(final CampaignType campaignType) {
-        EnumOptionData optionData = new EnumOptionData(CampaignType.INVALID.getValue().longValue(), CampaignType.INVALID.getCode(),
-                "Invalid");
+        EnumOptionData optionData = new EnumOptionData(INVALID.getValue().longValue(), INVALID.getCode(), "Invalid");
         switch (campaignType) {
             case INVALID:
-                optionData = new EnumOptionData(CampaignType.INVALID.getValue().longValue(), CampaignType.INVALID.getCode(), "Invalid");
+                optionData = new EnumOptionData(INVALID.getValue().longValue(), INVALID.getCode(), "Invalid");
             break;
             case SMS:
-                optionData = new EnumOptionData(CampaignType.SMS.getValue().longValue(), CampaignType.SMS.getCode(), "SMS");
+                optionData = new EnumOptionData(SMS.getValue().longValue(), SMS.getCode(), "SMS");
             break;
             case NOTIFICATION:
-                optionData = new EnumOptionData(CampaignType.NOTIFICATION.getValue().longValue(), CampaignType.NOTIFICATION.getCode(),
-                        "NOTIFICATION");
+                optionData = new EnumOptionData(NOTIFICATION.getValue().longValue(), NOTIFICATION.getCode(), "NOTIFICATION");
             break;
         }
         return optionData;
     }
 
     public boolean isSms() {
-        return this.value.equals(CampaignType.SMS.getValue());
-    }
-
-    public boolean isNotificaion() {
-        return this.value.equals(CampaignType.NOTIFICATION.getValue());
+        return this.equals(SMS);
     }
 }

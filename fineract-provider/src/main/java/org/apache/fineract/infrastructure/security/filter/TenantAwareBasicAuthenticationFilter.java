@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.filter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,16 +67,16 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Slf4j
 public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
-    private static boolean firstRequestProcessed = false;
+    private static boolean FIRST_REQUEST_PROCESSED = false;
+    private static final String TENANT_ID_REQUEST_HEADER = "Fineract-Platform-TenantId";
+    private static final boolean EXCEPTION_IF_HEADER_MISSING = true;
+
     private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
     private final ConfigurationDomainService configurationDomainService;
     private final CacheWritePlatformService cacheWritePlatformService;
     private final UserNotificationService userNotificationService;
     private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
-
-    private final String tenantRequestHeader = "Fineract-Platform-TenantId";
-    private final boolean exceptionIfHeaderMissing = true;
 
     @Setter
     private RequestMatcher requestMatcher = AnyRequestMatcher.INSTANCE;
@@ -95,6 +96,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     }
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
@@ -109,15 +111,15 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 filterChain.doFilter(request, response);
             } else {
                 if (requestMatcher.matches(request)) {
-                    String tenantIdentifier = request.getHeader(this.tenantRequestHeader);
+                    String tenantIdentifier = request.getHeader(TENANT_ID_REQUEST_HEADER);
 
                     if (org.apache.commons.lang3.StringUtils.isBlank(tenantIdentifier)) {
                         tenantIdentifier = request.getParameter("tenantIdentifier");
                     }
 
-                    if (tenantIdentifier == null && this.exceptionIfHeaderMissing) {
+                    if (tenantIdentifier == null && EXCEPTION_IF_HEADER_MISSING) {
                         throw new InvalidTenantIdentifierException("No tenant identifier found: Add request header of '"
-                                + this.tenantRequestHeader + "' or add the parameter 'tenantIdentifier' to query string of request URL.");
+                                + TENANT_ID_REQUEST_HEADER + "' or add the parameter 'tenantIdentifier' to query string of request URL.");
                     }
 
                     String pathInfo = request.getRequestURI();
@@ -125,10 +127,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                     if (pathInfo != null && pathInfo.contains("report")) {
                         isReportRequest = true;
                     }
-                    final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier,
-                            isReportRequest);
+                    final FineractPlatformTenant tenant = basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
                     ThreadLocalContextUtil.setTenant(tenant);
-                    HashMap<BusinessDateType, LocalDate> businessDates = this.businessDateReadPlatformService.getBusinessDates();
+                    HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
                     ThreadLocalContextUtil.setBusinessDates(businessDates);
                     String authToken = request.getHeader("Authorization");
 
@@ -136,17 +137,17 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                         ThreadLocalContextUtil.setAuthToken(authToken.replaceFirst("Basic ", ""));
                     }
 
-                    if (!firstRequestProcessed) {
+                    if (!FIRST_REQUEST_PROCESSED) {
                         final String baseUrl = request.getRequestURL().toString().replace(request.getPathInfo(), "/");
                         System.setProperty("baseUrl", baseUrl);
 
-                        final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
+                        final boolean ehcacheEnabled = configurationDomainService.isEhcacheEnabled();
                         if (ehcacheEnabled) {
-                            this.cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
+                            cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
                         } else {
-                            this.cacheWritePlatformService.switchToCache(CacheType.NO_CACHE);
+                            cacheWritePlatformService.switchToCache(CacheType.NO_CACHE);
                         }
-                        TenantAwareBasicAuthenticationFilter.firstRequestProcessed = true;
+                        TenantAwareBasicAuthenticationFilter.FIRST_REQUEST_PROCESSED = true;
                     }
                 }
 
@@ -161,8 +162,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         } finally {
             ThreadLocalContextUtil.reset();
             task.stop();
-            final PlatformRequestLog log = PlatformRequestLog.from(task, request);
-            TenantAwareBasicAuthenticationFilter.log.debug("{}", this.toApiJsonSerializer.serialize(log));
+            final PlatformRequestLog msg = PlatformRequestLog.from(task, request);
+            log.debug("{}", toApiJsonSerializer.serialize(msg));
         }
     }
 

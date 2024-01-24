@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -34,13 +35,14 @@ import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Profile("test")
+@Profile(FineractProfiles.TEST)
 @Component
 @Path("/v1/internal/loans")
 @RequiredArgsConstructor
@@ -50,6 +52,7 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
     private final LoanAccountLockRepository loanAccountLockRepository;
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void afterPropertiesSet() throws Exception {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -65,6 +68,7 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
     @Path("{loanId}/place-lock/{lockOwner}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public Response placeLockOnLoanAccount(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
             @PathParam("lockOwner") String lockOwner, @RequestBody(required = false) String error) {
         log.warn("------------------------------------------------------------");

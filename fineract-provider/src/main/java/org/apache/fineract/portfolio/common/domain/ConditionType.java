@@ -18,33 +18,37 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 public enum ConditionType {
 
     INVALID(0, "ConditionType.invalid"), //
     LESSTHAN(1, "ConditionType.lessthan"), //
     EQUAL(2, "ConditionType.equal"), //
+    // TODO: fix typo "GREATERTHAN"
     GRETERTHAN(3, "ConditionType.greterthan"), //
     NOT_EQUAL(4, "ConditionType.notequal");//
 
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, ConditionType> intToEnumMap = new HashMap<>();
-
-    static {
-        for (final ConditionType type : ConditionType.values()) {
-            intToEnumMap.put(type.value, type);
+    public static ConditionType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-    }
 
-    public static ConditionType fromInt(final Integer ruleTypeValue) {
-        final ConditionType type = intToEnumMap.get(ruleTypeValue);
-        return type;
+        switch (v) {
+            case 1:
+                return LESSTHAN;
+            case 2:
+                return EQUAL;
+            case 3:
+                return GRETERTHAN;
+            case 4:
+                return NOT_EQUAL;
+            default:
+                return INVALID;
+        }
     }
 
     ConditionType(final Integer value, final String code) {
@@ -65,34 +69,13 @@ public enum ConditionType {
         return this.code;
     }
 
-    public boolean isConditionTypeEqual() {
-        return ConditionType.EQUAL.getValue().equals(this.value);
-    }
-
-    public boolean isConditionTypeGreterThan() {
-        return ConditionType.GRETERTHAN.getValue().equals(this.value);
-    }
-
-    public boolean isConditionTypeNotEqual() {
-        return ConditionType.NOT_EQUAL.getValue().equals(this.value);
-    }
-
-    public boolean isConditionTypeLessThan() {
-        return ConditionType.LESSTHAN.getValue().equals(this.value);
-    }
-
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isInvalid() {
         return ConditionType.INVALID.getValue().equals(this.value);
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final ConditionType enumType : values()) {
-            if (!enumType.isInvalid()) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 }

@@ -23,8 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -33,9 +32,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
 
+@Slf4j
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
-
-    protected static final Logger LOG = LoggerFactory.getLogger(CustomAuthenticationFailureHandler.class);
 
     private String defaultFailureUrl;
     private boolean forwardToDestination = false;
@@ -55,18 +53,18 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             final AuthenticationException exception) throws IOException, ServletException {
 
         if (this.defaultFailureUrl == null) {
-            LOG.debug("No failure URL set, sending 401 Unauthorized error");
+            log.debug("No failure URL set, sending 401 Unauthorized error");
 
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
         } else {
             saveException(request, exception);
 
             if (this.forwardToDestination) {
-                LOG.debug("Forwarding to {}", this.defaultFailureUrl);
+                log.debug("Forwarding to {}", this.defaultFailureUrl);
 
                 request.getRequestDispatcher(this.defaultFailureUrl).forward(request, response);
             } else {
-                LOG.debug("Redirecting to {}", this.defaultFailureUrl);
+                log.debug("Redirecting to {}", this.defaultFailureUrl);
 
                 final String oauthToken = request.getParameter("oauth_token");
                 request.setAttribute("oauth_token", oauthToken);

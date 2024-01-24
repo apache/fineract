@@ -36,4 +36,5 @@
   <include relativeToChangelogFile="true" file="parts/1011_add_delinquency_actions_table.xml"/>
   <include relativeToChangelogFile="true" file="parts/1012_introduce_loan_schedule_processing_type_configuration.xml"/>
   <include relativeToChangelogFile="true" file="parts/1013_add_loan_account_delinquency_pause_changed_event.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1014_add_loan_account_custom_snapshot_event.xml"/>
 </databaseChangeLog>

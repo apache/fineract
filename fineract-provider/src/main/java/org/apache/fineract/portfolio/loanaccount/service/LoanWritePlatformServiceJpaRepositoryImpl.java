@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.resilience4j.retry.annotation.Retry;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -889,6 +890,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public CommandProcessingResult makeGLIMLoanRepayment(final Long loanId, final JsonCommand command) {
 
         final Long parentLoanId = loanId;

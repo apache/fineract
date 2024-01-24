@@ -53,10 +53,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,6 +98,11 @@ class LoanCOBApiFilterTest {
     @BeforeEach
     public void setUp() {
         testObj = new LoanCOBApiFilter(helper);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test
@@ -254,7 +259,6 @@ class LoanCOBApiFilterTest {
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
-        LoanRescheduleRequest rescheduleRequest = mock(LoanRescheduleRequest.class);
         given(loanRescheduleRequestRepository.getLoanIdByRescheduleRequestId(resourceId)).willReturn(Optional.of(2L));
         given(context.authenticatedUser()).willReturn(appUser);
 

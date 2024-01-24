@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  *
@@ -51,15 +50,9 @@ public enum DaysInMonthType {
         return this.code;
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final DaysInMonthType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 
     public static DaysInMonthType fromInt(final Integer type) {

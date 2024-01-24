@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Test;
 public class OAuth2AuthenticationTest {
 
     private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpec403;
     private ResponseSpecification responseSpec401;
     private RequestSpecification requestSpec;
     private RequestSpecification requestFormSpec;
@@ -61,7 +60,6 @@ public class OAuth2AuthenticationTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestFormSpec = new RequestSpecBuilder().setContentType(ContentType.URLENC).build();
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpec403 = new ResponseSpecBuilder().expectStatusCode(403).build();
         this.responseSpec401 = new ResponseSpecBuilder().expectStatusCode(401).build();
     }
 

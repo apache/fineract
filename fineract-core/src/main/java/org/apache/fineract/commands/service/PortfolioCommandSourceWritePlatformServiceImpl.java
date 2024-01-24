@@ -19,6 +19,7 @@
 package org.apache.fineract.commands.service;
 
 import com.google.gson.JsonElement;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.domain.CommandSource;
@@ -26,6 +27,8 @@ import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandNotAwaitingApprovalException;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
+import org.apache.fineract.commands.exception.UnsupportedCommandException;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -45,10 +48,10 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private final FromJsonHelper fromApiJsonHelper;
     private final CommandProcessingService processAndLogCommandService;
     private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
+    private final ConfigurationDomainService configurationService;
 
     @Override
     public CommandProcessingResult logCommandSource(final CommandWrapper wrapper) {
-
         boolean isApprovedByChecker = false;
 
         // check if is update of own account details
@@ -77,7 +80,6 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
     @Override
     public CommandProcessingResult approveEntry(final Long makerCheckerId) {
-
         final CommandSource commandSourceInput = validateMakerCheckerTransaction(makerCheckerId);
         validateIsUpdateAllowed();
 
@@ -111,16 +113,24 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     }
 
     private CommandSource validateMakerCheckerTransaction(final Long makerCheckerId) {
-
-        final CommandSource commandSourceInput = this.commandSourceRepository.findById(makerCheckerId)
+        final CommandSource commandSource = this.commandSourceRepository.findById(makerCheckerId)
                 .orElseThrow(() -> new CommandNotFoundException(makerCheckerId));
-        if (!commandSourceInput.isMarkedAsAwaitingApproval()) {
+        if (!commandSource.isMarkedAsAwaitingApproval()) {
             throw new CommandNotAwaitingApprovalException(makerCheckerId);
         }
-
-        this.context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
-
-        return commandSourceInput;
+        AppUser appUser = this.context.authenticatedUser();
+        String permissionCode = commandSource.getPermissionCode();
+        appUser.validateHasCheckerPermissionTo(permissionCode);
+        if (!configurationService.isSameMakerCheckerEnabled() && !appUser.isCheckerSuperUser()) {
+            AppUser maker = commandSource.getMaker();
+            if (maker == null) {
+                throw new UnsupportedCommandException(permissionCode, "Maker user is missing.");
+            }
+            if (Objects.equals(appUser.getId(), maker.getId())) {
+                throw new UnsupportedCommandException(permissionCode, "Can not be checked by the same user.");
+            }
+        }
+        return commandSource;
     }
 
     private void validateIsUpdateAllowed() {

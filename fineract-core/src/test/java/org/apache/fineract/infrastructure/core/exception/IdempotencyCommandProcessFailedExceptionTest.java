@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exceptionmapper.IdempotentCommandExceptionMapper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +47,11 @@ public class IdempotencyCommandProcessFailedExceptionTest {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, actualDate)));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test

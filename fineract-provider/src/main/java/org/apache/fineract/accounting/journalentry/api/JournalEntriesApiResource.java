@@ -83,7 +83,7 @@ public class JournalEntriesApiResource {
             "entityType", "entityId", "createdByUserId", "createdDate", "submittedOnDate", "createdByUserName", "comments", "reversed",
             "referenceNumber", "currency", "transactionDetails"));
 
-    private final String resourceNameForPermission = "JOURNALENTRY";
+    private static final String RESOURCE_NAME_FOR_PERMISSION = "JOURNALENTRY";
 
     private final PlatformSecurityContext context;
     private final JournalEntryReadPlatformService journalEntryReadPlatformService;
@@ -125,7 +125,7 @@ public class JournalEntriesApiResource {
             @QueryParam("runningBalance") @Parameter(description = "runningBalance") final boolean runningBalance,
             @QueryParam("transactionDetails") @Parameter(description = "transactionDetails") final boolean transactionDetails) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
 
@@ -174,7 +174,7 @@ public class JournalEntriesApiResource {
             @QueryParam("runningBalance") @Parameter(description = "runningBalance") final boolean runningBalance,
             @QueryParam("transactionDetails") @Parameter(description = "transactionDetails") final boolean transactionDetails) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
                 runningBalance);
         final JournalEntryData glJournalEntryData = this.journalEntryReadPlatformService.retrieveGLJournalEntryById(journalEntryId,
@@ -260,7 +260,7 @@ public class JournalEntriesApiResource {
     public String retrieveOpeningBalance(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
             @QueryParam("currencyCode") final String currencyCode) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         final OfficeOpeningBalancesData officeOpeningBalancesData = this.journalEntryReadPlatformService
                 .retrieveOfficeOpeningBalances(officeId, currencyCode);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

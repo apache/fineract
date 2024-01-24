@@ -736,6 +736,7 @@ public class JsonParserHelper {
     /***
      * TODO: Vishwas move all Locale related code to a separate Utils class
      ***/
+    @SuppressWarnings("StringSplitter")
     public static Locale localeFromString(final String localeAsString) {
 
         if (StringUtils.isBlank(localeAsString)) {
@@ -754,16 +755,16 @@ public class JsonParserHelper {
 
         final String[] localeParts = localeAsString.split("_");
 
-        if (localeParts != null && localeParts.length == 1) {
+        if (localeParts.length == 1) {
             languageCode = localeParts[0];
         }
 
-        if (localeParts != null && localeParts.length == 2) {
+        if (localeParts.length == 2) {
             languageCode = localeParts[0];
             countryCode = localeParts[1];
         }
 
-        if (localeParts != null && localeParts.length == 3) {
+        if (localeParts.length == 3) {
             languageCode = localeParts[0];
             countryCode = localeParts[1];
             variantCode = localeParts[2];

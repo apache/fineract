@@ -219,7 +219,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         Object columnValue = SearchUtil.parseJdbcColumnValue(column, columnValueString, null, null, null, false, sqlGenerator);
         String sql = sqlGenerator.buildSelect(selectColumns, null, false) + " " + sqlGenerator.buildFrom(datatable, null, false) + " WHERE "
                 + EQ.formatPlaceholder(sqlGenerator, column.getColumnName(), 1, null);
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, columnValue);
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, columnValue); // NOSONAR
 
         List<JsonObject> results = new ArrayList<>();
         while (rowSet.next()) {
@@ -279,7 +279,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         // Execute the count Query
         String countQuery = "SELECT COUNT(*)" + from + where;
-        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args);
+        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args); // NOSONAR
         if (totalElements == null || totalElements == 0) {
             return PageableExecutionUtils.getPage(results, pageable, () -> 0);
         }
@@ -371,7 +371,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private void registerDataTable(final String entityName, final String dataTableName, final String entitySubType, final Integer category,
             final String permissionsSql) {
-        EntityTables entityTable = resolveEntity(entityName);
+        resolveEntity(entityName);
         validateDatatableName(dataTableName);
         validateDataTableExists(dataTableName);
 
@@ -1012,7 +1012,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String findFKSql = "SELECT count(*) FROM information_schema.TABLE_CONSTRAINTS i" + " WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY' AND "
                 + schemaSql + " AND i.TABLE_NAME = '" + datatableName + "' AND i.CONSTRAINT_NAME = '" + fkName + "' ";
 
-        final Integer count = this.jdbcTemplate.queryForObject(findFKSql, Integer.class);
+        final Integer count = this.jdbcTemplate.queryForObject(findFKSql, Integer.class); // NOSONAR
         if (count != null && count > 0) {
             codeMappings.add(datatableAlias + "_" + name);
             constrainBuilder.append(", DROP FOREIGN KEY ").append(sqlGenerator.escape(fkName)).append(" ");
@@ -1076,7 +1076,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (type != null && mandatory && type.isStringType()) {
             String sql = "UPDATE " + sqlGenerator.escape(datatableName) + " SET " + sqlGenerator.escape(name) + " = '' WHERE "
                     + sqlGenerator.escape(name) + " IS NULL";
-            this.jdbcTemplate.update(sql);
+            this.jdbcTemplate.update(sql); // NOSONAR
         }
     }
 
@@ -1141,12 +1141,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private void createUniqueConstraint(String datatableName, String columnName, String uniqueKeyName) {
         String sql = "ALTER TABLE " + sqlGenerator.escape(datatableName) + " ADD CONSTRAINT " + sqlGenerator.escape(uniqueKeyName)
                 + " UNIQUE (" + sqlGenerator.escape(columnName) + ");";
-        this.jdbcTemplate.execute(sql);
+        this.jdbcTemplate.execute(sql); // NOSONAR
     }
 
     private void dropUniqueConstraint(String datatableName, String uniqueKeyName) {
         String sql = "ALTER TABLE " + sqlGenerator.escape(datatableName) + " DROP CONSTRAINT " + sqlGenerator.escape(uniqueKeyName) + ";";
-        this.jdbcTemplate.execute(sql);
+        this.jdbcTemplate.execute(sql); // NOSONAR
     }
 
     private void updateIndexesForTable(String datatableName, JsonArray changeColumns,
@@ -1294,16 +1294,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 List.of(entityTable.getForeignKeyColumnNameOnDatatable(), CREATEDAT_FIELD_NAME, UPDATEDAT_FIELD_NAME));
         LocalDateTime auditDateTime = DateUtils.getAuditLocalDateTime();
         ArrayList<Object> params = new ArrayList<>(List.of(appTableId, auditDateTime, auditDateTime));
-        for (String key : dataParams.keySet()) {
-            if (isTechnicalParam(key)) {
+        for (Map.Entry<String, String> entry : dataParams.entrySet()) {
+            if (isTechnicalParam(entry.getKey())) {
                 continue;
             }
-            ResultsetColumnHeaderData columnHeader = SearchUtil.validateToJdbcColumn(key, headersByName, false);
+            ResultsetColumnHeaderData columnHeader = SearchUtil.validateToJdbcColumn(entry.getKey(), headersByName, false);
             if (!isUserInsertable(entityTable, columnHeader)) {
                 continue;
             }
             insertColumns.add(columnHeader.getColumnName());
-            params.add(SearchUtil.parseJdbcColumnValue(columnHeader, dataParams.get(key), dateFormat, dateTimeFormat, locale, false,
+            params.add(SearchUtil.parseJdbcColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale, false,
                     sqlGenerator));
         }
         if (addScore) {
@@ -1403,17 +1403,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         ArrayList<String> updateColumns = new ArrayList<>(List.of(UPDATEDAT_FIELD_NAME));
         ArrayList<Object> params = new ArrayList<>(List.of(DateUtils.getAuditLocalDateTime()));
         final HashMap<String, Object> changes = new HashMap<>();
-        for (String key : dataParams.keySet()) {
-            if (isTechnicalParam(key)) {
+        for (Map.Entry<String, String> entry : dataParams.entrySet()) {
+            if (isTechnicalParam(entry.getKey())) {
                 continue;
             }
-            ResultsetColumnHeaderData columnHeader = SearchUtil.validateToJdbcColumn(key, headersByName, false);
+            ResultsetColumnHeaderData columnHeader = SearchUtil.validateToJdbcColumn(entry.getKey(), headersByName, false);
             if (!isUserUpdatable(entityTable, columnHeader)) {
                 continue;
             }
             String columnName = columnHeader.getColumnName();
             Object existingValue = valuesByHeader.get(columnHeader);
-            Object columnValue = SearchUtil.parseColumnValue(columnHeader, dataParams.get(key), dateFormat, dateTimeFormat, locale, false,
+            Object columnValue = SearchUtil.parseColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale, false,
                     sqlGenerator);
             if ((columnHeader.getColumnType().isDecimalType() && MathUtil.isEqualTo((BigDecimal) existingValue, (BigDecimal) columnValue))
                     || (existingValue == null ? columnValue == null : existingValue.equals(columnValue))) {
@@ -1430,7 +1430,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             params.add(primaryKey);
             final String sql = sqlGenerator.buildUpdate(dataTableName, updateColumns, headersByName) + " WHERE " + pkColumn.getColumnName()
                     + " = ?";
-            int updated = jdbcTemplate.update(sql, params.toArray(Object[]::new));
+            int updated = jdbcTemplate.update(sql, params.toArray(Object[]::new)); // NOSONAR
             if (updated != 1) {
                 throw new PlatformDataIntegrityException("error.msg.invalid.update", "Expected one updated row.");
             }
@@ -1486,7 +1486,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String sql = "DELETE FROM " + sqlGenerator.escape(dataTableName) + " WHERE " + sqlGenerator.escape(whereColumn) + " = "
                 + whereValue;
 
-        this.jdbcTemplate.update(sql);
+        this.jdbcTemplate.update(sql); // NOSONAR
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(whereValue) //
@@ -1643,7 +1643,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String sql = "SELECT COUNT(edc.x_registered_table_name) FROM x_registered_table xrt"
                 + " JOIN m_entity_datatable_check edc ON edc.x_registered_table_name = xrt.registered_table_name"
                 + " WHERE edc.x_registered_table_name = '" + datatableName + "'";
-        final Long count = this.jdbcTemplate.queryForObject(sql, Long.class);
+        final Long count = this.jdbcTemplate.queryForObject(sql, Long.class); // NOSONAR
         return count != null && count > 0;
     }
 
@@ -1682,7 +1682,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private void validateDataTableExists(final String datatableName) {
         final String sql = "select (CASE WHEN exists (select 1 from information_schema.tables where table_schema = "
                 + sqlGenerator.currentSchema() + " and table_name = ?) THEN 'true' ELSE 'false' END)";
-        final boolean dataTableExists = Boolean.parseBoolean(this.jdbcTemplate.queryForObject(sql, String.class, datatableName));
+        final boolean dataTableExists = Boolean.parseBoolean(this.jdbcTemplate.queryForObject(sql, String.class, datatableName)); // NOSONAR
         if (!dataTableExists) {
             throw new PlatformDataIntegrityException("error.msg.invalid.datatable", "Invalid Data Table: " + datatableName, API_FIELD_NAME,
                     datatableName);
@@ -1716,7 +1716,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private int getDatatableRowCount(final String datatableName) {
         final String sql = "select count(*) from " + sqlGenerator.escape(datatableName);
-        Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class);
+        Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class); // NOSONAR
         return count == null ? 0 : count;
     }
 

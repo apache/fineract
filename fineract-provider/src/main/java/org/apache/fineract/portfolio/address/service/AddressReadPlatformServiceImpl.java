@@ -65,8 +65,6 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
             final long addressId = rs.getLong("id");
 
-            final long clientId = rs.getLong("client_id");
-
             final String street = rs.getString("street");
 
             final String address_line_1 = rs.getString("address_line_1");

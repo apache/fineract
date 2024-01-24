@@ -79,8 +79,9 @@ services:
         condition: service_started
     env_file:
       - ./config/docker/env/aws.env
-      - ./config/docker/env/fineract-mariadb.env
       - ./config/docker/env/fineract.env
+      - ./config/docker/env/fineract-common.env
+      - ./config/docker/env/fineract-mariadb.env
       - ./config/docker/env/tracing.env
       - ./config/docker/env/oltp.env
       - ./config/docker/env/prometheus.env

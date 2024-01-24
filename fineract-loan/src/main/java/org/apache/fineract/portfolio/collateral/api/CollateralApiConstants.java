@@ -18,8 +18,9 @@
  */
 package org.apache.fineract.portfolio.collateral.api;
 
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class CollateralApiConstants {
 
@@ -43,16 +44,8 @@ public final class CollateralApiConstants {
             this.value = value;
         }
 
-        private static final Set<String> values = new HashSet<>();
-
-        static {
-            for (final CollateralJSONinputParams type : CollateralJSONinputParams.values()) {
-                values.add(type.value);
-            }
-        }
-
         public static Set<String> getAllValues() {
-            return values;
+            return Arrays.stream(values()).map(CollateralJSONinputParams::getValue).collect(Collectors.toSet());
         }
 
         @Override

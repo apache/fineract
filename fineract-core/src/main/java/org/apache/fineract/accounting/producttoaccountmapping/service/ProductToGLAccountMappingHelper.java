@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
@@ -99,7 +100,7 @@ public class ProductToGLAccountMappingHelper {
                     throw new ProductToGLAccountMappingNotFoundException(portfolioProductType, productId, accountTypeName);
                 }
             } else {
-                if (!accountMapping.getGlAccount().getId().equals(accountId)) {
+                if (accountMapping.getGlAccount() != null && !Objects.equals(accountMapping.getGlAccount().getId(), accountId)) {
                     final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
                     changes.put(paramName, accountId);
                     accountMapping.setGlAccount(glAccount);
@@ -124,7 +125,7 @@ public class ProductToGLAccountMappingHelper {
                 ProductToGLAccountMapping newAccountMapping = new ProductToGLAccountMapping().setGlAccount(glAccount)
                         .setProductId(productId).setProductType(portfolioProductType.getValue()).setFinancialAccountType(accountTypeId);
                 this.accountMappingRepository.saveAndFlush(newAccountMapping);
-            } else if (!accountMapping.getGlAccount().getId().equals(accountId)) {
+            } else if (accountMapping.getGlAccount() != null && !Objects.equals(accountMapping.getGlAccount().getId(), accountId)) {
                 final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
                 changes.put(paramName, accountId);
                 accountMapping.setGlAccount(glAccount);
@@ -272,14 +273,11 @@ public class ProductToGLAccountMappingHelper {
                         this.accountMappingRepository.delete(chargeToIncomeAccountMapping);
                     }
                 }
-                // create new mappings
-                final Set<Long> incomingCharges = inputChargeToIncomeAccountMap.keySet();
-                incomingCharges.removeAll(existingCharges);
-                // incomingPaymentTypes now only contains the newly added
-                // payment Type mappings
-                for (final Long newCharge : incomingCharges) {
-                    final Long newGLAccountId = inputChargeToIncomeAccountMap.get(newCharge);
-                    saveChargeToFundSourceMapping(productId, newCharge, newGLAccountId, portfolioProductType, isPenalty);
+
+                // only the newly added
+                for (Map.Entry<Long, Long> entry : inputChargeToIncomeAccountMap.entrySet().stream()
+                        .filter(e -> !existingCharges.contains(e.getKey())).toList()) {
+                    saveChargeToFundSourceMapping(productId, entry.getKey(), entry.getValue(), portfolioProductType, isPenalty);
                 }
             }
         }
@@ -321,7 +319,7 @@ public class ProductToGLAccountMappingHelper {
             }
 
             // If input map is empty, delete all existing mappings
-            if (inputPaymentChannelFundSourceMap.size() == 0) {
+            if (inputPaymentChannelFundSourceMap.isEmpty()) {
                 this.accountMappingRepository.deleteAllInBatch(existingPaymentChannelToFundSourceMappings);
             } /**
                * Else, <br/>
@@ -348,14 +346,11 @@ public class ProductToGLAccountMappingHelper {
                         this.accountMappingRepository.delete(existingPaymentChannelToFundSourceMapping);
                     }
                 }
-                // create new mappings
-                final Set<Long> incomingPaymentTypes = inputPaymentChannelFundSourceMap.keySet();
-                incomingPaymentTypes.removeAll(existingPaymentTypes);
-                // incomingPaymentTypes now only contains the newly added
-                // payment Type mappings
-                for (final Long newPaymentType : incomingPaymentTypes) {
-                    final Long newGLAccountId = inputPaymentChannelFundSourceMap.get(newPaymentType);
-                    savePaymentChannelToFundSourceMapping(productId, newPaymentType, newGLAccountId, portfolioProductType);
+
+                // only the newly added
+                for (Map.Entry<Long, Long> entry : inputPaymentChannelFundSourceMap.entrySet().stream()
+                        .filter(e -> !existingPaymentTypes.contains(e.getKey())).toList()) {
+                    savePaymentChannelToFundSourceMapping(productId, entry.getKey(), entry.getValue(), portfolioProductType);
                 }
             }
         }

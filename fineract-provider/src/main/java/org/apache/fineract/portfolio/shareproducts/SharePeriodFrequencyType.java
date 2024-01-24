@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.shareproducts;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * An enumeration of supported calendar periods used in savings.
@@ -48,39 +47,32 @@ public enum SharePeriodFrequencyType {
         return this.code;
     }
 
-    public static SharePeriodFrequencyType fromInt(final Integer type) {
-        SharePeriodFrequencyType repaymentFrequencyType = SharePeriodFrequencyType.INVALID;
-        if (type != null) {
-            switch (type) {
-                case 0:
-                    repaymentFrequencyType = SharePeriodFrequencyType.DAYS;
-                break;
-                case 1:
-                    repaymentFrequencyType = SharePeriodFrequencyType.WEEKS;
-                break;
-                case 2:
-                    repaymentFrequencyType = SharePeriodFrequencyType.MONTHS;
-                break;
-                case 3:
-                    repaymentFrequencyType = SharePeriodFrequencyType.YEARS;
-                break;
-            }
+    public static SharePeriodFrequencyType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return repaymentFrequencyType;
+
+        switch (v) {
+            case 0:
+                return DAYS;
+            case 1:
+                return WEEKS;
+            case 2:
+                return MONTHS;
+            case 3:
+                return YEARS;
+            default:
+                return INVALID;
+        }
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isInvalid() {
-        return this.value.equals(SharePeriodFrequencyType.INVALID.value);
+        return this.equals(INVALID);
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final SharePeriodFrequencyType enumType : values()) {
-            if (!enumType.isInvalid()) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 }

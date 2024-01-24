@@ -283,6 +283,9 @@ public final class Utils {
             final String deleteURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
                 .asString();
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 

@@ -105,7 +105,7 @@ public class AuditsApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
         final SQLBuilder extraCriteria = getExtraCriteria(actionName, entityName, resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
                 checkerId, checkerDateTimeFrom, checkerDateTimeTo, processingResult, officeId, groupId, clientId, loanId, savingsAccountId);
@@ -135,7 +135,7 @@ public class AuditsApiResource {
     public String retrieveAuditEntry(@PathParam("auditId") @Parameter(description = "auditId") final Long auditId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final AuditData auditEntry = this.auditReadPlatformService.retrieveAuditEntry(auditId);
 
@@ -153,7 +153,7 @@ public class AuditsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class))) })
     public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 

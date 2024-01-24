@@ -42,7 +42,7 @@ public class ExtendedSpringLiquibaseBuilder {
     private final String databaseChangeLogTable;
     private final String databaseChangeLogLockTable;
     private final boolean shouldRun;
-    private final String labels;
+    private final String labelFilter;
     private final File rollbackFile;
     private final boolean testRollbackOnUpdate;
     private final String tag;
@@ -68,7 +68,7 @@ public class ExtendedSpringLiquibaseBuilder {
         this.databaseChangeLogTable = liquibaseProperties.getDatabaseChangeLogTable();
         this.databaseChangeLogLockTable = liquibaseProperties.getDatabaseChangeLogLockTable();
         this.shouldRun = liquibaseProperties.isEnabled();
-        this.labels = liquibaseProperties.getLabels();
+        this.labelFilter = liquibaseProperties.getLabelFilter();
         this.rollbackFile = liquibaseProperties.getRollbackFile();
         this.testRollbackOnUpdate = liquibaseProperties.isTestRollbackOnUpdate();
         this.tag = liquibaseProperties.getTag();
@@ -116,7 +116,7 @@ public class ExtendedSpringLiquibaseBuilder {
         result.setDatabaseChangeLogTable(databaseChangeLogTable);
         result.setDatabaseChangeLogLockTable(databaseChangeLogLockTable);
         result.setShouldRun(shouldRun);
-        result.setLabels(labels);
+        result.setLabelFilter(labelFilter);
         result.setRollbackFile(rollbackFile);
         result.setTestRollbackOnUpdate(testRollbackOnUpdate);
         result.setTag(tag);

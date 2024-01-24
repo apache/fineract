@@ -35,5 +35,6 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - ./config/docker/env/fineract-postgresql.env
       - ./config/docker/env/fineract.env
+      - ./config/docker/env/fineract-common.env
+      - ./config/docker/env/fineract-postgresql.env

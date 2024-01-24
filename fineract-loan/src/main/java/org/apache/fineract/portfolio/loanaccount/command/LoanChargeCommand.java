@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.command;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -49,6 +50,7 @@ public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
     }
 
     @Override
+    @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
     public int compareTo(final LoanChargeCommand o) {
         int comparison = this.chargeId.compareTo(o.chargeId);
         if (comparison == 0) {

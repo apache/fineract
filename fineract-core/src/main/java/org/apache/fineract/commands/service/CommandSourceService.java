@@ -26,7 +26,10 @@ import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
+import org.apache.fineract.commands.exception.RollbackTransactionNotApprovedException;
+import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.jetbrains.annotations.NotNull;
@@ -95,19 +98,24 @@ public class CommandSourceService {
                 idempotencyKey);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
     public CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
-        CommandSource commandSourceResult;
-        if (jsonCommand.commandId() != null) {
-            commandSourceResult = commandSourceRepository.findById(jsonCommand.commandId())
-                    .orElseThrow(() -> new CommandNotFoundException(jsonCommand.commandId()));
-            commandSourceResult.markAsChecked(maker);
-        } else {
-            commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey, UNDER_PROCESSING.getValue());
-        }
+        CommandSource commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey,
+                UNDER_PROCESSING.getValue());
         if (commandSourceResult.getCommandJson() == null) {
             commandSourceResult.setCommandJson("{}");
         }
         return commandSourceResult;
+    }
+
+    @Transactional
+    public CommandProcessingResult processCommand(NewCommandSourceHandler handler, JsonCommand command, CommandSource commandSource,
+            AppUser user, boolean isApprovedByChecker, boolean isMakerChecker) {
+        final CommandProcessingResult result = handler.processCommand(command);
+        boolean isRollback = !isApprovedByChecker && !user.isCheckerSuperUser() && (isMakerChecker || result.isRollbackTransaction());
+        if (isRollback) {
+            commandSource.markAsAwaitingApproval();
+            throw new RollbackTransactionNotApprovedException(commandSource.getId(), commandSource.getResourceId());
+        }
+        return result;
     }
 }

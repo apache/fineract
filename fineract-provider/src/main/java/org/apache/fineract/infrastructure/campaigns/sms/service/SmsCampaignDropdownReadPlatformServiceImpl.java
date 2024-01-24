@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.campaigns.sms.service;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -72,7 +71,7 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
 
     @Override
     public Collection<SmsProviderData> retrieveSmsProviders() {
-        Collection<SmsProviderData> smsProviderOptions = new ArrayList<>();
+        Collection<SmsProviderData> smsProviderOptions;
         Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("smsbridges", null);
         URI uri = (URI) hostConfig.get("uri");
         HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
@@ -80,8 +79,7 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
         ResponseEntity<Collection<SmsProviderData>> responseOne = null;
 
         try {
-            responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity,
-                    new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
+            responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {});
         } catch (ResourceAccessException ex) {
             LOG.debug("Mobile service provider {} not available", uri, ex);
         }

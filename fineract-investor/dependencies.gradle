@@ -52,7 +52,7 @@ dependencies {
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot2',
+            'io.github.resilience4j:resilience4j-spring-boot3',
             )
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

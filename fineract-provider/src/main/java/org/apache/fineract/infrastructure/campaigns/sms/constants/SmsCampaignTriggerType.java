@@ -41,20 +41,21 @@ public enum SmsCampaignTriggerType {
         return code;
     }
 
-    public static SmsCampaignTriggerType fromInt(final Integer typeValue) {
-        SmsCampaignTriggerType type = null;
-        switch (typeValue) {
-            case 1:
-                type = DIRECT;
-            break;
-            case 2:
-                type = SCHEDULE;
-            break;
-            case 3:
-                type = TRIGGERED;
-            break;
+    public static SmsCampaignTriggerType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return type;
+
+        switch (v) {
+            case 1:
+                return DIRECT;
+            case 2:
+                return SCHEDULE;
+            case 3:
+                return TRIGGERED;
+            default:
+                return INVALID;
+        }
     }
 
     public static EnumOptionData triggerType(final Integer triggerTypeId) {
@@ -62,38 +63,32 @@ public enum SmsCampaignTriggerType {
     }
 
     public static EnumOptionData triggerType(final SmsCampaignTriggerType triggerType) {
-        EnumOptionData optionData = new EnumOptionData(SmsCampaignTriggerType.INVALID.getValue().longValue(),
-                SmsCampaignTriggerType.INVALID.getCode(), "Invalid");
         switch (triggerType) {
             case INVALID:
-                optionData = new EnumOptionData(SmsCampaignTriggerType.INVALID.getValue().longValue(),
-                        SmsCampaignTriggerType.INVALID.getCode(), "Invalid");
-            break;
+                return new EnumOptionData(INVALID.getValue().longValue(), INVALID.getCode(), "Invalid");
             case DIRECT:
-                optionData = new EnumOptionData(SmsCampaignTriggerType.DIRECT.getValue().longValue(),
-                        SmsCampaignTriggerType.DIRECT.getCode(), "Direct");
-            break;
+                return new EnumOptionData(DIRECT.getValue().longValue(), DIRECT.getCode(), "Direct");
             case SCHEDULE:
-                optionData = new EnumOptionData(SmsCampaignTriggerType.SCHEDULE.getValue().longValue(),
-                        SmsCampaignTriggerType.SCHEDULE.getCode(), "Schedule");
-            break;
+                return new EnumOptionData(SCHEDULE.getValue().longValue(), SCHEDULE.getCode(), "Schedule");
             case TRIGGERED:
-                optionData = new EnumOptionData(SmsCampaignTriggerType.TRIGGERED.getValue().longValue(),
-                        SmsCampaignTriggerType.TRIGGERED.getCode(), "Triggered");
-            break;
+                return new EnumOptionData(TRIGGERED.getValue().longValue(), TRIGGERED.getCode(), "Triggered");
+            default:
+                return new EnumOptionData(INVALID.getValue().longValue(), INVALID.getCode(), "Invalid");
         }
-        return optionData;
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isDirect() {
-        return this.value.equals(SmsCampaignTriggerType.DIRECT.getValue());
+        return this.equals(DIRECT);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isSchedule() {
-        return this.value.equals(SmsCampaignTriggerType.SCHEDULE.getValue());
+        return this.equals(SCHEDULE);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isTriggered() {
-        return this.value.equals(SmsCampaignTriggerType.TRIGGERED.getValue());
+        return this.equals(TRIGGERED);
     }
 }

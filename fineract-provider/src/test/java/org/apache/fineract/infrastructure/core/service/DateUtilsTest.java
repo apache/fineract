@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,11 @@ public class DateUtilsTest {
     public void init() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2022, 6, 12))));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test

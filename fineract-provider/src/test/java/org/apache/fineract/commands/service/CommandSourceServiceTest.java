@@ -21,6 +21,7 @@ package org.apache.fineract.commands.service;
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.UNDER_PROCESSING;
 import static org.mockito.ArgumentMatchers.any;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.ZoneId;
 import java.util.Optional;
 import org.apache.fineract.batch.exception.ErrorInfo;
@@ -44,6 +45,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class CommandSourceServiceTest {
 
     @Mock
@@ -87,24 +89,12 @@ public class CommandSourceServiceTest {
 
     @Test
     public void testCreateFromExisting() {
-        CommandWrapper wrapper = CommandWrapper.wrap("act", "ent", 1L, 1L);
         long commandId = 1L;
-        JsonCommand jsonCommand = JsonCommand.fromExistingCommand(commandId, "", null, null, null, 1L, null, null, null, null, null, null,
-                null, null, null, null, null);
         CommandSource commandMock = Mockito.mock(CommandSource.class);
-        Mockito.when(commandSourceRepository.saveAndFlush(commandMock)).thenReturn(commandMock);
         Mockito.when(commandSourceRepository.findById(commandId)).thenReturn(Optional.of(commandMock));
-        AppUser appUser = Mockito.mock(AppUser.class);
 
-        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "t1", "n1", ZoneId.systemDefault().toString(), null));
-
-        CommandSource actual = underTest.saveInitialNewTransaction(wrapper, jsonCommand, appUser, "idk");
-
-        ArgumentCaptor<CommandSource> commandSourceArgumentCaptor = ArgumentCaptor.forClass(CommandSource.class);
-        Mockito.verify(commandSourceRepository).saveAndFlush(commandSourceArgumentCaptor.capture());
-
-        CommandSource captured = commandSourceArgumentCaptor.getValue();
-        Assertions.assertEquals(actual, captured);
+        CommandSource actual = underTest.getCommandSource(commandId);
+        Assertions.assertEquals(commandMock, actual);
     }
 
     @Test

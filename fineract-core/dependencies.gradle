@@ -53,7 +53,7 @@ dependencies {
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot2',
+            'io.github.resilience4j:resilience4j-spring-boot3',
             'org.apache.httpcomponents:httpcore',
             )
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {

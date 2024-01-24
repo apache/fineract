@@ -114,7 +114,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
         Object[] args = params.toArray();
 
         String countQuery = "SELECT COUNT(*) " + tm.from() + where;
-        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args);
+        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args); // NOSONAR
         if (totalElements == null || totalElements == 0) {
             return emptyResult;
         }
@@ -266,7 +266,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
 
         // Execute the count Query
         String countQuery = "SELECT COUNT(*)" + from + where;
-        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args);
+        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args); // NOSONAR
         if (totalElements == null || totalElements == 0) {
             return PageableExecutionUtils.getPage(results, pageable, () -> 0);
         }

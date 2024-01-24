@@ -25,6 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -41,6 +42,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +57,7 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class BusinessDateWritePlatformServiceTest {
 
     @InjectMocks
@@ -75,6 +78,11 @@ public class BusinessDateWritePlatformServiceTest {
     @BeforeEach
     public void init() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test

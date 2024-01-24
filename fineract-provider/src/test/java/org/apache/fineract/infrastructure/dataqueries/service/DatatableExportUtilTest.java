@@ -21,11 +21,25 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.service.export.DatatableExportUtil;
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class DatatableExportUtilTest {
+
+    @BeforeEach
+    public void setUp() {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
 
     @Test
     public void emptyFolderTest() {

@@ -131,7 +131,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate) {
+    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate,
+            String repaymentStrategy) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -146,6 +147,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate(submitDate) //
                 .withSubmittedOnDate(submitDate) //
+                .withRepaymentStrategy(repaymentStrategy) //
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
@@ -161,7 +163,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                 accounts);
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, principal, submitApproveDisburseDate);
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, principal, submitApproveDisburseDate,
+                loanProductTestBuilder.getTransactionProcessingStrategyCode());
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);

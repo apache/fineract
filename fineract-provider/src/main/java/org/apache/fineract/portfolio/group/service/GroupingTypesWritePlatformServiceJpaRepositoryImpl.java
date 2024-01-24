@@ -172,16 +172,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
                 if (newGroup.isCenter()) {
                     final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateCenter(null).build();
-                    rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
+                    rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
                 } else {
                     final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateGroup(null).build();
-                    rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
+                    rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
                 }
             }
 
             if (!newGroup.isCenter() && newGroup.hasActiveClients()) {
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().associateClientsToGroup(newGroup.getId()).build();
-                rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
+                rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
             }
 
             // pre-save to generate id for use in group hierarchy

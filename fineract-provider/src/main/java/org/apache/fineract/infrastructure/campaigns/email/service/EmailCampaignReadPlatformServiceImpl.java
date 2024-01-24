@@ -30,7 +30,6 @@ import java.util.Map;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailBusinessRulesData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignTimeLine;
-import org.apache.fineract.infrastructure.campaigns.email.data.ScheduledEmailEnumerations;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignStatus;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignStatusEnumerations;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignType;
@@ -116,24 +115,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             final String emailMessage = rs.getString("emailMessage");
             final String emailAttachmentFileFormatString = rs.getString("emailAttachmentFileFormat");
             final String stretchyReportParamMap = rs.getString("stretchyReportParamMap");
-            EnumOptionData emailAttachmentFileFormat = null;
-            if (emailAttachmentFileFormatString != null) {
-                emailAttachmentFileFormat = ScheduledEmailEnumerations.emailAttachementFileFormat(emailAttachmentFileFormatString);
-            }
             final Long reportId = JdbcSupport.getLong(rs, "stretchyReportId");
-            final String reportName = rs.getString("reportName");
-            final String reportType = rs.getString("reportType");
-            final String reportSubType = rs.getString("reportSubType");
-            final String reportCategory = rs.getString("reportCategory");
-            final String reportSql = rs.getString("reportSql");
-            final String reportDescription = rs.getString("reportDescription");
-            final boolean coreReport = rs.getBoolean("coreReport");
-            final boolean useReport = rs.getBoolean("useReport");
-
-            /*
-             * final ReportData stretchyReport = new ReportData(reportId, reportName, reportType, reportSubType,
-             * reportCategory, reportDescription, reportSql, coreReport, useReport, null);
-             */
 
             final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
             final EnumOptionData status = EmailCampaignStatusEnumerations.status(statusId);

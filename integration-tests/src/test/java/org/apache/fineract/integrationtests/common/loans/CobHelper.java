@@ -23,16 +23,17 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @Slf4j
-public class CobHelper extends IntegrationTest {
+public final class CobHelper {
+
+    private CobHelper() {}
 
     public static List<Map<String, Object>> getCobPartitions(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, int partitionSize, final String jsonReturn) {
-        final String GET_LOAN_URL = "/fineract-provider/api/v1/internal/cob/partitions/" + partitionSize + "?" + Utils.TENANT_IDENTIFIER;
+        final String url = "/fineract-provider/api/v1/internal/cob/partitions/" + partitionSize + "?" + Utils.TENANT_IDENTIFIER;
         log.info("---------------------------------GET COB PARTITIONS---------------------------------------------");
-        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_URL, jsonReturn);
+        return Utils.performServerGet(requestSpec, responseSpec, url, jsonReturn);
     }
 }

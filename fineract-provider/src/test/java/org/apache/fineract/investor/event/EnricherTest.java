@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.investor.enricher.LoanAccountDataV1Enricher;
 import org.apache.fineract.investor.enricher.LoanChargeDataV1Enricher;
 import org.apache.fineract.investor.enricher.LoanTransactionDataV1Enricher;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,17 +54,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class EnricherTest {
 
-    private final LocalDate actualDate = LocalDate.now(ZoneId.systemDefault());
+    private static final LocalDate ACTUAL_DATE = LocalDate.now(ZoneId.systemDefault());
 
-    private final String purchasePriceRatio = "100.123";
-    private final String settlementDate = DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.systemDefault()));
+    private static final String PURCHASE_PRICE_RATIO = "100.123";
+    private static final String SETTLEMENT_DATE = DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.systemDefault()));
 
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, actualDate)));
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, ACTUAL_DATE)));
 
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test
@@ -73,8 +79,8 @@ public class EnricherTest {
         doAnswer(a -> {
             LoanAccountDataV1 data = a.getArgument(0, LoanAccountDataV1.class);
             data.setExternalOwnerId("1");
-            data.setSettlementDate(settlementDate);
-            data.setPurchasePriceRatio(purchasePriceRatio);
+            data.setSettlementDate(SETTLEMENT_DATE);
+            data.setPurchasePriceRatio(PURCHASE_PRICE_RATIO);
             return null;
         }).when(loanAccountDataV1Enricher).enrich(any(LoanAccountDataV1.class));
 
@@ -86,8 +92,8 @@ public class EnricherTest {
         verify(loanAccountDataV1Enricher, times(1)).enrich(any(LoanAccountDataV1.class));
 
         assertEquals("1", original.getExternalOwnerId());
-        assertEquals(settlementDate, original.getSettlementDate());
-        assertEquals(purchasePriceRatio, original.getPurchasePriceRatio());
+        assertEquals(SETTLEMENT_DATE, original.getSettlementDate());
+        assertEquals(PURCHASE_PRICE_RATIO, original.getPurchasePriceRatio());
     }
 
     @Test
@@ -143,8 +149,8 @@ public class EnricherTest {
         doAnswer(a -> {
             LoanAccountDataV1 data = a.getArgument(0, LoanAccountDataV1.class);
             data.setExternalOwnerId("1");
-            data.setSettlementDate(settlementDate);
-            data.setPurchasePriceRatio(purchasePriceRatio);
+            data.setSettlementDate(SETTLEMENT_DATE);
+            data.setPurchasePriceRatio(PURCHASE_PRICE_RATIO);
             return null;
         }).when(loanAccountDataV1Enricher).enrich(any(LoanAccountDataV1.class));
 
@@ -174,9 +180,8 @@ public class EnricherTest {
         verify(loanTransactionDataV1Enricher, times(1)).isDataTypeSupported(any());
 
         assertEquals("1", data.getExternalOwnerId());
-        assertEquals(settlementDate, data.getSettlementDate());
-        assertEquals(purchasePriceRatio, data.getPurchasePriceRatio());
+        assertEquals(SETTLEMENT_DATE, data.getSettlementDate());
+        assertEquals(PURCHASE_PRICE_RATIO, data.getPurchasePriceRatio());
 
     }
-
 }

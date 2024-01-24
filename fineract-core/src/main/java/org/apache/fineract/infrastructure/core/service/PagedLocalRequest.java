@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service;
 
 import java.util.Locale;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -37,5 +38,26 @@ public class PagedLocalRequest<T> extends PagedRequest<T> {
 
     public Locale getLocaleObject() {
         return locale == null ? null : JsonParserHelper.localeFromString(locale);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof PagedLocalRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        PagedLocalRequest<?> that = (PagedLocalRequest<?>) o;
+        return Objects.equals(dateFormat, that.dateFormat) && Objects.equals(dateTimeFormat, that.dateTimeFormat)
+                && Objects.equals(locale, that.locale);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), dateFormat, dateTimeFormat, locale);
     }
 }
