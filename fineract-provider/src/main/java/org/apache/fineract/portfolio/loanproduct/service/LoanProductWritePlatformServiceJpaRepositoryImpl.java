@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculat
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsJsonParser;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
@@ -109,13 +110,18 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final List<Rate> rates = assembleListOfProductRates(command);
             final List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = advancedPaymentJsonParser
                     .assembleLoanProductPaymentAllocationRules(command, loanTransactionProcessingStrategyCode);
+            List<LoanProductCreditAllocationRule> loanProductCreditAllocationRules = new ArrayList<>(); // TODO: this
+                                                                                                        // shall be
+                                                                                                        // parsed from
+                                                                                                        // the json
+                                                                                                        // command
             FloatingRate floatingRate = null;
             if (command.parameterExists("floatingRatesId")) {
                 floatingRate = this.floatingRateRepository
                         .findOneWithNotFoundDetection(command.longValueOfParameterNamed("floatingRatesId"));
             }
             final LoanProduct loanProduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategyCode, charges, command,
-                    this.aprCalculator, floatingRate, rates, loanProductPaymentAllocationRules);
+                    this.aprCalculator, floatingRate, rates, loanProductPaymentAllocationRules, loanProductCreditAllocationRules);
             loanProduct.updateLoanProductInRelatedClasses();
             loanProduct.setTransactionProcessingStrategyName(
                     loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(loanTransactionProcessingStrategyCode).getName());

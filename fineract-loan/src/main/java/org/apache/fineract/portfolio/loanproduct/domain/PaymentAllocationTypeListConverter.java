@@ -24,16 +24,16 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.data.GenericEnumListConverter;
 
 @Converter(autoApply = true)
-public class AllocationTypeListConverter extends GenericEnumListConverter<AllocationType>
-        implements AttributeConverter<List<AllocationType>, String> {
+public class PaymentAllocationTypeListConverter extends GenericEnumListConverter<PaymentAllocationType>
+        implements AttributeConverter<List<PaymentAllocationType>, String> {
 
     @Override
     public boolean isUnique() {
         return true;
     }
 
-    public AllocationTypeListConverter() {
-        super(AllocationType.class);
+    public PaymentAllocationTypeListConverter() {
+        super(PaymentAllocationType.class);
     }
 
 }
