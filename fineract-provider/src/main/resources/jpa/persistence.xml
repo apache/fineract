@@ -114,6 +114,10 @@
         <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />

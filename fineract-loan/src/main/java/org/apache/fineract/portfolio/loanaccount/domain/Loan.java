@@ -243,6 +243,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanPaymentAllocationRule> paymentAllocationRules = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<LoanCreditAllocationRule> creditAllocationRules = new ArrayList<>();
+
     @Embedded
     private LoanProductRelatedDetail loanRepaymentScheduleDetail;
 
@@ -7181,6 +7184,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void setPaymentAllocationRules(List<LoanPaymentAllocationRule> loanPaymentAllocationRules) {
         this.paymentAllocationRules = loanPaymentAllocationRules;
+    }
+
+    public List<LoanCreditAllocationRule> getCreditAllocationRules() {
+        return creditAllocationRules;
+    }
+
+    public void setCreditAllocationRules(List<LoanCreditAllocationRule> loanCreditAllocationRules) {
+        this.creditAllocationRules = loanCreditAllocationRules;
     }
 
     public String getTransactionProcessingStrategyCode() {

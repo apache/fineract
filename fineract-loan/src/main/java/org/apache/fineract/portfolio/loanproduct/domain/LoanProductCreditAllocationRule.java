@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.loanproduct.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -34,33 +34,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
-import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "m_loan_payment_allocation_rule", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "loan_id", "transaction_type" }, name = "uq_m_loan_payment_allocation_rule") })
+@Table(name = "m_loan_product_credit_allocation_rule", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "loan_product_id", "transaction_type" }, name = "uq_m_loan_product_credit_allocation_rule") })
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LoanPaymentAllocationRule extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanProductCreditAllocationRule extends AbstractAuditableWithUTCDateTimeCustom {
 
     @ManyToOne
-    @JoinColumn(name = "loan_id", nullable = false)
-    private Loan loan;
+    @JoinColumn(name = "loan_product_id", nullable = false)
+    private LoanProduct loanProduct;
 
     @Column(name = "transaction_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private PaymentAllocationTransactionType transactionType;
+    private CreditAllocationTransactionType transactionType;
 
-    @Convert(converter = PaymentAllocationTypeListConverter.class)
+    @Convert(converter = AllocationTypeListConverter.class)
     @Column(name = "allocation_types", nullable = false)
-    private List<PaymentAllocationType> allocationTypes;
+    private List<AllocationType> allocationTypes;
 
-    @Column(name = "future_installment_allocation_rule", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private FutureInstallmentAllocationRule futureInstallmentAllocationRule;
 }

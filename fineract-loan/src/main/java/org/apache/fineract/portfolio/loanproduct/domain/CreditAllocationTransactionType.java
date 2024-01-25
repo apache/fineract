@@ -18,22 +18,23 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import java.util.Arrays;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.data.GenericEnumListConverter;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
-@Converter(autoApply = true)
-public class AllocationTypeListConverter extends GenericEnumListConverter<AllocationType>
-        implements AttributeConverter<List<AllocationType>, String> {
+@Getter
+@RequiredArgsConstructor
+public enum CreditAllocationTransactionType {
 
-    @Override
-    public boolean isUnique() {
-        return true;
+    CHARGEBACK(LoanTransactionType.CHARGEBACK, "Chargeback");
+
+    private final LoanTransactionType loanTransactionType;
+    private final String humanReadableName;
+
+    public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
+        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
     }
-
-    public AllocationTypeListConverter() {
-        super(AllocationType.class);
-    }
-
 }
