@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import com.sun.research.ws.wadl.HTTPMethods;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -47,6 +48,7 @@ import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletRequestWrapper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
@@ -142,9 +144,10 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/v1/jobs/2/inline");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
 
         testObj.doFilterInternal(request, response, filterChain);
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -162,6 +165,7 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/v1/loans/invalid2LoanId/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(context.authenticatedUser()).willReturn(appUser);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
@@ -169,7 +173,7 @@ class LoanCOBApiFilterTest {
                 anyList())).willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -181,11 +185,12 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/v1/jobs/2/inline");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(context.authenticatedUser()).willReturn(appUser);
         given(appUser.isBypassUser()).willReturn(true);
 
         testObj.doFilterInternal(request, response, filterChain);
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -203,6 +208,7 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/v1/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(context.authenticatedUser()).willReturn(appUser);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
@@ -211,7 +217,7 @@ class LoanCOBApiFilterTest {
                 anyList())).willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -229,6 +235,7 @@ class LoanCOBApiFilterTest {
         String uuid = UUID.randomUUID().toString();
         given(request.getPathInfo()).willReturn("/v1/loans/external-id/" + uuid + "/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(context.authenticatedUser()).willReturn(appUser);
         given(loanRepository.findIdByExternalId(any())).willReturn(2L);
@@ -238,7 +245,7 @@ class LoanCOBApiFilterTest {
                 anyList())).willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -256,6 +263,7 @@ class LoanCOBApiFilterTest {
         Long resourceId = 123L;
         given(request.getPathInfo()).willReturn("/v1/rescheduleloans/" + resourceId + "/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
@@ -266,7 +274,7 @@ class LoanCOBApiFilterTest {
                 anyList())).willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -288,6 +296,7 @@ class LoanCOBApiFilterTest {
         given(result.getLastClosedBusinessDate()).willReturn(businessDate.minusDays(2));
         given(request.getPathInfo()).willReturn("/v1/loans/2?command=approve");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
@@ -297,7 +306,7 @@ class LoanCOBApiFilterTest {
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(inlineLoanCOBExecutorService, times(1)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -318,6 +327,7 @@ class LoanCOBApiFilterTest {
         given(result.getId()).willReturn(2L);
         given(request.getPathInfo()).willReturn("/v1/loans/2?command=approve");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
@@ -328,7 +338,7 @@ class LoanCOBApiFilterTest {
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(inlineLoanCOBExecutorService, times(0)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -340,12 +350,13 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/v1/loans");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
 
         given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(inlineLoanCOBExecutorService, times(0)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -357,12 +368,13 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/v1/loans/catch-up");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
 
         given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(inlineLoanCOBExecutorService, times(0)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
@@ -375,6 +387,7 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/v1/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(true);
         given(response.getWriter()).willReturn(writer);
         given(context.authenticatedUser()).willReturn(appUser);
@@ -396,6 +409,7 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/v1/loans/glimAccount/2");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new byte[0]));
         given(glimAccountInfoRepository.findOneByIsAcceptingChildAndApplicationId(true, BigDecimal.valueOf(2))).willReturn(glimAccount);
         given(glimAccount.getChildLoan()).willReturn(Collections.singleton(loan));
         given(loan.getId()).willReturn(loanId);

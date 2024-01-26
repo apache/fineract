@@ -43,8 +43,9 @@ public final class UserHelper {
     private static final String REPAYMENT_LOAN_PERMISSION = "REPAYMENT_LOAN";
     private static final String READ_LOAN_PERMISSION = "READ_LOAN";
 
-    private static boolean simpleUserCreated = false;
-    private static String simpleUsername;
+    public static final String SIMPLE_USER_NAME = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
+    public static final String SIMPLE_USER_PASSWORD = "aA1qwerty56";
+    private static boolean SIMPLE_USER_CREATED = false;
 
     private UserHelper() {}
 
@@ -141,23 +142,22 @@ public final class UserHelper {
 
     public static RequestSpecification getSimpleUserWithoutBypassPermission(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        String password = "aA1qwerty56";
-        if (!simpleUserCreated) {
+        String password = SIMPLE_USER_PASSWORD;
+        if (!SIMPLE_USER_CREATED) {
             GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-            simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
             String simpleRoleId = createSimpleRole(requestSpec, responseSpec);
-            PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
+            PostUsersRequest createUserRequest = new PostUsersRequest().username(SIMPLE_USER_NAME)
                     .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
                     .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
                     .roles(List.of(Long.valueOf(simpleRoleId))).officeId(headOffice.getId());
 
             PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
             Assertions.assertNotNull(userCreationResponse.getResourceId());
-            simpleUserCreated = true;
+            SIMPLE_USER_CREATED = true;
         }
         RequestSpecification responseRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         responseRequestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(simpleUsername, password));
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(SIMPLE_USER_NAME, password));
         return responseRequestSpec;
     }
 
@@ -172,6 +172,10 @@ public final class UserHelper {
         HashMap<String, Boolean> permissionMap = new HashMap<>();
         permissionMap.put(REPAYMENT_LOAN_PERMISSION, true);
         permissionMap.put(READ_LOAN_PERMISSION, true);
+        permissionMap.put("READ_RESCHEDULELOAN", true);
+        permissionMap.put("CREATE_RESCHEDULELOAN", true);
+        permissionMap.put("REJECT_RESCHEDULELOAN", true);
+        permissionMap.put("APPROVE_RESCHEDULELOAN", true);
         RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
     }
 }
