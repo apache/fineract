@@ -501,7 +501,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final boolean isRatesEnabled = false;
 
             // Delinquency Buckets
-            final Long delinquencyBucketId = rs.getLong("delinquencyBucketId");
+            final Long delinquencyBucketId = JdbcSupport.getLong(rs, "delinquencyBucketId");
             final String delinquencyBucketName = rs.getString("delinquencyBucketName");
             final DelinquencyBucketData delinquencyBucket = new DelinquencyBucketData(delinquencyBucketId, delinquencyBucketName,
                     new ArrayList<>());

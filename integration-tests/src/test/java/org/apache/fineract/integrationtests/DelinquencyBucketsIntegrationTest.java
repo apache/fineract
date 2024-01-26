@@ -285,12 +285,20 @@ public class DelinquencyBucketsIntegrationTest {
         // Loan product creation without Delinquency bucket
         GetLoanProductsProductIdResponse getLoanProductResponse = createLoanProduct(loanTransactionHelper, null, null);
         assertNotNull(getLoanProductResponse);
+        assertNull(getLoanProductResponse.getDelinquencyBucket().getId());
 
         // Loan product creation with Delinquency bucket
         getLoanProductResponse = createLoanProduct(loanTransactionHelper, Math.toIntExact(delinquencyBucket.getId()), null);
         assertNotNull(getLoanProductResponse);
         log.info("Loan Product Bucket Name: {}", getLoanProductResponse.getDelinquencyBucket().getName());
         assertEquals(getLoanProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
+
+        // Update Loan product to remove the Delinquency bucket
+        final Long loanProductId = getLoanProductResponse.getId();
+        loanTransactionHelper.updateLoanProduct(loanProductId, "{delinquencyBucketId: null}");
+        getLoanProductResponse = loanTransactionHelper.getLoanProduct(loanProductId.intValue());
+        assertNotNull(getLoanProductResponse);
+        assertNull(getLoanProductResponse.getDelinquencyBucket().getId());
     }
 
     @Test
