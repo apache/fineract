@@ -27,6 +27,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletRequestWrapper;
 import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedException;
 import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.apache.http.HttpStatus;
@@ -62,7 +63,9 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (!helper.isOnApiList(request.getPathInfo(), request.getMethod())) {
+        request = new BodyCachingHttpServletRequestWrapper(request);
+
+        if (!helper.isOnApiList(request)) {
             proceed(filterChain, request, response);
         } else {
             try {
@@ -71,7 +74,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
                     proceed(filterChain, request, response);
                 } else {
                     try {
-                        List<Long> loanIds = helper.calculateRelevantLoanIds(request.getPathInfo());
+                        List<Long> loanIds = helper.calculateRelevantLoanIds(request);
                         if (!loanIds.isEmpty() && helper.isLoanBehind(loanIds)) {
                             helper.executeInlineCob(loanIds);
                         }
