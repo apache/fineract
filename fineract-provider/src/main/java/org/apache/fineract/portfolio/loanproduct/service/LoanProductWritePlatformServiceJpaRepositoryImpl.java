@@ -127,9 +127,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(loanTransactionProcessingStrategyCode).getName());
 
             if (command.parameterExists("delinquencyBucketId")) {
-                DelinquencyBucket delinquencyBucket = this.delinquencyBucketRepository
-                        .getReferenceById(command.longValueOfParameterNamed("delinquencyBucketId"));
-                loanProduct.setDelinquencyBucket(delinquencyBucket);
+                loanProduct
+                        .setDelinquencyBucket(findDelinquencyBucketIdIfProvided(command.longValueOfParameterNamed("delinquencyBucketId")));
             }
 
             this.loanProductRepository.saveAndFlush(loanProduct);
@@ -168,6 +167,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         return fund;
     }
 
+    private DelinquencyBucket findDelinquencyBucketIdIfProvided(final Long delinquencyBucketId) {
+        DelinquencyBucket delinquencyBucket = null;
+        if (delinquencyBucketId != null) {
+            delinquencyBucket = delinquencyBucketRepository.findById(delinquencyBucketId)
+                    .orElseThrow(() -> new FundNotFoundException(delinquencyBucketId));
+        }
+        return delinquencyBucket;
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult updateLoanProduct(final Long loanProductId, final JsonCommand command) {
@@ -201,9 +209,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             }
 
             if (changes.containsKey("delinquencyBucketId")) {
-                final Long delinquencyBucketId = (Long) changes.get("delinquencyBucketId");
-                final DelinquencyBucket delinquencyBucket = this.delinquencyBucketRepository.getReferenceById(delinquencyBucketId);
-                product.setDelinquencyBucket(delinquencyBucket);
+                product.setDelinquencyBucket(findDelinquencyBucketIdIfProvided((Long) changes.get("delinquencyBucketId")));
             }
 
             if (changes.containsKey("transactionProcessingStrategyCode")) {

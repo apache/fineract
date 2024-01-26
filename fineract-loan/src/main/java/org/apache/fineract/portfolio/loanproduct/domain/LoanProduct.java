@@ -209,7 +209,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     private Integer overAppliedNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "delinquency_bucket_id")
+    @JoinColumn(name = "delinquency_bucket_id", nullable = true)
     private DelinquencyBucket delinquencyBucket;
 
     @Column(name = "enable_installment_level_delinquency", nullable = false)
