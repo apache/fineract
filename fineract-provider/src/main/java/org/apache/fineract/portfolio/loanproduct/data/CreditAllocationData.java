@@ -16,26 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.portfolio.loanproduct.data;
 
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-@RequiredArgsConstructor
 @Getter
-public enum AllocationType {
+@AllArgsConstructor
+public class CreditAllocationData implements Serializable {
 
-    PENALTY("Penalty"), //
-    FEE("Fee"), //
-    PRINCIPAL("Principal"), //
-    INTEREST("Interest"); //
+    private final String transactionType;
+    private final List<CreditAllocationOrder> creditAllocationOrder;
 
-    private final String humanReadableName;
+    @Getter
+    @AllArgsConstructor
+    public static class CreditAllocationOrder implements Serializable {
 
-    public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+        private final String creditAllocationRule;
+        private final Integer order;
     }
 }

@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -94,6 +95,7 @@ public class LoanProductTestBuilder {
     private String inArrearsTolerance = "0";
     private String transactionProcessingStrategyCode = DEFAULT_STRATEGY;
     private List<AdvancedPaymentData> advancedPaymentAllocations = null;
+    private List<CreditAllocationData> creditAllocations = null;
     private String accountingRule = NONE;
     private final String currencyCode = USD;
     private String amortizationType = EQUAL_INSTALLMENTS;
@@ -197,6 +199,7 @@ public class LoanProductTestBuilder {
         map.put("inArrearsTolerance", this.inArrearsTolerance);
         map.put("transactionProcessingStrategyCode", this.transactionProcessingStrategyCode);
         map.put("paymentAllocation", this.advancedPaymentAllocations);
+        map.put("creditAllocation", this.creditAllocations);
         map.put("accountingRule", this.accountingRule);
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
@@ -733,6 +736,11 @@ public class LoanProductTestBuilder {
     public LoanProductTestBuilder addAdvancedPaymentAllocation(AdvancedPaymentData... advancedPaymentData) {
         this.transactionProcessingStrategyCode = "advanced-payment-allocation-strategy";
         this.advancedPaymentAllocations = new ArrayList<>(Arrays.stream(advancedPaymentData).toList());
+        return this;
+    }
+
+    public LoanProductTestBuilder addCreditAllocations(CreditAllocationData... creditAllocationData) {
+        this.creditAllocations = new ArrayList<>(Arrays.stream(creditAllocationData).toList());
         return this;
     }
 
