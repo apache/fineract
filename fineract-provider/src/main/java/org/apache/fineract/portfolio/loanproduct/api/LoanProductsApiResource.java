@@ -81,6 +81,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
+import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -417,6 +419,8 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> advancedPaymentAllocationFutureInstallmentAllocationRules = FutureInstallmentAllocationRule
                 .getValuesAsEnumOptionDataList();
         final List<EnumOptionData> advancedPaymentAllocationTypes = PaymentAllocationType.getValuesAsEnumOptionDataList();
+        final List<EnumOptionData> creditAllocationTransactionTypes = CreditAllocationTransactionType.getValuesAsEnumOptionDataList();
+        final List<EnumOptionData> creditAllocationAllocationTypes = AllocationType.getValuesAsEnumOptionDataList();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
@@ -427,7 +431,8 @@ public class LoanProductsApiResource {
                 interestRecalculationDayOfWeekTypeOptions, isRatesEnabled, delinquencyBucketOptions, repaymentStartDateTypeOptions,
                 advancedPaymentAllocationTransactionTypes, advancedPaymentAllocationFutureInstallmentAllocationRules,
                 advancedPaymentAllocationTypes, LoanScheduleType.getValuesAsEnumOptionDataList(),
-                LoanScheduleProcessingType.getValuesAsEnumOptionDataList());
+                LoanScheduleProcessingType.getValuesAsEnumOptionDataList(), creditAllocationTransactionTypes,
+                creditAllocationAllocationTypes);
     }
 
 }

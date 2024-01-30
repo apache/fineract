@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsJsonParser;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationsJsonParser;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
@@ -88,7 +89,9 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final DelinquencyBucketRepository delinquencyBucketRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final AdvancedPaymentAllocationsJsonParser advancedPaymentJsonParser;
+    private final CreditAllocationsJsonParser creditAllocationsJsonParser;
     private final LoanProductPaymentAllocationRuleMerger loanProductPaymentAllocationRuleMerger = new LoanProductPaymentAllocationRuleMerger();
+    private final LoanProductCreditAllocationRuleMerger loanProductCreditAllocationRuleMerger = new LoanProductCreditAllocationRuleMerger();
 
     @Transactional
     @Override
@@ -110,11 +113,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final List<Rate> rates = assembleListOfProductRates(command);
             final List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = advancedPaymentJsonParser
                     .assembleLoanProductPaymentAllocationRules(command, loanTransactionProcessingStrategyCode);
-            List<LoanProductCreditAllocationRule> loanProductCreditAllocationRules = new ArrayList<>(); // TODO: this
-                                                                                                        // shall be
-                                                                                                        // parsed from
-                                                                                                        // the json
-                                                                                                        // command
+            final List<LoanProductCreditAllocationRule> loanProductCreditAllocationRules = creditAllocationsJsonParser
+                    .assembleLoanProductCreditAllocationRules(command, loanTransactionProcessingStrategyCode);
             FloatingRate floatingRate = null;
             if (command.parameterExists("floatingRatesId")) {
                 floatingRate = this.floatingRateRepository
@@ -236,6 +236,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                         loanProductPaymentAllocationRules);
                 if (!updated) {
                     changes.remove("paymentAllocation");
+                }
+            }
+
+            if (changes.containsKey("creditAllocation")) {
+                final List<LoanProductCreditAllocationRule> loanProductCreditAllocationRules = creditAllocationsJsonParser
+                        .assembleLoanProductCreditAllocationRules(command, product.getTransactionProcessingStrategyCode());
+                loanProductCreditAllocationRules.forEach(lpcar -> lpcar.setLoanProduct(product));
+                final boolean updated = loanProductCreditAllocationRuleMerger.updateCreditAllocationRules(product,
+                        loanProductCreditAllocationRules);
+                if (!updated) {
+                    changes.remove("creditAllocation");
                 }
             }
 
