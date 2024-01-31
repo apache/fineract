@@ -1100,13 +1100,13 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalAmount = totalAmount.add(principalAmount);
-            journalAmountHolders
-                    .add(new JournalAmountHolder(determineAccrualAccount(isMarkedChargeOff, isMarkedFraud, false), principalAmount));
+            journalAmountHolders.add(
+                    new JournalAmountHolder(determineAccrualAccount(isMarkedChargeOff, isMarkedFraud, false, isReversal), principalAmount));
         }
         if (overpaymentAmount != null && overpaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalAmount = totalAmount.add(overpaymentAmount);
-            journalAmountHolders
-                    .add(new JournalAmountHolder(determineAccrualAccount(isMarkedChargeOff, isMarkedFraud, true), overpaymentAmount));
+            journalAmountHolders.add(new JournalAmountHolder(determineAccrualAccount(isMarkedChargeOff, isMarkedFraud, true, isReversal),
+                    overpaymentAmount));
         }
 
         JournalAmountHolder totalAmountHolder = new JournalAmountHolder(AccrualAccountsForLoan.FUND_SOURCE.getValue(), totalAmount);
@@ -1115,8 +1115,8 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
     }
 
-    private Integer determineAccrualAccount(boolean isMarkedChargeOff, boolean isMarkedFraud, boolean isOverpayment) {
-        if (isMarkedChargeOff) {
+    private Integer determineAccrualAccount(boolean isMarkedChargeOff, boolean isMarkedFraud, boolean isOverpayment, boolean isReversal) {
+        if (isMarkedChargeOff && isReversal) {
             if (isMarkedFraud) {
                 return AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue();
             } else {

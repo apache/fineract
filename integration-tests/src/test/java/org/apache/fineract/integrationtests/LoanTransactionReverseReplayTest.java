@@ -280,6 +280,24 @@ public class LoanTransactionReverseReplayTest {
                     new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("05 October 2022").locale("en")
                             .transactionAmount(500.0));
 
+            GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
+            int lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
+            assertEquals(500.0, loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount());
+
+            ArrayList<HashMap> journalEntriesForCBR = journalEntryHelper
+                    .getJournalEntriesByTransactionId("L" + cbrTransactionResponse.getResourceId().toString());
+            assertNotNull(journalEntriesForCBR);
+            List<HashMap> cbrExpenseJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> assetAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            List<HashMap> cbrAssetJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> overpaymentAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            assertEquals(1, cbrExpenseJournalEntries.size());
+            assertEquals(1, cbrAssetJournalEntries.size());
+
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("06 October 2022").dateFormat(DATE_PATTERN).locale("en"));
 
@@ -288,29 +306,35 @@ public class LoanTransactionReverseReplayTest {
                             .dateFormat(DATE_PATTERN).transactionAmount(0.0));
 
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
-            GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
-            int lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
+            loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
+            lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
             assertEquals(500.0, loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount());
 
-            ArrayList<HashMap> journalEntriesForCBR = journalEntryHelper
+            journalEntriesForCBR = journalEntryHelper
                     .getJournalEntriesByTransactionId("L" + cbrTransactionResponse.getResourceId().toString());
             ArrayList<HashMap> journalEntriesForChargeOff = journalEntryHelper
                     .getJournalEntriesByTransactionId("L" + chargeOffResponse.getResourceId().toString());
             assertNotNull(journalEntriesForCBR);
             assertNotNull(journalEntriesForChargeOff);
 
-            String expenseGlAccountCode = (String) journalEntriesForChargeOff.get(0).get("glAccountCode");
-            String assetGlAccountCode = (String) journalEntriesForChargeOff.get(1).get("glAccountCode");
+            String expenseGlAccountCodeAfterReversal = (String) journalEntriesForChargeOff.get(0).get("glAccountCode");
+            String assetGlAccountCodeAfterReversal = (String) journalEntriesForChargeOff.get(1).get("glAccountCode");
 
-            List<HashMap> cbrExpenseJournalEntries = journalEntriesForCBR.stream() //
-                    .filter(journalEntry -> expenseGlAccountCode.equals(journalEntry.get("glAccountCode"))) //
+            cbrExpenseJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> expenseGlAccountCodeAfterReversal.equals(journalEntry.get("glAccountCode"))) //
                     .toList();
 
-            List<HashMap> cbrAssetJournalEntries = journalEntriesForCBR.stream() //
-                    .filter(journalEntry -> assetGlAccountCode.equals(journalEntry.get("glAccountCode"))) //
+            cbrAssetJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> assetGlAccountCodeAfterReversal.equals(journalEntry.get("glAccountCode"))) //
                     .toList();
 
-            assertEquals(2, cbrExpenseJournalEntries.size());
+            List<HashMap> cbrExpenseJournalEntriesAfterReversal = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> expenseGlAccountCodeAfterReversal.equals(journalEntry.get("glAccountCode")) //
+                            && expenseAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            assertEquals(1, cbrExpenseJournalEntries.size());
+            assertEquals(1, cbrExpenseJournalEntriesAfterReversal.size());
             assertEquals(2, cbrAssetJournalEntries.size());
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
