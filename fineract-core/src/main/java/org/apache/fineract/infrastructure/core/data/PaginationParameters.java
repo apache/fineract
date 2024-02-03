@@ -109,6 +109,9 @@ public final class PaginationParameters {
 
     public String orderBySql() {
         final StringBuilder sql = new StringBuilder();
+        //validate against sql injection
+        SQLInjectionValidator.validateSQLInput(this.getOrderBy());
+        SQLInjectionValidator.validateSQLInput(this.getSortOrder());
 
         if (this.isOrderByRequested()) {
             sql.append(" order by ").append(this.getOrderBy());
