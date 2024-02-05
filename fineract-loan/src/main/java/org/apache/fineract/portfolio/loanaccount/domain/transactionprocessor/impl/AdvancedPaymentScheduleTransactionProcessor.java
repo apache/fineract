@@ -154,7 +154,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     public void processLatestTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, MoneyHolder overpaymentHolder) {
         switch (loanTransaction.getTypeOf()) {
-            case DISBURSEMENT -> handleDisbursement(loanTransaction, currency, installments);
+            case DISBURSEMENT -> handleDisbursement(loanTransaction, currency, installments, overpaymentHolder);
             case WRITEOFF -> handleWriteOff(loanTransaction, currency, installments);
             case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, currency, installments, charges);
             case CHARGEBACK -> handleChargeback(loanTransaction, currency, installments, overpaymentHolder);
@@ -281,12 +281,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void handleDisbursement(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments) {
-        updateLoanSchedule(loanTransaction, currency, installments);
+            List<LoanRepaymentScheduleInstallment> installments, MoneyHolder overpaymentHolder) {
+        updateLoanSchedule(loanTransaction, currency, installments, overpaymentHolder);
     }
 
     private void updateLoanSchedule(LoanTransaction disbursementTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments) {
+            List<LoanRepaymentScheduleInstallment> installments, MoneyHolder overpaymentHolder) {
         final MathContext mc = MoneyHelper.getMathContext();
         List<LoanRepaymentScheduleInstallment> candidateRepaymentInstallments = installments.stream().filter(
                 i -> i.getDueDate().isAfter(disbursementTransaction.getTransactionDate()) && !i.isDownPayment() && !i.isAdditional())
@@ -304,23 +304,43 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 downPaymentAmt = Money.roundToMultiplesOf(downPaymentAmt, installmentAmountInMultiplesOf);
             }
             downPaymentAmount = Money.of(currency, downPaymentAmt);
+            Money autoPayFromOverpayment = overpaymentHolder.getMoneyObject();
             downPaymentInstallment.addToPrincipal(disbursementTransaction.getTransactionDate(), downPaymentAmount);
-
+            Money paidAmount = downPaymentInstallment.payPrincipalComponent(disbursementTransaction.getTransactionDate(),
+                    autoPayFromOverpayment);
+            disbursementTransaction.setOverPayments(paidAmount);
+            overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().minus(paidAmount));
         }
         Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
-        Money increasePrincipalBy = amortizableAmount.dividedBy(noCandidateRepaymentInstallments, mc.getRoundingMode());
-        if (installmentAmountInMultiplesOf != null) {
-            increasePrincipalBy = Money.roundToMultiplesOf(increasePrincipalBy, installmentAmountInMultiplesOf);
+        Money overpaidAmount = overpaymentHolder.getMoneyObject();
+        if (overpaidAmount.isGreaterThanZero()) {
+            if (amortizableAmount.isGreaterThan(overpaidAmount)) {
+                overpaymentHolder.setMoneyObject(Money.zero(currency));
+                amortizableAmount = amortizableAmount.minus(overpaidAmount);
+                disbursementTransaction.setOverPayments(disbursementTransaction.getOverPaymentPortion(currency).add(overpaidAmount));
+            } else {
+                overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().minus(amortizableAmount));
+                amortizableAmount = Money.zero(currency);
+                disbursementTransaction.setOverPayments(disbursementTransaction.getOverPaymentPortion(currency).add(amortizableAmount));
+            }
         }
-        Money remainingAmount = amortizableAmount
-                .minus(increasePrincipalBy.multiplyRetainScale(noCandidateRepaymentInstallments, mc.getRoundingMode()));
 
-        Money finalIncreasePrincipalBy = increasePrincipalBy;
-        candidateRepaymentInstallments
-                .forEach(i -> i.addToPrincipal(disbursementTransaction.getTransactionDate(), finalIncreasePrincipalBy));
-        // Hence the rounding, we might need to amend the last installment amount
-        candidateRepaymentInstallments.get(noCandidateRepaymentInstallments - 1)
-                .addToPrincipal(disbursementTransaction.getTransactionDate(), remainingAmount);
+        if (amortizableAmount.isGreaterThanZero()) {
+            Money increasePrincipalBy = amortizableAmount.dividedBy(noCandidateRepaymentInstallments, mc.getRoundingMode());
+            if (installmentAmountInMultiplesOf != null) {
+                increasePrincipalBy = Money.roundToMultiplesOf(increasePrincipalBy, installmentAmountInMultiplesOf);
+            }
+
+            Money remainingAmount = amortizableAmount
+                    .minus(increasePrincipalBy.multiplyRetainScale(noCandidateRepaymentInstallments, mc.getRoundingMode()));
+
+            Money finalIncreasePrincipalBy = increasePrincipalBy;
+            candidateRepaymentInstallments
+                    .forEach(i -> i.addToPrincipal(disbursementTransaction.getTransactionDate(), finalIncreasePrincipalBy));
+            // Hence the rounding, we might need to amend the last installment amount
+            candidateRepaymentInstallments.get(noCandidateRepaymentInstallments - 1)
+                    .addToPrincipal(disbursementTransaction.getTransactionDate(), remainingAmount);
+        }
     }
 
     private void handleRepayment(LoanTransaction loanTransaction, MonetaryCurrency currency,

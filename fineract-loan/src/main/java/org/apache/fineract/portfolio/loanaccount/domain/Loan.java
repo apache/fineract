@@ -2483,7 +2483,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public ChangedTransactionDetail disburse(final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO, final PaymentDetail paymentDetail, boolean downPaymentEnabled) {
+            final ScheduleGeneratorDTO scheduleGeneratorDTO, final PaymentDetail paymentDetail) {
 
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
 
@@ -2501,7 +2501,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         validateDisbursementDateIsOnHoliday(holidayDetailDTO.isAllowTransactionsOnHoliday(), holidayDetailDTO.getHolidays());
 
         regenerateRepaymentScheduleWithInterestRecalculationIfNeeded(this.repaymentScheduleDetail().isInterestRecalculationEnabled(),
-                isDisbursementMissed(), scheduleGeneratorDTO, downPaymentEnabled);
+                isDisbursementMissed(), scheduleGeneratorDTO);
 
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
@@ -2533,7 +2533,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private void regenerateRepaymentScheduleWithInterestRecalculationIfNeeded(boolean interestRecalculationEnabledParam,
-            boolean disbursementMissedParam, ScheduleGeneratorDTO scheduleGeneratorDTO, final boolean downPaymentEnabled) {
+            boolean disbursementMissedParam, ScheduleGeneratorDTO scheduleGeneratorDTO) {
 
         LocalDate firstInstallmentDueDate = fetchRepaymentScheduleInstallment(1).getDueDate();
         if ((interestRecalculationEnabledParam && (DateUtils.isBeforeBusinessDate(firstInstallmentDueDate) || disbursementMissedParam))) {
@@ -3837,7 +3837,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             }
             if (loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan()) {
                 totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
-            } else if (loanTransaction.isCreditBalanceRefund() || loanTransaction.isChargeback()) {
+            } else if (loanTransaction.isCreditBalanceRefund() || loanTransaction.isChargeback() || loanTransaction.isDisbursement()) {
                 totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getOverPaymentPortion(currency));
             }
         }
@@ -5940,7 +5940,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         List<LoanTransaction> loanTransactions = retrieveListOfTransactionsExcludeAccruals();
         for (LoanTransaction loanTransaction : loanTransactions) {
             if (loanTransaction.isDisbursement() || loanTransaction.isIncomePosting()) {
-                outstanding = outstanding.plus(loanTransaction.getAmount(getCurrency()));
+                outstanding = outstanding.plus(loanTransaction.getAmount(getCurrency()))
+                        .minus(loanTransaction.getOverPaymentPortion(getCurrency()));
                 loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
             } else if (loanTransaction.isChargeback() || loanTransaction.isCreditBalanceRefund()) {
                 Money transactionOutstanding = loanTransaction.getAmount(getCurrency());

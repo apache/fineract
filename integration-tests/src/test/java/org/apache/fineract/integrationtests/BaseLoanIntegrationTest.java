@@ -489,9 +489,9 @@ public abstract class BaseLoanIntegrationTest {
     }
 
     protected TransactionExt transaction(double amount, String type, String date, double outstandingAmount, double principalPortion,
-            double interestPortion, double feePortion, double penaltyPortion, double unrecognizedIncomePortion) {
+            double interestPortion, double feePortion, double penaltyPortion, double unrecognizedIncomePortion, double overpaymentPortion) {
         return new TransactionExt(amount, type, date, outstandingAmount, principalPortion, interestPortion, feePortion, penaltyPortion,
-                unrecognizedIncomePortion);
+                unrecognizedIncomePortion, overpaymentPortion);
     }
 
     protected Installment installment(double principalAmount, Boolean completed, String dueDate) {
@@ -530,6 +530,7 @@ public abstract class BaseLoanIntegrationTest {
         Double feePortion;
         Double penaltyPortion;
         Double unrecognizedPortion;
+        Double overpaymentPortion;
     }
 
     @ToString
