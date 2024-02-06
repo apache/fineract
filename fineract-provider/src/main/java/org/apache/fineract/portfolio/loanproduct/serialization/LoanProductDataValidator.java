@@ -91,6 +91,7 @@ public final class LoanProductDataValidator {
     public static final String IN_ARREARS_TOLERANCE = "inArrearsTolerance";
     public static final String TRANSACTION_PROCESSING_STRATEGY_CODE = "transactionProcessingStrategyCode";
     public static final String ADVANCED_PAYMENT_ALLOCATIONS = "paymentAllocation";
+    public static final String CREDIT_ALLOCATIONS = "creditAllocation";
     public static final String GRACE_ON_PRINCIPAL_PAYMENT = "graceOnPrincipalPayment";
     public static final String GRACE_ON_INTEREST_PAYMENT = "graceOnInterestPayment";
     public static final String GRACE_ON_INTEREST_CHARGED = "graceOnInterestCharged";
@@ -114,17 +115,18 @@ public final class LoanProductDataValidator {
             NUMBER_OF_REPAYMENTS, MIN_NUMBER_OF_REPAYMENTS, MAX_NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY_TYPE, INTEREST_RATE_PER_PERIOD,
             MIN_INTEREST_RATE_PER_PERIOD, MAX_INTEREST_RATE_PER_PERIOD, INTEREST_RATE_FREQUENCY_TYPE, AMORTIZATION_TYPE, INTEREST_TYPE,
             INTEREST_CALCULATION_PERIOD_TYPE, LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
-            IN_ARREARS_TOLERANCE, TRANSACTION_PROCESSING_STRATEGY_CODE, ADVANCED_PAYMENT_ALLOCATIONS, GRACE_ON_PRINCIPAL_PAYMENT,
-            "recurringMoratoriumOnPrincipalPeriods", GRACE_ON_INTEREST_PAYMENT, GRACE_ON_INTEREST_CHARGED, "charges", ACCOUNTING_RULE,
-            INCLUDE_IN_BORROWER_CYCLE, "startDate", "closeDate", "externalId", IS_LINKED_TO_FLOATING_INTEREST_RATES, FLOATING_RATES_ID,
-            INTEREST_RATE_DIFFERENTIAL, MIN_DIFFERENTIAL_LENDING_RATE, DEFAULT_DIFFERENTIAL_LENDING_RATE, MAX_DIFFERENTIAL_LENDING_RATE,
-            IS_FLOATING_INTEREST_RATE_CALCULATION_ALLOWED, "syncExpectedWithDisbursementDate",
-            LoanProductAccountingParams.FEES_RECEIVABLE.getValue(), LoanProductAccountingParams.FUND_SOURCE.getValue(),
-            LoanProductAccountingParams.INCOME_FROM_FEES.getValue(), LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
-            LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(), LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(),
-            LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(), LoanProductAccountingParams.OVERPAYMENT.getValue(),
-            LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
-            LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
+            IN_ARREARS_TOLERANCE, TRANSACTION_PROCESSING_STRATEGY_CODE, ADVANCED_PAYMENT_ALLOCATIONS, CREDIT_ALLOCATIONS,
+            GRACE_ON_PRINCIPAL_PAYMENT, "recurringMoratoriumOnPrincipalPeriods", GRACE_ON_INTEREST_PAYMENT, GRACE_ON_INTEREST_CHARGED,
+            "charges", ACCOUNTING_RULE, INCLUDE_IN_BORROWER_CYCLE, "startDate", "closeDate", "externalId",
+            IS_LINKED_TO_FLOATING_INTEREST_RATES, FLOATING_RATES_ID, INTEREST_RATE_DIFFERENTIAL, MIN_DIFFERENTIAL_LENDING_RATE,
+            DEFAULT_DIFFERENTIAL_LENDING_RATE, MAX_DIFFERENTIAL_LENDING_RATE, IS_FLOATING_INTEREST_RATE_CALCULATION_ALLOWED,
+            "syncExpectedWithDisbursementDate", LoanProductAccountingParams.FEES_RECEIVABLE.getValue(),
+            LoanProductAccountingParams.FUND_SOURCE.getValue(), LoanProductAccountingParams.INCOME_FROM_FEES.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(),
+            LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(), LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(),
+            LoanProductAccountingParams.OVERPAYMENT.getValue(), LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(),
+            LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), LoanProductAccountingParams.GOODWILL_CREDIT.getValue(),
+            LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
             LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
             LoanProductAccountingParams.FEE_INCOME_ACCOUNT_MAPPING.getValue(), LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(),
             LoanProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(),
@@ -170,8 +172,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT,
             LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE,
-            LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY,
-            LoanProductConstants.LOAN_SCHEDULE_TYPE, LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE));
+            LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.LOAN_SCHEDULE_TYPE,
+            LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -764,7 +766,6 @@ public final class LoanProductDataValidator {
                     .validateForBooleanValue();
             validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
             validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
-            validateScheduleExtensionForDownPayment(enableDownPayment, baseDataValidator, element, null);
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element)) {
@@ -819,41 +820,6 @@ public final class LoanProductDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-
-    private void validateScheduleExtensionForDownPayment(Boolean enableDownPayment, DataValidatorBuilder baseDataValidator,
-            JsonElement element, final LoanProduct loanProduct) {
-
-        Boolean multiDisburseLoan = null;
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, element)) {
-            multiDisburseLoan = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME,
-                    element);
-        } else if (loanProduct != null) {
-            multiDisburseLoan = loanProduct.isMultiDisburseLoan();
-        }
-
-        if (multiDisburseLoan != null && multiDisburseLoan) {
-            if (enableDownPayment) {
-                if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, element)) {
-                    final Boolean disableScheduleExtensionForDownPayment = this.fromApiJsonHelper
-                            .extractBooleanNamed(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, element);
-                    baseDataValidator.reset().parameter(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT)
-                            .value(disableScheduleExtensionForDownPayment).ignoreIfNull().validateForBooleanValue();
-                }
-            } else {
-                if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, element)) {
-                    baseDataValidator.reset().parameter(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT).failWithCode(
-                            "supported.only.for.multi.disburse.loan.with.enable.down.payment.true",
-                            "Disable repayment schedule extension for down-payment is supported only for multi disburse loan with enable down-payment true");
-                }
-            }
-        } else {
-            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT, element)) {
-                baseDataValidator.reset().parameter(LoanProductConstants.DISABLE_SCHEDULE_EXTENSION_FOR_DOWN_PAYMENT).failWithCode(
-                        "supported.only.for.multi.disburse.loan.with.enable.down.payment.true",
-                        "Disable repayment schedule extension for down-payment is supported only for multi disburse loan with enable down-payment true");
-            }
-        }
     }
 
     private void validateAutoRepaymentForDownPayment(Boolean enableDownPayment, DataValidatorBuilder baseDataValidator,
@@ -1777,7 +1743,6 @@ public final class LoanProductDataValidator {
                     .validateForBooleanValue();
             validateDownPaymentPercentage(enableDownPayment, baseDataValidator, element);
             validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
-            validateScheduleExtensionForDownPayment(enableDownPayment, baseDataValidator, element, loanProduct);
         }
 
         Integer repaymentStartDateType = loanProduct.getRepaymentStartDateType().getValue();

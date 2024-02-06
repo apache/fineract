@@ -13,22 +13,20 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
-# under the License.
-#
-
 version: "3.8"
 
 services:
   mariadb:
-    image: mariadb:11.0
+    container_name: mariadb
+    image: mariadb:11.2
     volumes:
-      - ../mysql/conf.d/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
-      - ../mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:Z,ro
+      - ${PWD}/config/docker/mysql/conf.d/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf:ro
+      - ${PWD}/config/docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:Z,ro
     restart: always
     env_file:
-      - ../env/mysql.env
+      - ${PWD}/config/docker/env/mysql.env
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
       timeout: 10s
       retries: 10
     ports:

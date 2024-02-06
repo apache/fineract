@@ -502,19 +502,17 @@ public class LoanProductWithDownPaymentConfigurationTest {
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = false;
-        Boolean disableScheduleExtensionForDownPayment = true;
 
         final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
         // Loan Product creation with down-payment configuration
         GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursementsWithDisableRepaymentConfiguration(
-                loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment, disableScheduleExtensionForDownPayment);
+                loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
                 .compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
-        assertEquals(disableScheduleExtensionForDownPayment, getLoanProductsProductResponse.getDisableScheduleExtensionForDownPayment());
 
         final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                 loanExternalIdStr);
@@ -528,52 +526,6 @@ public class LoanProductWithDownPaymentConfigurationTest {
         assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
         assertEquals(0, loanDetails.getDisbursedAmountPercentageForDownPayment().compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
-        assertEquals(disableScheduleExtensionForDownPayment, loanDetails.getDisableScheduleExtensionForDownPayment());
-    }
-
-    @Test
-    public void loanProductCreationWithEnableDownPaymentAndDisableRepaymentScheduleExtensionConfigurationValidationTest() {
-        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
-        final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
-
-        // down-payment configuration
-        Boolean enableDownPayment = true;
-        Boolean enableAutoRepaymentForDownPayment = false;
-        Boolean disableScheduleExtensionForDownPayment = true;
-
-        // Loan Product with no multi disbursement settings and enable down payment and with disable Schedule Extension
-        // For DownPayment
-        String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth().withRepaymentAfterEvery("1")
-                .withNumberOfRepayments("3").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
-                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
-                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
-                .withMoratorium("0", "0").withEnableDownPayment(enableDownPayment, "25", enableAutoRepaymentForDownPayment)
-                .withDisableScheduleExtensionForDownPayment(disableScheduleExtensionForDownPayment).build(null);
-
-        ArrayList<HashMap<String, Object>> loanProductErrorData = validationErrorHelper.getLoanProductError(loanProductJSON,
-                CommonConstants.RESPONSE_ERROR);
-        assertNotNull(loanProductErrorData);
-        assertEquals(
-                "validation.msg.loanproduct.disableScheduleExtensionForDownPayment.supported.only.for.multi.disburse.loan.with.enable.down.payment.true",
-                loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-
-        // Loan Product with multi disbursement settings and disable down payment and with disable Schedule Extension
-        // For DownPayment
-        enableDownPayment = false;
-        loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth().withRepaymentAfterEvery("1")
-                .withNumberOfRepayments("3").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
-                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
-                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
-                .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
-                .withEnableDownPayment(enableDownPayment, null, enableAutoRepaymentForDownPayment)
-                .withDisableScheduleExtensionForDownPayment(disableScheduleExtensionForDownPayment).build(null);
-
-        loanProductErrorData = validationErrorHelper.getLoanProductError(loanProductJSON, CommonConstants.RESPONSE_ERROR);
-        assertNotNull(loanProductErrorData);
-        assertEquals(
-                "validation.msg.loanproduct.disableScheduleExtensionForDownPayment.supported.only.for.multi.disburse.loan.with.enable.down.payment.true",
-                loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-
     }
 
     private void checkNoDownPaymentTransaction(final Integer loanID) {
@@ -695,14 +647,14 @@ public class LoanProductWithDownPaymentConfigurationTest {
 
     private GetLoanProductsProductIdResponse createLoanProductWithEnableDownPaymentAndMultipleDisbursementsWithDisableRepaymentConfiguration(
             LoanTransactionHelper loanTransactionHelper, Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment,
-            boolean enableAutoRepaymentForDownPayment, boolean disableScheduleExtensionForDownPayment) {
+            boolean enableAutoRepaymentForDownPayment) {
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("3").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .withDisableScheduleExtensionForDownPayment(disableScheduleExtensionForDownPayment).build(null);
+                .build(null);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
         return loanTransactionHelper.getLoanProduct(loanProductId);
     }

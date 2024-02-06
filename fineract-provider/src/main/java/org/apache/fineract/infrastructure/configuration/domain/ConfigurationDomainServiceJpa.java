@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,8 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     private static final String REPORT_EXPORT_S3_FOLDER_NAME = "report-export-s3-folder-name";
 
     public static final String CHARGE_ACCRUAL_DATE_CRITERIA = "charge-accrual-date";
+    public static final String NEXT_PAYMENT_DUE_DATE = "next-payment-due-date";
+
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -72,6 +75,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
             return thisTask.hasMakerCheckerEnabled();
         }
         return false;
+    }
+
+    @Override
+    public boolean isSameMakerCheckerEnabled() {
+        return getGlobalConfigurationPropertyData("enable-same-maker-checker").isEnabled();
     }
 
     @Override
@@ -379,18 +387,14 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.getValue();
     }
 
+    @NotNull
     private GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
         return globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName).toData();
     }
 
     @Override
     public boolean isSubRatesEnabled() {
-        GlobalConfigurationPropertyData configuration = getGlobalConfigurationPropertyData("sub-rates");
-        if (configuration == null) {
-            return false;
-        } else {
-            return configuration.isEnabled();
-        }
+        return getGlobalConfigurationPropertyData("sub-rates").isEnabled();
     }
 
     @Override
@@ -507,6 +511,17 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public String getAccrualDateConfigForCharge() {
         String defaultValue = "due-date";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(CHARGE_ACCRUAL_DATE_CRITERIA);
+        String value = property.getStringValue();
+        if (StringUtils.isBlank(value)) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    @Override
+    public String getNextPaymentDateConfigForLoan() {
+        String defaultValue = "earliest-unpaid-date";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(NEXT_PAYMENT_DUE_DATE);
         String value = property.getStringValue();
         if (StringUtils.isBlank(value)) {
             return defaultValue;

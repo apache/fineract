@@ -16,17 +16,19 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up JDK 17
-        uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0 # v3
+        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4
         with:
           java-version: '17'
           distribution: 'zulu'
           cache: gradle
       - name: Build the image
-        run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:jibDockerBuild -x test
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber
       - name: Start the Standalone Stack
-        run: docker-compose -f docker-compose-postgresql.yml up -d
+        run: docker compose -f docker-compose-postgresql.yml up -d
       - name: Wait for stack to come up
-        run: sleep 300
+        run: sleep 500
+      - name: Check the stack
+        run: docker ps
       - name: Check health
         run: curl -f -k --retry 10 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
       - name: Check info

@@ -39,6 +39,8 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -65,18 +67,14 @@ import org.apache.fineract.infrastructure.creditbureau.domain.TokenRepositoryWra
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauTokenCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implements ThitsaWorksCreditBureauIntegrationWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.class);
     public static final String UPLOAD_CREDIT_REPORT = "UploadCreditReport";
     public static final String RESPONSE_MESSAGE = "ResponseMessage";
     public static final String IS_NOT_AVAILABLE_SUFFIX = ".is.not.available";
@@ -85,28 +83,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
     private final TokenRepositoryWrapper tokenRepositoryWrapper;
     private final CreditBureauConfigurationRepositoryWrapper configDataRepository;
     private final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-
     private final OkHttpClient client;
-
-    @Autowired
-    public ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final FromJsonHelper fromApiJsonHelper, final TokenRepositoryWrapper tokenRepositoryWrapper,
-            final CreditBureauConfigurationRepositoryWrapper configDataRepository,
-            final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
-        this(new OkHttpClient(), context, fromApiJsonHelper, tokenRepositoryWrapper, configDataRepository, fromApiJsonDeserializer);
-    }
-
-    public ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl(final OkHttpClient okHttpClient,
-            final PlatformSecurityContext context, final FromJsonHelper fromApiJsonHelper,
-            final TokenRepositoryWrapper tokenRepositoryWrapper, final CreditBureauConfigurationRepositoryWrapper configDataRepository,
-            final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
-        this.client = okHttpClient;
-        this.context = context;
-        this.tokenRepositoryWrapper = tokenRepositoryWrapper;
-        this.configDataRepository = configDataRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-    }
 
     @Transactional
     @Override
@@ -151,7 +128,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             responseMessage = response.body().string();
         } catch (IOException e) {
 
-            LOG.error("error occured in HTTP request-response method.", e);
+            log.error("error occured in HTTP request-response method.", e);
         }
 
         if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -494,7 +471,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
                         "creditBureau.Configuration." + configurationParameterName + IS_NOT_AVAILABLE_SUFFIX);
 
             }
-        } catch (NullPointerException ex) {
+        } catch (Exception ex) {
             baseDataValidator.reset().failWithCode("creditBureau.configuration.is.not.available");
             throw new PlatformApiDataValidationException("creditBureau.Configuration.is.not.available" + ex,
                     "creditBureau.Configuration.is.not.available", dataValidationErrors);

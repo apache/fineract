@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * An enumeration of different options available on account closure {@link FixedDepositAccount} &amp;
@@ -49,63 +48,57 @@ public enum DepositAccountOnClosureType {
         return this.code;
     }
 
-    public static DepositAccountOnClosureType fromInt(final Integer closureTypeValue) {
-
-        if (closureTypeValue == null) {
-            return DepositAccountOnClosureType.INVALID;
+    public static DepositAccountOnClosureType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
 
-        DepositAccountOnClosureType accountOnClosureType = DepositAccountOnClosureType.INVALID;
-        switch (closureTypeValue) {
+        switch (v) {
             case 100:
-                accountOnClosureType = DepositAccountOnClosureType.WITHDRAW_DEPOSIT;
-            break;
+                return WITHDRAW_DEPOSIT;
             case 200:
-                accountOnClosureType = DepositAccountOnClosureType.TRANSFER_TO_SAVINGS;
-            break;
+                return TRANSFER_TO_SAVINGS;
             case 300:
-                accountOnClosureType = DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST;
-            break;
+                return REINVEST_PRINCIPAL_AND_INTEREST;
             case 400:
-                accountOnClosureType = DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY;
-            break;
+                return REINVEST_PRINCIPAL_ONLY;
+            default:
+                return INVALID;
         }
-        return accountOnClosureType;
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isWithdarwDeposit() {
-        return this.value.equals(DepositAccountOnClosureType.WITHDRAW_DEPOSIT.getValue());
+        return this.equals(WITHDRAW_DEPOSIT);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isTransferToSavings() {
-        return this.value.equals(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getValue());
+        return this.equals(TRANSFER_TO_SAVINGS);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isReinvest() {
-        return this.value.equals(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST.getValue())
-                || this.value.equals(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY.getValue());
+        return this.equals(REINVEST_PRINCIPAL_AND_INTEREST) || this.equals(REINVEST_PRINCIPAL_ONLY);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isReinvestPrincipal() {
-        return this.value.equals(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY.getValue());
+        return this.equals(REINVEST_PRINCIPAL_ONLY);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isReinvestPrincipalAndInterest() {
-        return this.value.equals(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST.getValue());
+        return this.equals(REINVEST_PRINCIPAL_AND_INTEREST);
     }
 
+    // TODO: why not just use the enum values... just more boilerplate code here!!
     public boolean isInvalid() {
-        return this.value.equals(DepositAccountOnClosureType.INVALID.getValue());
+        return this.equals(INVALID);
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final DepositAccountOnClosureType enumType : values()) {
-            if (!enumType.isInvalid()) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 }

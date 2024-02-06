@@ -31,17 +31,19 @@ public enum RescheduleType {
         this.code = code;
     }
 
-    public static RescheduleType fromInt(int rescheduleTypeValue) {
-        RescheduleType enumerration = RescheduleType.INVALID;
-        switch (rescheduleTypeValue) {
-            case 1:
-                enumerration = RescheduleType.RESCHEDULETONEXTREPAYMENTDATE;
-            break;
-            case 2:
-                enumerration = RescheduleType.RESCHEDULETOSPECIFICDATE;
-            break;
+    public static RescheduleType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return enumerration;
+
+        switch (v) {
+            case 1:
+                return RESCHEDULETONEXTREPAYMENTDATE;
+            case 2:
+                return RESCHEDULETOSPECIFICDATE;
+            default:
+                return INVALID;
+        }
     }
 
     public boolean isRescheduleToSpecificDate() {

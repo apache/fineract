@@ -25,6 +25,7 @@ dependencies {
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-accounting'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
@@ -47,7 +48,7 @@ dependencies {
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot2',
+            'io.github.resilience4j:resilience4j-spring-boot3',
             'org.apache.httpcomponents:httpcore',
             )
     compileOnly 'org.projectlombok:lombok'

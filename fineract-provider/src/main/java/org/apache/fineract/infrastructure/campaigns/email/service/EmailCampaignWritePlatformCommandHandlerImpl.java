@@ -350,11 +350,11 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             throws IOException {
         final String reportType = "report";
 
-        List<HashMap<String, Object>> resultList = new ArrayList<HashMap<String, Object>>();
+        List<HashMap<String, Object>> resultList;
         final GenericResultsetData results = this.readReportingService.retrieveGenericResultSetForSmsEmailCampaign(reportName, reportType,
                 queryParams);
         final String response = this.genericDataService.generateJsonFromGenericResultsetData(results);
-        resultList = new ObjectMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {});
+        resultList = new ObjectMapper().readValue(response, new TypeReference<>() {});
         // loop changes array date to string date
         for (Iterator<HashMap<String, Object>> it = resultList.iterator(); it.hasNext();) {
             HashMap<String, Object> entry = it.next();

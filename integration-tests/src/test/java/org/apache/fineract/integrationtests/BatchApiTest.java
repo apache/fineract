@@ -2153,12 +2153,7 @@ public class BatchApiTest {
 
         LOG.info("Batch Response : {}", new Gson().toJson(responseOfQueryAndUpdateDatatableBatch));
 
-        final BatchResponse queryResponse = responseOfQueryAndUpdateDatatableBatch.get(0);
-
-        Assertions.assertEquals(1L, queryResponse.getRequestId());
-        Assertions.assertEquals(HttpStatus.SC_OK, queryResponse.getStatusCode(), "Verify Status Code 200 for query datatable entry");
-
-        final BatchResponse updateResponse = responseOfQueryAndUpdateDatatableBatch.get(1);
+        final BatchResponse updateResponse = responseOfQueryAndUpdateDatatableBatch.get(0);
 
         Assertions.assertEquals(2L, updateResponse.getRequestId());
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, updateResponse.getStatusCode(),

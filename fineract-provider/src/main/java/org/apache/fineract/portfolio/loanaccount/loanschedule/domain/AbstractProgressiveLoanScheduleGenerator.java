@@ -77,7 +77,8 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
                 : loanApplicationTerms.getSubmittedOnDate();
 
         LoanScheduleParams scheduleParams = LoanScheduleParams.createLoanScheduleParams(currency,
-                Money.of(currency, chargesDueAtTimeOfDisbursement), periodStartDate, getPrincipalToBeScheduled(loanApplicationTerms));
+                Money.of(currency, chargesDueAtTimeOfDisbursement), periodStartDate,
+                getPrincipalToBeScheduled(loanApplicationTerms, periodStartDate));
 
         List<LoanScheduleModelPeriod> periods = createNewLoanScheduleListWithDisbursementDetails(loanApplicationTerms, scheduleParams,
                 chargesDueAtTimeOfDisbursement);
@@ -233,12 +234,14 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
     /**
      * this method calculates the principal amount for generating the repayment schedule.
      */
-    private Money getPrincipalToBeScheduled(final LoanApplicationTerms loanApplicationTerms) {
+    private Money getPrincipalToBeScheduled(final LoanApplicationTerms loanApplicationTerms, LocalDate periodStartDate) {
         Money principalToBeScheduled;
         if (loanApplicationTerms.isMultiDisburseLoan()) {
             if (loanApplicationTerms.getTotalDisbursedAmount().isGreaterThanZero()) {
-                principalToBeScheduled = Money.of(loanApplicationTerms.getCurrency(),
-                        loanApplicationTerms.getDisbursementDatas().get(0).getPrincipal());
+                BigDecimal totalDisbursalAmountsOnThe = loanApplicationTerms.getDisbursementDatas().stream()
+                        .filter(d -> d.getActualDisbursementDate().equals(periodStartDate)).map(DisbursementData::getPrincipal)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                principalToBeScheduled = Money.of(loanApplicationTerms.getCurrency(), totalDisbursalAmountsOnThe);
             } else if (loanApplicationTerms.getApprovedPrincipal().isGreaterThanZero()) {
                 principalToBeScheduled = loanApplicationTerms.getApprovedPrincipal();
             } else {

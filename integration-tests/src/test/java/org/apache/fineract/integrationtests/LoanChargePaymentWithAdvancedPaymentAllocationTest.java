@@ -130,14 +130,26 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
                     CommonConstants.RESPONSE_RESOURCE_ID);
             Assertions.assertNotNull(financialActivityAccountId);
         } else {
+            boolean existFinancialActivity = false;
             for (HashMap financialActivity : financialActivities) {
                 HashMap financialActivityData = (HashMap) financialActivity.get("financialActivityData");
                 if (financialActivityData.get("id").equals(FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID)) {
                     HashMap glAccountData = (HashMap) financialActivity.get("glAccountData");
                     liabilityTransferAccount = new Account((Integer) glAccountData.get("id"), Account.AccountType.LIABILITY);
                     financialActivityAccountId = (Integer) financialActivity.get("id");
+                    existFinancialActivity = true;
                     break;
                 }
+            }
+            if (!existFinancialActivity) {
+                liabilityTransferAccount = accountHelper.createLiabilityAccount();
+                Assertions.assertNotNull(liabilityTransferAccount);
+
+                /*** Create A Financial Activity to Account Mapping **/
+                financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
+                        LIABILITY_TRANSFER.getValue(), liabilityTransferAccount.getAccountID(), responseSpec,
+                        CommonConstants.RESPONSE_RESOURCE_ID);
+                Assertions.assertNotNull(financialActivityAccountId);
             }
         }
     }
@@ -181,8 +193,8 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
                     new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en"));
 
-            final float feePortion = 50.0f;
-            final float penaltyPortion = 100.0f;
+            final double feePortion = 50.0d;
+            final double penaltyPortion = 100.0d;
 
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
@@ -209,8 +221,8 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
             assertEquals(feePortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding());
             assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesDue());
             assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding());
-            assertEquals(400.0f, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
-            assertEquals(400.0f, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
+            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
+            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
             assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
 
             scheduleJobHelper.executeAndAwaitJob(jobName);
@@ -218,11 +230,11 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().size());
             assertEquals(feePortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesDue());
-            assertEquals(0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding());
+            assertEquals(0.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding());
             assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesDue());
-            assertEquals(0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding());
-            assertEquals(400, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
-            assertEquals(250, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
+            assertEquals(0.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding());
+            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
+            assertEquals(250.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
             assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
@@ -275,7 +287,6 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
                 .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
                 .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()).locale("en").submittedOnDate(submittedOnDate)
                 .amortizationType(1).interestRatePerPeriod(interestRate).interestCalculationPeriodType(1).interestType(0)
                 .repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery).repaymentFrequencyType(0)
@@ -302,7 +313,6 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
                 .withRepaymentFrequencyTypeAsDays() //
                 .withInterestRatePerPeriod("0") //
                 .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
                 .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //

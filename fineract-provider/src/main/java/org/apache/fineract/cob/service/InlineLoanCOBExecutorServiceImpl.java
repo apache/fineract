@@ -22,6 +22,7 @@ import static org.springframework.transaction.TransactionDefinition.PROPAGATION_
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -134,6 +135,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         return loanIdsToBeProcessed;
     }
 
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     private void execute(List<Long> loanIds, String jobName, LocalDate businessDate) {
         lockLoanAccounts(loanIds, businessDate);
         Job inlineLoanCOBJob;
@@ -226,9 +228,9 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
                         loanAccountLock.setNewLockOwner(LockOwner.LOAN_INLINE_COB_PROCESSING);
                         loanAccountLockRepository.saveAndFlush(loanAccountLock);
                     } catch (Exception e) {
-                        String message = "Error updating lock on loan account. Locked loan ID: %s".formatted(loanAccountLock.getLoanId());
-                        log.error("{}", message, e);
-                        throw new LoanAccountLockCannotBeOverruledException(message, e);
+                        log.error("Error updating lock on loan account. Locked loan ID: {}", loanAccountLock.getLoanId(), e);
+                        throw new LoanAccountLockCannotBeOverruledException(
+                                "Error updating lock on loan account. Locked loan ID: %s".formatted(loanAccountLock.getLoanId()), e);
                     }
                 });
             }

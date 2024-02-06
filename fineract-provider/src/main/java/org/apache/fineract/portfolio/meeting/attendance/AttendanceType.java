@@ -48,31 +48,24 @@ public enum AttendanceType {
         return this.code;
     }
 
-    public static AttendanceType fromInt(final Integer attendanceTypeId) {
-
-        if (attendanceTypeId == null) {
-            return AttendanceType.INVALID;
+    public static AttendanceType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
 
-        AttendanceType attendanceType = AttendanceType.INVALID;
-        switch (attendanceTypeId) {
+        switch (v) {
             case 1:
-                attendanceType = AttendanceType.PRESENT;
-            break;
+                return PRESENT;
             case 2:
-                attendanceType = AttendanceType.ABSENT;
-            break;
+                return ABSENT;
             case 3:
-                attendanceType = AttendanceType.APPROVED;
-            break;
+                return APPROVED;
             case 4:
-                attendanceType = AttendanceType.LEAVE;
-            break;
+                return LEAVE;
             case 5:
-                attendanceType = AttendanceType.LATE;
-            break;
+                return LATE;
+            default:
+                return INVALID;
         }
-        return attendanceType;
     }
-
 }

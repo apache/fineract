@@ -183,18 +183,18 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
                             });
 
-                    if (groupClients.size() > 0) {
+                    if (!groupClients.isEmpty()) {
                         for (Client client : groupClients) {
                             HashMap<String, Object> smsParams = processRepaymentDataForSms(loanTransaction, client);
-                            for (String key : campaignParams.keySet()) {
-                                String value = campaignParams.get(key);
+                            for (Map.Entry<String, String> entry : campaignParams.entrySet()) {
+                                String value = entry.getValue();
                                 String spvalue = null;
-                                boolean spkeycheck = smsParams.containsKey(key);
+                                boolean spkeycheck = smsParams.containsKey(entry.getKey());
                                 if (spkeycheck) {
-                                    spvalue = smsParams.get(key).toString();
+                                    spvalue = smsParams.get(entry.getKey()).toString();
                                 }
                                 if (spkeycheck && !(value.equals("-1") || spvalue.equals(value))) {
-                                    if (key.equals("officeId")) {
+                                    if (entry.getKey().equals("officeId")) {
                                         Long officeId = Long.valueOf(value);
                                         Office campaignOffice = this.officeRepository.findById(Long.valueOf(value))
                                                 .orElseThrow(() -> new OfficeNotFoundException(officeId));
@@ -244,15 +244,15 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
                             });
                     HashMap<String, Object> smsParams = processSavingsTransactionDataForSms(savingsTransaction, client);
-                    for (String key : campaignParams.keySet()) {
-                        String value = campaignParams.get(key);
+                    for (Map.Entry<String, String> entry : campaignParams.entrySet()) {
+                        String value = entry.getValue();
                         String spvalue = null;
-                        boolean spkeycheck = smsParams.containsKey(key);
+                        boolean spkeycheck = smsParams.containsKey(entry.getKey());
                         if (spkeycheck) {
-                            spvalue = smsParams.get(key).toString();
+                            spvalue = smsParams.get(entry.getKey()).toString();
                         }
                         if (spkeycheck && !(value.equals("-1") || spvalue.equals(value))) {
-                            if (key.equals("officeId")) {
+                            if (entry.getKey().equals("officeId")) {
                                 Long officeId = Long.valueOf(value);
                                 Office campaignOffice = this.officeRepository.findById(officeId)
                                         .orElseThrow(() -> new OfficeNotFoundException(officeId));

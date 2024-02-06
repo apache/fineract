@@ -47,6 +47,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,6 +79,11 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
     }
 
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
+
     @Test
     void loanTransactionReversedOnDateSerializationTest() {
         Loan loanForProcessing = Mockito.mock(Loan.class);
@@ -107,5 +113,4 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
                 .toAvroDTO(businessEvent);
         assertEquals(reversedLocalDate, loanTransactionAdjustmentDataV1.getTransactionToAdjust().getReversedOnDate());
     }
-
 }

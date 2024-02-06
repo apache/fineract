@@ -1126,8 +1126,6 @@ final class LoansApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
-        @Schema(example = "false")
-        public Boolean disableScheduleExtensionForDownPayment;
         @Schema(example = "CUMULATIVE")
         public EnumOptionData loanScheduleType;
         @Schema(example = "HORIZONTAL")
@@ -1215,8 +1213,6 @@ final class LoansApiResourceSwagger {
         public Integer graceOnInterestPayment;
         @Schema(example = "1")
         public Integer graceOnArrearsAgeing;
-        @Schema(example = "CUMULATIVE")
-        public String loanScheduleType;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
     }
@@ -1362,8 +1358,6 @@ final class LoansApiResourceSwagger {
         public List<PutLoansLoanIdChanges> charges;
         public List<PutLoansLoanIdCollateral> collateral;
         public List<PutLoansLoanIdDisbursementData> disbursementData;
-        @Schema(example = "CUMULATIVE")
-        public String loanScheduleType;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
 

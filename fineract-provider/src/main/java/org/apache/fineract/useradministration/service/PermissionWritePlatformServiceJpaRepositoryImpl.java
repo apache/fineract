@@ -55,19 +55,19 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
         final Map<String, Boolean> commandPermissions = permissionsCommand.getPermissions();
         final Map<String, Object> changes = new HashMap<>();
         final Map<String, Boolean> changedPermissions = new HashMap<>();
-        for (final String permissionCode : commandPermissions.keySet()) {
+        for (Map.Entry<String, Boolean> entry : commandPermissions.entrySet()) {
 
-            final Permission permission = findPermissionInCollectionByCode(allPermissions, permissionCode);
+            final Permission permission = findPermissionInCollectionByCode(allPermissions, entry.getKey());
 
             if (permission.getCode().endsWith("_CHECKER") || permission.getCode().startsWith("READ_")
                     || permission.getGrouping().equalsIgnoreCase("special")) {
-                throw new PermissionNotFoundException(permissionCode);
+                throw new PermissionNotFoundException(entry.getKey());
             }
 
-            final boolean isSelected = commandPermissions.get(permissionCode).booleanValue();
+            final boolean isSelected = entry.getValue();
             final boolean changed = permission.enableMakerChecker(isSelected);
             if (changed) {
-                changedPermissions.put(permissionCode, isSelected);
+                changedPermissions.put(entry.getKey(), isSelected);
                 this.permissionRepository.saveAndFlush(permission);
             }
         }

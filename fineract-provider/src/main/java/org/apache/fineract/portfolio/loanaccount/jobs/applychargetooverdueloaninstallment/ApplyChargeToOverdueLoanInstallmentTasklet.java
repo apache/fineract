@@ -66,23 +66,23 @@ public class ApplyChargeToOverdueLoanInstallmentTasklet implements Tasklet {
             }
 
             List<Throwable> exceptions = new ArrayList<>();
-            for (final Long loanId : overdueScheduleData.keySet()) {
+            for (Map.Entry<Long, Collection<OverdueLoanScheduleData>> entry : overdueScheduleData.entrySet()) {
                 try {
-                    loanChargeWritePlatformService.applyOverdueChargesForLoan(loanId, overdueScheduleData.get(loanId));
+                    loanChargeWritePlatformService.applyOverdueChargesForLoan(entry.getKey(), entry.getValue());
 
                 } catch (final PlatformApiDataValidationException e) {
                     final List<ApiParameterError> errors = e.getErrors();
                     for (final ApiParameterError error : errors) {
-                        log.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId,
+                        log.error("Apply Charges due for overdue loans failed for account {} with message: {}", entry.getKey(),
                                 error.getDeveloperMessage(), e);
                     }
                     exceptions.add(e);
                 } catch (final AbstractPlatformDomainRuleException e) {
-                    log.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId,
+                    log.error("Apply Charges due for overdue loans failed for account {} with message: {}", entry.getKey(),
                             e.getDefaultUserMessage(), e);
                     exceptions.add(e);
                 } catch (Exception e) {
-                    log.error("Apply Charges due for overdue loans failed for account {}", loanId, e);
+                    log.error("Apply Charges due for overdue loans failed for account {}", entry.getKey(), e);
                     exceptions.add(e);
                 }
             }

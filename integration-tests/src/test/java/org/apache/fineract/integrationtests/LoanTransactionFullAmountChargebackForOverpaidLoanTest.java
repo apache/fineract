@@ -100,7 +100,8 @@ public class LoanTransactionFullAmountChargebackForOverpaidLoanTest {
                 delinquencyBucketId, loanProductTestBuilder);
         assertNotNull(getLoanProductsProductResponse);
 
-        final Integer loanId = createLoanAccount(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr);
+        final Integer loanId = createLoanAccount(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr,
+                loanProductTestBuilder.getTransactionProcessingStrategyCode());
 
         // make Repayments
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -168,14 +169,16 @@ public class LoanTransactionFullAmountChargebackForOverpaidLoanTest {
         return loanTransactionHelper.getLoanProduct(loanProductId);
     }
 
-    private Integer createLoanAccount(final Integer clientID, final Long loanProductID, final String externalId) {
+    private Integer createLoanAccount(final Integer clientID, final Long loanProductID, final String externalId,
+            final String repaymentStrategy) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
+                .withExternalId(externalId).withRepaymentStrategy(repaymentStrategy)
+                .build(clientID.toString(), loanProductID.toString(), null);
 
         final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
         loanTransactionHelper.approveLoan("02 September 2022", "1000", loanId, null);

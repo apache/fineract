@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.cob.service;
 
-import com.google.gson.Gson;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +29,8 @@ import org.apache.fineract.cob.loan.LoanCOBConstant;
 import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
-import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 
@@ -45,12 +41,8 @@ public class LoanCOBCatchUpServiceImpl implements LoanCOBCatchUpService {
 
     private final AsyncLoanCOBExecutorService asyncLoanCOBExecutorService;
     private final JobExecutionRepository jobExecutionRepository;
-    private final JobExplorer jobExplorer;
     private final RetrieveLoanIdService retrieveLoanIdService;
-
     private final LoanAccountLockService accountLockService;
-    private final CustomJobParameterRepository customJobParameterRepository;
-    protected Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     @Override
     public void unlockHardLockedLoans() {

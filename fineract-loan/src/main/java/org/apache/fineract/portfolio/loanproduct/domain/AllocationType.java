@@ -18,9 +18,24 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+import java.util.Arrays;
+import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
+@RequiredArgsConstructor
+@Getter
 public enum AllocationType {
-    PENALTY, //
-    FEE, //
-    PRINCIPAL, //
-    INTEREST //
+
+    PENALTY("Penalty"), //
+    FEE("Fee"), //
+    PRINCIPAL("Principal"), //
+    INTEREST("Interest"); //
+
+    private final String humanReadableName;
+
+    public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
+        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+    }
 }

@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -109,8 +110,10 @@ public class DelinquencyBucketsIntegrationTest {
         // then
         assertNotNull(delinquencyRangeResponse01);
         assertNotNull(ranges);
-        assertEquals(1, ranges.get(0).getMinimumAgeDays(), "Expected Min Age Days to 1");
-        assertEquals(3, ranges.get(0).getMaximumAgeDays(), "Expected Max Age Days to 3");
+        assertFalse(ranges.isEmpty());
+        GetDelinquencyRangesResponse range = ranges.get(ranges.size() - 1);
+        assertEquals(1, range.getMinimumAgeDays(), "Expected Min Age Days to 1");
+        assertEquals(3, range.getMaximumAgeDays(), "Expected Max Age Days to 3");
     }
 
     @Test
@@ -282,12 +285,20 @@ public class DelinquencyBucketsIntegrationTest {
         // Loan product creation without Delinquency bucket
         GetLoanProductsProductIdResponse getLoanProductResponse = createLoanProduct(loanTransactionHelper, null, null);
         assertNotNull(getLoanProductResponse);
+        assertNull(getLoanProductResponse.getDelinquencyBucket().getId());
 
         // Loan product creation with Delinquency bucket
         getLoanProductResponse = createLoanProduct(loanTransactionHelper, Math.toIntExact(delinquencyBucket.getId()), null);
         assertNotNull(getLoanProductResponse);
         log.info("Loan Product Bucket Name: {}", getLoanProductResponse.getDelinquencyBucket().getName());
         assertEquals(getLoanProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
+
+        // Update Loan product to remove the Delinquency bucket
+        final Long loanProductId = getLoanProductResponse.getId();
+        loanTransactionHelper.updateLoanProduct(loanProductId, "{delinquencyBucketId: null}");
+        getLoanProductResponse = loanTransactionHelper.getLoanProduct(loanProductId.intValue());
+        assertNotNull(getLoanProductResponse);
+        assertNull(getLoanProductResponse.getDelinquencyBucket().getId());
     }
 
     @Test
@@ -1568,6 +1579,58 @@ public class DelinquencyBucketsIntegrationTest {
         }
     }
 
+    @Test
+    public void testLoanClassificationOnyForActiveLoan() {
+
+        // Given
+        final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        ArrayList<Integer> rangeIds = new ArrayList<>();
+        // First Range
+        String jsonRange = DelinquencyRangesHelper.getAsJSON(4, 30);
+        PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
+                jsonRange);
+        rangeIds.add(delinquencyRangeResponse.getResourceId());
+
+        String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
+        PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
+                responseSpec, jsonBucket);
+        assertNotNull(delinquencyBucketResponse);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+                delinquencyBucketResponse.getResourceId());
+
+        // Client and Loan account creation
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
+                Math.toIntExact(delinquencyBucket.getId()), null);
+        assertNotNull(getLoanProductsProductResponse);
+
+        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        // Older date to have more than one overdue installment
+        LocalDate transactionDate = todaysDate.minusDays(37);
+        String operationDate = Utils.dateFormatter.format(transactionDate);
+
+        // Create Loan Application
+        final Integer loanId = createLoanApplication(loanTransactionHelper, clientId.toString(),
+                getLoanProductsProductResponse.getId().toString(), operationDate, null);
+
+        // Evaluate default delinquent values in No Active Loan
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        assertNotNull(getLoansLoanIdResponse.getDelinquent());
+        assertEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentDays());
+        assertEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentAmount());
+
+        // Loan Disbursement
+        disburseLoanAccount(loanTransactionHelper, loanId, operationDate);
+        // Evaluate default delinquent values in No Active Loan
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        assertNotNull(getLoansLoanIdResponse.getDelinquent());
+        assertNotEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentDays());
+        assertNotEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentAmount());
+    }
+
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
             final Integer delinquencyBucketId, final String inArrearsTolerance) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withInArrearsTolerance(inArrearsTolerance).build(null,
@@ -1592,8 +1655,8 @@ public class DelinquencyBucketsIntegrationTest {
         return loanTransactionHelper.updateLoanProduct(id, requestModifyLoan);
     }
 
-    private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate, final String inArrearsTolerance) {
+    private Integer createLoanApplication(final LoanTransactionHelper loanTransactionHelper, final String clientId,
+            final String loanProductId, final String operationDate, final String inArrearsTolerance) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency("12")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths() //
@@ -1605,7 +1668,17 @@ public class DelinquencyBucketsIntegrationTest {
                 .build(clientId, loanProductId, null);
         final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
         loanTransactionHelper.approveLoan(operationDate, principalAmount, loanId, null);
+        return loanId;
+    }
+
+    private void disburseLoanAccount(final LoanTransactionHelper loanTransactionHelper, final Integer loanId, final String operationDate) {
         loanTransactionHelper.disburseLoanWithNetDisbursalAmount(operationDate, loanId, principalAmount);
+    }
+
+    private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
+            final String operationDate, final String inArrearsTolerance) {
+        final Integer loanId = createLoanApplication(loanTransactionHelper, clientId, loanProductId, operationDate, inArrearsTolerance);
+        disburseLoanAccount(loanTransactionHelper, loanId, operationDate);
         return loanId;
     }
 

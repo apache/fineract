@@ -31,29 +31,26 @@ public enum HolidayStatusType {
     private final Integer value;
     private final String code;
 
-    public static HolidayStatusType fromInt(final Integer type) {
-        HolidayStatusType enumeration = HolidayStatusType.INVALID;
-        switch (type) {
-            case 100:
-                enumeration = HolidayStatusType.PENDING_FOR_ACTIVATION;
-            break;
-            case 300:
-                enumeration = HolidayStatusType.ACTIVE;
-            break;
-            case 600:
-                enumeration = HolidayStatusType.DELETED;
-            break;
+    public static HolidayStatusType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return enumeration;
+
+        switch (v) {
+            case 100:
+                return PENDING_FOR_ACTIVATION;
+            case 300:
+                return ACTIVE;
+            case 600:
+                return DELETED;
+            default:
+                return INVALID;
+        }
     }
 
     HolidayStatusType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
-    }
-
-    public boolean hasStateOf(final HolidayStatusType state) {
-        return this.value.equals(state.getValue());
     }
 
     public Integer getValue() {

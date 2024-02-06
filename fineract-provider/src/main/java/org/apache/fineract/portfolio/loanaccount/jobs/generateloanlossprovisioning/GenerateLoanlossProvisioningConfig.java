@@ -39,7 +39,6 @@ public class GenerateLoanlossProvisioningConfig {
     private JobRepository jobRepository;
     @Autowired
     private PlatformTransactionManager transactionManager;
-    private StepBuilder steps;
     @Autowired
     private ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     @Autowired

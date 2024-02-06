@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void onApplicationEvent(ContextRefreshedEvent event) {
         // If the instance is not Batch Enabled will not load the Jobs
         if (!fineractProperties.getMode().isBatchManagerEnabled()) {

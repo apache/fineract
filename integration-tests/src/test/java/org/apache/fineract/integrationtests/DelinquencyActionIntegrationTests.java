@@ -49,6 +49,7 @@ import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -266,7 +267,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
-            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true);
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true, 3);
 
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "25 December 2022", 1500.0, 3,
@@ -319,6 +320,48 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "01 January 2023", "15 January 2023"));
             assertTrue(exception.getMessage().contains("Delinquency pause period cannot overlap with another pause period"));
+        });
+    }
+
+    @Test
+    public void testLoanAndInstallmentDelinquencyCalculationForCOBAfterPausePeriodEndTest() {
+        runAt("01 November 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true, 0);
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 November 2023", 1000.0, 3, req -> {
+                req.submittedOnDate("01 November 2023");
+                req.setLoanTermFrequency(45);
+                req.setRepaymentEvery(15);
+                req.setGraceOnArrearsAgeing(0);
+            });
+
+            // Partial Loan amount Disbursement
+            disburseLoan(loanId, BigDecimal.valueOf(100.00), "01 November 2023");
+
+            // Update business date
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("05 November 2023")
+                    .dateFormat(DATETIME_PATTERN).locale("en"));
+
+            // Create Delinquency Pause for the Loan
+            PostLoansDelinquencyActionResponse response = loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE,
+                    "16 November 2023", "25 November 2023");
+
+            // run cob for business date 26 November
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("26 November 2023")
+                    .dateFormat(DATETIME_PATTERN).locale("en"));
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+
+            // Loan delinquency data
+            verifyLoanDelinquencyData(loanId, 1, new InstallmentDelinquencyData(1, 3, BigDecimal.valueOf(25.0)));
+
+            // Validate Delinquency Pause Period on Loan
+            validateLoanDelinquencyPausePeriods(loanId, pausePeriods("16 November 2023", "25 November 2023", false));
         });
     }
 
@@ -388,7 +431,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
     }
 
     private Long createLoanProductWith25PctDownPaymentAndDelinquencyBucket(boolean autoDownPaymentEnabled, boolean multiDisburseEnabled,
-            boolean installmentLevelDelinquencyEnabled) {
+            boolean installmentLevelDelinquencyEnabled, Integer graceOnArrearsAging) {
         // Create DelinquencyBuckets
         Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
                 Pair.of(1, 3), //
@@ -400,6 +443,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
         product.setDelinquencyBucketId(delinquencyBucketId.longValue());
         product.setMultiDisburseLoan(multiDisburseEnabled);
         product.setEnableDownPayment(true);
+        product.setGraceOnArrearsAgeing(graceOnArrearsAging);
 
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE);
         product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);

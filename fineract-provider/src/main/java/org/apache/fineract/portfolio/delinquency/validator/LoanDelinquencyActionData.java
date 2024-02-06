@@ -27,14 +27,14 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 @Data
 public class LoanDelinquencyActionData {
 
-    public Long id;
-    public DelinquencyAction action;
-    public LocalDate startDate;
-    public LocalDate endDate;
-    public Long createdById;
-    public OffsetDateTime createdOn;
-    public Long updatedById;
-    public OffsetDateTime lastModifiedOn;
+    private Long id;
+    private DelinquencyAction action;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private Long createdById;
+    private OffsetDateTime createdOn;
+    private Long updatedById;
+    private OffsetDateTime lastModifiedOn;
 
     public LoanDelinquencyActionData(LoanDelinquencyAction loanDelinquencyAction) {
         this.id = loanDelinquencyAction.getId();

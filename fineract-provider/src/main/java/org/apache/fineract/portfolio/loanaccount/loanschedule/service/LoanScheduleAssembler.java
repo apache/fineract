@@ -459,13 +459,10 @@ public class LoanScheduleAssembler {
         final boolean isDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableDownPayment();
         BigDecimal disbursedAmountPercentageForDownPayment = null;
         boolean isAutoRepaymentForDownPaymentEnabled = false;
-        boolean isScheduleExtensionForDownPaymentDisabled = false;
         if (isDownPaymentEnabled) {
             disbursedAmountPercentageForDownPayment = loanProduct.getLoanProductRelatedDetail()
                     .getDisbursedAmountPercentageForDownPayment();
             isAutoRepaymentForDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableAutoRepaymentForDownPayment();
-            isScheduleExtensionForDownPaymentDisabled = loanProduct.getLoanProductRelatedDetail()
-                    .isDisableScheduleExtensionForDownPayment();
 
         }
 
@@ -493,7 +490,7 @@ public class LoanScheduleAssembler {
                 allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
                 fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled,
                 disbursedAmountPercentageForDownPayment, isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate,
-                isScheduleExtensionForDownPaymentDisabled, loanScheduleType, loanScheduleProcessingType);
+                loanScheduleType, loanScheduleProcessingType);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
@@ -771,10 +768,9 @@ public class LoanScheduleAssembler {
                 graceApplicable = installment.getDueDate();
             }
         }
-        Collection<LocalDate> keySet = adjustDueDateVariations.keySet();
-        dueDates.addAll(keySet);
-        for (final LocalDate date : keySet) {
-            LocalDate removeDate = adjustDueDateVariations.get(date);
+        dueDates.addAll(adjustDueDateVariations.keySet());
+        for (Map.Entry<LocalDate, LocalDate> entry : adjustDueDateVariations.entrySet()) {
+            LocalDate removeDate = entry.getValue();
             if (removeDate != null) {
                 dueDates.remove(removeDate);
             }

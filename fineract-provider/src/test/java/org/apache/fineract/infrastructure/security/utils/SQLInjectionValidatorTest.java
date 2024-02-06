@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.infrastructure.security.utils;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class SQLInjectionValidatorTest {
 
     private static final String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment", "sleep" };

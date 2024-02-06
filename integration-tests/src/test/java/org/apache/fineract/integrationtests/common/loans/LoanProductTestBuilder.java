@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -94,6 +95,7 @@ public class LoanProductTestBuilder {
     private String inArrearsTolerance = "0";
     private String transactionProcessingStrategyCode = DEFAULT_STRATEGY;
     private List<AdvancedPaymentData> advancedPaymentAllocations = null;
+    private List<CreditAllocationData> creditAllocations = null;
     private String accountingRule = NONE;
     private final String currencyCode = USD;
     private String amortizationType = EQUAL_INSTALLMENTS;
@@ -153,7 +155,6 @@ public class LoanProductTestBuilder {
     private String disbursedAmountPercentageForDownPayment = null;
     private boolean enableAutoRepaymentForDownPayment = false;
     private Integer repaymentStartDateType = null;
-    private boolean disableScheduleExtensionForDownPayment = false;
     private String loanScheduleType = LoanScheduleType.CUMULATIVE.name();
     private String loanScheduleProcessingType = LoanScheduleProcessingType.HORIZONTAL.name();
 
@@ -198,6 +199,7 @@ public class LoanProductTestBuilder {
         map.put("inArrearsTolerance", this.inArrearsTolerance);
         map.put("transactionProcessingStrategyCode", this.transactionProcessingStrategyCode);
         map.put("paymentAllocation", this.advancedPaymentAllocations);
+        map.put("creditAllocation", this.creditAllocations);
         map.put("accountingRule", this.accountingRule);
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
@@ -311,9 +313,6 @@ public class LoanProductTestBuilder {
 
         if (this.repaymentStartDateType != null) {
             map.put("repaymentStartDateType", repaymentStartDateType);
-        }
-        if (disableScheduleExtensionForDownPayment) {
-            map.put("disableScheduleExtensionForDownPayment", disableScheduleExtensionForDownPayment);
         }
 
         return map;
@@ -740,13 +739,13 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withRepaymentStartDateType(final Integer repaymentStartDateType) {
-        this.repaymentStartDateType = repaymentStartDateType;
+    public LoanProductTestBuilder addCreditAllocations(CreditAllocationData... creditAllocationData) {
+        this.creditAllocations = new ArrayList<>(Arrays.stream(creditAllocationData).toList());
         return this;
     }
 
-    public LoanProductTestBuilder withDisableScheduleExtensionForDownPayment(final Boolean disableScheduleExtensionForDownPayment) {
-        this.disableScheduleExtensionForDownPayment = disableScheduleExtensionForDownPayment;
+    public LoanProductTestBuilder withRepaymentStartDateType(final Integer repaymentStartDateType) {
+        this.repaymentStartDateType = repaymentStartDateType;
         return this;
     }
 
@@ -764,4 +763,9 @@ public class LoanProductTestBuilder {
         this.loanScheduleProcessingType = loanScheduleProcessingType.name();
         return this;
     }
+
+    public String getTransactionProcessingStrategyCode() {
+        return transactionProcessingStrategyCode;
+    }
+
 }

@@ -70,6 +70,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -105,12 +106,18 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
     }
 
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
+
     @Test
     public void testLoanDelinquencyRangeEventPayloadSerialization() throws IOException {
         // given
         LoanDelinquencyRangeChangeBusinessEventSerializer serializer = new LoanDelinquencyRangeChangeBusinessEventSerializer(
                 loanReadPlatformService, new LoanDelinquencyRangeDataMapperImpl(), loanChargeReadPlatformService,
-                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(null, null, null), new CurrencyDataMapperImpl(), mapper);
+                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(null, null, null), new CurrencyDataMapperImpl(), mapper,
+                new LoanInstallmentLevelDelinquencyEventProducer(delinquencyReadPlatformService, new CurrencyDataMapperImpl()));
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanAccountData loanAccountData = mock(LoanAccountData.class);
@@ -174,7 +181,8 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         // given
         LoanDelinquencyRangeChangeBusinessEventSerializer serializer = new LoanDelinquencyRangeChangeBusinessEventSerializer(
                 loanReadPlatformService, new LoanDelinquencyRangeDataMapperImpl(), loanChargeReadPlatformService,
-                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(null, null, null), new CurrencyDataMapperImpl(), mapper);
+                delinquencyReadPlatformService, new LoanChargeDataMapperImpl(null, null, null), new CurrencyDataMapperImpl(), mapper,
+                new LoanInstallmentLevelDelinquencyEventProducer(delinquencyReadPlatformService, new CurrencyDataMapperImpl()));
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanAccountData loanAccountData = mock(LoanAccountData.class);
@@ -340,5 +348,4 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         ReflectionTestUtils.setField(loanCharge, "id", 1L);
         return loanCharge;
     }
-
 }

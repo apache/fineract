@@ -111,6 +111,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementDa
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
@@ -190,6 +191,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public static final String WRITTEN_OFF_ON_DATE = "writtenOffOnDate";
     public static final String FEE = "fee";
     public static final String PENALTIES = "penalties";
+    public static final String EARLIEST_UNPAID_DATE = "earliest-unpaid-date";
+    public static final String NEXT_UNPAID_DUE_DATE = "next-unpaid-due-date";
     /** Disable optimistic locking till batch jobs failures can be fixed **/
     @Version
     int version;
@@ -239,6 +242,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanPaymentAllocationRule> paymentAllocationRules = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<LoanCreditAllocationRule> creditAllocationRules = new ArrayList<>();
 
     @Embedded
     private LoanProductRelatedDetail loanRepaymentScheduleDetail;
@@ -795,7 +801,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final Set<LoanCharge> loanCharges = new HashSet<>(1);
         loanCharges.add(charge);
         loanRepaymentScheduleTransactionProcessor.processLatestTransaction(chargesPayment, getCurrency(), chargePaymentInstallments,
-                loanCharges, getTotalOverpaidAsMoney());
+                loanCharges, new MoneyHolder(getTotalOverpaidAsMoney()));
 
         updateLoanSummaryDerivedFields();
         doPostLoanTransactionChecks(chargesPayment.getTransactionDate(), loanLifecycleStateMachine);
@@ -3319,7 +3325,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         if (isTransactionChronologicallyLatest && adjustedTransaction == null
                 && (!reprocess || !this.repaymentScheduleDetail().isInterestRecalculationEnabled()) && !isForeclosure()) {
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, getCurrency(),
-                    getRepaymentScheduleInstallments(), getActiveCharges(), getTotalOverpaidAsMoney());
+                    getRepaymentScheduleInstallments(), getActiveCharges(), new MoneyHolder(getTotalOverpaidAsMoney()));
             reprocess = false;
             if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                 if (currentInstallment == null || currentInstallment.isNotFullyPaidOff()) {
@@ -3624,7 +3630,40 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return isChronologicallyLatestRepaymentOrWaiver;
     }
 
-    public LocalDate possibleNextRepaymentDate() {
+    public LocalDate possibleNextRepaymentDate(final String nextPaymentDueDateConfig) {
+        LocalDate nextPossibleRepaymentDate = null;
+        if (EARLIEST_UNPAID_DATE.equalsIgnoreCase(nextPaymentDueDateConfig)) {
+            nextPossibleRepaymentDate = getEarliestUnpaidInstallmentDate();
+        } else if (NEXT_UNPAID_DUE_DATE.equalsIgnoreCase(nextPaymentDueDateConfig)) {
+            nextPossibleRepaymentDate = getNextUnpaidInstallmentDueDate();
+        }
+        return nextPossibleRepaymentDate;
+    }
+
+    private LocalDate getNextUnpaidInstallmentDueDate() {
+        LocalDate nextUnpaidInstallmentDate = null;
+        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
+        LocalDate currentBusinessDate = DateUtils.getBusinessLocalDate();
+        LocalDate expectedMaturityDate = determineExpectedMaturityDate();
+
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            boolean isCurrentDateBeforeInstallmentAndLoanPeriod = DateUtils.isBefore(currentBusinessDate, installment.getDueDate())
+                    && DateUtils.isBefore(currentBusinessDate, expectedMaturityDate);
+            if (installment.isDownPayment()) {
+                isCurrentDateBeforeInstallmentAndLoanPeriod = DateUtils.isEqual(currentBusinessDate, installment.getDueDate())
+                        && DateUtils.isBefore(currentBusinessDate, expectedMaturityDate);
+            }
+            if (isCurrentDateBeforeInstallmentAndLoanPeriod) {
+                if (installment.isNotFullyPaidOff()) {
+                    nextUnpaidInstallmentDate = installment.getDueDate();
+                    break;
+                }
+            }
+        }
+        return nextUnpaidInstallmentDate;
+    }
+
+    private LocalDate getEarliestUnpaidInstallmentDate() {
         LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
@@ -3879,7 +3918,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
             addLoanTransaction(loanTransaction);
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, loanCurrency(),
-                    getRepaymentScheduleInstallments(), getActiveCharges(), getTotalOverpaidAsMoney());
+                    getRepaymentScheduleInstallments(), getActiveCharges(), new MoneyHolder(getTotalOverpaidAsMoney()));
 
             updateLoanSummaryDerivedFields();
         }
@@ -3984,7 +4023,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
                 addLoanTransaction(loanTransaction);
                 loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, loanCurrency(),
-                        getRepaymentScheduleInstallments(), getActiveCharges(), getTotalOverpaidAsMoney());
+                        getRepaymentScheduleInstallments(), getActiveCharges(), new MoneyHolder(getTotalOverpaidAsMoney()));
 
                 updateLoanSummaryDerivedFields();
             } else if (totalOutstanding.isGreaterThanZero()) {
@@ -6338,7 +6377,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         // If is a refund
         if (adjustedTransaction == null) {
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, getCurrency(),
-                    getRepaymentScheduleInstallments(), getActiveCharges(), getTotalOverpaidAsMoney());
+                    getRepaymentScheduleInstallments(), getActiveCharges(), new MoneyHolder(getTotalOverpaidAsMoney()));
         } else {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retrieveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(getDisbursementDate(),
@@ -6369,7 +6408,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         addLoanTransaction(chargebackTransaction);
         loanRepaymentScheduleTransactionProcessor.processLatestTransaction(chargebackTransaction, getCurrency(),
-                getRepaymentScheduleInstallments(), getActiveCharges(), getTotalOverpaidAsMoney());
+                getRepaymentScheduleInstallments(), getActiveCharges(), new MoneyHolder(getTotalOverpaidAsMoney()));
 
         updateLoanSummaryDerivedFields();
         if (!doPostLoanTransactionChecks(chargebackTransaction.getTransactionDate(), loanLifecycleStateMachine)) {
@@ -7145,6 +7184,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void setPaymentAllocationRules(List<LoanPaymentAllocationRule> loanPaymentAllocationRules) {
         this.paymentAllocationRules = loanPaymentAllocationRules;
+    }
+
+    public List<LoanCreditAllocationRule> getCreditAllocationRules() {
+        return creditAllocationRules;
+    }
+
+    public void setCreditAllocationRules(List<LoanCreditAllocationRule> loanCreditAllocationRules) {
+        this.creditAllocationRules = loanCreditAllocationRules;
     }
 
     public String getTransactionProcessingStrategyCode() {

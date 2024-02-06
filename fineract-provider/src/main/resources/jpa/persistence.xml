@@ -114,6 +114,31 @@
         <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
+        <!-- Fineract Savings module -->
+        <class>org.apache.fineract.interoperation.domain.InteropIdentifier</class>
+        <class>org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives</class>
+        <class>org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart</class>
+        <class>org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlab</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestRateChart</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestRateChartSlabs</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestIncentives</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransaction</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountTermAndPreClosure</class>
+        <class>org.apache.fineract.portfolio.savings.domain.GroupSavingsIndividualMonitoring</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsProduct</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccount</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountChargePaidBy</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionTaxDetails</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsOfficerAssignmentHistory</class>
+        <!-- Fineract Accounting module -->
+        <class>org.apache.fineract.accounting.rule.domain.AccountingRule</class>
+        <class>org.apache.fineract.accounting.rule.domain.AccountingTagRule</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
