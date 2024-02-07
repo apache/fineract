@@ -1104,13 +1104,13 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalAmount = totalAmount.add(principalAmount);
-            journalAmountHolders.add(
-                    new JournalAmountHolder(determineAccrualAccount(isMarkedChargeOff, isMarkedFraud, false, isReversal), principalAmount));
+            journalAmountHolders
+                    .add(new JournalAmountHolder(determineAccrualAccountForCBR(isMarkedChargeOff, isMarkedFraud, false), principalAmount));
         }
         if (overpaymentAmount != null && overpaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
             totalAmount = totalAmount.add(overpaymentAmount);
-            journalAmountHolders.add(new JournalAmountHolder(determineAccrualAccount(isMarkedChargeOff, isMarkedFraud, true, isReversal),
-                    overpaymentAmount));
+            journalAmountHolders
+                    .add(new JournalAmountHolder(determineAccrualAccountForCBR(isMarkedChargeOff, isMarkedFraud, true), overpaymentAmount));
         }
 
         JournalAmountHolder totalAmountHolder = new JournalAmountHolder(AccrualAccountsForLoan.FUND_SOURCE.getValue(), totalAmount);
@@ -1119,16 +1119,16 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
     }
 
-    private Integer determineAccrualAccount(boolean isMarkedChargeOff, boolean isMarkedFraud, boolean isOverpayment, boolean isReversal) {
-        if (isMarkedChargeOff && isReversal) {
-            if (isMarkedFraud) {
-                return AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue();
-            } else {
-                return AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue();
-            }
+    private Integer determineAccrualAccountForCBR(boolean isMarkedChargeOff, boolean isMarkedFraud, boolean isOverpayment) {
+        if (isOverpayment) {
+            return AccrualAccountsForLoan.OVERPAYMENT.getValue();
         } else {
-            if (isOverpayment) {
-                return AccrualAccountsForLoan.OVERPAYMENT.getValue();
+            if (isMarkedChargeOff) {
+                if (isMarkedFraud) {
+                    return AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue();
+                } else {
+                    return AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue();
+                }
             } else {
                 return AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue();
             }
