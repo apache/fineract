@@ -744,6 +744,11 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.adjustLoanTransaction1(loanId, transactionExternalId, request, "undo"));
     }
 
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(final Long loanId, final Long transactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction(loanId, transactionId, request, "chargeback"));
+    }
+
     public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(final String loanExternalId, final Long transactionId,
             final PostLoansLoanIdTransactionsTransactionIdRequest request) {
         return ok(fineract().loanTransactions.adjustLoanTransaction2(loanExternalId, transactionId, request, "chargeback"));

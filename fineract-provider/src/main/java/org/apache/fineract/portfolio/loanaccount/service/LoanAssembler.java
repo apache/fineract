@@ -66,6 +66,7 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
@@ -390,6 +391,12 @@ public class LoanAssembler {
                             r.getFutureInstallmentAllocationRule()))
                     .toList();
             loanApplication.setPaymentAllocationRules(loanPaymentAllocationRules);
+
+            if (loanProduct.getCreditAllocationRules() != null && loanProduct.getCreditAllocationRules().size() > 0) {
+                List<LoanCreditAllocationRule> loanCreditAllocationRules = loanProduct.getCreditAllocationRules().stream()
+                        .map(r -> new LoanCreditAllocationRule(loanApplication, r.getTransactionType(), r.getAllocationTypes())).toList();
+                loanApplication.setCreditAllocationRules(loanCreditAllocationRules);
+            }
         }
     }
 }

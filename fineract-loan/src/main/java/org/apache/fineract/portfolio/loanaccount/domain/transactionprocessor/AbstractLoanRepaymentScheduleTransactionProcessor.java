@@ -474,7 +474,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     }
 
-    private void processCreditTransaction(LoanTransaction loanTransaction, MoneyHolder overpaymentHolder, MonetaryCurrency currency,
+    protected void processCreditTransaction(LoanTransaction loanTransaction, MoneyHolder overpaymentHolder, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments) {
         loanTransaction.resetDerivedComponents();
         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
