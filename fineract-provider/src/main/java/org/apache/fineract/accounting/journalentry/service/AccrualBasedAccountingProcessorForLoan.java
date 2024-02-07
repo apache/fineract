@@ -430,11 +430,12 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final BigDecimal overpaidAmount = Objects.isNull(loanTransactionDTO.getOverPayment()) ? BigDecimal.ZERO
                 : loanTransactionDTO.getOverPayment();
 
-        if (BigDecimal.ZERO.compareTo(overpaidAmount) == 0) {
+        if (BigDecimal.ZERO.compareTo(overpaidAmount) == 0) { // when no overpay
             helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
                     AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
                     amount, isReversal);
-        } else if (overpaidAmount.compareTo(amount) >= 0) {
+        } else if (overpaidAmount.compareTo(amount) >= 0) { // when the overpay amount is matching with the normal
+                                                            // amount
             helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
                     AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
                     amount, isReversal);
