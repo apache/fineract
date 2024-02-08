@@ -18,10 +18,17 @@
  */
 package org.apache.fineract.cob.loan;
 
+import static org.apache.fineract.infrastructure.core.diagnostics.performance.MeasuringUtil.measure;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountCustomSnapshotBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -36,23 +43,56 @@ public class CheckDueInstallmentsBusinessStep implements LoanCOBBusinessStep {
 
     @Override
     public Loan execute(Loan loan) {
-        log.debug("start processing custom snapshot event trigger business step loan for loan with id [{}]", loan.getId());
-
-        if (loan.getRepaymentScheduleInstallments() != null && loan.getRepaymentScheduleInstallments().size() > 0) {
-            final LocalDate currentDate = DateUtils.getBusinessLocalDate();
-            boolean shouldPostCustomSnapshotBusinessEvent = false;
-            for (int i = 0; i < loan.getRepaymentScheduleInstallments().size(); i++) {
-                if (loan.getRepaymentScheduleInstallments().get(i).getDueDate().equals(currentDate)
-                        && loan.getRepaymentScheduleInstallments().get(i).isNotFullyPaidOff()) {
-                    shouldPostCustomSnapshotBusinessEvent = true;
-                }
-            }
-            if (shouldPostCustomSnapshotBusinessEvent) {
-                businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountCustomSnapshotBusinessEvent(loan));
-            }
+        if (loan == null) {
+            log.debug("Ignoring custom snapshot event processing for null loan.");
+            return null;
         }
 
-        log.debug("end processing custom snapshot event trigger business step for loan with id [{}]", loan.getId());
+        String externalId = Optional.ofNullable(loan.getExternalId()).map(ExternalId::getValue).orElse(null);
+        measure(new Runnable() {
+
+            @SuppressFBWarnings("SLF4J_MANUALLY_PROVIDED_MESSAGE")
+            @Override
+            public void run() {
+                try {
+                    log.debug("Starting custom snapshot event processing for loan with id [{}], account number [{}], external Id [{}].",
+                            loan.getId(), loan.getAccountNumber(), externalId);
+
+                    if (loan.getRepaymentScheduleInstallments() != null && loan.getRepaymentScheduleInstallments().size() > 0) {
+                        final LocalDate currentDate = DateUtils.getBusinessLocalDate();
+                        boolean shouldPostCustomSnapshotBusinessEvent = false;
+                        for (int i = 0; i < loan.getRepaymentScheduleInstallments().size(); i++) {
+                            if (loan.getRepaymentScheduleInstallments().get(i).getDueDate().equals(currentDate)
+                                    && loan.getRepaymentScheduleInstallments().get(i).isNotFullyPaidOff()) {
+                                shouldPostCustomSnapshotBusinessEvent = true;
+                            }
+                        }
+
+                        if (shouldPostCustomSnapshotBusinessEvent) {
+                            // Change the Action Context to DEFAULT for Business Date so that we can compare the loan
+                            // due date
+                            // to the current date and not the previous (COB) date when calculation collection data.
+                            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+                            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccountCustomSnapshotBusinessEvent(loan));
+                        }
+                    }
+                } catch (RuntimeException re) {
+                    log.error(
+                            "Received [{}] exception while processing custom snapshot event for loan with Id [{}], account number [{}], external Id [{}].",
+                            re.getMessage(), loan.getId(), loan.getAccountNumber(), externalId, re);
+
+                    throw re;
+                } finally {
+                    // Change the Action Context back to COB to resume COB steps.
+                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+                }
+            }
+        }, duration -> {
+            log.debug(
+                    "Ending custom snapshot event processing for loan with Id [{}], account number [{}], external Id [{}], finished in [{}]ms.",
+                    loan.getId(), loan.getAccountNumber(), externalId, duration.toMillis());
+        });
+
         return loan;
     }
 
