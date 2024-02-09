@@ -3131,7 +3131,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     // 1. Create a Loan product with Adv. Pment. Alloc.
     // 2. Submit Loan and approve
     // 3. Disburse only 100 from 1000
-    // 4. Overpay the loan (110)
+    // 4. Overpay the loan (150)
     // 5. Disburse again 100
     @Test
     public void uc122() {
@@ -3166,9 +3166,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             assertTrue(loanDetails.getStatus().getActive());
 
             loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat(DATETIME_PATTERN).transactionDate("23 November 2023").locale("en").transactionAmount(110.0));
+                    .dateFormat(DATETIME_PATTERN).transactionDate("23 November 2023").locale("en").transactionAmount(150.0));
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 10.0);
+            validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 50.0);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 11, 22), 25.0, 25.0, 0.0, 0.0, 25.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 12, 7), 25.0, 25.0, 0.0, 25.0, 0.0);
             validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 12, 22), 25.0, 25.0, 0.0, 25.0, 0.0);
@@ -3179,27 +3179,27 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     new PostLoansLoanIdRequest().actualDisbursementDate("24 November 2023").dateFormat(DATETIME_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            validateLoanSummaryBalances(loanDetails, 90.0, 110.0, 90.0, 110.0, null);
+            validateLoanSummaryBalances(loanDetails, 50.0, 150.0, 50.0, 150.0, null);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 11, 22), 25.0, 25.0, 0.0, 0.0, 25.0);
-            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 11, 24), 25.0, 10.0, 15.0, 0.0, 0.0);
-            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 12, 7), 50.0, 25.0, 25.0, 25.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 11, 24), 25.0, 25.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 12, 7), 50.0, 50.0, 0.0, 50.0, 0.0);
             validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 12, 22), 50.0, 25.0, 25.0, 25.0, 0.0);
             validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2024, 1, 6), 50.0, 25.0, 25.0, 25.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
             verifyTransactions(loanResponse.getLoanId(), //
                     transaction(100, "Disbursement", "22 November 2023", 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(110, "Repayment", "23 November 2023", 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 10.0), //
-                    transaction(100, "Disbursement", "24 November 2023", 90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0) //
+                    transaction(150, "Repayment", "23 November 2023", 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 50.0), //
+                    transaction(100, "Disbursement", "24 November 2023", 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 50.0) //
             );
             // verify journal entries
             verifyJournalEntries(loanResponse.getLoanId(), journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
                     journalEntry(100.0, suspenseClearingAccount, "CREDIT"), //
                     journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(10.0, overpaymentAccount, "CREDIT"), //
-                    journalEntry(110.0, suspenseClearingAccount, "DEBIT"), //
-                    journalEntry(90.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(10.0, overpaymentAccount, "DEBIT"), //
+                    journalEntry(50.0, overpaymentAccount, "CREDIT"), //
+                    journalEntry(150.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(50.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(50.0, overpaymentAccount, "DEBIT"), //
                     journalEntry(100.0, suspenseClearingAccount, "CREDIT") //
             );
         });
