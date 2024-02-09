@@ -304,26 +304,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 downPaymentAmt = Money.roundToMultiplesOf(downPaymentAmt, installmentAmountInMultiplesOf);
             }
             downPaymentAmount = Money.of(currency, downPaymentAmt);
-            Money autoPayFromOverpayment = overpaymentHolder.getMoneyObject();
             downPaymentInstallment.addToPrincipal(disbursementTransaction.getTransactionDate(), downPaymentAmount);
-            Money paidAmount = downPaymentInstallment.payPrincipalComponent(disbursementTransaction.getTransactionDate(),
-                    autoPayFromOverpayment);
-            disbursementTransaction.setOverPayments(paidAmount);
-            overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().minus(paidAmount));
         }
+        disbursementTransaction.setOverPayments(overpaymentHolder.getMoneyObject());
         Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
-        Money overpaidAmount = overpaymentHolder.getMoneyObject();
-        if (overpaidAmount.isGreaterThanZero()) {
-            if (amortizableAmount.isGreaterThan(overpaidAmount)) {
-                overpaymentHolder.setMoneyObject(Money.zero(currency));
-                amortizableAmount = amortizableAmount.minus(overpaidAmount);
-                disbursementTransaction.setOverPayments(disbursementTransaction.getOverPaymentPortion(currency).add(overpaidAmount));
-            } else {
-                overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().minus(amortizableAmount));
-                amortizableAmount = Money.zero(currency);
-                disbursementTransaction.setOverPayments(disbursementTransaction.getOverPaymentPortion(currency).add(amortizableAmount));
-            }
-        }
 
         if (amortizableAmount.isGreaterThanZero()) {
             Money increasePrincipalBy = amortizableAmount.dividedBy(noCandidateRepaymentInstallments, mc.getRoundingMode());
@@ -341,6 +325,33 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             candidateRepaymentInstallments.get(noCandidateRepaymentInstallments - 1)
                     .addToPrincipal(disbursementTransaction.getTransactionDate(), remainingAmount);
         }
+
+        allocateOverpayment(disbursementTransaction, currency, installments, overpaymentHolder);
+    }
+
+    private void allocateOverpayment(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, MoneyHolder overpaymentHolder) {
+        List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
+        List<LoanPaymentAllocationRule> paymentAllocationRules = loanTransaction.getLoan().getPaymentAllocationRules();
+        LoanPaymentAllocationRule defaultPaymentAllocationRule = paymentAllocationRules.stream()
+                .filter(e -> PaymentAllocationTransactionType.DEFAULT.equals(e.getTransactionType())).findFirst().orElseThrow();
+
+        Money transactionAmountUnprocessed = null;
+        Money zero = Money.zero(currency);
+        Balances balances = new Balances(zero, zero, zero, zero);
+        if (LoanScheduleProcessingType.HORIZONTAL
+                .equals(loanTransaction.getLoan().getLoanProductRelatedDetail().getLoanScheduleProcessingType())) {
+            transactionAmountUnprocessed = processPeriodsHorizontally(loanTransaction, currency, installments,
+                    overpaymentHolder.getMoneyObject(), defaultPaymentAllocationRule, transactionMappings, Set.of(), balances);
+        } else if (LoanScheduleProcessingType.VERTICAL
+                .equals(loanTransaction.getLoan().getLoanProductRelatedDetail().getLoanScheduleProcessingType())) {
+            transactionAmountUnprocessed = processPeriodsVertically(loanTransaction, currency, installments,
+                    overpaymentHolder.getMoneyObject(), defaultPaymentAllocationRule, transactionMappings, Set.of(), balances);
+        }
+        if (transactionAmountUnprocessed != null && transactionAmountUnprocessed.isGreaterThanZero()) {
+            overpaymentHolder.setMoneyObject(transactionAmountUnprocessed);
+        }
+        loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
     }
 
     private void handleRepayment(LoanTransaction loanTransaction, MonetaryCurrency currency,
