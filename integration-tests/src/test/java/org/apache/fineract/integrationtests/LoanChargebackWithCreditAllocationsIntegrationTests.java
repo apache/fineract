@@ -38,7 +38,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -52,7 +51,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
-            Long loanProductId = createLoanProduct(charbackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
+            Long loanProductId = createLoanProduct(chargebackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
 
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId);
@@ -115,7 +114,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
-            Long loanProductId = createLoanProduct(charbackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
+            Long loanProductId = createLoanProduct(chargebackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
 
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId);
@@ -186,13 +185,12 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     }
 
     @Test
-    @Disabled
     public void createLoanWithCreditAllocationAndChargebackReverseReplayWithBackdatedPayment() {
         runAt("01 January 2023", () -> {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
-            Long loanProductId = createLoanProduct(charbackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
+            Long loanProductId = createLoanProduct(chargebackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
 
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId);
@@ -248,14 +246,91 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                     installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
             );
 
-            // let's add a backdated repayment on 19th of January reverse replaying the chargeback
+            // let's add a backdated repayment on 19th of January to trigger reverse replaying the chargeback, that will
+            // pay both the charges earlier.
             addRepaymentForLoan(loanId, 200.0, "19 January 2023");
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(200.0, "Repayment", "19 January 2023", 1120.0, 130.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(383.0, "Repayment", "20 January 2023", 737.0, 383.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "21 January 2023", 937.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(100.0, "Chargeback", "21 January 2023", 837.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+            );
+        });
+    }
+
+    @Test
+    public void createLoanWithCreditAllocationAndOnlyTheChargebackReverseReplayedWithBackdatedPayment() {
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            // Create Loan Product
+            Long loanProductId = createLoanProduct(chargebackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveLoan(clientId, loanProductId);
+
+            // Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
+
+            // Add Charges
+            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
+            Long penaltyId = addCharge(loanId, true, 20, "15 January 2023");
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(0, null, "01 January 2023"), //
+                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
+                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
+                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
+                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+            );
+
+            // Update Business Date
+            updateBusinessDate("20 January 2023");
+
+            // Add Repayment
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(0, null, "01 January 2023"), //
+                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
+                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
+                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+            );
+
+            updateBusinessDate("22 January 2023");
+
+            // Add Chargeback20 penalty + 50 fee + 0 interest + 30 principal
+            addChargebackForLoan(loanId, repaymentTransaction, 100.0);
+
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "22 January 2023", 1037.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+            );
+
+            // Verify Repayment Schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(0, null, "01 January 2023"), //
+                    installment(343.0, 0, 50, 20, 30.0, false, "01 February 2023"), // TODO: we still need to add the
+                    // fee and the penalty to the
+                    // outstanding
+                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
+                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
+                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+            );
+
+            // let's add a backdated repayment on 21th of January that will reverse replay the chargeback transaction
+            // but will leave the
+            // original repayment from 20th of January unchanged.
+            addRepaymentForLoan(loanId, 200.0, "21 January 2023");
+
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(200.0, "Repayment", "21 January 2023", 737.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "22 January 2023", 837.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
         });
     }
@@ -266,7 +341,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
-            Long loanProductId = createLoanProduct(charbackAllocation("PRINCIPAL", "INTEREST", "FEE", "PENALTY"));
+            Long loanProductId = createLoanProduct(chargebackAllocation("PRINCIPAL", "INTEREST", "FEE", "PENALTY"));
 
             // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId);
@@ -388,7 +463,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
         return advancedPaymentData;
     }
 
-    private CreditAllocationData charbackAllocation(String... allocationRules) {
+    private CreditAllocationData chargebackAllocation(String... allocationRules) {
         CreditAllocationData creditAllocationData = new CreditAllocationData();
         creditAllocationData.setTransactionType("CHARGEBACK");
         creditAllocationData.setCreditAllocationOrder(createCreditAllocationOrders(allocationRules));
