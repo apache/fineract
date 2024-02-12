@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -173,6 +174,10 @@ public class LoanCOBFilterHelper {
         }
     }
 
+    private boolean isLoanHardLocked(Long... loanIds) {
+        return isLoanHardLocked(Arrays.asList(loanIds));
+    }
+
     private boolean isLoanHardLocked(List<Long> loanIds) {
         return loanIds.stream().anyMatch(loanAccountLockService::isLoanHardLocked);
     }
@@ -208,7 +213,11 @@ public class LoanCOBFilterHelper {
             // check the body for Loan ID
             Long loanId = getTopLevelLoanIdFromBatchRequest(batchRequest);
             if (loanId != null) {
-                loanIds.add(loanId);
+                if (isLoanHardLocked(loanId)) {
+                    throw new LoanIdsHardLockedException(loanId);
+                } else {
+                    loanIds.add(loanId);
+                }
             }
         }
         return loanIds;

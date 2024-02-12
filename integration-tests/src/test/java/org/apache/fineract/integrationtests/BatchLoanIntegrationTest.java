@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import io.restassured.builder.ResponseSpecBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,6 +29,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.error.ErrorResponse;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -95,6 +97,67 @@ public class BatchLoanIntegrationTest extends BaseLoanIntegrationTest {
                         "Verify Status Code 200 for Approve Reschedule Loan request");
 
                 verifyLastClosedBusinessDate(loanId, "04 January 2023");
+            });
+        });
+    }
+
+    @Test
+    public void test_InlineLoanCOB_ShouldExecute_WhenLoanIsHardLocked_And_RescheduleIsRequestedViaBatchApi() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 24;
+            int repaymentEvery = 1;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1250.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
+
+            createdLoanId.set(loanId);
+        });
+
+        runAt("02 January 2023", () -> {
+            executeInlineCOB(createdLoanId.get());
+        });
+
+        runAt("05 January 2023", () -> {
+            long loanId = createdLoanId.get();
+            placeHardLockOnLoan(loanId);
+            runAsNonByPass(() -> {
+
+                ErrorResponse response = batchRequest() //
+                        .rescheduleLoan(1L, loanId, "01 January 2023", "01 February 2023", "01 March 2023") //
+                        .approveRescheduleLoan(2L, 1L, "01 January 2023") //
+                        .executeEnclosingTransactionError(new ResponseSpecBuilder().expectStatusCode(409).build()); //
+
+                Assertions.assertEquals(HttpStatus.SC_CONFLICT, Integer.parseInt(response.getHttpStatusCode()));
             });
         });
     }

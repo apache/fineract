@@ -43,8 +43,7 @@ public class LoanAccountLockHelper extends IntegrationTest {
 
     public String placeSoftLockOnLoanAccount(Integer loanId, String lockOwner, String error) {
         return Utils.performServerPost(requestSpec, responseSpec,
-                INTERNAL_PLACE_LOCK_ON_LOAN_ACCOUNT_URL + loanId + "/place-lock/" + lockOwner + "?" + Utils.TENANT_IDENTIFIER,
-                error == null ? GSON.toJson(null) : error);
+                INTERNAL_PLACE_LOCK_ON_LOAN_ACCOUNT_URL + loanId + "/place-lock/" + lockOwner + "?" + Utils.TENANT_IDENTIFIER, error);
     }
 
 }
