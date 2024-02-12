@@ -20,16 +20,16 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.Getter;
 
 /**
  * Stores details of {@link LoanTransaction}'s that were reversed or newly created
  */
+@Getter
 public class ChangedTransactionDetail {
 
     private final Map<Long, LoanTransaction> newTransactionMappings = new LinkedHashMap<>();
 
-    public Map<Long, LoanTransaction> getNewTransactionMappings() {
-        return this.newTransactionMappings;
-    }
+    private final Map<LoanTransaction, Long> currentTransactionToOldId = new LinkedHashMap<>();
 
 }

@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl;
 
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CHARGEBACK;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REPAYMENT;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.FEE;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.INTEREST;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PENALTY;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PRINCIPAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.lenient;
@@ -48,6 +46,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
@@ -55,7 +54,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
@@ -140,8 +142,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(1), refEq(zero))).thenReturn(chargeAmountMoney);
         Mockito.when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
-        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge),
-                new MoneyHolder(overpaidAmount));
+        underTest.processLatestTransaction(loanTransaction,
+                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount)));
 
         Mockito.verify(installment, Mockito.times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, Mockito.times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -185,8 +187,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(charge.updatePaidAmountBy(refEq(transactionAmountMoney), eq(1), refEq(zero))).thenReturn(transactionAmountMoney);
         Mockito.when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
-        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge),
-                new MoneyHolder(overpaidAmount));
+        underTest.processLatestTransaction(loanTransaction,
+                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount)));
 
         Mockito.verify(installment, Mockito.times(1)).payFeeChargesComponent(eq(transactionDate), eq(transactionAmountMoney));
         Mockito.verify(loanTransaction, Mockito.times(1)).updateComponents(refEq(zero), refEq(zero), refEq(transactionAmountMoney),
@@ -239,8 +241,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.when(loanPaymentAllocationRule.getAllocationTypes()).thenReturn(List.of(PaymentAllocationType.DUE_PRINCIPAL));
         Mockito.when(loanTransaction.isOn(eq(transactionDate))).thenReturn(true);
 
-        underTest.processLatestTransaction(loanTransaction, currency, List.of(installment), Set.of(charge),
-                new MoneyHolder(overpaidAmount));
+        underTest.processLatestTransaction(loanTransaction,
+                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount)));
 
         Mockito.verify(installment, Mockito.times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, Mockito.times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -255,19 +257,22 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     public void testProcessCreditTransactionWithAllocationRuleInterestAndPrincipal() {
         // given
         Loan loan = mock(Loan.class);
+        LoanTransaction chargeBackTransaction = createChargebackTransaction(loan);
+
         LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(INTEREST, PRINCIPAL, PENALTY, FEE);
         Mockito.when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
-        LoanTransaction repayment = createRepayment(loan);
-        lenient().when(loan.getLoanTransactions(any())).thenReturn(List.of(repayment));
+        LoanTransaction repayment = createRepayment(loan, chargeBackTransaction);
+        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
-        LoanTransaction chargeBackTransaction = createChargebackTransaction(loan);
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
         List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
         LoanRepaymentScheduleInstallment installment = createMockInstallment(LocalDate.of(2023, 1, 31), false);
         installments.add(installment);
 
         // when
-        underTest.processCreditTransaction(chargeBackTransaction, overpaymentHolder, MONETARY_CURRENCY, installments);
+
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder);
+        underTest.processCreditTransaction(chargeBackTransaction, ctx);
 
         // then
         Mockito.verify(installment, Mockito.times(1)).addToCredits(new BigDecimal("25.00"));
@@ -294,19 +299,21 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     public void testProcessCreditTransactionWithAllocationRulePrincipalAndInterest() {
         // given
         Loan loan = mock(Loan.class);
+        LoanTransaction chargeBackTransaction = createChargebackTransaction(loan);
+
         LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(PRINCIPAL, INTEREST, PENALTY, FEE);
         Mockito.when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
-        LoanTransaction repayment = createRepayment(loan);
-        lenient().when(loan.getLoanTransactions(any())).thenReturn(List.of(repayment));
+        LoanTransaction repayment = createRepayment(loan, chargeBackTransaction);
+        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
-        LoanTransaction chargeBackTransaction = createChargebackTransaction(loan);
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
         List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
         LoanRepaymentScheduleInstallment installment = createMockInstallment(LocalDate.of(2023, 1, 31), false);
         installments.add(installment);
 
         // when
-        underTest.processCreditTransaction(chargeBackTransaction, overpaymentHolder, MONETARY_CURRENCY, installments);
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder);
+        underTest.processCreditTransaction(chargeBackTransaction, ctx);
 
         // then
         Mockito.verify(installment, Mockito.times(1)).addToCredits(new BigDecimal("25.00"));
@@ -333,12 +340,13 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     public void testProcessCreditTransactionWithAllocationRulePrincipalAndInterestWithAdditionalInstallment() {
         // given
         Loan loan = mock(Loan.class);
+        LoanTransaction chargeBackTransaction = createChargebackTransaction(loan);
+
         LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(PRINCIPAL, INTEREST, PENALTY, FEE);
         Mockito.when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
-        LoanTransaction repayment = createRepayment(loan);
-        lenient().when(loan.getLoanTransactions(any())).thenReturn(List.of(repayment));
+        LoanTransaction repayment = createRepayment(loan, chargeBackTransaction);
+        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
-        LoanTransaction chargeBackTransaction = createChargebackTransaction(loan);
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
         List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
         LoanRepaymentScheduleInstallment installment1 = createMockInstallment(LocalDate.of(2022, 12, 20), false);
@@ -347,7 +355,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment2);
 
         // when
-        underTest.processCreditTransaction(chargeBackTransaction, overpaymentHolder, MONETARY_CURRENCY, installments);
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder);
+        underTest.processCreditTransaction(chargeBackTransaction, ctx);
 
         // then
         Mockito.verify(installment2, Mockito.times(1)).addToCredits(new BigDecimal("25.00"));
@@ -387,7 +396,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         return mockCreditAllocationRule;
     }
 
-    private LoanTransaction createRepayment(Loan loan) {
+    private LoanTransaction createRepayment(Loan loan, LoanTransaction toTransaction) {
         LoanTransaction repayment = mock(LoanTransaction.class);
         lenient().when(repayment.getLoan()).thenReturn(loan);
         lenient().when(repayment.isRepayment()).thenReturn(true);
@@ -396,13 +405,19 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         lenient().when(repayment.getInterestPortion()).thenReturn(BigDecimal.valueOf(20));
         lenient().when(repayment.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
         lenient().when(repayment.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+
+        LoanTransactionRelation relation = mock(LoanTransactionRelation.class);
+        lenient().when(relation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.CHARGEBACK);
+        lenient().when(relation.getToTransaction()).thenReturn(toTransaction);
+
+        lenient().when(repayment.getLoanTransactionRelations()).thenReturn(Set.of(relation));
         return repayment;
     }
 
     private LoanTransaction createChargebackTransaction(Loan loan) {
         LoanTransaction chargeback = mock(LoanTransaction.class);
         lenient().when(chargeback.isChargeback()).thenReturn(true);
-        lenient().when(chargeback.getTypeOf()).thenReturn(CHARGEBACK);
+        lenient().when(chargeback.getTypeOf()).thenReturn(LoanTransactionType.CHARGEBACK);
         lenient().when(chargeback.getLoan()).thenReturn(loan);
         lenient().when(chargeback.getAmount()).thenReturn(BigDecimal.valueOf(25));
         Money amount = Money.of(MONETARY_CURRENCY, BigDecimal.valueOf(25));
@@ -451,6 +466,110 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         allocationMap.put(AllocationType.FEE, BigDecimal.valueOf(fee));
         allocationMap.put(AllocationType.PENALTY, BigDecimal.valueOf(penalty));
         return allocationMap;
+    }
+
+    @Test
+    public void testFindOriginalTransactionShouldFindOriginalInLoansTransactionWhenIdProvided() {
+        // given
+        LoanTransaction chargebackTransaction = mock(LoanTransaction.class);
+        Mockito.when(chargebackTransaction.getId()).thenReturn(123L);
+        Loan loan = mock(Loan.class);
+        Mockito.when(chargebackTransaction.getLoan()).thenReturn(loan);
+        LoanTransaction repayment1 = mock(LoanTransaction.class);
+        LoanTransaction repayment2 = mock(LoanTransaction.class);
+        Mockito.when(loan.getLoanTransactions()).thenReturn(List.of(chargebackTransaction, repayment1, repayment2));
+
+        LoanTransactionRelation relation = mock(LoanTransactionRelation.class);
+        Mockito.when(relation.getToTransaction()).thenReturn(chargebackTransaction);
+        Mockito.when(relation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.CHARGEBACK);
+        Mockito.when(repayment2.getLoanTransactionRelations()).thenReturn(Set.of(relation));
+        TransactionCtx ctx = mock(TransactionCtx.class);
+
+        // when
+        LoanTransaction originalTransaction = underTest.findOriginalTransaction(chargebackTransaction, ctx);
+
+        // then
+        Assertions.assertEquals(originalTransaction, repayment2);
+    }
+
+    @Test
+    public void testFindOriginalTransactionThrowsRuntimeExceptionWhenIdProvidedAndRelationsAreMissing() {
+        // given
+        LoanTransaction chargebackTransaction = mock(LoanTransaction.class);
+        Mockito.when(chargebackTransaction.getId()).thenReturn(123L);
+        Loan loan = mock(Loan.class);
+        Mockito.when(chargebackTransaction.getLoan()).thenReturn(loan);
+        LoanTransaction repayment1 = mock(LoanTransaction.class);
+        LoanTransaction repayment2 = mock(LoanTransaction.class);
+        Mockito.when(loan.getLoanTransactions()).thenReturn(List.of(chargebackTransaction, repayment1, repayment2));
+
+        Mockito.when(repayment2.getLoanTransactionRelations()).thenReturn(Set.of());
+
+        TransactionCtx ctx = mock(TransactionCtx.class);
+
+        // when + then
+        RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class,
+                () -> underTest.findOriginalTransaction(chargebackTransaction, ctx));
+        Assertions.assertEquals("Chargeback transaction must have an original transaction", runtimeException.getMessage());
+    }
+
+    @Test
+    public void testFindOriginalTransactionShouldFindOriginalInLoansTransactionFromTransactionCtxWhenIdIsNotProvided() {
+        // given
+        LoanTransaction chargebackReplayed = mock(LoanTransaction.class);
+        Mockito.when(chargebackReplayed.getId()).thenReturn(null);
+        LoanTransaction repayment1 = mock(LoanTransaction.class);
+        LoanTransaction repayment2 = mock(LoanTransaction.class);
+
+        LoanTransaction originalChargeback = mock(LoanTransaction.class);
+        Mockito.when(originalChargeback.getId()).thenReturn(123L);
+        LoanTransactionRelation relation = mock(LoanTransactionRelation.class);
+        Mockito.when(relation.getToTransaction()).thenReturn(originalChargeback);
+        Mockito.when(relation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.CHARGEBACK);
+        Mockito.when(repayment2.getLoanTransactionRelations()).thenReturn(Set.of(relation));
+
+        TransactionCtx ctx = mock(TransactionCtx.class);
+        ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
+        Mockito.when(ctx.getChangedTransactionDetail()).thenReturn(changedTransactionDetail);
+        Mockito.when(changedTransactionDetail.getCurrentTransactionToOldId()).thenReturn(Map.of(chargebackReplayed, 123L));
+        Mockito.when(changedTransactionDetail.getNewTransactionMappings()).thenReturn(Map.of(122L, repayment1, 121L, repayment2));
+
+        // when
+        LoanTransaction originalTransaction = underTest.findOriginalTransaction(chargebackReplayed, ctx);
+
+        // then
+        Assertions.assertEquals(originalTransaction, repayment2);
+    }
+
+    @Test
+    public void testFindOriginalTransactionShouldFindOriginalInLoansTransactionFromTransactionCtxWhenIdIsNotProvidedFallbackToPersistedTransactions() {
+        // given
+        LoanTransaction chargebackReplayed = mock(LoanTransaction.class);
+        Mockito.when(chargebackReplayed.getId()).thenReturn(null);
+        LoanTransaction repayment1 = mock(LoanTransaction.class);
+        LoanTransaction repayment2 = mock(LoanTransaction.class);
+        Loan loan = mock(Loan.class);
+        Mockito.when(chargebackReplayed.getLoan()).thenReturn(loan);
+        Mockito.when(loan.getLoanTransactions()).thenReturn(List.of(repayment1, repayment2));
+
+        LoanTransaction originalChargeback = mock(LoanTransaction.class);
+        Mockito.when(originalChargeback.getId()).thenReturn(123L);
+        LoanTransactionRelation relation = mock(LoanTransactionRelation.class);
+        Mockito.when(relation.getToTransaction()).thenReturn(originalChargeback);
+        Mockito.when(relation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.CHARGEBACK);
+        Mockito.when(repayment2.getLoanTransactionRelations()).thenReturn(Set.of(relation));
+
+        TransactionCtx ctx = mock(TransactionCtx.class);
+        ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
+        Mockito.when(ctx.getChangedTransactionDetail()).thenReturn(changedTransactionDetail);
+        Mockito.when(changedTransactionDetail.getCurrentTransactionToOldId()).thenReturn(Map.of(chargebackReplayed, 123L));
+        Mockito.when(changedTransactionDetail.getNewTransactionMappings()).thenReturn(Map.of());
+
+        // when
+        LoanTransaction originalTransaction = underTest.findOriginalTransaction(chargebackReplayed, ctx);
+
+        // then
+        Assertions.assertEquals(originalTransaction, repayment2);
     }
 
 }

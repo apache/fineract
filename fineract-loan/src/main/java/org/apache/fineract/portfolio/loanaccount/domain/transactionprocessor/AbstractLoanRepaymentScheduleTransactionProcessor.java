@@ -164,7 +164,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
-                    processLatestTransaction(loanTransaction, currency, installments, charges, overpaymentHolder);
+                    processLatestTransaction(loanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder));
                     loanTransaction.adjustInterestComponent(currency);
                 } else {
                     /**
@@ -175,7 +175,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                     // Reset derived component of new loan transaction and
                     // re-process transaction
-                    processLatestTransaction(newLoanTransaction, currency, installments, charges, overpaymentHolder);
+                    processLatestTransaction(newLoanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder));
                     newLoanTransaction.adjustInterestComponent(currency);
                     /**
                      * Check if the transaction amounts have changed. If so, reverse the original transaction and update
@@ -211,15 +211,14 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     @Override
-    public void processLatestTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, MoneyHolder overpaymentHolder) {
+    public void processLatestTransaction(final LoanTransaction loanTransaction, final TransactionCtx ctx) {
         switch (loanTransaction.getTypeOf()) {
-            case WRITEOFF -> handleWriteOff(loanTransaction, currency, installments);
-            case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, currency, installments, charges);
-            case CHARGEBACK -> handleChargeback(loanTransaction, currency, installments, overpaymentHolder);
+            case WRITEOFF -> handleWriteOff(loanTransaction, ctx.getCurrency(), ctx.getInstallments());
+            case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, ctx.getCurrency(), ctx.getInstallments(), ctx.getCharges());
+            case CHARGEBACK -> handleChargeback(loanTransaction, ctx);
             default -> {
-                Money transactionAmountUnprocessed = handleTransactionAndCharges(loanTransaction, currency, installments, charges, null,
-                        false);
+                Money transactionAmountUnprocessed = handleTransactionAndCharges(loanTransaction, ctx.getCurrency(), ctx.getInstallments(),
+                        ctx.getCharges(), null, false);
                 if (transactionAmountUnprocessed.isGreaterThanZero()) {
                     if (loanTransaction.isWaiver()) {
                         loanTransaction.updateComponentsAndTotal(transactionAmountUnprocessed.zero(), transactionAmountUnprocessed.zero(),
@@ -228,9 +227,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
                         loanTransaction.setOverPayments(transactionAmountUnprocessed);
                     }
-                    overpaymentHolder.setMoneyObject(transactionAmountUnprocessed);
+                    ctx.getOverpaymentHolder().setMoneyObject(transactionAmountUnprocessed);
                 } else {
-                    overpaymentHolder.setMoneyObject(Money.zero(currency));
+                    ctx.getOverpaymentHolder().setMoneyObject(Money.zero(ctx.getCurrency()));
                 }
             }
         }
@@ -742,9 +741,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
     }
 
-    protected void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, MoneyHolder overpaidAmountHolder) {
-        processCreditTransaction(loanTransaction, overpaidAmountHolder, currency, installments);
+    protected void handleChargeback(LoanTransaction loanTransaction, TransactionCtx ctx) {
+        processCreditTransaction(loanTransaction, ctx.getOverpaymentHolder(), ctx.getCurrency(), ctx.getInstallments());
     }
 
     protected void handleCreditBalanceRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
