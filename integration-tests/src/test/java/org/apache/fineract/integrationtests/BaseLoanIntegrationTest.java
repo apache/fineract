@@ -73,6 +73,8 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.common.error.ErrorResponse;
+import org.apache.fineract.integrationtests.common.loans.LoanAccountLockHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
@@ -111,6 +113,9 @@ public abstract class BaseLoanIntegrationTest {
     protected final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
 
     protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
+
+    protected final LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(requestSpec,
+            createResponseSpecification(Matchers.is(202)));
     protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
     // asset
@@ -338,6 +343,10 @@ public abstract class BaseLoanIntegrationTest {
                 Assertions.assertTrue(found, "Required transaction  not found: " + tr);
             });
         }
+    }
+
+    protected void placeHardLockOnLoan(Long loanId) {
+        loanAccountLockHelper.placeSoftLockOnLoanAccount(loanId.intValue(), "LOAN_COB_CHUNK_PROCESSING");
     }
 
     protected void executeInlineCOB(Long loanId) {
@@ -611,6 +620,11 @@ public abstract class BaseLoanIntegrationTest {
 
         public List<BatchResponse> executeEnclosingTransaction() {
             return BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec, BatchHelper.toJsonString(requests));
+        }
+
+        public ErrorResponse executeEnclosingTransactionError(ResponseSpecification responseSpec) {
+            return BatchHelper.postBatchRequestsWithoutEnclosingTransactionError(requestSpec, responseSpec,
+                    BatchHelper.toJsonString(requests));
         }
     }
 
