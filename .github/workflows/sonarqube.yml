@@ -30,6 +30,6 @@ jobs:
           distribution: 'zulu'
           cache: gradle
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@83cf5fdbbf627c8da6fec32f28db58967a3136ac
+        uses: gradle/wrapper-validation-action@63d15e7a1e697b1de6f3ba0507106f89100c8518
       - name: Sonarqube
         run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY --info --stacktrace sonarqube
