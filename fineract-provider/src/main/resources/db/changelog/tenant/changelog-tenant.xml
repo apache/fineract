@@ -153,4 +153,5 @@
     <include file="parts/0131_add_configuration_maker_checker.xml" relativeToChangelogFile="true" />
     <include file="parts/0132_add_configuration_loan_next_repayment_date_calculation.xml" relativeToChangelogFile="true" />
     <include file="parts/0133_transaction_summary_with_asset_owner_report_recovery_repayments_chargeoff_reason.xml" relativeToChangelogFile="true" />
+    <include file="parts/0134_transaction_summary_with_asset_owner_report_down_payment_amount_fix.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
