@@ -829,7 +829,7 @@ log.info (&quot;The example answer is &quot; + base64EncodedAuthKey);
     &quot;daysInYearType&quot;:1,&#xd;
     &quot;isInterestRecalculationEnabled&quot;:&quot;false&quot;,&#xd;
     &quot;accountingRule&quot;:&quot;3&quot;,&#xd;
-    &quot;transactionProcessingStrategyId&quot;: 1,&#xd;
+    &quot;transactionProcessingStrategyCode&quot;: &quot;mifos-standard-strategy&quot;,&#xd;
     &quot;fundSourceAccountId&quot;: ${__property(ledger_asset_id)},&#xd;
     &quot;receivableInterestAccountId&quot;:${__property(ledger_asset_id)},&#xd;
     &quot;receivableFeeAccountId&quot;:${__property(ledger_asset_id)},&#xd;
@@ -1273,7 +1273,7 @@ fWriter.close();</stringProp>
     &quot;linkAccountId&quot; : ${account_id},&#xd;
     &quot;maxOutstandingLoanBalance&quot;:&quot;35000&quot;,&#xd;
     &quot;daysInYearType&quot;:1,&#xd;
-    &quot;transactionProcessingStrategyId&quot;: 1,&#xd;
+    &quot;transactionProcessingStrategyCode&quot;: &quot;mifos-standard-strategy&quot;,&#xd;
     &quot;disbursementData&quot;:[{&quot;expectedDisbursementDate&quot;:&quot;01 Jan 2023&quot;,&#xd;
     					&quot;principal&quot;:22000,&quot;approvedPrincipal&quot;:22000}]&#xd;
 }</stringProp>
