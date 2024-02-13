@@ -1,6 +1,7 @@
-# fineract-jmeter-suites
+# fineract jmeter suites
 
-Contents of the jmeter suite are organized as below:
+## Contents of the jmeter suite are organized as below:
+
 	1. Fineract-Setup.jmx
 		Jmeter test suite for creating required bank setup viz., ledger accounts, financial aactivity accounting, codes, loan products, savings product, creating clients,  
 
@@ -24,15 +25,15 @@ Contents of the jmeter suite are organized as below:
 		Modify the path of JMETER and JAVA_HOME according to your system. 				
 
 
-Note:
+### Note:
 
 1. Before starting the jmeter suite through the scripts, make sure to set the Java and Jmeter paths through exportRuntimeEnv.sh
 2. During re-run of the setup, stop your fineract instance and cleanup the DB contents. This is to avoid failures in setup APIs which try to create codes and products which were already present in the database.
 	DROP DATABASE fineract_default; DROP DATABASE fineract_tenants;
 	CREATE DATABASE fineract_default; CREATE DATABASE fineract_tenants;
 
-Concurrency and Loop count:
----------------------------
+## Concurrency and Loop count:
+
 In both setup and transactions you can set the concurrent users and the loop count for the APIs by adjusting the 'concurrent_users' and 'loop_count' parameters within the runSetup.sh and runTransactions.sh scripts.
 Make sure to set the values in such a way that the multiple of them doesn't exceed the value set during Setup.
 
@@ -41,11 +42,10 @@ Make sure to set the values in such a way that the multiple of them doesn't exce
 For example if concurrent_users=10 and loop_count=100 during setup, there will be a total of 1000 Client/Account/Loans be created and make sure to limit them to 1000 during transactions as well (multiple of concurrent_users and loop_count not be more than 1000).
 The multiple of them can be upto a million Clients/Accounts/Loans during setup.
 
-Example response:
------------------
+### Example response:
 
 
-# ./runSetup.sh
+$ ./runSetup.sh
 Creating summariser <summary>
 Created the tree successfully using Fineract-Setup.jmx
 Starting standalone test @ 2024 Feb 13 13:21:31 IST (1707810691626)
@@ -60,7 +60,7 @@ Tidying up ...    @ 2024 Feb 13 13:22:00 IST (1707810720872)
 
 
 
-# ./runTransactions.sh
+$ ./runTransactions.sh
 Creating summariser <summary>
 Created the tree successfully using Fineract-Transactions.jmx
 Starting standalone test @ 2024 Feb 13 13:22:20 IST (1707810740549)
