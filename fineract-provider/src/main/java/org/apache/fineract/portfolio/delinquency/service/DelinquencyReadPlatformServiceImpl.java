@@ -147,7 +147,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
                 collectionData.setLastPaymentAmount(lastPayment.getAmount());
             }
 
-            final LoanTransaction lastRepaymentTransaction = loan.getLastRepaymentTransaction();
+            final LoanTransaction lastRepaymentTransaction = loan.getLastRepaymentOrDownPaymentTransaction();
             if (lastRepaymentTransaction != null) {
                 collectionData.setLastRepaymentDate(lastRepaymentTransaction.getTransactionDate());
                 collectionData.setLastRepaymentAmount(lastRepaymentTransaction.getAmount());
