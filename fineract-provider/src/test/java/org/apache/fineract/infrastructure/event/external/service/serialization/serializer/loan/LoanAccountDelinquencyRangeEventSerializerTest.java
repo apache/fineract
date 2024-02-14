@@ -23,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -35,11 +37,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.fineract.avro.loan.v1.LoanAccountDelinquencyRangeDataV1;
 import org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -61,13 +65,27 @@ import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.data.LoanInstallmentDelinquencyTagData;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyActionRepository;
+import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
+import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
+import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
+import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
+import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainService;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.junit.jupiter.api.AfterEach;
@@ -297,6 +315,57 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         assertEquals(0, installmentDelinquencyBucketDataV1_2.getAmount().getPenaltyAmount().compareTo(new BigDecimal("0.0")));
         assertEquals(0, installmentDelinquencyBucketDataV1_2.getCharges().size());
         moneyHelper.close();
+    }
+
+    @Test
+    public void testLastRepaymentInCollectionData() {
+        // given
+        DelinquencyRangeRepository repositoryRange = Mockito.mock(DelinquencyRangeRepository.class);
+        DelinquencyBucketRepository repositoryBucket = Mockito.mock(DelinquencyBucketRepository.class);
+        LoanDelinquencyTagHistoryRepository repositoryLoanDelinquencyTagHistory = Mockito.mock(LoanDelinquencyTagHistoryRepository.class);
+        DelinquencyRangeMapper mapperRange = Mockito.mock(DelinquencyRangeMapper.class);
+        DelinquencyBucketMapper mapperBucket = Mockito.mock(DelinquencyBucketMapper.class);
+        LoanDelinquencyTagMapper mapperLoanDelinquencyTagHistory = Mockito.mock(LoanDelinquencyTagMapper.class);
+        LoanRepository loanRepository = Mockito.mock(LoanRepository.class);
+        LoanDelinquencyDomainService loanDelinquencyDomainService = Mockito.mock(LoanDelinquencyDomainService.class);
+        LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag = Mockito
+                .mock(LoanInstallmentDelinquencyTagRepository.class);
+        LoanDelinquencyActionRepository loanDelinquencyActionRepository = Mockito.mock(LoanDelinquencyActionRepository.class);
+        DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper = Mockito.mock(DelinquencyEffectivePauseHelper.class);
+        ConfigurationDomainService configurationDomainService = Mockito.mock(ConfigurationDomainService.class);
+
+        DelinquencyReadPlatformService delinquencyReadPlatformService = new DelinquencyReadPlatformServiceImpl(repositoryRange,
+                repositoryBucket, repositoryLoanDelinquencyTagHistory, mapperRange, mapperBucket, mapperLoanDelinquencyTagHistory,
+                loanRepository, loanDelinquencyDomainService, repositoryLoanInstallmentDelinquencyTag, loanDelinquencyActionRepository,
+                delinquencyEffectivePauseHelper, configurationDomainService);
+
+        Loan loan = Mockito.spy(Loan.class);
+        ReflectionTestUtils.setField(loan, "loanStatus", 300);
+        LoanTransaction transaction1 = Mockito.mock(LoanTransaction.class);
+        LoanTransaction transaction2 = Mockito.mock(LoanTransaction.class);
+        CollectionData collectionData = Mockito.mock(CollectionData.class);
+        when(transaction1.isRepayment()).thenReturn(true);
+        when(transaction1.isReversed()).thenReturn(false);
+        LocalDate transactionDate1 = LocalDate.of(2024, 1, 1);
+        when(transaction1.getTransactionDate()).thenReturn(transactionDate1);
+        when(transaction1.getAmount()).thenReturn(BigDecimal.ONE);
+        when(transaction2.isDownPayment()).thenReturn(true);
+        when(transaction2.isReversed()).thenReturn(false);
+        LocalDate transactionDate2 = LocalDate.of(2024, 1, 2);
+        when(transaction2.getTransactionDate()).thenReturn(transactionDate2);
+        when(transaction2.getAmount()).thenReturn(BigDecimal.TEN);
+        when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
+        when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.TEN);
+        when(loan.getDisbursedAmount()).thenReturn(BigDecimal.ONE);
+        ReflectionTestUtils.setField(loan, "loanTransactions", List.of(transaction1, transaction2));
+        when(loan.getLoanTransactions()).thenReturn(List.of(transaction1, transaction2));
+        when(loanDelinquencyDomainService.getOverdueCollectionData(Mockito.any(), Mockito.anyList())).thenReturn(collectionData);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        // when
+        delinquencyReadPlatformService.calculateLoanCollectionData(1L);
+        // then
+        verify(collectionData, times(1)).setLastRepaymentDate(LocalDate.of(2024, 1, 2));
+        verify(collectionData, times(1)).setLastRepaymentAmount(BigDecimal.TEN);
     }
 
     private LoanInstallmentDelinquencyTagData buildInstallmentDelinquencyTag(long installmentId, long rangeId) {

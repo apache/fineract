@@ -5085,10 +5085,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 .orElse(null);
     }
 
-    public LoanTransaction getLastRepaymentTransaction() {
+    public LoanTransaction getLastRepaymentOrDownPaymentTransaction() {
         return loanTransactions.stream() //
                 .filter(loanTransaction -> !loanTransaction.isReversed()) //
-                .filter(LoanTransaction::isRepayment) //
+                .filter(loanTransaction -> loanTransaction.isRepayment() || loanTransaction.isDownPayment()) //
                 .reduce((first, second) -> second) //
                 .orElse(null);
     }
