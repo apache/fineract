@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import lombok.Getter;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 /**
  * Immutable data object represent loan status enumerations.
@@ -55,6 +56,7 @@ public class LoanTransactionEnumData {
     private final boolean chargeback;
     private final boolean chargeoff;
     private final boolean downPayment;
+    private final boolean reAge;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -85,6 +87,7 @@ public class LoanTransactionEnumData {
         this.chargeAdjustment = Long.valueOf(26).equals(this.id);
         this.chargeoff = Long.valueOf(27).equals(this.id);
         this.downPayment = Long.valueOf(28).equals(this.id);
+        this.reAge = Long.valueOf(LoanTransactionType.REAGE.getValue()).equals(this.id);
     }
 
     public boolean isRepaymentType() {

@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -54,6 +55,7 @@ import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -317,10 +319,18 @@ public abstract class BaseLoanIntegrationTest {
         } else {
             Assertions.assertEquals(transactions.length, loanDetails.getTransactions().size());
             Arrays.stream(transactions).forEach(tr -> {
-                boolean found = loanDetails.getTransactions().stream()
-                        .anyMatch(item -> Objects.equals(item.getAmount(), tr.amount) && Objects.equals(item.getType().getValue(), tr.type)
-                                && Objects.equals(item.getDate(), LocalDate.parse(tr.date, dateTimeFormatter)));
-                Assertions.assertTrue(found, "Required transaction  not found: " + tr);
+                Optional<GetLoansLoanIdTransactions> optTx = loanDetails.getTransactions().stream()
+                        .filter(item -> Objects.equals(item.getAmount(), tr.amount) //
+                                && Objects.equals(item.getType().getValue(), tr.type) //
+                                && Objects.equals(item.getDate(), LocalDate.parse(tr.date, dateTimeFormatter)))
+                        .findFirst();
+                Assertions.assertTrue(optTx.isPresent(), "Required transaction  not found: " + tr);
+
+                GetLoansLoanIdTransactions tx = optTx.get();
+
+                if (tr.reversed != null) {
+                    Assertions.assertEquals(tr.reversed, tx.getManuallyReversed(), "Transaction is not reversed: " + tr);
+                }
             });
         }
     }
@@ -353,6 +363,20 @@ public abstract class BaseLoanIntegrationTest {
 
     protected void executeInlineCOB(Long loanId) {
         inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+    }
+
+    protected void reAgeLoan(Long loanId, String frequency, String startDate, Integer numberOfInstallments) {
+        PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
+        request.setDateFormat(DATETIME_PATTERN);
+        request.setLocale("en");
+        request.setFrequency(frequency);
+        request.setStartDate(startDate);
+        request.setNumberOfInstallments(numberOfInstallments);
+        loanTransactionHelper.reAge(loanId, request);
+    }
+
+    protected void undoReAgeLoan(Long loanId) {
+        loanTransactionHelper.undoReAge(loanId, new PostLoansLoanIdTransactionsRequest());
     }
 
     protected void verifyLastClosedBusinessDate(Long loanId, String lastClosedBusinessDate) {
@@ -554,7 +578,11 @@ public abstract class BaseLoanIntegrationTest {
     }
 
     protected Transaction transaction(double principalAmount, String type, String date) {
-        return new Transaction(principalAmount, type, date);
+        return new Transaction(principalAmount, type, date, null);
+    }
+
+    protected Transaction reversedTransaction(double principalAmount, String type, String date) {
+        return new Transaction(principalAmount, type, date, true);
     }
 
     protected TransactionExt transaction(double amount, String type, String date, double outstandingAmount, double principalPortion,
@@ -657,6 +685,7 @@ public abstract class BaseLoanIntegrationTest {
         Double amount;
         String type;
         String date;
+        Boolean reversed;
     }
 
     @ToString
@@ -711,6 +740,7 @@ public abstract class BaseLoanIntegrationTest {
     public static class RepaymentFrequencyType {
 
         public static final Integer MONTHS = 2;
+        public static final String MONTHS_STRING = "MONTHS";
     }
 
     public static class InterestCalculationPeriodType {
