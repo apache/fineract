@@ -316,7 +316,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 && loanTransaction.getOverPaymentPortion(currency).isEqualTo(newLoanTransaction.getOverPaymentPortion(currency));
     }
 
-    private LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final LocalDate dateOf, final BigDecimal amount,
+    public LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final LocalDate dateOf, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overPaymentPortion, final boolean reversed,
             final PaymentDetail paymentDetail, final ExternalId externalId) {
@@ -679,6 +679,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isChargeOff() {
         return getTypeOf().isChargeOff() && isNotReversed();
+    }
+
+    public boolean isReAge() {
+        return getTypeOf().isReAge() && isNotReversed();
     }
 
     public boolean isIdentifiedBy(final Long identifier) {

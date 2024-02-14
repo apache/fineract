@@ -81,6 +81,8 @@ public class LoanTransactionsApiResource {
     public static final String CHARGE_OFF_COMMAND_VALUE = "charge-off";
     public static final String UNDO_CHARGE_OFF_COMMAND_VALUE = "undo-charge-off";
     public static final String DOWN_PAYMENT = "downPayment";
+    public static final String UNDO_REAGE = "undoReAge";
+    public static final String REAGE = "reAge";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
@@ -477,6 +479,10 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.undoChargeOff(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, DOWN_PAYMENT)) {
             commandRequest = builder.downPayment(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, REAGE)) {
+            commandRequest = builder.reAge(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, UNDO_REAGE)) {
+            commandRequest = builder.undoReAge(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {

@@ -313,6 +313,8 @@ public final class LoanEnumerations {
                     LoanTransactionType.CHARGE_OFF.getCode(), "Charge-off");
             case DOWN_PAYMENT -> new LoanTransactionEnumData(LoanTransactionType.DOWN_PAYMENT.getValue().longValue(),
                     LoanTransactionType.DOWN_PAYMENT.getCode(), "Down Payment");
+            case REAGE -> new LoanTransactionEnumData(LoanTransactionType.REAGE.getValue().longValue(), LoanTransactionType.REAGE.getCode(),
+                    "Re-age");
         };
     }
 

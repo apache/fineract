@@ -60,7 +60,8 @@ public enum LoanTransactionType {
     CHARGEBACK(25, "loanTransactionType.chargeback"), //
     CHARGE_ADJUSTMENT(26, "loanTransactionType.chargeAdjustment"), //
     CHARGE_OFF(27, "loanTransactionType.chargeOff"), //
-    DOWN_PAYMENT(28, "loanTransactionType.downPayment");
+    DOWN_PAYMENT(28, "loanTransactionType.downPayment"), //
+    REAGE(29, "loanTransactionType.reAge");
 
     private final Integer value;
     private final String code;
@@ -104,6 +105,7 @@ public enum LoanTransactionType {
             case 26 -> LoanTransactionType.CHARGE_ADJUSTMENT;
             case 27 -> LoanTransactionType.CHARGE_OFF;
             case 28 -> LoanTransactionType.DOWN_PAYMENT;
+            case 29 -> LoanTransactionType.REAGE;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -190,6 +192,10 @@ public enum LoanTransactionType {
 
     public boolean isChargeOff() {
         return this.equals(LoanTransactionType.CHARGE_OFF);
+    }
+
+    public boolean isReAge() {
+        return this.equals(LoanTransactionType.REAGE);
     }
 
     public boolean isDownPayment() {

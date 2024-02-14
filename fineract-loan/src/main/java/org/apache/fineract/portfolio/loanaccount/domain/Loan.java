@@ -4280,6 +4280,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return cumulativePaid;
     }
 
+    public Money getTotalPrincipalOutstandingUntil(LocalDate date) {
+        return getRepaymentScheduleInstallments().stream()
+                .filter(installment -> installment.getDueDate().isBefore(date) || installment.getDueDate().isEqual(date))
+                .map(installment -> installment.getPrincipalOutstanding(loanCurrency())).reduce(Money.zero(loanCurrency()), Money::add);
+
+    }
+
     private Money getTotalInterestOutstandingOnLoan() {
         Money cumulativeInterest = Money.zero(loanCurrency());
 
