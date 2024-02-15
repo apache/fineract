@@ -130,8 +130,14 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "is_additional", nullable = false)
     private boolean additional;
 
-    @Column(name = "credits_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal credits;
+    @Column(name = "credited_principal", scale = 6, precision = 19, nullable = true)
+    private BigDecimal creditedPrincipal;
+
+    @Column(name = "credited_fee", scale = 6, precision = 19, nullable = true)
+    private BigDecimal creditedFee;
+
+    @Column(name = "credited_penalty", scale = 6, precision = 19, nullable = true)
+    private BigDecimal creditedPenalty;
 
     @Column(name = "is_down_payment", nullable = false)
     private boolean isDownPayment;
@@ -246,8 +252,16 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return this.dueDate;
     }
 
-    public Money getCredits(final MonetaryCurrency currency) {
-        return Money.of(currency, this.credits);
+    public Money getCreditedPrincipal(final MonetaryCurrency currency) {
+        return Money.of(currency, this.creditedPrincipal);
+    }
+
+    public Money getCreditedFee(final MonetaryCurrency currency) {
+        return Money.of(currency, this.creditedFee);
+    }
+
+    public Money getCreditedPenalty(final MonetaryCurrency currency) {
+        return Money.of(currency, this.creditedPenalty);
     }
 
     public Money getPrincipal(final MonetaryCurrency currency) {
@@ -408,9 +422,17 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
         this.obligationsMet = false;
         this.obligationsMetOnDate = null;
-        if (this.credits != null) {
-            this.principal = this.principal.subtract(this.credits);
-            this.credits = null;
+        if (this.creditedPrincipal != null) {
+            this.principal = this.principal.subtract(this.creditedPrincipal);
+            this.creditedPrincipal = null;
+        }
+        if (this.creditedFee != null) {
+            this.feeChargesCharged = this.feeChargesCharged.subtract(this.creditedFee);
+            this.creditedFee = null;
+        }
+        if (this.creditedPenalty != null) {
+            this.penaltyCharges = this.penaltyCharges.subtract(this.creditedPenalty);
+            this.creditedPenalty = null;
         }
     }
 
@@ -780,11 +802,27 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
     }
 
-    public void addToCredits(final BigDecimal amount) {
-        if (this.credits == null) {
-            this.credits = amount;
+    public void addToCreditedPrincipal(final BigDecimal amount) {
+        if (this.creditedPrincipal == null) {
+            this.creditedPrincipal = amount;
         } else {
-            this.credits = this.credits.add(amount);
+            this.creditedPrincipal = this.creditedPrincipal.add(amount);
+        }
+    }
+
+    public void addToCreditedFee(final BigDecimal amount) {
+        if (this.creditedFee == null) {
+            this.creditedFee = amount;
+        } else {
+            this.creditedFee = this.creditedFee.add(amount);
+        }
+    }
+
+    public void addToCreditedPenalty(final BigDecimal amount) {
+        if (this.creditedPenalty == null) {
+            this.creditedPenalty = amount;
+        } else {
+            this.creditedPenalty = this.creditedPenalty.add(amount);
         }
     }
 
@@ -908,7 +946,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public void updateCredits(final LocalDate transactionDate, final Money transactionAmount) {
-        addToCredits(transactionAmount.getAmount());
+        addToCreditedPrincipal(transactionAmount.getAmount());
         addToPrincipal(transactionDate, transactionAmount);
     }
 

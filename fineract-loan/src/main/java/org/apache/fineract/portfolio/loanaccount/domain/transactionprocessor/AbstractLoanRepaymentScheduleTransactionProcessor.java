@@ -494,7 +494,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
                 pastDueDate = currentInstallment.getDueDate();
                 if (!currentInstallment.isAdditional() && DateUtils.isAfter(currentInstallment.getDueDate(), transactionDate)) {
-                    currentInstallment.addToCredits(transactionAmount.getAmount());
+                    currentInstallment.addToCreditedPrincipal(transactionAmount.getAmount());
                     currentInstallment.addToPrincipal(transactionDate, transactionAmount);
                     if (repaidAmount.isGreaterThanZero()) {
                         currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
@@ -526,7 +526,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (!loanTransactionMapped) {
                 if (loanTransaction.getTransactionDate().equals(pastDueDate)) {
                     LoanRepaymentScheduleInstallment currentInstallment = installments.get(installments.size() - 1);
-                    currentInstallment.addToCredits(transactionAmount.getAmount());
+                    currentInstallment.addToCreditedPrincipal(transactionAmount.getAmount());
                     currentInstallment.addToPrincipal(transactionDate, transactionAmount);
                     if (repaidAmount.isGreaterThanZero()) {
                         currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
@@ -539,7 +539,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                             pastDueDate, transactionDate, transactionAmount.getAmount(), zeroMoney.getAmount(), zeroMoney.getAmount(),
                             zeroMoney.getAmount(), false, null);
                     installment.markAsAdditional();
-                    installment.addToCredits(transactionAmount.getAmount());
+                    installment.addToCreditedPrincipal(transactionAmount.getAmount());
                     loan.addLoanRepaymentScheduleInstallment(installment);
 
                     if (repaidAmount.isGreaterThanZero()) {

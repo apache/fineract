@@ -695,7 +695,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     installment.getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
                     installment.getInterestAccrued(currency).getAmount(), installment.getFeeAccrued(currency).getAmount(),
                     installment.getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom,
-                    installment.getInterestWaived(currency).getAmount());
+                    installment.getInterestWaived(currency).getAmount(), installment.getCreditedFee(currency).getAmount(),
+                    installment.getCreditedPenalty(currency).getAmount());
             loanScheduleAccrualDatas.add(accrualData);
 
         }
@@ -940,10 +941,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                         .minus(loanRepaymentScheduleInstallment.getInterestWaived(currency));
                 feePortion = feePortion.add(loanRepaymentScheduleInstallment.getFeeChargesCharged(currency))
                         .minus(loanRepaymentScheduleInstallment.getFeeAccrued(currency))
-                        .minus(loanRepaymentScheduleInstallment.getFeeChargesWaived(currency));
+                        .minus(loanRepaymentScheduleInstallment.getFeeChargesWaived(currency))
+                        .minus(loanRepaymentScheduleInstallment.getCreditedFee(currency));
                 penaltyPortion = penaltyPortion.add(loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency))
                         .minus(loanRepaymentScheduleInstallment.getPenaltyAccrued(currency))
-                        .minus(loanRepaymentScheduleInstallment.getPenaltyChargesWaived(currency));
+                        .minus(loanRepaymentScheduleInstallment.getPenaltyChargesWaived(currency))
+                        .minus(loanRepaymentScheduleInstallment.getCreditedPenalty(currency));
             }
             Money total = interestPortion.plus(feePortion).plus(penaltyPortion);
 

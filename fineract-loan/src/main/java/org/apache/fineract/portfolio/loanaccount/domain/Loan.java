@@ -140,6 +140,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCom
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
@@ -5945,10 +5946,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                         .minus(loanTransaction.getOverPaymentPortion(getCurrency()));
                 loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
             } else if (loanTransaction.isChargeback() || loanTransaction.isCreditBalanceRefund()) {
-                Money transactionOutstanding = loanTransaction.getAmount(getCurrency());
+                Money transactionOutstanding = loanTransaction.getPrincipalPortion(getCurrency());
                 if (!loanTransaction.getOverPaymentPortion(getCurrency()).isZero()) {
-                    transactionOutstanding = loanTransaction.getAmount(getCurrency())
-                            .minus(loanTransaction.getOverPaymentPortion(getCurrency()));
+                    // in case of advanced payment strategy and creditAllocations the full amount is recognized first
+                    if (this.getCreditAllocationRules() != null && this.getCreditAllocationRules().size() > 0) {
+                        Money payedPrincipal = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
+                                .map(mapping -> mapping.getPrincipalPortion(getCurrency())).reduce(Money.zero(getCurrency()), Money::plus);
+                        transactionOutstanding = loanTransaction.getPrincipalPortion(getCurrency()).minus(payedPrincipal);
+                    } else {
+                        // in case legacy payment strategy
+                        transactionOutstanding = loanTransaction.getAmount(getCurrency())
+                                .minus(loanTransaction.getOverPaymentPortion(getCurrency()));
+                    }
                     if (transactionOutstanding.isLessThanZero()) {
                         transactionOutstanding = Money.zero(getCurrency());
                     }
@@ -7182,6 +7191,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public List<LoanPaymentAllocationRule> getPaymentAllocationRules() {
         return paymentAllocationRules;
+    }
+
+    public LoanPaymentAllocationRule getPaymentAllocationRuleOrDefault(PaymentAllocationTransactionType transactionType) {
+        Optional<LoanPaymentAllocationRule> paymentAllocationRule = this.getPaymentAllocationRules().stream()
+                .filter(rule -> rule.getTransactionType().equals(transactionType)).findFirst();
+        return paymentAllocationRule.orElse(this.getPaymentAllocationRules().stream()
+                .filter(rule -> rule.getTransactionType().equals(PaymentAllocationTransactionType.DEFAULT)).findFirst().get());
     }
 
     public void setPaymentAllocationRules(List<LoanPaymentAllocationRule> loanPaymentAllocationRules) {

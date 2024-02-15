@@ -524,6 +524,8 @@ final class LoansApiResourceSwagger {
             public Double interestOutstanding;
             @Schema(example = "200000.000000")
             public Double interestOverdue;
+            @Schema(example = "0.00")
+            public Double feeAdjustments;
             @Schema(example = "18000.000000")
             public Double feeChargesCharged;
             @Schema(example = "0.000000")
@@ -538,6 +540,8 @@ final class LoansApiResourceSwagger {
             public Double feeChargesOutstanding;
             @Schema(example = "15000.000000")
             public Double feeChargesOverdue;
+            @Schema(example = "0.00")
+            public Double penaltyAdjustments;
             @Schema(example = "0.000000")
             public Double penaltyChargesCharged;
             @Schema(example = "0.000000")

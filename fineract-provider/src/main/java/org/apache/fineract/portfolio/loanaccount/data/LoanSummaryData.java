@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -31,6 +32,7 @@ import org.springframework.util.CollectionUtils;
  * Immutable data object representing loan summary information.
  */
 @Data
+@Builder
 @Accessors(chain = true)
 public class LoanSummaryData {
 
@@ -48,6 +50,7 @@ public class LoanSummaryData {
     private final BigDecimal interestOutstanding;
     private final BigDecimal interestOverdue;
     private final BigDecimal feeChargesCharged;
+    private final BigDecimal feeAdjustments;
     private final BigDecimal feeChargesDueAtDisbursementCharged;
     private final BigDecimal feeChargesPaid;
     private final BigDecimal feeChargesWaived;
@@ -55,6 +58,7 @@ public class LoanSummaryData {
     private final BigDecimal feeChargesOutstanding;
     private final BigDecimal feeChargesOverdue;
     private final BigDecimal penaltyChargesCharged;
+    private final BigDecimal penaltyAdjustments;
     private final BigDecimal penaltyChargesPaid;
     private final BigDecimal penaltyChargesWaived;
     private final BigDecimal penaltyChargesWrittenOff;
@@ -89,61 +93,6 @@ public class LoanSummaryData {
     private BigDecimal totalRepaymentTransactionReversed;
     private final Long chargeOffReasonId;
     private final String chargeOffReason;
-
-    public LoanSummaryData(final CurrencyData currency, final BigDecimal principalDisbursed, final BigDecimal principalAdjustments,
-            final BigDecimal principalPaid, final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding,
-            final BigDecimal principalOverdue, final BigDecimal interestCharged, final BigDecimal interestPaid,
-            final BigDecimal interestWaived, final BigDecimal interestWrittenOff, final BigDecimal interestOutstanding,
-            final BigDecimal interestOverdue, final BigDecimal feeChargesCharged, final BigDecimal feeChargesDueAtDisbursementCharged,
-            final BigDecimal feeChargesPaid, final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff,
-            final BigDecimal feeChargesOutstanding, final BigDecimal feeChargesOverdue, final BigDecimal penaltyChargesCharged,
-            final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived, final BigDecimal penaltyChargesWrittenOff,
-            final BigDecimal penaltyChargesOutstanding, final BigDecimal penaltyChargesOverdue, final BigDecimal totalExpectedRepayment,
-            final BigDecimal totalRepayment, final BigDecimal totalExpectedCostOfLoan, final BigDecimal totalCostOfLoan,
-            final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
-            final BigDecimal totalOverdue, final LocalDate overdueSinceDate, final Long writeoffReasonId, final String writeoffReason,
-            final BigDecimal totalRecovered, final Long chargeOffReasonId, final String chargeOffReason) {
-        this.currency = currency;
-        this.principalDisbursed = principalDisbursed;
-        this.principalAdjustments = principalAdjustments;
-        this.principalPaid = principalPaid;
-        this.principalWrittenOff = principalWrittenOff;
-        this.principalOutstanding = principalOutstanding;
-        this.principalOverdue = principalOverdue;
-        this.interestCharged = interestCharged;
-        this.interestPaid = interestPaid;
-        this.interestWaived = interestWaived;
-        this.interestWrittenOff = interestWrittenOff;
-        this.interestOutstanding = interestOutstanding;
-        this.interestOverdue = interestOverdue;
-        this.feeChargesCharged = feeChargesCharged;
-        this.feeChargesDueAtDisbursementCharged = feeChargesDueAtDisbursementCharged;
-        this.feeChargesPaid = feeChargesPaid;
-        this.feeChargesWaived = feeChargesWaived;
-        this.feeChargesWrittenOff = feeChargesWrittenOff;
-        this.feeChargesOutstanding = feeChargesOutstanding;
-        this.feeChargesOverdue = feeChargesOverdue;
-        this.penaltyChargesCharged = penaltyChargesCharged;
-        this.penaltyChargesPaid = penaltyChargesPaid;
-        this.penaltyChargesWaived = penaltyChargesWaived;
-        this.penaltyChargesWrittenOff = penaltyChargesWrittenOff;
-        this.penaltyChargesOutstanding = penaltyChargesOutstanding;
-        this.penaltyChargesOverdue = penaltyChargesOverdue;
-        this.totalExpectedRepayment = totalExpectedRepayment;
-        this.totalRepayment = totalRepayment;
-        this.totalExpectedCostOfLoan = totalExpectedCostOfLoan;
-        this.totalCostOfLoan = totalCostOfLoan;
-        this.totalWaived = totalWaived;
-        this.totalWrittenOff = totalWrittenOff;
-        this.totalOutstanding = totalOutstanding;
-        this.totalOverdue = totalOverdue;
-        this.overdueSinceDate = overdueSinceDate;
-        this.writeoffReasonId = writeoffReasonId;
-        this.writeoffReason = writeoffReason;
-        this.totalRecovered = totalRecovered;
-        this.chargeOffReasonId = chargeOffReasonId;
-        this.chargeOffReason = chargeOffReason;
-    }
 
     public static LoanSummaryData withTransactionAmountsSummary(final LoanSummaryData defaultSummaryData,
             final Collection<LoanTransactionData> loanTransactions) {
@@ -184,34 +133,41 @@ public class LoanSummaryData {
             totalRepaymentTransactionReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.REPAYMENT, loanTransactions);
         }
 
-        return new LoanSummaryData(defaultSummaryData.currency, defaultSummaryData.principalDisbursed,
-                defaultSummaryData.principalAdjustments, defaultSummaryData.principalPaid, defaultSummaryData.principalWrittenOff,
-                defaultSummaryData.principalOutstanding, defaultSummaryData.principalOverdue, defaultSummaryData.interestCharged,
-                defaultSummaryData.interestPaid, defaultSummaryData.interestWaived, defaultSummaryData.interestWrittenOff,
-                defaultSummaryData.interestOutstanding, defaultSummaryData.interestOverdue, defaultSummaryData.feeChargesCharged,
-                defaultSummaryData.feeChargesDueAtDisbursementCharged, defaultSummaryData.feeChargesPaid,
-                defaultSummaryData.feeChargesWaived, defaultSummaryData.feeChargesWrittenOff, defaultSummaryData.feeChargesOutstanding,
-                defaultSummaryData.feeChargesOverdue, defaultSummaryData.penaltyChargesCharged, defaultSummaryData.penaltyChargesPaid,
-                defaultSummaryData.penaltyChargesWaived, defaultSummaryData.penaltyChargesWrittenOff,
-                defaultSummaryData.penaltyChargesOutstanding, defaultSummaryData.penaltyChargesOverdue,
-                defaultSummaryData.totalExpectedRepayment, defaultSummaryData.totalRepayment, defaultSummaryData.totalExpectedCostOfLoan,
-                defaultSummaryData.totalCostOfLoan, defaultSummaryData.totalWaived, defaultSummaryData.totalWrittenOff,
-                defaultSummaryData.totalOutstanding, defaultSummaryData.totalOverdue, defaultSummaryData.overdueSinceDate,
-                defaultSummaryData.writeoffReasonId, defaultSummaryData.writeoffReason, defaultSummaryData.totalRecovered,
-                defaultSummaryData.chargeOffReasonId, defaultSummaryData.chargeOffReason).setTotalMerchantRefund(totalMerchantRefund)
-                .setTotalMerchantRefundReversed(totalMerchantRefundReversed).setTotalPayoutRefund(totalPayoutRefund)
-                .setTotalPayoutRefundReversed(totalPayoutRefundReversed).setTotalGoodwillCredit(totalGoodwillCredit)
-                .setTotalGoodwillCreditReversed(totalGoodwillCreditReversed).setTotalChargeAdjustment(totalChargeAdjustment)
-                .setTotalChargeAdjustmentReversed(totalChargeAdjustmentReversed).setTotalChargeback(totalChargeback)
-                .setTotalCreditBalanceRefund(totalCreditBalanceRefund).setTotalCreditBalanceRefundReversed(totalCreditBalanceRefundReversed)
-                .setTotalRepaymentTransaction(totalRepaymentTransaction)
-                .setTotalRepaymentTransactionReversed(totalRepaymentTransactionReversed);
+        return LoanSummaryData.builder().currency(defaultSummaryData.currency).principalDisbursed(defaultSummaryData.principalDisbursed)
+                .principalAdjustments(defaultSummaryData.principalAdjustments).principalPaid(defaultSummaryData.principalPaid)
+                .principalWrittenOff(defaultSummaryData.principalWrittenOff).principalOutstanding(defaultSummaryData.principalOutstanding)
+                .principalOverdue(defaultSummaryData.principalOverdue).interestCharged(defaultSummaryData.interestCharged)
+                .interestPaid(defaultSummaryData.interestPaid).interestWaived(defaultSummaryData.interestWaived)
+                .interestWrittenOff(defaultSummaryData.interestWrittenOff).interestOutstanding(defaultSummaryData.interestOutstanding)
+                .interestOverdue(defaultSummaryData.interestOverdue).feeChargesCharged(defaultSummaryData.feeChargesCharged)
+                .feeAdjustments(defaultSummaryData.feeAdjustments)
+                .feeChargesDueAtDisbursementCharged(defaultSummaryData.feeChargesDueAtDisbursementCharged)
+                .feeChargesPaid(defaultSummaryData.feeChargesPaid).feeChargesWaived(defaultSummaryData.feeChargesWaived)
+                .feeChargesWrittenOff(defaultSummaryData.feeChargesWrittenOff)
+                .feeChargesOutstanding(defaultSummaryData.feeChargesOutstanding).feeChargesOverdue(defaultSummaryData.feeChargesOverdue)
+                .penaltyChargesCharged(defaultSummaryData.penaltyChargesCharged).penaltyAdjustments(defaultSummaryData.penaltyAdjustments)
+                .penaltyChargesPaid(defaultSummaryData.penaltyChargesPaid).penaltyChargesWaived(defaultSummaryData.penaltyChargesWaived)
+                .penaltyChargesWrittenOff(defaultSummaryData.penaltyChargesWrittenOff)
+                .penaltyChargesOutstanding(defaultSummaryData.penaltyChargesOutstanding)
+                .penaltyChargesOverdue(defaultSummaryData.penaltyChargesOverdue)
+                .totalExpectedRepayment(defaultSummaryData.totalExpectedRepayment).totalRepayment(defaultSummaryData.totalRepayment)
+                .totalExpectedCostOfLoan(defaultSummaryData.totalExpectedCostOfLoan).totalCostOfLoan(defaultSummaryData.totalCostOfLoan)
+                .totalWaived(defaultSummaryData.totalWaived).totalWrittenOff(defaultSummaryData.totalWrittenOff)
+                .totalOutstanding(defaultSummaryData.totalOutstanding).totalOverdue(defaultSummaryData.totalOverdue)
+                .overdueSinceDate(defaultSummaryData.overdueSinceDate).writeoffReasonId(defaultSummaryData.writeoffReasonId)
+                .writeoffReason(defaultSummaryData.writeoffReason).totalRecovered(defaultSummaryData.totalRecovered)
+                .chargeOffReasonId(defaultSummaryData.chargeOffReasonId).chargeOffReason(defaultSummaryData.chargeOffReason)
+                .totalMerchantRefund(totalMerchantRefund).totalMerchantRefundReversed(totalMerchantRefundReversed)
+                .totalPayoutRefund(totalPayoutRefund).totalPayoutRefundReversed(totalPayoutRefundReversed)
+                .totalGoodwillCredit(totalGoodwillCredit).totalGoodwillCreditReversed(totalGoodwillCreditReversed)
+                .totalChargeAdjustment(totalChargeAdjustment).totalChargeAdjustmentReversed(totalChargeAdjustmentReversed)
+                .totalChargeback(totalChargeback).totalCreditBalanceRefund(totalCreditBalanceRefund)
+                .totalCreditBalanceRefundReversed(totalCreditBalanceRefundReversed).totalRepaymentTransaction(totalRepaymentTransaction)
+                .totalRepaymentTransactionReversed(totalRepaymentTransactionReversed).build();
     }
 
     public static LoanSummaryData withOnlyCurrencyData(CurrencyData currencyData) {
-        return new LoanSummaryData(currencyData, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null);
+        return LoanSummaryData.builder().currency(currencyData).build();
     }
 
     private static BigDecimal computeTotalAmountForReversedTransactions(LoanTransactionType transactionType,

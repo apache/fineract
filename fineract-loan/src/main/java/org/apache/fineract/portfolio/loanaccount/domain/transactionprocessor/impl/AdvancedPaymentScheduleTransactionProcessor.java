@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.FE
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.INTEREST;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PENALTY;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PRINCIPAL;
+import static org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType.DEFAULT;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -76,7 +77,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransact
 import org.apache.fineract.portfolio.loanproduct.domain.DueType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -235,27 +235,31 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (hasNoCustomCreditAllocationRule(loanTransaction)) {
             super.processCreditTransaction(loanTransaction, ctx.getOverpaymentHolder(), ctx.getCurrency(), ctx.getInstallments());
         } else {
-            log.debug("Processing credit transaction with custom credit allocation rules");
-
             loanTransaction.resetDerivedComponents();
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
             final Comparator<LoanRepaymentScheduleInstallment> byDate = Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate);
             ctx.getInstallments().sort(byDate);
             final Money zeroMoney = Money.zero(ctx.getCurrency());
             Money transactionAmount = loanTransaction.getAmount(ctx.getCurrency());
-            Money amountToDistribute = MathUtil
-                    .negativeToZero(loanTransaction.getAmount(ctx.getCurrency()).minus(ctx.getOverpaymentHolder().getMoneyObject()));
-            Money repaidAmount = MathUtil.negativeToZero(transactionAmount.minus(amountToDistribute));
-            loanTransaction.setOverPayments(repaidAmount);
-            ctx.getOverpaymentHolder().setMoneyObject(ctx.getOverpaymentHolder().getMoneyObject().minus(repaidAmount));
+            Money totalOverpaid = ctx.getOverpaymentHolder().getMoneyObject();
+            Money amountToDistribute = MathUtil.negativeToZero(loanTransaction.getAmount(ctx.getCurrency()).minus(totalOverpaid));
+            Money overpaymentAmount = MathUtil.negativeToZero(transactionAmount.minus(amountToDistribute));
+            loanTransaction.setOverPayments(overpaymentAmount);
 
-            if (amountToDistribute.isGreaterThanZero()) {
+            if (transactionAmount.isGreaterThanZero()) {
                 if (loanTransaction.isChargeback()) {
                     LoanTransaction originalTransaction = findOriginalTransaction(loanTransaction, ctx);
-                    Map<AllocationType, BigDecimal> originalAllocation = getOriginalAllocation(originalTransaction);
+                    // get the original allocation from the opriginal transaction
+                    Map<AllocationType, Money> originalAllocationNotAdjusted = getOriginalAllocation(originalTransaction,
+                            ctx.getCurrency());
                     LoanCreditAllocationRule chargeBackAllocationRule = getChargebackAllocationRules(loanTransaction);
+
+                    // if there were earlier chargebacks then let's calculate the remaining amounts for each portion
+                    Map<AllocationType, Money> originalAllocation = adjustOriginalAllocationWithFormerChargebacks(originalTransaction,
+                            originalAllocationNotAdjusted, loanTransaction, ctx, chargeBackAllocationRule);
+
+                    // calculate the current chargeback allocation
                     Map<AllocationType, Money> chargebackAllocation = calculateChargebackAllocationMap(originalAllocation,
-                            amountToDistribute.getAmount(), chargeBackAllocationRule.getAllocationTypes(), ctx.getCurrency());
+                            transactionAmount.getAmount(), chargeBackAllocationRule.getAllocationTypes(), ctx.getCurrency());
 
                     loanTransaction.updateComponents(chargebackAllocation.get(PRINCIPAL), chargebackAllocation.get(INTEREST),
                             chargebackAllocation.get(FEE), chargebackAllocation.get(PENALTY));
@@ -266,18 +270,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     for (final LoanRepaymentScheduleInstallment currentInstallment : ctx.getInstallments()) {
                         pastDueDate = currentInstallment.getDueDate();
                         if (!currentInstallment.isAdditional() && DateUtils.isAfter(currentInstallment.getDueDate(), transactionDate)) {
-
-                            currentInstallment.addToCredits(transactionAmount.getAmount());
-                            currentInstallment.addToPrincipal(transactionDate, chargebackAllocation.get(PRINCIPAL));
-                            Money originalInterest = currentInstallment.getInterestCharged(ctx.getCurrency());
-                            currentInstallment.updateInterestCharged(
-                                    originalInterest.plus(chargebackAllocation.get(INTEREST)).getAmountDefaultedToNullIfZero());
-
-                            if (repaidAmount.isGreaterThanZero()) {
-                                currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
-                                transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
-                                        currentInstallment, repaidAmount, zeroMoney, zeroMoney, zeroMoney));
-                            }
+                            recognizeAmountsAfterChargeback(ctx.getCurrency(), transactionDate, currentInstallment, chargebackAllocation);
                             loanTransactionMapped = true;
                             break;
 
@@ -287,16 +280,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             if (DateUtils.isAfter(transactionDate, currentInstallment.getDueDate())) {
                                 currentInstallment.updateDueDate(transactionDate);
                             }
-                            currentInstallment.addToCredits(transactionAmount.getAmount());
-                            currentInstallment.addToPrincipal(transactionDate, chargebackAllocation.get(PRINCIPAL));
-                            Money originalInterest = currentInstallment.getInterestCharged(ctx.getCurrency());
-                            currentInstallment.updateInterestCharged(
-                                    originalInterest.plus(chargebackAllocation.get(INTEREST)).getAmountDefaultedToNullIfZero());
-                            if (repaidAmount.isGreaterThanZero()) {
-                                currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
-                                transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
-                                        currentInstallment, repaidAmount, zeroMoney, zeroMoney, zeroMoney));
-                            }
+                            recognizeAmountsAfterChargeback(ctx.getCurrency(), transactionDate, currentInstallment, chargebackAllocation);
                             loanTransactionMapped = true;
                             break;
                         }
@@ -307,39 +291,96 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         if (loanTransaction.getTransactionDate().equals(pastDueDate)) {
                             LoanRepaymentScheduleInstallment currentInstallment = ctx.getInstallments()
                                     .get(ctx.getInstallments().size() - 1);
-                            currentInstallment.addToCredits(transactionAmount.getAmount());
-                            currentInstallment.addToPrincipal(transactionDate, chargebackAllocation.get(PRINCIPAL));
-                            Money originalInterest = currentInstallment.getInterestCharged(ctx.getCurrency());
-                            currentInstallment.updateInterestCharged(
-                                    originalInterest.plus(chargebackAllocation.get(INTEREST)).getAmountDefaultedToNullIfZero());
-                            if (repaidAmount.isGreaterThanZero()) {
-                                currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
-                                transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
-                                        currentInstallment, repaidAmount, zeroMoney, zeroMoney, zeroMoney));
-                            }
+                            recognizeAmountsAfterChargeback(ctx.getCurrency(), transactionDate, currentInstallment, chargebackAllocation);
                         } else {
                             Loan loan = loanTransaction.getLoan();
                             LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan,
                                     (ctx.getInstallments().size() + 1), pastDueDate, transactionDate, zeroMoney.getAmount(),
                                     zeroMoney.getAmount(), zeroMoney.getAmount(), zeroMoney.getAmount(), false, null);
-                            installment.markAsAdditional();
-                            installment.addToCredits(transactionAmount.getAmount());
-                            installment.addToPrincipal(transactionDate, chargebackAllocation.get(PRINCIPAL));
-                            Money originalInterest = installment.getInterestCharged(ctx.getCurrency());
-                            installment.updateInterestCharged(
-                                    originalInterest.plus(chargebackAllocation.get(INTEREST)).getAmountDefaultedToNullIfZero());
+                            recognizeAmountsAfterChargeback(ctx.getCurrency(), transactionDate, installment, chargebackAllocation);
                             loan.addLoanRepaymentScheduleInstallment(installment);
-                            if (repaidAmount.isGreaterThanZero()) {
-                                installment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
-                                transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, installment,
-                                        repaidAmount, zeroMoney, zeroMoney, zeroMoney));
-                            }
                         }
                     }
-
-                    loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
+                    allocateOverpayment(loanTransaction, ctx.getCurrency(), loanTransaction.getLoan().getRepaymentScheduleInstallments(),
+                            ctx.getOverpaymentHolder());
+                } else {
+                    throw new RuntimeException("Unsupported transaction " + loanTransaction.getTypeOf().name());
                 }
             }
+        }
+    }
+
+    private Map<AllocationType, Money> adjustOriginalAllocationWithFormerChargebacks(LoanTransaction originalTransaction,
+            Map<AllocationType, Money> originalAllocation, LoanTransaction chargeBackTransaction, TransactionCtx ctx,
+            LoanCreditAllocationRule chargeBackAllocationRule) {
+        // these are the list of existing transactions
+        List<LoanTransaction> allTransactions = new ArrayList<>(chargeBackTransaction.getLoan().getLoanTransactions());
+
+        // Remove the current chargeback from the list
+        if (chargeBackTransaction.getId() != null) {
+            allTransactions.remove(chargeBackTransaction);
+        } else {
+            Long oldId = ctx.getChangedTransactionDetail().getCurrentTransactionToOldId().get(chargeBackTransaction);
+            allTransactions.remove(allTransactions.stream().filter(tr -> Objects.equals(tr.getId(), oldId)).findFirst().get());
+        }
+
+        // Add the replayed transactions and remove their old version before the replay
+        if (ctx.getChangedTransactionDetail() != null && ctx.getChangedTransactionDetail().getNewTransactionMappings() != null) {
+            for (Long id : ctx.getChangedTransactionDetail().getNewTransactionMappings().keySet()) {
+                allTransactions.remove(allTransactions.stream().filter(tr -> Objects.equals(tr.getId(), id)).findFirst().get());
+                allTransactions.add(ctx.getChangedTransactionDetail().getNewTransactionMappings().get(id));
+            }
+        }
+
+        // keep only the chargeback transactions
+        List<LoanTransaction> chargebacks = allTransactions.stream().filter(LoanTransaction::isChargeback).toList();
+
+        // let's figure out the original transaction for these chargebacks, and order them by ascending order
+        List<LoanTransaction> chargebacksForTheSameOriginal = chargebacks.stream()
+                .filter(tr -> findOriginalTransaction(tr, ctx) == originalTransaction).sorted(loanTransactionDateComparator()).toList();
+
+        Map<AllocationType, Money> allocation = new HashMap<>(originalAllocation);
+        for (LoanTransaction loanTransaction : chargebacksForTheSameOriginal) {
+            Map<AllocationType, Money> temp = calculateChargebackAllocationMap(allocation, loanTransaction.getAmount(),
+                    chargeBackAllocationRule.getAllocationTypes(), ctx.getCurrency());
+            allocation.keySet().forEach(k -> allocation.put(k, allocation.get(k).minus(temp.get(k))));
+        }
+        return allocation;
+    }
+
+    @NotNull
+    private Comparator<LoanTransaction> loanTransactionDateComparator() {
+        return (tr1, tr2) -> {
+            if (tr1.getTransactionDate().compareTo(tr2.getTransactionDate()) != 0) {
+                return tr1.getTransactionDate().compareTo(tr2.getTransactionDate());
+            } else if (tr1.getSubmittedOnDate().compareTo(tr2.getSubmittedOnDate()) != 0) {
+                return tr1.getSubmittedOnDate().compareTo(tr2.getSubmittedOnDate());
+            } else {
+                return tr1.getCreatedDateTime().compareTo(tr2.getCreatedDateTime());
+            }
+        };
+    }
+
+    private void recognizeAmountsAfterChargeback(MonetaryCurrency currency, LocalDate localDate,
+            LoanRepaymentScheduleInstallment installment, Map<AllocationType, Money> chargebackAllocation) {
+        Money principal = chargebackAllocation.get(PRINCIPAL);
+        if (principal.isGreaterThanZero()) {
+            installment.addToCreditedPrincipal(principal.getAmount());
+            installment.addToPrincipal(localDate, principal);
+        }
+
+        Money fee = chargebackAllocation.get(FEE);
+        if (fee.isGreaterThanZero()) {
+            installment.addToCreditedFee(fee.getAmount());
+            installment.addToChargePortion(fee, Money.zero(currency), Money.zero(currency), Money.zero(currency), Money.zero(currency),
+                    Money.zero(currency));
+        }
+
+        Money penalty = chargebackAllocation.get(PENALTY);
+        if (penalty.isGreaterThanZero()) {
+            installment.addToCreditedPenalty(penalty.getAmount());
+            installment.addToChargePortion(Money.zero(currency), Money.zero(currency), Money.zero(currency), penalty, Money.zero(currency),
+                    Money.zero(currency));
         }
     }
 
@@ -351,23 +392,23 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     @NotNull
-    private Map<AllocationType, BigDecimal> getOriginalAllocation(LoanTransaction originalLoanTransaction) {
-        Map<AllocationType, BigDecimal> originalAllocation = new HashMap<>();
-        originalAllocation.put(PRINCIPAL, originalLoanTransaction.getPrincipalPortion());
-        originalAllocation.put(INTEREST, originalLoanTransaction.getInterestPortion());
-        originalAllocation.put(PENALTY, originalLoanTransaction.getPenaltyChargesPortion());
-        originalAllocation.put(FEE, originalLoanTransaction.getFeeChargesPortion());
+    private Map<AllocationType, Money> getOriginalAllocation(LoanTransaction originalLoanTransaction, MonetaryCurrency currency) {
+        Map<AllocationType, Money> originalAllocation = new HashMap<>();
+        originalAllocation.put(PRINCIPAL, Money.of(currency, originalLoanTransaction.getPrincipalPortion()));
+        originalAllocation.put(INTEREST, Money.of(currency, originalLoanTransaction.getInterestPortion()));
+        originalAllocation.put(PENALTY, Money.of(currency, originalLoanTransaction.getPenaltyChargesPortion()));
+        originalAllocation.put(FEE, Money.of(currency, originalLoanTransaction.getFeeChargesPortion()));
         return originalAllocation;
     }
 
-    protected Map<AllocationType, Money> calculateChargebackAllocationMap(Map<AllocationType, BigDecimal> originalAllocation,
+    protected Map<AllocationType, Money> calculateChargebackAllocationMap(Map<AllocationType, Money> originalAllocation,
             BigDecimal amountToDistribute, List<AllocationType> allocationTypes, MonetaryCurrency currency) {
         BigDecimal remainingAmount = amountToDistribute;
         Map<AllocationType, Money> result = new HashMap<>();
         Arrays.stream(AllocationType.values()).forEach(allocationType -> result.put(allocationType, Money.of(currency, BigDecimal.ZERO)));
         for (AllocationType allocationType : allocationTypes) {
             if (remainingAmount.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal originalAmount = originalAllocation.get(allocationType);
+                BigDecimal originalAmount = originalAllocation.get(allocationType).getAmount();
                 if (originalAmount != null && remainingAmount.compareTo(originalAmount) > 0
                         && originalAmount.compareTo(BigDecimal.ZERO) > 0) {
                     result.put(allocationType, Money.of(currency, originalAmount));
@@ -395,14 +436,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         List<LoanPaymentAllocationRule> paymentAllocationRules = loanTransaction.getLoan().getPaymentAllocationRules();
         LoanPaymentAllocationRule defaultPaymentAllocationRule = paymentAllocationRules.stream()
-                .filter(e -> PaymentAllocationTransactionType.DEFAULT.equals(e.getTransactionType())).findFirst().orElseThrow();
+                .filter(e -> DEFAULT.equals(e.getTransactionType())).findFirst().orElseThrow();
         LoanPaymentAllocationRule paymentAllocationRule = paymentAllocationRules.stream()
                 .filter(e -> loanTransaction.getTypeOf().equals(e.getTransactionType().getLoanTransactionType())).findFirst()
                 .orElse(defaultPaymentAllocationRule);
         Balances balances = new Balances(zero, zero, zero, zero);
         List<PaymentAllocationType> paymentAllocationTypes;
         FutureInstallmentAllocationRule futureInstallmentAllocationRule;
-        if (PaymentAllocationTransactionType.DEFAULT.equals(paymentAllocationRule.getTransactionType())) {
+        if (DEFAULT.equals(paymentAllocationRule.getTransactionType())) {
             // if the allocation rule is not defined then the reverse order of the default allocation rule will be used
             paymentAllocationTypes = new ArrayList<>(paymentAllocationRule.getAllocationTypes());
             Collections.reverse(paymentAllocationTypes);
@@ -551,7 +592,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
             List<LoanPaymentAllocationRule> paymentAllocationRules = loanTransaction.getLoan().getPaymentAllocationRules();
             LoanPaymentAllocationRule defaultPaymentAllocationRule = paymentAllocationRules.stream()
-                    .filter(e -> PaymentAllocationTransactionType.DEFAULT.equals(e.getTransactionType())).findFirst().orElseThrow();
+                    .filter(e -> DEFAULT.equals(e.getTransactionType())).findFirst().orElseThrow();
 
             Money transactionAmountUnprocessed = null;
             Money zero = Money.zero(currency);
@@ -919,7 +960,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         List<LoanPaymentAllocationRule> paymentAllocationRules = loanTransaction.getLoan().getPaymentAllocationRules();
         LoanPaymentAllocationRule defaultPaymentAllocationRule = paymentAllocationRules.stream()
-                .filter(e -> PaymentAllocationTransactionType.DEFAULT.equals(e.getTransactionType())).findFirst().orElseThrow();
+                .filter(e -> DEFAULT.equals(e.getTransactionType())).findFirst().orElseThrow();
         LoanPaymentAllocationRule paymentAllocationRule = paymentAllocationRules.stream()
                 .filter(e -> loanTransaction.getTypeOf().equals(e.getTransactionType().getLoanTransactionType())).findFirst()
                 .orElse(defaultPaymentAllocationRule);

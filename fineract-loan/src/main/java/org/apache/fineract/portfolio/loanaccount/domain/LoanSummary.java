@@ -74,6 +74,9 @@ public class LoanSummary {
     @Column(name = "total_charges_due_at_disbursement_derived", scale = 6, precision = 19)
     private BigDecimal totalFeeChargesDueAtDisbursement;
 
+    @Column(name = "fee_adjustments_derived", scale = 6, precision = 19)
+    private BigDecimal totalFeeAdjustments;
+
     @Column(name = "fee_charges_repaid_derived", scale = 6, precision = 19)
     private BigDecimal totalFeeChargesRepaid;
 
@@ -88,6 +91,9 @@ public class LoanSummary {
 
     @Column(name = "penalty_charges_charged_derived", scale = 6, precision = 19)
     private BigDecimal totalPenaltyChargesCharged;
+
+    @Column(name = "penalty_adjustments_derived", scale = 6, precision = 19)
+    private BigDecimal totalPenaltyAdjustments;
 
     @Column(name = "penalty_charges_repaid_derived", scale = 6, precision = 19)
     private BigDecimal totalPenaltyChargesRepaid;
@@ -204,6 +210,8 @@ public class LoanSummary {
     public void zeroFields() {
         this.totalPrincipalDisbursed = BigDecimal.ZERO;
         this.totalPrincipalAdjustments = BigDecimal.ZERO;
+        this.totalFeeAdjustments = BigDecimal.ZERO;
+        this.totalPenaltyAdjustments = BigDecimal.ZERO;
         this.totalPrincipalRepaid = BigDecimal.ZERO;
         this.totalPrincipalWrittenOff = BigDecimal.ZERO;
         this.totalPrincipalOutstanding = BigDecimal.ZERO;
@@ -238,6 +246,8 @@ public class LoanSummary {
         this.totalPrincipalDisbursed = principal.getAmount();
         this.totalPrincipalAdjustments = summaryWrapper.calculateTotalPrincipalAdjusted(repaymentScheduleInstallments, currency)
                 .getAmount();
+        this.totalFeeAdjustments = summaryWrapper.calculateTotalFeeAdjusted(repaymentScheduleInstallments, currency).getAmount();
+        this.totalPenaltyAdjustments = summaryWrapper.calculateTotalPenaltyAdjusted(repaymentScheduleInstallments, currency).getAmount();
         this.totalPrincipalRepaid = summaryWrapper.calculateTotalPrincipalRepaid(repaymentScheduleInstallments, currency).getAmount();
         this.totalPrincipalWrittenOff = summaryWrapper.calculateTotalPrincipalWrittenOff(repaymentScheduleInstallments, currency)
                 .getAmount();
@@ -259,7 +269,9 @@ public class LoanSummary {
         this.totalFeeChargesCharged = totalFeeChargesCharged.getAmount();
 
         Money totalFeeChargesRepaidAtDisbursement = summaryWrapper.calculateTotalChargesRepaidAtDisbursement(charges, currency);
-        this.totalFeeChargesRepaid = totalFeeChargesRepaidAtDisbursement.getAmount();
+        Money totalFeeChargesRepaidAfterDisbursement = summaryWrapper.calculateTotalFeeChargesRepaid(repaymentScheduleInstallments,
+                currency);
+        this.totalFeeChargesRepaid = totalFeeChargesRepaidAfterDisbursement.plus(totalFeeChargesRepaidAtDisbursement).getAmount();
 
         if (charges != null) {
             this.totalFeeChargesWaived = summaryWrapper.calculateTotalFeeChargesWaived(charges, currency).getAmount();
