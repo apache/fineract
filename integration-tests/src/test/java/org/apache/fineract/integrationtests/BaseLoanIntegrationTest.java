@@ -476,6 +476,46 @@ public abstract class BaseLoanIntegrationTest {
                                     totalOutstanding));
                 }
 
+                Double outstandingPrincipalExpected = installments[i].outstandingAmounts != null
+                        ? installments[i].outstandingAmounts.principalOutstanding
+                        : null;
+                Double outstandingPrincipal = period.getPrincipalOutstanding();
+                if (outstandingPrincipalExpected != null) {
+                    Assertions.assertEquals(outstandingPrincipalExpected, outstandingPrincipal,
+                            "%d. installment's outstanding principal is different, expected: %.2f, actual: %.2f".formatted(i,
+                                    outstandingPrincipalExpected, outstandingPrincipal));
+                }
+
+                Double outstandingFeeExpected = installments[i].outstandingAmounts != null
+                        ? installments[i].outstandingAmounts.feeOutstanding
+                        : null;
+                Double outstandingFee = period.getFeeChargesOutstanding();
+                if (outstandingFeeExpected != null) {
+                    Assertions.assertEquals(outstandingFeeExpected, outstandingFee,
+                            "%d. installment's outstanding fee is different, expected: %.2f, actual: %.2f".formatted(i,
+                                    outstandingFeeExpected, outstandingFee));
+                }
+
+                Double outstandingPenaltyExpected = installments[i].outstandingAmounts != null
+                        ? installments[i].outstandingAmounts.penaltyOutstanding
+                        : null;
+                Double outstandingPenalty = period.getPenaltyChargesOutstanding();
+                if (outstandingPenaltyExpected != null) {
+                    Assertions.assertEquals(outstandingPenaltyExpected, outstandingPenalty,
+                            "%d. installment's outstanding penalty is different, expected: %.2f, actual: %.2f".formatted(i,
+                                    outstandingPenaltyExpected, outstandingPenalty));
+                }
+
+                Double outstandingTotalExpected = installments[i].outstandingAmounts != null
+                        ? installments[i].outstandingAmounts.totalOutstanding
+                        : null;
+                Double outstandingTotal = period.getTotalOutstandingForPeriod();
+                if (outstandingTotalExpected != null) {
+                    Assertions.assertEquals(outstandingTotalExpected, outstandingTotal,
+                            "%d. installment's total outstanding is different, expected: %.2f, actual: %.2f".formatted(i,
+                                    outstandingTotalExpected, outstandingTotal));
+                }
+
             }
             Assertions.assertEquals(installments[i].completed, period.getComplete());
             Assertions.assertEquals(LocalDate.parse(installments[i].dueDate, dateTimeFormatter), period.getDueDate());
@@ -603,22 +643,31 @@ public abstract class BaseLoanIntegrationTest {
     }
 
     protected Installment installment(double principalAmount, Boolean completed, String dueDate) {
-        return new Installment(principalAmount, null, null, null, null, completed, dueDate);
+        return new Installment(principalAmount, null, null, null, null, completed, dueDate, null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double totalOutstandingAmount, Boolean completed,
             String dueDate) {
-        return new Installment(principalAmount, interestAmount, null, null, totalOutstandingAmount, completed, dueDate);
+        return new Installment(principalAmount, interestAmount, null, null, totalOutstandingAmount, completed, dueDate, null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double totalOutstandingAmount,
             Boolean completed, String dueDate) {
-        return new Installment(principalAmount, interestAmount, feeAmount, null, totalOutstandingAmount, completed, dueDate);
+        return new Installment(principalAmount, interestAmount, feeAmount, null, totalOutstandingAmount, completed, dueDate, null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double penaltyAmount,
             double totalOutstandingAmount, Boolean completed, String dueDate) {
-        return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, totalOutstandingAmount, completed, dueDate);
+        return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, totalOutstandingAmount, completed, dueDate, null);
+    }
+
+    protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double penaltyAmount,
+            OutstandingAmounts outstandingAmounts, Boolean completed, String dueDate) {
+        return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, null, completed, dueDate, outstandingAmounts);
+    }
+
+    protected OutstandingAmounts outstanding(double principal, double fee, double penalty, double total) {
+        return new OutstandingAmounts(principal, fee, penalty, total);
     }
 
     protected BatchRequestBuilder batchRequest() {
@@ -735,6 +784,17 @@ public abstract class BaseLoanIntegrationTest {
         Double totalOutstandingAmount;
         Boolean completed;
         String dueDate;
+        OutstandingAmounts outstandingAmounts;
+    }
+
+    @AllArgsConstructor
+    @ToString
+    public static class OutstandingAmounts {
+
+        Double principalOutstanding;
+        Double feeOutstanding;
+        Double penaltyOutstanding;
+        Double totalOutstanding;
     }
 
     public static class AmortizationType {

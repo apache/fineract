@@ -39,4 +39,5 @@
   <include relativeToChangelogFile="true" file="parts/1014_add_loan_account_custom_snapshot_event.xml"/>
   <include relativeToChangelogFile="true" file="parts/1015_remove_disable_schedule_extension_column.xml"/>
   <include relativeToChangelogFile="true" file="parts/1016_add_credit_allocation_rule.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1017_add_fee_and_penalty_adjustments_to_loan.xml"/>
 </databaseChangeLog>
