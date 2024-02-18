@@ -318,88 +318,31 @@ final class FixedDepositProductsApiResourceSwagger {
             public String description;
         }
 
+        static final class GetFixedDepositProductsGlAccount {
+
+            private GetFixedDepositProductsGlAccount() {}
+
+            @Schema(example = "12")
+            public Long id;
+            @Schema(example = "savings ref")
+            public String name;
+            @Schema(example = "20")
+            public Integer glCode;
+        }
+
         static final class GetFixedDepositProductsProductIdAccountingMappings {
 
             private GetFixedDepositProductsProductIdAccountingMappings() {}
 
-            static final class GetFixedDepositProductsProductIdSavingsReferenceAccount {
-
-                private GetFixedDepositProductsProductIdSavingsReferenceAccount() {}
-
-                @Schema(example = "12")
-                public Long id;
-                @Schema(example = "savings ref")
-                public String name;
-                @Schema(example = "20")
-                public String glCode;
-            }
-
-            static final class GetFixedDepositProductsProductIdIncomeFromFeeAccount {
-
-                private GetFixedDepositProductsProductIdIncomeFromFeeAccount() {}
-
-                @Schema(example = "16")
-                public Long id;
-                @Schema(example = "income from savings fee")
-                public String name;
-                @Schema(example = "24")
-                public String glCode;
-            }
-
-            static final class GetFixedDepositProductsProductIdIncomeFromPenaltyAccount {
-
-                private GetFixedDepositProductsProductIdIncomeFromPenaltyAccount() {}
-
-                @Schema(example = "17")
-                public Long id;
-                @Schema(example = "income from sav penalties")
-                public String name;
-                @Schema(example = "25")
-                public String glCode;
-            }
-
-            static final class GetFixedDepositProductsProductIdInterestOnSavingsAccount {
-
-                private GetFixedDepositProductsProductIdInterestOnSavingsAccount() {}
-
-                @Schema(example = "15")
-                public Long id;
-                @Schema(example = "interest on savings")
-                public String name;
-                @Schema(example = "23")
-                public String glCode;
-            }
-
-            static final class GetFixedDepositProductsProductIdSavingsControlAccount {
-
-                private GetFixedDepositProductsProductIdSavingsControlAccount() {}
-
-                @Schema(example = "13")
-                public Long id;
-                @Schema(example = "savings ref tool kit")
-                public String name;
-                @Schema(example = "21")
-                public String glCode;
-            }
-
-            static final class GetFixedDepositProductsProductIdTransfersInSuspenseAccount {
-
-                private GetFixedDepositProductsProductIdTransfersInSuspenseAccount() {}
-
-                @Schema(example = "14")
-                public Long id;
-                @Schema(example = "saving transfers")
-                public String name;
-                @Schema(example = "22")
-                public String glCode;
-            }
-
-            public GetFixedDepositProductsProductIdSavingsReferenceAccount savingsReferenceAccount;
-            public GetFixedDepositProductsProductIdIncomeFromFeeAccount incomeFromFeeAccount;
-            public GetFixedDepositProductsProductIdIncomeFromPenaltyAccount incomeFromPenaltyAccount;
-            public GetFixedDepositProductsProductIdInterestOnSavingsAccount interestOnSavingsAccount;
-            public GetFixedDepositProductsProductIdSavingsControlAccount savingsControlAccount;
-            public GetFixedDepositProductsProductIdTransfersInSuspenseAccount transfersInSuspenseAccount;
+            public GetFixedDepositProductsGlAccount savingsReferenceAccount;
+            public GetFixedDepositProductsGlAccount feeReceivableAccount;
+            public GetFixedDepositProductsGlAccount penaltyReceivableAccount;
+            public GetFixedDepositProductsGlAccount incomeFromFeeAccount;
+            public GetFixedDepositProductsGlAccount incomeFromPenaltyAccount;
+            public GetFixedDepositProductsGlAccount interestOnSavingsAccount;
+            public GetFixedDepositProductsGlAccount savingsControlAccount;
+            public GetFixedDepositProductsGlAccount transfersInSuspenseAccount;
+            public GetFixedDepositProductsGlAccount interestPayableAccount;
         }
 
         static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappings {
@@ -455,7 +398,7 @@ final class FixedDepositProductsApiResourceSwagger {
             }
 
             public GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge charge;
-            public GetFixedDepositProductsProductIdAccountingMappings.GetFixedDepositProductsProductIdIncomeFromPenaltyAccount incomeAccount;
+            public GetFixedDepositProductsGlAccount incomeAccount;
         }
 
         static final class GetFixedDepositProductsProductIdPreClosurePenalInterestOnType {

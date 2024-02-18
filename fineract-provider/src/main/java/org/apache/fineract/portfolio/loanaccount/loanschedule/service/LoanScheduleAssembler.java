@@ -359,6 +359,8 @@ public class LoanScheduleAssembler {
         CalendarInstance compoundingCalendarInstance = null;
         InterestRecalculationCompoundingMethod compoundingMethod = null;
         boolean allowCompoundingOnEod = false;
+        final Boolean isFloatingInterestRate = this.fromApiJsonHelper
+                .extractBooleanNamed(LoanApiConstants.isFloatingInterestRateParameterName, element);
         if (isInterestRecalculationEnabled) {
             LoanProductInterestRecalculationDetails loanProductInterestRecalculationDetails = loanProduct
                     .getProductInterestRecalculationDetails();
@@ -409,8 +411,7 @@ public class LoanScheduleAssembler {
         if (loanProduct.isLinkedToFloatingInterestRate()) {
             final BigDecimal interestRateDiff = this.fromApiJsonHelper
                     .extractBigDecimalWithLocaleNamed(LoanApiConstants.interestRateDifferentialParameterName, element);
-            final Boolean isFloatingInterestRate = this.fromApiJsonHelper
-                    .extractBooleanNamed(LoanApiConstants.isFloatingInterestRateParameterName, element);
+
             List<FloatingRatePeriodData> baseLendingRatePeriods = null;
             try {
                 baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate().getRatePeriods();

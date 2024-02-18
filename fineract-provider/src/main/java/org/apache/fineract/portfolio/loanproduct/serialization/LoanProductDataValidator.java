@@ -33,10 +33,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
-import org.apache.fineract.accounting.common.AccountingRuleType;
+import org.apache.fineract.accounting.common.AccountingValidations;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -65,7 +64,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyTy
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @RequiredArgsConstructor
 @Component
 public final class LoanProductDataValidator {
@@ -613,7 +611,8 @@ public final class LoanProductDataValidator {
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed(ACCOUNTING_RULE, element, Locale.getDefault());
         baseDataValidator.reset().parameter(ACCOUNTING_RULE).value(accountingRuleType).notNull().inMinMaxRange(1, 4);
 
-        if (isCashBasedAccounting(accountingRuleType) || isAccrualBasedAccounting(accountingRuleType)) {
+        if (AccountingValidations.isCashBasedAccounting(accountingRuleType)
+                || AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
 
             final Long fundAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.FUND_SOURCE.getValue(), element);
             baseDataValidator.reset().parameter(LoanProductAccountingParams.FUND_SOURCE.getValue()).value(fundAccountId).notNull()
@@ -709,7 +708,7 @@ public final class LoanProductDataValidator {
 
         }
 
-        if (isAccrualBasedAccounting(accountingRuleType)) {
+        if (AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
 
             final Long receivableInterestAccountId = this.fromApiJsonHelper
                     .extractLongNamed(LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(), element);
@@ -2142,22 +2141,6 @@ public final class LoanProductDataValidator {
                         .notLessThanMin(minInterestRatePerPeriod);
             }
         }
-    }
-
-    private boolean isCashBasedAccounting(final Integer accountingRuleType) {
-        return AccountingRuleType.CASH_BASED.getValue().equals(accountingRuleType);
-    }
-
-    private boolean isAccrualBasedAccounting(final Integer accountingRuleType) {
-        return isUpfrontAccrualAccounting(accountingRuleType) || isPeriodicAccounting(accountingRuleType);
-    }
-
-    private boolean isUpfrontAccrualAccounting(final Integer accountingRuleType) {
-        return AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(accountingRuleType);
-    }
-
-    private boolean isPeriodicAccounting(final Integer accountingRuleType) {
-        return AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingRuleType);
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
