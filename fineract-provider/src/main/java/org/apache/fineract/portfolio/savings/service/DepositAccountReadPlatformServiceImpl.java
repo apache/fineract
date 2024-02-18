@@ -99,7 +99,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
-
 public class DepositAccountReadPlatformServiceImpl implements DepositAccountReadPlatformService {
 
     private static final FixedDepositAccountMapper FIXED_DEPOSIT_ACCOUNT_MAPPER = new FixedDepositAccountMapper();
