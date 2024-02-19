@@ -47,7 +47,7 @@ public class NoAuthorizationExceptionMapper implements ExceptionMapper<NoAuthori
         // Status code 403 really reads as:
         // "Authenticated - but not authorized":
         final String defaultUserMessage = exception.getMessage();
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", exception);
         return Response.status(Status.FORBIDDEN).entity(ApiGlobalErrorResponse.unAuthorized(defaultUserMessage))
                 .type(MediaType.APPLICATION_JSON).build();
     }

@@ -45,7 +45,7 @@ public class RollbackTransactionNotApprovedExceptionMapper
 
     @Override
     public Response toResponse(final RollbackTransactionNotApprovedException exception) {
-        log.warn("Exception: {}", exception.getClass().getName());
+        log.warn("Exception occurred", exception);
         return Response.ok().entity(new Gson().toJson(exception.getResult())).type(MediaType.APPLICATION_JSON).build();
     }
 

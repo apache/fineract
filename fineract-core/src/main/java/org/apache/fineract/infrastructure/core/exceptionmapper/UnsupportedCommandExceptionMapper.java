@@ -53,7 +53,7 @@ public class UnsupportedCommandExceptionMapper implements ExceptionMapper<Unsupp
         if (message != null) {
             defaultEnglishMessage.append(" ").append(message);
         }
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultEnglishMessage);
+        log.warn("Exception occurred", exception);
         final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
                 exception.getUnsupportedCommandName(), exception.getUnsupportedCommandName());
 

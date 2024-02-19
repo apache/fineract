@@ -43,7 +43,7 @@ public class OptimisticLockExceptionMapper implements FineractExceptionMapper, E
 
     @Override
     public Response toResponse(final OptimisticLockException exception) {
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", exception);
         String type = exception.getQuery() == null ? "unknown" : "query";
         String identifier = "unknown";
         final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.conflict(type, identifier);

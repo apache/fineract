@@ -43,7 +43,7 @@ public class ConcurrencyFailureExceptionMapper implements FineractExceptionMappe
 
     @Override
     public Response toResponse(final ConcurrencyFailureException exception) {
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", exception);
         String type;
         String identifier;
         if (exception instanceof ObjectOptimisticLockingFailureException olex) {

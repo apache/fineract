@@ -42,7 +42,7 @@ public class JsonSyntaxExceptionMapper implements ExceptionMapper<JsonSyntaxExce
     public Response toResponse(final JsonSyntaxException exception) {
         final String globalisationMessageCode = "error.msg.invalid.request.body";
         final String defaultUserMessage = "The JSON syntax provided in the body of the request is invalid: " + exception.getMessage();
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", exception);
 
         final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 

@@ -36,7 +36,7 @@ public class BusinessStepNotBelongsToJobExceptionMapper implements ExceptionMapp
     public Response toResponse(BusinessStepNotBelongsToJobException exception) {
         final String globalisationMessageCode = "error.msg.invalid.request.body";
         final String defaultUserMessage = "One of the provided Business Steps does not belong to the provided Job Name.";
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", exception);
 
         final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 

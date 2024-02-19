@@ -40,9 +40,10 @@ public class DefaultExceptionMapper implements FineractExceptionMapper, Exceptio
     }
 
     @Override
-    public Response toResponse(RuntimeException runtimeException) {
+    public Response toResponse(RuntimeException exception) {
+        log.warn("Exception occurred", exception);
         return Response.status(SC_INTERNAL_SERVER_ERROR)
-                .entity(Map.of("Exception", ObjectUtils.defaultIfNull(runtimeException.getMessage(), "No error message available")))
+                .entity(Map.of("Exception", ObjectUtils.defaultIfNull(exception.getMessage(), "No error message available")))
                 .type(MediaType.APPLICATION_JSON).build();
     }
 }

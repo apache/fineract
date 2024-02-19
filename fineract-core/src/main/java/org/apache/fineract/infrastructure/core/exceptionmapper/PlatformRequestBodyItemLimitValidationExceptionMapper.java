@@ -38,7 +38,7 @@ public class PlatformRequestBodyItemLimitValidationExceptionMapper
     @Override
     public Response toResponse(PlatformRequestBodyItemLimitValidationException exception) {
         String globalisationMessage = "error.msg.validation.request.body.item.limit.validation";
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", exception);
         final ApiGlobalErrorResponse badRequestErrorResponse = ApiGlobalErrorResponse.badClientRequest(globalisationMessage,
                 exception.getMessage());
         return Response.status(Response.Status.BAD_REQUEST).entity(badRequestErrorResponse).type(MediaType.APPLICATION_JSON).build();

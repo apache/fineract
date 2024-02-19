@@ -46,7 +46,7 @@ public class IdempotentCommandExceptionMapper implements FineractExceptionMapper
 
     @Override
     public Response toResponse(final AbstractIdempotentCommandException exception) {
-        log.warn("Processing {} request: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", exception);
         Integer status = null;
         if (exception instanceof IdempotentCommandProcessSucceedException pse) {
             Integer statusCode = pse.getStatusCode();

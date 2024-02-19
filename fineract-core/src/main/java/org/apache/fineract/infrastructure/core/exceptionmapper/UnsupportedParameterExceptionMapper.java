@@ -55,7 +55,7 @@ public class UnsupportedParameterExceptionMapper implements FineractExceptionMap
 
             errors.add(error);
         }
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), errors);
+        log.warn("Exception occurred", exception);
 
         final ApiGlobalErrorResponse invalidParameterError = ApiGlobalErrorResponse
                 .badClientRequest("validation.msg.validation.errors.exist", "Validation errors exist.", errors);

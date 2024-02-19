@@ -42,7 +42,7 @@ public class InvalidJsonExceptionMapper implements ExceptionMapper<InvalidJsonEx
     public Response toResponse(@SuppressWarnings("unused") final InvalidJsonException exception) {
         final String globalisationMessageCode = "error.msg.invalid.request.body";
         final String defaultUserMessage = "The JSON provided in the body of the request is invalid or missing.";
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", exception);
 
         final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 

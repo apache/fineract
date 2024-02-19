@@ -39,7 +39,7 @@ public class InvalidInstanceTypeMethodExceptionMapper implements ExceptionMapper
 
     @Override
     public Response toResponse(final InvalidInstanceTypeMethodException exception) {
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", exception);
         ApiGlobalErrorResponse errorResponse = ApiGlobalErrorResponse.invalidInstanceTypeMethod(exception.getMethod());
         return Response.status(Status.METHOD_NOT_ALLOWED).entity(errorResponse).type(MediaType.APPLICATION_JSON).build();
     }
