@@ -36,7 +36,7 @@ public class ExternalAssetOwnerInitiateTransferExceptionMapper implements Except
     public Response toResponse(ExternalAssetOwnerInitiateTransferException exception) {
         final String globalisationMessageCode = "error.msg.external.asset.owner.initiate";
         final String defaultUserMessage = exception.getMessage();
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", exception);
 
         final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 

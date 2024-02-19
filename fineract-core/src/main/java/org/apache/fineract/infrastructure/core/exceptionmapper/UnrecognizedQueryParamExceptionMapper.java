@@ -55,7 +55,7 @@ public class UnrecognizedQueryParamExceptionMapper implements ExceptionMapper<Un
                 .append(parameterName) //
                 .append(" has an unsupported value of: ") //
                 .append(parameterValue);
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultEnglishMessage);
+        log.warn("Exception occurred", exception);
 
         final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
                 parameterName, parameterName, parameterValue, exception.getSupportedParams());

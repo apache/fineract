@@ -36,7 +36,7 @@ public class LoanAccountLockCannotBeOverruledExceptionMapper implements Exceptio
     public Response toResponse(LoanAccountLockCannotBeOverruledException exception) {
         final String globalisationMessageCode = "error.msg.invalid.request.body";
         final String defaultUserMessage = exception.getMessage();
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", exception);
 
         final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 

@@ -38,7 +38,7 @@ public class JsonPathExceptionMapper implements ExceptionMapper<JsonPathExceptio
     public Response toResponse(JsonPathException exception) {
         final String globalisationMessageCode = "error.msg.invalid.json.path";
         final String defaultUserMessage = "The referenced JSON path is invalid.";
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", exception);
 
         final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 

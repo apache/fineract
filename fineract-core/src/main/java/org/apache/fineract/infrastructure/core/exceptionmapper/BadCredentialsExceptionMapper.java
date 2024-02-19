@@ -44,7 +44,7 @@ public class BadCredentialsExceptionMapper implements ExceptionMapper<BadCredent
 
     @Override
     public Response toResponse(@SuppressWarnings("unused") final BadCredentialsException exception) {
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", exception);
         return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.unAuthenticated()).type(MediaType.APPLICATION_JSON)
                 .build();
     }
