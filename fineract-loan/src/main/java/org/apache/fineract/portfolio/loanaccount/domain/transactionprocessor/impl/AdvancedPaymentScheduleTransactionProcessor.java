@@ -522,7 +522,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             downPaymentAmount = Money.of(currency, downPaymentAmt);
             downPaymentInstallment.addToPrincipal(disbursementTransaction.getTransactionDate(), downPaymentAmount);
         }
-        disbursementTransaction.setOverPayments(overpaymentHolder.getMoneyObject());
+
         Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
 
         if (amortizableAmount.isGreaterThanZero()) {
@@ -548,6 +548,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private void allocateOverpayment(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, MoneyHolder overpaymentHolder) {
         if (overpaymentHolder.getMoneyObject().isGreaterThanZero()) {
+            if (overpaymentHolder.getMoneyObject().isGreaterThan(loanTransaction.getAmount(currency))) {
+                loanTransaction.setOverPayments(loanTransaction.getAmount(currency));
+            } else {
+                loanTransaction.setOverPayments(overpaymentHolder.getMoneyObject());
+            }
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
             List<LoanPaymentAllocationRule> paymentAllocationRules = loanTransaction.getLoan().getPaymentAllocationRules();
             LoanPaymentAllocationRule defaultPaymentAllocationRule = paymentAllocationRules.stream()
@@ -653,7 +658,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private void handleOverpayment(Money overpaymentPortion, LoanTransaction loanTransaction, MoneyHolder overpaymentHolder) {
         if (overpaymentPortion.isGreaterThanZero()) {
             onLoanOverpayment(loanTransaction, overpaymentPortion);
-            overpaymentHolder.setMoneyObject(overpaymentPortion);
+            overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().add(overpaymentPortion));
             loanTransaction.setOverPayments(overpaymentPortion);
         } else {
             overpaymentHolder.setMoneyObject(overpaymentPortion.zero());

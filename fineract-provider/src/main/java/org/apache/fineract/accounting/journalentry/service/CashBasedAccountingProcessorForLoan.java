@@ -475,8 +475,10 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         final boolean isReversal = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
-        this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalPortion, isReversal);
+        if (MathUtil.isGreaterThanZero(principalPortion)) {
+            this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalPortion, isReversal);
+        }
 
         if (MathUtil.isGreaterThanZero(overpaymentPortion)) {
             this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.OVERPAYMENT.getValue(),
