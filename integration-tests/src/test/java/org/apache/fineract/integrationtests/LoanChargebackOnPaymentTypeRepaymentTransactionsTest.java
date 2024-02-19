@@ -201,7 +201,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         // chargeback on Merchant Issued Refund Transaction
         chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr,
                 merchantIssuedRefund_1.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0).paymentTypeId(1L));
+                new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0));
 
         // verify transaction relation and outstanding balance
         assertNotNull(chargebackTransactionResponse);
