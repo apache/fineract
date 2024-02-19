@@ -50,6 +50,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -272,6 +273,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             Money originalInterest = currentInstallment.getInterestCharged(ctx.getCurrency());
                             currentInstallment.updateInterestCharged(
                                     originalInterest.plus(chargebackAllocation.get(INTEREST)).getAmountDefaultedToNullIfZero());
+                            if (chargebackAllocation.get(PENALTY).isGreaterThanZero()
+                                    || chargebackAllocation.get(FEE).isGreaterThanZero()) {
+                                createChargesForInstallment(chargebackAllocation, zeroMoney, originalTransaction, loanTransaction,
+                                        currentInstallment, transactionMappings);
+                            }
 
                             if (repaidAmount.isGreaterThanZero()) {
                                 currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
@@ -292,6 +298,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             Money originalInterest = currentInstallment.getInterestCharged(ctx.getCurrency());
                             currentInstallment.updateInterestCharged(
                                     originalInterest.plus(chargebackAllocation.get(INTEREST)).getAmountDefaultedToNullIfZero());
+                            if (chargebackAllocation.get(PENALTY).isGreaterThanZero()
+                                    || chargebackAllocation.get(FEE).isGreaterThanZero()) {
+                                createChargesForInstallment(chargebackAllocation, zeroMoney, originalTransaction, loanTransaction,
+                                        currentInstallment, transactionMappings);
+                            }
                             if (repaidAmount.isGreaterThanZero()) {
                                 currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
                                 transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
@@ -341,6 +352,51 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 }
             }
         }
+    }
+
+    private void createChargesForInstallment(Map<AllocationType, Money> chargebackAllocation, Money zeroMoney,
+            LoanTransaction originalTransaction, LoanTransaction loanTransaction, LoanRepaymentScheduleInstallment currentInstallment,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+        Money feePortion = chargebackAllocation.get(FEE);
+        Money penaltyPortion = chargebackAllocation.get(PENALTY);
+        Set<LoanChargePaidBy> loanChargesPaid = originalTransaction.getLoanChargesPaid();
+        List<LoanChargePaidBy> penalties = loanChargesPaid.stream().filter(chargePaid -> chargePaid.getLoanCharge().isPenaltyCharge())
+                .sorted(Comparator.comparing(cp -> cp.getLoanTransaction().getSubmittedOnDate())).toList();
+
+        List<LoanChargePaidBy> fees = loanChargesPaid.stream().filter(chargePaid -> !chargePaid.getLoanCharge().isPenaltyCharge())
+                .sorted(Comparator.comparing(cp -> cp.getLoanTransaction().getSubmittedOnDate())).toList();
+
+        createCharges(chargebackAllocation, loanTransaction, currentInstallment, penalties, PENALTY, transactionMappings);
+
+        createCharges(chargebackAllocation, loanTransaction, currentInstallment, fees, FEE, transactionMappings);
+
+        transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment, zeroMoney,
+                zeroMoney, feePortion, penaltyPortion));
+    }
+
+    private void createCharges(Map<AllocationType, Money> chargebackAllocation, LoanTransaction loanTransaction,
+            LoanRepaymentScheduleInstallment currentInstallment, List<LoanChargePaidBy> charges, AllocationType chargeType,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+        MonetaryCurrency currency = chargebackAllocation.get(PRINCIPAL).getCurrency();
+        charges.forEach(charge -> {
+            Money penaltyAllocation = chargebackAllocation.get(chargeType);
+            if (penaltyAllocation.isGreaterThan(Money.zero(currency))) {
+                BigDecimal penaltyAmount = penaltyAllocation.getAmount().compareTo(charge.getAmount()) < 0 ? penaltyAllocation.getAmount()
+                        : charge.getAmount();
+                LoanCharge loanCharge = createNewLoanCharge(charge.getLoanCharge(), penaltyAmount, loanTransaction);
+                Loan loan = currentInstallment.getLoan();
+                loan.addLoanCharge(loanCharge);
+                BigDecimal remainingAllocation = penaltyAllocation.getAmount().subtract(penaltyAmount);
+                chargebackAllocation.put(chargeType, Money.of(currency, remainingAllocation));
+            }
+        });
+    }
+
+    private LoanCharge createNewLoanCharge(LoanCharge originalLoanCharge, BigDecimal penaltyAmount, LoanTransaction loanTransaction) {
+        return new LoanCharge(originalLoanCharge.getLoan(), originalLoanCharge.getCharge(),
+                originalLoanCharge.getLoan().getPrincipal().getAmount(), penaltyAmount, originalLoanCharge.getChargeTimeType(),
+                originalLoanCharge.getChargeCalculation(), loanTransaction.getSubmittedOnDate(), originalLoanCharge.getChargePaymentMode(),
+                1, penaltyAmount, ExternalId.generate());
     }
 
     @NotNull
