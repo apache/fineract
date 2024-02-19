@@ -477,9 +477,11 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // create journal entries for the disbursement (or disbursement
         // reversal)
-        this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalPortion, isReversed);
+        if (MathUtil.isGreaterThanZero(principalPortion)) {
+            this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalPortion, isReversed);
 
+        }
         if (MathUtil.isGreaterThanZero(overpaymentPortion)) {
             this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, overpaymentPortion, isReversed);
