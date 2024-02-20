@@ -18,33 +18,39 @@
  */
 package org.apache.fineract.infrastructure.core.exceptionmapper;
 
-import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+import static org.apache.http.HttpStatus.SC_CONFLICT;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
-import java.util.Map;
+import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
-import org.springframework.context.annotation.Scope;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
+/**
+ * An {@link ExceptionMapper} to map {@link ObjectOptimisticLockingFailureException} thrown by platform into a HTTP API
+ * friendly format.
+ */
+@Provider
 @Component
-@Scope("singleton")
 @Slf4j
-public class DefaultExceptionMapper implements FineractExceptionMapper, ExceptionMapper<RuntimeException> {
+public class JakartaOptimisticLockExceptionMapper implements FineractExceptionMapper, ExceptionMapper<OptimisticLockException> {
 
     @Override
-    public int errorCode() {
-        return 9999;
+    public Response toResponse(final OptimisticLockException exception) {
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
+        String type = "optimistic lock";
+        String identifier = "unknown";
+        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.conflict(type, identifier);
+        return Response.status(SC_CONFLICT).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
     }
 
     @Override
-    public Response toResponse(RuntimeException exception) {
-        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
-        return Response.status(SC_INTERNAL_SERVER_ERROR)
-                .entity(Map.of("Exception", ObjectUtils.defaultIfNull(exception.getMessage(), "No error message available")))
-                .type(MediaType.APPLICATION_JSON).build();
+    public int errorCode() {
+        return 4019;
     }
 }
