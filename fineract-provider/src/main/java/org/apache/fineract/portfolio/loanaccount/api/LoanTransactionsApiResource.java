@@ -83,6 +83,8 @@ public class LoanTransactionsApiResource {
     public static final String DOWN_PAYMENT = "downPayment";
     public static final String UNDO_REAGE = "undoReAge";
     public static final String REAGE = "reAge";
+    public static final String REAMORTIZE = "reAmortize";
+    public static final String UNDO_REAMORTIZE = "undoReAmortize";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
@@ -483,6 +485,10 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.reAge(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, UNDO_REAGE)) {
             commandRequest = builder.undoReAge(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, REAMORTIZE)) {
+            commandRequest = builder.reAmortize(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, UNDO_REAMORTIZE)) {
+            commandRequest = builder.undoReAmortize(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {

@@ -510,6 +510,16 @@ public class ExternalEventConfigurationHelper {
         loanUndoReAgeTransactionBusinessEvent.put("enabled", false);
         defaults.add(loanUndoReAgeTransactionBusinessEvent);
 
+        Map<String, Object> loanReAmortizeTransactionBusinessEvent = new HashMap<>();
+        loanReAmortizeTransactionBusinessEvent.put("type", "LoanReAmortizeTransactionBusinessEvent");
+        loanReAmortizeTransactionBusinessEvent.put("enabled", false);
+        defaults.add(loanReAmortizeTransactionBusinessEvent);
+
+        Map<String, Object> loanUndoReAmortizeTransactionBusinessEvent = new HashMap<>();
+        loanUndoReAmortizeTransactionBusinessEvent.put("type", "LoanUndoReAmortizeTransactionBusinessEvent");
+        loanUndoReAmortizeTransactionBusinessEvent.put("enabled", false);
+        defaults.add(loanUndoReAmortizeTransactionBusinessEvent);
+
         return defaults;
 
     }

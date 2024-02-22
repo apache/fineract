@@ -24,6 +24,8 @@ import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanReAgeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanUndoReAgeTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reamortization.LoanReAmortizeTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reamortization.LoanUndoReAmortizeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -39,7 +41,9 @@ public class LoanTransactionDelinquencyRecalculationListener
     // use-cases
     private static final List<Class<? extends LoanTransactionBusinessEvent>> SUPPORTED_EVENT_TYPES = List.of(//
             LoanReAgeTransactionBusinessEvent.class, //
-            LoanUndoReAgeTransactionBusinessEvent.class //
+            LoanUndoReAgeTransactionBusinessEvent.class, //
+            LoanReAmortizeTransactionBusinessEvent.class, //
+            LoanUndoReAmortizeTransactionBusinessEvent.class //
     );//
 
     private final LoanAccountDomainService loanAccountDomainService;
