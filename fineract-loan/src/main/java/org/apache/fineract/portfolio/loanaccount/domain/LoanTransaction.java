@@ -685,6 +685,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return getTypeOf().isReAge() && isNotReversed();
     }
 
+    public boolean isReAmortize() {
+        return getTypeOf().isReAmortize() && isNotReversed();
+    }
+
     public boolean isIdentifiedBy(final Long identifier) {
         return getId().equals(identifier);
     }

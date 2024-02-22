@@ -375,8 +375,19 @@ public abstract class BaseLoanIntegrationTest {
         loanTransactionHelper.reAge(loanId, request);
     }
 
+    protected void reAmortizeLoan(Long loanId) {
+        PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
+        request.setDateFormat(DATETIME_PATTERN);
+        request.setLocale("en");
+        loanTransactionHelper.reAmortize(loanId, request);
+    }
+
     protected void undoReAgeLoan(Long loanId) {
         loanTransactionHelper.undoReAge(loanId, new PostLoansLoanIdTransactionsRequest());
+    }
+
+    protected void undoReAmortizeLoan(Long loanId) {
+        loanTransactionHelper.undoReAmortize(loanId, new PostLoansLoanIdTransactionsRequest());
     }
 
     protected void verifyLastClosedBusinessDate(Long loanId, String lastClosedBusinessDate) {

@@ -57,6 +57,7 @@ public class LoanTransactionEnumData {
     private final boolean chargeoff;
     private final boolean downPayment;
     private final boolean reAge;
+    private final boolean reAmortize;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -88,6 +89,7 @@ public class LoanTransactionEnumData {
         this.chargeoff = Long.valueOf(27).equals(this.id);
         this.downPayment = Long.valueOf(28).equals(this.id);
         this.reAge = Long.valueOf(LoanTransactionType.REAGE.getValue()).equals(this.id);
+        this.reAmortize = Long.valueOf(LoanTransactionType.REAMORTIZE.getValue()).equals(this.id);
     }
 
     public boolean isRepaymentType() {
