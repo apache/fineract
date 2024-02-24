@@ -256,6 +256,32 @@ final class FixedDepositAccountsApiResourceSwagger {
         public GetFixedDepositAccountsDepositPeriodFrequency depositPeriodFrequency;
     }
 
+    @Schema(description = "CalculateFixedDepositInterestRequest")
+    public static final class CalculateFixedDepositInterestRequest {
+        private CalculateFixedDepositInterestRequest(){}
+
+        @Schema(example = "10000")
+        public long principalAmount;
+        @Schema(example = "5")
+        public float annualInterestRate;
+        @Schema(example = "12")
+        public int tenureInMonths;
+        @Schema(example= "3")
+        public int interestPostingPeriodInMonths;
+        @Schema(example = "1")
+        public int interestCompoundingPeriodInMonths;
+
+    }
+
+    @Schema(description = "CalculateFixedDepositInterestResponse")
+    public static final class CalculateFixedDepositInterestResponse {
+
+        private CalculateFixedDepositInterestResponse() {}
+
+        @Schema(example = "10512.5")
+        public float maturityAmount;
+    }
+
     @Schema(description = "PostFixedDepositAccountsRequest")
     public static final class PostFixedDepositAccountsRequest {
 

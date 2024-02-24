@@ -129,6 +129,23 @@ public class DepositAccountDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
+    public void validateFixedDepositForInterestCalculation(final String json){
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_INTEREST_CALCULATION_PARAMETERS);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        validateForInterestCalc(element, baseDataValidator);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
+
     public void validateFixedDepositForUpdate(final String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -331,6 +348,35 @@ public class DepositAccountDataValidator {
                         .longGreaterThanZero();
             }
         }
+    }
+
+    private void validateForInterestCalc(final JsonElement element, final DataValidatorBuilder baseDataValidator){
+
+
+        Long principalAmount = this.fromApiJsonHelper.extractLongNamed("principalAmount", element);
+        baseDataValidator.reset().parameter("principalAmount").value(principalAmount).notNull();
+        baseDataValidator.reset().parameter("principalAmount").value(principalAmount).longGreaterThanZero();
+
+        BigDecimal annualInterestRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("annualInterestRate", element);
+        baseDataValidator.reset().parameter("annualInterestRate").value(annualInterestRate).notNull();
+        baseDataValidator.reset().parameter("annualInterestRate").value(annualInterestRate).notLessThanMin(BigDecimal.valueOf(0));
+
+
+        Long tenureInMonths = this.fromApiJsonHelper.extractLongNamed("tenureInMonths", element);
+        baseDataValidator.reset().parameter("tenureInMonths").value(tenureInMonths).notNull();
+        baseDataValidator.reset().parameter("tenureInMonths").value(tenureInMonths).longGreaterThanZero();
+
+
+        Long interestPostingPeriodInMonths = this.fromApiJsonHelper.extractLongNamed("interestPostingPeriodInMonths", element);
+        baseDataValidator.reset().parameter("interestPostingPeriodInMonths").value(interestPostingPeriodInMonths).notNull();
+        baseDataValidator.reset().parameter("interestPostingPeriodInMonths").value(interestPostingPeriodInMonths).longGreaterThanZero();
+
+
+        Long interestCompoundingPeriodInMonths = this.fromApiJsonHelper.extractLongNamed("interestCompoundingPeriodInMonths", element);
+        baseDataValidator.reset().parameter("interestCompoundingPeriodInMonths").value(interestCompoundingPeriodInMonths).notNull();
+        baseDataValidator.reset().parameter("interestCompoundingPeriodInMonths").value(interestCompoundingPeriodInMonths).inMinMaxRange(0,12);
+
+
     }
 
     private void validateDepositDetailsForUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
