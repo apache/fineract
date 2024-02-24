@@ -29,11 +29,17 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
 @Table(name = "interop_identifier", uniqueConstraints = {
         @UniqueConstraint(name = "uk_hathor_identifier_account", columnNames = { "account_id", "type" }),
         @UniqueConstraint(name = "uk_hathor_identifier_value", columnNames = { "type", "a_value", "sub_value_or_type" }) })
@@ -65,8 +71,6 @@ public class InteropIdentifier extends AbstractPersistableCustom {
     @Column(name = "modified_on")
     private LocalDateTime modifiedOn;
 
-    protected InteropIdentifier() {}
-
     public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String value, String subType,
             @NotNull String createdBy) {
         this.account = account;
@@ -79,54 +83,6 @@ public class InteropIdentifier extends AbstractPersistableCustom {
 
     public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String createdBy) {
         this(account, type, null, null, createdBy);
-    }
-
-    public SavingsAccount getAccount() {
-        return account;
-    }
-
-    public InteropIdentifierType getType() {
-        return type;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getSubType() {
-        return subType;
-    }
-
-    public void setSubType(String subType) {
-        this.subType = subType;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public LocalDateTime getCreatedOn() {
-        return createdOn;
-    }
-
-    public String geModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    public LocalDateTime getModifiedOn() {
-        return modifiedOn;
-    }
-
-    public void setModifiedOn(LocalDateTime modifiedOn) {
-        this.modifiedOn = modifiedOn;
     }
 
     @Override
