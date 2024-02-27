@@ -4599,7 +4599,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 getAccountingBridgeDataGenericAttributes(currencyCode, isAccountTransfer));
         if (isBeforeChargeOffDate) {
             accountingBridgeDataChargeOff.put("isChargeOff", false);
-            accountingBridgeDataChargeOff.put("isFraud", false);
+            accountingBridgeDataChargeOff.put("isFraud", isFraud());
         } else {
             accountingBridgeDataChargeOff.put("isChargeOff", isChargedOff());
             accountingBridgeDataChargeOff.put("isFraud", isFraud());
