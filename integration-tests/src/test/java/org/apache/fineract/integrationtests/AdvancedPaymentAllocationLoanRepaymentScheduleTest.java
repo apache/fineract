@@ -3264,7 +3264,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 12, 7), 32.0, 32.0, 0.0, 32.0, 0.0);
             validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2023, 12, 22), 32.0, 32.0, 0.0, 32.0, 0.0);
             validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2024, 1, 6), 32.0, 32.0, 0.0, 32.0, 0.0);
-            assertTrue(loanDetails.getStatus().getActive());
+            assertTrue(loanDetails.getStatus().getOverpaid());
 
             verifyTransactions(loanResponse.getLoanId(), //
                     transaction(100, "Disbursement", "22 November 2023", 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
