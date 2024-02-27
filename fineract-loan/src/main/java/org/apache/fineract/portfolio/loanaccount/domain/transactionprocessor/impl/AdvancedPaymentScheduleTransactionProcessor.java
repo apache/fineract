@@ -465,10 +465,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 newLoanTransaction.adjustInterestComponent(currency);
             }
             /*
-             * Check if the transaction amounts have changed. If so, reverse the original transaction and update
-             * changedTransactionDetail accordingly
+             * Check if the transaction amounts have changed or was there any transaction for the same date which was
+             * reverse-replayed. If so, reverse the original transaction and update changedTransactionDetail accordingly
              */
-            if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
+            boolean aTransactionWasAlreadyReplayedForTheSameDate = changedTransactionDetail.getNewTransactionMappings().values().stream()
+                    .anyMatch(lt -> lt.getTransactionDate().equals(loanTransaction.getTransactionDate()));
+            if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)
+                    && !aTransactionWasAlreadyReplayedForTheSameDate) {
                 loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
                         newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
             } else {
@@ -503,6 +506,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void updateLoanSchedule(LoanTransaction disbursementTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, MoneyHolder overpaymentHolder) {
+        disbursementTransaction.resetDerivedComponents();
         final MathContext mc = MoneyHelper.getMathContext();
         List<LoanRepaymentScheduleInstallment> candidateRepaymentInstallments = installments.stream().filter(
                 i -> i.getDueDate().isAfter(disbursementTransaction.getTransactionDate()) && !i.isDownPayment() && !i.isAdditional())
@@ -570,9 +574,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 transactionAmountUnprocessed = processPeriodsVertically(loanTransaction, currency, installments,
                         overpaymentHolder.getMoneyObject(), defaultPaymentAllocationRule, transactionMappings, Set.of(), balances);
             }
-            if (transactionAmountUnprocessed != null && transactionAmountUnprocessed.isGreaterThanZero()) {
-                overpaymentHolder.setMoneyObject(transactionAmountUnprocessed);
-            }
+            overpaymentHolder.setMoneyObject(transactionAmountUnprocessed);
             loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
         }
     }

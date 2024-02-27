@@ -2955,7 +2955,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     }
 
-    public LoanTransaction handleDownPayment(final BigDecimal disbursedAmount, final JsonCommand command,
+    public LoanTransaction handleDownPayment(final LoanTransaction disbursementTransaction, final JsonCommand command,
             final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         LocalDate disbursedOn = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
         BigDecimal disbursedAmountPercentageForDownPayment = this.loanRepaymentScheduleDetail.getDisbursedAmountPercentageForDownPayment();
@@ -2964,19 +2964,26 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             externalId = ExternalId.generate();
         }
         Money downPaymentMoney = Money.of(getCurrency(),
-                MathUtil.percentageOf(disbursedAmount, disbursedAmountPercentageForDownPayment, 19));
-        LoanTransaction downPaymentTransaction = LoanTransaction.downPayment(getOffice(), downPaymentMoney, null, disbursedOn, externalId);
+                MathUtil.percentageOf(disbursementTransaction.getAmount(), disbursedAmountPercentageForDownPayment, 19));
 
-        LoanEvent event = LoanEvent.LOAN_REPAYMENT_OR_WAIVER;
-        validateRepaymentTypeAccountStatus(downPaymentTransaction, event);
-        HolidayDetailDTO holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
-        validateRepaymentDateIsOnHoliday(downPaymentTransaction.getTransactionDate(), holidayDetailDTO.isAllowTransactionsOnHoliday(),
-                holidayDetailDTO.getHolidays());
-        validateRepaymentDateIsOnNonWorkingDay(downPaymentTransaction.getTransactionDate(), holidayDetailDTO.getWorkingDays(),
-                holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
+        Money adjustedDownPaymentMoney = MathUtil
+                .negativeToZero(downPaymentMoney.minus(disbursementTransaction.getOverPaymentPortion(getCurrency())));
+        if (adjustedDownPaymentMoney.isGreaterThanZero()) {
+            LoanTransaction downPaymentTransaction = LoanTransaction.downPayment(getOffice(), adjustedDownPaymentMoney, null, disbursedOn,
+                    externalId);
+            LoanEvent event = LoanEvent.LOAN_REPAYMENT_OR_WAIVER;
+            validateRepaymentTypeAccountStatus(downPaymentTransaction, event);
+            HolidayDetailDTO holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
+            validateRepaymentDateIsOnHoliday(downPaymentTransaction.getTransactionDate(), holidayDetailDTO.isAllowTransactionsOnHoliday(),
+                    holidayDetailDTO.getHolidays());
+            validateRepaymentDateIsOnNonWorkingDay(downPaymentTransaction.getTransactionDate(), holidayDetailDTO.getWorkingDays(),
+                    holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
 
-        handleRepaymentOrRecoveryOrWaiverTransaction(downPaymentTransaction, loanLifecycleStateMachine, null, scheduleGeneratorDTO);
-        return downPaymentTransaction;
+            handleRepaymentOrRecoveryOrWaiverTransaction(downPaymentTransaction, loanLifecycleStateMachine, null, scheduleGeneratorDTO);
+            return downPaymentTransaction;
+        } else {
+            return null;
+        }
     }
 
     public boolean isAutoRepaymentForDownPaymentEnabled() {

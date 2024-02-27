@@ -485,7 +485,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 } else {
-                    loanDownPaymentHandlerService.handleDownPayment(scheduleGeneratorDTO, command, amountToDisburse, loan);
+                    loanDownPaymentHandlerService.handleDownPayment(scheduleGeneratorDTO, command, disbursementTransaction, loan);
                 }
             }
         }
@@ -562,6 +562,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             disbursalTransactionExternalId = disbursalTransaction.getExternalId();
             businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursalTransaction));
         }
+
+        loan.updateLoanSummaryAndStatus();
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
