@@ -148,9 +148,14 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate disbursementDate, final ExternalId externalId) {
-        return new LoanTransaction(null, office, LoanTransactionType.DISBURSEMENT, paymentDetail, amount.getAmount(), disbursementDate,
-                externalId);
+            final LocalDate disbursementDate, final ExternalId externalId, final Money loanTotalOverpaid) {
+        // We need to set the overpayment amount because it could happen the transaction got saved before the proper
+        // portion calculation and side effect would be reverse-replay
+        Money overPaymentPortion = amount.isGreaterThan(loanTotalOverpaid) ? loanTotalOverpaid : amount;
+        LoanTransaction disbursement = new LoanTransaction(null, office, LoanTransactionType.DISBURSEMENT, paymentDetail,
+                amount.getAmount(), disbursementDate, externalId);
+        disbursement.setOverPayments(overPaymentPortion);
+        return disbursement;
     }
 
     public static LoanTransaction repayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
