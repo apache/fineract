@@ -82,7 +82,9 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                 }
             break;
             case LOAN_DISBURSED:
-                if (anyOfAllowedWhenComingFrom(from, LoanStatus.APPROVED, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.APPROVED, LoanStatus.CLOSED_OBLIGATIONS_MET)) {
+                    newState = activeTransition();
+                } else if (from.isOverpaid() && loan.getTotalOverpaidAsMoney().isZero()) {
                     newState = activeTransition();
                 }
             break;
