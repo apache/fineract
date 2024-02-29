@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -133,15 +134,41 @@ class DefaultLoanLifecycleStateMachineTest {
     @Test
     public void testTransitionShouldWorkProperlyForLoanDisbursementWhenLoanIsOverpaid() {
         // given
-        Money overpayment = Money.of(new MonetaryCurrency("USD", 2, null), BigDecimal.ZERO);
+        MonetaryCurrency currency = new MonetaryCurrency("USD", 2, null);
+        Money zero = Money.of(currency, BigDecimal.ZERO);
+        Money one = Money.of(currency, BigDecimal.ONE);
         Loan loan = Mockito.mock(Loan.class);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
+        Mockito.when(loan.getCurrency()).thenReturn(currency);
         Mockito.when(loan.getPlainStatus()).thenReturn(LoanStatus.OVERPAID.getValue());
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.OVERPAID);
-        Mockito.when(loan.getTotalOverpaidAsMoney()).thenReturn(overpayment);
+        Mockito.when(loan.getTotalOverpaidAsMoney()).thenReturn(zero);
+        Mockito.when(loan.getLoanSummary()).thenReturn(loanSummary);
+        Mockito.when(loanSummary.getTotalOutstanding(eq(currency))).thenReturn(one);
         // when
         underTest.transition(LoanEvent.LOAN_DISBURSED, loan);
         // then
         verify(loan, Mockito.times(1)).setLoanStatus(LoanStatus.ACTIVE.getValue());
+        verify(businessEventNotifierService).notifyPostBusinessEvent(any(LoanStatusChangedBusinessEvent.class));
+    }
+
+    @Test
+    public void testTransitionShouldWorkProperlyForLoanDisbursementWhenLoanIsOverpaidAndGotClosed() {
+        // given
+        MonetaryCurrency currency = new MonetaryCurrency("USD", 2, null);
+        Money zero = Money.of(currency, BigDecimal.ZERO);
+        Loan loan = Mockito.mock(Loan.class);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
+        Mockito.when(loan.getCurrency()).thenReturn(currency);
+        Mockito.when(loan.getPlainStatus()).thenReturn(LoanStatus.OVERPAID.getValue());
+        Mockito.when(loan.getStatus()).thenReturn(LoanStatus.OVERPAID);
+        Mockito.when(loan.getTotalOverpaidAsMoney()).thenReturn(zero);
+        Mockito.when(loan.getLoanSummary()).thenReturn(loanSummary);
+        Mockito.when(loanSummary.getTotalOutstanding(currency)).thenReturn(zero);
+        // when
+        underTest.transition(LoanEvent.LOAN_DISBURSED, loan);
+        // then
+        verify(loan, Mockito.times(1)).setLoanStatus(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue());
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(LoanStatusChangedBusinessEvent.class));
     }
 
