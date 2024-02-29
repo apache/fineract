@@ -1580,7 +1580,7 @@ public class DelinquencyBucketsIntegrationTest {
     }
 
     @Test
-    public void testLoanClassificationOnyForActiveLoan() {
+    public void testLoanClassificationOnlyForActiveLoan() {
 
         // Given
         final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -1629,6 +1629,64 @@ public class DelinquencyBucketsIntegrationTest {
         assertNotNull(getLoansLoanIdResponse.getDelinquent());
         assertNotEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentDays());
         assertNotEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentAmount());
+    }
+
+    @Test
+    public void testLoanClassificationOnlyForActiveLoanWithCOB() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            final String operationDate = "01 January 2012";
+
+            LocalDate bussinesLocalDate = Utils.getDateAsLocalDate(operationDate);
+            log.info("Current date {}", bussinesLocalDate);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
+
+            // Given
+            final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+
+            ArrayList<Integer> rangeIds = new ArrayList<>();
+            // First Range
+            String jsonRange = DelinquencyRangesHelper.getAsJSON(4, 30);
+            PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec,
+                    responseSpec, jsonRange);
+            rangeIds.add(delinquencyRangeResponse.getResourceId());
+
+            String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
+            PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
+                    responseSpec, jsonBucket);
+            assertNotNull(delinquencyBucketResponse);
+            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+                    delinquencyBucketResponse.getResourceId());
+
+            // Client creation
+            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, operationDate);
+            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
+                    Math.toIntExact(delinquencyBucket.getId()), null);
+            assertNotNull(getLoanProductsProductResponse);
+
+            // Create Loan Application
+            final Integer loanId = createLoanApplication(loanTransactionHelper, clientId.toString(),
+                    getLoanProductsProductResponse.getId().toString(), operationDate, null);
+
+            // run cob for business date 01 January 2012
+            final String jobName = "Loan COB";
+            bussinesLocalDate = Utils.getDateAsLocalDate(operationDate);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
+            schedulerJobHelper.executeAndAwaitJob(jobName);
+
+            // Loan delinquency data
+            GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            loanTransactionHelper.printDelinquencyData(getLoansLoanIdResponse);
+            GetLoansLoanIdDelinquencySummary delinquent = getLoansLoanIdResponse.getDelinquent();
+            assertNotNull(getLoansLoanIdResponse);
+            assertNotNull(delinquent);
+            assertEquals(0, delinquent.getDelinquentDays());
+            assertEquals(0, delinquent.getDelinquentAmount());
+
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,

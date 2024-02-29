@@ -160,7 +160,13 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         if (loan == null) {
             loan = this.loanRepository.findOneWithNotFoundDetection(loanScheduleDelinquencyData.getLoanId());
         }
-        final CollectionData collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
+        CollectionData collectionData = null;
+        // If the Loan is not Active yet, return template data
+        if (loan.isSubmittedAndPendingApproval() || loan.isApproved()) {
+            collectionData = CollectionData.template();
+        } else {
+            collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
+        }
         log.debug("Delinquency {}", collectionData);
         return new LoanScheduleDelinquencyData(loan.getId(), collectionData.getDelinquentDate(), collectionData.getDelinquentDays(), loan);
     }
