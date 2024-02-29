@@ -401,6 +401,10 @@ public abstract class BaseLoanIntegrationTest {
                 .transactionAmount(amount).locale("en"));
     }
 
+    protected void undoDisbursement(Integer loanId) {
+        loanTransactionHelper.undoDisbursal(loanId);
+    }
+
     protected void verifyJournalEntries(Long loanId, Journal... entries) {
         GetJournalEntriesTransactionIdResponse journalEntriesForLoan = journalEntryHelper.getJournalEntriesForLoan(loanId);
         Assertions.assertEquals(entries.length, journalEntriesForLoan.getPageItems().size());
