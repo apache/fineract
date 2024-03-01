@@ -60,4 +60,9 @@ public class LoanTransactionDTO {
 
     private final String chargeRefundChargeType;
     private final LoanChargeData loanChargeData;
+
+    /** In case chargeback and overpayment the below field contains the distribution payment **/
+    private final BigDecimal principalPaid;
+    private final BigDecimal feePaid;
+    private final BigDecimal penaltyPaid;
 }

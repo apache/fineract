@@ -430,23 +430,52 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final BigDecimal overpaidAmount = Objects.isNull(loanTransactionDTO.getOverPayment()) ? BigDecimal.ZERO
                 : loanTransactionDTO.getOverPayment();
 
-        if (BigDecimal.ZERO.compareTo(overpaidAmount) == 0) { // when no overpay
-            helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                    AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
-                    amount, isReversal);
-        } else if (overpaidAmount.compareTo(amount) >= 0) { // when the overpay amount is matching with the normal
-                                                            // amount
-            helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
-                    AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
-                    amount, isReversal);
-        } else {
-            BigDecimal diff = amount.subtract(overpaidAmount);
-            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, diff, isReversal);
-            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.FUND_SOURCE, loanProductId,
-                    paymentTypeId, loanId, transactionId, transactionDate, amount, isReversal);
+        final BigDecimal principalCredited = Objects.isNull(loanTransactionDTO.getPrincipal()) ? BigDecimal.ZERO
+                : loanTransactionDTO.getPrincipal();
+        final BigDecimal feeCredited = Objects.isNull(loanTransactionDTO.getFees()) ? BigDecimal.ZERO : loanTransactionDTO.getFees();
+        final BigDecimal penaltyCredited = Objects.isNull(loanTransactionDTO.getPenalties()) ? BigDecimal.ZERO
+                : loanTransactionDTO.getPenalties();
+
+        final BigDecimal principalPaid = Objects.isNull(loanTransactionDTO.getPrincipalPaid()) ? BigDecimal.ZERO
+                : loanTransactionDTO.getPrincipalPaid();
+        final BigDecimal feePaid = Objects.isNull(loanTransactionDTO.getFeePaid()) ? BigDecimal.ZERO : loanTransactionDTO.getFeePaid();
+        final BigDecimal penaltyPaid = Objects.isNull(loanTransactionDTO.getPenaltyPaid()) ? BigDecimal.ZERO
+                : loanTransactionDTO.getPenaltyPaid();
+
+        helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.FUND_SOURCE, loanProductId,
+                paymentTypeId, loanId, transactionId, transactionDate, amount, isReversal);
+
+        if (overpaidAmount.compareTo(BigDecimal.ZERO) > 0) {
             helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.OVERPAYMENT.getValue(),
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, overpaidAmount, isReversal);
+        }
+
+        if (principalCredited.compareTo(principalPaid) > 0) {
+            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalCredited.subtract(principalPaid),
+                    isReversal);
+        } else if (principalCredited.compareTo(principalPaid) < 0) {
+            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalPaid.subtract(principalCredited),
+                    isReversal);
+        }
+
+        if (feeCredited.compareTo(feePaid) > 0) {
+            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, feeCredited.subtract(feePaid), isReversal);
+        } else if (feeCredited.compareTo(feePaid) < 0) {
+            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, feePaid.subtract(feeCredited), isReversal);
+        }
+
+        if (penaltyCredited.compareTo(penaltyPaid) > 0) {
+            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, penaltyCredited.subtract(penaltyPaid),
+                    isReversal);
+        } else if (penaltyCredited.compareTo(penaltyPaid) < 0) {
+            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, penaltyPaid.subtract(penaltyCredited),
+                    isReversal);
         }
 
     }

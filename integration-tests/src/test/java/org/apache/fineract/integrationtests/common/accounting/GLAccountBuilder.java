@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.common.accounting;
 import com.google.gson.Gson;
 import java.util.Calendar;
 import java.util.HashMap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class GLAccountBuilder {
@@ -83,6 +84,13 @@ public class GLAccountBuilder {
     public GLAccountBuilder withAccountTypeAsExpense() {
         accountType = EXPENSE_ACCOUNT;
         glCode = Utils.uniqueRandomStringGenerator("EXPENSE_" + Calendar.getInstance().getTimeInMillis(), 2);
+        return this;
+    }
+
+    public GLAccountBuilder withName(String name) {
+        if (StringUtils.isNotBlank(name)) {
+            this.name = Utils.uniqueRandomStringGenerator(name + "_", 5);
+        }
         return this;
     }
 

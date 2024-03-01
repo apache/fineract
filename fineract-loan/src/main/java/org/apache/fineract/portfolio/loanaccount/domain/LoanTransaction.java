@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -763,7 +764,14 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         thisTransactionData.put("currencyCode", currencyCode);
         thisTransactionData.put("amount", this.amount);
         thisTransactionData.put("netDisbursalAmount", this.loan.getNetDisbursalAmount());
-        thisTransactionData.put("principalPortion", this.principalPortion);
+
+        if (transactionType.isChargeback()
+                && (getLoan().getCreditAllocationRules() == null || getLoan().getCreditAllocationRules().size() == 0)) {
+            thisTransactionData.put("principalPortion", this.amount);
+        } else {
+            thisTransactionData.put("principalPortion", this.principalPortion);
+        }
+
         thisTransactionData.put("interestPortion", this.interestPortion);
         thisTransactionData.put("feeChargesPortion", this.feeChargesPortion);
         thisTransactionData.put("penaltyChargesPortion", this.penaltyChargesPortion);
@@ -788,6 +796,26 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 loanChargesPaidData.add(loanChargePaidData);
             }
             thisTransactionData.put("loanChargesPaid", loanChargesPaidData);
+        }
+
+        if (transactionType.isChargeback() && this.overPaymentPortion != null && this.overPaymentPortion.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal principalPaid = overPaymentPortion;
+            BigDecimal feePaid = BigDecimal.ZERO;
+            BigDecimal penaltyPaid = BigDecimal.ZERO;
+            if (getLoanTransactionToRepaymentScheduleMappings().size() > 0) {
+                principalPaid = getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getPrincipalPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                feePaid = getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getFeeChargesPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                penaltyPaid = getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getPenaltyChargesPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+            }
+            thisTransactionData.put("principalPaid", principalPaid);
+            thisTransactionData.put("feePaid", feePaid);
+            thisTransactionData.put("penaltyPaid", penaltyPaid);
         }
 
         LoanTransactionRelation loanTransactionRelation = loanTransactionRelations.stream()

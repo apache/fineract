@@ -3194,13 +3194,13 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             );
             // verify journal entries
             verifyJournalEntries(loanResponse.getLoanId(), journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, suspenseClearingAccount, "CREDIT"), //
+                    journalEntry(100.0, fundSource, "CREDIT"), //
                     journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
                     journalEntry(50.0, overpaymentAccount, "CREDIT"), //
-                    journalEntry(150.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(150.0, fundSource, "DEBIT"), //
                     journalEntry(50.0, loansReceivableAccount, "DEBIT"), //
                     journalEntry(50.0, overpaymentAccount, "DEBIT"), //
-                    journalEntry(100.0, suspenseClearingAccount, "CREDIT") //
+                    journalEntry(100.0, fundSource, "CREDIT") //
             );
         });
     }
@@ -3273,12 +3273,12 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             );
             // verify journal entries
             verifyJournalEntries(loanResponse.getLoanId(), journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, suspenseClearingAccount, "CREDIT"), //
+                    journalEntry(100.0, fundSource, "CREDIT"), //
                     journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
                     journalEntry(50.0, overpaymentAccount, "CREDIT"), //
-                    journalEntry(150.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(150.0, fundSource, "DEBIT"), //
                     journalEntry(28.0, overpaymentAccount, "DEBIT"), //
-                    journalEntry(28.0, suspenseClearingAccount, "CREDIT") //
+                    journalEntry(28.0, fundSource, "CREDIT") //
             );
         });
     }

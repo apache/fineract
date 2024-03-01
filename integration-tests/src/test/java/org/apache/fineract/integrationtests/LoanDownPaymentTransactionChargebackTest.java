@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
-import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -88,15 +87,10 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
             );
 
             // verify journal entries for chargeback transaction
-            GetJournalEntriesTransactionIdResponse journalEntries = journalEntryHelper
-                    .getJournalEntries("L" + chargebackTransactionId.toString());
-            assertEquals(2L, journalEntries.getTotalFilteredRecords());
-            assertEquals(50.0, journalEntries.getPageItems().get(0).getAmount());
-            assertEquals("CREDIT", journalEntries.getPageItems().get(0).getEntryType().getValue());
-
-            assertEquals(50.0, journalEntries.getPageItems().get(1).getAmount());
-            assertEquals("DEBIT", journalEntries.getPageItems().get(1).getEntryType().getValue());
-
+            verifyTRJournalEntries(chargebackTransactionId, //
+                    credit(fundSource, 50.0), //
+                    debit(loansReceivableAccount, 50.0) //
+            );
         });
     }
 
@@ -152,15 +146,10 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
             );
 
             // verify journal entries for chargeback transaction
-            GetJournalEntriesTransactionIdResponse journalEntries = journalEntryHelper
-                    .getJournalEntries("L" + chargebackTransactionId.toString());
-            assertEquals(2L, journalEntries.getTotalFilteredRecords());
-            assertEquals(50.0, journalEntries.getPageItems().get(0).getAmount());
-            assertEquals("CREDIT", journalEntries.getPageItems().get(0).getEntryType().getValue());
-
-            assertEquals(50.0, journalEntries.getPageItems().get(1).getAmount());
-            assertEquals("DEBIT", journalEntries.getPageItems().get(1).getEntryType().getValue());
-
+            verifyTRJournalEntries(chargebackTransactionId, //
+                    credit(fundSource, 50.0), //
+                    debit(loansReceivableAccount, 50.0) //
+            );
         });
     }
 
