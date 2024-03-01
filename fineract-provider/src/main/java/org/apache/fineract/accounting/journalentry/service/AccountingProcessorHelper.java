@@ -156,9 +156,15 @@ public class AccountingProcessorHelper {
                 isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
                         PortfolioAccountType.LOAN);
             }
+
+            BigDecimal principalPaid = (BigDecimal) map.get("principalPaid");
+            BigDecimal feePaid = (BigDecimal) map.get("feePaid");
+            BigDecimal penaltyPaid = (BigDecimal) map.get("penaltyPaid");
+
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
-                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer, chargeRefundChargeType, loanChargeData);
+                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer, chargeRefundChargeType, loanChargeData, principalPaid,
+                    feePaid, penaltyPaid);
             Boolean isLoanToLoanTransfer = (Boolean) accountingBridgeData.get("isLoanToLoanTransfer");
             transaction.setLoanToLoanTransfer(isLoanToLoanTransfer != null && isLoanToLoanTransfer);
             newLoanTransactions.add(transaction);

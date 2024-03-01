@@ -42,35 +42,55 @@ public class AccountHelper extends IntegrationTest {
     }
 
     public Account createAssetAccount() {
-        final String assetAccountJSON = new GLAccountBuilder().withAccountTypeAsAsset().build();
+        return this.createAssetAccount(null);
+    }
+
+    public Account createIncomeAccount() {
+        return this.createIncomeAccount(null);
+    }
+
+    public Account createExpenseAccount() {
+        return this.createExpenseAccount(null);
+    }
+
+    public Account createLiabilityAccount() {
+        return this.createLiabilityAccount(null);
+    }
+
+    public Account createEquityAccount() {
+        return this.createEquityAccount(null);
+    }
+
+    public Account createAssetAccount(String accountName) {
+        final String assetAccountJSON = new GLAccountBuilder().withName(accountName).withAccountTypeAsAsset().build();
         final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GL_ACCOUNT_URL, assetAccountJSON,
                 GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.ASSET);
     }
 
-    public Account createIncomeAccount() {
-        final String assetAccountJSON = new GLAccountBuilder().withAccountTypeAsIncome().build();
+    public Account createIncomeAccount(String accountName) {
+        final String assetAccountJSON = new GLAccountBuilder().withName(accountName).withAccountTypeAsIncome().build();
         final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GL_ACCOUNT_URL, assetAccountJSON,
                 GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.INCOME);
     }
 
-    public Account createExpenseAccount() {
-        final String assetAccountJSON = new GLAccountBuilder().withAccountTypeAsExpense().build();
+    public Account createExpenseAccount(String accountName) {
+        final String assetAccountJSON = new GLAccountBuilder().withName(accountName).withAccountTypeAsExpense().build();
         final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GL_ACCOUNT_URL, assetAccountJSON,
                 GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.EXPENSE);
     }
 
-    public Account createLiabilityAccount() {
-        final String liabilityAccountJSON = new GLAccountBuilder().withAccountTypeAsLiability().build();
+    public Account createLiabilityAccount(String accountName) {
+        final String liabilityAccountJSON = new GLAccountBuilder().withName(accountName).withAccountTypeAsLiability().build();
         final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GL_ACCOUNT_URL, liabilityAccountJSON,
                 GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.LIABILITY);
     }
 
-    public Account createEquityAccount() {
-        final String equityAccountJSON = new GLAccountBuilder().withAccountTypeAsAsEquity().build();
+    public Account createEquityAccount(String accountName) {
+        final String equityAccountJSON = new GLAccountBuilder().withName(accountName).withAccountTypeAsAsEquity().build();
         final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GL_ACCOUNT_URL, equityAccountJSON,
                 GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.EQUITY);

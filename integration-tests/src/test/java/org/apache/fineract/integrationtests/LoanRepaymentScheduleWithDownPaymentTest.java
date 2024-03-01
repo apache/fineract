@@ -1252,10 +1252,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(1000.0, "Disbursement", "03 March 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
-            verifyJournalEntries(loanResponse.getResourceId(), journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, suspenseClearingAccount, "CREDIT"), //
+            verifyJournalEntries(loanResponse.getResourceId(), //
+                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(1000.0, fundSource, "CREDIT"), //
                     journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, suspenseClearingAccount, "DEBIT") //
+                    journalEntry(250.0, fundSource, "DEBIT") //
             );
 
             loanTransactionHelper.makeLoanRepayment(loanResponse.getResourceId(), new PostLoansLoanIdTransactionsRequest()
@@ -1464,10 +1465,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(1000.0, "Disbursement", "03 March 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
-            verifyJournalEntries(loanResponse.getResourceId(), journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, suspenseClearingAccount, "CREDIT"), //
+            verifyJournalEntries(loanResponse.getResourceId(), //
+                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(1000.0, fundSource, "CREDIT"), //
                     journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, suspenseClearingAccount, "DEBIT") //
+                    journalEntry(250.0, fundSource, "DEBIT") //
             );
 
             String externalId = UUID.randomUUID().toString();
