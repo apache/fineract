@@ -36,82 +36,112 @@ public class SavingsProductAccountingDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
 
     public void evaluateProductAccountingData(final Integer accountingRuleType, final boolean isDormancyActive, final JsonElement element,
-            DataValidatorBuilder baseDataValidator, final DepositAccountType accountType) {
+            DataValidatorBuilder baseDataValidator, final DepositAccountType accountType, boolean ignoreExistenceValidation) {
         // GL Accounts for Cash or Accrual Periodic
         if (AccountingValidations.isCashBasedAccounting(accountingRuleType)
                 || AccountingValidations.isAccrualPeriodicBasedAccounting(accountingRuleType)) {
 
-            final Long savingsControlAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_CONTROL.getValue()).value(savingsControlAccountId)
-                    .notNull().integerGreaterThanZero();
-
-            final Long savingsReferenceAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue()).value(savingsReferenceAccountId)
-                    .notNull().integerGreaterThanZero();
-
-            final Long transfersInSuspenseAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue())
-                    .value(transfersInSuspenseAccountId).notNull().integerGreaterThanZero();
-
-            final Long interestOnSavingsAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue())
-                    .value(interestOnSavingsAccountId).notNull().integerGreaterThanZero();
-
-            final Long incomeFromFeeId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.INCOME_FROM_FEES.getValue(),
-                    element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId).notNull()
-                    .integerGreaterThanZero();
-
-            final Long incomeFromPenaltyId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
-                    .notNull().integerGreaterThanZero();
-
-            if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
-                final Long overdraftControlAccountId = fromApiJsonHelper
-                        .extractLongNamed(SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
-                baseDataValidator.reset().parameter(SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue())
-                        .value(overdraftControlAccountId).notNull().integerGreaterThanZero();
-
-                final Long incomeFromInterest = fromApiJsonHelper
-                        .extractLongNamed(SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), element);
-                baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue()).value(incomeFromInterest)
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long savingsControlAccountId = fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_CONTROL.getValue()).value(savingsControlAccountId)
                         .notNull().integerGreaterThanZero();
+            }
 
-                final Long writtenoff = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long savingsReferenceAccountId = fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue())
+                        .value(savingsReferenceAccountId).notNull().integerGreaterThanZero();
+            }
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long transfersInSuspenseAccountId = fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue())
+                        .value(transfersInSuspenseAccountId).notNull().integerGreaterThanZero();
+            }
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long interestOnSavingsAccountId = fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue())
+                        .value(interestOnSavingsAccountId).notNull().integerGreaterThanZero();
+            }
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.INCOME_FROM_FEES.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long incomeFromFeeId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.INCOME_FROM_FEES.getValue(),
                         element);
-                baseDataValidator.reset().parameter(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue()).value(writtenoff).notNull()
-                        .integerGreaterThanZero();
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
+                        .notNull().integerGreaterThanZero();
+            }
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long incomeFromPenaltyId = fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue())
+                        .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
+            }
+            if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
+                if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element)
+                        || ignoreExistenceValidation) {
+                    final Long overdraftControlAccountId = fromApiJsonHelper
+                            .extractLongNamed(SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
+                    baseDataValidator.reset().parameter(SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue())
+                            .value(overdraftControlAccountId).notNull().integerGreaterThanZero();
+                }
+                if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), element)
+                        || ignoreExistenceValidation) {
+                    final Long incomeFromInterest = fromApiJsonHelper
+                            .extractLongNamed(SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), element);
+                    baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue())
+                            .value(incomeFromInterest).notNull().integerGreaterThanZero();
+                }
+                if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), element)
+                        || ignoreExistenceValidation) {
+                    final Long writtenoff = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
+                            element);
+                    baseDataValidator.reset().parameter(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue()).value(writtenoff)
+                            .notNull().integerGreaterThanZero();
+                }
             }
 
             if (isDormancyActive) {
-                final Long escheatLiabilityAccountId = fromApiJsonHelper
-                        .extractLongNamed(SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), element);
-                baseDataValidator.reset().parameter(SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue())
-                        .value(escheatLiabilityAccountId).notNull().integerGreaterThanZero();
+                if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), element)
+                        || ignoreExistenceValidation) {
+                    final Long escheatLiabilityAccountId = fromApiJsonHelper
+                            .extractLongNamed(SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), element);
+                    baseDataValidator.reset().parameter(SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue())
+                            .value(escheatLiabilityAccountId).notNull().integerGreaterThanZero();
+                }
             }
         }
 
         // GL Accounts for Accrual Period only
         if (AccountingValidations.isAccrualPeriodicBasedAccounting(accountingRuleType)) {
-            final Long feeReceivableAccountId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(),
-                    element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.FEES_RECEIVABLE.getValue()).value(feeReceivableAccountId)
-                    .notNull().integerGreaterThanZero();
-
-            final Long penaltyReceivableAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue())
-                    .value(penaltyReceivableAccountId).notNull().integerGreaterThanZero();
-
-            final Long interestPayableAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_PAYABLE.getValue()).value(interestPayableAccountId)
-                    .notNull().integerGreaterThanZero();
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long feeReceivableAccountId = fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.FEES_RECEIVABLE.getValue()).value(feeReceivableAccountId)
+                        .notNull().integerGreaterThanZero();
+            }
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long penaltyReceivableAccountId = fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue())
+                        .value(penaltyReceivableAccountId).notNull().integerGreaterThanZero();
+            }
+            if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), element)
+                    || ignoreExistenceValidation) {
+                final Long interestPayableAccountId = fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_PAYABLE.getValue())
+                        .value(interestPayableAccountId).notNull().integerGreaterThanZero();
+            }
         }
 
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);

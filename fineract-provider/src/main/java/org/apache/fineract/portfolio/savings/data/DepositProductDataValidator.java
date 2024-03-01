@@ -302,7 +302,7 @@ public class DepositProductDataValidator {
         if (AccountingValidations.isCashBasedAccounting(accountingRuleType)
                 || AccountingValidations.isAccrualPeriodicBasedAccounting(accountingRuleType)) {
             savingsProductAccountingDataValidator.evaluateProductAccountingData(accountingRuleType, isDormancyActive, element,
-                    baseDataValidator, accountType);
+                    baseDataValidator, accountType, true);
         }
 
         validateTaxWithHoldingParams(baseDataValidator, element, true);
