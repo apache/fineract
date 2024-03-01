@@ -159,7 +159,6 @@ public abstract class BaseLoanIntegrationTest {
                 .includeInBorrowerCycle(false)//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(2)//
-                .inMultiplesOf(0)//
                 .installmentAmountInMultiplesOf(1)//
                 .useBorrowerCycle(false)//
                 .minPrincipal(100.0)//
@@ -643,7 +642,14 @@ public abstract class BaseLoanIntegrationTest {
     protected TransactionExt transaction(double amount, String type, String date, double outstandingAmount, double principalPortion,
             double interestPortion, double feePortion, double penaltyPortion, double unrecognizedIncomePortion, double overpaymentPortion) {
         return new TransactionExt(amount, type, date, outstandingAmount, principalPortion, interestPortion, feePortion, penaltyPortion,
-                unrecognizedIncomePortion, overpaymentPortion);
+                unrecognizedIncomePortion, overpaymentPortion, false);
+    }
+
+    protected TransactionExt transaction(double amount, String type, String date, double outstandingAmount, double principalPortion,
+            double interestPortion, double feePortion, double penaltyPortion, double unrecognizedIncomePortion, double overpaymentPortion,
+            boolean reversed) {
+        return new TransactionExt(amount, type, date, outstandingAmount, principalPortion, interestPortion, feePortion, penaltyPortion,
+                unrecognizedIncomePortion, overpaymentPortion, reversed);
     }
 
     protected Installment installment(double principalAmount, Boolean completed, String dueDate) {
@@ -766,6 +772,7 @@ public abstract class BaseLoanIntegrationTest {
         Double penaltyPortion;
         Double unrecognizedPortion;
         Double overpaymentPortion;
+        Boolean reversed;
     }
 
     @ToString

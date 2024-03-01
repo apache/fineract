@@ -46,6 +46,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -147,14 +148,16 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId);
     }
 
-    public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
+    public static LoanTransaction disbursement(final Loan loan, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate disbursementDate, final ExternalId externalId, final Money loanTotalOverpaid) {
         // We need to set the overpayment amount because it could happen the transaction got saved before the proper
         // portion calculation and side effect would be reverse-replay
-        Money overPaymentPortion = amount.isGreaterThan(loanTotalOverpaid) ? loanTotalOverpaid : amount;
-        LoanTransaction disbursement = new LoanTransaction(null, office, LoanTransactionType.DISBURSEMENT, paymentDetail,
+        LoanTransaction disbursement = new LoanTransaction(null, loan.getOffice(), LoanTransactionType.DISBURSEMENT, paymentDetail,
                 amount.getAmount(), disbursementDate, externalId);
-        disbursement.setOverPayments(overPaymentPortion);
+        if (LoanScheduleType.PROGRESSIVE.equals(loan.getLoanProductRelatedDetail().getLoanScheduleType())) {
+            Money overPaymentPortion = amount.isGreaterThan(loanTotalOverpaid) ? loanTotalOverpaid : amount;
+            disbursement.setOverPayments(overPaymentPortion);
+        }
         return disbursement;
     }
 
@@ -909,6 +912,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public BigDecimal getOutstandingLoanBalance() {
         return outstandingLoanBalance;
+    }
+
+    public Money getOutstandingLoanBalanceMoney(final MonetaryCurrency currency) {
+        return Money.of(currency, this.outstandingLoanBalance);
     }
 
     public PaymentDetail getPaymentDetail() {
