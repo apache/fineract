@@ -435,8 +435,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             } else {
                 existingTransactionIds.addAll(loan.findExistingTransactionIds());
                 existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
-                disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), amountToDisburse, paymentDetail,
-                        actualDisbursementDate, txnExternalId, loan.getTotalOverpaidAsMoney());
+                disbursementTransaction = LoanTransaction.disbursement(loan, amountToDisburse, paymentDetail, actualDisbursementDate,
+                        txnExternalId, loan.getTotalOverpaidAsMoney());
                 disbursementTransaction.updateLoan(loan);
                 loan.addLoanTransaction(disbursementTransaction);
             }
@@ -460,6 +460,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.adjustNetDisbursalAmount(amountToDisburse.getAmount());
             if (disbursementTransaction != null) {
                 loanTransactionRepository.saveAndFlush(disbursementTransaction);
+            }
+            if (changedTransactionDetail != null) {
+                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                }
+                // Trigger transaction replayed event
+                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
             if (loan.isAutoRepaymentForDownPaymentEnabled()) {
                 // updating linked savings account for auto down payment transaction for disbursement to savings account
@@ -490,14 +498,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
         if (!changes.isEmpty()) {
-            if (changedTransactionDetail != null) {
-                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
-                }
-                // Trigger transaction replayed event
-                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
-            }
+
             loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
@@ -562,8 +563,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             disbursalTransactionExternalId = disbursalTransaction.getExternalId();
             businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursalTransaction));
         }
-
-        loan.updateLoanSummaryAndStatus();
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -751,7 +750,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 } else {
                     existingTransactionIds.addAll(loan.findExistingTransactionIds());
                     existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
-                    LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
+                    LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan, disburseAmount, paymentDetail,
                             actualDisbursementDate, txnExternalId, loan.getTotalOverpaidAsMoney());
                     disbursementTransaction.updateLoan(loan);
                     loan.addLoanTransaction(disbursementTransaction);
