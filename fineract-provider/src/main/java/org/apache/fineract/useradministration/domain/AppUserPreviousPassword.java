@@ -22,6 +22,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
@@ -35,6 +37,7 @@ public class AppUserPreviousPassword extends AbstractPersistableCustom {
     @Column(name = "removal_date")
     private LocalDate removalDate;
 
+    @Getter
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -46,10 +49,6 @@ public class AppUserPreviousPassword extends AbstractPersistableCustom {
         this.userId = user.getId();
         this.password = user.getPassword().trim();
         this.removalDate = DateUtils.getLocalDateOfTenant();
-    }
-
-    public String getPassword() {
-        return this.password;
     }
 
 }
