@@ -32,6 +32,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.event.business.domain.loan.reamortization.LoanReAmortizeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.reamortization.LoanUndoReAmortizeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reamortization.LoanReAmortizeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reamortization.LoanUndoReAmortizeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -68,6 +70,7 @@ public class LoanReAmortizationServiceImpl {
         loanTransactionRepository.saveAndFlush(reAmortizeTransaction);
 
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanReAmortizeBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanReAmortizeTransactionBusinessEvent(reAmortizeTransaction));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -96,6 +99,7 @@ public class LoanReAmortizationServiceImpl {
         loanTransactionRepository.saveAndFlush(reAmortizeTransaction);
 
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoReAmortizeBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoReAmortizeTransactionBusinessEvent(reAmortizeTransaction));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

@@ -32,6 +32,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.LoanReAgeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.LoanUndoReAgeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanReAgeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanUndoReAgeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -76,6 +78,7 @@ public class LoanReAgingServiceImpl {
         reAgingParameterRepository.saveAndFlush(reAgeParameter);
 
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanReAgeBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanReAgeTransactionBusinessEvent(reAgeTransaction));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -113,6 +116,7 @@ public class LoanReAgingServiceImpl {
         loanTransactionRepository.saveAndFlush(reAgeTransaction);
 
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoReAgeBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoReAgeTransactionBusinessEvent(reAgeTransaction));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
