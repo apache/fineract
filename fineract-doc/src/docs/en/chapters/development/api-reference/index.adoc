@@ -1,0 +1,5 @@
+= API Documentation
+
+include::platform-api.adoc[leveloffset=+1]
+include::api-clients.adoc[leveloffset=+1]
+include::swagger-ui-documentation.adoc[leveloffset=+1]

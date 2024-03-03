@@ -1,0 +1,13 @@
+== Mailing Lists
+
+Users & Developers
+
+If you use, build on top of, deploy or are building contributions and modifications to Apache Fineract, this is the list for you.
+To subscribe, send a blank email to dev-subscribe@fineract.apache.org.
+To unsubscribe later, just send a blank email to dev-unsubscribe@fineract.apache.org.
+You can also read the archives on lists.apache.org or on MarkMail.org.
+Commits
+
+This list receives an email whenever new code is contributed to Apache Fineract.
+To subscribe, send a blank email to commits-subscribe@fineract.apache.org.
+You can also read the archives.

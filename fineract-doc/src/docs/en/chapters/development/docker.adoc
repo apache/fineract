@@ -1,9 +1,0 @@
-= Docker
-
-TBD
-
-include::docker-compose.adoc[leveloffset=+1]
-
-include::docker-podman.adoc[leveloffset=+1]
-
-include::docker-rancher.adoc[leveloffset=+1]

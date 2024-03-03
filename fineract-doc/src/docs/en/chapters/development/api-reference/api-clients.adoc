@@ -1,0 +1,6 @@
+= API CLIENTS (Web UIs, Mobile, etc.)
+
+* https://github.com/openMF/community-app/ is the "traditional" Reference Client App Web UI for the API offered by this project
+* https://github.com/openMF/web-app is the next generation UI rewrite also using this project's API
+* https://github.com/openMF/android-client is an Android Mobile App client for this project's API
+* https://github.com/openMF has more related proejcts

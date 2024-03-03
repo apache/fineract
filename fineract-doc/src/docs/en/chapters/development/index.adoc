@@ -1,17 +1,36 @@
-= Fineract Development Environment
+= Fineract Development Guide
 
-TBD
+include::run-fineract/dev-env-setup.adoc[leveloffset=+1]
 
-include::git.adoc[leveloffset=+1]
+include::run-fineract/gradle.adoc[leveloffset=+1]
 
-include::gpg.adoc[leveloffset=+1]
+include::configuration/index.adoc[leveloffset=+1]
 
-include::docker.adoc[leveloffset=+1]
+include::run-fineract/run-locally.adoc[leveloffset=+1]
 
-include::gradle.adoc[leveloffset=+1]
+include::run-fineract/build-jar-file.adoc[leveloffset=+1]
 
-include::ide.adoc[leveloffset=+1]
+include::run-fineract/build-war-file.adoc[leveloffset=+1]
 
-include::kubernetes.adoc[leveloffset=+1]
+include::run-fineract/eclipse-ide.adoc[leveloffset=+1]
 
-include::tools.adoc[leveloffset=+1]
+include::run-fineract/docker.adoc[leveloffset=+1]
+
+include::run-fineract/kubernetes.adoc[leveloffset=+1]
+
+include::dev-guidelines/index.adoc[leveloffset=+1]
+
+
+// include::git.adoc[leveloffset=+1]
+// 
+// include::gpg.adoc[leveloffset=+1]
+// 
+// include::docker.adoc[leveloffset=+1]
+// 
+// include::gradle.adoc[leveloffset=+1]
+// 
+// include::ide.adoc[leveloffset=+1]
+// 
+// include::kubernetes.adoc[leveloffset=+1]
+// 
+// include::tools.adoc[leveloffset=+1]

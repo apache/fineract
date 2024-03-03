@@ -1,0 +1,3 @@
+= VIDEO DEMONSTRATION
+
+Apache Fineract / Mifos X Demo (November 2016) - <https://www.youtube.com/watch?v=h61g9TptMBo>

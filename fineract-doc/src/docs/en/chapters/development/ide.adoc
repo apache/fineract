@@ -1,9 +1,0 @@
-= IDE
-
-TBD
-
-include::ide-intellij.adoc[leveloffset=+1]
-
-include::ide-eclipse.adoc[leveloffset=+1]
-
-include::ide-vscode.adoc[leveloffset=+1]

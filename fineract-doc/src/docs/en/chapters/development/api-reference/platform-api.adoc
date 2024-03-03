@@ -1,0 +1,7 @@
+= APACHE FINERACT PLATFORM API
+
+The API for Fineract is documented in link:../fineract-provider/src/main/resources/static/api-docs/apiLive.htm[apiLive.htm], and the [apiLive.htm can be viewed on Fineract.dev](https://fineract.apache.org/legacy-docs/apiLive.htm "API Documentation").  If you have your own Fineract instance running, you can find this documentation under [/fineract-provider/api-docs/apiLive.htm](https://localhost:8443/fineract-provider/api-docs/apiLive.htm).
+
+The Swagger documentation (work in progress; see link:https://issues.apache.org/jira/browse/FINERACT-733[FINERACT-733]) can be accessed under link:https://localhost:8443/fineract-provider/swagger-ui/index.html[/fineract-provider/swagger-ui/index.html] and link:https://demo.fineract.dev/fineract-provider/swagger-ui/index.html[live Swagger UI here on Fineract.dev].
+
+Apache Fineract supports client code generation using link:https://github.com/swagger-api/swagger-codegen[Swagger Codegen] based on the link:https://swagger.io/specification/[OpenAPI Specification].  For more instructions on how to generate the client code, check link:../developers/swagger/client.md[docs/developers/swagger/client.md].

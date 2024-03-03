@@ -1,3 +1,0 @@
-= Rancher Docker Desktop
-
-TBD
