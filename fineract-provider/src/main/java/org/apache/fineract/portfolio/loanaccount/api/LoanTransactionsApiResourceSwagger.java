@@ -283,6 +283,15 @@ final class LoanTransactionsApiResourceSwagger {
         public Long chargeOffReasonId;
         @Schema(example = "1")
         public Long writeoffReasonId;
+
+        // command=reAge START
+        @Schema(example = "frequency")
+        public String frequency;
+        @Schema(example = "startDate")
+        public String startDate;
+        @Schema(example = "numberOfInstallments")
+        public Integer numberOfInstallments;
+        // command=reAge END
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsResponse")

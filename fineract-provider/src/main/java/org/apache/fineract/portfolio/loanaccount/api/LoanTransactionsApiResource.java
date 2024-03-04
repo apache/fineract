@@ -81,10 +81,14 @@ public class LoanTransactionsApiResource {
     public static final String CHARGE_OFF_COMMAND_VALUE = "charge-off";
     public static final String UNDO_CHARGE_OFF_COMMAND_VALUE = "undo-charge-off";
     public static final String DOWN_PAYMENT = "downPayment";
+    public static final String UNDO_REAGE = "undoReAge";
+    public static final String REAGE = "reAge";
+    public static final String REAMORTIZE = "reAmortize";
+    public static final String UNDO_REAMORTIZE = "undoReAmortize";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
-    private final String resourceNameForPermissions = "LOAN";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
 
     private final PlatformSecurityContext context;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -414,7 +418,7 @@ public class LoanTransactionsApiResource {
 
     private String retrieveTransaction(final Long loanId, final String loanExternalIdStr, final Long transactionId,
             final String transactionExternalIdStr, final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
         ExternalId transactionExternalId = ExternalIdFactory.produce(transactionExternalIdStr);
@@ -477,6 +481,14 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.undoChargeOff(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, DOWN_PAYMENT)) {
             commandRequest = builder.downPayment(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, REAGE)) {
+            commandRequest = builder.reAge(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, UNDO_REAGE)) {
+            commandRequest = builder.undoReAge(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, REAMORTIZE)) {
+            commandRequest = builder.reAmortize(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, UNDO_REAMORTIZE)) {
+            commandRequest = builder.undoReAmortize(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {
@@ -488,7 +500,7 @@ public class LoanTransactionsApiResource {
 
     private String retrieveTransactionTemplate(Long loanId, String loanExternalIdStr, String commandParam, UriInfo uriInfo,
             DateFormat dateFormat, DateParam transactionDateParam, String locale) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
 

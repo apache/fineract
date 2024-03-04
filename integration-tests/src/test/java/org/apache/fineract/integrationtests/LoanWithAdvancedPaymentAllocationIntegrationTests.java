@@ -44,6 +44,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -55,8 +57,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class LoanWithAdvancedPaymentAllocationIntegrationTests {
 
     private static ClientHelper CLIENT_HELPER;
-    private static ResponseSpecification RESPONSE_SPEC;
-    private static RequestSpecification REQUEST_SPEC;
     private static Account ASSET_ACCOUNT;
     private static Account FEE_PENALTY_ACCOUNT;
     private static Account EXPENSE_ACCOUNT;
@@ -67,12 +67,12 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
     @BeforeAll
     public static void setupTests() {
         Utils.initializeRESTAssured();
-        REQUEST_SPEC = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        REQUEST_SPEC.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        RESPONSE_SPEC = new ResponseSpecBuilder().expectStatusCode(200).build();
-        AccountHelper accountHelper = new AccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
-        LOAN_TRANSACTION_HELPER = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC);
-        CLIENT_HELPER = new ClientHelper(REQUEST_SPEC, RESPONSE_SPEC);
+        RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        AccountHelper accountHelper = new AccountHelper(requestSpec, responseSpec);
+        LOAN_TRANSACTION_HELPER = new LoanTransactionHelper(requestSpec, responseSpec);
+        CLIENT_HELPER = new ClientHelper(requestSpec, responseSpec);
 
         ASSET_ACCOUNT = accountHelper.createAssetAccount();
         FEE_PENALTY_ACCOUNT = accountHelper.createAssetAccount();
@@ -132,7 +132,9 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
                 .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                 .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).addAdvancedPaymentAllocation(advancedPaymentData).build();
+                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).addAdvancedPaymentAllocation(advancedPaymentData)
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL)
+                .build();
         return loanProductJSON;
     }
 
@@ -152,6 +154,7 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
                 .withInterestTypeAsDecliningBalance() //
                 .withSubmittedOnDate(operationDate) //
                 .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY) //
+                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
                 .build(clientId, loanProductId, null);
         return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }

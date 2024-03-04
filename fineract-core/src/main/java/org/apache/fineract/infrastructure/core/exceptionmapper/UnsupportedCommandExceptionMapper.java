@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -47,9 +48,13 @@ public class UnsupportedCommandExceptionMapper implements ExceptionMapper<Unsupp
         final List<ApiParameterError> errors = new ArrayList<>();
 
         final StringBuilder validationErrorCode = new StringBuilder("error.msg.command.unsupported");
+        String message = exception.getMessage();
         final StringBuilder defaultEnglishMessage = new StringBuilder("The command ").append(exception.getUnsupportedCommandName())
                 .append(" is not supported.");
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultEnglishMessage);
+        if (message != null) {
+            defaultEnglishMessage.append(" ").append(message);
+        }
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
                 exception.getUnsupportedCommandName(), exception.getUnsupportedCommandName());
 

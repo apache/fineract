@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
@@ -40,6 +42,7 @@ import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.service.JobStarter;
+import org.quartz.JobExecutionException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobLocator;
@@ -51,6 +54,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Conditional(LoanCOBEnabledCondition.class)
@@ -64,6 +68,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
 
     @Override
     @Async(TaskExecutorConstant.LOAN_COB_CATCH_UP_TASK_EXECUTOR_BEAN_NAME)
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void executeLoanCOBCatchUpAsync(FineractContext context) {
         try {
             ThreadLocalContextUtil.init(context);
@@ -78,10 +83,12 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
                 executeLoanCOBDayByDayUntilCOBBusinessDate(oldestCOBProcessedDate, cobBusinessDate);
             }
         } catch (NoSuchJobException e) {
-            throw new JobNotFoundException(LoanCOBConstant.JOB_NAME, e);
+            // Throwing an error here is useless as it will be swallowed hence it is async method
+            log.error("", new JobNotFoundException(LoanCOBConstant.JOB_NAME, e));
         } catch (JobInstanceAlreadyCompleteException | JobRestartException | JobParametersInvalidException
-                | JobExecutionAlreadyRunningException e) {
-            throw new RuntimeException(e);
+                | JobExecutionAlreadyRunningException | JobExecutionException e) {
+            // Throwing an error here is useless as it will be swallowed hence it is async method
+            log.error("", e);
         } finally {
             ThreadLocalContextUtil.reset();
         }
@@ -89,7 +96,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
 
     private void executeLoanCOBDayByDayUntilCOBBusinessDate(LocalDate oldestCOBProcessedDate, LocalDate cobBusinessDate)
             throws NoSuchJobException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
-            JobParametersInvalidException, JobRestartException {
+            JobParametersInvalidException, JobRestartException, JobExecutionException {
         Job job = jobLocator.getJob(LoanCOBConstant.JOB_NAME);
         ScheduledJobDetail scheduledJobDetail = scheduledJobDetailRepository.findByJobName(LoanCOBConstant.JOB_HUMAN_READABLE_NAME);
         LocalDate executingBusinessDate = oldestCOBProcessedDate.plusDays(1);

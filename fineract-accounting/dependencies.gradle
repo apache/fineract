@@ -1,0 +1,79 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+dependencies {
+    // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
+    // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
+    // We also (normally should have) no need to ever use 'compileOnly'.
+
+    // implementation dependencies are directly used (compiled against) in src/main (and src/test)
+    //
+    implementation(project(path: ':fineract-core'))
+    implementation('org.apache.avro:avro')
+    implementation(
+            project(path: ':fineract-avro-schemas')
+            )
+
+    implementation(
+            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-security',
+            'org.springframework.boot:spring-boot-starter-batch',
+            'org.springframework.batch:spring-batch-integration',
+            'jakarta.ws.rs:jakarta.ws.rs-api',
+            'org.glassfish.jersey.media:jersey-media-multipart',
+
+            'com.google.guava:guava',
+            'com.google.code.gson:gson',
+
+            'org.apache.commons:commons-lang3',
+
+            'com.jayway.jsonpath:json-path',
+
+            'com.github.spotbugs:spotbugs-annotations',
+            'io.swagger.core.v3:swagger-annotations-jakarta',
+
+            'com.squareup.retrofit2:converter-gson',
+
+            'org.springdoc:springdoc-openapi-starter-webmvc-ui',
+            'org.mapstruct:mapstruct',
+
+            'io.github.resilience4j:resilience4j-spring-boot3',
+            )
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.mapstruct:mapstruct-processor'
+    implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
+        exclude group: 'org.hibernate'
+    }
+    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
+        exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
+    }
+    // testCompile dependencies are ONLY used in src/test, not src/main.
+    // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
+    //
+    testImplementation( 'io.github.classgraph:classgraph' )
+    testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'com.jayway.jsonpath', module: 'json-path'
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        exclude group: 'jakarta.activation'
+        exclude group: 'javax.activation'
+        exclude group: 'org.skyscreamer'
+    }
+    testImplementation ('org.mockito:mockito-inline')
+}

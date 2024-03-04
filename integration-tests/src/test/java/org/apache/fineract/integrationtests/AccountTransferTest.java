@@ -50,6 +50,7 @@ import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -479,6 +480,7 @@ public class AccountTransferTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withAccountingRuleAsCashBased(accounts)//
+                .withLoanScheduleType(LoanScheduleType.CUMULATIVE)//
                 .build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }

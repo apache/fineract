@@ -62,11 +62,9 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     @Override
     public void notifyPreBusinessEvent(BusinessEvent<?> businessEvent) {
         throwExceptionIfBulkEvent(businessEvent);
-        List<BusinessEventListener> businessEventListeners = preListeners.get(businessEvent.getClass());
-        if (businessEventListeners != null) {
-            for (BusinessEventListener eventListener : businessEventListeners) {
-                eventListener.onBusinessEvent(businessEvent);
-            }
+        List<BusinessEventListener> businessEventListeners = findSuitableListeners(preListeners, businessEvent.getClass());
+        for (BusinessEventListener eventListener : businessEventListeners) {
+            eventListener.onBusinessEvent(businessEvent);
         }
     }
 
@@ -84,11 +82,9 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     public void notifyPostBusinessEvent(BusinessEvent<?> businessEvent) {
         throwExceptionIfBulkEvent(businessEvent);
         boolean isExternalEvent = !(businessEvent instanceof NoExternalEvent);
-        List<BusinessEventListener> businessEventListeners = postListeners.get(businessEvent.getClass());
-        if (businessEventListeners != null) {
-            for (BusinessEventListener eventListener : businessEventListeners) {
-                eventListener.onBusinessEvent(businessEvent);
-            }
+        List<BusinessEventListener> businessEventListeners = findSuitableListeners(postListeners, businessEvent.getClass());
+        for (BusinessEventListener eventListener : businessEventListeners) {
+            eventListener.onBusinessEvent(businessEvent);
         }
         if (isExternalEvent && isExternalEventPostingEnabled()) {
             // we only want to create external events for operations that were successful, hence the post listener
@@ -100,6 +96,17 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
                 }
             }
         }
+    }
+
+    private List<BusinessEventListener> findSuitableListeners(Map<Class, List<BusinessEventListener>> listeners, Class<?> eventClazz) {
+        List<BusinessEventListener> result = new ArrayList<>();
+        for (Map.Entry<Class, List<BusinessEventListener>> entry : listeners.entrySet()) {
+            Class<?> registeredClazz = entry.getKey();
+            if (registeredClazz.isAssignableFrom(eventClazz)) {
+                result.addAll(entry.getValue());
+            }
+        }
+        return result;
     }
 
     @Override

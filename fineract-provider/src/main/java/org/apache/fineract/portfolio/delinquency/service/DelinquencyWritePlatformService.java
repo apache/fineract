@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.portfolio.delinquency.service;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
@@ -43,9 +45,11 @@ public interface DelinquencyWritePlatformService {
 
     void cleanLoanDelinquencyTags(Loan loan);
 
-    LoanScheduleDelinquencyData calculateDelinquencyData(LoanScheduleDelinquencyData loanScheduleDelinquencyData);
+    LoanScheduleDelinquencyData calculateDelinquencyData(LoanScheduleDelinquencyData loanScheduleDelinquencyData,
+            List<LoanDelinquencyActionData> effectiveDelinquencyList);
 
-    void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData);
+    void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData,
+            List<LoanDelinquencyActionData> effectiveDelinquencyList);
 
     CommandProcessingResult createDelinquencyAction(Long loanId, JsonCommand command);
 

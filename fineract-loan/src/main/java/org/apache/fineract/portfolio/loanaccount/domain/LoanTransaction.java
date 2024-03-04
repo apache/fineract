@@ -46,6 +46,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -147,10 +148,17 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId);
     }
 
-    public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate disbursementDate, final ExternalId externalId) {
-        return new LoanTransaction(null, office, LoanTransactionType.DISBURSEMENT, paymentDetail, amount.getAmount(), disbursementDate,
-                externalId);
+    public static LoanTransaction disbursement(final Loan loan, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate disbursementDate, final ExternalId externalId, final Money loanTotalOverpaid) {
+        // We need to set the overpayment amount because it could happen the transaction got saved before the proper
+        // portion calculation and side effect would be reverse-replay
+        LoanTransaction disbursement = new LoanTransaction(null, loan.getOffice(), LoanTransactionType.DISBURSEMENT, paymentDetail,
+                amount.getAmount(), disbursementDate, externalId);
+        if (LoanScheduleType.PROGRESSIVE.equals(loan.getLoanProductRelatedDetail().getLoanScheduleType())) {
+            Money overPaymentPortion = amount.isGreaterThan(loanTotalOverpaid) ? loanTotalOverpaid : amount;
+            disbursement.setOverPayments(overPaymentPortion);
+        }
+        return disbursement;
     }
 
     public static LoanTransaction repayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -316,7 +324,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 && loanTransaction.getOverPaymentPortion(currency).isEqualTo(newLoanTransaction.getOverPaymentPortion(currency));
     }
 
-    private LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final LocalDate dateOf, final BigDecimal amount,
+    public LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final LocalDate dateOf, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overPaymentPortion, final boolean reversed,
             final PaymentDetail paymentDetail, final ExternalId externalId) {
@@ -483,11 +491,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 .plus(getPenaltyChargesPortion(currency)).getAmount();
     }
 
-    public void updateOverPayments(final Money overPayment) {
-        final MonetaryCurrency currency = overPayment.getCurrency();
-        this.overPaymentPortion = defaultToNullIfZero(getOverPaymentPortion(currency).plus(overPayment).getAmount());
-    }
-
     public void setOverPayments(final Money overPayment) {
         if (overPayment != null) {
             this.overPaymentPortion = defaultToNullIfZero(overPayment.getAmount());
@@ -572,7 +575,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean isTypeAllowedForChargeback() {
-        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit();
+        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isDownPayment();
     }
 
     public boolean isRepayment() {
@@ -684,6 +687,14 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isChargeOff() {
         return getTypeOf().isChargeOff() && isNotReversed();
+    }
+
+    public boolean isReAge() {
+        return getTypeOf().isReAge() && isNotReversed();
+    }
+
+    public boolean isReAmortize() {
+        return getTypeOf().isReAmortize() && isNotReversed();
     }
 
     public boolean isIdentifiedBy(final Long identifier) {
@@ -901,6 +912,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public BigDecimal getOutstandingLoanBalance() {
         return outstandingLoanBalance;
+    }
+
+    public Money getOutstandingLoanBalanceMoney(final MonetaryCurrency currency) {
+        return Money.of(currency, this.outstandingLoanBalance);
     }
 
     public PaymentDetail getPaymentDetail() {

@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.accounting.journalentry.domain;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum JournalEntryType {
 
     CREDIT(1, "journalEntryType.credit"), DEBIT(2, "journalEntrytType.debit");
@@ -41,16 +38,19 @@ public enum JournalEntryType {
         return this.code;
     }
 
-    private static final Map<Integer, JournalEntryType> intToEnumMap = new HashMap<>();
-
-    static {
-        for (final JournalEntryType type : JournalEntryType.values()) {
-            intToEnumMap.put(type.value, type);
+    public static JournalEntryType fromInt(final Integer v) {
+        if (v == null) {
+            return null;
         }
-    }
 
-    public static JournalEntryType fromInt(final int i) {
-        return intToEnumMap.get(i);
+        switch (v) {
+            case 1:
+                return CREDIT;
+            case 2:
+                return DEBIT;
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -59,11 +59,11 @@ public enum JournalEntryType {
     }
 
     public boolean isDebitType() {
-        return this.value.equals(JournalEntryType.DEBIT.getValue());
+        return this.equals(DEBIT);
     }
 
     public boolean isCreditType() {
-        return this.value.equals(JournalEntryType.CREDIT.getValue());
+        return this.equals(CREDIT);
     }
 
 }

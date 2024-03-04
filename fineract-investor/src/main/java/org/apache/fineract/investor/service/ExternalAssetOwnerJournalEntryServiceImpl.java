@@ -22,7 +22,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
-import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.journalentry.LoanJournalEntryCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
@@ -46,26 +45,17 @@ public class ExternalAssetOwnerJournalEntryServiceImpl implements ExternalAssetO
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addPostBusinessEventListener(LoanJournalEntryCreatedBusinessEvent.class,
-                new HandleLoanJournalEntryCreatedBusinessEvent());
-    }
-
-    private final class HandleLoanJournalEntryCreatedBusinessEvent implements BusinessEventListener<LoanJournalEntryCreatedBusinessEvent> {
-
-        @Override
-        public void onBusinessEvent(LoanJournalEntryCreatedBusinessEvent event) {
+        businessEventNotifierService.addPostBusinessEventListener(LoanJournalEntryCreatedBusinessEvent.class, event -> {
             JournalEntry journalEntry = event.get();
-            createMapping(journalEntry);
-        }
 
-        private void createMapping(JournalEntry journalEntry) {
             Long loanId = loanTransactionRepository.findLoanIdById(journalEntry.getLoanTransactionId()).orElseThrow();
+
             externalAssetOwnerTransferLoanMappingRepository.findByLoanId(loanId).ifPresent(transferLoanMapping -> {
                 ExternalAssetOwnerJournalEntryMapping mapping = new ExternalAssetOwnerJournalEntryMapping();
                 mapping.setJournalEntry(journalEntry);
                 mapping.setOwner(transferLoanMapping.getOwnerTransfer().getOwner());
                 externalAssetOwnerJournalEntryMappingRepository.saveAndFlush(mapping);
             });
-        }
+        });
     }
 }

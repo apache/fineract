@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAcc
 import org.apache.fineract.infrastructure.event.business.domain.loan.product.LoanProductCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.monetary.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
@@ -54,10 +55,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsJsonParser;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationsJsonParser;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
-import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductCannotBeModifiedDueToNonClosedLoansException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductDateException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
@@ -87,7 +89,9 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final DelinquencyBucketRepository delinquencyBucketRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final AdvancedPaymentAllocationsJsonParser advancedPaymentJsonParser;
+    private final CreditAllocationsJsonParser creditAllocationsJsonParser;
     private final LoanProductPaymentAllocationRuleMerger loanProductPaymentAllocationRuleMerger = new LoanProductPaymentAllocationRuleMerger();
+    private final LoanProductCreditAllocationRuleMerger loanProductCreditAllocationRuleMerger = new LoanProductCreditAllocationRuleMerger();
 
     @Transactional
     @Override
@@ -109,21 +113,22 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final List<Rate> rates = assembleListOfProductRates(command);
             final List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = advancedPaymentJsonParser
                     .assembleLoanProductPaymentAllocationRules(command, loanTransactionProcessingStrategyCode);
+            final List<LoanProductCreditAllocationRule> loanProductCreditAllocationRules = creditAllocationsJsonParser
+                    .assembleLoanProductCreditAllocationRules(command, loanTransactionProcessingStrategyCode);
             FloatingRate floatingRate = null;
             if (command.parameterExists("floatingRatesId")) {
                 floatingRate = this.floatingRateRepository
                         .findOneWithNotFoundDetection(command.longValueOfParameterNamed("floatingRatesId"));
             }
             final LoanProduct loanProduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategyCode, charges, command,
-                    this.aprCalculator, floatingRate, rates, loanProductPaymentAllocationRules);
+                    this.aprCalculator, floatingRate, rates, loanProductPaymentAllocationRules, loanProductCreditAllocationRules);
             loanProduct.updateLoanProductInRelatedClasses();
             loanProduct.setTransactionProcessingStrategyName(
                     loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(loanTransactionProcessingStrategyCode).getName());
 
             if (command.parameterExists("delinquencyBucketId")) {
-                DelinquencyBucket delinquencyBucket = this.delinquencyBucketRepository
-                        .getReferenceById(command.longValueOfParameterNamed("delinquencyBucketId"));
-                loanProduct.setDelinquencyBucket(delinquencyBucket);
+                loanProduct
+                        .setDelinquencyBucket(findDelinquencyBucketIdIfProvided(command.longValueOfParameterNamed("delinquencyBucketId")));
             }
 
             this.loanProductRepository.saveAndFlush(loanProduct);
@@ -162,6 +167,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         return fund;
     }
 
+    private DelinquencyBucket findDelinquencyBucketIdIfProvided(final Long delinquencyBucketId) {
+        DelinquencyBucket delinquencyBucket = null;
+        if (delinquencyBucketId != null) {
+            delinquencyBucket = delinquencyBucketRepository.findById(delinquencyBucketId)
+                    .orElseThrow(() -> new FundNotFoundException(delinquencyBucketId));
+        }
+        return delinquencyBucket;
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult updateLoanProduct(final Long loanProductId, final JsonCommand command) {
@@ -195,9 +209,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             }
 
             if (changes.containsKey("delinquencyBucketId")) {
-                final Long delinquencyBucketId = (Long) changes.get("delinquencyBucketId");
-                final DelinquencyBucket delinquencyBucket = this.delinquencyBucketRepository.getReferenceById(delinquencyBucketId);
-                product.setDelinquencyBucket(delinquencyBucket);
+                product.setDelinquencyBucket(findDelinquencyBucketIdIfProvided((Long) changes.get("delinquencyBucketId")));
             }
 
             if (changes.containsKey("transactionProcessingStrategyCode")) {
@@ -224,6 +236,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                         loanProductPaymentAllocationRules);
                 if (!updated) {
                     changes.remove("paymentAllocation");
+                }
+            }
+
+            if (changes.containsKey("creditAllocation")) {
+                final List<LoanProductCreditAllocationRule> loanProductCreditAllocationRules = creditAllocationsJsonParser
+                        .assembleLoanProductCreditAllocationRules(command, product.getTransactionProcessingStrategyCode());
+                loanProductCreditAllocationRules.forEach(lpcar -> lpcar.setLoanProduct(product));
+                final boolean updated = loanProductCreditAllocationRuleMerger.updateCreditAllocationRules(product,
+                        loanProductCreditAllocationRules);
+                if (!updated) {
+                    changes.remove("creditAllocation");
                 }
             }
 

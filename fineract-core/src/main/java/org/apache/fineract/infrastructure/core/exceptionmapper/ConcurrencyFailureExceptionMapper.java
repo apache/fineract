@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.exceptionmapper;
 
-import static org.apache.http.HttpStatus.SC_LOCKED;
+import static org.apache.http.HttpStatus.SC_CONFLICT;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -26,6 +26,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.springframework.context.annotation.Scope;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -43,7 +44,7 @@ public class ConcurrencyFailureExceptionMapper implements FineractExceptionMappe
 
     @Override
     public Response toResponse(final ConcurrencyFailureException exception) {
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         String type;
         String identifier;
         if (exception instanceof ObjectOptimisticLockingFailureException olex) {
@@ -53,8 +54,8 @@ public class ConcurrencyFailureExceptionMapper implements FineractExceptionMappe
             type = "lock";
             identifier = null;
         }
-        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.locked(type, identifier);
-        return Response.status(SC_LOCKED).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
+        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.conflict(type, identifier);
+        return Response.status(SC_CONFLICT).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
     }
 
     @Override

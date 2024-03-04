@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  *
@@ -64,29 +63,23 @@ public enum SavingsInterestCalculationType {
         return this.code;
     }
 
+    // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<>();
-        for (final SavingsInterestCalculationType enumType : values()) {
-            if (enumType.getValue() > 0) {
-                values.add(enumType.getValue());
-            }
-        }
-
-        return values.toArray();
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
 
-    public static SavingsInterestCalculationType fromInt(final Integer type) {
-        SavingsInterestCalculationType repaymentFrequencyType = SavingsInterestCalculationType.INVALID;
-        if (type != null) {
-            switch (type) {
-                case 1:
-                    repaymentFrequencyType = SavingsInterestCalculationType.DAILY_BALANCE;
-                break;
-                case 2:
-                    repaymentFrequencyType = SavingsInterestCalculationType.AVERAGE_DAILY_BALANCE;
-                break;
-            }
+    public static SavingsInterestCalculationType fromInt(final Integer v) {
+        if (v == null) {
+            return INVALID;
         }
-        return repaymentFrequencyType;
+
+        switch (v) {
+            case 1:
+                return DAILY_BALANCE;
+            case 2:
+                return AVERAGE_DAILY_BALANCE;
+            default:
+                return INVALID;
+        }
     }
 }

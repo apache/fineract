@@ -64,6 +64,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -1185,6 +1186,7 @@ public class LoanPostChargeOffScenariosTest {
                 .isEqualAmortization(false)//
                 .interestCalculationPeriodType(1)//
                 .transactionProcessingStrategyCode("mifos-standard-strategy")//
+                .loanScheduleType(LoanScheduleType.CUMULATIVE.toString())//
                 .daysInYearType(1)//
                 .daysInMonthType(1)//
                 .canDefineInstallmentAmount(true)//

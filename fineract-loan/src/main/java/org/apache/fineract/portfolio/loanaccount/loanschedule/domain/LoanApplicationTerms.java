@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -212,6 +213,7 @@ public final class LoanApplicationTerms {
     private LocalDate newScheduledDueDateStart;
     private boolean isDownPaymentEnabled;
     private BigDecimal disbursedAmountPercentageForDownPayment;
+    private Money downPaymentAmount;
     private boolean isAutoRepaymentForDownPaymentEnabled;
 
     private RepaymentStartDateType repaymentStartDateType;
@@ -246,8 +248,8 @@ public final class LoanApplicationTerms {
             final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean isPrincipalCompoundingDisabledForOverdueLoans,
             final Boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final Boolean isAutoRepaymentForDownPaymentEnabled, final RepaymentStartDateType repaymentStartDateType,
-            final LocalDate submittedOnDate, final Boolean isScheduleExtensionForDownPaymentDisabled,
-            final LoanScheduleType loanScheduleType, final LoanScheduleProcessingType loanScheduleProcessingType) {
+            final LocalDate submittedOnDate, final LoanScheduleType loanScheduleType,
+            final LoanScheduleProcessingType loanScheduleProcessingType) {
 
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
@@ -265,8 +267,8 @@ public final class LoanApplicationTerms {
                 isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false,
                 isInterestToBeRecoveredFirstWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment,
                 isPrincipalCompoundingDisabledForOverdueLoans, enableDownPayment, disbursedAmountPercentageForDownPayment,
-                isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, isScheduleExtensionForDownPaymentDisabled,
-                loanScheduleType, loanScheduleProcessingType);
+                isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, loanScheduleType,
+                loanScheduleProcessingType);
 
     }
 
@@ -316,11 +318,9 @@ public final class LoanApplicationTerms {
         final boolean isDownPaymentEnabled = loanProductRelatedDetail.isEnableDownPayment();
         BigDecimal disbursedAmountPercentageForDownPayment = null;
         boolean isAutoRepaymentForDownPaymentEnabled = false;
-        boolean isScheduleExtensionForDownPaymentDisabled = false;
         if (isDownPaymentEnabled) {
             disbursedAmountPercentageForDownPayment = loanProductRelatedDetail.getDisbursedAmountPercentageForDownPayment();
             isAutoRepaymentForDownPaymentEnabled = loanProductRelatedDetail.isEnableAutoRepaymentForDownPayment();
-            isScheduleExtensionForDownPaymentDisabled = loanProductRelatedDetail.isDisableScheduleExtensionForDownPayment();
         }
         LoanScheduleType loanScheduleType = loanProductRelatedDetail.getLoanScheduleType();
         LoanScheduleProcessingType loanScheduleProcessingType = loanProductRelatedDetail.getLoanScheduleProcessingType();
@@ -339,8 +339,8 @@ public final class LoanApplicationTerms {
                 allowCompoundingOnEod, isEqualAmortization, isFirstRepaymentDateAllowedOnHoliday,
                 isInterestToBeRecoveredFirstWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment,
                 isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled, disbursedAmountPercentageForDownPayment,
-                isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, isScheduleExtensionForDownPaymentDisabled,
-                loanScheduleType, loanScheduleProcessingType);
+                isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, loanScheduleType,
+                loanScheduleProcessingType);
     }
 
     private LoanApplicationTerms(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -368,8 +368,7 @@ public final class LoanApplicationTerms {
             final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI, final BigDecimal fixedPrincipalPercentagePerInstallment,
             final boolean isPrincipalCompoundingDisabledForOverdueLoans, final boolean isDownPaymentEnabled,
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean isAutoRepaymentForDownPaymentEnabled,
-            final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate,
-            final boolean isScheduleExtensionForDownPaymentDisabled, final LoanScheduleType loanScheduleType,
+            final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType) {
 
         this.currency = currency;
@@ -450,10 +449,18 @@ public final class LoanApplicationTerms {
         this.isPrincipalCompoundingDisabledForOverdueLoans = isPrincipalCompoundingDisabledForOverdueLoans;
         this.isDownPaymentEnabled = isDownPaymentEnabled;
         this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
+        this.downPaymentAmount = Money.zero(getCurrency());
+        if (isDownPaymentEnabled) {
+            this.downPaymentAmount = Money.of(getCurrency(),
+                    MathUtil.percentageOf(getPrincipal().getAmount(), getDisbursedAmountPercentageForDownPayment(), 19));
+            if (getInstallmentAmountInMultiplesOf() != null) {
+                downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, getInstallmentAmountInMultiplesOf());
+            }
+        }
+
         this.isAutoRepaymentForDownPaymentEnabled = isAutoRepaymentForDownPaymentEnabled;
         this.repaymentStartDateType = repaymentStartDateType;
         this.submittedOnDate = submittedOnDate;
-        this.isScheduleExtensionForDownPaymentDisabled = isScheduleExtensionForDownPaymentDisabled;
         this.loanScheduleType = loanScheduleType;
         this.loanScheduleProcessingType = loanScheduleProcessingType;
     }
@@ -1318,8 +1325,8 @@ public final class LoanApplicationTerms {
                 this.interestPaymentGrace, this.interestChargingGrace, this.amortizationMethod, this.inArrearsTolerance.getAmount(),
                 this.graceOnArrearsAgeing, this.daysInMonthType.getValue(), this.daysInYearType.getValue(),
                 this.interestRecalculationEnabled, this.isEqualAmortization, this.isDownPaymentEnabled,
-                this.disbursedAmountPercentageForDownPayment, this.isAutoRepaymentForDownPaymentEnabled,
-                this.isScheduleExtensionForDownPaymentDisabled, this.loanScheduleType, this.loanScheduleProcessingType);
+                this.disbursedAmountPercentageForDownPayment, this.isAutoRepaymentForDownPaymentEnabled, this.loanScheduleType,
+                this.loanScheduleProcessingType);
     }
 
     public Integer getLoanTermFrequency() {
@@ -1816,5 +1823,9 @@ public final class LoanApplicationTerms {
 
     public LoanScheduleType getLoanScheduleType() {
         return loanScheduleType;
+    }
+
+    public Money getDownPaymentAmount() {
+        return downPaymentAmount;
     }
 }

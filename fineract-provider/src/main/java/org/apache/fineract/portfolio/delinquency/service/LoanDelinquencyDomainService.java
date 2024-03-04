@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.delinquency.service;
 
+import java.util.List;
+import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -29,9 +31,10 @@ public interface LoanDelinquencyDomainService {
      * Charge back transaction
      *
      * @param loan
+     * @param effectiveDelinquencyList
      */
-    CollectionData getOverdueCollectionData(Loan loan);
+    CollectionData getOverdueCollectionData(Loan loan, List<LoanDelinquencyActionData> effectiveDelinquencyList);
 
-    LoanDelinquencyData getLoanDelinquencyData(Loan loan);
+    LoanDelinquencyData getLoanDelinquencyData(Loan loan, List<LoanDelinquencyActionData> effectiveDelinquencyList);
 
 }

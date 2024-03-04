@@ -233,7 +233,7 @@ public final class LoanEventApiJsonValidator {
         baseDataValidator.reset().parameter(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME).ignoreIfNull().value(reversalExternalId)
                 .notExceedingLengthOf(100);
 
-        validatePaymentDetails(baseDataValidator, element, false);
+        validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -263,7 +263,7 @@ public final class LoanEventApiJsonValidator {
         final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
-        validatePaymentDetails(baseDataValidator, element, true);
+        validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -313,19 +313,11 @@ public final class LoanEventApiJsonValidator {
     }
 
     private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
-        final boolean paymentDetailRequired = false; // Default value for backward compatibility
-        validatePaymentDetails(baseDataValidator, element, paymentDetailRequired);
-    }
-
-    private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element,
-            final boolean paymentDetailRequired) {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("paymentTypeId", element);
-        if (paymentDetailRequired) {
-            baseDataValidator.reset().parameter("paymentTypeId").value(paymentTypeId).notNull().integerGreaterThanZero();
-        } else {
-            baseDataValidator.reset().parameter("paymentTypeId").value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        }
+
+        baseDataValidator.reset().parameter("paymentTypeId").value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
+
         final Set<String> paymentDetailParameters = new HashSet<>(
                 Arrays.asList("accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
         for (final String paymentDetailParameterName : paymentDetailParameters) {

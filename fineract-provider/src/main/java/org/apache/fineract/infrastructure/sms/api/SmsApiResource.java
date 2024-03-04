@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SmsApiResource {
 
-    private final String resourceNameForPermissions = "SMS";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "SMS";
 
     private final PlatformSecurityContext context;
     private final SmsReadPlatformService readPlatformService;
@@ -69,7 +69,7 @@ public class SmsApiResource {
 
     @GET
     public String retrieveAll(@Context final UriInfo uriInfo) {
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final Collection<SmsData> smsMessages = readPlatformService.retrieveAll();
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializer.serialize(settings, smsMessages);
@@ -95,11 +95,11 @@ public class SmsApiResource {
     public String retrieveAllSmsByStatus(@PathParam("campaignId") final Long campaignId, @Context final UriInfo uriInfo,
             @QueryParam("status") final Long status, @QueryParam("fromDate") final DateParam fromDateParam,
             @QueryParam("toDate") final DateParam toDateParam, @QueryParam("locale") final String locale,
-            @QueryParam("dateFormat") final String rawDateFormat, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+            @QueryParam("dateFormat") final String rawDateFormat, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder) {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        final SearchParameters searchParameters = SearchParameters.forSMSCampaign(offset, limit, orderBy, sortOrder);
 
         final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
 

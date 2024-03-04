@@ -59,6 +59,7 @@ public class LoanApplicationTestBuilder {
     private String amortizationType = EQUAL_PRINCIPAL_PAYMENTS;
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private String transactionProcessingCode = DEFAULT_STRATEGY;
+    private String loanScheduleProcessingType = null;
     private String expectedDisbursmentDate = "";
     private String submittedOnDate = "";
     private String loanType = "individual";
@@ -83,6 +84,7 @@ public class LoanApplicationTestBuilder {
     private String interestChargedFromDate;
     private String linkAccountId;
     private String inArrearsTolerance;
+    private boolean createStandingInstructionAtDisbursement = false;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -158,6 +160,10 @@ public class LoanApplicationTestBuilder {
         map.put("collateral", this.collaterals);
         map.put("interestChargedFromDate", this.interestChargedFromDate);
 
+        if (loanScheduleProcessingType != null) {
+            map.put("loanScheduleProcessingType", this.loanScheduleProcessingType);
+        }
+
         if (this.externalId != null) {
             map.put("externalId", this.externalId);
         }
@@ -197,6 +203,10 @@ public class LoanApplicationTestBuilder {
 
         if (datatables != null) {
             map.put("datatables", this.datatables);
+        }
+
+        if (createStandingInstructionAtDisbursement == true) {
+            map.put("createStandingInstructionAtDisbursement", true);
         }
         LOG.info("Loan Application request : {} ", map);
         return new Gson().toJson(map);
@@ -357,6 +367,11 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
+    public LoanApplicationTestBuilder withLoanScheduleProcessingType(final String loanScheduleProcessingType) {
+        this.loanScheduleProcessingType = loanScheduleProcessingType;
+        return this;
+    }
+
     public LoanApplicationTestBuilder withFirstRepaymentDate(final String firstRepaymentDate) {
         this.repaymentsStartingFromDate = firstRepaymentDate;
         return this;
@@ -418,6 +433,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withInArrearsTolerance(String amount) {
         this.inArrearsTolerance = amount;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withCreateStandingInstructionAtDisbursement() {
+        this.createStandingInstructionAtDisbursement = true;
         return this;
     }
 }

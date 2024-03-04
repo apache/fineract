@@ -50,6 +50,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -130,7 +131,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate) {
+    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate,
+            String repaymentStrategy) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -145,6 +147,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate(submitDate) //
                 .withSubmittedOnDate(submitDate) //
+                .withRepaymentStrategy(repaymentStrategy) //
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
@@ -160,7 +163,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                 accounts);
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, principal, submitApproveDisburseDate);
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, principal, submitApproveDisburseDate,
+                loanProductTestBuilder.getTransactionProcessingStrategyCode());
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -735,6 +739,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", new LoanProductTestBuilder().withRepaymentStrategy(DEFAULT_STRATEGY))),
                 Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY",
                         new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
                                 .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation()))));
     }
 

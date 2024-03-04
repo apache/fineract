@@ -22,5 +22,5 @@ services:
   activemq:
     image: symptoma/activemq:5.18.3
     ports:
-      - 6161:6161
-      - 61616:61616
+      - "6161:6161"
+      - "61616:61616"

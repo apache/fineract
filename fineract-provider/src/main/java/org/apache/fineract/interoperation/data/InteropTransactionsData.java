@@ -22,11 +22,15 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
+@Getter
+@Setter
 public class InteropTransactionsData extends CommandProcessingResult {
 
     List<InteropTransactionData> transactions;

@@ -59,6 +59,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
@@ -117,7 +118,8 @@ public class DelinquencyAndChargebackIntegrationTest {
 
             // Create Loan Account
             final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
-                    getLoanProductsProductResponse.getId().toString(), operationDate, "12");
+                    getLoanProductsProductResponse.getId().toString(), operationDate, "12",
+                    loanProductTestBuilder.getTransactionProcessingStrategyCode());
 
             // Move the Business date 1 month to apply the first repayment
             businessDate = businessDate.plusMonths(1);
@@ -237,7 +239,8 @@ public class DelinquencyAndChargebackIntegrationTest {
 
             // Create Loan Account
             final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
-                    getLoanProductsProductResponse.getId().toString(), operationDate, "3");
+                    getLoanProductsProductResponse.getId().toString(), operationDate, "3",
+                    loanProductTestBuilder.getTransactionProcessingStrategyCode());
 
             // Move the Business date 1 month to apply the first repayment
             businessDate = businessDate.plusMonths(1);
@@ -345,7 +348,7 @@ public class DelinquencyAndChargebackIntegrationTest {
     }
 
     private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate, final String periods) {
+            final String operationDate, final String periods, String repaymentStrategy) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency(periods)
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments(periods).withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths() //
@@ -353,6 +356,7 @@ public class DelinquencyAndChargebackIntegrationTest {
                 .withExpectedDisbursementDate(operationDate) //
                 .withInterestTypeAsDecliningBalance() //
                 .withSubmittedOnDate(operationDate) //
+                .withRepaymentStrategy(repaymentStrategy) //
                 .build(clientId, loanProductId, null);
         final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
         loanTransactionHelper.approveLoan(operationDate, principalAmount, loanId, null);
@@ -422,6 +426,7 @@ public class DelinquencyAndChargebackIntegrationTest {
         return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", new LoanProductTestBuilder().withRepaymentStrategy(DEFAULT_STRATEGY))),
                 Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY",
                         new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
                                 .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation()))));
     }
 

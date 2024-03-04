@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -29,12 +30,14 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -43,11 +46,15 @@ import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +71,8 @@ public class LoanTransactionReverseReplayTest {
     private ClientHelper clientHelper;
     private LoanTransactionHelper loanTransactionHelper;
     private InlineLoanCOBHelper inlineLoanCOBHelper;
+    private JournalEntryHelper journalEntryHelper;
+    private AccountHelper accountHelper;
 
     @BeforeEach
     public void setup() {
@@ -75,6 +84,8 @@ public class LoanTransactionReverseReplayTest {
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         clientHelper = new ClientHelper(requestSpec, responseSpec);
         inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+        journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+        accountHelper = new AccountHelper(requestSpec, responseSpec);
     }
 
     /**
@@ -214,6 +225,136 @@ public class LoanTransactionReverseReplayTest {
             lastPeriodIndex = loansLoanIdResponse.getRepaymentSchedule().getPeriods().size() - 1;
             assertEquals(LocalDate.of(2022, 10, 11),
                     loansLoanIdResponse.getRepaymentSchedule().getPeriods().get(lastPeriodIndex).getDueDate());
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        }
+    }
+
+    @Test
+    public void loanTransactionReverseReplayWithChargeOffAndCBR() {
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("04 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account assetFeeAndPenaltyAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+
+            // Loan ExternalId
+            String loanExternalIdStr = UUID.randomUUID().toString();
+
+            // Client and Loan account creation
+
+            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+                    .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
+                    .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
+                    .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                    .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
+                    .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(null);
+            final Integer loanProductID = loanTransactionHelper.getLoanProductId(loanProductJSON);
+
+            final Integer loanId = createLoanAccount(clientId, loanProductID.longValue(), loanExternalIdStr);
+
+            // set loan as chargeoff
+            String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
+                    + Utils.randomStringGenerator("is", 5);
+            Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+            String transactionExternalId = UUID.randomUUID().toString();
+            PostLoansLoanIdTransactionsResponse chargeOffResponse = loanTransactionHelper.chargeOffLoan(loanId.longValue(),
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("03 October 2022").locale("en").dateFormat("dd MMMM yyyy")
+                            .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("03 October 2022").locale("en")
+                            .transactionAmount(1500.0));
+
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("05 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+
+            PostLoansLoanIdTransactionsResponse cbrTransactionResponse = loanTransactionHelper.makeCreditBalanceRefund(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("05 October 2022").locale("en")
+                            .transactionAmount(500.0));
+
+            GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
+            int lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
+            assertEquals(500.0, loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount());
+
+            ArrayList<HashMap> journalEntriesForCBR = journalEntryHelper
+                    .getJournalEntriesByTransactionId("L" + cbrTransactionResponse.getResourceId().toString());
+            assertNotNull(journalEntriesForCBR);
+            List<HashMap> cbrExpenseJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> assetAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            List<HashMap> cbrAssetJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> overpaymentAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            assertEquals(1, cbrExpenseJournalEntries.size());
+            assertEquals(1, cbrAssetJournalEntries.size());
+
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                    .date("06 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+
+            loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("06 October 2022").locale("en")
+                            .dateFormat(DATE_PATTERN).transactionAmount(0.0));
+
+            // check if the original CBR got reversed
+            journalEntriesForCBR = journalEntryHelper
+                    .getJournalEntriesByTransactionId("L" + cbrTransactionResponse.getResourceId().toString());
+            assertNotNull(journalEntriesForCBR);
+            cbrExpenseJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> assetAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            cbrAssetJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> overpaymentAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            assertEquals(2, cbrExpenseJournalEntries.size());
+            assertEquals(2, cbrAssetJournalEntries.size());
+
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+            loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
+            lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
+            assertEquals(500.0, loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount());
+
+            // replayed CBR transaction
+            GetLoansLoanIdTransactions newCBRTransaction = loansLoanIdResponse.getTransactions().stream()
+                    .filter(transaction -> transaction.getType().getCreditBalanceRefund()).findFirst().orElse(null);
+
+            assertNotNull(newCBRTransaction);
+
+            Long newCBRTransactionId = newCBRTransaction.getId();
+
+            journalEntriesForCBR = journalEntryHelper.getJournalEntriesByTransactionId("L" + newCBRTransactionId);
+            ArrayList<HashMap> journalEntriesForChargeOff = journalEntryHelper
+                    .getJournalEntriesByTransactionId("L" + chargeOffResponse.getResourceId().toString());
+            assertNotNull(journalEntriesForCBR);
+            assertNotNull(journalEntriesForChargeOff);
+
+            String expenseGlAccountCodeForChargeOff = (String) journalEntriesForChargeOff.get(0).get("glAccountCode");
+            String assetGlAccountCodeForChargeOff = (String) journalEntriesForChargeOff.get(1).get("glAccountCode");
+
+            cbrExpenseJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> expenseGlAccountCodeForChargeOff.equals(journalEntry.get("glAccountCode"))
+                            && expenseAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            cbrAssetJournalEntries = journalEntriesForCBR.stream() //
+                    .filter(journalEntry -> assetGlAccountCodeForChargeOff.equals(journalEntry.get("glAccountCode"))
+                            && assetAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+                    .toList();
+
+            assertEquals(1, cbrExpenseJournalEntries.size());
+            assertEquals(1, cbrAssetJournalEntries.size());
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }

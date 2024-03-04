@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.springframework.stereotype.Component;
 
 @Provider
@@ -36,7 +37,7 @@ public class BusinessStepExceptionMapper implements ExceptionMapper<BusinessStep
     public Response toResponse(BusinessStepException exception) {
         final String globalisationMessageCode = "error.msg.invalid.request.body";
         final String defaultUserMessage = exception.getMessage();
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
 
         final ApiParameterError error = ApiParameterError.parameterError(globalisationMessageCode, defaultUserMessage, "stepName");
 

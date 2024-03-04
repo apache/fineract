@@ -18,6 +18,7 @@
  */
 package org.apache.fineract;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.mock;
 
@@ -25,10 +26,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.util.List;
 import javax.sql.DataSource;
 import liquibase.change.custom.CustomTaskChange;
+import okhttp3.OkHttpClient;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
 import org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.migration.ExtendedSpringLiquibaseFactory;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseStateVerifier;
@@ -107,11 +111,32 @@ public class TestConfiguration {
         return mock(JobLauncher.class, RETURNS_MOCKS);
     }
 
+    @Primary
     @Bean
     public HikariDataSource tenantDataSource() {
-        return mock(HikariDataSource.class, Mockito.RETURNS_MOCKS);
+        HikariDataSource mockDataSource = mock(HikariDataSource.class, Mockito.RETURNS_MOCKS);
+        return mockDataSource;
     }
 
+    /**
+     * DataSource with Mockito RETURNS_MOCKS black magic.
+     */
+    @Bean
+    public DataSource hikariTenantDataSource() {
+        HikariDataSource mockDataSource = mock(HikariDataSource.class, Mockito.RETURNS_MOCKS);
+        return mockDataSource;
+    }
+
+    @Primary
+    @Bean
+    public DatabaseTypeResolver databaseTypeResolver() {
+        DatabaseTypeResolver mock = mock(DatabaseTypeResolver.class, RETURNS_MOCKS);
+        given(mock.databaseType()).willReturn(DatabaseType.POSTGRESQL);
+        given(mock.isPostgreSQL()).willReturn(true);
+        return mock;
+    }
+
+    @Primary
     @Bean
     public TenantDetailsService tenantDetailsService() {
         return mock(TenantDetailsService.class, Mockito.RETURNS_MOCKS);
@@ -157,15 +182,6 @@ public class TestConfiguration {
         return mockJobRegisterService;
     }
 
-    /**
-     * DataSource with Mockito RETURNS_MOCKS black magic.
-     */
-    @Bean
-    public DataSource hikariTenantDataSource() {
-        DataSource mockDataSource = mock(DataSource.class, Mockito.RETURNS_MOCKS);
-        return mockDataSource;
-    }
-
     @Bean
     public JdbcTemplate jdbcTemplate() {
         return mock(JdbcTemplate.class);
@@ -187,5 +203,11 @@ public class TestConfiguration {
     @Bean
     public JobOperator jobOperator() {
         return mock(JobOperator.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public OkHttpClient okHttpClient() {
+        return mock(OkHttpClient.class, RETURNS_MOCKS);
     }
 }

@@ -271,8 +271,8 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<OfficeData> offices = null;
         if (officeId == null) {
             Boolean includeAllOffices = Boolean.TRUE;
-            offices = (List) this.officeReadPlatformService.retrieveAllOffices(includeAllOffices, new SearchParameters(null, null, null,
-                    null, null, null, null, null, null, "id", "asc", null, null, null, null, null, null));
+            offices = (List) this.officeReadPlatformService.retrieveAllOffices(includeAllOffices,
+                    new SearchParameters(null, null, null, null, null, null, null, null, "id", "asc", null, null, null, null, null, null));
         } else {
             offices = new ArrayList<>();
             offices.add(this.officeReadPlatformService.retrieveOffice(officeId));
@@ -341,7 +341,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         if (officeId == null) {
             centers = (List<CenterData>) this.centerReadPlatformService.retrieveAll(null, null);
         } else {
-            SearchParameters searchParameters = SearchParameters.from(null, officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.from(officeId, null, null, null);
             centers = (List<CenterData>) centerReadPlatformService.retrieveAll(searchParameters, null);
         }
 
@@ -359,7 +359,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
                 }
             }
         } else {
-            SearchParameters searchParameters = SearchParameters.from(null, officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.from(officeId, null, null, null);
             Page<ClientData> clientDataPage = this.clientReadPlatformService.retrieveAll(searchParameters);
             if (clientDataPage != null) {
                 clients = new ArrayList<>();
@@ -420,7 +420,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         if (officeId == null) {
             groups = (List<GroupGeneralData>) this.groupReadPlatformService.retrieveAll(null, null);
         } else {
-            SearchParameters searchParameters = SearchParameters.from(null, officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.from(officeId, null, null, null);
             groups = (List<GroupGeneralData>) groupReadPlatformService.retrieveAll(searchParameters, null);
         }
 
@@ -448,7 +448,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         if (officeId == null) {
             loanAccounts = loanReadPlatformService.retrieveAll(null).getPageItems();
         } else {
-            SearchParameters searchParameters = SearchParameters.from(null, officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.from(officeId, null, null, null);
             loanAccounts = loanReadPlatformService.retrieveAll(searchParameters).getPageItems();
         }
         return loanAccounts;
@@ -488,12 +488,11 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
 
     private List<SavingsAccountData> fetchSavingsAccounts(Long officeId) {
         List<SavingsAccountData> savingsAccounts = null;
-        String activeAccounts = "sa.status_enum = 300";
         if (officeId != null) {
-            SearchParameters searchParameters = SearchParameters.from(activeAccounts, officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.builder().officeId(officeId).status("300").build();
             savingsAccounts = savingsAccountReadPlatformService.retrieveAll(searchParameters).getPageItems();
         } else {
-            SearchParameters searchParameters = SearchParameters.from(activeAccounts, null, null, null, null);
+            SearchParameters searchParameters = SearchParameters.builder().status("300").build();
             savingsAccounts = savingsAccountReadPlatformService.retrieveAll(searchParameters).getPageItems();
         }
         return savingsAccounts;

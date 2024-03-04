@@ -524,6 +524,8 @@ final class LoansApiResourceSwagger {
             public Double interestOutstanding;
             @Schema(example = "200000.000000")
             public Double interestOverdue;
+            @Schema(example = "0.00")
+            public Double feeAdjustments;
             @Schema(example = "18000.000000")
             public Double feeChargesCharged;
             @Schema(example = "0.000000")
@@ -538,6 +540,8 @@ final class LoansApiResourceSwagger {
             public Double feeChargesOutstanding;
             @Schema(example = "15000.000000")
             public Double feeChargesOverdue;
+            @Schema(example = "0.00")
+            public Double penaltyAdjustments;
             @Schema(example = "0.000000")
             public Double penaltyChargesCharged;
             @Schema(example = "0.000000")
@@ -1082,7 +1086,7 @@ final class LoansApiResourceSwagger {
         public Integer repaymentEvery;
         public GetLoansLoanIdRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "24")
-        public Integer interestRatePerPeriod;
+        public BigDecimal interestRatePerPeriod;
         public GetLoansLoanIdInterestRateFrequencyType interestRateFrequencyType;
         @Schema(example = "24")
         public Integer annualInterestRate;
@@ -1126,8 +1130,6 @@ final class LoansApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
-        @Schema(example = "false")
-        public Boolean disableScheduleExtensionForDownPayment;
         @Schema(example = "CUMULATIVE")
         public EnumOptionData loanScheduleType;
         @Schema(example = "HORIZONTAL")
@@ -1180,7 +1182,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "2")
         public Integer repaymentFrequencyType;
         @Schema(example = "2")
-        public Integer interestRatePerPeriod;
+        public BigDecimal interestRatePerPeriod;
         @Schema(example = "1")
         public Integer amortizationType;
         @Schema(example = "5.5")
@@ -1215,8 +1217,6 @@ final class LoansApiResourceSwagger {
         public Integer graceOnInterestPayment;
         @Schema(example = "1")
         public Integer graceOnArrearsAgeing;
-        @Schema(example = "CUMULATIVE")
-        public String loanScheduleType;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
     }
@@ -1318,7 +1318,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "0")
         public Integer repaymentFrequencyType;
         @Schema(example = "2")
-        public Integer interestRatePerPeriod;
+        public BigDecimal interestRatePerPeriod;
         @Schema(example = "0")
         public Integer interestType;
         @Schema(example = "0")
@@ -1362,8 +1362,6 @@ final class LoansApiResourceSwagger {
         public List<PutLoansLoanIdChanges> charges;
         public List<PutLoansLoanIdCollateral> collateral;
         public List<PutLoansLoanIdDisbursementData> disbursementData;
-        @Schema(example = "CUMULATIVE")
-        public String loanScheduleType;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
 

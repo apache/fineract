@@ -42,7 +42,9 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainServiceImpl;
+import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -75,6 +77,8 @@ public class LoanDelinquencyDomainServiceTest {
     private Loan loan;
     @Mock
     private LoanProduct loanProduct;
+    @Mock
+    private DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
     @InjectMocks
     private LoanDelinquencyDomainServiceImpl underTest;
 
@@ -101,12 +105,14 @@ public class LoanDelinquencyDomainServiceTest {
 
     @AfterEach
     public void deregister() {
+        ThreadLocalContextUtil.reset();
         moneyHelperStatic.close();
     }
 
     @Test
     public void givenLoanAccountWithoutOverdueThenCalculateDelinquentData() {
         // given
+        final List<LoanDelinquencyActionData> effectiveDelinquencyList = Collections.emptyList();
         final LocalDate fromDate = businessDate.minusMonths(1);
         final LocalDate dueDate = businessDate;
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = Arrays.asList(new LoanRepaymentScheduleInstallment(loan, 1,
@@ -118,7 +124,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getCurrency()).thenReturn(currency);
 
-        CollectionData collectionData = underTest.getOverdueCollectionData(loan);
+        CollectionData collectionData = underTest.getOverdueCollectionData(loan, effectiveDelinquencyList);
 
         // then
         assertEquals(0L, collectionData.getDelinquentDays());
@@ -130,6 +136,7 @@ public class LoanDelinquencyDomainServiceTest {
     @Test
     public void givenLoanAccountWithOverdueThenCalculateDelinquentData() {
         // given
+        final List<LoanDelinquencyActionData> effectiveDelinquencyList = Collections.emptyList();
         final Long daysDiff = 2L;
         final LocalDate fromDate = businessDate.minusMonths(1).minusDays(daysDiff);
         final LocalDate dueDate = businessDate.minusDays(daysDiff);
@@ -143,8 +150,9 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getLoanTransactions(Mockito.any(Predicate.class))).thenReturn(Collections.emptyList());
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
+        when(delinquencyEffectivePauseHelper.getPausedDaysBeforeDate(effectiveDelinquencyList, businessDate)).thenReturn(0L);
 
-        CollectionData collectionData = underTest.getOverdueCollectionData(loan);
+        CollectionData collectionData = underTest.getOverdueCollectionData(loan, effectiveDelinquencyList);
 
         // then
         assertEquals(daysDiff, collectionData.getDelinquentDays());
@@ -156,6 +164,7 @@ public class LoanDelinquencyDomainServiceTest {
     @Test
     public void givenLoanAccountWithoutOverdueWithChargebackThenCalculateDelinquentData() {
         // given
+        final List<LoanDelinquencyActionData> effectiveDelinquencyList = Collections.emptyList();
         PaymentDetail paymentDetail = Mockito.mock(PaymentDetail.class);
         Long daysDiff = 2L;
         final LocalDate fromDate = businessDate.minusMonths(1).plusDays(daysDiff);
@@ -178,7 +187,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getCurrency()).thenReturn(currency);
 
-        CollectionData collectionData = underTest.getOverdueCollectionData(loan);
+        CollectionData collectionData = underTest.getOverdueCollectionData(loan, effectiveDelinquencyList);
 
         // then
         assertEquals(0L, collectionData.getDelinquentDays());
@@ -190,6 +199,7 @@ public class LoanDelinquencyDomainServiceTest {
     @Test
     public void givenLoanInstallmentWithOverdueEnableInstallmentDelinquencyThenCalculateDelinquentData() {
         // given
+        final List<LoanDelinquencyActionData> effectiveDelinquencyList = Collections.emptyList();
         final Long daysDiff = 2L;
         final LocalDate fromDate = businessDate.minusMonths(1).minusDays(daysDiff);
         final LocalDate dueDate = businessDate.minusDays(daysDiff);
@@ -207,8 +217,9 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
         when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
+        when(delinquencyEffectivePauseHelper.getPausedDaysBeforeDate(effectiveDelinquencyList, businessDate)).thenReturn(0L);
 
-        LoanDelinquencyData collectionData = underTest.getLoanDelinquencyData(loan);
+        LoanDelinquencyData collectionData = underTest.getLoanDelinquencyData(loan, effectiveDelinquencyList);
 
         // then
         assertNotNull(collectionData);
@@ -232,6 +243,7 @@ public class LoanDelinquencyDomainServiceTest {
     public void givenLoanInstallmentWithoutOverdueWithChargebackAndEnableInstallmentDelinquencyThenCalculateDelinquentData() {
 
         // given
+        final List<LoanDelinquencyActionData> effectiveDelinquencyList = Collections.emptyList();
         PaymentDetail paymentDetail = Mockito.mock(PaymentDetail.class);
         Long daysDiff = 2L;
         final LocalDate fromDate = businessDate.minusMonths(1).plusDays(daysDiff);
@@ -255,8 +267,9 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
         when(loan.getCurrency()).thenReturn(currency);
         when(loan.getLoanTransactions(Mockito.any(Predicate.class))).thenReturn(Arrays.asList(loanTransaction));
+        when(delinquencyEffectivePauseHelper.getPausedDaysBeforeDate(effectiveDelinquencyList, businessDate)).thenReturn(0L);
 
-        LoanDelinquencyData collectionData = underTest.getLoanDelinquencyData(loan);
+        LoanDelinquencyData collectionData = underTest.getLoanDelinquencyData(loan, effectiveDelinquencyList);
 
         // then
         assertNotNull(collectionData);

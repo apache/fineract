@@ -24,6 +24,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerInitiateTransferException;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,7 @@ public class ExternalAssetOwnerInitiateTransferExceptionMapper implements Except
     public Response toResponse(ExternalAssetOwnerInitiateTransferException exception) {
         final String globalisationMessageCode = "error.msg.external.asset.owner.initiate";
         final String defaultUserMessage = exception.getMessage();
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
 
         final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 

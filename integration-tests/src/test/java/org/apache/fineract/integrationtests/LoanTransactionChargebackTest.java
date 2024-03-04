@@ -61,6 +61,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
@@ -624,7 +625,7 @@ public class LoanTransactionChargebackTest {
         String operationDate = Utils.dateFormatter.format(transactionDate);
 
         return createLoanAccount(loanTransactionHelper, clientId.toString(), getLoanProductsProductResponse.getId().toString(),
-                operationDate, amountVal, numberOfRepayments.toString());
+                operationDate, amountVal, numberOfRepayments.toString(), loanProductTestBuilder.getTransactionProcessingStrategyCode());
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
@@ -646,7 +647,7 @@ public class LoanTransactionChargebackTest {
     }
 
     private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate, final String principalAmount, final String numberOfRepayments) {
+            final String operationDate, final String principalAmount, final String numberOfRepayments, final String repaymentStrategy) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount)
                 .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments)
                 .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths() //
@@ -654,6 +655,7 @@ public class LoanTransactionChargebackTest {
                 .withExpectedDisbursementDate(operationDate) //
                 .withInterestTypeAsDecliningBalance() //
                 .withSubmittedOnDate(operationDate) //
+                .withRepaymentStrategy(repaymentStrategy) //
                 .build(clientId, loanProductId, null);
         final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
         loanTransactionHelper.approveLoan(operationDate, principalAmount, loanId, null);
@@ -720,6 +722,7 @@ public class LoanTransactionChargebackTest {
         return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", new LoanProductTestBuilder().withRepaymentStrategy(DEFAULT_STRATEGY))),
                 Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY",
                         new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
                                 .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation()))));
     }
 

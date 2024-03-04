@@ -264,14 +264,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Transactional
     @Override
     public CommandProcessingResult gsimDeposit(final Long gsimId, final JsonCommand command) {
-        Long parentSavingId = gsimId;
-        // GroupSavingsIndividualMonitoringparentSavings=gsimRepository.findById(parentSavingId).get();
-        List<SavingsAccount> childSavings = this.savingAccountRepositoryWrapper.findByGsimId(gsimId);
-
         JsonArray savingsArray = command.arrayOfParameterNamed("savingsArray");
-
-        JsonArray childAccounts = command.arrayOfParameterNamed("childAccounts");
-        int count = 0;
 
         CommandProcessingResult result = null;
         for (JsonElement element : savingsArray) {
@@ -1452,13 +1445,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private void updateSavingsTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds) {
-        existingTransactionIds.addAll(account.findCurrentTransactionIdsWithPivotDateConfig());
-        existingReversedTransactionIds.addAll(account.findCurrentReversedTransactionIdsWithPivotDateConfig());
-    }
-
-    @SuppressWarnings("unused")
-    private void updateSavingsTransactionsDetails(SavingsAccountData account, Set<Long> existingTransactionIds,
             Set<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(account.findCurrentTransactionIdsWithPivotDateConfig());
         existingReversedTransactionIds.addAll(account.findCurrentReversedTransactionIdsWithPivotDateConfig());

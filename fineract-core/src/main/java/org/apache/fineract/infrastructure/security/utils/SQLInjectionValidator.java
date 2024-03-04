@@ -38,10 +38,16 @@ public final class SQLInjectionValidator {
 
     private static final String SQL_PATTERN = "[a-zA-Z_=,\\-:'!><.?\"`% ()0-9*\n\r]*";
 
+    // TODO: see here https://rails-sqli.org for and
+    // https://larrysteinle.com/2011/02/20/use-regular-expressions-to-detect-sql-code-injection more examples
+    private static final List<String> INJECTION_PATTERNS = List.of("(?i).*[or|and]\s*[\"']?-1[\"']?\\s*(-*).*",
+            "(?i).*\\s+[\"']?(\\d+)[\"']?\\s*=\\s*[\"']?(\\1)[\"']?\\s*(-*).*");
+
     public static void validateSQLInput(final String sqlSearch) {
         if (StringUtils.isBlank(sqlSearch)) {
             return;
         }
+
         String lowerCaseSQL = sqlSearch.toLowerCase();
         List<String[]> commandsList = List.of(DDL_COMMANDS, DML_COMMANDS, COMMENTS);
         validateSQLCommands(lowerCaseSQL, commandsList, String::contains);
@@ -53,6 +59,7 @@ public final class SQLInjectionValidator {
         if (StringUtils.isBlank(sqlSearch)) {
             return;
         }
+
         String lowerCaseSQL = sqlSearch.toLowerCase().trim();
         validateSQLCommand(lowerCaseSQL, DDL_COMMANDS, String::startsWith);
         validateSQLCommand(lowerCaseSQL, COMMENTS, String::contains);
@@ -80,16 +87,8 @@ public final class SQLInjectionValidator {
         // Removing the space before and after '=' operator
         // String s = " \" OR 1 = 1"; For the cases like this
         boolean injectionFound = false;
-        String inputSqlString = lowerCaseSQL;
-        while (inputSqlString.indexOf(" =") > 0) { // Don't remove space before
-            // = operator
-            inputSqlString = inputSqlString.replaceAll(" =", "=");
-        }
 
-        while (inputSqlString.indexOf("= ") > 0) { // Don't remove space after =
-            // operator
-            inputSqlString = inputSqlString.replaceAll("= ", "=");
-        }
+        String inputSqlString = lowerCaseSQL.replaceAll("\\s*=\\s*", "=");
 
         StringTokenizer tokenizer = new StringTokenizer(inputSqlString, " ");
         while (tokenizer.hasMoreTokens()) {
@@ -131,8 +130,17 @@ public final class SQLInjectionValidator {
                 }
             }
         }
+
         if (injectionFound) {
             throw new SQLInjectionException();
+        }
+
+        for (String injectionPattern : INJECTION_PATTERNS) {
+            Pattern pattern = Pattern.compile(injectionPattern);
+            Matcher matcher = pattern.matcher(sqlSearch);
+            if (matcher.matches()) {
+                throw new SQLInjectionException();
+            }
         }
 
         Pattern pattern = Pattern.compile(SQL_PATTERN);

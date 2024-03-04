@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.accounting.producttoaccountmapping.domain;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum PortfolioProductType {
 
     LOAN(1, "productType.loan"), SAVING(2, "productType.saving"), CLIENT(5, "productType.client"), PROVISIONING(3,
@@ -47,33 +44,41 @@ public enum PortfolioProductType {
         return this.code;
     }
 
-    private static final Map<Integer, PortfolioProductType> intToEnumMap = new HashMap<>();
+    public static PortfolioProductType fromInt(final Integer v) {
+        if (v == null) {
+            return null;
+        }
 
-    static {
-        for (final PortfolioProductType type : PortfolioProductType.values()) {
-            intToEnumMap.put(type.value, type);
+        switch (v) {
+            case 1:
+                return LOAN;
+            case 2:
+                return SAVING;
+            case 3:
+                return CLIENT;
+            case 4:
+                return PROVISIONING;
+            case 5:
+                return SHARES;
+            default:
+                return null;
         }
     }
 
-    public static PortfolioProductType fromInt(final int i) {
-        final PortfolioProductType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
-    }
-
     public boolean isSavingProduct() {
-        return this.value.equals(PortfolioProductType.SAVING.getValue());
+        return this.equals(SAVING);
     }
 
     public boolean isLoanProduct() {
-        return this.value.equals(PortfolioProductType.LOAN.getValue());
+        return this.equals(LOAN);
     }
 
     public boolean isClient() {
-        return this.value.equals(PortfolioProductType.CLIENT.getValue());
+        return this.equals(CLIENT);
     }
 
     public boolean isShareProduct() {
-        return this.value.equals(PortfolioProductType.SHARES.getValue());
+        return this.equals(SHARES);
     }
 
 }

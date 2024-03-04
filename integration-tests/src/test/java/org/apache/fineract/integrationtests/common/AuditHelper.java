@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import org.apache.fineract.client.util.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +40,14 @@ import org.slf4j.LoggerFactory;
 
 public class AuditHelper {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-
     private static final Logger LOG = LoggerFactory.getLogger(AuditHelper.class);
     private static final String AUDIT_BASE_URL = "/fineract-provider/api/v1/audits?" + Utils.TENANT_IDENTIFIER;
     private static final String AUDITSEARCH_BASE_URL = "/fineract-provider/api/v1/audits/searchtemplate?" + Utils.TENANT_IDENTIFIER;
+
+    private static final Gson GSON = new JSON().getGson();
+
+    private ResponseSpecification responseSpec;
+    private RequestSpecification requestSpec;
 
     public AuditHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;

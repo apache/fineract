@@ -19,7 +19,6 @@
 version: "3.8"
 
 services:
-
   db:
     extends:
       file: ./config/docker/compose/postgresql.yml
@@ -35,8 +34,10 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - ./config/docker/env/aws.env
       - ./config/docker/env/fineract-manager.env
+      - ./config/docker/env/fineract-common.env
+      - ./config/docker/env/fineract-postgresql.env
+      - ./config/docker/env/aws.env
       - ./config/docker/env/kafka-client-msk.env
 
   fineract-worker:
@@ -49,9 +50,11 @@ services:
     ports:
       - "8444-8445:8443"
     depends_on:
-      db:
+      fineract-manager:
         condition: service_healthy
     env_file:
-      - ./config/docker/env/aws.env
       - ./config/docker/env/fineract-worker.env
+      - ./config/docker/env/fineract-common.env
+      - ./config/docker/env/fineract-postgresql.env
+      - ./config/docker/env/aws.env
       - ./config/docker/env/kafka-client-msk.env

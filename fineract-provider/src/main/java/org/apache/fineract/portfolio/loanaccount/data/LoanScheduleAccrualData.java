@@ -51,12 +51,15 @@ public class LoanScheduleAccrualData {
     private BigDecimal dueDatePenaltyIncome;
     private BigDecimal accruableIncome;
 
+    private BigDecimal creditedFee;
+    private BigDecimal creditedPenalty;
+
     public LoanScheduleAccrualData(final Long loanId, final Long officeId, final Integer installmentNumber, final LocalDate accruedTill,
             final PeriodFrequencyType repaymentFrequency, final Integer repayEvery, final LocalDate dueDate, final LocalDate fromDate,
             final Long repaymentScheduleId, final Long loanProductId, final BigDecimal interestIncome, final BigDecimal feeIncome,
             final BigDecimal penaltyIncome, final BigDecimal accruedInterestIncome, final BigDecimal accruedFeeIncome,
             final BigDecimal accruedPenaltyIncome, final CurrencyData currencyData, final LocalDate interestCalculatedFrom,
-            final BigDecimal waivedInterestIncome) {
+            final BigDecimal waivedInterestIncome, BigDecimal creditedFee, BigDecimal creditedPenalty) {
         this.loanId = loanId;
         this.installmentNumber = installmentNumber;
         this.officeId = officeId;
@@ -76,6 +79,8 @@ public class LoanScheduleAccrualData {
         this.repayEvery = repayEvery;
         this.interestCalculatedFrom = interestCalculatedFrom;
         this.waivedInterestIncome = waivedInterestIncome;
+        this.creditedFee = creditedFee;
+        this.creditedPenalty = creditedPenalty;
     }
 
     public Long getLoanId() {
@@ -183,6 +188,14 @@ public class LoanScheduleAccrualData {
 
     public void updateAccruableIncome(BigDecimal accruableIncome) {
         this.accruableIncome = accruableIncome;
+    }
+
+    public BigDecimal getCreditedFee() {
+        return this.creditedFee;
+    }
+
+    public BigDecimal getCreditedPenalty() {
+        return this.creditedPenalty;
     }
 
 }

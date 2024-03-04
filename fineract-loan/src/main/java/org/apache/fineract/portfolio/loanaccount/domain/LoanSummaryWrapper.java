@@ -45,7 +45,25 @@ public final class LoanSummaryWrapper {
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
-            total = total.plus(installment.getCredits(currency));
+            total = total.plus(installment.getCreditedPrincipal(currency));
+        }
+        return total;
+    }
+
+    public Money calculateTotalFeeAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getCreditedFee(currency));
+        }
+        return total;
+    }
+
+    public Money calculateTotalPenaltyAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getCreditedPenalty(currency));
         }
         return total;
     }
@@ -247,7 +265,8 @@ public final class LoanSummaryWrapper {
             return total;
         }
         for (final LoanCharge loanCharge : charges) {
-            if (!loanCharge.isPenaltyCharge() && loanCharge.getAmountPaid(currency).isGreaterThanZero()) {
+            if (!loanCharge.isPenaltyCharge() && loanCharge.getAmountPaid(currency).isGreaterThanZero()
+                    && loanCharge.isDisbursementCharge()) {
                 total = total.plus(loanCharge.getAmountPaid(currency));
             }
         }

@@ -20,10 +20,12 @@ package org.apache.fineract.commands.provider;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.java8.En;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class CommandHandlerExceptionStepDefinitions implements En {
 
     @Autowired

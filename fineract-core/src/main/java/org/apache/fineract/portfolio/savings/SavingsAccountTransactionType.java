@@ -40,6 +40,7 @@ public enum SavingsAccountTransactionType {
     WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharge"), //
     PAY_CHARGE(7, "savingsAccountTransactionType.payCharge", TransactionEntryType.DEBIT), //
     DIVIDEND_PAYOUT(8, "savingsAccountTransactionType.dividendPayout", TransactionEntryType.CREDIT), //
+    ACCRUAL(10, "savingsAccountTransactionType.accrual"), //
     INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer"), //
     WITHDRAW_TRANSFER(14, "savingsAccountTransactionType.withdrawTransfer"), //
@@ -51,9 +52,7 @@ public enum SavingsAccountTransactionType {
     AMOUNT_HOLD(20, "savingsAccountTransactionType.onHold", TransactionEntryType.DEBIT), //
     AMOUNT_RELEASE(21, "savingsAccountTransactionType.release", TransactionEntryType.CREDIT); //
 
-    public static final SavingsAccountTransactionType[] VALUES = values();
-
-    private static final Map<Integer, SavingsAccountTransactionType> BY_ID = Arrays.stream(VALUES)
+    private static final Map<Integer, SavingsAccountTransactionType> BY_ID = Arrays.stream(values())
             .collect(Collectors.toMap(SavingsAccountTransactionType::getValue, v -> v));
 
     private final int value;
@@ -183,6 +182,10 @@ public enum SavingsAccountTransactionType {
         return this == AMOUNT_RELEASE;
     }
 
+    public boolean isAccrual() {
+        return this == ACCRUAL;
+    }
+
     public boolean isCredit() {
         // AMOUNT_RELEASE is not credit, because the account balance is not changed
         return isCreditEntryType() && !isAmountRelease();
@@ -195,6 +198,6 @@ public enum SavingsAccountTransactionType {
 
     @NotNull
     public static List<SavingsAccountTransactionType> getFiltered(Predicate<SavingsAccountTransactionType> filter) {
-        return Arrays.stream(VALUES).filter(filter).toList();
+        return Arrays.stream(values()).filter(filter).toList();
     }
 }

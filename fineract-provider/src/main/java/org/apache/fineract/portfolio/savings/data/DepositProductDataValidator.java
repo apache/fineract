@@ -71,35 +71,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.SavingProductAccountingParams;
-import org.apache.fineract.accounting.common.AccountingRuleType;
+import org.apache.fineract.accounting.common.AccountingValidations;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDataValidator;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
+import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class DepositProductDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final InterestRateChartDataValidator chartDataValidator;
-
-    @Autowired
-    public DepositProductDataValidator(FromJsonHelper fromApiJsonHelper, InterestRateChartDataValidator chartDataValidator) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.chartDataValidator = chartDataValidator;
-    }
+    private final SavingsProductAccountingDataValidator savingsProductAccountingDataValidator;
 
     public void validateForFixedDepositCreate(final String json) {
         if (StringUtils.isBlank(json)) {
@@ -115,7 +113,7 @@ public class DepositProductDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        validateDepositDetailForCreate(element, this.fromApiJsonHelper, baseDataValidator);
+        validateDepositDetailForCreate(element, this.fromApiJsonHelper, baseDataValidator, DepositAccountType.FIXED_DEPOSIT);
 
         validatePreClosureDetailForCreate(element, baseDataValidator);
 
@@ -168,7 +166,7 @@ public class DepositProductDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        validateDepositDetailForCreate(element, this.fromApiJsonHelper, baseDataValidator);
+        validateDepositDetailForCreate(element, this.fromApiJsonHelper, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
 
         validatePreClosureDetailForCreate(element, baseDataValidator);
 
@@ -212,7 +210,7 @@ public class DepositProductDataValidator {
     }
 
     private void validateDepositDetailForCreate(final JsonElement element, final FromJsonHelper fromApiJsonHelper,
-            final DataValidatorBuilder baseDataValidator) {
+            final DataValidatorBuilder baseDataValidator, final DepositAccountType accountType) {
         final String name = fromApiJsonHelper.extractStringNamed(nameParamName, element);
         baseDataValidator.reset().parameter(nameParamName).value(name).notBlank().notExceedingLengthOf(100);
 
@@ -258,13 +256,6 @@ public class DepositProductDataValidator {
         baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType).notNull()
                 .isOneOfTheseValues(SavingsInterestCalculationDaysInYearType.integerValues());
 
-        /*
-         * if (fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName , element)) { final BigDecimal
-         * minOpeningBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed (minRequiredOpeningBalanceParamName,
-         * element); baseDataValidator.reset ().parameter(minRequiredOpeningBalanceParamName
-         * ).value(minOpeningBalance).zeroOrPositiveAmount(); }
-         */
-
         if (fromApiJsonHelper.parameterExists(lockinPeriodFrequencyParamName, element)) {
 
             final Integer lockinPeriodFrequency = fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName, element);
@@ -302,40 +293,16 @@ public class DepositProductDataValidator {
         final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
         baseDataValidator.reset().parameter("accountingRule").value(accountingRuleType).notNull().inMinMaxRange(1, 3);
 
-        if (isCashBasedAccounting(accountingRuleType)) {
+        Boolean isDormancyActive = this.fromApiJsonHelper.extractBooleanNamed(SavingsApiConstants.isDormancyTrackingActiveParamName,
+                element);
+        if (isDormancyActive == null) {
+            isDormancyActive = false;
+        }
 
-            final Long savingsControlAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_CONTROL.getValue()).value(savingsControlAccountId)
-                    .notNull().integerGreaterThanZero();
-
-            final Long savingsReferenceAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue()).value(savingsReferenceAccountId)
-                    .notNull().integerGreaterThanZero();
-
-            final Long transfersInSuspenseAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue())
-                    .value(transfersInSuspenseAccountId).notNull().integerGreaterThanZero();
-
-            final Long interestOnSavingsAccountId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue())
-                    .value(interestOnSavingsAccountId).notNull().integerGreaterThanZero();
-
-            final Long incomeFromFeeId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.INCOME_FROM_FEES.getValue(),
-                    element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId).notNull()
-                    .integerGreaterThanZero();
-
-            final Long incomeFromPenaltyId = fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
-                    .notNull().integerGreaterThanZero();
-
-            validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
-            validateChargeToIncomeAccountMappings(fromApiJsonHelper, baseDataValidator, element);
+        if (AccountingValidations.isCashBasedAccounting(accountingRuleType)
+                || AccountingValidations.isAccrualPeriodicBasedAccounting(accountingRuleType)) {
+            savingsProductAccountingDataValidator.evaluateProductAccountingData(accountingRuleType, isDormancyActive, element,
+                    baseDataValidator, accountType, true);
         }
 
         validateTaxWithHoldingParams(baseDataValidator, element, true);
@@ -542,8 +509,8 @@ public class DepositProductDataValidator {
         baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
                 .ignoreIfNull().integerGreaterThanZero();
 
-        validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
-        validateChargeToIncomeAccountMappings(fromApiJsonHelper, baseDataValidator, element);
+        savingsProductAccountingDataValidator.validatePaymentChannelFundSourceMappings(baseDataValidator, element);
+        savingsProductAccountingDataValidator.validateChargeToIncomeAccountMappings(baseDataValidator, element);
         validateTaxWithHoldingParams(baseDataValidator, element, false);
     }
 
@@ -608,76 +575,6 @@ public class DepositProductDataValidator {
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-    }
-
-    private boolean isCashBasedAccounting(final Integer accountingRuleType) {
-        return AccountingRuleType.CASH_BASED.getValue().equals(accountingRuleType);
-    }
-
-    /**
-     * Validation for advanced accounting options
-     */
-    private void validatePaymentChannelFundSourceMappings(final FromJsonHelper fromApiJsonHelper,
-            final DataValidatorBuilder baseDataValidator, final JsonElement element) {
-        if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element)) {
-            final JsonArray paymentChannelMappingArray = fromApiJsonHelper
-                    .extractJsonArrayNamed(SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
-            if (paymentChannelMappingArray != null && paymentChannelMappingArray.size() > 0) {
-                int i = 0;
-                do {
-                    final JsonObject jsonObject = paymentChannelMappingArray.get(i).getAsJsonObject();
-                    final Long paymentTypeId = jsonObject.get(SavingProductAccountingParams.PAYMENT_TYPE.getValue()).getAsLong();
-                    final Long paymentSpecificFundAccountId = jsonObject.get(SavingProductAccountingParams.FUND_SOURCE.getValue())
-                            .getAsLong();
-                    baseDataValidator.reset()
-                            .parameter(SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
-                                    + SavingProductAccountingParams.PAYMENT_TYPE.toString())
-                            .value(paymentTypeId).notNull().integerGreaterThanZero();
-                    baseDataValidator.reset()
-                            .parameter(SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
-                                    + SavingProductAccountingParams.FUND_SOURCE.getValue())
-                            .value(paymentSpecificFundAccountId).notNull().integerGreaterThanZero();
-                    i++;
-                } while (i < paymentChannelMappingArray.size());
-            }
-        }
-    }
-
-    private void validateChargeToIncomeAccountMappings(final FromJsonHelper fromApiJsonHelper, final DataValidatorBuilder baseDataValidator,
-            final JsonElement element) {
-        // validate for both fee and penalty charges
-        validateChargeToIncomeAccountMappings(fromApiJsonHelper, baseDataValidator, element, true);
-        validateChargeToIncomeAccountMappings(fromApiJsonHelper, baseDataValidator, element, true);
-    }
-
-    private void validateChargeToIncomeAccountMappings(final FromJsonHelper fromApiJsonHelper, final DataValidatorBuilder baseDataValidator,
-            final JsonElement element, final boolean isPenalty) {
-        String parameterName;
-        if (isPenalty) {
-            parameterName = SavingProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue();
-        } else {
-            parameterName = SavingProductAccountingParams.FEE_INCOME_ACCOUNT_MAPPING.getValue();
-        }
-
-        if (fromApiJsonHelper.parameterExists(parameterName, element)) {
-            final JsonArray chargeToIncomeAccountMappingArray = fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
-            if (chargeToIncomeAccountMappingArray != null && chargeToIncomeAccountMappingArray.size() > 0) {
-                int i = 0;
-                do {
-                    final JsonObject jsonObject = chargeToIncomeAccountMappingArray.get(i).getAsJsonObject();
-                    final Long chargeId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.CHARGE_ID.getValue(),
-                            jsonObject);
-                    final Long incomeAccountId = fromApiJsonHelper
-                            .extractLongNamed(SavingProductAccountingParams.INCOME_ACCOUNT_ID.getValue(), jsonObject);
-                    baseDataValidator.reset().parameter(parameterName + "[" + i + "]." + SavingProductAccountingParams.CHARGE_ID.getValue())
-                            .value(chargeId).notNull().integerGreaterThanZero();
-                    baseDataValidator.reset()
-                            .parameter(parameterName + "[" + i + "]." + SavingProductAccountingParams.INCOME_ACCOUNT_ID.getValue())
-                            .value(incomeAccountId).notNull().integerGreaterThanZero();
-                    i++;
-                } while (i < chargeToIncomeAccountMappingArray.size());
-            }
         }
     }
 

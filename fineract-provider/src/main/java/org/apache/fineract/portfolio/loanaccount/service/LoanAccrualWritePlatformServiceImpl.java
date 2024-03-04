@@ -168,7 +168,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
         BigDecimal totalAccInterest = accrualData.getAccruedInterestIncome();
         BigDecimal totalAccPenalty = accrualData.getAccruedPenaltyIncome();
+        BigDecimal totalCreditedPenalty = accrualData.getCreditedPenalty();
         BigDecimal totalAccFee = accrualData.getAccruedFeeIncome();
+        BigDecimal totalCreditedFee = accrualData.getCreditedFee();
 
         if (totalAccInterest == null) {
             totalAccInterest = BigDecimal.ZERO;
@@ -183,7 +185,10 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             if (totalAccFee == null) {
                 totalAccFee = BigDecimal.ZERO;
             }
-            feePortion = feePortion.subtract(totalAccFee);
+            if (totalCreditedFee == null) {
+                totalCreditedFee = BigDecimal.ZERO;
+            }
+            feePortion = feePortion.subtract(totalAccFee).subtract(totalCreditedFee);
             amount = amount.add(feePortion);
             totalAccFee = totalAccFee.add(feePortion);
             if (feePortion.compareTo(BigDecimal.ZERO) == 0) {
@@ -195,7 +200,10 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             if (totalAccPenalty == null) {
                 totalAccPenalty = BigDecimal.ZERO;
             }
-            penaltyPortion = penaltyPortion.subtract(totalAccPenalty);
+            if (totalCreditedPenalty == null) {
+                totalCreditedPenalty = BigDecimal.ZERO;
+            }
+            penaltyPortion = penaltyPortion.subtract(totalAccPenalty).subtract(totalCreditedPenalty);
             amount = amount.add(penaltyPortion);
             totalAccPenalty = totalAccPenalty.add(penaltyPortion);
             if (penaltyPortion.compareTo(BigDecimal.ZERO) == 0) {
@@ -234,6 +242,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             if (scheduleAccrualData.getAccruedFeeIncome() != null) {
                 feePortion = feePortion.subtract(scheduleAccrualData.getAccruedFeeIncome());
             }
+            if (scheduleAccrualData.getCreditedFee() != null) {
+                feePortion = feePortion.subtract(scheduleAccrualData.getCreditedFee());
+            }
             amount = amount.add(feePortion);
             if (feePortion.compareTo(BigDecimal.ZERO) == 0) {
                 feePortion = null;
@@ -247,6 +258,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             totalAccPenalty = penaltyPortion;
             if (scheduleAccrualData.getAccruedPenaltyIncome() != null) {
                 penaltyPortion = penaltyPortion.subtract(scheduleAccrualData.getAccruedPenaltyIncome());
+            }
+            if (scheduleAccrualData.getCreditedPenalty() != null) {
+                penaltyPortion = penaltyPortion.subtract(scheduleAccrualData.getCreditedPenalty());
             }
             amount = amount.add(penaltyPortion);
             if (penaltyPortion.compareTo(BigDecimal.ZERO) == 0) {

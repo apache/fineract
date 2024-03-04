@@ -931,11 +931,11 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify transactions
             verifyTransactions(loanId, //
-                    transaction(250.0, "Down Payment", "01 January 2023"), //
                     transaction(1000.0, "Disbursement", "01 January 2023"), //
+                    transaction(250.0, "Down Payment", "01 January 2023"), //
                     transaction(300.0, "Repayment", "10 January 2023"), //
-                    transaction(100.0, "Down Payment", "15 January 2023"), //
-                    transaction(400.0, "Disbursement", "15 January 2023") //
+                    transaction(400.0, "Disbursement", "15 January 2023"), //
+                    transaction(100.0, "Down Payment", "15 January 2023") //
             );
 
             // verify journal entries
@@ -966,8 +966,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify transactions
             verifyTransactions(loanId, //
-                    transaction(250.0, "Down Payment", "01 January 2023"), //
                     transaction(1000.0, "Disbursement", "01 January 2023"), //
+                    transaction(250.0, "Down Payment", "01 January 2023"), //
                     transaction(300.0, "Repayment", "10 January 2023") //
             );
 

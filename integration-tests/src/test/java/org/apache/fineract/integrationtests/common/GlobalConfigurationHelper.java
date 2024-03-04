@@ -119,8 +119,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        Assertions.assertEquals(52, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(52, actualGlobalConfigurations.size());
+        Assertions.assertEquals(54, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(54, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -571,8 +571,24 @@ public class GlobalConfigurationHelper {
         assetExternalizationOfNonActiveLoans.put("value", 0);
         assetExternalizationOfNonActiveLoans.put("enabled", true);
         assetExternalizationOfNonActiveLoans.put("trapDoor", false);
-        assetExternalizationOfNonActiveLoans.put("string_value", "due-date");
         defaults.add(assetExternalizationOfNonActiveLoans);
+
+        HashMap<String, Object> enableSameMakerChecker = new HashMap<>();
+        enableSameMakerChecker.put("id", 58);
+        enableSameMakerChecker.put("name", "enable-same-maker-checker");
+        enableSameMakerChecker.put("value", 0);
+        enableSameMakerChecker.put("enabled", false);
+        enableSameMakerChecker.put("trapDoor", false);
+        defaults.add(enableSameMakerChecker);
+
+        HashMap<String, Object> nextPaymentDateConfigForLoan = new HashMap<>();
+        nextPaymentDateConfigForLoan.put("id", 59);
+        nextPaymentDateConfigForLoan.put("name", "next-payment-due-date");
+        nextPaymentDateConfigForLoan.put("value", 0);
+        nextPaymentDateConfigForLoan.put("enabled", true);
+        nextPaymentDateConfigForLoan.put("trapDoor", false);
+        nextPaymentDateConfigForLoan.put("string_value", "earliest-unpaid-date");
+        defaults.add(nextPaymentDateConfigForLoan);
 
         return defaults;
     }
@@ -688,6 +704,19 @@ public class GlobalConfigurationHelper {
     public static Integer updateChargeAccrualDateConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String stringValue) {
         long configId = 56;
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("stringValue", stringValue);
+        log.info("map :  {}", map);
+        final String configValue = GSON.toJson(map);
+        final String GLOBAL_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------UPDATE VALUE FOR GLOBAL CONFIG---------------------------------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, GLOBAL_CONFIG_UPDATE_URL, configValue, "resourceId");
+
+    }
+
+    public static Integer updateLoanNextPaymentDateConfiguration(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String stringValue) {
+        long configId = 59;
         final HashMap<String, String> map = new HashMap<>();
         map.put("stringValue", stringValue);
         log.info("map :  {}", map);

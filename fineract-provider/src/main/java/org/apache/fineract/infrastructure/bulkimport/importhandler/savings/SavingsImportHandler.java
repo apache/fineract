@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOp
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsActivation;
@@ -147,7 +148,9 @@ public class SavingsImportHandler implements ImportHandler {
         Long interestPostingPeriodTypeId = null;
         EnumOptionData interestPostingPeriodTypeEnum = null;
         if (interestPostingPeriodType != null) {
-            if (interestPostingPeriodType.equalsIgnoreCase(MONTHLY)) {
+            if (interestPostingPeriodType.equalsIgnoreCase(DAILY)) {
+                interestPostingPeriodTypeId = SavingsPostingInterestPeriodType.DAILY.getValue().longValue();
+            } else if (interestPostingPeriodType.equalsIgnoreCase(MONTHLY)) {
                 interestPostingPeriodTypeId = 4L;
             } else if (interestPostingPeriodType.equalsIgnoreCase(QUARTERLY)) {
                 interestPostingPeriodTypeId = 5L;

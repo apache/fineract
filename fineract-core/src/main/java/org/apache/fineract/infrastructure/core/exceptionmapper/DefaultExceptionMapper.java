@@ -26,6 +26,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -40,9 +41,10 @@ public class DefaultExceptionMapper implements FineractExceptionMapper, Exceptio
     }
 
     @Override
-    public Response toResponse(RuntimeException runtimeException) {
+    public Response toResponse(RuntimeException exception) {
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         return Response.status(SC_INTERNAL_SERVER_ERROR)
-                .entity(Map.of("Exception", ObjectUtils.defaultIfNull(runtimeException.getMessage(), "No error message available")))
+                .entity(Map.of("Exception", ObjectUtils.defaultIfNull(exception.getMessage(), "No error message available")))
                 .type(MediaType.APPLICATION_JSON).build();
     }
 }

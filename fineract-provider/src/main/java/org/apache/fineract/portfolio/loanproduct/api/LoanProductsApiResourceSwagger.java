@@ -114,6 +114,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
         public List<AdvancedPaymentData> paymentAllocation;
+        public List<CreditAllocationData> creditAllocation;
         @Schema(example = "false")
         public Boolean isLinkedToFloatingInterestRates;
         @Schema(example = "false")
@@ -166,8 +167,6 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "1")
         public Integer repaymentStartDateType;
-        @Schema(example = "false")
-        public Boolean disableScheduleExtensionForDownPayment;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -1044,6 +1043,10 @@ final class LoanProductsApiResourceSwagger {
         public List<EnumOptionData> advancedPaymentAllocationTypes;
         public List<EnumOptionData> loanScheduleTypeOptions;
         public List<EnumOptionData> loanScheduleProcessingTypeOptions;
+
+        public List<EnumOptionData> creditAllocationAllocationTypes;
+        public List<EnumOptionData> creditAllocationTransactionTypes;
+
     }
 
     @Schema(description = "GetLoanProductsProductIdResponse")
@@ -1224,6 +1227,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "[]")
         public List<AdvancedPaymentData> paymentAllocation;
         @Schema(example = "[]")
+        public List<CreditAllocationData> creditAllocation;
+        @Schema(example = "[]")
         public List<Integer> charges;
         public Set<GetLoanProductsPrincipalVariationsForBorrowerCycle> productsPrincipalVariationsForBorrowerCycle;
         @Schema(example = "[]")
@@ -1262,8 +1267,6 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
         public GetLoanProductsRepaymentStartDateType repaymentStartDateType;
-        @Schema(example = "false")
-        public Boolean disableScheduleExtensionForDownPayment;
         @Schema(example = "CUMULATIVE")
         public EnumOptionData loanScheduleType;
         @Schema(example = "HORIZONTAL")
@@ -1347,7 +1350,10 @@ final class LoanProductsApiResourceSwagger {
         public Integer interestCalculationPeriodType;
         @Schema(example = "mifos-standard-strategy")
         public String transactionProcessingStrategyCode;
+        @Schema(example = "[]")
         public List<AdvancedPaymentData> paymentAllocation;
+        @Schema(example = "[]")
+        public List<CreditAllocationData> creditAllocation;
         @Schema(example = "false")
         public Boolean isLinkedToFloatingInterestRates;
         @Schema(example = "false")
@@ -1400,8 +1406,6 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "1")
         public Integer repaymentStartDateType;
-        @Schema(example = "false")
-        public Boolean disableScheduleExtensionForDownPayment;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -1494,6 +1498,11 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
 
+        @Schema(example = "HORIZONTAL")
+        public String loanScheduleProcessingType;
+        @Schema(example = "CUMULATIVE")
+        public String loanScheduleType;
+
         public PostLoanProductsRequest.AllowAttributeOverrides allowAttributeOverrides;
         public List<PostLoanProductsRequest.RateData> rates;
 
@@ -1560,6 +1569,23 @@ final class LoanProductsApiResourceSwagger {
 
         @Schema(example = "DUE_PAST_PENALTY")
         public String paymentAllocationRule;
+
+        @Schema(example = "1")
+        public Integer order;
+    }
+
+    public static final class CreditAllocationData {
+
+        @Schema(example = "Chargeback")
+        public String transactionType;
+        @Schema(example = "[]")
+        public List<CreditAllocationOrder> creditAllocationOrder;
+    }
+
+    public static class CreditAllocationOrder {
+
+        @Schema(example = "PENALTY")
+        public String creditAllocationRule;
 
         @Schema(example = "1")
         public Integer order;

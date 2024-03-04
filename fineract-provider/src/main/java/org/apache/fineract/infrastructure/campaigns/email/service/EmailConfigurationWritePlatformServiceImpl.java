@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -43,8 +42,9 @@ public class EmailConfigurationWritePlatformServiceImpl implements EmailConfigur
 
     @Override
     public CommandProcessingResult update(final JsonCommand command) {
-
-        final AppUser currentUser = this.context.authenticatedUser();
+        // TODO: leaving function call for backward compatibility... but security configuration should be done somewhere
+        // else
+        this.context.authenticatedUser();
 
         this.emailConfigurationValidator.validateUpdateConfiguration(command.json());
         final String smtpUsername = command.stringValueOfParameterNamed("SMTP_USERNAME");

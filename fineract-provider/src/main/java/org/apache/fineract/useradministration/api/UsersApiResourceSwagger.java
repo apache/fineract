@@ -127,9 +127,13 @@ final class UsersApiResourceSwagger {
         @Schema(example = "1")
         public Long staffId;
         @Schema(example = "[2,3]")
-        public List<String> roles;
+        public List<Long> roles;
+        @Schema(example = "[2,3]")
+        public List<Long> clients;
         @Schema(example = "true")
         public Boolean sendPasswordToEmail;
+        @Schema(example = "true")
+        public Boolean passwordNeverExpires;
         @Schema(example = "true")
         public Boolean isSelfServiceUser;
     }
@@ -156,10 +160,26 @@ final class UsersApiResourceSwagger {
 
         @Schema(example = "Test")
         public String firstname;
-        @Schema(example = "window75")
+        @Schema(example = "User")
+        public String lastname;
+        @Schema(example = "whatever@mifos.org")
+        public String email;
+        @Schema(example = "1")
+        public Long officeId;
+        @Schema(example = "1")
+        public Long staffId;
+        @Schema(example = "[2,3]")
+        public List<Long> roles;
+        @Schema(example = "[2,3]")
+        public List<Long> clients;
+        @Schema(example = "password")
         public String password;
-        @Schema(example = "window75")
+        @Schema(example = "repeatPassword")
         public String repeatPassword;
+        @Schema(example = "true")
+        public Boolean sendPasswordToEmail;
+        @Schema(example = "true")
+        public Boolean isSelfServiceUser;
     }
 
     @Schema(description = "PutUsersUserIdResponse")
