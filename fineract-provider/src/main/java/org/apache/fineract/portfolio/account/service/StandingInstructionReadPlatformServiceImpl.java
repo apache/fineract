@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.account.service;
 
+import static com.querydsl.core.types.dsl.Expressions.ONE;
+import static java.util.stream.Collectors.toList;
 import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.accountType;
 import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.recurrenceType;
 import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.standingInstructionPriority;
@@ -25,24 +27,34 @@ import static org.apache.fineract.portfolio.account.service.AccountTransferEnume
 import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.standingInstructionType;
 import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.transferType;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
+import org.apache.fineract.organisation.office.domain.QOffice;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountDTO;
@@ -52,51 +64,39 @@ import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
+import org.apache.fineract.portfolio.account.domain.QAccountTransferDetails;
+import org.apache.fineract.portfolio.account.domain.QAccountTransferStandingInstruction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionPriority;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.account.exception.AccountTransferNotFoundException;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.client.domain.QClient;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.apache.fineract.portfolio.loanaccount.domain.QLoan;
+import org.apache.fineract.portfolio.loanaccount.domain.QLoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanproduct.domain.QLoanProduct;
+import org.apache.fineract.portfolio.savings.domain.QSavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.QSavingsProduct;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+@AllArgsConstructor
 public class StandingInstructionReadPlatformServiceImpl implements StandingInstructionReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final ColumnValidator columnValidator;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
-
-    // mapper
-    private final StandingInstructionMapper standingInstructionMapper;
 
     // pagination
     private final PaginationHelper paginationHelper;
+    private final EntityManager entityManager;
 
-    public StandingInstructionReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
-            final DropdownReadPlatformService dropdownReadPlatformService, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.clientReadPlatformService = clientReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.sqlGenerator = sqlGenerator;
-        this.standingInstructionMapper = new StandingInstructionMapper();
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
-    }
-
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public StandingInstructionData retrieveTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
             final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
@@ -110,24 +110,22 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         final EnumOptionData loanAccountType = accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = accountType(PortfolioAccountType.SAVINGS);
 
-        final Integer mostRelevantFromAccountType = fromAccountType;
-        Collection<EnumOptionData> fromAccountTypeOptions = null;
-        Collection<EnumOptionData> toAccountTypeOptions = null;
+        Collection<EnumOptionData> fromAccountTypeOptions;
+        Collection<EnumOptionData> toAccountTypeOptions;
 
         if (accountTransferType.isAccountTransfer()) {
-            fromAccountTypeOptions = Arrays.asList(savingsAccountType);
-            toAccountTypeOptions = Arrays.asList(savingsAccountType);
+            fromAccountTypeOptions = Collections.singletonList(savingsAccountType);
+            toAccountTypeOptions = Collections.singletonList(savingsAccountType);
         } else if (accountTransferType.isLoanRepayment()) {
-            fromAccountTypeOptions = Arrays.asList(savingsAccountType);
-            toAccountTypeOptions = Arrays.asList(loanAccountType);
+            fromAccountTypeOptions = Collections.singletonList(savingsAccountType);
+            toAccountTypeOptions = Collections.singletonList(loanAccountType);
         } else {
             fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
             toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
         }
-        final Integer mostRelevantToAccountType = toAccountType;
 
-        final EnumOptionData fromAccountTypeData = accountType(mostRelevantFromAccountType);
-        final EnumOptionData toAccountTypeData = accountType(mostRelevantToAccountType);
+        final EnumOptionData fromAccountTypeData = accountType(fromAccountType);
+        final EnumOptionData toAccountTypeData = accountType(toAccountType);
 
         // from settings
         OfficeData fromOffice = null;
@@ -150,7 +148,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         if (fromAccountId != null) {
             Integer accountType;
-            if (mostRelevantFromAccountType == 1) {
+            if (fromAccountType == 1) {
                 accountType = PortfolioAccountType.LOAN.getValue();
             } else {
                 accountType = PortfolioAccountType.SAVINGS.getValue();
@@ -165,11 +163,10 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
             mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
-            if (mostRelevantFromAccountType == 1) {
+            if (fromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
             }
-            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
-                    loanStatus);
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(fromAccountType, mostRelevantFromClientId, loanStatus);
             fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
         }
 
@@ -187,8 +184,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         Collection<ClientData> toClientOptions = null;
 
         if (toAccountId != null && fromAccount != null) {
-            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.getCurrencyCode());
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, toAccountType, fromAccount.getCurrencyCode());
             mostRelevantToClientId = toAccount.getClientId();
         }
 
@@ -198,7 +194,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 
-            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
+            toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
         }
 
         if (mostRelevantToOfficeId != null) {
@@ -209,7 +205,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             if (toClientOptions != null && toClientOptions.size() == 1) {
                 toClient = new ArrayList<>(toClientOptions).get(0);
 
-                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
+                toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
             }
         }
 
@@ -253,338 +249,423 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         return accountOptions;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Page<StandingInstructionData> retrieveAll(final StandingInstructionDTO standingInstructionDTO) {
 
-        final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(this.standingInstructionMapper.schema());
+        final QAccountTransferDetails qAccountTransferDetails = QAccountTransferDetails.accountTransferDetails;
+        final QClient qFromClient = new QClient("qFromClient");
+        final QSavingsAccount qFromSavingsAccount = new QSavingsAccount("qFromSavingsAccount");
+        final QLoan qFromLoan = new QLoan("qFromLoan");
+        final JPAQuery<Tuple> query = getStandingInstructionSelectQuery();
+        final JPAQuery<Long> totalCountQuery = getStandingInstructionCountQuery();
+
+        BooleanExpression whereClause = null;
+
         if (standingInstructionDTO.transferType() != null || standingInstructionDTO.clientId() != null
                 || standingInstructionDTO.clientName() != null) {
-            sqlBuilder.append(" where ");
-        }
-        boolean addAndCaluse = false;
-        List<Object> paramObj = new ArrayList<>();
-        if (standingInstructionDTO.transferType() != null) {
-            if (addAndCaluse) {
-                sqlBuilder.append(" and ");
+            if (standingInstructionDTO.transferType() != null) {
+                whereClause = addCondition(null, qAccountTransferDetails.transferType.eq(standingInstructionDTO.transferType()));
             }
-            sqlBuilder.append(" atd.transfer_type=? ");
-            paramObj.add(standingInstructionDTO.transferType());
-            addAndCaluse = true;
-        }
-        if (standingInstructionDTO.clientId() != null) {
-            if (addAndCaluse) {
-                sqlBuilder.append(" and ");
+
+            if (standingInstructionDTO.clientId() != null) {
+                whereClause = addCondition(whereClause, qFromClient.id.eq(standingInstructionDTO.clientId()));
+            } else if (standingInstructionDTO.clientName() != null) {
+                whereClause = addCondition(whereClause, qFromClient.displayName.eq(standingInstructionDTO.clientName()));
             }
-            sqlBuilder.append(" fromclient.id=? ");
-            paramObj.add(standingInstructionDTO.clientId());
-            addAndCaluse = true;
-        } else if (standingInstructionDTO.clientName() != null) {
-            if (addAndCaluse) {
-                sqlBuilder.append(" and ");
+
+            if (standingInstructionDTO.fromAccountType() != null && standingInstructionDTO.fromAccount() != null) {
+                PortfolioAccountType accountType = PortfolioAccountType.fromInt(standingInstructionDTO.fromAccountType());
+                if (accountType.isSavingsAccount()) {
+                    whereClause = addCondition(whereClause, qFromSavingsAccount.id.eq(standingInstructionDTO.fromAccount()));
+                } else if (accountType.isLoanAccount()) {
+                    whereClause = addCondition(whereClause, qFromLoan.id.eq(standingInstructionDTO.fromAccount()));
+                }
             }
-            sqlBuilder.append(" fromclient.display_name=? ");
-            paramObj.add(standingInstructionDTO.clientName());
-            addAndCaluse = true;
         }
 
-        if (standingInstructionDTO.fromAccountType() != null && standingInstructionDTO.fromAccount() != null) {
-            PortfolioAccountType accountType = PortfolioAccountType.fromInt(standingInstructionDTO.fromAccountType());
-            if (addAndCaluse) {
-                sqlBuilder.append(" and ");
-            }
-            if (accountType.isSavingsAccount()) {
-                sqlBuilder.append(" fromsavacc.id=? ");
-                paramObj.add(standingInstructionDTO.fromAccount());
-            } else if (accountType.isLoanAccount()) {
-                sqlBuilder.append(" fromloanacc.id=? ");
-                paramObj.add(standingInstructionDTO.fromAccount());
-            }
-            addAndCaluse = true;
-        }
+        query.where(whereClause);
+        totalCountQuery.where(whereClause);
 
         final SearchParameters searchParameters = standingInstructionDTO.searchParameters();
         if (searchParameters.isOrderByRequested()) {
-            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-            if (searchParameters.isSortOrderProvided()) {
-                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
-                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
+            final Order order = searchParameters.getSortOrder().equalsIgnoreCase("desc") ? Order.DESC
+                    : searchParameters.getSortOrder().equalsIgnoreCase("asc") || searchParameters.getSortOrder().isEmpty() ? Order.ASC
+                            : null;
+            if (order == null) {
+                throw new IllegalArgumentException("Unknown sort order: " + searchParameters.getSortOrder());
             }
+
+            final OrderSpecifier<?> specifier = OrderSpecifierFactory.getSpecifier(searchParameters.getOrderBy(), order);
+            query.orderBy(specifier);
         }
 
         if (searchParameters.isLimited()) {
-            sqlBuilder.append(" ");
+            query.limit(searchParameters.getLimit());
             if (searchParameters.isOffset()) {
-                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
-            } else {
-                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
+                query.offset(searchParameters.getOffset());
             }
         }
 
-        final Object[] finalObjectArray = paramObj.toArray();
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.standingInstructionMapper);
+        final List<Tuple> queryResult = query.fetch();
+        return this.paginationHelper.createPageFromItems(
+                queryResult.isEmpty() ? Collections.emptyList() : mapQueryResultToStandingInstructionDuesDataList(queryResult),
+                Objects.requireNonNull(totalCountQuery.fetchOne()));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Collection<StandingInstructionData> retrieveAll(final Integer status) {
-        final StringBuilder sqlBuilder = new StringBuilder(200);
-        String businessDate = sqlGenerator.currentBusinessDate();
-        sqlBuilder.append("select ");
-        sqlBuilder.append(this.standingInstructionMapper.schema());
-        sqlBuilder
-                .append(" where atsi.status=? and " + businessDate + " >= atsi.valid_from and (atsi.valid_till IS NULL or " + businessDate
-                        + " < atsi.valid_till) ")
-                .append(" and  (atsi.last_run_date <> " + businessDate + " or atsi.last_run_date IS NULL)")
-                .append(" ORDER BY atsi.priority DESC");
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.standingInstructionMapper, status);
+        final String businessDate = DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATTER);
+
+        final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+        final List<Tuple> queryResult = getStandingInstructionSelectQuery()
+                .where(eq(qAccountTransferStandingInstruction.status, status)
+                        .and(qAccountTransferStandingInstruction.validFrom.loe(LocalDate.parse(businessDate)))
+                        .and(qAccountTransferStandingInstruction.validTill.isNull()
+                                .or(qAccountTransferStandingInstruction.validTill.gt(LocalDate.parse(businessDate))))
+                        .and(qAccountTransferStandingInstruction.latsRunDate.ne(LocalDate.parse(businessDate))
+                                .or(qAccountTransferStandingInstruction.latsRunDate.isNull())))
+                .orderBy(new OrderSpecifier<>(Order.DESC, qAccountTransferStandingInstruction.priority)).fetch();
+        return queryResult.isEmpty() ? Collections.emptyList() : mapQueryResultToStandingInstructionDuesDataList(queryResult);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public StandingInstructionData retrieveOne(final Long instructionId) {
+        final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+        final Tuple queryResult = getStandingInstructionSelectQuery().where(eq(qAccountTransferStandingInstruction.id, instructionId))
+                .fetchOne();
 
-        try {
-            final String sql = "select " + this.standingInstructionMapper.schema() + " where atsi.id = ?";
-
-            return this.jdbcTemplate.queryForObject(sql, this.standingInstructionMapper, new Object[] { instructionId }); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            throw new AccountTransferNotFoundException(instructionId, e);
-        }
+        return Optional.ofNullable(queryResult).map(this::mapQueryResultToStandingInstructionDuesData)
+                .orElseThrow(() -> new AccountTransferNotFoundException(instructionId));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public StandingInstructionDuesData retriveLoanDuesData(final Long loanId) {
-        final StandingInstructionLoanDuesMapper rm = new StandingInstructionLoanDuesMapper();
-        final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= " + sqlGenerator.currentBusinessDate()
-                + " and ls.completed_derived <> 1";
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId }); // NOSONAR
+        final QLoanRepaymentScheduleInstallment qLoanRepaymentSchedule = QLoanRepaymentScheduleInstallment.loanRepaymentScheduleInstallment;
+        final QLoan qLoan = QLoan.loan;
+        final JPAQuery<StandingInstructionDuesData> query = getStandingInstructionDuesSelectQuery();
+        query.where(eq(qLoan.id, loanId),
+                qLoanRepaymentSchedule.dueDate
+                        .loe(LocalDate.parse(DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATTER))),
+                qLoanRepaymentSchedule.obligationsMet.ne(true));
+        return query.fetchOne();
     }
 
-    private static final class StandingInstructionMapper implements RowMapper<StandingInstructionData> {
+    private static final class OrderSpecifierFactory {
 
-        private final String schemaSql;
+        @FunctionalInterface
+        interface OrderSpecifierGenerator {
 
-        StandingInstructionMapper() {
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("atsi.id as id,atsi.name as name, atsi.priority as priority,");
-            sqlBuilder.append("atsi.status as status, atsi.instruction_type as instructionType,");
-            sqlBuilder.append("atsi.amount as amount,");
-            sqlBuilder.append("atsi.valid_from as validFrom, atsi.valid_till as validTill,");
-            sqlBuilder.append("atsi.recurrence_type as recurrenceType, atsi.recurrence_frequency as recurrenceFrequency,");
-            sqlBuilder.append("atsi.recurrence_interval as recurrenceInterval, atsi.recurrence_on_day as recurrenceOnDay,");
-            sqlBuilder.append("atsi.recurrence_on_month as recurrenceOnMonth,");
-            sqlBuilder.append("atd.id as accountDetailId,atd.transfer_type as transferType,");
-            sqlBuilder.append("fromoff.id as fromOfficeId, fromoff.name as fromOfficeName,");
-            sqlBuilder.append("tooff.id as toOfficeId, tooff.name as toOfficeName,");
-            sqlBuilder.append("fromclient.id as fromClientId, fromclient.display_name as fromClientName,");
-            sqlBuilder.append("toclient.id as toClientId, toclient.display_name as toClientName,");
-            sqlBuilder.append("fromsavacc.id as fromSavingsAccountId, fromsavacc.account_no as fromSavingsAccountNo,");
-            sqlBuilder.append("fromsp.id as fromProductId, fromsp.name as fromProductName, ");
-            sqlBuilder.append("fromloanacc.id as fromLoanAccountId, fromloanacc.account_no as fromLoanAccountNo,");
-            sqlBuilder.append("fromlp.id as fromLoanProductId, fromlp.name as fromLoanProductName,");
-            sqlBuilder.append("tosavacc.id as toSavingsAccountId, tosavacc.account_no as toSavingsAccountNo,");
-            sqlBuilder.append("tosp.id as toProductId, tosp.name as toProductName, ");
-            sqlBuilder.append("toloanacc.id as toLoanAccountId, toloanacc.account_no as toLoanAccountNo, ");
-            sqlBuilder.append("tolp.id as toLoanProductId, tolp.name as toLoanProductName ");
-            sqlBuilder.append(" FROM m_account_transfer_standing_instructions atsi ");
-            sqlBuilder.append("join m_account_transfer_details atd on atd.id = atsi.account_transfer_details_id ");
-            sqlBuilder.append("join m_office fromoff on fromoff.id = atd.from_office_id ");
-            sqlBuilder.append("join m_office tooff on tooff.id = atd.to_office_id ");
-            sqlBuilder.append("join m_client fromclient on fromclient.id = atd.from_client_id ");
-            sqlBuilder.append("join m_client toclient on toclient.id = atd.to_client_id ");
-            sqlBuilder.append("left join m_savings_account fromsavacc on fromsavacc.id = atd.from_savings_account_id ");
-            sqlBuilder.append("left join m_savings_product fromsp ON fromsavacc.product_id = fromsp.id ");
-            sqlBuilder.append("left join m_loan fromloanacc on fromloanacc.id = atd.from_loan_account_id ");
-            sqlBuilder.append("left join m_product_loan fromlp ON fromloanacc.product_id = fromlp.id ");
-            sqlBuilder.append("left join m_savings_account tosavacc on tosavacc.id = atd.to_savings_account_id ");
-            sqlBuilder.append("left join m_savings_product tosp ON tosavacc.product_id = tosp.id ");
-            sqlBuilder.append("left join m_loan toloanacc on toloanacc.id = atd.to_loan_account_id ");
-            sqlBuilder.append("left join m_product_loan tolp ON toloanacc.product_id = tolp.id ");
-
-            this.schemaSql = sqlBuilder.toString();
+            OrderSpecifier<?> generate(Order order);
         }
 
-        public String schema() {
-            return this.schemaSql;
+        private static final Map<String, OrderSpecifierGenerator> fieldToSpecifier = new HashMap<>();
+
+        static {
+            fieldToSpecifier.put("id",
+                    order -> new OrderSpecifier<>(order, QAccountTransferStandingInstruction.accountTransferStandingInstruction.id));
+            fieldToSpecifier.put("name",
+                    order -> new OrderSpecifier<>(order, QAccountTransferStandingInstruction.accountTransferStandingInstruction.name));
+            fieldToSpecifier.put("priority",
+                    order -> new OrderSpecifier<>(order, QAccountTransferStandingInstruction.accountTransferStandingInstruction.priority));
+            fieldToSpecifier.put("status",
+                    order -> new OrderSpecifier<>(order, QAccountTransferStandingInstruction.accountTransferStandingInstruction.status));
+            fieldToSpecifier.put("instructionType", order -> new OrderSpecifier<>(order,
+                    QAccountTransferStandingInstruction.accountTransferStandingInstruction.instructionType));
+            fieldToSpecifier.put("amount",
+                    order -> new OrderSpecifier<>(order, QAccountTransferStandingInstruction.accountTransferStandingInstruction.amount));
+            fieldToSpecifier.put("validFrom",
+                    order -> new OrderSpecifier<>(order, QAccountTransferStandingInstruction.accountTransferStandingInstruction.validFrom));
+            fieldToSpecifier.put("validTill",
+                    order -> new OrderSpecifier<>(order, QAccountTransferStandingInstruction.accountTransferStandingInstruction.validTill));
+            fieldToSpecifier.put("recurrenceType", order -> new OrderSpecifier<>(order,
+                    QAccountTransferStandingInstruction.accountTransferStandingInstruction.recurrenceType));
+            fieldToSpecifier.put("recurrenceFrequency", order -> new OrderSpecifier<>(order,
+                    QAccountTransferStandingInstruction.accountTransferStandingInstruction.recurrenceFrequency));
+            fieldToSpecifier.put("recurrenceInterval", order -> new OrderSpecifier<>(order,
+                    QAccountTransferStandingInstruction.accountTransferStandingInstruction.recurrenceInterval));
+            fieldToSpecifier.put("recurrenceOnDay", order -> new OrderSpecifier<>(order,
+                    QAccountTransferStandingInstruction.accountTransferStandingInstruction.recurrenceOnDay));
+            fieldToSpecifier.put("recurrenceOnMonth", order -> new OrderSpecifier<>(order,
+                    QAccountTransferStandingInstruction.accountTransferStandingInstruction.recurrenceOnMonth));
+            fieldToSpecifier.put("accountDetailId",
+                    order -> new OrderSpecifier<>(order, QAccountTransferDetails.accountTransferDetails.id));
+            fieldToSpecifier.put("transferType",
+                    order -> new OrderSpecifier<>(order, QAccountTransferDetails.accountTransferDetails.transferType));
+            fieldToSpecifier.put("fromOfficeId", order -> new OrderSpecifier<>(order, new QOffice("fromOffice").id));
+            fieldToSpecifier.put("fromOfficeName", order -> new OrderSpecifier<>(order, new QOffice("fromOffice").name));
+            fieldToSpecifier.put("toOfficeId", order -> new OrderSpecifier<>(order, new QOffice("toOffice").id));
+            fieldToSpecifier.put("toOfficeName", order -> new OrderSpecifier<>(order, new QOffice("toOffice").name));
+            fieldToSpecifier.put("fromClientId", order -> new OrderSpecifier<>(order, new QClient("fromClient").id));
+            fieldToSpecifier.put("fromClientName", order -> new OrderSpecifier<>(order, new QClient("fromClient").displayName));
+            fieldToSpecifier.put("toClientId", order -> new OrderSpecifier<>(order, new QClient("toClient").id));
+            fieldToSpecifier.put("toClientName", order -> new OrderSpecifier<>(order, new QClient("toClient").displayName));
+            fieldToSpecifier.put("fromSavingsAccountId",
+                    order -> new OrderSpecifier<>(order, new QSavingsAccount("fromSavingsAccount").id));
+            fieldToSpecifier.put("fromSavingsAccountNo",
+                    order -> new OrderSpecifier<>(order, new QSavingsAccount("fromSavingsAccount").accountNumber));
+            fieldToSpecifier.put("toSavingsAccountId", order -> new OrderSpecifier<>(order, new QSavingsAccount("toSavingsAccount").id));
+            fieldToSpecifier.put("toSavingsAccountNo",
+                    order -> new OrderSpecifier<>(order, new QSavingsAccount("toSavingsAccount").accountNumber));
+            fieldToSpecifier.put("fromLoanAccountId", order -> new OrderSpecifier<>(order, new QLoan("fromLoan").id));
+            fieldToSpecifier.put("fromLoanAccountNo", order -> new OrderSpecifier<>(order, new QLoan("fromLoan").accountNumber));
+            fieldToSpecifier.put("toLoanAccountId", order -> new OrderSpecifier<>(order, new QLoan("toLoan").id));
+            fieldToSpecifier.put("toLoanAccountNo", order -> new OrderSpecifier<>(order, new QLoan("toLoan").accountNumber));
+            fieldToSpecifier.put("fromProductId", order -> new OrderSpecifier<>(order, new QSavingsProduct("fromSavingsProduct").id));
+            fieldToSpecifier.put("fromProductName", order -> new OrderSpecifier<>(order, new QSavingsProduct("fromSavingsProduct").name));
+            fieldToSpecifier.put("toProductId", order -> new OrderSpecifier<>(order, new QSavingsProduct("toSavingsProduct").id));
+            fieldToSpecifier.put("fromLoanProductId", order -> new OrderSpecifier<>(order, new QLoanProduct("fromLoanProduct").id));
+            fieldToSpecifier.put("fromLoanProductName", order -> new OrderSpecifier<>(order, new QLoanProduct("fromLoanProduct").name));
+            fieldToSpecifier.put("toLoanProductId", order -> new OrderSpecifier<>(order, new QLoanProduct("toLoanProduct").id));
+            fieldToSpecifier.put("toLoanProductName", order -> new OrderSpecifier<>(order, new QLoanProduct("toLoanProduct").name));
         }
 
-        @Override
-        public StandingInstructionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final Long accountDetailId = rs.getLong("accountDetailId");
-            final String name = rs.getString("name");
-            final Integer priority = JdbcSupport.getInteger(rs, "priority");
-            EnumOptionData priorityEnum = AccountTransferEnumerations.standingInstructionPriority(priority);
-
-            final Integer status = JdbcSupport.getInteger(rs, "status");
-            EnumOptionData statusEnum = AccountTransferEnumerations.standingInstructionStatus(status);
-            final Integer instructionType = JdbcSupport.getInteger(rs, "instructionType");
-            EnumOptionData instructionTypeEnum = AccountTransferEnumerations.standingInstructionType(instructionType);
-            final LocalDate validFrom = JdbcSupport.getLocalDate(rs, "validFrom");
-            final LocalDate validTill = JdbcSupport.getLocalDate(rs, "validTill");
-            final BigDecimal transferAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amount");
-            final Integer recurrenceType = JdbcSupport.getInteger(rs, "recurrenceType");
-            EnumOptionData recurrenceTypeEnum = AccountTransferEnumerations.recurrenceType(recurrenceType);
-            final Integer recurrenceFrequency = JdbcSupport.getInteger(rs, "recurrenceFrequency");
-
-            EnumOptionData recurrenceFrequencyEnum = null;
-            if (recurrenceFrequency != null) {
-                recurrenceFrequencyEnum = CommonEnumerations.termFrequencyType(recurrenceFrequency, "recurrence");
+        public static OrderSpecifier<?> getSpecifier(final String fieldName, final Order order) {
+            final OrderSpecifierGenerator generator = fieldToSpecifier.get(fieldName);
+            if (generator != null) {
+                return generator.generate(order);
+            } else {
+                throw new IllegalArgumentException("Unknown order field name: " + fieldName);
             }
-            final Integer recurrenceInterval = JdbcSupport.getInteger(rs, "recurrenceInterval");
-
-            MonthDay recurrenceOnMonthDay = null;
-            final Integer recurrenceOnDay = JdbcSupport.getInteger(rs, "recurrenceOnDay");
-            final Integer recurrenceOnMonth = JdbcSupport.getInteger(rs, "recurrenceOnMonth");
-            if (recurrenceOnDay != null) {
-                recurrenceOnMonthDay = MonthDay.now(DateUtils.getDateTimeZoneOfTenant()).withMonth(recurrenceOnMonth)
-                        .withDayOfMonth(recurrenceOnDay);
-            }
-
-            final Integer transferType = rs.getInt("transferType");
-            EnumOptionData transferTypeEnum = AccountTransferEnumerations.transferType(transferType);
-
-            /*
-             * final String currencyCode = rs.getString("currencyCode"); final String currencyName =
-             * rs.getString("currencyName"); final String currencyNameCode = rs.getString("currencyNameCode"); final
-             * String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol"); final Integer currencyDigits =
-             * JdbcSupport.getInteger(rs, "currencyDigits"); final Integer inMultiplesOf = JdbcSupport.getInteger(rs,
-             * "inMultiplesOf"); final CurrencyData currency = new CurrencyData(currencyCode, currencyName,
-             * currencyDigits, inMultiplesOf, currencyDisplaySymbol, currencyNameCode);
-             */
-            final Long fromOfficeId = JdbcSupport.getLong(rs, "fromOfficeId");
-            final String fromOfficeName = rs.getString("fromOfficeName");
-            final OfficeData fromOffice = OfficeData.dropdown(fromOfficeId, fromOfficeName, null);
-
-            final Long toOfficeId = JdbcSupport.getLong(rs, "toOfficeId");
-            final String toOfficeName = rs.getString("toOfficeName");
-            final OfficeData toOffice = OfficeData.dropdown(toOfficeId, toOfficeName, null);
-
-            final Long fromClientId = JdbcSupport.getLong(rs, "fromClientId");
-            final String fromClientName = rs.getString("fromClientName");
-            final ClientData fromClient = ClientData.lookup(fromClientId, fromClientName, fromOfficeId, fromOfficeName);
-
-            final Long toClientId = JdbcSupport.getLong(rs, "toClientId");
-            final String toClientName = rs.getString("toClientName");
-            final ClientData toClient = ClientData.lookup(toClientId, toClientName, toOfficeId, toOfficeName);
-
-            final Long fromSavingsAccountId = JdbcSupport.getLong(rs, "fromSavingsAccountId");
-            final String fromSavingsAccountNo = rs.getString("fromSavingsAccountNo");
-            final Long fromProductId = JdbcSupport.getLong(rs, "fromProductId");
-            final String fromProductName = rs.getString("fromProductName");
-            final Long fromLoanAccountId = JdbcSupport.getLong(rs, "fromLoanAccountId");
-            final String fromLoanAccountNo = rs.getString("fromLoanAccountNo");
-            final Long fromLoanProductId = JdbcSupport.getLong(rs, "fromLoanProductId");
-            final String fromLoanProductName = rs.getString("fromLoanProductName");
-            PortfolioAccountData fromAccount = null;
-            EnumOptionData fromAccountType = null;
-            if (fromSavingsAccountId != null) {
-                fromAccount = new PortfolioAccountData(fromSavingsAccountId, fromSavingsAccountNo, null, null, null, null, null,
-                        fromProductId, fromProductName, null, null, null);
-                fromAccountType = accountType(PortfolioAccountType.SAVINGS);
-            } else if (fromLoanAccountId != null) {
-                fromAccount = new PortfolioAccountData(fromLoanAccountId, fromLoanAccountNo, null, null, null, null, null,
-                        fromLoanProductId, fromLoanProductName, null, null, null);
-                fromAccountType = accountType(PortfolioAccountType.LOAN);
-            }
-
-            PortfolioAccountData toAccount = null;
-            EnumOptionData toAccountType = null;
-            final Long toSavingsAccountId = JdbcSupport.getLong(rs, "toSavingsAccountId");
-            final String toSavingsAccountNo = rs.getString("toSavingsAccountNo");
-            final Long toProductId = JdbcSupport.getLong(rs, "toProductId");
-            final String toProductName = rs.getString("toProductName");
-            final Long toLoanAccountId = JdbcSupport.getLong(rs, "toLoanAccountId");
-            final String toLoanAccountNo = rs.getString("toLoanAccountNo");
-            final Long toLoanProductId = JdbcSupport.getLong(rs, "toLoanProductId");
-            final String toLoanProductName = rs.getString("toLoanProductName");
-
-            if (toSavingsAccountId != null) {
-                toAccount = new PortfolioAccountData(toSavingsAccountId, toSavingsAccountNo, null, null, null, null, null, toProductId,
-                        toProductName, null, null, null);
-                toAccountType = accountType(PortfolioAccountType.SAVINGS);
-            } else if (toLoanAccountId != null) {
-                toAccount = new PortfolioAccountData(toLoanAccountId, toLoanAccountNo, null, null, null, null, null, toLoanProductId,
-                        toLoanProductName, null, null, null);
-                toAccountType = accountType(PortfolioAccountType.LOAN);
-            }
-
-            return StandingInstructionData.instance(id, accountDetailId, name, fromOffice, toOffice, fromClient, toClient, fromAccountType,
-                    fromAccount, toAccountType, toAccount, transferTypeEnum, priorityEnum, instructionTypeEnum, statusEnum, transferAmount,
-                    validFrom, validTill, recurrenceTypeEnum, recurrenceFrequencyEnum, recurrenceInterval, recurrenceOnMonthDay);
         }
     }
 
-    private static final class StandingInstructionLoanDuesMapper implements RowMapper<StandingInstructionDuesData> {
+    private JPAQuery<Tuple> getStandingInstructionSelectQuery() {
+        final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+        final QAccountTransferDetails qAccountTransferDetails = QAccountTransferDetails.accountTransferDetails;
+        final QOffice qFromOffice = new QOffice("qFromOffice");
+        final QOffice qToOffice = new QOffice("qToOffice");
+        final QClient qFromClient = new QClient("qFromClient");
+        final QClient qToClient = new QClient("qToClient");
+        final QSavingsAccount qFromSavingsAccount = new QSavingsAccount("qFromSavingsAccount");
+        final QSavingsAccount qToSavingsAccount = new QSavingsAccount("qToSavingsAccount");
+        final QSavingsProduct qFromSavingsProduct = new QSavingsProduct("qFromSavingsProduct");
+        final QSavingsProduct qToSavingsProduct = new QSavingsProduct("qToSavingsProduct");
+        final QLoan qFromLoan = new QLoan("qFromLoan");
+        final QLoan qToLoan = new QLoan("qToLoan");
+        final QLoanProduct qFromLoanProduct = new QLoanProduct("qFromLoanProduct");
+        final QLoanProduct qToLoanProduct = new QLoanProduct("qToLoanProduct");
 
-        private final String schemaSql;
+        final JPAQuery<Tuple> query = new JPAQuery<>(entityManager);
+        query.select(qAccountTransferStandingInstruction.id, qAccountTransferStandingInstruction.name,
+                qAccountTransferStandingInstruction.priority, qAccountTransferStandingInstruction.status,
+                qAccountTransferStandingInstruction.instructionType, qAccountTransferStandingInstruction.amount,
+                qAccountTransferStandingInstruction.validFrom, qAccountTransferStandingInstruction.validTill,
+                qAccountTransferStandingInstruction.recurrenceType, qAccountTransferStandingInstruction.recurrenceFrequency,
+                qAccountTransferStandingInstruction.recurrenceInterval, qAccountTransferStandingInstruction.recurrenceOnDay,
+                qAccountTransferStandingInstruction.recurrenceOnMonth, qAccountTransferDetails.id.as("accountDetailId"),
+                qAccountTransferDetails.transferType, qFromOffice.id.as("fromOfficeId"), qFromOffice.name.as("fromOfficeName"),
+                qToOffice.id.as("toOfficeId"), qToOffice.name.as("toOfficeName"), qFromClient.id.as("fromClientId"),
+                qFromClient.displayName.as("fromClientName"), qToClient.id.as("toClientId"), qToClient.displayName.as("toClientName"),
+                qFromSavingsAccount.id.as("fromSavingsAccountId"), qFromSavingsAccount.accountNumber.as("fromSavingsAccountNo"),
+                qFromSavingsProduct.id.as("fromProductId"), qFromSavingsProduct.name.as("fromProductName"),
+                qFromLoan.id.as("fromLoanAccountId"), qFromLoan.accountNumber.as("fromLoanAccountNo"),
+                qFromLoanProduct.id.as("fromLoanProductId"), qFromLoanProduct.name.as("fromLoanProductName"),
+                qToSavingsAccount.id.as("toSavingsAccountId"), qToSavingsAccount.accountNumber.as("toSavingsAccountNo"),
+                qToSavingsProduct.id.as("toProductId"), qToSavingsProduct.name.as("toProductName"), qToLoan.id.as("toLoanAccountId"),
+                qToLoan.accountNumber.as("toLoanAccountNo"), qToLoanProduct.id.as("toLoanProductId"),
+                qToLoanProduct.name.as("toLoanProductName")).from(qAccountTransferStandingInstruction);
 
-        StandingInstructionLoanDuesMapper() {
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-
-            sqlBuilder.append("max(ls.duedate) as dueDate,sum(ls.principal_amount) as principalAmount,");
-            sqlBuilder.append("sum(ls.principal_completed_derived) as principalCompleted,");
-            sqlBuilder.append("sum(ls.principal_writtenoff_derived) as principalWrittenOff,");
-            sqlBuilder.append("sum(ls.interest_amount) as interestAmount,");
-            sqlBuilder.append("sum(ls.interest_completed_derived) as interestCompleted,");
-            sqlBuilder.append("sum(ls.interest_writtenoff_derived) as interestWrittenOff,");
-            sqlBuilder.append("sum(ls.interest_waived_derived) as interestWaived,");
-            sqlBuilder.append("sum(ls.penalty_charges_amount) as penalityAmount,");
-            sqlBuilder.append("sum(ls.penalty_charges_completed_derived) as penalityCompleted,");
-            sqlBuilder.append("sum(ls.penalty_charges_writtenoff_derived)as penaltyWrittenOff,");
-            sqlBuilder.append("sum(ls.penalty_charges_waived_derived) as penaltyWaived,");
-            sqlBuilder.append("sum(ls.fee_charges_amount) as feeAmount,");
-            sqlBuilder.append("sum(ls.fee_charges_completed_derived) as feecompleted,");
-            sqlBuilder.append("sum(ls.fee_charges_writtenoff_derived) as feeWrittenOff,");
-            sqlBuilder.append("sum(ls.fee_charges_waived_derived) as feeWaived ");
-            sqlBuilder.append("from m_loan_repayment_schedule ls ");
-            sqlBuilder.append(" join m_loan ml on ml.id = ls.loan_id ");
-
-            this.schemaSql = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schemaSql;
-        }
-
-        @Override
-        public StandingInstructionDuesData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
-            final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAmount");
-            final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalCompleted");
-            final BigDecimal principalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalWrittenOff");
-            final BigDecimal principalOutstanding = principalDue.subtract(principalPaid).subtract(principalWrittenOff);
-
-            final BigDecimal interestExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestAmount");
-            final BigDecimal interestPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestCompleted");
-            final BigDecimal interestWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWrittenOff");
-            final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
-            final BigDecimal interestActualDue = interestExpectedDue.subtract(interestWaived).subtract(interestWrittenOff);
-            final BigDecimal interestOutstanding = interestActualDue.subtract(interestPaid);
-
-            final BigDecimal penaltyChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penalityAmount");
-            final BigDecimal penaltyChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penalityCompleted");
-            final BigDecimal penaltyChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyWrittenOff");
-            final BigDecimal penaltyChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyWaived");
-            final BigDecimal penaltyChargesActualDue = penaltyChargesExpectedDue.subtract(penaltyChargesWaived)
-                    .subtract(penaltyChargesWrittenOff);
-            final BigDecimal penaltyChargesOutstanding = penaltyChargesActualDue.subtract(penaltyChargesPaid);
-
-            final BigDecimal feeChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeAmount");
-            final BigDecimal feeChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feecompleted");
-            final BigDecimal feeChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeWrittenOff");
-            final BigDecimal feeChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeWaived");
-            final BigDecimal feeChargesActualDue = feeChargesExpectedDue.subtract(feeChargesWaived).subtract(feeChargesWrittenOff);
-            final BigDecimal feeChargesOutstanding = feeChargesActualDue.subtract(feeChargesPaid);
-
-            final BigDecimal totalOutstanding = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding)
-                    .add(penaltyChargesOutstanding);
-
-            return new StandingInstructionDuesData(dueDate, totalOutstanding);
-        }
+        addJoinsToStandingInstructionQuery(query);
+        return query;
     }
 
+    private StandingInstructionData mapQueryResultToStandingInstructionDuesData(final Tuple queryResult) {
+        final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+        final QAccountTransferDetails qAccountTransferDetails = QAccountTransferDetails.accountTransferDetails;
+        final QOffice qFromOffice = new QOffice("qFromOffice");
+        final QOffice qToOffice = new QOffice("qToOffice");
+        final QClient qFromClient = new QClient("qFromClient");
+        final QClient qToClient = new QClient("qToClient");
+        final QSavingsAccount qFromSavingsAccount = new QSavingsAccount("qFromSavingsAccount");
+        final QSavingsAccount qToSavingsAccount = new QSavingsAccount("qToSavingsAccount");
+        final QSavingsProduct qFromSavingsProduct = new QSavingsProduct("qFromSavingsProduct");
+        final QSavingsProduct qToSavingsProduct = new QSavingsProduct("qToSavingsProduct");
+        final QLoan qFromLoan = new QLoan("qFromLoan");
+        final QLoan qToLoan = new QLoan("qToLoan");
+        final QLoanProduct qFromLoanProduct = new QLoanProduct("qFromLoanProduct");
+        final QLoanProduct qToLoanProduct = new QLoanProduct("qToLoanProduct");
+
+        EnumOptionData priorityEnum = AccountTransferEnumerations
+                .standingInstructionPriority(queryResult.get(qAccountTransferStandingInstruction.priority));
+        EnumOptionData statusEnum = AccountTransferEnumerations
+                .standingInstructionStatus(queryResult.get(qAccountTransferStandingInstruction.status));
+        EnumOptionData instructionTypeEnum = AccountTransferEnumerations
+                .standingInstructionType(queryResult.get(qAccountTransferStandingInstruction.instructionType));
+
+        final LocalDate validFrom = queryResult.get(qAccountTransferStandingInstruction.validFrom);
+        final LocalDate validTill = queryResult.get(qAccountTransferStandingInstruction.validTill);
+        final BigDecimal transferAmount = JdbcSupport.defaultToNullIfZero(queryResult.get(qAccountTransferStandingInstruction.amount));
+        EnumOptionData recurrenceTypeEnum = AccountTransferEnumerations
+                .recurrenceType(queryResult.get(qAccountTransferStandingInstruction.recurrenceType));
+        final Integer recurrenceFrequency = queryResult.get(qAccountTransferStandingInstruction.recurrenceFrequency);
+
+        EnumOptionData recurrenceFrequencyEnum = null;
+        if (recurrenceFrequency != null) {
+            recurrenceFrequencyEnum = CommonEnumerations.termFrequencyType(recurrenceFrequency, "recurrence");
+        }
+
+        MonthDay recurrenceOnMonthDay = null;
+        final Integer recurrenceOnDay = queryResult.get(qAccountTransferStandingInstruction.recurrenceOnDay);
+        final Integer recurrenceOnMonth = queryResult.get(qAccountTransferStandingInstruction.recurrenceOnMonth);
+        if (recurrenceOnDay != null && recurrenceOnMonth != null) {
+            recurrenceOnMonthDay = MonthDay.now(DateUtils.getDateTimeZoneOfTenant()).withMonth(recurrenceOnMonth)
+                    .withDayOfMonth(recurrenceOnDay);
+        }
+
+        EnumOptionData transferTypeEnum = AccountTransferEnumerations.transferType(queryResult.get(qAccountTransferDetails.transferType));
+
+        final Long fromOfficeId = queryResult.get(qFromOffice.id.as("fromOfficeId"));
+        final String fromOfficeName = queryResult.get(qFromOffice.name.as("fromOfficeName"));
+        final OfficeData fromOffice = OfficeData.dropdown(fromOfficeId, fromOfficeName, null);
+
+        final Long toOfficeId = queryResult.get(qToOffice.id.as("toOfficeId"));
+        final String toOfficeName = queryResult.get(qToOffice.name.as("toOfficeName"));
+        final OfficeData toOffice = OfficeData.dropdown(toOfficeId, toOfficeName, null);
+
+        final Long fromClientId = queryResult.get(qFromClient.id.as("fromClientId"));
+        final String fromClientName = queryResult.get(qFromClient.displayName.as("fromClientName"));
+        final ClientData fromClient = ClientData.lookup(fromClientId, fromClientName, fromOfficeId, fromOfficeName);
+
+        final Long toClientId = queryResult.get(qToClient.id.as("toClientId"));
+        final String toClientName = queryResult.get(qToClient.displayName.as("toClientName"));
+        final ClientData toClient = ClientData.lookup(toClientId, toClientName, toOfficeId, toOfficeName);
+
+        final Long fromSavingsAccountId = queryResult.get(qFromSavingsAccount.id.as("fromSavingsAccountId"));
+        final String fromSavingsAccountNo = queryResult.get(qFromSavingsAccount.accountNumber.as("fromSavingsAccountNo"));
+        final Long fromProductId = queryResult.get(qFromSavingsProduct.id.as("fromProductId"));
+        final String fromProductName = queryResult.get(qFromSavingsProduct.name.as("fromProductName"));
+        final Long fromLoanAccountId = queryResult.get(qFromLoan.id.as("fromLoanAccountId"));
+        final String fromLoanAccountNo = queryResult.get(qFromLoan.accountNumber.as("fromLoanAccountNo"));
+        final Long fromLoanProductId = queryResult.get(qFromLoanProduct.id.as("fromLoanProductId"));
+        final String fromLoanProductName = queryResult.get(qFromLoanProduct.name.as("fromLoanProductName"));
+        PortfolioAccountData fromAccount = null;
+        EnumOptionData fromAccountType = null;
+
+        if (fromSavingsAccountId != null) {
+            fromAccount = new PortfolioAccountData(fromSavingsAccountId, fromSavingsAccountNo, null, null, null, null, null, fromProductId,
+                    fromProductName, null, null, null);
+            fromAccountType = accountType(PortfolioAccountType.SAVINGS);
+        } else if (fromLoanAccountId != null) {
+            fromAccount = new PortfolioAccountData(fromLoanAccountId, fromLoanAccountNo, null, null, null, null, null, fromLoanProductId,
+                    fromLoanProductName, null, null, null);
+            fromAccountType = accountType(PortfolioAccountType.LOAN);
+        }
+
+        PortfolioAccountData toAccount = null;
+        EnumOptionData toAccountType = null;
+        final Long toSavingsAccountId = queryResult.get(qToSavingsAccount.id.as("toSavingsAccountId"));
+        final String toSavingsAccountNo = queryResult.get(qToSavingsAccount.accountNumber.as("toSavingsAccountNo"));
+        final Long toProductId = queryResult.get(qToSavingsProduct.id.as("toProductId"));
+        final String toProductName = queryResult.get(qToSavingsProduct.name.as("toProductName"));
+        final Long toLoanAccountId = queryResult.get(qToLoan.id.as("toLoanAccountId"));
+        final String toLoanAccountNo = queryResult.get(qToLoan.accountNumber.as("toLoanAccountNo"));
+        final Long toLoanProductId = queryResult.get(qToLoanProduct.id.as("toLoanProductId"));
+        final String toLoanProductName = queryResult.get(qToLoanProduct.name.as("toLoanProductName"));
+
+        if (toSavingsAccountId != null) {
+            toAccount = new PortfolioAccountData(toSavingsAccountId, toSavingsAccountNo, null, null, null, null, null, toProductId,
+                    toProductName, null, null, null);
+            toAccountType = accountType(PortfolioAccountType.SAVINGS);
+        } else if (toLoanAccountId != null) {
+            toAccount = new PortfolioAccountData(toLoanAccountId, toLoanAccountNo, null, null, null, null, null, toLoanProductId,
+                    toLoanProductName, null, null, null);
+            toAccountType = accountType(PortfolioAccountType.LOAN);
+        }
+
+        return StandingInstructionData.instance(queryResult.get(qAccountTransferStandingInstruction.id),
+                queryResult.get(qAccountTransferDetails.id.as("accountDetailId")),
+                queryResult.get(qAccountTransferStandingInstruction.name), fromOffice, toOffice, fromClient, toClient, fromAccountType,
+                fromAccount, toAccountType, toAccount, transferTypeEnum, priorityEnum, instructionTypeEnum, statusEnum, transferAmount,
+                validFrom, validTill, recurrenceTypeEnum, recurrenceFrequencyEnum,
+                queryResult.get(qAccountTransferStandingInstruction.recurrenceInterval), recurrenceOnMonthDay);
+    }
+
+    private List<StandingInstructionData> mapQueryResultToStandingInstructionDuesDataList(final List<Tuple> queryResult) {
+        return queryResult.stream().map(this::mapQueryResultToStandingInstructionDuesData).collect(toList());
+    }
+
+    private JPAQuery<StandingInstructionDuesData> getStandingInstructionDuesSelectQuery() {
+        final QLoanRepaymentScheduleInstallment qLoanRepaymentSchedule = QLoanRepaymentScheduleInstallment.loanRepaymentScheduleInstallment;
+        final QLoan qLoan = QLoan.loan;
+
+        final JPAQuery<StandingInstructionDuesData> query = new JPAQuery<>(entityManager);
+
+        query.select(qLoanRepaymentSchedule.dueDate.max().as("dueDate"), qLoanRepaymentSchedule.principal.sum().as("principalAmount"),
+                qLoanRepaymentSchedule.principalCompleted.sum().as("principalCompleted"),
+                qLoanRepaymentSchedule.principalWrittenOff.sum().as("principalWrittenOff"),
+                qLoanRepaymentSchedule.interestCharged.sum().as("interestAmount"),
+                qLoanRepaymentSchedule.interestPaid.sum().as("interestCompleted"),
+                qLoanRepaymentSchedule.interestWrittenOff.sum().as("interestWrittenOff"),
+                qLoanRepaymentSchedule.interestWaived.sum().as("interestWaived"),
+                qLoanRepaymentSchedule.penaltyCharges.sum().as("penalityAmount"),
+                qLoanRepaymentSchedule.penaltyChargesPaid.sum().as("penalityCompleted"),
+                qLoanRepaymentSchedule.penaltyChargesWrittenOff.sum().as("penaltyWrittenOff"),
+                qLoanRepaymentSchedule.penaltyChargesWaived.sum().as("penaltyWaived"),
+                qLoanRepaymentSchedule.feeChargesCharged.sum().as("feeAmount"),
+                qLoanRepaymentSchedule.feeChargesPaid.sum().as("feecompleted"),
+                qLoanRepaymentSchedule.feeChargesWrittenOff.sum().as("feeWrittenOff"),
+                qLoanRepaymentSchedule.feeChargesWaived.sum().as("feeWaived")).from(qLoanRepaymentSchedule).join(qLoan)
+                .on(qLoan.id.eq(qLoanRepaymentSchedule.loan.id));
+
+        return query;
+    }
+
+    private void addJoinsToStandingInstructionQuery(final JPAQuery<?> selectFromQuery) {
+        final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+        final QAccountTransferDetails qAccountTransferDetails = QAccountTransferDetails.accountTransferDetails;
+        final QOffice qFromOffice = new QOffice("qFromOffice");
+        final QOffice qToOffice = new QOffice("qToOffice");
+        final QClient qFromClient = new QClient("qFromClient");
+        final QClient qToClient = new QClient("qToClient");
+        final QSavingsAccount qFromSavingsAccount = new QSavingsAccount("qFromSavingsAccount");
+        final QSavingsAccount qToSavingsAccount = new QSavingsAccount("qToSavingsAccount");
+        final QSavingsProduct qFromSavingsProduct = new QSavingsProduct("qFromSavingsProduct");
+        final QSavingsProduct qToSavingsProduct = new QSavingsProduct("qToSavingsProduct");
+        final QLoan qFromLoan = new QLoan("qFromLoan");
+        final QLoan qToLoan = new QLoan("qToLoan");
+        final QLoanProduct qFromLoanProduct = new QLoanProduct("qFromLoanProduct");
+        final QLoanProduct qToLoanProduct = new QLoanProduct("qToLoanProduct");
+
+        selectFromQuery.join(qAccountTransferStandingInstruction.accountTransferDetails, qAccountTransferDetails)
+                .on(qAccountTransferDetails.id.eq(qAccountTransferStandingInstruction.accountTransferDetails.id))
+                .join(qAccountTransferDetails.fromOffice, qFromOffice).on(qFromOffice.id.eq(qAccountTransferDetails.fromOffice.id))
+                .join(qAccountTransferDetails.toOffice, qToOffice).on(qToOffice.id.eq(qAccountTransferDetails.toOffice.id))
+                .join(qAccountTransferDetails.fromClient, qFromClient).on(qFromClient.id.eq(qAccountTransferDetails.fromClient.id))
+                .join(qAccountTransferDetails.toClient, qToClient).on(qToClient.id.eq(qAccountTransferDetails.toClient.id))
+                .leftJoin(qAccountTransferDetails.fromSavingsAccount, qFromSavingsAccount)
+                .on(qFromSavingsAccount.id.eq(qAccountTransferDetails.fromSavingsAccount.id))
+                .leftJoin(qFromSavingsAccount.product, qFromSavingsProduct).on(qFromSavingsProduct.id.eq(qFromSavingsAccount.product.id))
+                .leftJoin(qAccountTransferDetails.fromLoanAccount, qFromLoan)
+                .on(qFromLoan.id.eq(qAccountTransferDetails.fromLoanAccount.id)).leftJoin(qFromLoan.loanProduct, qFromLoanProduct)
+                .on(qFromLoanProduct.id.eq(qFromLoan.loanProduct.id)).leftJoin(qAccountTransferDetails.toSavingsAccount, qToSavingsAccount)
+                .on(qToSavingsAccount.id.eq(qAccountTransferDetails.toSavingsAccount.id))
+                .leftJoin(qToSavingsAccount.product, qToSavingsProduct).on(qToSavingsProduct.id.eq(qToSavingsAccount.product.id))
+                .leftJoin(qAccountTransferDetails.toLoanAccount, qToLoan).on(qToLoan.id.eq(qAccountTransferDetails.toLoanAccount.id))
+                .leftJoin(qToLoan.loanProduct, qToLoanProduct).on(qToLoanProduct.id.eq(qToLoan.loanProduct.id));
+    }
+
+    private JPAQuery<Long> getStandingInstructionCountQuery() {
+        final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+        final JPAQuery<Long> query = new JPAQuery<>(entityManager);
+
+        query.select(ONE.count()).from(qAccountTransferStandingInstruction);
+        addJoinsToStandingInstructionQuery(query);
+        return query;
+    }
+
+    private <T> BooleanExpression eq(final SimpleExpression<T> expression, final T value) {
+        return value == null ? expression.isNull() : expression.eq(value);
+    }
+
+    private BooleanExpression addCondition(final BooleanExpression whereClause, final BooleanExpression condition) {
+        if (whereClause == null) {
+            return condition;
+        } else {
+            return whereClause.and(condition);
+        }
+    }
 }

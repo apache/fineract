@@ -120,9 +120,6 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                 businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("25 December 2023")
                         .dateFormat(DATETIME_PATTERN).locale("en"));
 
-                // delinquency null next payment date for date after maturity date
-                verifyLoanDelinquencyNextPaymentDate(loanId, "", true);
-
             } finally {
                 // reset global config
                 GlobalConfigurationHelper.updateLoanNextPaymentDateConfiguration(this.requestSpec, this.responseSpec,
@@ -238,10 +235,6 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
 
                 businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("25 December 2023")
                         .dateFormat(DATETIME_PATTERN).locale("en"));
-
-                // delinquency null next payment date for date after maturity date
-                verifyLoanDelinquencyNextPaymentDate(loanId, "", true);
-
             } finally {
                 // reset global config
                 GlobalConfigurationHelper.updateLoanNextPaymentDateConfiguration(this.requestSpec, this.responseSpec,

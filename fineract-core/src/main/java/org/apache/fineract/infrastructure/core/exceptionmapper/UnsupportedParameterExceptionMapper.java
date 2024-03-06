@@ -28,6 +28,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -55,7 +56,7 @@ public class UnsupportedParameterExceptionMapper implements FineractExceptionMap
 
             errors.add(error);
         }
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), errors);
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
 
         final ApiGlobalErrorResponse invalidParameterError = ApiGlobalErrorResponse
                 .badClientRequest("validation.msg.validation.errors.exist", "Validation errors exist.", errors);

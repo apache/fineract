@@ -55,6 +55,10 @@ public class PaginationHelper {
         return new Page<>(items, totalFilteredRecords);
     }
 
+    public <E> Page<E> createPageFromItems(final List<E> items, final Long filteredRecords) {
+        return new Page<>(items, filteredRecords.intValue());
+    }
+
     public <E> Page<Long> fetchPage(JdbcTemplate jdbcTemplate, String sql, Class<Long> type) {
         final List<Long> items = jdbcTemplate.queryForList(sql, type);
 

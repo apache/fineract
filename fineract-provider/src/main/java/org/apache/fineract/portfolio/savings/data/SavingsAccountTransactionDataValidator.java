@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -55,15 +56,14 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.exception.TransactionBeforePivotDateNotAllowed;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SavingsAccountTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -71,15 +71,6 @@ public class SavingsAccountTransactionDataValidator {
             Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName, SavingsApiConstants.localeParamName,
                     transactionAmountParamName, lienAllowedParamName, SavingsApiConstants.reasonForBlockParamName));
     private final ConfigurationDomainService configurationDomainService;
-    private final SavingsAccountAssembler savingAccountAssembler;
-
-    @Autowired
-    public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper,
-            final ConfigurationDomainService configurationDomainService, final SavingsAccountAssembler savingAccountAssembler) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.configurationDomainService = configurationDomainService;
-        this.savingAccountAssembler = savingAccountAssembler;
-    }
 
     public void validateTransactionWithPivotDate(final LocalDate transactionDate, final SavingsAccount savingsAccount) {
         final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();

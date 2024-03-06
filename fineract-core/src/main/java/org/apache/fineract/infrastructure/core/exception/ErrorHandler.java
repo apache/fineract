@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exceptionmapper.DefaultExceptionMapper;
 import org.apache.fineract.infrastructure.core.exceptionmapper.FineractExceptionMapper;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.eclipse.persistence.exceptions.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.NestedRuntimeException;
@@ -177,11 +178,16 @@ public final class ErrorHandler {
             if (nre instanceof NonTransientDataAccessException) {
                 msgCode = msgCode == null ? codePfx + ".data.integrity.issue" : msgCode;
                 return new PlatformDataIntegrityException(msgCode, msg, param, args);
+            } else if (cause instanceof OptimisticLockException) {
+                return (RuntimeException) cause;
             }
         }
         if (t instanceof ValidationException) {
             msgCode = msgCode == null ? codePfx + ".validation.error" : msgCode;
             return new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError(msgCode, msg, param, defaultMsgArgs)));
+        }
+        if (t instanceof jakarta.persistence.OptimisticLockException) {
+            return (RuntimeException) t;
         }
         if (t instanceof PersistenceException) {
             msgCode = msgCode == null ? codePfx + ".persistence.error" : msgCode;
@@ -191,12 +197,12 @@ public final class ErrorHandler {
             msgCode = msgCode == null ? codePfx + ".authentication.error" : msgCode;
             return new PlatformDataIntegrityException(msgCode, msg, param, args);
         }
-        if (t instanceof RuntimeException re) {
-            return re;
-        }
         if (t instanceof ParseException) {
             msgCode = msgCode == null ? codePfx + ".parse.error" : msgCode;
             return new PlatformDataIntegrityException(msgCode, msg, param, args);
+        }
+        if (t instanceof RuntimeException re) {
+            return re;
         }
         return new RuntimeException(msg, t);
     }
@@ -207,5 +213,13 @@ public final class ErrorHandler {
         } else {
             return Set.of(array);
         }
+    }
+
+    public static Throwable findMostSpecificException(Exception exception) {
+        Throwable mostSpecificException = exception;
+        while (mostSpecificException.getCause() != null) {
+            mostSpecificException = mostSpecificException.getCause();
+        }
+        return mostSpecificException;
     }
 }

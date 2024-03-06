@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.portfolio.account.starter;
 
+import jakarta.persistence.EntityManager;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDataValidator;
@@ -58,25 +57,23 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatform
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class AccountConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AccountAssociationsReadPlatformService.class)
-    public AccountAssociationsReadPlatformService accountAssociationsReadPlatformService(JdbcTemplate jdbcTemplate) {
-        return new AccountAssociationsReadPlatformServiceImpl(jdbcTemplate);
+    public AccountAssociationsReadPlatformService accountAssociationsReadPlatformService(EntityManager entityManager) {
+        return new AccountAssociationsReadPlatformServiceImpl(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean(AccountTransfersReadPlatformService.class)
-    public AccountTransfersReadPlatformService accountTransfersReadPlatformService(JdbcTemplate jdbcTemplate,
-            ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
-            PortfolioAccountReadPlatformService portfolioAccountReadPlatformService, ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        return new AccountTransfersReadPlatformServiceImpl(jdbcTemplate, clientReadPlatformService, officeReadPlatformService,
-                portfolioAccountReadPlatformService, columnValidator, sqlGenerator, paginationHelper);
+    public AccountTransfersReadPlatformService accountTransfersReadPlatformService(ClientReadPlatformService clientReadPlatformService,
+            OfficeReadPlatformService officeReadPlatformService, PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
+            PaginationHelper paginationHelper, EntityManager entityManager) {
+        return new AccountTransfersReadPlatformServiceImpl(clientReadPlatformService, officeReadPlatformService,
+                portfolioAccountReadPlatformService, paginationHelper, entityManager);
     }
 
     @Bean
@@ -88,36 +85,34 @@ public class AccountConfiguration {
             LoanAccountDomainService loanAccountDomainService, SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             AccountTransferDetailRepository accountTransferDetailRepository, LoanReadPlatformService loanReadPlatformService,
             GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService, ExternalIdFactory externalIdFactory,
-            FineractProperties fineractProperties) {
+            FineractProperties fineractProperties, EntityManager entityManager) {
         return new AccountTransfersWritePlatformServiceImpl(accountTransfersDataValidator, accountTransferAssembler,
                 accountTransferRepository, savingsAccountAssembler, savingsAccountDomainService, loanAccountAssembler,
                 loanAccountDomainService, savingsAccountWritePlatformService, accountTransferDetailRepository, loanReadPlatformService,
-                gsimRepository, configurationDomainService, externalIdFactory, fineractProperties);
+                gsimRepository, configurationDomainService, externalIdFactory, fineractProperties, entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean(PortfolioAccountReadPlatformService.class)
-    public PortfolioAccountReadPlatformService portfolioAccountReadPlatformService(JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
-        return new PortfolioAccountReadPlatformServiceImpl(jdbcTemplate, sqlGenerator);
+    public PortfolioAccountReadPlatformService portfolioAccountReadPlatformService(EntityManager entityManager) {
+        return new PortfolioAccountReadPlatformServiceImpl(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean(StandingInstructionHistoryReadPlatformService.class)
-    public StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService(JdbcTemplate jdbcTemplate,
-            ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        return new StandingInstructionHistoryReadPlatformServiceImpl(jdbcTemplate, columnValidator, sqlGenerator, paginationHelper);
+    public StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService(PaginationHelper paginationHelper,
+            EntityManager entityManager) {
+        return new StandingInstructionHistoryReadPlatformServiceImpl(paginationHelper, entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean(StandingInstructionReadPlatformService.class)
-    public StandingInstructionReadPlatformService standingInstructionReadPlatformService(JdbcTemplate jdbcTemplate,
+    public StandingInstructionReadPlatformService standingInstructionReadPlatformService(
             ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
             PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
-            DropdownReadPlatformService dropdownReadPlatformService, ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        return new StandingInstructionReadPlatformServiceImpl(jdbcTemplate, clientReadPlatformService, officeReadPlatformService,
-                portfolioAccountReadPlatformService, dropdownReadPlatformService, columnValidator, sqlGenerator, paginationHelper);
+            DropdownReadPlatformService dropdownReadPlatformService, PaginationHelper paginationHelper, EntityManager entityManager) {
+        return new StandingInstructionReadPlatformServiceImpl(clientReadPlatformService, officeReadPlatformService,
+                portfolioAccountReadPlatformService, dropdownReadPlatformService, paginationHelper, entityManager);
     }
 
     @Bean

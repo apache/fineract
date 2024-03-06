@@ -524,6 +524,8 @@ final class LoansApiResourceSwagger {
             public Double interestOutstanding;
             @Schema(example = "200000.000000")
             public Double interestOverdue;
+            @Schema(example = "0.00")
+            public Double feeAdjustments;
             @Schema(example = "18000.000000")
             public Double feeChargesCharged;
             @Schema(example = "0.000000")
@@ -538,6 +540,8 @@ final class LoansApiResourceSwagger {
             public Double feeChargesOutstanding;
             @Schema(example = "15000.000000")
             public Double feeChargesOverdue;
+            @Schema(example = "0.00")
+            public Double penaltyAdjustments;
             @Schema(example = "0.000000")
             public Double penaltyChargesCharged;
             @Schema(example = "0.000000")
@@ -1081,6 +1085,8 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1")
         public Integer repaymentEvery;
         public GetLoansLoanIdRepaymentFrequencyType repaymentFrequencyType;
+        @Schema(example = "1")
+        public Integer fixedLength;
         @Schema(example = "24")
         public BigDecimal interestRatePerPeriod;
         public GetLoansLoanIdInterestRateFrequencyType interestRateFrequencyType;
@@ -1177,6 +1183,8 @@ final class LoansApiResourceSwagger {
         public Integer repaymentEvery;
         @Schema(example = "2")
         public Integer repaymentFrequencyType;
+        @Schema(example = "1")
+        public Integer fixedLength;
         @Schema(example = "2")
         public BigDecimal interestRatePerPeriod;
         @Schema(example = "1")
@@ -1313,6 +1321,8 @@ final class LoansApiResourceSwagger {
         public Integer repaymentEvery;
         @Schema(example = "0")
         public Integer repaymentFrequencyType;
+        @Schema(example = "1")
+        public Integer fixedLength;
         @Schema(example = "2")
         public BigDecimal interestRatePerPeriod;
         @Schema(example = "0")

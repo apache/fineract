@@ -25,7 +25,6 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalance
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
-import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -39,13 +38,15 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
     private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
-    public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command, Money amountToDisburse,
-            Loan loan) {
+    public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,
+            LoanTransaction disbursementTransaction, Loan loan) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionDownPaymentPreBusinessEvent(loan));
-        LoanTransaction downPaymentTransaction = loan.handleDownPayment(amountToDisburse.getAmount(), command, scheduleGeneratorDTO);
-        LoanTransaction savedLoanTransaction = loanTransactionRepository.saveAndFlush(downPaymentTransaction);
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionDownPaymentPostBusinessEvent(savedLoanTransaction));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        return savedLoanTransaction;
+        LoanTransaction downPaymentTransaction = loan.handleDownPayment(disbursementTransaction, command, scheduleGeneratorDTO);
+        if (downPaymentTransaction != null) {
+            downPaymentTransaction = loanTransactionRepository.saveAndFlush(downPaymentTransaction);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionDownPaymentPostBusinessEvent(downPaymentTransaction));
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        }
+        return downPaymentTransaction;
     }
 }

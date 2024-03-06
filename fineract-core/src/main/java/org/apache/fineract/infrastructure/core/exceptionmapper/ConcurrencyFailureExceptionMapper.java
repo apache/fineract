@@ -26,6 +26,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.springframework.context.annotation.Scope;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -43,7 +44,7 @@ public class ConcurrencyFailureExceptionMapper implements FineractExceptionMappe
 
     @Override
     public Response toResponse(final ConcurrencyFailureException exception) {
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         String type;
         String identifier;
         if (exception instanceof ObjectOptimisticLockingFailureException olex) {

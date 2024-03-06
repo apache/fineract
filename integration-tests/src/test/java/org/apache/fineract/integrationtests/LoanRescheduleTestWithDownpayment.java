@@ -74,9 +74,9 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
 
             // verify journal entries
             verifyJournalEntries(loanId, journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(250.0, fundSource, "DEBIT"), //
                     journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, suspenseClearingAccount, "CREDIT") //
+                    journalEntry(1000.0, fundSource, "CREDIT") //
             );
 
             // Verify Repayment Schedule

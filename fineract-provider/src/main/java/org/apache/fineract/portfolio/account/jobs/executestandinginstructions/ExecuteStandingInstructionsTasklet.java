@@ -18,8 +18,11 @@
  */
 package org.apache.fineract.portfolio.account.jobs.executestandinginstructions;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,12 +32,14 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
+import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstructionsHistory;
+import org.apache.fineract.portfolio.account.domain.QAccountTransferStandingInstruction;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
@@ -48,19 +53,21 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
-    private final JdbcTemplate jdbcTemplate;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
+    private final EntityManager entityManager;
+    private final StandingInstructionRepository standingInstructionRepository;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws JobExecutionException {
         Collection<StandingInstructionData> instructionData = standingInstructionReadPlatformService
                 .retrieveAll(StandingInstructionStatus.ACTIVE.getValue());
         List<Throwable> errors = new ArrayList<>();
@@ -113,8 +120,12 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                 final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId());
 
                 if (transferCompleted) {
-                    final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
-                    jdbcTemplate.update(updateQuery, transactionDate, data.getId());
+                    final JPAQueryFactory queryFactory = new JPAQueryFactory(this.entityManager);
+                    final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+
+                    queryFactory.update(qAccountTransferStandingInstruction)
+                            .set(qAccountTransferStandingInstruction.latsRunDate, transactionDate)
+                            .where(qAccountTransferStandingInstruction.id.eq(data.getId())).execute();
                 }
 
             }
@@ -127,10 +138,8 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
     private boolean transferAmount(final List<Throwable> errors, final AccountTransferDTO accountTransferDTO, final Long instructionId) {
         boolean transferCompleted = true;
-        StringBuilder errorLog = new StringBuilder();
-        StringBuilder updateQuery = new StringBuilder(
-                "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, " + sqlGenerator.escape("status")
-                        + ", amount,execution_time, error_log) VALUES (");
+        final StringBuilder errorLog = new StringBuilder();
+
         try {
             accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         } catch (final PlatformApiDataValidationException e) {
@@ -151,17 +160,21 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             errorLog.append("Exception while trasfering funds ").append(e.getMessage());
 
         }
-        updateQuery.append(instructionId).append(",");
-        if (errorLog.length() > 0) {
+
+        if (!errorLog.isEmpty()) {
             transferCompleted = false;
-            updateQuery.append("'failed'").append(",");
-        } else {
-            updateQuery.append("'success'").append(",");
         }
-        updateQuery.append(accountTransferDTO.getTransactionAmount().doubleValue());
-        updateQuery.append(", now(),");
-        updateQuery.append("'").append(errorLog).append("')");
-        jdbcTemplate.update(updateQuery.toString());
+
+        final AccountTransferStandingInstructionsHistory newHistory = new AccountTransferStandingInstructionsHistory();
+        newHistory.setAccountTransferStandingInstruction(standingInstructionRepository.getReferenceById(instructionId));
+        newHistory.setStatus(transferCompleted ? "success" : "failed");
+        newHistory.setAmount(accountTransferDTO.getTransactionAmount());
+        newHistory.setExecutionTime(LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
+        newHistory.setErrorLog(String.valueOf(errorLog));
+
+        entityManager.persist(newHistory);
+        entityManager.flush();
+
         return transferCompleted;
     }
 }

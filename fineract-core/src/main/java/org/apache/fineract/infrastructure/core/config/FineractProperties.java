@@ -284,6 +284,7 @@ public class FineractProperties {
 
         private boolean enabled;
         private FineractExternalEventsProducerProperties producer;
+        private int partitionSize;
     }
 
     @Getter
@@ -448,6 +449,7 @@ public class FineractProperties {
     public static class FineractLoanProperties {
 
         private FineractTransactionProcessorProperties transactionProcessor;
+        private String statusChangeHistoryStatuses;
     }
 
     @Getter

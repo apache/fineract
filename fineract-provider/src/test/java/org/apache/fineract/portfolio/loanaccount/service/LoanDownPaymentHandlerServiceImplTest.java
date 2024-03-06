@@ -19,13 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -88,19 +87,19 @@ public class LoanDownPaymentHandlerServiceImplTest {
     public void testDownPaymentHandler() {
         // given
         Loan loanForProcessing = Mockito.mock(Loan.class);
+        LoanTransaction disbursement = Mockito.mock(LoanTransaction.class);
         MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
         doNothing().when(businessEventNotifierService).notifyPreBusinessEvent(any(LoanTransactionDownPaymentPreBusinessEvent.class));
         doNothing().when(businessEventNotifierService).notifyPostBusinessEvent(any(LoanTransactionDownPaymentPostBusinessEvent.class));
         doNothing().when(businessEventNotifierService).notifyPostBusinessEvent(any(LoanBalanceChangedBusinessEvent.class));
         when(loanTransactionRepository.saveAndFlush(any(LoanTransaction.class))).thenReturn(loanTransaction);
-        when(loanForProcessing.handleDownPayment(any(BigDecimal.class), eq(command), eq(scheduleGeneratorDTO))).thenReturn(loanTransaction);
+        when(loanForProcessing.handleDownPayment(eq(disbursement), eq(command), eq(scheduleGeneratorDTO))).thenReturn(loanTransaction);
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
         when(loanCurrency.getCode()).thenReturn("CODE");
         when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
         when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
-        Money amount = Money.of(loanCurrency, BigDecimal.TEN);
         // when
-        LoanTransaction actual = underTest.handleDownPayment(scheduleGeneratorDTO, command, amount, loanForProcessing);
+        LoanTransaction actual = underTest.handleDownPayment(scheduleGeneratorDTO, command, disbursement, loanForProcessing);
 
         // then
         assertNotNull(actual);
@@ -109,6 +108,32 @@ public class LoanDownPaymentHandlerServiceImplTest {
         verify(businessEventNotifierService, Mockito.times(1))
                 .notifyPostBusinessEvent(Mockito.any(LoanTransactionDownPaymentPostBusinessEvent.class));
         verify(businessEventNotifierService, Mockito.times(1)).notifyPostBusinessEvent(Mockito.any(LoanBalanceChangedBusinessEvent.class));
-        verify(loanForProcessing, Mockito.times(1)).handleDownPayment(any(BigDecimal.class), eq(command), eq(scheduleGeneratorDTO));
+        verify(loanForProcessing, Mockito.times(1)).handleDownPayment(eq(disbursement), eq(command), eq(scheduleGeneratorDTO));
+    }
+
+    @Test
+    public void testDownPaymentHandlerNoNewTransaction() {
+        // given
+        Loan loanForProcessing = Mockito.mock(Loan.class);
+        LoanTransaction disbursement = Mockito.mock(LoanTransaction.class);
+        MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
+        doNothing().when(businessEventNotifierService).notifyPreBusinessEvent(any(LoanTransactionDownPaymentPreBusinessEvent.class));
+        when(loanForProcessing.handleDownPayment(eq(disbursement), eq(command), eq(scheduleGeneratorDTO))).thenReturn(null);
+        when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
+        when(loanCurrency.getCode()).thenReturn("CODE");
+        when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
+        when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
+        // when
+        LoanTransaction actual = underTest.handleDownPayment(scheduleGeneratorDTO, command, disbursement, loanForProcessing);
+
+        // then
+        assertNull(actual);
+        verify(businessEventNotifierService, Mockito.times(1))
+                .notifyPreBusinessEvent(Mockito.any(LoanTransactionDownPaymentPreBusinessEvent.class));
+        verify(businessEventNotifierService, Mockito.never())
+                .notifyPostBusinessEvent(Mockito.any(LoanTransactionDownPaymentPostBusinessEvent.class));
+        verify(businessEventNotifierService, Mockito.never()).notifyPostBusinessEvent(Mockito.any(LoanBalanceChangedBusinessEvent.class));
+        verify(loanForProcessing, Mockito.times(1)).handleDownPayment(eq(disbursement), eq(command), eq(scheduleGeneratorDTO));
+        verify(loanTransactionRepository, Mockito.never()).saveAndFlush(any(LoanTransaction.class));
     }
 }

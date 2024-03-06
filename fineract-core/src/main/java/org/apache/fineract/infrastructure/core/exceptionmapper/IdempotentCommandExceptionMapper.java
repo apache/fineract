@@ -28,6 +28,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessFailedException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessSucceedException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
@@ -46,7 +47,7 @@ public class IdempotentCommandExceptionMapper implements FineractExceptionMapper
 
     @Override
     public Response toResponse(final AbstractIdempotentCommandException exception) {
-        log.warn("Processing {} request: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         Integer status = null;
         if (exception instanceof IdempotentCommandProcessSucceedException pse) {
             Integer statusCode = pse.getStatusCode();

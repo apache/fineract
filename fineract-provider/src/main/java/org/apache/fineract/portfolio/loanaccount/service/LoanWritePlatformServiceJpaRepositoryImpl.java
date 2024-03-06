@@ -22,8 +22,10 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.querydsl.jpa.impl.JPAQuery;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.resilience4j.retry.annotation.Retry;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -111,6 +113,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
+import org.apache.fineract.portfolio.account.domain.QAccountAssociations;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionPriority;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
@@ -249,6 +252,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
     private final ErrorHandler errorHandler;
     private final LoanDownPaymentHandlerService loanDownPaymentHandlerService;
+    private final EntityManager entityManager;
 
     @Transactional
     @Override
@@ -435,8 +439,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             } else {
                 existingTransactionIds.addAll(loan.findExistingTransactionIds());
                 existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
-                disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), amountToDisburse, paymentDetail,
-                        actualDisbursementDate, txnExternalId);
+                disbursementTransaction = LoanTransaction.disbursement(loan, amountToDisburse, paymentDetail, actualDisbursementDate,
+                        txnExternalId, loan.getTotalOverpaidAsMoney());
                 disbursementTransaction.updateLoan(loan);
                 loan.addLoanTransaction(disbursementTransaction);
             }
@@ -460,6 +464,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.adjustNetDisbursalAmount(amountToDisburse.getAmount());
             if (disbursementTransaction != null) {
                 loanTransactionRepository.saveAndFlush(disbursementTransaction);
+            }
+            if (changedTransactionDetail != null) {
+                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                }
+                // Trigger transaction replayed event
+                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
             if (loan.isAutoRepaymentForDownPaymentEnabled()) {
                 // updating linked savings account for auto down payment transaction for disbursement to savings account
@@ -485,19 +497,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 } else {
-                    loanDownPaymentHandlerService.handleDownPayment(scheduleGeneratorDTO, command, amountToDisburse, loan);
+                    loanDownPaymentHandlerService.handleDownPayment(scheduleGeneratorDTO, command, disbursementTransaction, loan);
                 }
             }
         }
         if (!changes.isEmpty()) {
-            if (changedTransactionDetail != null) {
-                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
-                }
-                // Trigger transaction replayed event
-                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
-            }
+            loan.updateLoanScheduleDependentDerivedFields();
             loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
@@ -597,8 +602,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void createStandingInstruction(Loan loan) {
 
         if (loan.shouldCreateStandingInstructionAtDisbursement()) {
-            AccountAssociations accountAssociations = this.accountAssociationRepository.findByLoanIdAndType(loan.getId(),
-                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+            final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+            final JPAQuery<AccountAssociations> query = new JPAQuery<>(entityManager);
+
+            final AccountAssociations accountAssociations = query.select(qAccountAssociations).from(qAccountAssociations)
+                    .where(qAccountAssociations.loanAccount.id.eq(loan.getId())
+                            .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                    .fetchOne();
 
             if (accountAssociations != null) {
 
@@ -749,8 +759,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 } else {
                     existingTransactionIds.addAll(loan.findExistingTransactionIds());
                     existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
-                    LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
-                            actualDisbursementDate, txnExternalId);
+                    LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan, disburseAmount, paymentDetail,
+                            actualDisbursementDate, txnExternalId, loan.getTotalOverpaidAsMoney());
                     disbursementTransaction.updateLoan(loan);
                     loan.addLoanTransaction(disbursementTransaction);
                     businessEventNotifierService
@@ -2548,11 +2558,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         final Map<String, Object> changes = new LinkedHashMap<>();
-
-        if (loan.isApproved() || loan.isSubmittedAndPendingApproval()) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.mark.as.fraud.not.allowed",
-                    "Loan Id: " + loanId + " mark as fraud is not allowed as loan status is not active", loan.getStatus().getCode());
-        }
         final boolean fraud = command.booleanPrimitiveValueOfParameterNamed(LoanApiConstants.FRAUD_ATTRIBUTE_NAME);
         if (loan.isFraud() != fraud) {
             loan.markAsFraud(fraud);

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -79,6 +81,8 @@ import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepository
 import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
 import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
+import org.apache.fineract.portfolio.account.domain.QAccountTransferStandingInstruction;
+import org.apache.fineract.portfolio.account.domain.QAccountTransferTransaction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
@@ -141,6 +145,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
+    private final EntityManager entityManager;
 
     @Transactional
     @Override
@@ -534,8 +539,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
         final Money amount = Money.of(loan.getCurrency(), transactionAmount);
-        LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), amount, paymentDetail, transactionDate,
-                txnExternalId);
+        LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan, amount, paymentDetail, transactionDate, txnExternalId,
+                loan.getTotalOverpaidAsMoney());
 
         // Subtract Previous loan outstanding balance from netDisbursalAmount
         loan.deductFromNetDisbursalAmount(transactionAmount);
@@ -695,14 +700,27 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     installment.getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
                     installment.getInterestAccrued(currency).getAmount(), installment.getFeeAccrued(currency).getAmount(),
                     installment.getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom,
-                    installment.getInterestWaived(currency).getAmount());
+                    installment.getInterestWaived(currency).getAmount(), installment.getCreditedFee(currency).getAmount(),
+                    installment.getCreditedPenalty(currency).getAmount());
             loanScheduleAccrualDatas.add(accrualData);
 
         }
     }
 
     private void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
-        final AccountTransferTransaction transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
+        final QAccountTransferTransaction qAccountTransferTransaction = QAccountTransferTransaction.accountTransferTransaction;
+        final JPAQuery<AccountTransferTransaction> query = new JPAQuery<>(entityManager);
+        final AccountTransferTransaction transferTransaction;
+        if (loanTransactionId == null) {
+            transferTransaction = query.select(qAccountTransferTransaction).from(qAccountTransferTransaction)
+                    .where(qAccountTransferTransaction.toLoanTransaction.id.isNull().and(qAccountTransferTransaction.reversed.isFalse()))
+                    .fetchOne();
+        } else {
+            transferTransaction = query.select(qAccountTransferTransaction).from(qAccountTransferTransaction)
+                    .where(qAccountTransferTransaction.toLoanTransaction.id.eq(loanTransactionId)
+                            .and(qAccountTransferTransaction.reversed.isFalse()))
+                    .fetchOne();
+        }
         if (transferTransaction != null) {
             transferTransaction.updateToLoanTransaction(newLoanTransaction);
             this.accountTransferRepository.save(transferTransaction);
@@ -909,8 +927,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     public void disableStandingInstructionsLinkedToClosedLoan(Loan loan) {
         if ((loan != null) && (loan.getStatus() != null) && loan.getStatus().isClosed()) {
             final Integer standingInstructionStatus = StandingInstructionStatus.ACTIVE.getValue();
-            final Collection<AccountTransferStandingInstruction> accountTransferStandingInstructions = this.standingInstructionRepository
-                    .findByLoanAccountAndStatus(loan, standingInstructionStatus);
+            final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+            final JPAQuery<AccountTransferStandingInstruction> query = new JPAQuery<>(entityManager);
+            final Collection<AccountTransferStandingInstruction> accountTransferStandingInstructions = query
+                    .select(qAccountTransferStandingInstruction).from(qAccountTransferStandingInstruction).where(
+                            qAccountTransferStandingInstruction.status.eq(standingInstructionStatus)
+                                    .and(qAccountTransferStandingInstruction.accountTransferDetails.toLoanAccount.eq(loan)
+                                            .or(qAccountTransferStandingInstruction.accountTransferDetails.fromLoanAccount.eq(loan))))
+                    .fetch();
 
             if (!accountTransferStandingInstructions.isEmpty()) {
                 for (AccountTransferStandingInstruction accountTransferStandingInstruction : accountTransferStandingInstructions) {
@@ -940,10 +964,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                         .minus(loanRepaymentScheduleInstallment.getInterestWaived(currency));
                 feePortion = feePortion.add(loanRepaymentScheduleInstallment.getFeeChargesCharged(currency))
                         .minus(loanRepaymentScheduleInstallment.getFeeAccrued(currency))
-                        .minus(loanRepaymentScheduleInstallment.getFeeChargesWaived(currency));
+                        .minus(loanRepaymentScheduleInstallment.getFeeChargesWaived(currency))
+                        .minus(loanRepaymentScheduleInstallment.getCreditedFee(currency));
                 penaltyPortion = penaltyPortion.add(loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency))
                         .minus(loanRepaymentScheduleInstallment.getPenaltyAccrued(currency))
-                        .minus(loanRepaymentScheduleInstallment.getPenaltyChargesWaived(currency));
+                        .minus(loanRepaymentScheduleInstallment.getPenaltyChargesWaived(currency))
+                        .minus(loanRepaymentScheduleInstallment.getCreditedPenalty(currency));
             }
             Money total = interestPortion.plus(feePortion).plus(penaltyPortion);
 

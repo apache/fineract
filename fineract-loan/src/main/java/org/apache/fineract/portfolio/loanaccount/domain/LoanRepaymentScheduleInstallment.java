@@ -29,6 +29,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -130,11 +131,23 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "is_additional", nullable = false)
     private boolean additional;
 
+    // TODO: At some point in time this database column needs to be renamed to credited_principal using the following
+    // approach
+    // https://blog.thepete.net/blog/2023/12/05/expand/contract-making-a-breaking-change-without-a-big-bang/
     @Column(name = "credits_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal credits;
+    private BigDecimal creditedPrincipal;
+
+    @Column(name = "credited_fee", scale = 6, precision = 19, nullable = true)
+    private BigDecimal creditedFee;
+
+    @Column(name = "credited_penalty", scale = 6, precision = 19, nullable = true)
+    private BigDecimal creditedPenalty;
 
     @Column(name = "is_down_payment", nullable = false)
     private boolean isDownPayment;
+
+    @Column(name = "is_re_aged", nullable = false)
+    private boolean isReAged;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
@@ -214,6 +227,36 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.obligationsMet = false;
     }
 
+    public LoanRepaymentScheduleInstallment(Loan loan, Integer installmentNumber, LocalDate fromDate, LocalDate dueDate,
+            BigDecimal principal, BigDecimal interestCharged, BigDecimal feeChargesCharged, BigDecimal penaltyCharges,
+            BigDecimal creditedPrincipal, BigDecimal creditedFee, BigDecimal creditedPenalty, boolean additional, boolean isDownPayment,
+            boolean isReAged) {
+        this.loan = loan;
+        this.installmentNumber = installmentNumber;
+        this.fromDate = fromDate;
+        this.dueDate = dueDate;
+        this.principal = principal;
+        this.interestCharged = interestCharged;
+        this.feeChargesCharged = feeChargesCharged;
+        this.penaltyCharges = penaltyCharges;
+        this.creditedPrincipal = creditedPrincipal;
+        this.creditedFee = creditedFee;
+        this.creditedPenalty = creditedPenalty;
+        this.additional = additional;
+        this.isDownPayment = isDownPayment;
+        this.isReAged = isReAged;
+    }
+
+    public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal) {
+        return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, null, null, null, null, null,
+                null, false, false, true);
+    }
+
+    public static LoanRepaymentScheduleInstallment getLastNonDownPaymentInstallment(List<LoanRepaymentScheduleInstallment> installments) {
+        return installments.stream().filter(i -> !i.isDownPayment()).reduce((first, second) -> second).orElseThrow();
+    }
+
     private BigDecimal defaultToNullIfZero(final BigDecimal value) {
         BigDecimal result = value;
         if (BigDecimal.ZERO.compareTo(value) == 0) {
@@ -246,8 +289,16 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return this.dueDate;
     }
 
-    public Money getCredits(final MonetaryCurrency currency) {
-        return Money.of(currency, this.credits);
+    public Money getCreditedPrincipal(final MonetaryCurrency currency) {
+        return Money.of(currency, this.creditedPrincipal);
+    }
+
+    public Money getCreditedFee(final MonetaryCurrency currency) {
+        return Money.of(currency, this.creditedFee);
+    }
+
+    public Money getCreditedPenalty(final MonetaryCurrency currency) {
+        return Money.of(currency, this.creditedPenalty);
     }
 
     public Money getPrincipal(final MonetaryCurrency currency) {
@@ -383,6 +434,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return this.installmentNumber.compareTo(o.installmentNumber);
     }
 
+    public int compareToByDueDate(LoanRepaymentScheduleInstallment o) {
+        return this.dueDate.compareTo(o.dueDate);
+    }
+
     public boolean isPrincipalNotCompleted(final MonetaryCurrency currency) {
         return !isPrincipalCompleted(currency);
     }
@@ -408,9 +463,17 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
         this.obligationsMet = false;
         this.obligationsMetOnDate = null;
-        if (this.credits != null) {
-            this.principal = this.principal.subtract(this.credits);
-            this.credits = null;
+        if (this.creditedPrincipal != null) {
+            this.principal = this.principal.subtract(this.creditedPrincipal);
+            this.creditedPrincipal = null;
+        }
+        if (this.creditedFee != null) {
+            this.feeChargesCharged = this.feeChargesCharged.subtract(this.creditedFee);
+            this.creditedFee = null;
+        }
+        if (this.creditedPenalty != null) {
+            this.penaltyCharges = this.penaltyCharges.subtract(this.creditedPenalty);
+            this.creditedPenalty = null;
         }
     }
 
@@ -780,11 +843,27 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
     }
 
-    public void addToCredits(final BigDecimal amount) {
-        if (this.credits == null) {
-            this.credits = amount;
+    public void addToCreditedPrincipal(final BigDecimal amount) {
+        if (this.creditedPrincipal == null) {
+            this.creditedPrincipal = amount;
         } else {
-            this.credits = this.credits.add(amount);
+            this.creditedPrincipal = this.creditedPrincipal.add(amount);
+        }
+    }
+
+    public void addToCreditedFee(final BigDecimal amount) {
+        if (this.creditedFee == null) {
+            this.creditedFee = amount;
+        } else {
+            this.creditedFee = this.creditedFee.add(amount);
+        }
+    }
+
+    public void addToCreditedPenalty(final BigDecimal amount) {
+        if (this.creditedPenalty == null) {
+            this.creditedPenalty = amount;
+        } else {
+            this.creditedPenalty = this.creditedPenalty.add(amount);
         }
     }
 
@@ -908,7 +987,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public void updateCredits(final LocalDate transactionDate, final Money transactionAmount) {
-        addToCredits(transactionAmount.getAmount());
+        addToCreditedPrincipal(transactionAmount.getAmount());
         addToPrincipal(transactionDate, transactionAmount);
     }
 
@@ -980,5 +1059,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public enum PaymentAction {
         PAY, UNPAY
+    }
+
+    public boolean isReAged() {
+        return isReAged;
     }
 }

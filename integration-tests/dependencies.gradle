@@ -20,7 +20,7 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    tomcat 'org.apache.tomcat:tomcat:10.1.18@zip'
+    tomcat 'org.apache.tomcat:tomcat:10.1.19@zip'
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
             project(path: ':fineract-core', configuration: 'runtimeElements'),
             project(path: ':fineract-accounting', configuration: 'runtimeElements'),
@@ -55,4 +55,9 @@ dependencies {
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor'
 
     testImplementation 'com.github.tomakehurst:wiremock-standalone:3.0.1'
+
+    testImplementation 'com.querydsl:querydsl-core:5.1.0'
+    testImplementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
+    testAnnotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
+    testAnnotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 }

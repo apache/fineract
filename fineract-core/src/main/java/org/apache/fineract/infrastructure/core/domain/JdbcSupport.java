@@ -117,7 +117,7 @@ public final class JdbcSupport {
         return defaultToNullIfZero(value);
     }
 
-    private static BigDecimal defaultToNullIfZero(final BigDecimal value) {
+    public static BigDecimal defaultToNullIfZero(final BigDecimal value) {
         BigDecimal result = value;
         if (value != null && BigDecimal.ZERO.compareTo(value) == 0) {
             result = null;

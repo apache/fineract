@@ -194,6 +194,13 @@ dependencies {
 
     implementation 'io.github.classgraph:classgraph'
 
+    implementation('com.querydsl:querydsl-core:5.1.0',
+            'com.querydsl:querydsl-jpa:5.1.0:jakarta')
+    annotationProcessor(
+            'com.querydsl:querydsl-apt:5.1.0:jakarta',
+            'jakarta.persistence:jakarta.persistence-api:3.1.0',
+            )
+
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //

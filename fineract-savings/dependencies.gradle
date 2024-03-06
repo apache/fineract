@@ -25,6 +25,7 @@ dependencies {
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-accounting'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
@@ -59,6 +60,14 @@ dependencies {
     implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
         exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
     }
+
+    implementation('com.querydsl:querydsl-core:5.1.0',
+            'com.querydsl:querydsl-jpa:5.1.0:jakarta')
+    annotationProcessor(
+            'com.querydsl:querydsl-apt:5.1.0:jakarta',
+            'jakarta.persistence:jakarta.persistence-api:3.1.0',
+            )
+
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //

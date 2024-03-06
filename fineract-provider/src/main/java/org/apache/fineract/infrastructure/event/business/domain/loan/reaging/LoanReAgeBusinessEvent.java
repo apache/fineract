@@ -16,17 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.conditions;
+package org.apache.fineract.infrastructure.event.business.domain.loan.reaging;
 
-import org.apache.fineract.infrastructure.core.condition.PropertiesCondition;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-public class LoanCOBWorkerCondition extends PropertiesCondition {
+public class LoanReAgeBusinessEvent extends LoanBusinessEvent {
+
+    private static final String TYPE = "LoanReAgeBusinessEvent";
+
+    public LoanReAgeBusinessEvent(Loan value) {
+        super(value);
+    }
 
     @Override
-    protected boolean matches(FineractProperties properties) {
-        boolean loanCobEnabled = properties.getJob().isLoanCobEnabled();
-        boolean batchWorkerEnabled = properties.getMode().isBatchWorkerEnabled();
-        return loanCobEnabled && batchWorkerEnabled;
+    public String getType() {
+        return TYPE;
     }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.conditions;
+package org.apache.fineract.infrastructure.core.condition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -32,7 +32,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.mock.env.MockEnvironment;
 
 @ExtendWith(MockitoExtension.class)
-class LoanCOBWorkerConditionTest {
+class FineractExternalEventConfigConditionTest {
 
     @Mock
     private ConditionContext conditionContext;
@@ -43,7 +43,7 @@ class LoanCOBWorkerConditionTest {
     private MockEnvironment environment;
 
     @InjectMocks
-    private LoanCOBWorkerCondition testObj = new LoanCOBWorkerCondition();
+    private FineractExternalEventConfigCondition underTest = new FineractExternalEventConfigCondition();
 
     @BeforeEach
     public void setUp() {
@@ -52,26 +52,32 @@ class LoanCOBWorkerConditionTest {
     }
 
     @Test
-    public void testMatchesShouldReturnFalseWhenLoanCobIsDisabledAndWorker() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "false");
-        environment.withProperty("fineract.mode.batch-worker-enabled", "true");
-        boolean result = testObj.matches(conditionContext, metadata);
+    public void testMatchesShouldReturnFalseWhenPartitionSizeIsNotBiggerThanLimit() {
+        // given
+        environment.withProperty("fineract.events.external.partition-size", "25000");
+        // when
+        boolean result = underTest.matches(conditionContext, metadata);
+        // then
         assertThat(result).isFalse();
     }
 
     @Test
-    public void testMatchesShouldReturnFalseWhenLoanCobIsEnabledAndNotWorker() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "true");
-        environment.withProperty("fineract.mode.batch-worker-enabled", "false");
-        boolean result = testObj.matches(conditionContext, metadata);
-        assertThat(result).isFalse();
+    public void testMatchesShouldReturnTrueWhenPartitionSizeIsBiggerThanLimit() {
+        // given
+        environment.withProperty("fineract.events.external.partition-size", "25001");
+        // when
+        boolean result = underTest.matches(conditionContext, metadata);
+        // then
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testMatchesShouldReturnTrueWhenLoanCobIsEnabledAndWorker() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "true");
-        environment.withProperty("fineract.mode.batch-worker-enabled", "true");
-        boolean result = testObj.matches(conditionContext, metadata);
+    public void testMatchesShouldReturnTrueWhenPartitionSizeIsNotPositive() {
+        // given
+        environment.withProperty("fineract.events.external.partition-size", "0");
+        // when
+        boolean result = underTest.matches(conditionContext, metadata);
+        // then
         assertThat(result).isTrue();
     }
 }

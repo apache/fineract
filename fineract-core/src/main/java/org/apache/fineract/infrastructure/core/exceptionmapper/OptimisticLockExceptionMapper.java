@@ -26,8 +26,8 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.eclipse.persistence.exceptions.OptimisticLockException;
-import org.springframework.context.annotation.Scope;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
@@ -37,13 +37,12 @@ import org.springframework.stereotype.Component;
  */
 @Provider
 @Component
-@Scope("singleton")
 @Slf4j
 public class OptimisticLockExceptionMapper implements FineractExceptionMapper, ExceptionMapper<OptimisticLockException> {
 
     @Override
     public Response toResponse(final OptimisticLockException exception) {
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         String type = exception.getQuery() == null ? "unknown" : "query";
         String identifier = "unknown";
         final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.conflict(type, identifier);

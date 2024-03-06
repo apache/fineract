@@ -3656,6 +3656,38 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder reAge(final Long loanId) {
+        this.actionName = "REAGE";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=reAge";
+        return this;
+    }
+
+    public CommandWrapperBuilder undoReAge(final Long loanId) {
+        this.actionName = "UNDO_REAGE";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=undoReAge";
+        return this;
+    }
+
+    public CommandWrapperBuilder reAmortize(final Long loanId) {
+        this.actionName = "REAMORTIZE";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=reAmortize";
+        return this;
+    }
+
+    public CommandWrapperBuilder undoReAmortize(final Long loanId) {
+        this.actionName = "UNDO_REAMORTIZE";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=undoReAmortize";
+        return this;
+    }
+
     public CommandWrapperBuilder createDelinquencyAction(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "DELINQUENCY_ACTION";

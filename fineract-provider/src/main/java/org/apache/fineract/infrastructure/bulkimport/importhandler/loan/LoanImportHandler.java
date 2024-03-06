@@ -351,7 +351,7 @@ public class LoanImportHandler implements ImportHandler {
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
                         arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, null, charges, linkAccountId, locale,
-                        dateFormat, loanCollateralManagementData);
+                        dateFormat, loanCollateralManagementData, null);
             } else if (loanType.equals("jlg")) {
                 Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME),
                         clientOrGroupName);
@@ -360,7 +360,7 @@ public class LoanImportHandler implements ImportHandler {
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
                         arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, groupId, charges, linkAccountId, locale,
-                        dateFormat, null);
+                        dateFormat, null, null);
             } else {
                 Long groupIdforGroupLoan = ImportHandlerUtils
                         .getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME), clientOrGroupName);
@@ -369,7 +369,7 @@ public class LoanImportHandler implements ImportHandler {
                         loanTermFrequencyEnum, nominalInterestRate, amortizationEnumOption, interestMethodEnum,
                         interestCalculationPeriodEnum, arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment,
                         graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(),
-                        externalId, linkAccountId, locale, dateFormat);
+                        externalId, linkAccountId, locale, dateFormat, null);
             }
         }
 

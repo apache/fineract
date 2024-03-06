@@ -589,6 +589,22 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
     }
 
+    public PostLoansLoanIdTransactionsResponse reAge(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "reAge"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reAmortize(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "reAmortize"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse undoReAge(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "undoReAge"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse undoReAmortize(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "undoReAmortize"));
+    }
+
     public PutChargeTransactionChangesResponse undoWaiveLoanCharge(final Long loanId, final Long transactionId,
             final PutChargeTransactionChangesRequest request) {
         log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
@@ -742,6 +758,11 @@ public class LoanTransactionHelper extends IntegrationTest {
     public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Long loanId, final String transactionExternalId,
             final PostLoansLoanIdTransactionsTransactionIdRequest request) {
         return ok(fineract().loanTransactions.adjustLoanTransaction1(loanId, transactionExternalId, request, "undo"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(final Long loanId, final Long transactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction(loanId, transactionId, request, "chargeback"));
     }
 
     public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(final String loanExternalId, final Long transactionId,

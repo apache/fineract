@@ -95,6 +95,8 @@ final class LoanProductsApiResourceSwagger {
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "true")
         public Boolean canDefineInstallmentAmount;
+        @Schema(example = "10")
+        public Integer fixedLength;
 
         // Settings
         @Schema(example = "false")
@@ -555,6 +557,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "7")
         public Integer repaymentEvery;
         public GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
+        @Schema(example = "10")
+        public Integer fixedLength;
         @Schema(example = "15.000000")
         public Double interestRatePerPeriod;
         public GetLoanProductsResponse.GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
@@ -1210,6 +1214,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "7")
         public Integer repaymentEvery;
         public GetLoanProductsResponse.GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
+        @Schema(example = "10")
+        public Integer fixedLength;
         @Schema(example = "5.000000")
         public Double interestRatePerPeriod;
         public GetLoanProductsProductIdResponse.GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
@@ -1332,6 +1338,8 @@ final class LoanProductsApiResourceSwagger {
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "true")
         public Boolean canDefineInstallmentAmount;
+        @Schema(example = "10.0")
+        public Integer fixedLength;
 
         // Settings
         @Schema(example = "false")

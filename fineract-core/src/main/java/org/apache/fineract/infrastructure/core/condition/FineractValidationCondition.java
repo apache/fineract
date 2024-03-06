@@ -35,4 +35,7 @@ public class FineractValidationCondition extends AnyNestedCondition {
 
     @Conditional(FineractRemoteJobMessageHandlerCondition.class)
     static class FineractRemoteJobMessageHandlerValidation {}
+
+    @Conditional(FineractExternalEventConfigCondition.class)
+    static class FineractExternalEventConfigValidation {}
 }

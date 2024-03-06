@@ -102,14 +102,17 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         OffsetDateTime sentAt = DateUtils.getAuditOffsetDateTime();
 
         // Partitioning dataset to avoid exception: PreparedStatement can have at most 65,535 parameters
-        List<List<Long>> partitions = Lists.partition(eventIds, 5_000);
-        partitions.forEach(partitionedEventIds -> {
-            measure(() -> {
-                repository.markEventsSent(partitionedEventIds, sentAt);
-            }, timeTaken -> {
-                log.debug("Took {}ms to update {} events", timeTaken.toMillis(), partitionedEventIds.size());
-            });
-        });
+        final int partitionSize = fineractProperties.getEvents().getExternal().getPartitionSize();
+        List<List<Long>> partitions = Lists.partition(eventIds, partitionSize);
+        partitions.stream() //
+                .parallel() //
+                .forEach(partitionedEventIds -> {
+                    measure(() -> {
+                        repository.markEventsSent(partitionedEventIds, sentAt);
+                    }, timeTaken -> {
+                        log.debug("Took {}ms to update {} events", timeTaken.toMillis(), partitionedEventIds.size());
+                    });
+                });
     }
 
     private Map<Long, List<byte[]>> generatePartitions(List<ExternalEventView> queuedEvents) {

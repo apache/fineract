@@ -611,7 +611,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final BigDecimal outstandingChargeAmount = null;
                     final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "runningBalance");
                     final boolean reversed = rs.getBoolean("reversed");
-                    final boolean isManualTransaction = rs.getBoolean("manualTransaction");
                     final Long officeId = rs.getLong("officeId");
                     final BigDecimal cumulativeBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "cumulativeBalance");
 
@@ -684,59 +683,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             }
             return savingsAccountDataList;
 
-            // final String productName = rs.getString("productName");
-
-            // final String fieldOfficerName = rs.getString("fieldOfficerName");
-
-            // final String submittedByUsername = rs.getString("submittedByUsername");
-            // final String submittedByFirstname = rs.getString("submittedByFirstname");
-            // final String submittedByLastname = rs.getString("submittedByLastname");
-            //
-
-            // final String rejectedByUsername = rs.getString("rejectedByUsername");
-            // final String rejectedByFirstname = rs.getString("rejectedByFirstname");
-            // final String rejectedByLastname = rs.getString("rejectedByLastname");
-            //
-
-            // final String withdrawnByUsername = rs.getString("withdrawnByUsername");
-            // final String withdrawnByFirstname = rs.getString("withdrawnByFirstname");
-            // final String withdrawnByLastname = rs.getString("withdrawnByLastname");
-
-            // final String approvedByUsername = rs.getString("approvedByUsername");
-            // final String approvedByFirstname = rs.getString("approvedByFirstname");
-            // final String approvedByLastname = rs.getString("approvedByLastname");
-
-            // final String activatedByUsername = rs.getString("activatedByUsername");
-            // final String activatedByFirstname = rs.getString("activatedByFirstname");
-            // final String activatedByLastname = rs.getString("activatedByLastname");
-
-            // final String closedByUsername = rs.getString("closedByUsername");
-            // final String closedByFirstname = rs.getString("closedByFirstname");
-            // final String closedByLastname = rs.getString("closedByLastname");
-
-            // final String currencyName = rs.getString("currencyName");
-            // final String currencyNameCode = rs.getString("currencyNameCode");
-            // final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-
-            /*
-             * final BigDecimal withdrawalFeeAmount = rs.getBigDecimal("withdrawalFeeAmount");
-             *
-             * EnumOptionData withdrawalFeeType = null; final Integer withdrawalFeeTypeValue =
-             * JdbcSupport.getInteger(rs, "withdrawalFeeTypeEnum"); if (withdrawalFeeTypeValue != null) {
-             * withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue); }
-             */
-
-            /*
-             * final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
-             *
-             * MonthDay annualFeeOnMonthDay = null; final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs,
-             * "annualFeeOnMonth"); final Integer annualFeeOnDay = JdbcSupport.getInteger(rs, "annualFeeOnDay"); if
-             * (annualFeeAmount != null && annualFeeOnDay != null) { annualFeeOnMonthDay = new
-             * MonthDay(annualFeeOnMonth, annualFeeOnDay); }
-             *
-             * final LocalDate annualFeeNextDueDate = JdbcSupport.getLocalDate(rs, "annualFeeNextDueDate");
-             */
-
         }
     }
 
@@ -792,20 +738,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.min_required_opening_balance as minRequiredOpeningBalance, ");
             sqlBuilder.append("sa.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sa.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
-            // sqlBuilder.append("sa.withdrawal_fee_amount as
-            // withdrawalFeeAmount,");
-            // sqlBuilder.append("sa.withdrawal_fee_type_enum as
-            // withdrawalFeeTypeEnum, ");
+
             sqlBuilder.append("sa.allow_overdraft as allowOverdraft, ");
             sqlBuilder.append("sa.overdraft_limit as overdraftLimit, ");
             sqlBuilder.append("sa.nominal_annual_interest_rate_overdraft as nominalAnnualInterestRateOverdraft, ");
             sqlBuilder.append("sa.min_overdraft_for_interest_calculation as minOverdraftForInterestCalculation, ");
-            // sqlBuilder.append("sa.annual_fee_amount as annualFeeAmount,");
-            // sqlBuilder.append("sa.annual_fee_on_month as annualFeeOnMonth,
-            // ");
-            // sqlBuilder.append("sa.annual_fee_on_day as annualFeeOnDay, ");
-            // sqlBuilder.append("sa.annual_fee_next_due_date as
-            // annualFeeNextDueDate, ");
+
             sqlBuilder.append("sa.total_deposits_derived as totalDeposits, ");
             sqlBuilder.append("sa.total_withdrawals_derived as totalWithdrawals, ");
             sqlBuilder.append("sa.total_withdrawal_fees_derived as totalWithdrawalFees, ");
@@ -981,14 +919,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 lockinPeriodFrequencyType = SavingsEnumerations.lockinPeriodFrequencyType(lockinPeriodType);
             }
 
-            /*
-             * final BigDecimal withdrawalFeeAmount = rs.getBigDecimal("withdrawalFeeAmount");
-             *
-             * EnumOptionData withdrawalFeeType = null; final Integer withdrawalFeeTypeValue =
-             * JdbcSupport.getInteger(rs, "withdrawalFeeTypeEnum"); if (withdrawalFeeTypeValue != null) {
-             * withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue); }
-             */
-
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
 
             final boolean allowOverdraft = rs.getBoolean("allowOverdraft");
@@ -1004,16 +934,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal maxAllowedLienLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "maxAllowedLienLimit");
             final boolean lienAllowed = rs.getBoolean("lienAllowed");
 
-            /*
-             * final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
-             *
-             * MonthDay annualFeeOnMonthDay = null; final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs,
-             * "annualFeeOnMonth"); final Integer annualFeeOnDay = JdbcSupport.getInteger(rs, "annualFeeOnDay"); if
-             * (annualFeeAmount != null && annualFeeOnDay != null) { annualFeeOnMonthDay = new
-             * MonthDay(annualFeeOnMonth, annualFeeOnDay); }
-             *
-             * final LocalDate annualFeeNextDueDate = JdbcSupport.getLocalDate(rs, "annualFeeNextDueDate");
-             */
             final BigDecimal totalDeposits = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalDeposits");
             final BigDecimal totalWithdrawals = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawals");
             final BigDecimal totalWithdrawalFees = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawalFees");

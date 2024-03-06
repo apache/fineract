@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.ACCRUAL_PERIODIC;
 import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.DEFAULT_STRATEGY;
 import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
-import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
@@ -53,7 +53,6 @@ import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -72,7 +71,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 @Slf4j
 @ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanTransactionChargebackTest {
+public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecErr400;
@@ -139,14 +138,10 @@ public class LoanTransactionChargebackTest {
 
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, amount.doubleValue());
 
-        GetJournalEntriesTransactionIdResponse journalEntries = journalEntryHelper
-                .getJournalEntries("L" + chargebackTransactionId.toString());
-        assertEquals(2L, journalEntries.getTotalFilteredRecords());
-        assertEquals(1000.0, journalEntries.getPageItems().get(0).getAmount());
-        assertEquals("CREDIT", journalEntries.getPageItems().get(0).getEntryType().getValue());
-
-        assertEquals(1000.0, journalEntries.getPageItems().get(1).getAmount());
-        assertEquals("DEBIT", journalEntries.getPageItems().get(1).getEntryType().getValue());
+        verifyTRJournalEntries(chargebackTransactionId, //
+                credit(fundSource, 1000.0), //
+                debit(loansReceivableAccount, 1000.0) //
+        );
 
         // Try to reverse a Loan Transaction charge back
         PostLoansLoanIdTransactionsResponse reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId,
@@ -431,17 +426,11 @@ public class LoanTransactionChargebackTest {
         assertEquals(getLoansLoanIdResponse.getTimeline().getExpectedMaturityDate(),
                 getLoansLoanIdResponse.getTimeline().getActualMaturityDate());
 
-        GetJournalEntriesTransactionIdResponse journalEntries = journalEntryHelper
-                .getJournalEntries("L" + chargebackTransactionId.toString());
-        assertEquals(3L, journalEntries.getTotalFilteredRecords());
-        assertEquals(100.0, journalEntries.getPageItems().get(0).getAmount());
-        assertEquals("DEBIT", journalEntries.getPageItems().get(0).getEntryType().getValue());
-
-        assertEquals(200.0, journalEntries.getPageItems().get(1).getAmount());
-        assertEquals("CREDIT", journalEntries.getPageItems().get(1).getEntryType().getValue());
-
-        assertEquals(100.0, journalEntries.getPageItems().get(2).getAmount());
-        assertEquals("DEBIT", journalEntries.getPageItems().get(2).getEntryType().getValue());
+        verifyTRJournalEntries(chargebackTransactionId, //
+                credit(fundSource, 200.0), //
+                debit(loansReceivableAccount, 100.0), //
+                debit(overpaymentAccount, 100.0) //
+        );
 
         final GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
         assertNull(delinquencyRange);
@@ -525,14 +514,10 @@ public class LoanTransactionChargebackTest {
 
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("0.00"));
 
-        GetJournalEntriesTransactionIdResponse journalEntries = journalEntryHelper
-                .getJournalEntries("L" + chargebackTransactionId.toString());
-        assertEquals(2L, journalEntries.getTotalFilteredRecords());
-        assertEquals(50.0, journalEntries.getPageItems().get(0).getAmount());
-        assertEquals("CREDIT", journalEntries.getPageItems().get(0).getEntryType().getValue());
-
-        assertEquals(50.0, journalEntries.getPageItems().get(1).getAmount());
-        assertEquals("DEBIT", journalEntries.getPageItems().get(1).getEntryType().getValue());
+        verifyTRJournalEntries(chargebackTransactionId, //
+                credit(fundSource, 50.0), //
+                debit(overpaymentAccount, 50.0) //
+        );
     }
 
     @ParameterizedTest
@@ -632,12 +617,20 @@ public class LoanTransactionChargebackTest {
             final Integer delinquencyBucketId, final boolean withJournalEntries, LoanProductTestBuilder loanProductTestBuilder) {
         final HashMap<String, Object> loanProductMap;
         if (withJournalEntries) {
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
             loanProductMap = loanProductTestBuilder
-                    .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, expenseAccount, incomeAccount, overpaymentAccount })
+                    .withFullAccountingConfig(ACCRUAL_PERIODIC,
+                            LoanProductTestBuilder.FullAccountingConfig.builder().fundSourceAccountId(fundSource.getAccountID().longValue())//
+                                    .loanPortfolioAccountId(loansReceivableAccount.getAccountID().longValue())//
+                                    .transfersInSuspenseAccountId(suspenseAccount.getAccountID().longValue())//
+                                    .interestOnLoanAccountId(interestIncomeAccount.getAccountID().longValue())//
+                                    .incomeFromFeeAccountId(feeIncomeAccount.getAccountID().longValue())//
+                                    .incomeFromPenaltyAccountId(penaltyIncomeAccount.getAccountID().longValue())//
+                                    .incomeFromRecoveryAccountId(recoveriesAccount.getAccountID().longValue())//
+                                    .writeOffAccountId(writtenOffAccount.getAccountID().longValue())//
+                                    .overpaymentLiabilityAccountId(overpaymentAccount.getAccountID().longValue())//
+                                    .receivableInterestAccountId(interestReceivableAccount.getAccountID().longValue())//
+                                    .receivableFeeAccountId(interestReceivableAccount.getAccountID().longValue())//
+                                    .receivablePenaltyAccountId(interestReceivableAccount.getAccountID().longValue()).build())
                     .build(null, delinquencyBucketId);
         } else {
             loanProductMap = loanProductTestBuilder.build(null, delinquencyBucketId);

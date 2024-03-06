@@ -251,8 +251,11 @@ public final class Utils {
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         LOG.info("JSON {}", jsonBodyToSend);
-        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL)
-                .andReturn().asString();
+        RequestSpecification spec = given().spec(requestSpec);
+        if (StringUtils.isNotBlank(jsonBodyToSend)) {
+            spec = spec.body(jsonBodyToSend);
+        }
+        final String json = spec.expect().spec(responseSpec).log().ifError().when().post(postURL).andReturn().asString();
         if (jsonAttributeToGetBack == null) {
             return (T) json;
         }

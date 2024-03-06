@@ -63,7 +63,7 @@ Fineract has been developed for 10+ years by the community and unfortunately the
 
 As for every system, the database structure will and need to evolve over time. Fineract is no different. Originally for Fineract, Flyway was used until Fineract 1.6.x.
 
-After 1.6.x, PostgreSQL support was added to the platform hence there was a need to make the data-access layer and the schema migration as database independent as possible. Becuase of that, from Fineract 1.7.0, Flyway is not used anymore but Liquibase is.
+After 1.6.x, PostgreSQL support was added to the platform hence there was a need to make the data-access layer and the schema migration as database independent as possible. Because of that, from Fineract 1.7.0, Flyway is not used anymore but Liquibase is.
 
 Some of the changesets in the Liquibase changelogs have database specifics into it but they only run for the relevant databases. This is controller by Liquibase contexts.
 
@@ -86,13 +86,13 @@ The switch from Flyway (1.6.x) to Liquibase (1.7.x) was planned to be as smooth 
 
 1. During upgrade from Fineract 1.5.0 to 1.6.0, Liquibase fails
 
-After dropping the flyway migrations table (schema_version), Liquibase runs it's
-own migrations which fails (in recreating tables which already exisit) because
+After dropping the flyway migrations table (schema_version), Liquibase runs its
+own migrations which fails (in recreating tables which already exist) because
 we are aiming to re-use DB with existing data from Fineract 1.5.0.
 
 Solution: The latest release version (1.6.0) doesn't have Liquibase at all, it
 still runs Flyway migrations. Only the develop branch (later to be 1.7.0) got
-sqitched to Liquibase. Do not pull the develop before upgrading your instance.
+switched to Liquibase. Do not pull the develop before upgrading your instance.
 
 Make sure first you upgrade your instance (aka database schema with Fineract 1.6.0).
 Then upgrade with the current develop branch. Check if some migration scripts

@@ -35,7 +35,7 @@ public class LinkedAccountRequiredExceptionMapper implements FineractExceptionMa
 
     @Override
     public Response toResponse(LinkedAccountRequiredException exception) {
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.domainRuleViolation(
                 exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
         // request understood but not carried out due to it violating some

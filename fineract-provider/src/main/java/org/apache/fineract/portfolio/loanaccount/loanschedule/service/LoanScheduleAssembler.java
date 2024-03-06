@@ -359,6 +359,8 @@ public class LoanScheduleAssembler {
         CalendarInstance compoundingCalendarInstance = null;
         InterestRecalculationCompoundingMethod compoundingMethod = null;
         boolean allowCompoundingOnEod = false;
+        final Boolean isFloatingInterestRate = this.fromApiJsonHelper
+                .extractBooleanNamed(LoanApiConstants.isFloatingInterestRateParameterName, element);
         if (isInterestRecalculationEnabled) {
             LoanProductInterestRecalculationDetails loanProductInterestRecalculationDetails = loanProduct
                     .getProductInterestRecalculationDetails();
@@ -409,8 +411,7 @@ public class LoanScheduleAssembler {
         if (loanProduct.isLinkedToFloatingInterestRate()) {
             final BigDecimal interestRateDiff = this.fromApiJsonHelper
                     .extractBigDecimalWithLocaleNamed(LoanApiConstants.interestRateDifferentialParameterName, element);
-            final Boolean isFloatingInterestRate = this.fromApiJsonHelper
-                    .extractBooleanNamed(LoanApiConstants.isFloatingInterestRateParameterName, element);
+
             List<FloatingRatePeriodData> baseLendingRatePeriods = null;
             try {
                 baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate().getRatePeriods();
@@ -468,14 +469,21 @@ public class LoanScheduleAssembler {
 
         LoanScheduleType loanScheduleType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleType();
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
-            LoanScheduleType.valueOf(this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element));
+            loanScheduleType = LoanScheduleType
+                    .valueOf(this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element));
         }
-        LoanScheduleProcessingType loanScheduleProcessingType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleProcessingType();
 
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
-            LoanScheduleProcessingType
+        LoanScheduleProcessingType loanScheduleProcessingType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleProcessingType();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, element)) {
+            loanScheduleProcessingType = LoanScheduleProcessingType
                     .valueOf(this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, element));
         }
+
+        Integer fixedLength = loanProduct.getLoanProductRelatedDetail().getFixedLength();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.FIXED_LENGTH, element)) {
+            fixedLength = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanProductConstants.FIXED_LENGTH, element);
+        }
+
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -490,7 +498,7 @@ public class LoanScheduleAssembler {
                 allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
                 fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled,
                 disbursedAmountPercentageForDownPayment, isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate,
-                loanScheduleType, loanScheduleProcessingType);
+                loanScheduleType, loanScheduleProcessingType, fixedLength);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

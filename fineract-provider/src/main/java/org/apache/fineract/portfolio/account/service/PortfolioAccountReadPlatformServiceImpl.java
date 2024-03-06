@@ -18,379 +18,232 @@
  */
 package org.apache.fineract.portfolio.account.service;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import java.util.Collections;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.QApplicationCurrency;
+import org.apache.fineract.organisation.staff.domain.QStaff;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountDTO;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.exception.AccountTransferNotFoundException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.apache.fineract.portfolio.client.domain.QClient;
+import org.apache.fineract.portfolio.group.domain.QGroup;
+import org.apache.fineract.portfolio.loanaccount.domain.QLoan;
+import org.apache.fineract.portfolio.loanaccount.domain.QLoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanproduct.domain.QLoanProduct;
+import org.apache.fineract.portfolio.savings.domain.QSavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.QSavingsProduct;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+@AllArgsConstructor
 public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccountReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final EntityManager entityManager;
 
-    // mapper
-    private final PortfolioSavingsAccountMapper savingsAccountMapper;
-    private final PortfolioLoanAccountMapper loanAccountMapper;
-    private final PortfolioLoanAccountRefundByTransferMapper accountRefundByTransferMapper;
-
-    public PortfolioAccountReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.savingsAccountMapper = new PortfolioSavingsAccountMapper();
-        this.loanAccountMapper = new PortfolioLoanAccountMapper();
-        this.accountRefundByTransferMapper = new PortfolioLoanAccountRefundByTransferMapper(sqlGenerator);
-    }
-
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retrieveOne(final Long accountId, final Integer accountTypeId) {
         return retrieveOne(accountId, accountTypeId, null);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retrieveOne(final Long accountId, final Integer accountTypeId, final String currencyCode) {
 
-        Object[] sqlParams = new Object[] { accountId };
-        PortfolioAccountData accountData = null;
-        try {
-            String sql = null;
-            final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
-            switch (accountType) {
-                case INVALID:
-                break;
-                case LOAN:
-
-                    sql = "select " + this.loanAccountMapper.schema() + " where la.id = ?";
-                    if (currencyCode != null) {
-                        sql += " and la.currency_code = ?";
-                        sqlParams = new Object[] { accountId, currencyCode };
-                    }
-
-                    accountData = this.jdbcTemplate.queryForObject(sql, this.loanAccountMapper, sqlParams);
-                break;
-                case SAVINGS:
-                    sql = "select " + this.savingsAccountMapper.schema() + " where sa.id = ?";
-                    if (currencyCode != null) {
-                        sql += " and sa.currency_code = ?";
-                        sqlParams = new Object[] { accountId, currencyCode };
-                    }
-
-                    accountData = this.jdbcTemplate.queryForObject(sql, this.savingsAccountMapper, sqlParams);
-                break;
+        final PortfolioAccountData accountData;
+        final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
+        accountData = switch (accountType) {
+            case INVALID -> null;
+            case LOAN -> {
+                final QLoan qLoan = QLoan.loan;
+                final JPAQuery<PortfolioAccountData> loanQuery = getLoanPortfolioAccountSelectQuery();
+                BooleanExpression loanPredicate = eq(qLoan.id, accountId);
+                if (currencyCode != null) {
+                    loanPredicate = loanPredicate.and(qLoan.loanRepaymentScheduleDetail.currency.code.eq(currencyCode));
+                }
+                yield loanQuery.where(loanPredicate).fetchOne();
             }
-        } catch (final EmptyResultDataAccessException e) {
-            throw new AccountTransferNotFoundException(accountId, e);
-        }
+            case SAVINGS -> {
+                final QSavingsAccount qSavingsAccount = QSavingsAccount.savingsAccount;
+                final JPAQuery<PortfolioAccountData> savingsQuery = getSavingsPortfolioAccountSelectQuery();
+                BooleanExpression savingsPredicate = eq(qSavingsAccount.id, accountId);
+                if (currencyCode != null) {
+                    savingsPredicate = savingsPredicate.and(qSavingsAccount.currency.code.eq(currencyCode));
+                }
+                yield savingsQuery.where(savingsPredicate).fetchOne();
+            }
+        };
 
-        return accountData;
+        return Optional.ofNullable(accountData).orElseThrow(() -> new AccountTransferNotFoundException(accountId));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Collection<PortfolioAccountData> retrieveAllForLookup(final PortfolioAccountDTO portfolioAccountDTO) {
 
-        final List<Object> sqlParams = new ArrayList<>();
-        // sqlParams.add(portfolioAccountDTO.getClientId());
         Collection<PortfolioAccountData> accounts = null;
-        String sql = null;
         long defaultAccountStatus = 300; // Active Status
         if (portfolioAccountDTO.getAccountStatus() != null) {
             defaultAccountStatus = portfolioAccountDTO.getFirstAccountStatus();
         }
         final PortfolioAccountType accountType = PortfolioAccountType.fromInt(portfolioAccountDTO.getAccountTypeId());
-        switch (accountType) {
-            case INVALID:
-            break;
-            case LOAN:
-                sql = "select " + this.loanAccountMapper.schema() + " where ";
+        accounts = switch (accountType) {
+            case INVALID -> Collections.emptyList();
+            case LOAN -> {
+                final QLoan qLoan = QLoan.loan;
+                JPAQuery<PortfolioAccountData> loanQuery = getLoanPortfolioAccountSelectQuery();
+                BooleanExpression loanPredicate = qLoan.loanStatus.in(defaultAccountStatus);
                 if (portfolioAccountDTO.getClientId() != null) {
-                    sql += " la.client_id = ? and la.loan_status_id in (?) ";
-                    sqlParams.add(portfolioAccountDTO.getClientId());
-                    sqlParams.add(defaultAccountStatus);
-                } else {
-                    sql += " la.loan_status_id in (?) ";
-                    sqlParams.add(defaultAccountStatus);
+                    loanPredicate = loanPredicate.and(qLoan.client.id.eq(portfolioAccountDTO.getClientId()));
                 }
                 if (portfolioAccountDTO.getCurrencyCode() != null) {
-                    sql += " and la.currency_code = ?";
-                    sqlParams.add(portfolioAccountDTO.getCurrencyCode());
+                    loanPredicate = loanPredicate
+                            .and(qLoan.loanRepaymentScheduleDetail.currency.code.eq(portfolioAccountDTO.getCurrencyCode()));
                 }
-
-                accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams.toArray()); // NOSONAR
-            break;
-            case SAVINGS:
-                sql = "select " + this.savingsAccountMapper.schema() + " where ";
+                yield loanQuery.where(loanPredicate).fetch();
+            }
+            case SAVINGS -> {
+                final QSavingsAccount qSavingsAccount = QSavingsAccount.savingsAccount;
+                JPAQuery<PortfolioAccountData> savingsQuery = getSavingsPortfolioAccountSelectQuery();
+                BooleanExpression savingsPredicate = qSavingsAccount.status.in(defaultAccountStatus);
                 if (portfolioAccountDTO.getClientId() != null) {
-                    sql += " sa.client_id = ? and sa.status_enum in (?) ";
-                    sqlParams.add(portfolioAccountDTO.getClientId());
-                    sqlParams.add(defaultAccountStatus);
-                } else {
-                    sql += " sa.status_enum in (?) ";
-                    sqlParams.add(defaultAccountStatus);
+                    savingsPredicate = savingsPredicate.and(qSavingsAccount.client.id.eq(portfolioAccountDTO.getClientId()));
+                } else if (portfolioAccountDTO.getGroupId() != null) {
+                    savingsPredicate = savingsPredicate.and(qSavingsAccount.group.id.eq(portfolioAccountDTO.getGroupId()));
                 }
                 if (portfolioAccountDTO.getCurrencyCode() != null) {
-                    sql += " and sa.currency_code = ?";
-                    sqlParams.add(portfolioAccountDTO.getCurrencyCode());
+                    savingsPredicate = savingsPredicate.and(qSavingsAccount.currency.code.eq(portfolioAccountDTO.getCurrencyCode()));
                 }
-
                 if (portfolioAccountDTO.getDepositType() != null) {
-                    sql += " and sa.deposit_type_enum = ?";
-                    sqlParams.add(portfolioAccountDTO.getDepositType().shortValue());
+                    savingsPredicate = savingsPredicate.and(qSavingsAccount.depositType.eq(portfolioAccountDTO.getDepositType()));
                 }
-
                 if (portfolioAccountDTO.isExcludeOverDraftAccounts()) {
-                    sql += " and sa.allow_overdraft = false";
+                    savingsPredicate = savingsPredicate.and(qSavingsAccount.allowOverdraft.isFalse());
                 }
-
-                if (portfolioAccountDTO.getClientId() == null && portfolioAccountDTO.getGroupId() != null) {
-                    sql += " and sa.group_id = ? ";
-                    sqlParams.add(portfolioAccountDTO.getGroupId());
-                }
-
-                accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray()); // NOSONAR
-            break;
-        }
+                yield savingsQuery.where(savingsPredicate).fetch();
+            }
+        };
 
         return accounts;
     }
 
-    private static final class PortfolioSavingsAccountMapper implements RowMapper<PortfolioAccountData> {
-
-        private final String schemaSql;
-
-        PortfolioSavingsAccountMapper() {
-
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, ");
-            sqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
-            sqlBuilder.append("g.id as groupId, g.display_name as groupName, ");
-            sqlBuilder.append("sp.id as productId, sp.name as productName, ");
-            sqlBuilder.append("s.id as fieldOfficerId, s.display_name as fieldOfficerName, ");
-            sqlBuilder.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits,");
-            sqlBuilder.append("sa.currency_multiplesof as inMultiplesOf, ");
-            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
-            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol ");
-            sqlBuilder.append("from m_savings_account sa ");
-            sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
-            sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
-            sqlBuilder.append("left join m_client c ON c.id = sa.client_id ");
-            sqlBuilder.append("left join m_group g ON g.id = sa.group_id ");
-            sqlBuilder.append("left join m_staff s ON s.id = sa.field_officer_id ");
-
-            this.schemaSql = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schemaSql;
-        }
-
-        @Override
-        public PortfolioAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String accountNo = rs.getString("accountNo");
-            final String externalId = rs.getString("externalId");
-
-            final Long groupId = JdbcSupport.getLong(rs, "groupId");
-            final String groupName = rs.getString("groupName");
-            final Long clientId = JdbcSupport.getLong(rs, "clientId");
-            final String clientName = rs.getString("clientName");
-
-            final Long productId = rs.getLong("productId");
-            final String productName = rs.getString("productName");
-
-            final Long fieldOfficerId = rs.getLong("fieldOfficerId");
-            final String fieldOfficerName = rs.getString("fieldOfficerName");
-
-            final String currencyCode = rs.getString("currencyCode");
-            final String currencyName = rs.getString("currencyName");
-            final String currencyNameCode = rs.getString("currencyNameCode");
-            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
-
-            return new PortfolioAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
-                    fieldOfficerId, fieldOfficerName, currency);
-        }
-    }
-
-    private static final class PortfolioLoanAccountMapper implements RowMapper<PortfolioAccountData> {
-
-        private final String schemaSql;
-
-        PortfolioLoanAccountMapper() {
-
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("la.id as id, la.account_no as accountNo, la.external_id as externalId, ");
-            sqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
-            sqlBuilder.append("g.id as groupId, g.display_name as groupName, ");
-            sqlBuilder.append("lp.id as productId, lp.name as productName, ");
-            sqlBuilder.append("s.id as fieldOfficerId, s.display_name as fieldOfficerName, ");
-            sqlBuilder.append("la.currency_code as currencyCode, la.currency_digits as currencyDigits,");
-            sqlBuilder.append("la.currency_multiplesof as inMultiplesOf, ");
-            sqlBuilder.append("la.total_overpaid_derived as totalOverpaid, ");
-            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
-            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol ");
-            sqlBuilder.append("from m_loan la ");
-            sqlBuilder.append("join m_product_loan lp ON la.product_id = lp.id ");
-            sqlBuilder.append("join m_currency curr on curr.code = la.currency_code ");
-            sqlBuilder.append("left join m_client c ON c.id = la.client_id ");
-            sqlBuilder.append("left join m_group g ON g.id = la.group_id ");
-            sqlBuilder.append("left join m_staff s ON s.id = la.loan_officer_id ");
-
-            this.schemaSql = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schemaSql;
-        }
-
-        @Override
-        public PortfolioAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String accountNo = rs.getString("accountNo");
-            final String externalId = rs.getString("externalId");
-
-            final Long groupId = JdbcSupport.getLong(rs, "groupId");
-            final String groupName = rs.getString("groupName");
-            final Long clientId = JdbcSupport.getLong(rs, "clientId");
-            final String clientName = rs.getString("clientName");
-
-            final Long productId = rs.getLong("productId");
-            final String productName = rs.getString("productName");
-
-            final Long fieldOfficerId = rs.getLong("fieldOfficerId");
-            final String fieldOfficerName = rs.getString("fieldOfficerName");
-
-            final String currencyCode = rs.getString("currencyCode");
-            final String currencyName = rs.getString("currencyName");
-            final String currencyNameCode = rs.getString("currencyNameCode");
-            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final BigDecimal amtForTransfer = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalOverpaid");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
-
-            return new PortfolioAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
-                    fieldOfficerId, fieldOfficerName, currency, amtForTransfer);
-        }
-    }
-
-    private static final class PortfolioLoanAccountRefundByTransferMapper implements RowMapper<PortfolioAccountData> {
-
-        private String schemaSql;
-        private final DatabaseSpecificSQLGenerator sqlGenerator;
-
-        PortfolioLoanAccountRefundByTransferMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
-            this.sqlGenerator = sqlGenerator;
-        }
-
-        public String schema() {
-            final StringBuilder amountQueryString = new StringBuilder(400);
-            amountQueryString.append("(select (SUM(COALESCE(mr.principal_completed_derived, 0)) +");
-            amountQueryString.append("SUM(COALESCE(mr.interest_completed_derived, 0)) + ");
-            amountQueryString.append("SUM(COALESCE(mr.fee_charges_completed_derived, 0)) + ");
-            amountQueryString.append(" SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
-            amountQueryString.append(" from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id");
-            amountQueryString.append(" where ml.id=? and ml.loan_status_id = 300");
-            amountQueryString.append("  and  mr.duedate >= " + sqlGenerator.currentBusinessDate() + " group by ml.id having");
-            amountQueryString.append(" (SUM(COALESCE(mr.principal_completed_derived, 0)) + ");
-            amountQueryString.append(" SUM(COALESCE(mr.interest_completed_derived, 0)) + ");
-            amountQueryString.append("SUM(COALESCE(mr.fee_charges_completed_derived, 0)) + ");
-            amountQueryString.append("SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) > 0) as totalOverpaid ");
-
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("la.id as id, la.account_no as accountNo, la.external_id as externalId, ");
-            sqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
-            sqlBuilder.append("g.id as groupId, g.display_name as groupName, ");
-            sqlBuilder.append("lp.id as productId, lp.name as productName, ");
-            sqlBuilder.append("s.id as fieldOfficerId, s.display_name as fieldOfficerName, ");
-            sqlBuilder.append("la.currency_code as currencyCode, la.currency_digits as currencyDigits,");
-            sqlBuilder.append("la.currency_multiplesof as inMultiplesOf, ");
-            sqlBuilder.append(amountQueryString.toString());
-            sqlBuilder.append(", ");
-            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
-            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol ");
-            sqlBuilder.append("from m_loan la ");
-            sqlBuilder.append("join m_product_loan lp ON la.product_id = lp.id ");
-            sqlBuilder.append("join m_currency curr on curr.code = la.currency_code ");
-            sqlBuilder.append("left join m_client c ON c.id = la.client_id ");
-            sqlBuilder.append("left join m_group g ON g.id = la.group_id ");
-            sqlBuilder.append("left join m_staff s ON s.id = la.loan_officer_id ");
-
-            this.schemaSql = sqlBuilder.toString();
-
-            return this.schemaSql;
-        }
-
-        @Override
-        public PortfolioAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String accountNo = rs.getString("accountNo");
-            final String externalId = rs.getString("externalId");
-
-            final Long groupId = JdbcSupport.getLong(rs, "groupId");
-            final String groupName = rs.getString("groupName");
-            final Long clientId = JdbcSupport.getLong(rs, "clientId");
-            final String clientName = rs.getString("clientName");
-
-            final Long productId = rs.getLong("productId");
-            final String productName = rs.getString("productName");
-
-            final Long fieldOfficerId = rs.getLong("fieldOfficerId");
-            final String fieldOfficerName = rs.getString("fieldOfficerName");
-
-            final String currencyCode = rs.getString("currencyCode");
-            final String currencyName = rs.getString("currencyName");
-            final String currencyNameCode = rs.getString("currencyNameCode");
-            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final BigDecimal amtForTransfer = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalOverpaid");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
-
-            return new PortfolioAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
-                    fieldOfficerId, fieldOfficerName, currency, amtForTransfer);
-        }
-    }
-
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId) {
         // TODO Auto-generated method stub
-        Object[] sqlParams = new Object[] { accountId, accountId };
-        PortfolioAccountData accountData = null;
-        // String currencyCode = null;
-        try {
-            String sql = null;
-            // final PortfolioAccountType accountType =
-            // PortfolioAccountType.fromInt(accountTypeId);
+        // final PortfolioAccountType accountType =
+        // PortfolioAccountType.fromInt(accountTypeId);
 
-            sql = "select " + this.accountRefundByTransferMapper.schema() + " where la.id = ?";
-            /*
-             * if (currencyCode != null) { sql += " and la.currency_code = ?"; sqlParams = new Object[] {accountId ,
-             * accountId,currencyCode }; }
-             */
+        final QLoan qLoan = QLoan.loan;
+        final QLoan qLoanSubQuery = new QLoan("loanSubQuery");
+        final QLoanRepaymentScheduleInstallment qLoanRepaymentSchedule = QLoanRepaymentScheduleInstallment.loanRepaymentScheduleInstallment;
+        final QLoanProduct qLoanProduct = QLoanProduct.loanProduct;
+        final QApplicationCurrency qCurrency = QApplicationCurrency.applicationCurrency;
+        final QClient qClient = QClient.client;
+        final QGroup qGroup = QGroup.group;
+        final QStaff qStaff = QStaff.staff;
 
-            accountData = this.jdbcTemplate.queryForObject(sql, this.accountRefundByTransferMapper, sqlParams);
+        final JPAQuery<PortfolioAccountData> mainQuery = new JPAQuery<>();
+        mainQuery
+                .select(qLoan.id.as("id"), qLoan.accountNumber.as("accountNo"), qLoan.externalId.as("externalId"),
+                        qClient.id.as("clientId"), qClient.displayName.as("clientName"), qGroup.id.as("groupId"),
+                        qGroup.name.as("groupName"), qLoanProduct.id.as("productId"), qLoanProduct.name.as("productName"),
+                        qStaff.id.as("fieldOfficerId"), qStaff.displayName.as("fieldOfficerName"),
+                        qLoan.loanRepaymentScheduleDetail.currency.code.as("currencyCode"),
+                        qLoan.loanRepaymentScheduleDetail.currency.digitsAfterDecimal.as("currencyDigits"),
+                        qLoan.loanRepaymentScheduleDetail.currency.inMultiplesOf.as("inMultiplesOf"),
+                        JPAExpressions.select(qLoanRepaymentSchedule.principalCompleted.coalesce(BigDecimal.valueOf(0.0)).sum()
+                                .add(qLoanRepaymentSchedule.interestPaid.coalesce(BigDecimal.valueOf(0.0)).sum())
+                                .add(qLoanRepaymentSchedule.feeChargesPaid.coalesce(BigDecimal.valueOf(0.0)).sum())
+                                .add(qLoanRepaymentSchedule.penaltyChargesPaid.coalesce(BigDecimal.valueOf(0.0)).sum()).as("totalOverpaid"))
+                                .from(qLoanSubQuery).join(qLoanRepaymentSchedule).on(qLoanSubQuery.id.eq(qLoanRepaymentSchedule.loan.id))
+                                .where(qLoanRepaymentSchedule.loan.id.eq(qLoan.id).and(qLoan.loanStatus.eq(300))
+                                        .and(qLoanRepaymentSchedule.dueDate.goe(LocalDate
+                                                .parse(DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATTER)))))
+                                .groupBy(qLoanSubQuery.id)
+                                .having(qLoanRepaymentSchedule.principalCompleted.coalesce(BigDecimal.valueOf(0.0)).sum()
+                                        .add(qLoanRepaymentSchedule.interestPaid.coalesce(BigDecimal.valueOf(0.0)).sum())
+                                        .add(qLoanRepaymentSchedule.feeChargesPaid.coalesce(BigDecimal.valueOf(0.0)).sum())
+                                        .add(qLoanRepaymentSchedule.penaltyChargesPaid.coalesce(BigDecimal.valueOf(0.0)).sum()).gt(0.0)),
+                        qCurrency.name.as("currencyName"), qCurrency.nameCode.as("currencyNameCode"),
+                        qCurrency.displaySymbol.as("currencyDisplaySymbol"))
+                .from(qLoan).join(qLoan.loanProduct, qLoanProduct).on(qLoanProduct.id.eq(qLoan.loanProduct.id)).join(qCurrency)
+                .on(qCurrency.code.eq(qLoan.loanRepaymentScheduleDetail.currency.code)).leftJoin(qLoan.client, qClient)
+                .on(qClient.id.eq(qLoan.client.id)).leftJoin(qLoan.group, qGroup).on(qGroup.id.eq(qLoan.group.id))
+                .leftJoin(qLoan.loanOfficer, qStaff).on(qStaff.id.eq(qLoan.loanOfficer.id)).where(qLoan.id.eq(accountId));
 
-        } catch (final EmptyResultDataAccessException e) {
-            throw new AccountTransferNotFoundException(accountId, e);
-        }
+        /*
+         * if (currencyCode != null) { sql += " and la.currency_code = ?"; sqlParams = new Object[] {accountId ,
+         * accountId,currencyCode }; }
+         */
 
-        return accountData;
+        return Optional.ofNullable(mainQuery.fetchOne()).orElseThrow(() -> new AccountTransferNotFoundException(accountId));
+    }
+
+    private JPAQuery<PortfolioAccountData> getLoanPortfolioAccountSelectQuery() {
+        final QLoan qLoan = QLoan.loan;
+        final QLoanProduct qLoanProduct = QLoanProduct.loanProduct;
+        final QApplicationCurrency qApplicationCurrency = QApplicationCurrency.applicationCurrency;
+        final QClient qClient = QClient.client;
+        final QGroup qGroup = QGroup.group;
+        final QStaff qStaff = QStaff.staff;
+
+        final JPAQuery<PortfolioAccountData> loanQuery = new JPAQuery<>(entityManager);
+        loanQuery
+                .select(qLoan.id, qLoan.accountNumber.as("accountNo"), qLoan.externalId, qClient.id.as("clientId"),
+                        qClient.displayName.as("clientName"), qGroup.id.as("groupId"), qGroup.name.as("groupName"),
+                        qLoanProduct.id.as("productId"), qLoanProduct.name.as("productName"), qStaff.id.as("fieldOfficerId"),
+                        qStaff.displayName.as("fieldOfficerName"), qLoan.loanRepaymentScheduleDetail.currency.code.as("currencyCode"),
+                        qLoan.loanRepaymentScheduleDetail.currency.digitsAfterDecimal.as("currencyDigits"),
+                        qLoan.loanRepaymentScheduleDetail.currency.inMultiplesOf, qLoan.totalOverpaid,
+                        qApplicationCurrency.name.as("currencyName"), qApplicationCurrency.code.as("currencyNameCode"),
+                        qApplicationCurrency.displaySymbol.as("currencyDisplaySymbol"))
+                .from(qLoan).join(qLoan.loanProduct, qLoanProduct).on(qLoanProduct.id.eq(qLoan.loanProduct.id)).join(qApplicationCurrency)
+                .on(qApplicationCurrency.code.eq(qLoan.loanRepaymentScheduleDetail.currency.code)).leftJoin(qLoan.client, qClient)
+                .on(qClient.id.eq(qLoan.client.id)).leftJoin(qLoan.group, qGroup).on(qGroup.id.eq(qLoan.group.id))
+                .leftJoin(qLoan.loanOfficer, qStaff).on(qStaff.id.eq(qLoan.loanOfficer.id));
+
+        return loanQuery;
+    }
+
+    private JPAQuery<PortfolioAccountData> getSavingsPortfolioAccountSelectQuery() {
+        final QSavingsAccount qSavingsAccount = QSavingsAccount.savingsAccount;
+        final QSavingsProduct qSavingsProduct = QSavingsProduct.savingsProduct;
+        final QApplicationCurrency qApplicationCurrency = QApplicationCurrency.applicationCurrency;
+        final QClient qClient = QClient.client;
+        final QGroup qGroup = QGroup.group;
+        final QStaff qStaff = QStaff.staff;
+
+        final JPAQuery<PortfolioAccountData> savingsQuery = new JPAQuery<>(entityManager);
+        savingsQuery
+                .select(qSavingsAccount.id, qSavingsAccount.accountNumber.as("accountNo"), qSavingsAccount.externalId,
+                        qClient.id.as("clientId"), qClient.displayName.as("clientName"), qGroup.id.as("groupId"),
+                        qGroup.name.as("groupName"), qSavingsProduct.id.as("productId"), qSavingsProduct.name.as("productName"),
+                        qStaff.id.as("fieldOfficerId"), qStaff.displayName.as("fieldOfficerName"),
+                        qSavingsAccount.currency.code.as("currencyCode"), qSavingsAccount.currency.digitsAfterDecimal.as("currencyDigits"),
+                        qSavingsAccount.currency.inMultiplesOf, qApplicationCurrency.name.as("currencyName"),
+                        qApplicationCurrency.code.as("currencyNameCode"), qApplicationCurrency.displaySymbol.as("currencyDisplaySymbol"))
+                .from(qSavingsAccount).join(qSavingsProduct).on(qSavingsAccount.product.id.eq(qSavingsProduct.id))
+                .join(qApplicationCurrency).on(qApplicationCurrency.code.eq(qSavingsAccount.currency.code))
+                .leftJoin(qSavingsAccount.client, qClient).on(qClient.id.eq(qSavingsAccount.client.id))
+                .leftJoin(qSavingsAccount.group, qGroup).on(qGroup.id.eq(qSavingsAccount.group.id))
+                .leftJoin(qSavingsAccount.savingsOfficer, qStaff).on(qStaff.id.eq(qSavingsAccount.savingsOfficer.id));
+
+        return savingsQuery;
+    }
+
+    private <T> BooleanExpression eq(final SimpleExpression<T> expression, final T value) {
+        return value == null ? expression.isNull() : expression.eq(value);
     }
 }

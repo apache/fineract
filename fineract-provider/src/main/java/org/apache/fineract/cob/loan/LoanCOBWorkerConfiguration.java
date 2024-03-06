@@ -22,7 +22,7 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.common.InitialisationTasklet;
 import org.apache.fineract.cob.common.ResetContextTasklet;
-import org.apache.fineract.cob.conditions.LoanCOBWorkerCondition;
+import org.apache.fineract.cob.conditions.BatchWorkerCondition;
 import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -51,7 +51,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
-@Conditional(LoanCOBWorkerCondition.class)
+@Conditional(BatchWorkerCondition.class)
 public class LoanCOBWorkerConfiguration {
 
     @Autowired

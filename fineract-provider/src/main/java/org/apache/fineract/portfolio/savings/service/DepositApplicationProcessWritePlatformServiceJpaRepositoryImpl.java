@@ -23,6 +23,8 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurri
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 
+import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -58,6 +60,7 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
+import org.apache.fineract.portfolio.account.domain.QAccountAssociations;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
@@ -121,6 +124,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final EntityManager entityManager;
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
@@ -361,8 +365,22 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             // Save linked account information
             final Long savingsAccountId = command.longValueOfParameterNamed(DepositsApiConstants.linkedAccountParamName);
-            AccountAssociations accountAssociations = this.accountAssociationsRepository.findBySavingsIdAndType(accountId,
-                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+
+            final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+            final JPAQuery<AccountAssociations> query = new JPAQuery<>(entityManager);
+
+            AccountAssociations accountAssociations;
+            if (accountId == null) {
+                accountAssociations = query.select(qAccountAssociations).from(qAccountAssociations)
+                        .where(qAccountAssociations.savingsAccount.id.isNull()
+                                .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                        .fetchOne();
+            } else {
+                accountAssociations = query.select(qAccountAssociations).from(qAccountAssociations)
+                        .where(qAccountAssociations.savingsAccount.id.eq(accountId)
+                                .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                        .fetchOne();
+            }
             if (savingsAccountId == null) {
                 if (accountAssociations != null) {
                     if (this.fromJsonHelper.parameterExists(DepositsApiConstants.linkedAccountParamName, command.parsedJson())) {

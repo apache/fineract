@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -76,6 +78,7 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
+import org.apache.fineract.portfolio.account.domain.QAccountAssociations;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -196,6 +199,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanRepository loanRepository;
     private final GSIMReadPlatformService gsimReadPlatformService;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final EntityManager entityManager;
 
     @Transactional
     @Override
@@ -1097,8 +1101,21 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final String linkAccountIdParamName = "linkAccountId";
             final boolean backdatedTxnsAllowedTill = false;
             final Long savingsAccountId = command.longValueOfParameterNamed(linkAccountIdParamName);
-            AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
-                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+            final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+            final JPAQuery<AccountAssociations> query = new JPAQuery<>(entityManager);
+
+            AccountAssociations accountAssociations;
+            if (loanId == null) {
+                accountAssociations = query.select(qAccountAssociations).from(qAccountAssociations)
+                        .where(qAccountAssociations.loanAccount.id.isNull()
+                                .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                        .fetchOne();
+            } else {
+                accountAssociations = query.select(qAccountAssociations).from(qAccountAssociations)
+                        .where(qAccountAssociations.loanAccount.id.eq(loanId)
+                                .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                        .fetchOne();
+            }
             boolean isLinkedAccPresent = false;
             if (savingsAccountId == null) {
                 if (accountAssociations != null) {
@@ -1225,8 +1242,21 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
         this.noteRepository.deleteAllInBatch(relatedNotes);
 
-        final AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
-                AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+        final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+        final JPAQuery<AccountAssociations> query = new JPAQuery<>(entityManager);
+
+        final AccountAssociations accountAssociations;
+        if (loanId == null) {
+            accountAssociations = query.select(qAccountAssociations).from(qAccountAssociations)
+                    .where(qAccountAssociations.loanAccount.id.isNull()
+                            .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                    .fetchOne();
+        } else {
+            accountAssociations = query.select(qAccountAssociations).from(qAccountAssociations)
+                    .where(qAccountAssociations.loanAccount.id.eq(loanId)
+                            .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                    .fetchOne();
+        }
         if (accountAssociations != null) {
             this.accountAssociationsRepository.delete(accountAssociations);
         }

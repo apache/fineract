@@ -18,86 +18,101 @@
  */
 package org.apache.fineract.portfolio.account.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import static java.util.stream.Collectors.toList;
+
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.account.data.AccountAssociationsData;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
+import org.apache.fineract.portfolio.account.domain.QAccountAssociations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.QLoan;
+import org.apache.fineract.portfolio.savings.domain.QSavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Slf4j
 public class AccountAssociationsReadPlatformServiceImpl implements AccountAssociationsReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final EntityManager entityManager;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retriveLoanLinkedAssociation(final Long loanId) {
-        PortfolioAccountData linkedAccount = null;
-        final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
-        final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? and aa.association_type_enum = ?";
-        try {
-            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, loanId, // NOSONAR
-                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
-            if (accountAssociationsData != null) {
-                linkedAccount = accountAssociationsData.linkedAccount();
-            }
-        } catch (final EmptyResultDataAccessException e) {
-            log.debug("Linking account is not configured");
+        final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+        final JPAQuery<Tuple> query = getAccountAssociationsSelectQuery();
+        final Tuple queryResult = query
+                .where(eq(qAccountAssociations.loanAccount.id, loanId)
+                        .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                .fetchOne();
+        if (queryResult != null) {
+            final AccountAssociationsData accountAssociationsData = mapQueryResultToAccountAssociationsData(queryResult);
+            return accountAssociationsData.linkedAccount();
         }
-        return linkedAccount;
+        log.debug("Linking account is not configured");
+        return null;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Collection<AccountAssociationsData> retriveLoanAssociations(final Long loanId, final Integer associationType) {
-        final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
-        final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? and aa.association_type_enum = ?";
-        try {
-            return this.jdbcTemplate.query(sql, mapper, new Object[] { loanId, associationType }); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            return null;
-        }
+        final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+        final JPAQuery<Tuple> query = getAccountAssociationsSelectQuery();
 
+        final List<Tuple> queryResult = query
+                .where(eq(qAccountAssociations.loanAccount.id, loanId).and(eq(qAccountAssociations.associationType, associationType)))
+                .fetch();
+        return queryResult.isEmpty() ? Collections.emptyList() : mapQueryResultToAccountAssociationsDataList(queryResult);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retriveSavingsLinkedAssociation(final Long savingsId) {
-        PortfolioAccountData linkedAccount = null;
-        final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
-        final String sql = "select " + mapper.schema() + " where aa.savings_account_id = ? and aa.association_type_enum = ?";
-        try {
-            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, // NOSONAR
-                    new Object[] { savingsId, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue() });
-            if (accountAssociationsData != null) {
-                linkedAccount = accountAssociationsData.linkedAccount();
-            }
-        } catch (final EmptyResultDataAccessException e) {
-            log.debug("Linking account is not configured");
+        final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+        final JPAQuery<Tuple> query = getAccountAssociationsSelectQuery();
+
+        final Tuple queryResult = query
+                .where(eq(qAccountAssociations.savingsAccount.id, savingsId)
+                        .and(qAccountAssociations.associationType.eq(AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue())))
+                .fetchOne();
+        if (queryResult != null) {
+            final AccountAssociationsData accountAssociationsData = mapQueryResultToAccountAssociationsData(queryResult);
+            return accountAssociationsData.linkedAccount();
         }
-        return linkedAccount;
+        log.debug("Linking account is not configured");
+        return null;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public boolean isLinkedWithAnyActiveAccount(final Long savingsId) {
         boolean hasActiveAccount = false;
 
-        final String sql1 = "select aa.is_active as active,aa.association_type_enum as type, loanAccount.loan_status_id as loanStatus,"
-                + "savingAccount.status_enum as savingsStatus from m_portfolio_account_associations aa "
-                + "left join m_loan loanAccount on loanAccount.id = aa.loan_account_id "
-                + "left join m_savings_account savingAccount on savingAccount.id = aa.savings_account_id "
-                + "where aa.linked_savings_account_id = ?";
+        final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+        final QLoan qLoan = QLoan.loan;
+        final QSavingsAccount qSavingsAccount = QSavingsAccount.savingsAccount;
 
-        final List<Map<String, Object>> statusList = this.jdbcTemplate.queryForList(sql1, savingsId);
+        final JPAQuery<Map<String, Object>> query = new JPAQuery<>(entityManager);
+        query.select(qAccountAssociations.active, qAccountAssociations.associationType, qLoan.loanStatus,
+                qSavingsAccount.status.as("savingsStatus")).from(qAccountAssociations).leftJoin(qAccountAssociations.loanAccount, qLoan)
+                .on(qLoan.id.eq(qAccountAssociations.loanAccount.id)).leftJoin(qAccountAssociations.savingsAccount, qSavingsAccount)
+                .on(qSavingsAccount.id.eq(qAccountAssociations.savingsAccount.id))
+                .where(eq(qAccountAssociations.linkedSavingsAccount.id, savingsId));
+
+        List<Map<String, Object>> statusList = query.fetch();
+
         for (final Map<String, Object> statusMap : statusList) {
             AccountAssociationType associationType = AccountAssociationType.fromInt((Integer) statusMap.get("type"));
             if (!associationType.isLinkedAccountAssociation() && (Boolean) statusMap.get("active")) {
@@ -125,69 +140,50 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         return hasActiveAccount;
     }
 
-    private static final class AccountAssociationsMapper implements RowMapper<AccountAssociationsData> {
-
-        private final String schemaSql;
-
-        AccountAssociationsMapper() {
-            final StringBuilder sqlBuilder = new StringBuilder();
-            sqlBuilder.append("aa.id as id,");
-            // sqlBuilder.append("savingsAccount.id as savingsAccountId,
-            // savingsAccount.account_no as savingsAccountNo,");
-            sqlBuilder.append("loanAccount.id as loanAccountId, loanAccount.account_no as loanAccountNo,");
-            // sqlBuilder.append("linkLoanAccount.id as linkLoanAccountId,
-            // linkLoanAccount.account_no as linkLoanAccountNo, ");
-            sqlBuilder.append("linkSavingsAccount.id as linkSavingsAccountId, linkSavingsAccount.account_no as linkSavingsAccountNo ");
-            sqlBuilder.append("from m_portfolio_account_associations aa ");
-            // sqlBuilder.append("left join m_savings_account savingsAccount on
-            // savingsAccount.id = aa.savings_account_id ");
-            sqlBuilder.append("left join m_loan loanAccount on loanAccount.id = aa.loan_account_id ");
-            sqlBuilder.append("left join m_savings_account linkSavingsAccount on linkSavingsAccount.id = aa.linked_savings_account_id ");
-            // sqlBuilder.append("left join m_loan linkLoanAccount on
-            // linkLoanAccount.id = aa.linked_loan_account_id ");
-            this.schemaSql = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schemaSql;
-        }
-
-        @Override
-        public AccountAssociationsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            // final Long savingsAccountId = JdbcSupport.getLong(rs,
-            // "savingsAccountId");
-            // final String savingsAccountNo = rs.getString("savingsAccountNo");
-            final Long loanAccountId = JdbcSupport.getLong(rs, "loanAccountId");
-            final String loanAccountNo = rs.getString("loanAccountNo");
-            final PortfolioAccountData account = PortfolioAccountData.lookup(loanAccountId, loanAccountNo);
-            /*
-             * if (savingsAccountId != null) { account = PortfolioAccountData.lookup(savingsAccountId,
-             * savingsAccountNo); } else if (loanAccountId != null) { account =
-             * PortfolioAccountData.lookup(loanAccountId, loanAccountNo); }
-             */
-            final Long linkSavingsAccountId = JdbcSupport.getLong(rs, "linkSavingsAccountId");
-            final String linkSavingsAccountNo = rs.getString("linkSavingsAccountNo");
-            // final Long linkLoanAccountId = JdbcSupport.getLong(rs,
-            // "linkLoanAccountId");
-            // final String linkLoanAccountNo =
-            // rs.getString("linkLoanAccountNo");
-            final PortfolioAccountData linkedAccount = PortfolioAccountData.lookup(linkSavingsAccountId, linkSavingsAccountNo);
-            /*
-             * if (linkSavingsAccountId != null) { linkedAccount = PortfolioAccountData.lookup(linkSavingsAccountId,
-             * linkSavingsAccountNo); } else if (linkLoanAccountId != null) { linkedAccount =
-             * PortfolioAccountData.lookup(linkLoanAccountId, linkLoanAccountNo); }
-             */
-
-            return new AccountAssociationsData(id, account, linkedAccount);
-        }
-
-    }
-
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retriveSavingsAccount(final Long savingsId) {
-        String accountNo = jdbcTemplate.queryForObject("select account_no from m_savings_account where id = ?", String.class, savingsId);
+        final QSavingsAccount qSavingsAccount = QSavingsAccount.savingsAccount;
+        final JPAQuery<String> query = new JPAQuery<>(entityManager);
+        final String accountNo = query.select(qSavingsAccount.accountNumber).from(qSavingsAccount).where(eq(qSavingsAccount.id, savingsId))
+                .fetchOne();
         return PortfolioAccountData.lookup(savingsId, accountNo);
+    }
+
+    private JPAQuery<Tuple> getAccountAssociationsSelectQuery() {
+        final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+        final QLoan qLoan = QLoan.loan;
+        final QSavingsAccount qSavingsAccount = QSavingsAccount.savingsAccount;
+
+        final JPAQuery<Tuple> query = new JPAQuery<>(entityManager);
+        query.select(qAccountAssociations.id, qLoan.id.as("loanAccountId"), qLoan.accountNumber.as("loanAccountNo"),
+                qSavingsAccount.id.as("linkSavingsAccountId"), qSavingsAccount.accountNumber.as("linkSavingsAccountNo"))
+                .from(qAccountAssociations).leftJoin(qAccountAssociations.loanAccount, qLoan)
+                .on(qLoan.id.eq(qAccountAssociations.loanAccount.id)).leftJoin(qAccountAssociations.linkedSavingsAccount, qSavingsAccount)
+                .on(qSavingsAccount.id.eq(qAccountAssociations.linkedSavingsAccount.id));
+
+        return query;
+    }
+
+    private AccountAssociationsData mapQueryResultToAccountAssociationsData(final Tuple queryResult) {
+        final QAccountAssociations qAccountAssociations = QAccountAssociations.accountAssociations;
+        final QLoan qLoan = QLoan.loan;
+        final QSavingsAccount qSavingsAccount = QSavingsAccount.savingsAccount;
+
+        final PortfolioAccountData account = PortfolioAccountData.lookup(queryResult.get(qLoan.id.as("loanAccountId")),
+                queryResult.get(qLoan.accountNumber.as("loanAccountNo")));
+        final PortfolioAccountData linkedAccount = PortfolioAccountData.lookup(
+                queryResult.get(qSavingsAccount.id.as("linkSavingsAccountId")),
+                queryResult.get(qSavingsAccount.accountNumber.as("linkSavingsAccountNo")));
+
+        return new AccountAssociationsData(queryResult.get(qAccountAssociations.id), account, linkedAccount);
+    }
+
+    private List<AccountAssociationsData> mapQueryResultToAccountAssociationsDataList(final List<Tuple> queryResult) {
+        return queryResult.stream().map(this::mapQueryResultToAccountAssociationsData).collect(toList());
+    }
+
+    private <T> BooleanExpression eq(final SimpleExpression<T> expression, final T value) {
+        return value == null ? expression.isNull() : expression.eq(value);
     }
 }

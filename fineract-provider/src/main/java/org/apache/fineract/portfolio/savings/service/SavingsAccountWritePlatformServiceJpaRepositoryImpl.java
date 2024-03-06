@@ -31,7 +31,9 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdraw
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.querydsl.jpa.impl.JPAQuery;
 import io.github.resilience4j.retry.annotation.Retry;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -81,6 +83,7 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
+import org.apache.fineract.portfolio.account.domain.QAccountTransferStandingInstruction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
@@ -166,6 +169,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final GSIMRepositoy gsimRepository;
     private final SavingsAccountInterestPostingService savingsAccountInterestPostingService;
     private final ErrorHandler errorHandler;
+    private final EntityManager entityManager;
 
     @Transactional
     @Override
@@ -1673,8 +1677,14 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private void disableStandingInstructionsLinkedToClosedSavings(final SavingsAccount savingsAccount) {
         if (savingsAccount != null && savingsAccount.isClosed()) {
             final Integer standingInstructionStatus = StandingInstructionStatus.ACTIVE.getValue();
-            final Collection<AccountTransferStandingInstruction> accountTransferStandingInstructions = this.standingInstructionRepository
-                    .findBySavingsAccountAndStatus(savingsAccount, standingInstructionStatus);
+            final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
+            final JPAQuery<AccountTransferStandingInstruction> query = new JPAQuery<>(entityManager);
+            final Collection<AccountTransferStandingInstruction> accountTransferStandingInstructions = query
+                    .select(qAccountTransferStandingInstruction).from(qAccountTransferStandingInstruction)
+                    .where(qAccountTransferStandingInstruction.status.eq(standingInstructionStatus)
+                            .and(qAccountTransferStandingInstruction.accountTransferDetails.toSavingsAccount.eq(savingsAccount)
+                                    .or(qAccountTransferStandingInstruction.accountTransferDetails.fromSavingsAccount.eq(savingsAccount))))
+                    .fetch();
 
             if (!accountTransferStandingInstructions.isEmpty()) {
                 for (AccountTransferStandingInstruction accountTransferStandingInstruction : accountTransferStandingInstructions) {
