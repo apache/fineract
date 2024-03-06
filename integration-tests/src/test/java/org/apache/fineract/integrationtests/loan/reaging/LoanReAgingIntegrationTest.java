@@ -27,6 +27,7 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.Test;
 
 public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
@@ -43,7 +44,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
             int repaymentEvery = 1;
 
             // Create Loan Product
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
                     .numberOfRepayments(numberOfRepayments) //
                     .repaymentEvery(repaymentEvery) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
@@ -55,6 +56,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
             double amount = 1250.0;
 
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                     .repaymentEvery(repaymentEvery)//
                     .loanTermFrequency(numberOfRepayments)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
@@ -112,7 +114,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
             int repaymentEvery = 1;
 
             // Create Loan Product
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
                     .numberOfRepayments(numberOfRepayments) //
                     .repaymentEvery(repaymentEvery) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
@@ -124,6 +126,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
             double amount = 1250.0;
 
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                     .repaymentEvery(repaymentEvery)//
                     .loanTermFrequency(numberOfRepayments)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
