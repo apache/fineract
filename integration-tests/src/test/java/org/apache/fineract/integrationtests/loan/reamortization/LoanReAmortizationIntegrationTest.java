@@ -27,6 +27,7 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.Test;
 
 public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
@@ -39,11 +40,11 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            int numberOfRepayments = 1;
+            int numberOfRepayments = 2;
             int repaymentEvery = 1;
 
             // Create Loan Product
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
                     .numberOfRepayments(numberOfRepayments) //
                     .repaymentEvery(repaymentEvery) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
@@ -55,6 +56,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
             double amount = 1250.0;
 
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                     .repaymentEvery(repaymentEvery)//
                     .loanTermFrequency(numberOfRepayments)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
@@ -78,7 +80,8 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
             // verify schedule
             verifyRepaymentSchedule(loanId, //
                     installment(0, null, "01 January 2023"), //
-                    installment(1250.0, false, "01 February 2023") //
+                    installment(625.0, false, "01 February 2023"), //
+                    installment(625.0, false, "01 March 2023") //
             );
 
             createdLoanId.set(loanId);
@@ -93,7 +96,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
             // verify transactions
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023"), //
-                    transaction(1250.0, "Re-amortize", "02 February 2023") //
+                    transaction(625.0, "Re-amortize", "02 February 2023") //
             );
 
             // TODO: verify installments when schedule generation is implemented
@@ -108,11 +111,11 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
             // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            int numberOfRepayments = 1;
+            int numberOfRepayments = 2;
             int repaymentEvery = 1;
 
             // Create Loan Product
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
                     .numberOfRepayments(numberOfRepayments) //
                     .repaymentEvery(repaymentEvery) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
@@ -124,6 +127,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
             double amount = 1250.0;
 
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                     .repaymentEvery(repaymentEvery)//
                     .loanTermFrequency(numberOfRepayments)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
@@ -147,7 +151,8 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
             // verify schedule
             verifyRepaymentSchedule(loanId, //
                     installment(0, null, "01 January 2023"), //
-                    installment(1250.0, false, "01 February 2023") //
+                    installment(625.0, false, "01 February 2023"), //
+                    installment(625.0, false, "01 March 2023") //
             );
 
             createdLoanId.set(loanId);
@@ -162,20 +167,20 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
             // verify transactions
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023"), //
-                    transaction(1250.0, "Re-amortize", "02 February 2023") //
+                    transaction(625.0, "Re-amortize", "02 February 2023") //
             );
         });
 
         runAt("03 February 2023", () -> {
             long loanId = createdLoanId.get();
 
-            // create re-amortize transaction
+            // undo re-amortize transaction
             undoReAmortizeLoan(loanId);
 
             // verify transactions
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023"), //
-                    reversedTransaction(1250.0, "Re-amortize", "02 February 2023") //
+                    reversedTransaction(625.0, "Re-amortize", "02 February 2023") //
             );
 
             // TODO: verify installments when schedule generation is implemented
