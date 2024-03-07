@@ -587,7 +587,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 50.0), //
                     transaction(70.0, "Accrual", "20 January 2023", 0.0, 0.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(100.0, "Chargeback", "02 May 2023", 50.0, 100.0, 0.0, 0.0, 0.0, 0.0, 50.0) //
             );
@@ -653,7 +653,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 50.0), //
                     transaction(70.0, "Accrual", "20 January 2023", 0.0, 0.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(100.0, "Chargeback", "20 January 2023", 30.0, 30.0, 0.0, 50.0, 20.0, 0.0, 50.0) //
             );
@@ -720,7 +720,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 50.0), //
                     transaction(70.0, "Accrual", "20 January 2023", 0.0, 0.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(100.0, "Chargeback", "20 January 2023", 0.0, 30.0, 0.0, 50.0, 20.0, 0.0, 50.0) //
             );
@@ -1280,7 +1280,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                     transaction(750.0, "Disbursement", "01 January 2023", 750.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Repayment", "01 February 2023", 500.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Repayment", "01 March 2023", 250.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(400.0, "Repayment", "30 March 2023", 0.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(400.0, "Repayment", "30 March 2023", 0.0, 250.0, 0.0, 0.0, 0.0, 0.0, 150.0), //
                     transaction(250.0, "Chargeback", "31 March 2023", 100, 250.0, 0.0, 0.0, 0.0, 0.0, 150.0) //
             );
 
@@ -1352,8 +1352,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                     transaction(750.0, "Disbursement", "01 January 2023", 750.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Repayment", "01 February 2023", 500.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Repayment", "01 March 2023", 250.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(400.0, "Repayment", "30 March 2023", 0.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "31 March 2023", 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, -50.0) //
+                    transaction(400.0, "Repayment", "30 March 2023", 0.0, 250.0, 0.0, 0.0, 0.0, 0.0, 150.0), //
+                    transaction(100.0, "Chargeback", "31 March 2023", 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 100.0) //
             );
 
             // Verify GL entries
@@ -1426,8 +1426,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                     transaction(250.0, "Repayment", "01 February 2023", 500.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(280.0, "Repayment", "01 March 2023", 250.0, 250.0, 0.0, 30.0, 0.0, 0.0, 0.0), //
                     transaction(30.0, "Accrual", "01 March 2023", 0.0, 0.0, 0.0, 30.0, 0.0, 0.0, 0.0), //
-                    transaction(400.0, "Repayment", "30 March 2023", 0.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "31 March 2023", 0.0, 70.0, 0.0, 30.0, 0.0, 0.0, -50.0) //
+                    transaction(400.0, "Repayment", "30 March 2023", 0.0, 250.0, 0.0, 0.0, 0.0, 0.0, 150.0), //
+                    transaction(100.0, "Chargeback", "31 March 2023", 0.0, 70.0, 0.0, 30.0, 0.0, 0.0, 100.0) //
             );
 
             // Verify GL entries

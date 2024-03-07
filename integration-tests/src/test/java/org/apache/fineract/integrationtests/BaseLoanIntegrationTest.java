@@ -362,6 +362,7 @@ public abstract class BaseLoanIntegrationTest {
                         && Objects.equals(item.getInterestPortion(), tr.interestPortion) //
                         && Objects.equals(item.getFeeChargesPortion(), tr.feePortion) //
                         && Objects.equals(item.getPenaltyChargesPortion(), tr.penaltyPortion) //
+                        && Objects.equals(item.getOverpaymentPortion(), tr.overpaymentPortion) //
                         && Objects.equals(item.getUnrecognizedIncomePortion(), tr.unrecognizedPortion) //
                 );
                 Assertions.assertTrue(found, "Required transaction not found: " + tr);
