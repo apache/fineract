@@ -1300,7 +1300,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(1000.0, "Disbursement", "03 March 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(800.0, "Repayment", "03 March 2023", 0.0, 750.0, 0.0, 0.0, 0.0, 0.0, 50.0), //
-                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0) //
+                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0) //
             );
             assertTrue(loanDetails.getStatus().getOverpaid());
             assertEquals(30.0, loanDetails.getTotalOverpaid());
@@ -1325,8 +1325,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(1000.0, "Disbursement", "03 March 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(800.0, "Repayment", "03 March 2023", 0.0, 750.0, 0.0, 0.0, 0.0, 0.0, 50.0), //
-                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0), //
-                    transaction(30.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0), //
+                    transaction(30.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0) //
             );
 
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
@@ -1343,8 +1343,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(1000.0, "Disbursement", "03 March 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(800.0, "Repayment", "03 March 2023", 0.0, 750.0, 0.0, 0.0, 0.0, 0.0, 50.0), //
-                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0), //
-                    transaction(30.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0), //
+                    transaction(30.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0), //
                     transaction(1.0, "Repayment", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0) //
             );
             assertTrue(loanDetails.getStatus().getOverpaid());
@@ -1371,8 +1371,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(1000.0, "Disbursement", "03 March 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(800.0, "Repayment", "03 March 2023", 0.0, 750.0, 0.0, 0.0, 0.0, 0.0, 50.0), //
-                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0), //
-                    transaction(30.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0), //
+                    transaction(30.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0), //
                     transaction(1.0, "Repayment", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0), //
                     transaction(40.0, "Disbursement", "05 March 2023", 39.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0), //
                     transaction(9.0, "Down Payment", "05 March 2023", 30.0, 9.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
@@ -1403,8 +1403,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(1000.0, "Disbursement", "03 March 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(800.0, "Repayment", "03 March 2023", 0.0, 750.0, 0.0, 0.0, 0.0, 0.0, 50.0), //
-                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0), //
-                    transaction(30.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(20.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0), //
+                    transaction(30.0, "Disbursement", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0), //
                     transaction(1.0, "Repayment", "05 March 2023", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, true), //
                     transaction(40.0, "Disbursement", "05 March 2023", 40.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(9.0, "Down Payment", "05 March 2023", 31.0, 9.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
