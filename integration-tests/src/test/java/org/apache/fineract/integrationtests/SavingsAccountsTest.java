@@ -26,8 +26,6 @@ import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.GetSavingsAccountsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -56,12 +54,7 @@ public class SavingsAccountsTest extends IntegrationTest {
     @Order(1)
     void submitSavingsAccountsApplication() {
         LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
-//        PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
-//        request.setClientId(1);
-//        request.setProductId(1);
-//        request.setLocale(locale);
-//        request.setDateFormat(dateFormat);
-//        request.submittedOnDate(formattedDate);
+
 
         PostSavingsAccountsRequest request = buildPostSavingsAccountRequest(1);
 
