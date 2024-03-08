@@ -20,10 +20,16 @@ package org.apache.fineract.integrationtests;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.time.LocalDate;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
+import org.apache.fineract.client.models.GetSavingsAccountsResponse;
+import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.client.models.GetClientsClientIdResponse;
+import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -50,12 +56,15 @@ public class SavingsAccountsTest extends IntegrationTest {
     @Order(1)
     void submitSavingsAccountsApplication() {
         LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
-        PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
-        request.setClientId(1);
-        request.setProductId(1);
-        request.setLocale(locale);
-        request.setDateFormat(dateFormat);
-        request.submittedOnDate(formattedDate);
+//        PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
+//        request.setClientId(1);
+//        request.setProductId(1);
+//        request.setLocale(locale);
+//        request.setDateFormat(dateFormat);
+//        request.submittedOnDate(formattedDate);
+
+        PostSavingsAccountsRequest request = buildPostSavingsAccountRequest(1);
+
 
         Response<PostSavingsAccountsResponse> response = okR(fineract().savingsAccounts.submitApplication2(request));
 
@@ -92,6 +101,64 @@ public class SavingsAccountsTest extends IntegrationTest {
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
+    }
+
+    @Test
+    @Order(4)
+    void getSavingsAccountsByBirthday() {
+        LOG.info("------------------------------ GET SAVINGS ACCOUNT BY BIRTH DAY ---------------------------------------");
+        int year = 1994, month = 12, day = 2;
+
+        PostClientsRequest clientsRequest = new PostClientsRequest();
+        clientsRequest.setDateOfBirth(LocalDate.of(year, month, day));
+        clientsRequest.setFirstname("Alan");
+        clientsRequest.setLastname("Wake");
+        clientsRequest.setOfficeId(1);
+        clientsRequest.setActive(true);
+        clientsRequest.setActivationDate("04 March 2009");
+        Response<PostClientsResponse> clientResponse = okR(
+                fineract().clients.create6(clientsRequest)
+        );
+
+        assertThat(clientResponse.isSuccessful()).isTrue();
+        long clientId = clientResponse.body().getClientId();
+        assertThat(clientId).isNotNull();
+
+        PostSavingsAccountsRequest postSavingsRequest = buildPostSavingsAccountRequest((int) clientId);
+
+        Response<PostSavingsAccountsResponse> postSavingsResponse = okR(
+                fineract().savingsAccounts.submitApplication2(postSavingsRequest)
+        );
+
+        assertThat(postSavingsResponse.isSuccessful()).isTrue();
+
+        Response<GetSavingsAccountsResponse> getSavingsResponse = okR(
+                fineract().savingsAccounts.retrieveAll33(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        String.format("%d-0%d", month, day))
+        );
+
+        assertThat(getSavingsResponse.isSuccessful()).isTrue();
+
+        GetSavingsAccountsResponse body = getSavingsResponse.body();
+
+        assertThat(body).isNotNull();
+        assertThat(body.getTotalFilteredRecords()).isEqualTo(1);
+    }
+
+    PostSavingsAccountsRequest buildPostSavingsAccountRequest(int clientId) {
+        PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
+        request.setClientId(clientId);
+        request.setProductId(1);
+        request.setLocale(locale);
+        request.setDateFormat(dateFormat);
+        request.submittedOnDate(formattedDate);
+        return request;
     }
 
 }
