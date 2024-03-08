@@ -20,11 +20,14 @@ package org.apache.fineract.portfolio.savings.data;
 
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.annualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositAmountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermTypeIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.interestCompoundingPeriodInMonthsParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.interestPostingPeriodInMonthsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
@@ -37,8 +40,10 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepo
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.principalAmountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.tenureInMonthsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferToSavingsIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountNoParamName;
@@ -197,6 +202,23 @@ public class DepositAccountDataValidator {
         // validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
 
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
+
+    public void validateFixedDepositForInterestCalculation(final String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_INTEREST_CALCULATION_PARAMETERS);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        validateForInterestCalc(element, baseDataValidator);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
@@ -580,6 +602,40 @@ public class DepositAccountDataValidator {
             baseDataValidator.reset().parameter(depositPeriodFrequencyIdParamName).value(depositPeriodFrequencyId)
                     .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
         }
+    }
+
+    private void validateForInterestCalc(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
+
+        BigDecimal principalAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(principalAmountParamName, element);
+        baseDataValidator.reset().parameter(principalAmountParamName).value(principalAmount).notNull().positiveAmount();
+
+        BigDecimal annualInterestRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(annualInterestRateParamName, element);
+        baseDataValidator.reset().parameter(annualInterestRateParamName).value(annualInterestRate).notNull()
+                .notLessThanMin(BigDecimal.valueOf(0));
+
+        Long tenureInMonths = this.fromApiJsonHelper.extractLongNamed(tenureInMonthsParamName, element);
+        baseDataValidator.reset().parameter(tenureInMonthsParamName).value(tenureInMonths).notNull().longGreaterThanZero();
+
+        Long interestPostingPeriodInMonths = this.fromApiJsonHelper.extractLongNamed(interestPostingPeriodInMonthsParamName, element);
+        baseDataValidator.reset().parameter(interestPostingPeriodInMonthsParamName).value(interestPostingPeriodInMonths).notNull()
+                .longGreaterThanZero();
+
+        Long interestCompoundingPeriodInMonths = this.fromApiJsonHelper.extractLongNamed(interestCompoundingPeriodInMonthsParamName,
+                element);
+        baseDataValidator.reset().parameter(interestCompoundingPeriodInMonthsParamName).value(interestCompoundingPeriodInMonths).notNull();
+
+        List<Long> allowedValues = List.of(1L, 2L, 3L, 4L, 6L, 12L);
+        if (interestCompoundingPeriodInMonths != null && !allowedValues.contains(interestCompoundingPeriodInMonths)) {
+            baseDataValidator.reset().parameter(interestCompoundingPeriodInMonthsParamName).value(interestCompoundingPeriodInMonths)
+                    .failWithCode("parameter.value.error", "interestCompoundingPeriodInMonths can only be one {1,2,3,4,6,12}");
+        }
+        if (interestCompoundingPeriodInMonths != null && tenureInMonths != null
+                && tenureInMonths % interestCompoundingPeriodInMonths != 0) {
+            baseDataValidator.reset().parameter(interestCompoundingPeriodInMonthsParamName).value(interestCompoundingPeriodInMonths)
+                    .failWithCode("parameter.relational.validation",
+                            "tenureInMonths must be perfectly divisible by interestCompoundingPeriodInMonths");
+        }
+
     }
 
     private void validateRecurringDetailForSubmit(final JsonElement element, final DataValidatorBuilder baseDataValidator) {

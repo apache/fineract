@@ -20,14 +20,19 @@ package org.apache.fineract.integrationtests;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.truth.Truth;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -44,6 +49,9 @@ import java.util.Locale;
 import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
+import org.apache.fineract.infrastructure.core.api.JsonQuery;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -62,10 +70,15 @@ import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProd
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.savings.data.DepositAccountDataValidator;
+import org.apache.fineract.portfolio.savings.service.FixedDepositAccountInterestCalculationServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 @Slf4j
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
@@ -79,6 +92,8 @@ public class FixedDepositTest {
     private SavingsAccountHelper savingsAccountHelper;
     private JournalEntryHelper journalEntryHelper;
     private FinancialActivityAccountHelper financialActivityAccountHelper;
+
+    private FixedDepositAccountInterestCalculationServiceImpl fixedDepositAccountInterestCalculationServiceImpl;
 
     public static final String WHOLE_TERM = "1";
     public static final String TILL_PREMATURE_WITHDRAWAL = "2";
@@ -114,6 +129,8 @@ public class FixedDepositTest {
     // and then to compare the exact results
     public static final Float THRESHOLD = 1.0f;
 
+    private MockedStatic<MoneyHelper> moneyHelperStatic;
+
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
@@ -124,6 +141,83 @@ public class FixedDepositTest {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
         TimeZone.setDefault(TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE));
+    }
+
+    /***
+     * Test case for Fixed Deposit Account Interest Calculation
+     */
+    @Test
+    public void testFixedDepositInterestCalculationWithWrongCompoundingPeriod() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("principalAmount", 100);
+        jsonObject.addProperty("annualInterestRate", 5);
+        jsonObject.addProperty("tenureInMonths", 12);
+        jsonObject.addProperty("interestPostingPeriodInMonths", 3);
+        jsonObject.addProperty("interestCompoundingPeriodInMonths", 7);
+        JsonParser parser = new JsonParser();
+        String apiRequestBodyAsJson = jsonObject.toString();
+        JsonElement element = parser.parse(apiRequestBodyAsJson);
+        moneyHelperStatic = Mockito.mockStatic(MoneyHelper.class);
+        moneyHelperStatic.when(() -> MoneyHelper.getMathContext()).thenReturn(new MathContext(12, RoundingMode.UP));
+        fixedDepositAccountInterestCalculationServiceImpl = new FixedDepositAccountInterestCalculationServiceImpl(
+                new DepositAccountDataValidator(new FromJsonHelper(), null), new FromJsonHelper());
+        try {
+            HashMap h = fixedDepositAccountInterestCalculationServiceImpl
+                    .calculateInterest(new JsonQuery(apiRequestBodyAsJson, element, new FromJsonHelper()));
+            fail("The function must throw an exception when called with invalid Compounding period");
+        } catch (PlatformApiDataValidationException e) {
+            assertEquals("Validation errors exist.", e.getMessage());
+        } finally {
+            moneyHelperStatic.close();
+        }
+    }
+
+    @Test
+    public void testFixedDepositInterestCalculationWithWrongCompoundingPeriod2() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("principalAmount", 100);
+        jsonObject.addProperty("annualInterestRate", 5);
+        jsonObject.addProperty("tenureInMonths", 15);
+        jsonObject.addProperty("interestPostingPeriodInMonths", 3);
+        jsonObject.addProperty("interestCompoundingPeriodInMonths", 6);
+        JsonParser parser = new JsonParser();
+        String apiRequestBodyAsJson = jsonObject.toString();
+        JsonElement element = parser.parse(apiRequestBodyAsJson);
+        moneyHelperStatic = Mockito.mockStatic(MoneyHelper.class);
+        moneyHelperStatic.when(() -> MoneyHelper.getMathContext()).thenReturn(new MathContext(12, RoundingMode.UP));
+        fixedDepositAccountInterestCalculationServiceImpl = new FixedDepositAccountInterestCalculationServiceImpl(
+                new DepositAccountDataValidator(new FromJsonHelper(), null), new FromJsonHelper());
+        try {
+            HashMap h = fixedDepositAccountInterestCalculationServiceImpl
+                    .calculateInterest(new JsonQuery(apiRequestBodyAsJson, element, new FromJsonHelper()));
+            fail("The function must throw an exception when called with invalid Compounding period");
+        } catch (PlatformApiDataValidationException e) {
+            assertEquals("Validation errors exist.", e.getMessage());
+        } finally {
+            moneyHelperStatic.close();
+        }
+    }
+
+    @Test
+    public void testFixedDepositInterestCalculationWithValidInput() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("principalAmount", 10000);
+        jsonObject.addProperty("annualInterestRate", 5);
+        jsonObject.addProperty("tenureInMonths", 12);
+        jsonObject.addProperty("interestPostingPeriodInMonths", 3);
+        jsonObject.addProperty("interestCompoundingPeriodInMonths", 6);
+        JsonParser parser = new JsonParser();
+        String apiRequestBodyAsJson = jsonObject.toString();
+        JsonElement element = parser.parse(apiRequestBodyAsJson);
+        moneyHelperStatic = Mockito.mockStatic(MoneyHelper.class);
+        moneyHelperStatic.when(() -> MoneyHelper.getMathContext()).thenReturn(new MathContext(12, RoundingMode.UP));
+        fixedDepositAccountInterestCalculationServiceImpl = new FixedDepositAccountInterestCalculationServiceImpl(
+                new DepositAccountDataValidator(new FromJsonHelper(), null), new FromJsonHelper());
+        BigDecimal expectedResult = new BigDecimal("10506.250000");
+        BigDecimal actualResult = new BigDecimal(fixedDepositAccountInterestCalculationServiceImpl
+                .calculateInterest(new JsonQuery(apiRequestBodyAsJson, element, new FromJsonHelper())).get("maturityAmount").toString());
+        assertEquals(expectedResult, actualResult);
+        moneyHelperStatic.close();
     }
 
     /***
