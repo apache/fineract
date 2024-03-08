@@ -130,7 +130,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "is_additional", nullable = false)
     private boolean additional;
 
-    @Column(name = "credited_principal", scale = 6, precision = 19, nullable = true)
+    // TODO: At some point in time this database column needs to be renamed to credited_principal using the following
+    // approach
+    // https://blog.thepete.net/blog/2023/12/05/expand/contract-making-a-breaking-change-without-a-big-bang/
+    @Column(name = "credits_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal creditedPrincipal;
 
     @Column(name = "credited_fee", scale = 6, precision = 19, nullable = true)
