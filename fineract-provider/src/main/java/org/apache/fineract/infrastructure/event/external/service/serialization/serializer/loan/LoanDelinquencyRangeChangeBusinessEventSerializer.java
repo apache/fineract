@@ -29,6 +29,7 @@ import org.apache.fineract.avro.loan.v1.LoanAccountDelinquencyRangeDataV1;
 import org.apache.fineract.avro.loan.v1.LoanAmountDataV1;
 import org.apache.fineract.avro.loan.v1.LoanChargeDataRangeViewV1;
 import org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinquencyRangeChangeBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic.CurrencyDataMapper;
@@ -114,9 +115,9 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer implements Busine
     }
 
     private BigDecimal calculateDataSummary(Loan loan, BiFunction<Loan, LoanRepaymentScheduleInstallment, BigDecimal> mapper) {
-        return loan.getRepaymentScheduleInstallments().stream().map(installment -> mapper.apply(loan, installment)).reduce(BigDecimal.ZERO,
-                BigDecimal::add);
-
+        return loan.getRepaymentScheduleInstallments().stream()
+                .filter(installment -> DateUtils.isBeforeBusinessDate(installment.getDueDate()))
+                .map(installment -> mapper.apply(loan, installment)).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
