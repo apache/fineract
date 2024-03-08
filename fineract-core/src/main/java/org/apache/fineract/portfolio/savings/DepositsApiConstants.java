@@ -112,6 +112,11 @@ public final class DepositsApiConstants {
     public static final String routingCodeParamName = "routingCode";
     public static final String receiptNumberParamName = "receiptNumber";
     public static final String bankNumberParamName = "bankNumber";
+    public static final String principalAmountParamName = "principalAmount";
+    public static final String annualInterestRateParamName = "annualInterestRate";
+    public static final String interestPostingPeriodInMonthsParamName = "interestPostingPeriodInMonths";
+    public static final String tenureInMonthsParamName = "tenureInMonths";
+    public static final String interestCompoundingPeriodInMonthsParamName = "interestCompoundingPeriodInMonths";
 
     // Preclosure parameters
     public static final String preClosurePenalApplicableParamName = "preClosurePenalApplicable";
@@ -307,9 +312,21 @@ public final class DepositsApiConstants {
 
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = fixedDepositAccountRequestData();
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = fixedDepositAccountResponseData();
-
+    public static final Set<String> FIXED_DEPOSIT_ACCOUNT_INTEREST_CALCULATION_PARAMETERS = fixedDepositInterestCalculationData();
     public static final Set<String> RECURRING_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = recurringDepositAccountRequestData();
     public static final Set<String> RECURRING_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = recurringDepositAccountResponseData();
+
+    private static Set<String> fixedDepositInterestCalculationData() {
+        final Set<String> fixedDepositInterestCalculationData = new HashSet<>();
+        fixedDepositInterestCalculationData.add(principalAmountParamName);
+        fixedDepositInterestCalculationData.add(annualInterestRateParamName);
+        fixedDepositInterestCalculationData.add(tenureInMonthsParamName);
+        fixedDepositInterestCalculationData.add(interestPostingPeriodInMonthsParamName);
+        fixedDepositInterestCalculationData.add(interestCompoundingPeriodInMonthsParamName);
+
+        return fixedDepositInterestCalculationData;
+
+    }
 
     private static Set<String> fixedDepositAccountRequestData() {
         final Set<String> fixedDepositRequestData = new HashSet<>();
