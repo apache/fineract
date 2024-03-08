@@ -23,6 +23,7 @@ import static java.lang.Boolean.TRUE;
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
 import static org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -68,6 +69,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -85,6 +87,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -140,11 +143,13 @@ public abstract class BaseLoanIntegrationTest {
     protected final Account feeIncomeAccount = accountHelper.createIncomeAccount("feeIncome");
     protected final Account penaltyIncomeAccount = accountHelper.createIncomeAccount("penaltyIncome");
     protected final Account feeChargeOffAccount = accountHelper.createIncomeAccount("feeChargeOff");
+    protected final Account penaltyChargeOffAccount = accountHelper.createIncomeAccount("penaltyChargeOff");
+
     protected final Account recoveriesAccount = accountHelper.createIncomeAccount("recoveries");
     protected final Account interestIncomeChargeOffAccount = accountHelper.createIncomeAccount("interestIncomeChargeOff");
     // expense
-    protected final Account creditLossBadDebtAccount = accountHelper.createExpenseAccount();
-    protected final Account creditLossBadDebtFraudAccount = accountHelper.createExpenseAccount();
+    protected final Account chargeOffExpenseAccount = accountHelper.createExpenseAccount("chargeOff");
+    protected final Account chargeOffFraudExpenseAccount = accountHelper.createExpenseAccount("chargeOffFraud");
     protected final Account writtenOffAccount = accountHelper.createExpenseAccount();
     protected final Account goodwillExpenseAccount = accountHelper.createExpenseAccount();
 
@@ -233,9 +238,10 @@ public abstract class BaseLoanIntegrationTest {
                 .incomeFromGoodwillCreditPenaltyAccountId(feeChargeOffAccount.getAccountID().longValue())//
                 .incomeFromChargeOffInterestAccountId(interestIncomeChargeOffAccount.getAccountID().longValue())//
                 .incomeFromChargeOffFeesAccountId(feeChargeOffAccount.getAccountID().longValue())//
-                .chargeOffExpenseAccountId(creditLossBadDebtAccount.getAccountID().longValue())//
-                .chargeOffFraudExpenseAccountId(creditLossBadDebtFraudAccount.getAccountID().longValue())//
-                .incomeFromChargeOffPenaltyAccountId(feeChargeOffAccount.getAccountID().longValue()).dateFormat(DATETIME_PATTERN)//
+                .incomeFromChargeOffPenaltyAccountId(penaltyChargeOffAccount.getAccountID().longValue())//
+                .chargeOffExpenseAccountId(chargeOffExpenseAccount.getAccountID().longValue())//
+                .chargeOffFraudExpenseAccountId(chargeOffFraudExpenseAccount.getAccountID().longValue())//
+                .dateFormat(DATETIME_PATTERN)//
                 .locale("en_GB")//
                 .disallowExpectedDisbursements(true)//
                 .allowApprovedDisbursedAmountsOverApplied(true)//
@@ -398,7 +404,7 @@ public abstract class BaseLoanIntegrationTest {
 
     protected void verifyLastClosedBusinessDate(Long loanId, String lastClosedBusinessDate) {
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-        Assertions.assertNotNull(loanDetails.getLastClosedBusinessDate());
+        assertNotNull(loanDetails.getLastClosedBusinessDate());
         Assertions.assertEquals(lastClosedBusinessDate, loanDetails.getLastClosedBusinessDate().format(dateTimeFormatter));
     }
 
@@ -438,10 +444,10 @@ public abstract class BaseLoanIntegrationTest {
     protected Long addCharge(Long loanId, boolean isPenalty, double amount, String dueDate) {
         Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(amount), isPenalty));
-        Assertions.assertNotNull(chargeId);
+        assertNotNull(chargeId);
         Integer loanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId.intValue(),
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(chargeId), dueDate, String.valueOf(amount)));
-        Assertions.assertNotNull(loanChargeId);
+        assertNotNull(loanChargeId);
         return loanChargeId.longValue();
     }
 
@@ -449,8 +455,8 @@ public abstract class BaseLoanIntegrationTest {
         GetLoansLoanIdResponse loanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
-        Assertions.assertNotNull(loanResponse.getRepaymentSchedule());
-        Assertions.assertNotNull(loanResponse.getRepaymentSchedule().getPeriods());
+        assertNotNull(loanResponse.getRepaymentSchedule());
+        assertNotNull(loanResponse.getRepaymentSchedule().getPeriods());
         Assertions.assertEquals(installments.length, loanResponse.getRepaymentSchedule().getPeriods().size(),
                 "Expected installments are not matching with the installments configured on the loan");
 
@@ -619,6 +625,24 @@ public abstract class BaseLoanIntegrationTest {
                 new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate(date).locale("en")
                         .transactionAmount(amount).externalId(firstRepaymentUUID));
         return response.getResourceId();
+    }
+
+    protected Long chargeOffLoan(Long loanId, String date) {
+        String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
+        Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+        String transactionExternalId = UUID.randomUUID().toString();
+
+        PostLoansLoanIdTransactionsResponse chargeOffTransaction = this.loanTransactionHelper.chargeOffLoan((long) loanId,
+                new PostLoansLoanIdTransactionsRequest().transactionDate(date).locale("en").dateFormat("dd MMMM yyyy")
+                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+        return chargeOffTransaction.getResourceId();
+    }
+
+    protected void changeLoanFraudState(Long loanId, boolean fraudState) {
+        String payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", fraudState ? "true" : "false");
+        PutLoansLoanIdResponse response = loanTransactionHelper.modifyLoanCommand(Math.toIntExact(loanId), "markAsFraud", payload,
+                responseSpec);
+        assertNotNull(response);
     }
 
     protected Long addChargebackForLoan(Long loanId, Long transactionId, Double amount) {

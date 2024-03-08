@@ -451,33 +451,54 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         }
 
         if (principalCredited.compareTo(principalPaid) > 0) {
-            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalCredited.subtract(principalPaid),
-                    isReversal);
+            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, getPrincipalAccount(loanDTO), loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, principalCredited.subtract(principalPaid), isReversal);
         } else if (principalCredited.compareTo(principalPaid) < 0) {
-            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalPaid.subtract(principalCredited),
-                    isReversal);
+            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, getPrincipalAccount(loanDTO), loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, principalPaid.subtract(principalCredited), isReversal);
         }
 
         if (feeCredited.compareTo(feePaid) > 0) {
-            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, feeCredited.subtract(feePaid), isReversal);
+            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, getFeeAccount(loanDTO), loanProductId, paymentTypeId,
+                    loanId, transactionId, transactionDate, feeCredited.subtract(feePaid), isReversal);
         } else if (feeCredited.compareTo(feePaid) < 0) {
-            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, feePaid.subtract(feeCredited), isReversal);
+            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, getFeeAccount(loanDTO), loanProductId, paymentTypeId,
+                    loanId, transactionId, transactionDate, feePaid.subtract(feeCredited), isReversal);
         }
 
         if (penaltyCredited.compareTo(penaltyPaid) > 0) {
-            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, penaltyCredited.subtract(penaltyPaid),
-                    isReversal);
+            helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, getPenaltyAccount(loanDTO), loanProductId, paymentTypeId,
+                    loanId, transactionId, transactionDate, penaltyCredited.subtract(penaltyPaid), isReversal);
         } else if (penaltyCredited.compareTo(penaltyPaid) < 0) {
-            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, penaltyPaid.subtract(penaltyCredited),
-                    isReversal);
+            helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, getPenaltyAccount(loanDTO), loanProductId, paymentTypeId,
+                    loanId, transactionId, transactionDate, penaltyPaid.subtract(penaltyCredited), isReversal);
         }
+    }
 
+    private Integer getFeeAccount(LoanDTO loanDTO) {
+        Integer account = AccrualAccountsForLoan.FEES_RECEIVABLE.getValue();
+        if (loanDTO.isMarkedAsChargeOff()) {
+            account = AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue();
+        }
+        return account;
+    }
+
+    private Integer getPenaltyAccount(LoanDTO loanDTO) {
+        Integer account = AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue();
+        if (loanDTO.isMarkedAsChargeOff()) {
+            account = AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY.getValue();
+        }
+        return account;
+    }
+
+    private Integer getPrincipalAccount(LoanDTO loanDTO) {
+        if (loanDTO.isMarkedAsFraud() && loanDTO.isMarkedAsChargeOff()) {
+            return AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue();
+        } else if (!loanDTO.isMarkedAsFraud() && loanDTO.isMarkedAsChargeOff()) {
+            return AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue();
+        } else {
+            return AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue();
+        }
     }
 
     /**
