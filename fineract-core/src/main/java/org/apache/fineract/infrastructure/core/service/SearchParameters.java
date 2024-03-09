@@ -274,9 +274,9 @@ public final class SearchParameters {
     }
 
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
-                             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
-                             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
-                             final Long savingsId, final Boolean orphansOnly, final String dateOfBirth, boolean isSelfUser) {
+            final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+            final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+            final Long savingsId, final Boolean orphansOnly, final String dateOfBirth, boolean isSelfUser) {
         this.sqlSearch = sqlSearch;
         this.officeId = officeId;
         this.externalId = externalId;
