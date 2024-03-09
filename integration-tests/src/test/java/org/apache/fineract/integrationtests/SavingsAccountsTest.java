@@ -54,10 +54,7 @@ public class SavingsAccountsTest extends IntegrationTest {
     @Order(1)
     void submitSavingsAccountsApplication() {
         LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
-
-
-        PostSavingsAccountsRequest request = buildPostSavingsAccountRequest(1);
-
+        PostSavingsAccountsRequest request = buildPostSavingsAccountRequest(1, 1);
 
         Response<PostSavingsAccountsResponse> response = okR(fineract().savingsAccounts.submitApplication2(request));
 
@@ -102,6 +99,9 @@ public class SavingsAccountsTest extends IntegrationTest {
         LOG.info("------------------------------ GET SAVINGS ACCOUNT BY BIRTH DAY ---------------------------------------");
         int year = 1994, month = 12, day = 2;
 
+        String birthDayQueryParam = String.format("%d-0%d", month, day);
+
+        LOG.info("--------------- CREATE NEW CLIENT ---------------");
         PostClientsRequest clientsRequest = new PostClientsRequest();
         clientsRequest.setDateOfBirth(LocalDate.of(year, month, day));
         clientsRequest.setFirstname("Alan");
@@ -114,10 +114,11 @@ public class SavingsAccountsTest extends IntegrationTest {
         );
 
         assertThat(clientResponse.isSuccessful()).isTrue();
+        assertThat(clientResponse.body()).isNotNull();
         long clientId = clientResponse.body().getClientId();
-        assertThat(clientId).isNotNull();
 
-        PostSavingsAccountsRequest postSavingsRequest = buildPostSavingsAccountRequest((int) clientId);
+        LOG.info("--------------- CREATE NEW SAVINGS ACCOUNT ---------------");
+        PostSavingsAccountsRequest postSavingsRequest = buildPostSavingsAccountRequest((int) clientId, 1);
 
         Response<PostSavingsAccountsResponse> postSavingsResponse = okR(
                 fineract().savingsAccounts.submitApplication2(postSavingsRequest)
@@ -125,6 +126,7 @@ public class SavingsAccountsTest extends IntegrationTest {
 
         assertThat(postSavingsResponse.isSuccessful()).isTrue();
 
+        LOG.info("--------------- GET ALL SAVINGS ACCOUNTS BY BIRHDAY:" + birthDayQueryParam + " ---------------");
         Response<GetSavingsAccountsResponse> getSavingsResponse = okR(
                 fineract().savingsAccounts.retrieveAll33(
                         null,
@@ -133,7 +135,8 @@ public class SavingsAccountsTest extends IntegrationTest {
                         null,
                         null,
                         null,
-                        String.format("%d-0%d", month, day))
+                        birthDayQueryParam
+                )
         );
 
         assertThat(getSavingsResponse.isSuccessful()).isTrue();
@@ -144,10 +147,10 @@ public class SavingsAccountsTest extends IntegrationTest {
         assertThat(body.getTotalFilteredRecords()).isEqualTo(1);
     }
 
-    PostSavingsAccountsRequest buildPostSavingsAccountRequest(int clientId) {
+    PostSavingsAccountsRequest buildPostSavingsAccountRequest(int clientId, int productId) {
         PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
         request.setClientId(clientId);
-        request.setProductId(1);
+        request.setProductId(productId);
         request.setLocale(locale);
         request.setDateFormat(dateFormat);
         request.submittedOnDate(formattedDate);
