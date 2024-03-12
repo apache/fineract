@@ -22,8 +22,10 @@ import static java.math.BigDecimal.ZERO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -40,9 +42,13 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAmortizationApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +63,7 @@ public class LoanReAmortizationServiceImpl {
     private final ExternalIdFactory externalIdFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     public CommandProcessingResult reAmortize(Long loanId, JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(loanId);
@@ -67,6 +74,13 @@ public class LoanReAmortizationServiceImpl {
         changes.put(LoanReAmortizationApiConstants.dateFormatParameterName, command.dateFormat());
 
         LoanTransaction reAmortizeTransaction = createReAmortizeTransaction(loan, command);
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(loan.transactionProcessingStrategy());
+        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAmortizeTransaction,
+                new LoanRepaymentScheduleTransactionProcessor.TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                        loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney())));
+
         loanTransactionRepository.saveAndFlush(reAmortizeTransaction);
 
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
@@ -117,6 +131,23 @@ public class LoanReAmortizationServiceImpl {
                 LoanReAmortizationApiConstants.externalIdParameterName);
         reAmortizeTransaction.reverse(reversalExternalId);
         reAmortizeTransaction.manuallyAdjustedOrReversed();
+        reProcessLoanTransactions(reAmortizeTransaction.getLoan());
+    }
+
+    private void reProcessLoanTransactions(Loan loan) {
+        final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
+        List<LoanTransaction> trans = loan.getLoanTransactions();
+        for (final LoanTransaction transaction : trans) {
+            if (transaction.isNotReversed() && (transaction.isChargeOff() || !transaction.isNonMonetaryTransaction())) {
+                repaymentsOrWaivers.add(transaction);
+            }
+        }
+        repaymentsOrWaivers.sort(LoanTransactionComparator.INSTANCE);
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(loan.transactionProcessingStrategy());
+        loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(), repaymentsOrWaivers,
+                loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
     }
 
     private LoanTransaction findLatestNonReversedReAmortizeTransaction(Loan loan) {
