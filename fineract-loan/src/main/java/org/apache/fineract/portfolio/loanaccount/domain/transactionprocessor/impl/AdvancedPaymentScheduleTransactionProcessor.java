@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl;
 
+import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum.CHARGEBACK;
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REAMORTIZE;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.FEE;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.INTEREST;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PENALTY;
@@ -182,9 +184,56 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case CHARGE_PAYMENT -> handleChargePayment(loanTransaction, ctx.getCurrency(), ctx.getInstallments(), ctx.getCharges(),
                     ctx.getOverpaymentHolder());
             case WAIVE_CHARGES -> log.debug("WAIVE_CHARGES transaction will not be processed.");
+            case REAMORTIZE -> handleReAmortization(loanTransaction, ctx.getCurrency(), ctx.getInstallments());
             // TODO: Cover rest of the transaction types
             default -> {
                 log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
+            }
+        }
+    }
+
+    private void handleReAmortization(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        BigDecimal remainingAmount = loanTransaction.getAmount();
+        LocalDate transactionDate = loanTransaction.getTransactionDate();
+        List<LoanRepaymentScheduleInstallment> previousInstallments = installments.stream() //
+                .filter(installment -> !installment.getDueDate().isAfter(transactionDate)) //
+                .toList();
+        List<LoanRepaymentScheduleInstallment> futureInstallments = installments.stream() //
+                .filter(installment -> installment.getDueDate().isAfter(transactionDate)) //
+                .filter(installment -> !installment.isAdditional() && !installment.isDownPayment()) //
+                .toList();
+
+        BigDecimal overallOverDuePrincipal = ZERO;
+        for (LoanRepaymentScheduleInstallment installment : previousInstallments) {
+            Money principalCompleted = installment.getPrincipalCompleted(currency);
+            overallOverDuePrincipal = overallOverDuePrincipal.add(installment.getPrincipal(currency).minus(principalCompleted).getAmount());
+            installment.updatePrincipal(installment.getPrincipalCompleted(currency).getAmount());
+            installment.updateDerivedFields(currency, transactionDate);
+        }
+
+        if (overallOverDuePrincipal.compareTo(remainingAmount) != 0) {
+            remainingAmount = overallOverDuePrincipal;
+            loanTransaction.updateComponentsAndTotal(Money.of(currency, remainingAmount), Money.zero(currency), Money.zero(currency),
+                    Money.zero(currency));
+        }
+
+        LoanRepaymentScheduleInstallment lastFutureInstallment = futureInstallments.stream()
+                .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)).get();
+        BigDecimal reAmortizationAmountPerInstallment = remainingAmount.divide(BigDecimal.valueOf(futureInstallments.size()),
+                MoneyHelper.getRoundingMode());
+        Integer installmentAmountInMultiplesOf = loanTransaction.getLoan().getLoanProduct().getInstallmentAmountInMultiplesOf();
+
+        for (LoanRepaymentScheduleInstallment installment : futureInstallments) {
+            if (lastFutureInstallment.equals(installment)) {
+                installment.addToPrincipal(transactionDate, Money.of(currency, remainingAmount));
+            } else {
+                if (installmentAmountInMultiplesOf != null) {
+                    reAmortizationAmountPerInstallment = Money.roundToMultiplesOf(reAmortizationAmountPerInstallment,
+                            installmentAmountInMultiplesOf);
+                }
+                installment.addToPrincipal(transactionDate, Money.of(currency, reAmortizationAmountPerInstallment));
+                remainingAmount = remainingAmount.subtract(reAmortizationAmountPerInstallment);
             }
         }
     }
