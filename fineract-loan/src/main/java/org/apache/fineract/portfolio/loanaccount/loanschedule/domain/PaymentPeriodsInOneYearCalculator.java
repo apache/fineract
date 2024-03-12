@@ -25,7 +25,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public interface PaymentPeriodsInOneYearCalculator {
 
-    Integer calculate(PeriodFrequencyType repaymentFrequencyType);
+    Integer calculate(PeriodFrequencyType repaymentFrequencyType, PeriodFrequencyType interestRatePeriodType);
 
     BigDecimal calculatePortionOfRepaymentPeriodInterestChargingGrace(LocalDate repaymentPeriodStartDate, LocalDate scheduledDueDate,
             LocalDate interestChargedFromLocalDate, PeriodFrequencyType repaymentPeriodFrequencyType, int repaidEvery, MathContext mc);
