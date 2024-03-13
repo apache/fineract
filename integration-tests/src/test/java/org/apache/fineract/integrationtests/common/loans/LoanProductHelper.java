@@ -46,6 +46,10 @@ public class LoanProductHelper extends IntegrationTest {
         return ok(fineract().loanProducts.updateLoanProduct1(externalId, request));
     }
 
+    public PutLoanProductsProductIdResponse updateLoanProductById(Long loanProductId, PutLoanProductsProductIdRequest request) {
+        return ok(fineract().loanProducts.updateLoanProduct(loanProductId, request));
+    }
+
     public GetLoanProductsTemplateResponse getLoanProductTemplate(boolean isProductMixTemplate) {
         return ok(fineract().loanProducts.retrieveTemplate11(isProductMixTemplate));
     }

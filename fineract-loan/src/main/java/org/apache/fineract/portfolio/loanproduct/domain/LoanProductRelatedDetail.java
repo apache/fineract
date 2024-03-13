@@ -92,6 +92,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "repayment_period_frequency_enum", nullable = false)
     private PeriodFrequencyType repaymentPeriodFrequencyType;
 
+    @Column(name = "fixed_length", nullable = false)
+    private Integer fixedLength;
+
     @Column(name = "number_of_repayments", nullable = false)
     private Integer numberOfRepayments;
 
@@ -159,7 +162,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
-            final LoanScheduleProcessingType loanScheduleProcessingType) {
+            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
@@ -167,7 +170,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
-                loanScheduleType, loanScheduleProcessingType);
+                loanScheduleType, loanScheduleProcessingType, fixedLength);
     }
 
     protected LoanProductRelatedDetail() {
@@ -185,7 +188,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
-            final LoanScheduleProcessingType loanScheduleProcessingType) {
+            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -197,6 +200,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.repayEvery = repayEvery;
         this.repaymentPeriodFrequencyType = repaymentFrequencyType;
         this.numberOfRepayments = defaultNumberOfRepayments;
+        this.fixedLength = fixedLength;
         this.graceOnPrincipalPayment = defaultToNullIfZero(graceOnPrincipalPayment);
         this.recurringMoratoriumOnPrincipalPeriods = recurringMoratoriumOnPrincipalPeriods;
         this.graceOnInterestPayment = defaultToNullIfZero(graceOnInterestPayment);
@@ -752,5 +756,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public LoanScheduleProcessingType getLoanScheduleProcessingType() {
         return loanScheduleProcessingType;
+    }
+
+    public Integer getFixedLength() {
+        return this.fixedLength;
+    }
+
+    public void setFixedLength(Integer fixedLength) {
+        this.fixedLength = fixedLength;
     }
 }
