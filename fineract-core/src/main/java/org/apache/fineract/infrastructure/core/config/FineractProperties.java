@@ -284,6 +284,7 @@ public class FineractProperties {
 
         private boolean enabled;
         private FineractExternalEventsProducerProperties producer;
+        private int partitionSize;
     }
 
     @Getter

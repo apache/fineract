@@ -18,24 +18,23 @@
  */
 package org.apache.fineract.infrastructure.core.condition;
 
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
-import org.springframework.context.annotation.Conditional;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 
-public class FineractValidationCondition extends AnyNestedCondition {
+@Slf4j
+public class FineractExternalEventConfigCondition extends PropertiesCondition {
 
-    public FineractValidationCondition() {
-        super(ConfigurationPhase.PARSE_CONFIGURATION);
+    @Override
+    protected boolean matches(FineractProperties properties) {
+        int partitionSize = properties.getEvents().getExternal().getPartitionSize();
+        boolean conditionFails = false;
+        if (partitionSize > 25000) {
+            conditionFails = true;
+            log.error("The partition size for external event partitions cannot be bigger than 25000.");
+        } else if (partitionSize < 1) {
+            conditionFails = true;
+            log.error("The partition size for external event partitions must be positive.");
+        }
+        return conditionFails;
     }
-
-    @Conditional(FineractModeValidationCondition.class)
-    static class FineractModeValidation {}
-
-    @Conditional(FineractPartitionJobConfigValidationCondition.class)
-    static class FineractPartitionedJobValidation {}
-
-    @Conditional(FineractRemoteJobMessageHandlerCondition.class)
-    static class FineractRemoteJobMessageHandlerValidation {}
-
-    @Conditional(FineractExternalEventConfigCondition.class)
-    static class FineractExternalEventConfigValidation {}
 }
