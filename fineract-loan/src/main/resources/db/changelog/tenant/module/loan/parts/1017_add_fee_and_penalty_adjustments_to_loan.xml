@@ -32,11 +32,11 @@
     </changeSet>
 
     <changeSet author="fineract" id="2">
+        <validCheckSum>9:9e13876473fb1fc84046fb672fcf9309</validCheckSum>
         <addColumn tableName="m_loan_repayment_schedule">
             <column defaultValueComputed="NULL" name="credited_fee" type="DECIMAL(19, 6)"/>
             <column defaultValueComputed="NULL" name="credited_penalty" type="DECIMAL(19, 6)"/>
         </addColumn>
-        <renameColumn tableName="m_loan_repayment_schedule" oldColumnName="credits_amount" newColumnName="credited_principal"  columnDataType="DECIMAL(19, 6)"/>
     </changeSet>
 
 
