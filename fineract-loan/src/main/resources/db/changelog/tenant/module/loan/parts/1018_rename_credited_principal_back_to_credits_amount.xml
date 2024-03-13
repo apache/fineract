@@ -20,7 +20,12 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="fineract" id="1">
+    <changeSet author="fineract" id="1" failOnError="false">
+        <preConditions onFail="MARK_RAN" onError="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT 1
+                                         FROM information_schema.columns
+                                         WHERE table_name='m_loan_repayment_schedule' and column_name='credited_principal'</sqlCheck>
+        </preConditions>
         <renameColumn tableName="m_loan_repayment_schedule" oldColumnName="credited_principal" newColumnName="credits_amount"  columnDataType="DECIMAL(19, 6)"/>
     </changeSet>
 </databaseChangeLog>
