@@ -110,6 +110,7 @@ class SendAsynchronousEventsTaskletTest {
         FineractProperties.FineractExternalEventsProducerJmsProperties externalEventsProducerJMSProperties = new FineractProperties.FineractExternalEventsProducerJmsProperties();
         externalEventsProducerJMSProperties.setEnabled(true);
         externalProperties.setEnabled(true);
+        externalProperties.setPartitionSize(5000);
         externalEventsProducerProperties.setJms(externalEventsProducerJMSProperties);
         externalProperties.setProducer(externalEventsProducerProperties);
         eventsProperties.setExternal(externalProperties);
