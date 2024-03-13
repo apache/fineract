@@ -41,4 +41,5 @@
   <include relativeToChangelogFile="true" file="parts/1016_add_credit_allocation_rule.xml"/>
   <include relativeToChangelogFile="true" file="parts/1017_add_fee_and_penalty_adjustments_to_loan.xml"/>
   <include relativeToChangelogFile="true" file="parts/1018_rename_credited_principal_back_to_credits_amount.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1019_add_fixed_length.xml"/>
 </databaseChangeLog>
