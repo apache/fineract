@@ -1,0 +1,58 @@
+Being a committer in FINERACT is a responsibility that we wish to encourage as many good contributors as possible to share with us.  It is also an honor which is earned by good behavior.
+
+Apache explains what values underlie Apache community work here: https://community.apache.org/contributors/
+
+FINERACT will designate contributors to committers via the following process.
+
+* A current PMC member will decide to sponsor a contributor.
+* The sponsor will propose via the private mailing list, that a contributor be made a committer. The sponsor should explain why he or she believes the contributor should be made a committer.  At this point it would be unkind to inform the contributor in case the proposal fails the vote.
+* If within 72 hours of the proposal, no committers have vetoed the proposal, the proposal is accepted.
+* The sponsor will ask the contributor if he or she wishes to become a committer.
+* If contributor so desires, the sponsor will set in motion the processes necessary to add a new committer to FINERACT.
+* If a contributor is vetoed there is no need to inform him or her that a vote occurred.  Depending on the reason for a veto, the question may be raised again at a later date.
+
+Because committers determine who will become committers, they need to be able to recognize good committers.  A good committer also has other qualities.
+
+== Developer committer qualities
+
+To be made a developer committer, a contributor should have developed experience with FINERACT by
+
+* creating bug fixes or programming features,
+* producing multiple high quality code changes as determined by an existing committer using the Code Review Guide,
+* owning and fixing their own mistakes, and
+* mentoring other contributors.
+
+== Community Liaison Committer qualities
+
+To be made a community liaison committer, a contributor should have developed experience with FINERACT by
+
+* helping other users learn to use FINERACT, or
+* helping programmers learn what users need by providing detailed business requirements and use cases required for functional specifications, or
+* testing FINERACT for correctness, robustness, scaleability, security, or usability, and reporting bugs and issues found, or
+* connecting users with complementary needs with each other on the list, or
+* supporting implementers and users of FINERACT with best practices and lessons learned from practical implementation, or
+* writing documentation and tutorials for usage of FINERACT and design of financial services,
+* owning and fixing their mistakes, and
+* mentoring other contributors.
+
+== Developer committer rights and responsibilities
+
+* Everything listed in http://www.apache.org/dev/new-committers-guide.html
+* Reviewing code before it is committed using the Code Review Guide.
+* Reviewing code for other committers after it is committed.
+* Taking part in conversations on the dev mailing list when he or she has something to contribute.
+* Keeping all decision-making processes transparent for all project participants.
+* Community Liaison Committer rights and responsibilities
+* Everything listed in http://www.apache.org/dev/new-committers-guide.html
+* Prioritizing and refining user stories and tickets on JIRA. 
+* Moderating and maintaining functional documentation on FINERACT.
+* Taking part in conversations on the dev mailing list when he or she has something to contribute.
+* Keeping all decision-making processes transparent for all project participants.
+
+== PMC member rights and responsibilities
+
+* Taking part in conversations on the private mailing list and keeping those conversations private.
+* Proposing new committers and new PMC members.
+* Representing Apache Fineract to the ASF Board.
+* Protecting the Apache Fineract brand from misuse
+* Keeping all decision-making processes transparent for all project participants.

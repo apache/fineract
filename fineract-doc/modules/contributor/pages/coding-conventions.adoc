@@ -1,0 +1,35 @@
+== Coding Conventions
+https://google.github.io/styleguide/javaguide.html[Google Java Style] covers filenames, file organization, indentation, comments, declarations, statements, white space, naming conventions, and programming practices. All code written for Apache Fineract should follow these conventions except as noted below.
+
+== License or copyright information
+
+License or copyright information, if present
+According to https://www.apache.org/legal/src-headers.html#headers[ASF policy,] the license header should be:
+
+[sidebar]
+.ALv2 License Header
+--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+ 
+  http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+--
+This is enforced through a Gradle plugin, and the build will fail if this header is missing.
+
+== Column Limit
+We've chosen to use a column limit of 100 characters.
+
+== Checkstyle / Spotless etc
+A number of checks for coding standards are performed at build time. Any violations need to be resolved before the automated build will pass and a PR will be approved. 
