@@ -30,7 +30,6 @@ Follow link:../development/dev-env-setup.adoc[these] steps to set up your dev en
 
 * Browse existing link:https://issues.apache.org/jira/browse/FINERACT-2055?jql=project%20%3D%20FINERACT%20ORDER%20BY%20created%20DESC[issues]
 ** Filter by tags - "volunteer", "gsoc", "new contributor", etc.
-* Browse link:https://mifosforge.jira.com/wiki/spaces/RES/pages/3532095546/Google+Summer+of+Code+2024+Ideas[GSoC projects]
 
 == Open your first PR
 
