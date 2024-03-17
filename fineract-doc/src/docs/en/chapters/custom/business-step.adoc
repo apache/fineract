@@ -1,9 +1,9 @@
 = Custom Business Steps
 
-It very easy to add your own business steps to Fineract's default steps:
+It is very easy to add your own business steps to Fineract's default steps:
 
 1. Create a custom module (e. g. `custom/acme/steps`, follow the instructions on how to create a custom module)
-2. Create a class that implements interace `org.apache.fineract.cob.COBBusinessStep`
+2. Create a class that implements interface `org.apache.fineract.cob.COBBusinessStep`
 3. Provide the custom database migration to add the necessary information about your business step in table `m_batch_business_steps`
 
 .Business Step Interface

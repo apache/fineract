@@ -21,15 +21,15 @@ The platform uses an approach that isolates an FIs data per database/schema (See
 
 Whilst each tenant will have a set of core tables, the platform tables can be extended in different ways for each tenant through the use of Data tables functionality.
 
-== Command Query Seperation
+== Command Query Separation
 
-We seperate *commands* (that change data) from *queries* (that read data).
+We separate *commands* (that change data) from *queries* (that read data).
 
 Why? There are numerous reasons for choosing this approach which at present is not an attempt at full blown CQRS. The main advantages at present are:
 
 * State changing commands are persisted providing an audit of all state changes.
 * Used to support a general approach to *maker-checker*.
-* State changing commands use the Object-Oriented paradign (and hence ORM) whilst querys can stay in the data paradigm.
+* State changing commands use the Object-Oriented paradigm (and hence ORM) whilst querys can stay in the data paradigm.
 
 == Maker-Checker
 

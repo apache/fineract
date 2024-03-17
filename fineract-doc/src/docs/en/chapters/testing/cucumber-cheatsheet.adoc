@@ -104,6 +104,6 @@ TBD
 
 As a proof of concept we've converted all unit tests in `fineract-provider` into Cucumber tests. The more interesting part starts when we'll attack the integration tests with over 400 mostly business logic related tests. These tests fit very well in Cucumber's test specification structure (a lot of _if-then-else_ or in Gherkin: _Given-When-Then_). Migrating all tests will take a while, but we would already recommend trying to implement tests as Cucumber specifications. It should be relatively easy to convert these tests into the new syntax.
 
-Hopefully this will motivate even more people from the broader Fineract community to participate in the project by sharing their domain specific knowledge as Cucumber specifications. Specifications are written in Englisch (although not a technical requirement).
+Hopefully this will motivate even more people from the broader Fineract community to participate in the project by sharing their domain specific knowledge as Cucumber specifications. Specifications are written in English (although not a technical requirement).
 
 NOTE: Have a look at the specifications in `fineract-provider` for an initial inspiration. For more information please see https://cucumber.io/docs

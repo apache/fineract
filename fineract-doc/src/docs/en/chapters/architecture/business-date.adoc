@@ -175,7 +175,7 @@ The - logical - date of the actual business day, eg: 2022-05-06
 
 The - logical - date of the business day for job execution, eg: 2022-05-05
 
-* It can be calculated based on the the business date
+* It can be calculated based on the business date
 
 ** COB date = business date - 1 day
 
@@ -295,4 +295,4 @@ We shall modify at all the relevant places where the tenant date was used:
 
 ** Storing DATETIME fields without Timezone is potential problem due to the daylight savings
 
-** Also  some external libs (like Quartz) are using system timezone and Fineract will using Tenant timezone for audit fields. To be able to distinct them in DB we shall use DATETIME with TIMESTAMP column types and use timezoned java time objects in the application
+** Also, some external libs (like Quartz) are using system timezone and Fineract will using Tenant timezone for audit fields. To be able to distinct them in DB we shall use DATETIME with TIMESTAMP column types and use timezoned java time objects in the application

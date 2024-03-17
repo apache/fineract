@@ -21,7 +21,7 @@ To be able to send emails via SMTP with your GMail account you probably need to 
 5. 2-Step Verification is only set up for security keys.
 6. Your account is through work, school, or other organization.
 7. You turned on Advanced Protection.
-8. At the bottom, choose Select app and choose the app you using and then Select device and choose the device you're using and then Generate.
+8. At the bottom, choose Select app and choose the app you're using and then Select device and choose the device you're using and then Generate.
 9. Follow the instructions to enter the App Password. The App Password is the 16-character code in the yellow bar on your device.
 10. Tap Done.
 

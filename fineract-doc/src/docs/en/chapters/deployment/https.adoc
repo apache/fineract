@@ -8,6 +8,6 @@ For production deployments, we recommend running Fineract behind a modern manage
 
 Such products, when correctly configured, add the conventional `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers, which Fineract (or rather the Spring Framework really) correctly respects since https://issues.apache.org/jira/browse/FINERACT-914[FINERACT-914 was fixed].
 
-Alternatively, you could replace the built-in default SSL certificate with one you obtained from a Certificate Authority.  We currently do not document how to do this, because we do not recommend this approach, as its cumbersome to configure and support and less secure than a managed auto rotating solution.
+Alternatively, you could replace the built-in default SSL certificate with one you obtained from a Certificate Authority.  We currently do not document how to do this, because we do not recommend this approach, as it's cumbersome to configure and support and less secure than a managed auto rotating solution.
 
 The Fineract API client supports an insecure mode (`FineractClient.Builder#insecure()`), and API users such as mobile apps may expose Settings to let end-users accept the self signed certificate. This should always be used for testing only, never in production.

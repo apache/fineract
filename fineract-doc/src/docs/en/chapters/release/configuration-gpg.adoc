@@ -176,7 +176,7 @@ gpg --export-secret-keys --armor aleks@apache.org > privkey.asc
 +
 Your private key should be kept in a safe place, like an encrypted flash drive. Treat it like your house key. Only you can have it and don't lose it. And you must remember your passphrase, otherwise you can't unlock your private key.
 +
-You should protect your revocation certificate. Anyone in posession of your revocation certificate, could immediately revoke your public/private key pair and generate fake ones.
+You should protect your revocation certificate. Anyone in possession of your revocation certificate, could immediately revoke your public/private key pair and generate fake ones.
 
 IMPORTANT: Please contact a PMC member to add your GPG public key in Fineract's Subversion repository. This is necessary to be able to validate published releases.
 
@@ -194,7 +194,7 @@ Before doing this, make sure that your default keyserver is hkp://keyserver.ubun
 keyserver hkp://keyserver.ubuntu.com/
 ----
 +
-Alternatively you can provide the keyserver whith the send command:
+Alternatively you can provide the keyserver with the send command:
 +
 [source,bash]
 ----

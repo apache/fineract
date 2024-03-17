@@ -81,7 +81,7 @@ TBD
 
 == Override Processor Factory
 
-The processor factory has no reference to any specific implementation of the loan transaction processor interface. All avaible implementations will be injected here (internal default and custom implementations). Processor instances can be looked up via method `determineProcessor()`. You can pass either the code of the processor or the processor's name to look it up. If a matching processor can't be found then the factory function will either return the default instance or fails with an exception depending on the configuration in `application.properties`.
+The processor factory has no reference to any specific implementation of the loan transaction processor interface. All available implementations will be injected here (internal default and custom implementations). Processor instances can be looked up via method `determineProcessor()`. You can pass either the code of the processor or the processor's name to look it up. If a matching processor can't be found then the factory function will either return the default instance or fails with an exception depending on the configuration in `application.properties`.
 
 IMPORTANT: It is preferable to use the processor code to lookup processor instances. Lookups via processor names are only done in the import service via Excel sheets (should be fixed).
 
