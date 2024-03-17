@@ -54,7 +54,7 @@
 |fineract
 |TBD
 
-|fineract.tenant.encrytion
+|fineract.tenant.encryption
 |FINERACT_DEFAULT_TENANTDB_ENCRYPTION
 |AES/CBC/PKCS5Padding
 |TBD

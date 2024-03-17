@@ -258,7 +258,7 @@ The business step configuration for jobs are tracked within the database in the 
 == Inline Jobs
 
 Some jobs that work with business entities have a corresponding job that can trigger the job with a list of specified entities.
-When the Inline job gets triggered then then the corresponding existing job will run in real time with the given entities as a dataset.
+When the Inline job gets triggered then the corresponding existing job will run in real time with the given entities as a dataset.
 
 === List of Inline jobs
 

@@ -4,7 +4,7 @@
 
 The RM should, if one doesn't already exist, first create a new release umbrella issue in JIRA. This issue is dedicated to tracking (a summary of) any discussion related to the planned new release. An example of such an issue is FINERACT-873 - Release Apache Fineract v1.4.0 RESOLVED.
 
-The RM then creates an list of resolved issues & features through an initial check in JIRA for already resolved issues for the release, and then setup a timeline for release branch point. The time for the day the issue list is created to the release branch point must be at least two weeks in order to give the community a chance to prioritize and commit any last minute features and issues they would like to see in the upcoming release.
+The RM then creates a list of resolved issues & features through an initial check in JIRA for already resolved issues for the release, and then setup a timeline for release branch point. The time for the day the issue list is created to the release branch point must be at least two weeks in order to give the community a chance to prioritize and commit any last minute features and issues they would like to see in the upcoming release.
 
 The RM must then send the pointer to the umbrella issue along with the tentative timeline for branch point to the developer lists. Any work identified as release related that needs to be completed should be added as a sub tasks of the umbrella issue to allow all developers and users to see the overall release progress in one place. The umbrella issue shall also link to any issues still requiring clarification whether or not they will make it into the release.
 
