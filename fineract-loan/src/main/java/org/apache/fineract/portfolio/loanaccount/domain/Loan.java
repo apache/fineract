@@ -2166,8 +2166,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private LocalDate determineExpectedMaturityDate() {
-        final int numberOfInstallments = this.repaymentScheduleInstallments.size();
-        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
+        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments().stream()
+                .filter(i -> !i.isDownPayment() && !i.isAdditional()).toList();
+        final int numberOfInstallments = installments.size();
         LocalDate maturityDate = installments.get(numberOfInstallments - 1).getDueDate();
         ListIterator<LoanRepaymentScheduleInstallment> iterator = installments.listIterator(numberOfInstallments);
         while (iterator.hasPrevious()) {
@@ -3432,7 +3433,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         List<LoanTransaction> trans = getLoanTransactions();
         for (final LoanTransaction transaction : trans) {
-            if (transaction.isNotReversed() && (transaction.isChargeOff() || !transaction.isNonMonetaryTransaction())) {
+            if (transaction.isNotReversed() && (transaction.isChargeOff() || transaction.isReAge() || transaction.isReAmortize()
+                    || !transaction.isNonMonetaryTransaction())) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -3670,10 +3672,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private LocalDate getNextUnpaidInstallmentDueDate() {
-        LocalDate nextUnpaidInstallmentDate = null;
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         LocalDate currentBusinessDate = DateUtils.getBusinessLocalDate();
         LocalDate expectedMaturityDate = determineExpectedMaturityDate();
+        LocalDate nextUnpaidInstallmentDate = expectedMaturityDate;
 
         for (final LoanRepaymentScheduleInstallment installment : installments) {
             boolean isCurrentDateBeforeInstallmentAndLoanPeriod = DateUtils.isBefore(currentBusinessDate, installment.getDueDate())
@@ -5664,7 +5666,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 lastCompoundingDate = compoundingDetail.getEffectiveDate();
             }
             List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
-            LoanRepaymentScheduleInstallment lastInstallment = installments.get(installments.size() - 1);
+            LoanRepaymentScheduleInstallment lastInstallment = LoanRepaymentScheduleInstallment
+                    .getLastNonDownPaymentInstallment(installments);
             reverseTransactionsPostEffectiveDate(incomeTransactions, lastInstallment.getDueDate());
             reverseTransactionsPostEffectiveDate(accrualTransactions, lastInstallment.getDueDate());
         }

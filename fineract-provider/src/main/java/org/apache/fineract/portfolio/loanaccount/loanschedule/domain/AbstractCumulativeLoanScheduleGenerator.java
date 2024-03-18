@@ -1854,7 +1854,8 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                 holidayDetailDTO);
         updateMapWithAmount(principalPortionMap, unprocessed, applicableDate);
         installment.addPrincipalAmount(unprocessed);
-        LoanRepaymentScheduleInstallment lastInstallment = installments.get(installments.size() - 1);
+        LoanRepaymentScheduleInstallment lastInstallment = installments.stream().filter(i -> !i.isDownPayment())
+                .reduce((first, second) -> second).orElseThrow();
         lastInstallment.updatePrincipal(lastInstallment.getPrincipal(unprocessed.getCurrency()).plus(unprocessed).getAmount());
         lastInstallment.payPrincipalComponent(detail.getTransactionDate(), unprocessed);
     }

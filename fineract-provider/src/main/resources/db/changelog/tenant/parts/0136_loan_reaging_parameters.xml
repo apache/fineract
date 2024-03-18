@@ -71,4 +71,12 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="4" author="fineract">
+        <addColumn tableName="m_loan_reage_parameter">
+            <column name="frequency_number" type="SMALLINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <renameColumn tableName="m_loan_reage_parameter" oldColumnName="frequency" newColumnName="frequency_type" columnDataType="VARCHAR(100)"/>
+    </changeSet>
 </databaseChangeLog>

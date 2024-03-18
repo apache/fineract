@@ -61,7 +61,9 @@ public enum LoanTransactionType {
     CHARGE_ADJUSTMENT(26, "loanTransactionType.chargeAdjustment"), //
     CHARGE_OFF(27, "loanTransactionType.chargeOff"), //
     DOWN_PAYMENT(28, "loanTransactionType.downPayment"), //
-    REAGE(29, "loanTransactionType.reAge"), REAMORTIZE(30, "loanTransactionType.reAmortize");
+    REAGE(29, "loanTransactionType.reAge"), //
+    REAMORTIZE(30, "loanTransactionType.reAmortize"), //
+    ;
 
     private final Integer value;
     private final String code;

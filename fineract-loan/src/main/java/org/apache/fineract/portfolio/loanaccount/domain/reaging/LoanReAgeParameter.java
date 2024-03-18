@@ -40,8 +40,11 @@ public class LoanReAgeParameter extends AbstractAuditableWithUTCDateTimeCustom {
     private Long loanTransactionId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "frequency", nullable = false)
-    private PeriodFrequencyType frequency;
+    @Column(name = "frequency_type", nullable = false)
+    private PeriodFrequencyType frequencyType;
+
+    @Column(name = "frequency_number", nullable = false)
+    private Integer frequencyNumber;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;

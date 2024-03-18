@@ -285,8 +285,10 @@ final class LoanTransactionsApiResourceSwagger {
         public Long writeoffReasonId;
 
         // command=reAge START
-        @Schema(example = "frequency")
-        public String frequency;
+        @Schema(example = "frequencyType")
+        public String frequencyType;
+        @Schema(example = "frequencyNumber")
+        public Integer frequencyNumber;
         @Schema(example = "startDate")
         public String startDate;
         @Schema(example = "numberOfInstallments")

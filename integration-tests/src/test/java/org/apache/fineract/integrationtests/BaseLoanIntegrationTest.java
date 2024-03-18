@@ -378,11 +378,12 @@ public abstract class BaseLoanIntegrationTest {
         inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
     }
 
-    protected void reAgeLoan(Long loanId, String frequency, String startDate, Integer numberOfInstallments) {
+    protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
         request.setDateFormat(DATETIME_PATTERN);
         request.setLocale("en");
-        request.setFrequency(frequency);
+        request.setFrequencyType(frequencyType);
+        request.setFrequencyNumber(frequencyNumber);
         request.setStartDate(startDate);
         request.setNumberOfInstallments(numberOfInstallments);
         loanTransactionHelper.reAge(loanId, request);
@@ -798,6 +799,13 @@ public abstract class BaseLoanIntegrationTest {
         assertEquals(paidLate, period.getTotalPaidLateForPeriod());
     }
 
+    protected void checkMaturityDates(long loanId, LocalDate expectedMaturityDate, LocalDate actualMaturityDate) {
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+
+        assertEquals(expectedMaturityDate, loanDetails.getTimeline().getExpectedMaturityDate());
+        assertEquals(actualMaturityDate, loanDetails.getTimeline().getActualMaturityDate());
+    }
+
     @RequiredArgsConstructor
     public static class BatchRequestBuilder {
 
@@ -937,6 +945,7 @@ public abstract class BaseLoanIntegrationTest {
 
         public static final Integer MONTHS = 2;
         public static final String MONTHS_STRING = "MONTHS";
+        public static final String DAYS_STRING = "DAYS";
     }
 
     public static class InterestCalculationPeriodType {
