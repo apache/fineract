@@ -181,6 +181,12 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
             // }
         }
 
+        // If the disbursement happened after maturity date
+        if (loanApplicationTerms.isMultiDisburseLoan()) {
+            processDisbursements(loanApplicationTerms, chargesDueAtTimeOfDisbursement, scheduleParams, periods,
+                    DateUtils.getBusinessLocalDate().plusDays(1));
+        }
+
         // determine fees and penalties for charges which depends on total
         // loan interest
         updatePeriodsWithCharges(currency, scheduleParams, periods, nonCompoundingCharges, mc);

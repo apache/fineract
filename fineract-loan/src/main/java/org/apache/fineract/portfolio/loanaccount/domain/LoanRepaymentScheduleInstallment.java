@@ -29,6 +29,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -145,6 +146,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "is_down_payment", nullable = false)
     private boolean isDownPayment;
 
+    @Column(name = "is_re_aged", nullable = false)
+    private boolean isReAged;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
@@ -221,6 +225,36 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.fromDate = null;
         this.dueDate = null;
         this.obligationsMet = false;
+    }
+
+    public LoanRepaymentScheduleInstallment(Loan loan, Integer installmentNumber, LocalDate fromDate, LocalDate dueDate,
+            BigDecimal principal, BigDecimal interestCharged, BigDecimal feeChargesCharged, BigDecimal penaltyCharges,
+            BigDecimal creditedPrincipal, BigDecimal creditedFee, BigDecimal creditedPenalty, boolean additional, boolean isDownPayment,
+            boolean isReAged) {
+        this.loan = loan;
+        this.installmentNumber = installmentNumber;
+        this.fromDate = fromDate;
+        this.dueDate = dueDate;
+        this.principal = principal;
+        this.interestCharged = interestCharged;
+        this.feeChargesCharged = feeChargesCharged;
+        this.penaltyCharges = penaltyCharges;
+        this.creditedPrincipal = creditedPrincipal;
+        this.creditedFee = creditedFee;
+        this.creditedPenalty = creditedPenalty;
+        this.additional = additional;
+        this.isDownPayment = isDownPayment;
+        this.isReAged = isReAged;
+    }
+
+    public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal) {
+        return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, null, null, null, null, null,
+                null, false, false, true);
+    }
+
+    public static LoanRepaymentScheduleInstallment getLastNonDownPaymentInstallment(List<LoanRepaymentScheduleInstallment> installments) {
+        return installments.stream().filter(i -> !i.isDownPayment()).reduce((first, second) -> second).orElseThrow();
     }
 
     private BigDecimal defaultToNullIfZero(final BigDecimal value) {
@@ -398,6 +432,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Override
     public int compareTo(LoanRepaymentScheduleInstallment o) {
         return this.installmentNumber.compareTo(o.installmentNumber);
+    }
+
+    public int compareToByDueDate(LoanRepaymentScheduleInstallment o) {
+        return this.dueDate.compareTo(o.dueDate);
     }
 
     public boolean isPrincipalNotCompleted(final MonetaryCurrency currency) {
@@ -1021,5 +1059,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public enum PaymentAction {
         PAY, UNPAY
+    }
+
+    public boolean isReAged() {
+        return isReAged;
     }
 }

@@ -24,7 +24,8 @@ public interface LoanReAgingApiConstants {
     String dateFormatParameterName = "dateFormat";
     String externalIdParameterName = "externalId";
 
-    String frequency = "frequency";
+    String frequencyType = "frequencyType";
+    String frequencyNumber = "frequencyNumber";
     String startDate = "startDate";
     String numberOfInstallments = "numberOfInstallments";
 }

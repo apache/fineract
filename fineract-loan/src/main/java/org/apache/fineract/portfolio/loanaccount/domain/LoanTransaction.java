@@ -865,7 +865,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 || LoanTransactionType.MARKED_FOR_RESCHEDULING.equals(getTypeOf())
                 || LoanTransactionType.APPROVE_TRANSFER.equals(getTypeOf()) || LoanTransactionType.INITIATE_TRANSFER.equals(getTypeOf())
                 || LoanTransactionType.REJECT_TRANSFER.equals(getTypeOf()) || LoanTransactionType.WITHDRAW_TRANSFER.equals(getTypeOf())
-                || LoanTransactionType.CHARGE_OFF.equals(getTypeOf()));
+                || LoanTransactionType.CHARGE_OFF.equals(getTypeOf()) || LoanTransactionType.REAMORTIZE.equals(getTypeOf())
+                || LoanTransactionType.REAGE.equals(getTypeOf()));
     }
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {

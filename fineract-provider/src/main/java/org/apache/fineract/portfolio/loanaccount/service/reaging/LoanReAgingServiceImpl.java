@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -41,12 +42,18 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgingParameterRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +68,8 @@ public class LoanReAgingServiceImpl {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanReAgingParameterRepository reAgingParameterRepository;
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
+    private final NoteRepository noteRepository;
 
     public CommandProcessingResult reAge(Long loanId, JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(loanId);
@@ -77,6 +86,15 @@ public class LoanReAgingServiceImpl {
         LoanReAgeParameter reAgeParameter = createReAgeParameter(reAgeTransaction, command);
         reAgingParameterRepository.saveAndFlush(reAgeParameter);
 
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(loan.transactionProcessingStrategy());
+        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction,
+                new LoanRepaymentScheduleTransactionProcessor.TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                        loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney())));
+
+        loan.updateLoanScheduleDependentDerivedFields();
+        persistNote(loan, command, changes);
+
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
         businessEventNotifierService.notifyPostBusinessEvent(new LoanReAgeBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanReAgeTransactionBusinessEvent(reAgeTransaction));
@@ -89,15 +107,6 @@ public class LoanReAgingServiceImpl {
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(command.getLoanId()) //
                 .with(changes).build();
-    }
-
-    private LoanReAgeParameter createReAgeParameter(LoanTransaction reAgeTransaction, JsonCommand command) {
-        // TODO: these parameters should be checked when the validations are implemented
-        PeriodFrequencyType periodFrequencyType = command.enumValueOfParameterNamed(LoanReAgingApiConstants.frequency,
-                PeriodFrequencyType.class);
-        LocalDate startDate = command.dateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
-        Integer numberOfInstallments = command.integerValueOfParameterNamed(LoanReAgingApiConstants.numberOfInstallments);
-        return new LoanReAgeParameter(reAgeTransaction.getId(), periodFrequencyType, startDate, numberOfInstallments);
     }
 
     public CommandProcessingResult undoReAge(Long loanId, JsonCommand command) {
@@ -114,6 +123,10 @@ public class LoanReAgingServiceImpl {
         }
         reverseReAgeTransaction(reAgeTransaction, command);
         loanTransactionRepository.saveAndFlush(reAgeTransaction);
+
+        reProcessLoanTransactions(reAgeTransaction.getLoan());
+        loan.updateLoanScheduleDependentDerivedFields();
+        persistNote(loan, command, changes);
 
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
         businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoReAgeBusinessEvent(loan));
@@ -155,5 +168,36 @@ public class LoanReAgingServiceImpl {
 
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.REAGE.getValue(), transactionDate, txPrincipalAmount,
                 txPrincipalAmount, ZERO, ZERO, ZERO, null, false, null, txExternalId);
+    }
+
+    private LoanReAgeParameter createReAgeParameter(LoanTransaction reAgeTransaction, JsonCommand command) {
+        // TODO: these parameters should be checked when the validations are implemented
+        PeriodFrequencyType periodFrequencyType = command.enumValueOfParameterNamed(LoanReAgingApiConstants.frequencyType,
+                PeriodFrequencyType.class);
+        LocalDate startDate = command.dateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
+        Integer numberOfInstallments = command.integerValueOfParameterNamed(LoanReAgingApiConstants.numberOfInstallments);
+        Integer periodFrequencyNumber = command.integerValueOfParameterNamed(LoanReAgingApiConstants.frequencyNumber);
+        return new LoanReAgeParameter(reAgeTransaction.getId(), periodFrequencyType, periodFrequencyNumber, startDate,
+                numberOfInstallments);
+    }
+
+    private void reProcessLoanTransactions(Loan loan) {
+        final List<LoanTransaction> filteredTransactions = loan.getLoanTransactions().stream().filter(LoanTransaction::isNotReversed)
+                .filter(t -> t.isChargeOff() || !t.isNonMonetaryTransaction()).sorted(LoanTransactionComparator.INSTANCE).toList();
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(loan.transactionProcessingStrategy());
+        loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(), filteredTransactions,
+                loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+    }
+
+    private void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
+        if (command.hasParameter("note")) {
+            final String note = command.stringValueOfParameterNamed("note");
+            final Note newNote = Note.loanNote(loan, note);
+            changes.put("note", note);
+
+            this.noteRepository.saveAndFlush(newNote);
+        }
     }
 }
