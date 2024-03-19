@@ -22,10 +22,16 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,25 +41,25 @@ public class FixedLengthLoanProductIntegrationTest extends BaseLoanIntegrationTe
 
     @Test
     public void testCreateReadUpdateReadLoanProductWithFixedLength() {
-        // create with 5
-        PostLoanProductsRequest loanProductsRequest = fixedLengthLoanProduct(5);
+        // create with 4
+        PostLoanProductsRequest loanProductsRequest = fixedLengthLoanProduct(4);
         PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(loanProductsRequest);
         Assertions.assertNotNull(loanProduct.getResourceId());
 
         // read
         GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
                 .retrieveLoanProductById(loanProduct.getResourceId());
-        Assertions.assertEquals(5, getLoanProductsProductIdResponse.getFixedLength());
+        Assertions.assertEquals(4, getLoanProductsProductIdResponse.getFixedLength());
 
-        // update to 6
-        PutLoanProductsProductIdRequest updateRequest = new PutLoanProductsProductIdRequest().fixedLength(6).locale("en");
+        // update to 5
+        PutLoanProductsProductIdRequest updateRequest = new PutLoanProductsProductIdRequest().fixedLength(5).locale("en");
         PutLoanProductsProductIdResponse putLoanProductsProductIdResponse = loanProductHelper
                 .updateLoanProductById(loanProduct.getResourceId(), updateRequest);
         Assertions.assertNotNull(putLoanProductsProductIdResponse.getResourceId());
 
         // read again
         getLoanProductsProductIdResponse = loanProductHelper.retrieveLoanProductById(loanProduct.getResourceId());
-        Assertions.assertEquals(6, getLoanProductsProductIdResponse.getFixedLength());
+        Assertions.assertEquals(5, getLoanProductsProductIdResponse.getFixedLength());
 
         // update to null
         loanTransactionHelper.updateLoanProduct(putLoanProductsProductIdResponse.getResourceId(), """
@@ -73,12 +79,18 @@ public class FixedLengthLoanProductIntegrationTest extends BaseLoanIntegrationTe
         runAt("01 January 2023", () -> {
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(fixedLengthLoanProduct(6));
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(fixedLengthLoanProduct(4));
             Assertions.assertNotNull(loanProduct.getResourceId());
 
-            Long loanId = applyAndApproveLoan(clientId, loanProduct.getResourceId(), "01 January 2023", 1000.0);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProduct.getResourceId(), "01 January 2023", 1000.0, 4);
+            applicationRequest = applicationRequest
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long loanId = loanResponse.getLoanId();
+
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertEquals(6, loanDetails.getFixedLength());
+            Assertions.assertEquals(4, loanDetails.getFixedLength());
         });
     }
 
@@ -87,22 +99,29 @@ public class FixedLengthLoanProductIntegrationTest extends BaseLoanIntegrationTe
         runAt("01 January 2023", () -> {
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(fixedLengthLoanProduct(6));
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(fixedLengthLoanProduct(4));
             Assertions.assertNotNull(loanProduct.getResourceId());
 
-            Long loanId = applyAndApproveLoan(clientId, loanProduct.getResourceId(), "01 January 2023", 1000.0, 1, //
-                    loanApplication -> loanApplication.fixedLength(5) //
-            );
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProduct.getResourceId(), "01 January 2023", 1000.0, 4);
+            applicationRequest = applicationRequest.fixedLength(5).repaymentEvery(1).repaymentFrequencyType(2).loanTermFrequencyType(2)
+                    .loanTermFrequency(4).transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long loanId = loanResponse.getLoanId();
+
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             Assertions.assertEquals(5, loanDetails.getFixedLength());
         });
     }
 
     private PostLoanProductsRequest fixedLengthLoanProduct(Integer fixedLength) {
-        return createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().numberOfRepayments(4)//
-                .repaymentEvery(1)//
-                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                .transactionProcessingStrategyCode("mifos-standard-strategy").fixedLength(fixedLength);
+        return createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
+                .numberOfRepayments(4).repaymentEvery(1) //
+                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()) //
+                .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
+                .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY) //
+                .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.name()) //
+                .interestRatePerPeriod(0.0).fixedLength(fixedLength);
     }
 
 }

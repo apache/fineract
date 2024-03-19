@@ -1832,4 +1832,43 @@ public final class LoanApplicationTerms {
     public Money getDownPaymentAmount() {
         return downPaymentAmount;
     }
+
+    public Integer getFixedLength() {
+        return fixedLength;
+    }
+
+    public LocalDate calculateMaxDateForFixedLength() {
+        final LocalDate startDate = getRepaymentStartDate();
+        LocalDate maxDateForFixedLength = null;
+        if (fixedLength == null) {
+            return maxDateForFixedLength;
+        }
+        switch (repaymentPeriodFrequencyType) {
+            case DAYS:
+                maxDateForFixedLength = startDate.plusDays(fixedLength);
+            break;
+            case WEEKS:
+                maxDateForFixedLength = startDate.plusWeeks(fixedLength);
+            break;
+            case MONTHS:
+                maxDateForFixedLength = startDate.plusMonths(fixedLength);
+            break;
+            case YEARS:
+                maxDateForFixedLength = startDate.plusYears(fixedLength);
+            break;
+            case INVALID:
+            break;
+            case WHOLE_TERM:
+                log.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
+            break;
+        }
+        return maxDateForFixedLength;
+    }
+
+    public LocalDate getRepaymentStartDate() {
+        final RepaymentStartDateType repaymentStartDateType = getRepaymentStartDateType();
+        return RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType) ? getExpectedDisbursementDate()
+                : getSubmittedOnDate();
+    }
+
 }

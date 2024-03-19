@@ -343,6 +343,11 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanCharges.retrieveTemplate9(loanExternalId));
     }
 
+    public HashMap applyLoan(final String payload, final ResponseSpecification responseSpec) {
+        final String postURLForLoan = "/fineract-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoan, payload, null);
+    }
+
     public List getRepaymentTemplate(final Integer loanId) {
         final String GET_REPAYMENTS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/template?command=repayment&"
                 + Utils.TENANT_IDENTIFIER;

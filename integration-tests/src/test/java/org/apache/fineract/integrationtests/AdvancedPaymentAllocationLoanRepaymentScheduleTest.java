@@ -3542,6 +3542,283 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC126: Advanced payment allocation with Fixed Length for 40 days and Loan Term for 45 days (3 repayments every 15
+    // days)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    @Test
+    public void uc126() {
+        runAt("22 November 2023", () -> {
+            final Integer fixedLength = 40; // 40 days
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(3).repaymentEvery(15).fixedLength(fixedLength);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "22 November 2023",
+                    1000.0, 4);
+
+            applicationRequest = applicationRequest.numberOfRepayments(3).loanTermFrequency(45)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(15);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("22 November 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("22 November 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 100.0, 0.0, 100.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 12, 7), 33.0, 0.0, 33.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 12, 22), 33.0, 0.0, 33.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 1, 01), 34.0, 0.0, 34.0, 0.0, 0.0);
+            assertEquals(loanDetails.getNumberOfRepayments(), 3);
+            assertEquals(
+                    Utils.getDifferenceInDays(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue());
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
+    // UC127: Advanced payment allocation with Fixed Length for 5 weeks and Loan Term for 6 weeks (3 repayments every 2
+    // weeks)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    @Test
+    public void uc127() {
+        runAt("22 November 2023", () -> {
+            final Integer fixedLength = 5; // 5 weeks
+            final Integer repaymentFrequencyType = 1; // week
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(3).repaymentEvery(2).repaymentFrequencyType(repaymentFrequencyType.longValue())
+                    .fixedLength(fixedLength);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "22 November 2023",
+                    1000.0, 4);
+
+            applicationRequest = applicationRequest.numberOfRepayments(3).loanTermFrequency(6).loanTermFrequencyType(repaymentFrequencyType)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(2)
+                    .repaymentFrequencyType(repaymentFrequencyType);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("22 November 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("22 November 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 100.0, 0.0, 100.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 12, 6), 33.0, 0.0, 33.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 12, 20), 33.0, 0.0, 33.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2023, 12, 27), 34.0, 0.0, 34.0, 0.0, 0.0);
+            assertEquals(loanDetails.getNumberOfRepayments(), 3);
+            assertEquals(
+                    Utils.getDifferenceInWeeks(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue());
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
+    // UC128: Advanced payment allocation with Fixed Length for 11 months and Loan Term for 12 months (6 repayments each
+    // 2 months)
+    // every 2 months)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    @Test
+    public void uc128() {
+        runAt("22 November 2023", () -> {
+            final Integer fixedLength = 11; // 11 months
+            final Integer repaymentFrequencyType = 2; // month
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(6).repaymentEvery(2).repaymentFrequencyType(repaymentFrequencyType.longValue())
+                    .fixedLength(fixedLength);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "22 November 2023",
+                    1000.0, 4);
+
+            applicationRequest = applicationRequest.numberOfRepayments(6).loanTermFrequency(12)
+                    .loanTermFrequencyType(repaymentFrequencyType)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(2)
+                    .repaymentFrequencyType(repaymentFrequencyType);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("22 November 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("22 November 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 100.0, 0.0, 100.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 1, 22), 17.0, 0.0, 17.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 22), 17.0, 0.0, 17.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 5, 22), 17.0, 0.0, 17.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2024, 7, 22), 17.0, 0.0, 17.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2024, 9, 22), 17.0, 0.0, 17.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 6, LocalDate.of(2024, 10, 22), 15.0, 0.0, 15.0, 0.0, 0.0);
+            assertEquals(loanDetails.getNumberOfRepayments(), 6);
+            assertEquals(
+                    Utils.getDifferenceInMonths(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue());
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
+    // UC129: Advanced payment allocation with Fixed Length for 5 months and Loan Term for 6 months (6 repayments
+    // every month)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve -> expect validation error
+    @Test
+    public void uc129() {
+        final String operationDate = "22 November 2023";
+        runAt(operationDate, () -> {
+            final Integer fixedLength = 5; // 5 months
+            final Integer repaymentFrequencyType = 2; // month
+
+            // Try to create a Loan Product using Fixed Length with a wrong Loan Term setup
+            LOG.info("Try to create a Loan Product using Fixed Length with a wrong Loan Term setup");
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanProductHelper
+                            .createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                                    .interestRatePerPeriod(0.0).numberOfRepayments(6).repaymentEvery(1)
+                                    .repaymentFrequencyType(repaymentFrequencyType.longValue()).fixedLength(fixedLength)));
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.number.repayments.and.fixed.length.configuration.not.valid"));
+        });
+    }
+
+    // UC130: Advanced payment allocation with Fixed Length for 5 months and Loan Term for 6 months (6 repayments
+    // every month)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve -> expect validation error - Fixed Length without Advanced Payment Allocation
+    @Test
+    public void uc130() {
+        final String operationDate = "22 November 2023";
+        runAt(operationDate, () -> {
+            final Integer fixedLength = 5; // 5 months
+            final Integer repaymentFrequencyType = 2; // month
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(6).repaymentEvery(1).repaymentFrequencyType(repaymentFrequencyType.longValue()).fixedLength(6);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+
+            // Try to use Fixed Length without Advanced Payment Allocation as transaction processing strategy code
+            LOG.info("Try to use Fixed Length without Advanced Payment Allocation as transaction processing strategy code");
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(client.getClientId())
+                            .productId(loanProductResponse.getResourceId()).loanType("individual").locale("en")
+                            .submittedOnDate(operationDate).expectedDisbursementDate(operationDate).dateFormat(DATETIME_PATTERN)
+                            .amortizationType(1).interestRatePerPeriod(BigDecimal.ZERO).interestCalculationPeriodType(1).interestType(0)
+                            .repaymentEvery(1).repaymentFrequencyType(repaymentFrequencyType).numberOfRepayments(6).loanTermFrequency(6)
+                            .loanTermFrequencyType(repaymentFrequencyType).principal(BigDecimal.valueOf(1000.0))
+                            .maxOutstandingLoanBalance(BigDecimal.valueOf(35000)).fixedLength(fixedLength)
+                            .transactionProcessingStrategyCode(FineractStyleLoanRepaymentScheduleTransactionProcessor.STRATEGY_CODE)
+                            .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.name())));
+
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage()
+                    .contains("error.msg.loan.repayment.strategy.can.not.be.different.than.advanced.payment.allocation"));
+        });
+    }
+
+    // UC131: Advanced payment allocation with Fixed Length for 5 months and Loan Term for 6 months (6 repayments
+    // every month)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve -> expect validation error - Interest Rate value higher than Zero
+    @Test
+    public void uc131() {
+        final String operationDate = "22 November 2023";
+        runAt(operationDate, () -> {
+            final Integer fixedLength = 5; // 5 months
+            final Integer repaymentFrequencyType = 2; // month
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(6).repaymentEvery(1).repaymentFrequencyType(repaymentFrequencyType.longValue()).fixedLength(6);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+
+            // Try to use Fixed Length with an Interest Rate value higher than Zero
+            LOG.info("Try to use Fixed Length with an Interest Rate value higher than Zero");
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(client.getClientId())
+                            .productId(loanProductResponse.getResourceId()).loanType("individual").locale("en")
+                            .submittedOnDate(operationDate).expectedDisbursementDate(operationDate).dateFormat(DATETIME_PATTERN)
+                            .amortizationType(1).interestRatePerPeriod(BigDecimal.ONE).interestCalculationPeriodType(1).interestType(0)
+                            .repaymentEvery(1).repaymentFrequencyType(repaymentFrequencyType).numberOfRepayments(6).loanTermFrequency(6)
+                            .loanTermFrequencyType(repaymentFrequencyType).principal(BigDecimal.valueOf(1000.0))
+                            .maxOutstandingLoanBalance(BigDecimal.valueOf(35000)).fixedLength(fixedLength)
+                            .transactionProcessingStrategyCode(
+                                    AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                            .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.name())));
+
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.fixed.length.only.supported.for.zero.interest"));
+        });
+    }
+
+    // UC132: Advanced payment allocation with Fixed Length for 5 months and Loan Term for 6 months (3 repayments
+    // every 2 months)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve -> expect validation error - Loan acount Fixed Length with a wrong Loan Term setup
+    @Test
+    public void uc132() {
+        final String operationDate = "22 November 2023";
+        runAt(operationDate, () -> {
+            final Integer fixedLength = 5; // 5 months
+            final Integer repaymentFrequencyType = 2; // month
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(6).repaymentEvery(1).repaymentFrequencyType(repaymentFrequencyType.longValue()).fixedLength(6);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+
+            // Try to use Fixed Length with a wrong Loan Term setup
+            LOG.info("Try to use Fixed Length with a wrong Loan Term setup");
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(client.getClientId())
+                            .productId(loanProductResponse.getResourceId()).loanType("individual").locale("en")
+                            .submittedOnDate(operationDate).expectedDisbursementDate(operationDate).dateFormat(DATETIME_PATTERN)
+                            .amortizationType(1).interestRatePerPeriod(BigDecimal.ZERO).interestCalculationPeriodType(1).interestType(0)
+                            .repaymentEvery(2).repaymentFrequencyType(repaymentFrequencyType).numberOfRepayments(6).loanTermFrequency(6)
+                            .loanTermFrequencyType(repaymentFrequencyType).principal(BigDecimal.valueOf(1000.0))
+                            .maxOutstandingLoanBalance(BigDecimal.valueOf(35000)).fixedLength(fixedLength)
+                            .transactionProcessingStrategyCode(
+                                    AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                            .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.name())));
+
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.number.repayments.and.fixed.length.configuration.not.valid"));
+        });
+    }
+
     private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
         AtomicInteger integer = new AtomicInteger(1);
         return Arrays.stream(paymentAllocationTypes).map(pat -> {
