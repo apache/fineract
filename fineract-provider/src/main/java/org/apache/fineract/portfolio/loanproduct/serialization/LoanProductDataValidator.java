@@ -39,6 +39,7 @@ import org.apache.fineract.accounting.common.AccountingValidations;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -47,6 +48,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -399,6 +401,7 @@ public final class LoanProductDataValidator {
         }
 
         // interest rates
+        BigDecimal interestRatePerPeriod = null;
         if (this.fromApiJsonHelper.parameterExists(IS_LINKED_TO_FLOATING_INTEREST_RATES, element)
                 && this.fromApiJsonHelper.extractBooleanNamed(IS_LINKED_TO_FLOATING_INTEREST_RATES, element)) {
             if (isEqualAmortization) {
@@ -519,8 +522,7 @@ public final class LoanProductDataValidator {
                         "isFloatingInterestRateCalculationAllowed param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
 
-            final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(INTEREST_RATE_PER_PERIOD,
-                    element);
+            interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(INTEREST_RATE_PER_PERIOD, element);
             baseDataValidator.reset().parameter(INTEREST_RATE_PER_PERIOD).value(interestRatePerPeriod).notNull().zeroOrPositiveAmount();
 
             final String minInterestRatePerPeriodParameterName = MIN_INTEREST_RATE_PER_PERIOD;
@@ -563,6 +565,10 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(INTEREST_RATE_FREQUENCY_TYPE).value(interestRateFrequencyType).notNull().inMinMaxRange(0,
                     4);
         }
+
+        // Fixed Length validation
+        fixedLengthValidations(transactionProcessingStrategyCode, interestRatePerPeriod, numberOfRepayments, repaymentEvery, element,
+                baseDataValidator);
 
         // Guarantee Funds
         Boolean holdGuaranteeFunds = false;
@@ -1238,13 +1244,15 @@ public final class LoanProductDataValidator {
                     .integerGreaterThanZero();
         }
 
+        Integer numberOfRepayments = loanProduct.getNumberOfRepayments();
         if (this.fromApiJsonHelper.parameterExists(NUMBER_OF_REPAYMENTS, element)) {
-            final Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(NUMBER_OF_REPAYMENTS, element);
+            numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(NUMBER_OF_REPAYMENTS, element);
             baseDataValidator.reset().parameter(NUMBER_OF_REPAYMENTS).value(numberOfRepayments).notNull().integerGreaterThanZero();
         }
 
+        Integer repaymentEvery = loanProduct.getLoanProductRelatedDetail().getRepayEvery();
         if (this.fromApiJsonHelper.parameterExists(REPAYMENT_EVERY, element)) {
-            final Integer repaymentEvery = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(REPAYMENT_EVERY, element);
+            repaymentEvery = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(REPAYMENT_EVERY, element);
             baseDataValidator.reset().parameter(REPAYMENT_EVERY).value(repaymentEvery).notNull().integerGreaterThanZero();
         }
 
@@ -1364,6 +1372,7 @@ public final class LoanProductDataValidator {
         }
 
         // interest rates
+        BigDecimal interestRatePerPeriod = null;
         boolean isLinkedToFloatingInterestRates = loanProduct.isLinkedToFloatingInterestRate();
         if (this.fromApiJsonHelper.parameterExists(IS_LINKED_TO_FLOATING_INTEREST_RATES, element)) {
             isLinkedToFloatingInterestRates = this.fromApiJsonHelper.extractBooleanNamed(IS_LINKED_TO_FLOATING_INTEREST_RATES, element);
@@ -1531,7 +1540,7 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).ignoreIfNull()
                     .zeroOrPositiveAmount();
 
-            BigDecimal interestRatePerPeriod = loanProduct.getLoanProductRelatedDetail().getNominalInterestRatePerPeriod();
+            interestRatePerPeriod = loanProduct.getLoanProductRelatedDetail().getNominalInterestRatePerPeriod();
             if (this.fromApiJsonHelper.parameterExists(INTEREST_RATE_PER_PERIOD, element)) {
                 interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(INTEREST_RATE_PER_PERIOD, element);
             }
@@ -1545,6 +1554,10 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(INTEREST_RATE_FREQUENCY_TYPE).value(interestRateFrequencyType).notNull().inMinMaxRange(0,
                     4);
         }
+
+        // Fixed Length validation
+        fixedLengthValidations(transactionProcessingStrategyCode, interestRatePerPeriod, numberOfRepayments, repaymentEvery, element,
+                baseDataValidator);
 
         // Guarantee Funds
         Boolean holdGuaranteeFunds = loanProduct.isHoldGuaranteeFundsEnabled();
@@ -2392,6 +2405,48 @@ public final class LoanProductDataValidator {
                 }
             }
 
+        }
+    }
+
+    public void fixedLengthValidations(final String transactionProcessingStrategyCode, final LoanApplicationTerms loanApplicationTerms,
+            final JsonElement element, final DataValidatorBuilder baseDataValidator) {
+        fixedLengthValidations(transactionProcessingStrategyCode, loanApplicationTerms.getAnnualNominalInterestRate(),
+                loanApplicationTerms.getNumberOfRepayments(), loanApplicationTerms.getRepaymentEvery(), element, baseDataValidator);
+    }
+
+    public void fixedLengthValidations(final String transactionProcessingStrategyCode, final BigDecimal interestRatePerPeriod,
+            final Integer numberOfRepayments, final Integer repayEvery, final JsonElement element,
+            final DataValidatorBuilder baseDataValidator) {
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.FIXED_LENGTH, element)) {
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+            final Integer fixedLength = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.FIXED_LENGTH, element, locale);
+            baseDataValidator.reset().parameter(LoanProductConstants.FIXED_LENGTH).value(fixedLength).ignoreIfNull()
+                    .integerGreaterThanZero();
+
+            if (fixedLength != null) {
+                if (!AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+                        .equals(transactionProcessingStrategyCode)) {
+                    final String errorMsg = "Fixed Length configuration is only allowed with "
+                            + AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY + " stratefy";
+                    throw new GeneralPlatformDomainRuleException("error.msg.fixed.length.only.supported.for.advanced.payment.allocation",
+                            errorMsg, AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+                }
+
+                if (interestRatePerPeriod.compareTo(BigDecimal.ZERO) > 0) {
+                    final String errorMsg = "Fixed Length configuration is only allowed for zero interest products";
+                    throw new GeneralPlatformDomainRuleException("error.msg.fixed.length.only.supported.for.zero.interest", errorMsg,
+                            interestRatePerPeriod);
+                }
+
+                final Integer valueToCompare = ((numberOfRepayments - 1) * repayEvery) + 1;
+                if (fixedLength.compareTo(valueToCompare) < 0) {
+                    final String errorMsg = "Wrong configuration between Number Of Repayments: " + numberOfRepayments + " * " + repayEvery
+                            + " and Fixed Length: " + fixedLength + " values";
+                    throw new GeneralPlatformDomainRuleException("error.msg.number.repayments.and.fixed.length.configuration.not.valid",
+                            errorMsg, numberOfRepayments, repayEvery, valueToCompare, fixedLength);
+                }
+            }
         }
     }
 }

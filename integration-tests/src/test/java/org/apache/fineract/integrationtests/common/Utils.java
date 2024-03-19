@@ -19,6 +19,9 @@
 package org.apache.fineract.integrationtests.common;
 
 import static io.restassured.RestAssured.given;
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MONTHS;
+import static java.time.temporal.ChronoUnit.WEEKS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -519,5 +522,17 @@ public final class Utils {
 
     public static LocalDate getDateAsLocalDate(String dateAsString) {
         return LocalDate.parse(dateAsString, dateFormatter);
+    }
+
+    public static long getDifferenceInDays(final LocalDate localDateBefore, final LocalDate localDateAfter) {
+        return DAYS.between(localDateBefore, localDateAfter);
+    }
+
+    public static long getDifferenceInWeeks(final LocalDate localDateBefore, final LocalDate localDateAfter) {
+        return WEEKS.between(localDateBefore, localDateAfter);
+    }
+
+    public static long getDifferenceInMonths(final LocalDate localDateBefore, final LocalDate localDateAfter) {
+        return MONTHS.between(localDateBefore, localDateAfter);
     }
 }
