@@ -462,6 +462,7 @@ public abstract class BaseLoanIntegrationTest {
         Assertions.assertEquals(installments.length, loanResponse.getRepaymentSchedule().getPeriods().size(),
                 "Expected installments are not matching with the installments configured on the loan");
 
+        int installmentNumber = 0;
         for (int i = 1; i < installments.length; i++) {
             GetLoansLoanIdRepaymentPeriod period = loanResponse.getRepaymentSchedule().getPeriods().get(i);
             Double principalDue = period.getPrincipalDue();
@@ -546,6 +547,8 @@ public abstract class BaseLoanIntegrationTest {
                                     outstandingTotalExpected, outstandingTotal));
                 }
 
+                installmentNumber++;
+                Assertions.assertEquals(installmentNumber, period.getPeriod());
             }
             Assertions.assertEquals(installments[i].completed, period.getComplete());
             Assertions.assertEquals(LocalDate.parse(installments[i].dueDate, dateTimeFormatter), period.getDueDate());
