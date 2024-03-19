@@ -1335,7 +1335,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void reprocessInstallmentsOrder(List<LoanRepaymentScheduleInstallment> installments) {
-        AtomicInteger counter = new AtomicInteger(0);
+        AtomicInteger counter = new AtomicInteger(1);
         installments.stream().sorted(LoanRepaymentScheduleInstallment::compareToByDueDate)
                 .forEachOrdered(i -> i.updateInstallmentNumber(counter.getAndIncrement()));
     }
