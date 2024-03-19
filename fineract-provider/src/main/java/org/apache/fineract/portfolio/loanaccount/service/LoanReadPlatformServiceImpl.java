@@ -1225,16 +1225,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 final boolean complete = rs.getBoolean("complete");
                 final boolean isAdditional = rs.getBoolean("isAdditional");
                 BigDecimal disbursedAmount = BigDecimal.ZERO;
-                if (!isAdditional) {
-                    disbursedAmount = processDisbursementData(loanScheduleType, disbursementData, fromDate, dueDate, disbursementPeriodIds,
-                            disbursementChargeAmount, waivedChargeAmount, periods);
 
-                }
+                disbursedAmount = processDisbursementData(loanScheduleType, disbursementData, fromDate, dueDate, disbursementPeriodIds,
+                        disbursementChargeAmount, waivedChargeAmount, periods);
+
                 // Add the Charge back or Credits to the initial amount to avoid negative balance
                 final BigDecimal credits = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalCredits");
-                if (!isAdditional) {
-                    this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(credits);
-                }
+
+                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(credits);
 
                 totalPrincipalDisbursed = totalPrincipalDisbursed.add(disbursedAmount);
 
@@ -1313,16 +1311,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 }
 
                 BigDecimal outstandingPrincipalBalanceOfLoan = this.outstandingLoanPrincipalBalance.subtract(principalDue);
-                if (isAdditional) {
-                    outstandingPrincipalBalanceOfLoan = this.outstandingLoanPrincipalBalance.add(principalDue);
-                }
 
                 // update based on current period values
                 this.lastDueDate = dueDate;
                 this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue);
-                if (isAdditional) {
-                    this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(principalDue);
-                }
 
                 final boolean isDownPayment = rs.getBoolean("isDownPayment");
 

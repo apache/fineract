@@ -547,6 +547,13 @@ public abstract class BaseLoanIntegrationTest {
                                     outstandingTotalExpected, outstandingTotal));
                 }
 
+                Double loanBalanceExpected = installments[i].loanBalance;
+                Double loanBalance = period.getPrincipalLoanBalanceOutstanding();
+                if (loanBalanceExpected != null) {
+                    Assertions.assertEquals(loanBalanceExpected, loanBalance,
+                            "%d. installment's loan balance is different, expected: %.2f, actual: %.2f".formatted(i, loanBalanceExpected,
+                                    loanBalance));
+                }
                 installmentNumber++;
                 Assertions.assertEquals(installmentNumber, period.getPeriod());
             }
@@ -716,27 +723,35 @@ public abstract class BaseLoanIntegrationTest {
     }
 
     protected Installment installment(double principalAmount, Boolean completed, String dueDate) {
-        return new Installment(principalAmount, null, null, null, null, completed, dueDate, null);
+        return new Installment(principalAmount, null, null, null, null, completed, dueDate, null, null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double totalOutstandingAmount, Boolean completed,
             String dueDate) {
-        return new Installment(principalAmount, interestAmount, null, null, totalOutstandingAmount, completed, dueDate, null);
+        return new Installment(principalAmount, interestAmount, null, null, totalOutstandingAmount, completed, dueDate, null, null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double totalOutstandingAmount,
             Boolean completed, String dueDate) {
-        return new Installment(principalAmount, interestAmount, feeAmount, null, totalOutstandingAmount, completed, dueDate, null);
+        return new Installment(principalAmount, interestAmount, feeAmount, null, totalOutstandingAmount, completed, dueDate, null, null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double penaltyAmount,
             double totalOutstandingAmount, Boolean completed, String dueDate) {
-        return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, totalOutstandingAmount, completed, dueDate, null);
+        return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, totalOutstandingAmount, completed, dueDate, null,
+                null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double penaltyAmount,
             OutstandingAmounts outstandingAmounts, Boolean completed, String dueDate) {
-        return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, null, completed, dueDate, outstandingAmounts);
+        return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, null, completed, dueDate, outstandingAmounts,
+                null);
+    }
+
+    protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double penaltyAmount,
+            double totalOutstanding, Boolean completed, String dueDate, double loanBalance) {
+        return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, totalOutstanding, completed, dueDate, null,
+                loanBalance);
     }
 
     protected OutstandingAmounts outstanding(double principal, double fee, double penalty, double total) {
@@ -921,6 +936,7 @@ public abstract class BaseLoanIntegrationTest {
         Boolean completed;
         String dueDate;
         OutstandingAmounts outstandingAmounts;
+        Double loanBalance;
     }
 
     @AllArgsConstructor
