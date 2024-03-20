@@ -1,0 +1,5 @@
+= ONLINE DEMOS
+
+* link:https://www.fineract.dev[fineract.dev] always runs the latest version of this code
+* link:https://demo.mifos.io[demo.mifos.io] A demo account is provided for users to experience the functionality of the Community App.  Users can use "mifos" for USERNAME and "password" for PASSWORD (without quotation marks).
+* link:https://www.youtube.com/watch?v=FlVd-0YAo6c[Swagger-UI Demo video] This is a demo video for Swagger-UI documentation, more information link:https://github.com/apache/fineract#swagger-ui-documentation[here].

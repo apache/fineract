@@ -1,0 +1,21 @@
+= Additonal Dev Guidelines and How-tos
+
+include::apache-rat.adoc[leveloffset=+1]
+
+include::checkstyle.adoc[leveloffset=+1]
+
+include::integration-tests.adoc[leveloffset=+1]
+
+include::coverage-reports.adoc[leveloffset=+1]
+
+include::error-handling.adoc[leveloffset=+1]
+
+include::logging.adoc[leveloffset=+1]
+
+include::pull-requests.adoc[leveloffset=+1]
+
+include::git-fork.adoc[leveloffset=+1]
+
+include::merge-strategy.adoc[leveloffset=+1]
+
+include::dependency-upgrades.adoc[leveloffset=+1]

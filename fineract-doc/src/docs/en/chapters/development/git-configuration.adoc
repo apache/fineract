@@ -1,9 +1,0 @@
-= Configuration
-
-Configure your personal details properly:
-
-* email
-* name
-* GPG key
-
-TBD

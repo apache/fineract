@@ -1,7 +1,0 @@
-= Tools
-
-TBD
-
-include::tools-sdkman.adoc[leveloffset=+1]
-
-include::tools-brew.adoc[leveloffset=+1]

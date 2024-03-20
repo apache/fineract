@@ -1,0 +1,4 @@
+= GORVENANCE AND POLICIES
+
+link:https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer[Becoming a Committer]
+documents the process through which you can become a committer in this project.

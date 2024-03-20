@@ -1,0 +1,41 @@
+= INSTRUCTIONS: How to run using Docker and docker-compose
+
+It is possible to do a 'one-touch' installation of Fineract using containers (AKA "Docker").
+Fineract now packs the Mifos community-app web UI in it's docker deploy.
+You can now run and test fineract with a GUI directly from the combined docker builds.
+This includes the database running in a container.
+
+As Prerequisites, you must have `docker` and `docker-compose` installed on your machine; see
+[Docker Install](https://docs.docker.com/install/) and
+[Docker Compose Install](https://docs.docker.com/compose/install/).
+
+Alternatively, you can also use [Podman](https://github.com/containers/libpod)
+(e.g. via `dnf install podman-docker`), and [Podman Compose](https://github.com/containers/podman-compose/)
+(e.g. via `pip3 install podman-compose`) instead of Docker.
+
+Now to run a new Fineract instance you can simply:
+
+1. `git clone https://github.com/apache/fineract.git ; cd fineract`
+2. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
+3. `./gradlew :fineract-provider:jibDockerBuild -x test`
+4. install the Loki log driver with `docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions`
+5. `docker compose -f docker-compose-development.yml up -d`
+6. fineract (back-end) is running at https://localhost:8443/fineract-provider/
+7. wait for https://localhost:8443/fineract-provider/actuator/health to return `{"status":"UP"}`
+8. you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise  you get a message that is rather misleading from the UI.
+9. community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
+10. login using default _username_ `mifos` and _password_ `password`
+
+https://hub.docker.com/r/apache/fineract has a pre-built container image of this project, built continuously.
+
+You must specify the MySQL tenants database JDBC URL by passing it to the `fineract` container via environment
+variables; please consult the [`docker-compose.yml`](docker-compose.yml) for exact details how to specify those.
+_(Note that in previous versions, the `mysqlserver` environment variable used at `docker build` time instead of at
+`docker run` time did something similar; this has changed in [FINERACT-773](https://issues.apache.org/jira/browse/FINERACT-773)),
+and the `mysqlserver` environment variable is now no longer supported.)_
+
+If you need the Java Flight Recorder image then copy the file from the running fineract-development container:
+
+    docker container cp fineract-development:/tmp/fineract.jfr /tmp
+
+NOTE: Download Azul Mission Control from here https://www.azul.com/products/components/azul-mission-control/ to analyze the Java Flight Recorder file.

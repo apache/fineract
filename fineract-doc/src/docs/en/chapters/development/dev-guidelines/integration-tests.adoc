@@ -1,0 +1,8 @@
+= INSTRUCTIONS: How to execute Integration Tests
+
+__Note that if this is the first time to access MySQL DB, then you may need to reset your password.__
+
+Run the following commands:
+1. `./gradlew createDB -PdbName=fineract_tenants`
+1. `./gradlew createDB -PdbName=fineract_default`
+1. `./gradlew clean test`

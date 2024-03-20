@@ -29,7 +29,9 @@ include::preface.adoc[leveloffset=+1]
 
 include::colophon.adoc[leveloffset=+1]
 
-include::introduction.adoc[leveloffset=+1]
+include::chapters/introduction/index.adoc[leveloffset=+1]
+
+include::chapters/contributing/index.adoc[leveloffset=+1]
 
 include::chapters/deployment/index.adoc[leveloffset=+1]
 

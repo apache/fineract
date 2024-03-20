@@ -1,0 +1,3 @@
+= Fork
+
+Make sure to disable Github Actions in your forked repository. See: https://github.com/orgs/community/discussions/26704

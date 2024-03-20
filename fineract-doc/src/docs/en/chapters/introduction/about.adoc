@@ -1,0 +1,9 @@
+== About
+
+Apache Fineract can be deployed in any environment: cloud or on-premise. It can support front end interfaces on or offline, mobile or PC. It’s extensible enough to support any organizational type or delivery channel, and flexible enough to support any product, service, or lending methodology. For any organization, big or small, it provides the client data management, loan and savings portfolio management, integrated real time accounting, and social and financial reporting needed to bring digital financial services to a modern connected world.
+
+Fineract 1.x compares well to other core banking systems and draws from requirements in credit unions, microfinance institutions, and small non-banking financial institutions. Features include flexible product configuration, KYC documentation support, business rule sets, payment transactions, and portfolio management. It includes an open API that dates to 2011 and is deployed in relatively high transaction volume environments.
+
+Fineract CN operates on the principle that financial services are an innovative space and so each fineract microservice encapsulates a domain that can be combined with other microservices to create new platform offerings. Fineract CN microservices can be combined to create new software platforms for digital financial service providers. Fineract CN is still in its early days, but preliminary tests have shown that a simple single-instance laptop deployment of Fineract CN can process over 1000 transactions/second. Fineract CN also includes a fully Apache-licensed backoffice UI.
+
+Fineract 1.x began incubation at Apache in December 2015 and is used by an active community of companies who build solutions for both financial inclusion and fintech innovation.

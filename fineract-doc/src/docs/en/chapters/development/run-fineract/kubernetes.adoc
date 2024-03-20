@@ -1,0 +1,52 @@
+= INSTRUCTIONS: How to run on Kubernetes
+
+== General Clusters
+
+You can also run Fineract using containers on a Kubernetes cluster.
+Make sure you set up and connect to your Kubernetes cluster.
+You can follow link:https://cwiki.apache.org/confluence/display/FINERACT/Install+and+configure+kubectl+and+Google+Cloud+SDK+on+ubuntu+16.04[this] guide to set up a Kubernetes cluster on GKE. Make sure to replace `apache-fineract-cn` with `apache-fineract`
+
+Now e.g. from your Google Cloud shell, run the following commands:
+
+1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
+2. `./kubectl-startup.sh`
+
+To shutdown and reset your Cluster, run:
+
+    ./kubectl-shutdown.sh
+
+== Using Minikube
+
+Alternatively, you can run fineract on a local kubernetes cluster using link:https://minikube.sigs.k8s.io/docs/[minikube].
+As Prerequisites, you must have `minikube` and `kubectl` installed on your machine; see
+link:https://kubernetes.io/docs/tasks/tools/install-minikube/[Minikube & Kubectl install].
+
+Now to run a new Fineract instance on Minikube you can simply:
+
+1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
+2. `minikube start`
+3. `./kubectl-startup.sh`
+4. `minikube service fineract-server --url --https`
+5. Fineract is now running at the printed URL (note HTTP), which you can check e.g. using:
+
+   http --verify=no --timeout 240 --check-status get $(minikube service fineract-server --url --https)/fineract-provider/actuator/health
+
+To check the status of your containers on your local minikube Kubernetes cluster, run:
+
+    minikube dashboard
+
+You can check Fineract logs using:
+
+    kubectl logs deployment/fineract-server
+
+To shutdown and reset your cluster, run:
+
+    ./kubectl-shutdown.sh
+
+To shutdown and reset your cluster, run:
+
+    minikube ssh
+
+    sudo rm -rf /mnt/data/
+
+We have link:https://jira.apache.org/jira/browse/FINERACT-783?jql=labels%20%3D%20kubernetes%20AND%20project%20%3D%20%22Apache%20Fineract%22%20[some open issues in JIRA with Kubernetes related enhancement ideas] which you are welcome to contribute to.

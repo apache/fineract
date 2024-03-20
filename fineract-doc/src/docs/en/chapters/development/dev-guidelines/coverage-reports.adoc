@@ -1,0 +1,7 @@
+= Code Coverage Reports
+
+The project uses Jacoco to measure unit tests code coverage, to generate a report run the following command:
+
+    ./gradlew clean build jacocoTestReport
+
+Generated reports can be found in build/code-coverage directory.

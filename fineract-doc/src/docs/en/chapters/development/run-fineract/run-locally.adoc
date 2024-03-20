@@ -1,0 +1,7 @@
+= Run Fineract locally
+
+Run the following commands:
+
+1. `./gradlew createDB -PdbName=fineract_tenants`
+2. `./gradlew createDB -PdbName=fineract_default`
+3. `./gradlew bootRun`
