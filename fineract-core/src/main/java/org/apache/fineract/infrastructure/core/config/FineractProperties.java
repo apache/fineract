@@ -449,6 +449,7 @@ public class FineractProperties {
     public static class FineractLoanProperties {
 
         private FineractTransactionProcessorProperties transactionProcessor;
+        private String statusChangeHistoryStatuses;
     }
 
     @Getter
