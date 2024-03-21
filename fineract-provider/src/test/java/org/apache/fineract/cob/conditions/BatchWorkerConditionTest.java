@@ -32,7 +32,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.mock.env.MockEnvironment;
 
 @ExtendWith(MockitoExtension.class)
-class LoanCOBManagerConditionTest {
+class BatchWorkerConditionTest {
 
     @Mock
     private ConditionContext conditionContext;
@@ -43,7 +43,7 @@ class LoanCOBManagerConditionTest {
     private MockEnvironment environment;
 
     @InjectMocks
-    private LoanCOBManagerCondition testObj = new LoanCOBManagerCondition();
+    private BatchWorkerCondition testObj = new BatchWorkerCondition();
 
     @BeforeEach
     public void setUp() {
@@ -52,25 +52,15 @@ class LoanCOBManagerConditionTest {
     }
 
     @Test
-    public void testMatchesShouldReturnFalseWhenLoanCobIsDisabledAndManager() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "false");
-        environment.withProperty("fineract.mode.batch-manager-enabled", "true");
+    public void testMatchesShouldReturnFalseWhenWorkerDisabled() {
+        environment.withProperty("fineract.mode.batch-worker-enabled", "false");
         boolean result = testObj.matches(conditionContext, metadata);
         assertThat(result).isFalse();
     }
 
     @Test
-    public void testMatchesShouldReturnFalseWhenLoanCobIsEnabledAndNotManager() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "true");
-        environment.withProperty("fineract.mode.batch-manager-enabled", "false");
-        boolean result = testObj.matches(conditionContext, metadata);
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void testMatchesShouldReturnTrueWhenLoanCobIsEnabledAndManager() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "true");
-        environment.withProperty("fineract.mode.batch-manager-enabled", "true");
+    public void testMatchesShouldReturnTrueWhenWorkerEnabled() {
+        environment.withProperty("fineract.mode.batch-worker-enabled", "true");
         boolean result = testObj.matches(conditionContext, metadata);
         assertThat(result).isTrue();
     }
