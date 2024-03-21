@@ -21,12 +21,10 @@ package org.apache.fineract.cob.conditions;
 import org.apache.fineract.infrastructure.core.condition.PropertiesCondition;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 
-public class LoanCOBManagerCondition extends PropertiesCondition {
+public class BatchManagerCondition extends PropertiesCondition {
 
     @Override
     protected boolean matches(FineractProperties properties) {
-        boolean loanCobEnabled = properties.getJob().isLoanCobEnabled();
-        boolean batchManagerEnabled = properties.getMode().isBatchManagerEnabled();
-        return loanCobEnabled && batchManagerEnabled;
+        return properties.getMode().isBatchManagerEnabled();
     }
 }

@@ -32,7 +32,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.mock.env.MockEnvironment;
 
 @ExtendWith(MockitoExtension.class)
-class LoanCOBWorkerConditionTest {
+class BatchManagerConditionTest {
 
     @Mock
     private ConditionContext conditionContext;
@@ -43,7 +43,7 @@ class LoanCOBWorkerConditionTest {
     private MockEnvironment environment;
 
     @InjectMocks
-    private LoanCOBWorkerCondition testObj = new LoanCOBWorkerCondition();
+    private BatchManagerCondition testObj = new BatchManagerCondition();
 
     @BeforeEach
     public void setUp() {
@@ -52,25 +52,15 @@ class LoanCOBWorkerConditionTest {
     }
 
     @Test
-    public void testMatchesShouldReturnFalseWhenLoanCobIsDisabledAndWorker() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "false");
-        environment.withProperty("fineract.mode.batch-worker-enabled", "true");
+    public void testMatchesShouldReturnFalseWhenManagerDisabled() {
+        environment.withProperty("fineract.mode.batch-manager-enabled", "false");
         boolean result = testObj.matches(conditionContext, metadata);
         assertThat(result).isFalse();
     }
 
     @Test
-    public void testMatchesShouldReturnFalseWhenLoanCobIsEnabledAndNotWorker() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "true");
-        environment.withProperty("fineract.mode.batch-worker-enabled", "false");
-        boolean result = testObj.matches(conditionContext, metadata);
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void testMatchesShouldReturnTrueWhenLoanCobIsEnabledAndWorker() {
-        environment.withProperty("fineract.job.loan-cob-enabled", "true");
-        environment.withProperty("fineract.mode.batch-worker-enabled", "true");
+    public void testMatchesShouldReturnTrueWhenManagerEnabled() {
+        environment.withProperty("fineract.mode.batch-manager-enabled", "true");
         boolean result = testObj.matches(conditionContext, metadata);
         assertThat(result).isTrue();
     }
