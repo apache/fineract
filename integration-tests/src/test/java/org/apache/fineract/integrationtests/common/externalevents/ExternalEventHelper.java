@@ -23,11 +23,14 @@ import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.List;
+import java.util.Map;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.Assertions;
 
 @Slf4j
 public final class ExternalEventHelper {
@@ -87,6 +90,15 @@ public final class ExternalEventHelper {
         final String url = "/fineract-provider/api/v1/internal/externalevents?" + Utils.TENANT_IDENTIFIER;
         log.info("-----------------------------DELETE ALL EXTERNAL EVENTS PARTITIONS----------------------------------------");
         Utils.performServerDelete(requestSpec, responseSpec, url, null);
+    }
+
+    public static void changeEventState(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, String eventName,
+            boolean status) {
+        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
+                responseSpec, "{\"externalEventConfigurations\":{\"" + eventName + "\":" + status + "}}\n");
+        Assertions.assertEquals(updatedConfigurations.size(), 1);
+        Assertions.assertTrue(updatedConfigurations.containsKey(eventName));
+        Assertions.assertEquals(status, updatedConfigurations.get(eventName));
     }
 
 }
