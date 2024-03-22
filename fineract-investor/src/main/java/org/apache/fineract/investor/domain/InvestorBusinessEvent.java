@@ -40,6 +40,6 @@ public abstract class InvestorBusinessEvent extends AbstractBusinessEvent<Extern
 
     @Override
     public Long getAggregateRootId() {
-        return get().getId();
+        return loan.getId();
     }
 }
