@@ -228,7 +228,7 @@ NOTE: we'll keep backwards compatibility until one of the next releases to ensur
 <br>SSL CONFIGURATION
 =================
 
-Read also [the HTTPS related doc](fineract-doc/src/docs/en/deployment.adoc#https).
+Read also [the HTTPS related doc](fineract-doc/src/docs/en/chapters/deployment/https.adoc).
 
 By default SSL is enabled, but all SSL related properties are now tunable. SSL can be turned off by setting the environment variable `FINERACT_SERVER_SSL_ENABLED` to false. If you do that then please make sure to also change the server port to `8080` via the variable `FINERACT_SERVER_PORT`, just for the sake of keeping the conventions.
 You can choose now easily a different SSL keystore by setting `FINERACT_SERVER_SSL_KEY_STORE` with a path to a different (not embedded) keystore. The password can be set via `FINERACT_SERVER_SSL_KEY_STORE_PASSWORD`. See the `application.properties` file and the latest Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) for more details.
@@ -387,7 +387,7 @@ The progress of this project can be viewed here: [View change log](https://githu
 License
 ============
 
-This project is licensed under Apache License Version 2.0. See <https://github.com/apache/incubator-fineract/blob/develop/LICENSE.md> for reference.
+This project is licensed under Apache License Version 2.0. See <https://github.com/apache/fineract/blob/develop/APACHE_LICENSETEXT.md> for reference.
 
 The Connector/J JDBC Driver client library from MariaDB.org, which is licensed under the LGPL,
 is used in development when running integration tests that use the Liquibase library.  That JDBC
@@ -406,7 +406,7 @@ The API for Fineract is documented in [apiLive.htm](fineract-provider/src/main/r
 
 The Swagger documentation (work in progress; see [FINERACT-733](https://issues.apache.org/jira/browse/FINERACT-733)) can be accessed under [/fineract-provider/swagger-ui/index.html](https://localhost:8443/fineract-provider/swagger-ui/index.html) and [live Swagger UI here on Fineract.dev](https://sandbox.mifos.community/fineract-provider/swagger-ui/index.html).
 
-Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification](https://swagger.io/specification/).  For more instructions on how to generate the client code, check [docs/developers/swagger/client.md](docs/developers/swagger/client.md).
+Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification](https://swagger.io/specification/).  For more instructions on how to generate the client code, check [fineract-doc/src/docs/en/chapters/sdk/client.adoc](fineract-doc/src/docs/en/chapters/sdk/client.adoc).
 
 
 <br>API CLIENTS (Web UIs, Mobile, etc.)
