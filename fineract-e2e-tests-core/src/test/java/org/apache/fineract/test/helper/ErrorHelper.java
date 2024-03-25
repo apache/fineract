@@ -21,6 +21,8 @@ package org.apache.fineract.test.helper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.List;
+import org.apache.fineract.client.models.BatchResponse;
 import retrofit2.Response;
 
 public final class ErrorHelper {
@@ -33,5 +35,19 @@ public final class ErrorHelper {
         if (response.code() != 200 && response.code() != 202 && response.code() != 204) {
             throw new AssertionError(ErrorMessageHelper.requestFailedWithCode(response));
         }
+    }
+
+    public static void checkFailedApiCall(Response response, int requiredCode) throws IOException {
+        assertThat(!response.isSuccessful()).as(ErrorMessageHelper.requestFailed(response)).isTrue();
+
+        if (response.code() != requiredCode) {
+            throw new AssertionError("Request success but should fail with code: " + requiredCode);
+        }
+    }
+
+    public static void checkSuccessfulBatchApiCall(Response<List<BatchResponse>> batchResponseList) {
+        batchResponseList.body().forEach(response -> {
+            assertThat(response.getStatusCode()).as(ErrorMessageHelper.batchRequestFailedWithCode(response)).isEqualTo(200);
+        });
     }
 }
