@@ -62,3 +62,7 @@ dependencies {
 
     testImplementation 'org.apache.commons:commons-collections4:4.4'
 }
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("-parameters")
+}
