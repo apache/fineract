@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateRequest;
@@ -3464,6 +3465,80 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     transaction(1.0, "Chargeback", "06 March 2024", 0.01, 0.01, 0.0, 0.0, 0.0, 0.0, 0.99) //
             );
 
+        });
+    }
+
+    // UC125: Advanced payment allocation, multiple disbursement on the next day
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc.
+    // 2. Submit Loan and approve
+    // 3. Disburse only 10
+    // 4. On the next day disburse 100, and also disburse 10
+    // 5. Check the repayment schedule is correct
+    @Test
+    public void uc125() {
+        AtomicLong createdLoanId = new AtomicLong();
+        runAt("23 March 2024", () -> {
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .installmentAmountInMultiplesOf(null).numberOfRepayments(3).repaymentEvery(15).enableDownPayment(true)
+                    .enableAutoRepaymentForDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25));
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(),
+                    "23 March 2024", 1000.0, 4);
+
+            applicationRequest = applicationRequest.numberOfRepayments(3).loanTermFrequency(45)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(15);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(10)).dateFormat(DATETIME_PATTERN).approvedOnDate("23 March 2024").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("23 March 2024").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(10.0)).locale("en"));
+
+            // verify schedule
+            verifyRepaymentSchedule(loanResponse.getLoanId(), //
+                    installment(10, null, "23 March 2024"), //
+                    installment(2.5, 0, 0, 0, 0.0, true, "23 March 2024", 7.5), //
+                    installment(2.5, 0, 0, 0, 2.5, false, "07 April 2024", 5.0), //
+                    installment(2.5, 0, 0, 0, 2.5, false, "22 April 2024", 2.5), //
+                    installment(2.5, 0, 0, 0, 2.5, false, "07 May 2024", 0.0) //
+            );
+            createdLoanId.set(loanResponse.getLoanId());
+        });
+
+        runAt("24 March 2024", () -> {
+            loanTransactionHelper.disburseLoan(createdLoanId.get(), new PostLoansLoanIdRequest().actualDisbursementDate("24 March 2024")
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            // verify schedule
+            verifyRepaymentSchedule(createdLoanId.get(), //
+                    installment(10, null, "23 March 2024"), //
+                    installment(2.5, 0, 0, 0, 0.0, true, "23 March 2024", 7.5), //
+                    installment(100, null, "24 March 2024"), //
+                    installment(25.0, 0, 0, 0, 0.0, true, "24 March 2024", 82.5), //
+                    installment(27.5, 0, 0, 0, 27.5, false, "07 April 2024", 55.0), //
+                    installment(27.5, 0, 0, 0, 27.5, false, "22 April 2024", 27.5), //
+                    installment(27.5, 0, 0, 0, 27.5, false, "07 May 2024", 0.0) //
+            );
+
+            loanTransactionHelper.disburseLoan(createdLoanId.get(), new PostLoansLoanIdRequest().actualDisbursementDate("24 March 2024")
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(11.0)).locale("en"));
+
+            // verify schedule
+            verifyRepaymentSchedule(createdLoanId.get(), //
+                    installment(10, null, "23 March 2024"), //
+                    installment(2.5, 0, 0, 0, 0.0, true, "23 March 2024", 7.5), //
+                    installment(100, null, "24 March 2024"), //
+                    installment(11, null, "24 March 2024"), //
+                    installment(25.0, 0, 0, 0, 0.0, true, "24 March 2024", 93.5), //
+                    installment(2.75, 0, 0, 0, 0.0, true, "24 March 2024", 90.75), //
+                    installment(30.25, 0, 0, 0, 30.25, false, "07 April 2024", 60.5), //
+                    installment(30.25, 0, 0, 0, 30.25, false, "22 April 2024", 30.25), //
+                    installment(30.25, 0, 0, 0, 30.25, false, "07 May 2024", 0.0) //
+            );
         });
     }
 
