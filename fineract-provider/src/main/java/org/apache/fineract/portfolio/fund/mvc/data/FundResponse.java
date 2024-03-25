@@ -16,41 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.fund.data;
+package org.apache.fineract.portfolio.fund.mvc.data;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonFilter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.apache.fineract.infrastructure.core.api.mvc.JacksonPartialResponseFilter;
 
 /**
  * Immutable data object to represent fund data.
  */
-public final class FundData implements Serializable {
-
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final String name;
-    @SuppressWarnings("unused")
-    private final String externalId;
-
-    public static FundData instance(final Long id, final String name, final String externalId) {
-        return new FundData(id, name, externalId);
-    }
-
-    private FundData(final Long id, final String name, final String externalId) {
-        this.id = id;
-        this.name = name;
-        this.externalId = externalId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
+@JsonFilter(JacksonPartialResponseFilter.PARTIAL_RESPONSE)
+public record FundResponse(@Schema(example = "1") Long id, @Schema(example = "EU Agri Fund") String name,
+        @Schema(example = "123") String externalId) {
 }
