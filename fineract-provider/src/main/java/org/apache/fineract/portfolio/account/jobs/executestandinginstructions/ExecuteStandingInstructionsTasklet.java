@@ -97,7 +97,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
                 if (recurrenceType.isDuesRecurrence()) {
-                    isDueForTransfer = LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).equals(standingInstructionDuesData.dueDate());
+                    isDueForTransfer = isDueForTransfer(standingInstructionDuesData);
                 }
             }
 
@@ -163,5 +163,10 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
         updateQuery.append("'").append(errorLog).append("')");
         jdbcTemplate.update(updateQuery.toString());
         return transferCompleted;
+    }
+
+    public boolean isDueForTransfer(StandingInstructionDuesData standingInstructionDuesData) {
+        return standingInstructionDuesData.dueDate() != null
+                && !standingInstructionDuesData.dueDate().isAfter(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
     }
 }
