@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="../test/lunr/lunr-0.7.0.min.js"></script>
+    <script src="../lunr.stemmer.support.js"></script>
+    <script src="../lunr.de.js"></script>
+</head>
+<body>
+    <p>Open developer tools and observe the results in the Console tab. View source for code.</p>
+    <script>
+        /* init lunr */
+        var idx = lunr(function () {
+            // use the language (de)
+            this.use(lunr.de);
+            // then, the normal lunr index initialization
+            this.field('title', { boost: 10 })
+            this.field('body')
+        });
+
+        /* add documents to index */
+        idx.add({
+            "title": "Deutschland",
+            "body": "auffassen An Deutschland grenzen neun Nachbarländer und naturräumlich im Norden die Gewässer der Nord- und Ostsee, im Süden das Bergland der Alpen. Es liegt in der gemäßigten Klimazone, zählt mit rund 80 Millionen Einwohnern zu den dicht besiedelten Flächenstaaten und gilt international als das Land mit der dritthöchsten Zahl von Einwanderern.",
+            "id": 1
+        });
+        idx.add({
+            "title": "Tourismus in Deutschland",
+            "body": "Deutschland als Urlaubsziel verfügt über günstige Voraussetzungen: Gebirgslandschaften (Alpen und Mittelgebirge), See- und Flusslandschaften, die Küsten und Inseln der Nord- und Ostsee, zahlreiche Kulturdenkmäler und eine Vielzahl geschichtsträchtiger Städte sowie gut ausgebaute Infrastruktur. Vorteilhaft ist die zentrale Lage in Europa.",
+            "id": 2
+        });
+
+        console.log('Search for `auffassen`: ', idx.search('auffassen'));
+        console.log('Search for `auffassung`: ', idx.search('auffassung'));
+    </script>
+</body>
+</html>

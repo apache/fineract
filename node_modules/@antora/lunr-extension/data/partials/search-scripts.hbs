@@ -1,0 +1,6 @@
+<script src="{{{uiRootPath}}}/js/vendor/lunr.js"></script>
+{{#if env.SITE_SEARCH_LANGUAGES}}
+<script src="{{{uiRootPath}}}/js/vendor/lunr-languages.js"></script>
+{{/if}}
+<script src="{{{uiRootPath}}}/js/search-ui.js" id="search-ui-script" data-site-root-path="{{{siteRootPath}}}" data-snippet-length="${snippetLength}" data-stylesheet="{{{uiRootPath}}}/css/search.css"></script>
+<script async src="{{{siteRootPath}}}/search-index.js"></script>

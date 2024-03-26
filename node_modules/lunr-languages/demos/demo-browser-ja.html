@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <script src="../test/lunr/lunr-0.7.0.min.js"></script>
+    <!--<script src="../test/lunr/lunr-2.0.0-alpha.5.js"></script>-->
+    <script src="../lunr.stemmer.support.js" charset="UTF-8"></script>
+    <script src="../tinyseg.js" charset="UTF-8"></script>
+    <script src="../lunr.ja.js" charset="UTF-8"></script>
+</head>
+<body>
+    <p>Open developer tools and observe the results in the Console tab. View source for code.</p>
+    <script>
+        /* init lunr */
+        var idx = lunr(function () {
+            // use the language (ja)
+            this.use(lunr.ja);
+            // then, the normal lunr index initialization
+            this.field('title', { boost: 10 })
+            this.field('body')
+
+            /* add documents to index */
+            this.add({
+                "title": "名前",
+                "body": "私の名前は中野です",
+                "id": 1
+            });
+        });
+
+        console.log('Search for `中野`: ', idx.search('中野'));
+    </script>
+</body>
+</html>

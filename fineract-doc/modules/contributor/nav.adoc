@@ -1,0 +1,9 @@
+.Contributors Zone
+* xref:take-your-first-steps.adoc[Getting started]
+* xref:submitting-a-pull-request.adoc[Guidelines for submitting a PR]
+* xref:key-design-principles.adoc[Key Design principles]
+* xref:coding-conventions.adoc[Coding Conventions]
+* xref:checkstyle-and-spotless.adoc[Checkstyle and Spotless]
+* xref:error-handling.adoc[Error handling]
+* xref:logging-guidelines.adoc[Logging guidelines]
+

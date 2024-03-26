@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <script src="../test/lunr/lunr-2.0.1.js"></script>
+    <script src="../lunr.stemmer.support.js" charset="UTF-8"></script>
+    <script src="../wordcut.js" charset="UTF-8"></script>
+    <script src="../lunr.th.js" charset="UTF-8"></script>
+</head>
+<body>
+    <p>Open developer tools and observe the results in the Console tab. View source for code.</p>
+    <script>
+        /* init lunr */
+        var idx = lunr(function () {
+            this.use(lunr.th);
+            // then, the normal lunr index initialization
+            this.field('title', { boost: 10 })
+            this.field('body')
+
+            /* add documents to index */
+            this.add({
+                "title": "สวัสดี",
+                "body" : "กากากากา 123",
+                "id": 1
+            });
+            this.add({
+                "title": "สวัสดีโลก",
+                "body" : "คาคาคาคา",
+                "id": 2
+            });
+
+        });
+
+        console.log('test 1', idx.search('สวัส~3'));
+        console.log('test 1.1', idx.search('สวัส'));
+        console.log('test 2', idx.search('คา'));
+        console.log('test 3', idx.search('123'));
+    </script>
+</body>
+</html>
