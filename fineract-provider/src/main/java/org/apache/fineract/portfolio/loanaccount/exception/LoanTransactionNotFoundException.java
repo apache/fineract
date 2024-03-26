@@ -28,6 +28,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
  */
 public class LoanTransactionNotFoundException extends AbstractPlatformResourceNotFoundException {
 
+    public LoanTransactionNotFoundException(final String msg) {
+        super("error.msg.loan.transaction.not.found", msg);
+    }
+
     public LoanTransactionNotFoundException(final Long id) {
         super("error.msg.loan.transaction.id.invalid", "Transaction with identifier " + id + " does not exist", id);
     }

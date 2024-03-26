@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.integrationtests.loan.reaging;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -28,12 +32,15 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Test;
 
 public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
@@ -404,6 +411,223 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     installment(234.36, 0.0, 0.0, 0.0, 234.36, false, "12 July 2023", 0.0) //
             );
             checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
+        });
+    }
+
+    @Test
+    public void test_LoanReAgeReverseReplay_Works() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 15;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .enableDownPayment(true) //
+                    .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)) //
+                    .enableAutoRepaymentForDownPayment(true) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1250.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments * repaymentEvery)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.DAYS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(500.0), "01 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, false, "16 January 2023"), //
+                    installment(125.0, false, "31 January 2023"), //
+                    installment(125.0, false, "15 February 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 15));
+            createdLoanId.set(loanId);
+        });
+
+        runAt("27 February 2023", () -> {
+
+            long loanId = createdLoanId.get();
+
+            // create re-age transaction
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "01 March 2023", 6);
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(375.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(0.0, true, "16 January 2023"), //
+                    installment(0.0, true, "31 January 2023"), //
+                    installment(0.0, true, "15 February 2023"), //
+                    installment(62.5, false, "01 March 2023"), //
+                    installment(62.5, false, "01 April 2023"), //
+                    installment(62.5, false, "01 May 2023"), //
+                    installment(62.5, false, "01 June 2023"), //
+                    installment(62.5, false, "01 July 2023"), //
+                    installment(62.5, false, "01 August 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
+
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("01 February 2023").locale("en").transactionAmount(125.0));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    transaction(250.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, true, "16 January 2023"), //
+                    installment(0.0, true, "31 January 2023"), //
+                    installment(0.0, true, "15 February 2023"), //
+                    installment(41.67, false, "01 March 2023"), //
+                    installment(41.67, false, "01 April 2023"), //
+                    installment(41.67, false, "01 May 2023"), //
+                    installment(41.67, false, "01 June 2023"), //
+                    installment(41.67, false, "01 July 2023"), //
+                    installment(41.65, false, "01 August 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
+        });
+        runAt("28 February 2023", () -> {
+
+            long loanId = createdLoanId.get();
+            PostLoansLoanIdTransactionsResponse repaymentResponse = loanTransactionHelper.makeLoanRepayment(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("02 February 2023").locale("en")
+                            .transactionAmount(250.0));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    transaction(250.0, "Repayment", "02 February 2023"), //
+                    transaction(0.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, true, "16 January 2023"), //
+                    installment(125.0, true, "31 January 2023"), //
+                    installment(125.0, true, "15 February 2023"), //
+                    installment(0.0, true, "01 March 2023"), //
+                    installment(0.0, true, "01 April 2023"), //
+                    installment(0.0, true, "01 May 2023"), //
+                    installment(0.0, true, "01 June 2023"), //
+                    installment(0.0, true, "01 July 2023"), //
+                    installment(0.0, true, "01 August 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 2, 2));
+
+            verifyLoanStatus(loanId, LoanStatus.CLOSED_OBLIGATIONS_MET);
+
+            loanTransactionHelper.reverseLoanTransaction(loanId, repaymentResponse.getResourceId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("28 February 2023")
+                            .transactionAmount(0.0).locale("en"));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    reversedTransaction(250.0, "Repayment", "02 February 2023"), //
+                    transaction(250.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, true, "16 January 2023"), //
+                    installment(0.0, true, "31 January 2023"), //
+                    installment(0.0, true, "15 February 2023"), //
+                    installment(41.67, false, "01 March 2023"), //
+                    installment(41.67, false, "01 April 2023"), //
+                    installment(41.67, false, "01 May 2023"), //
+                    installment(41.67, false, "01 June 2023"), //
+                    installment(41.67, false, "01 July 2023"), //
+                    installment(41.65, false, "01 August 2023") //
+            );
+
+            verifyLoanStatus(loanId, LoanStatus.ACTIVE);
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
+        });
+
+        runAt("01 March 2023", () -> {
+
+            long loanId = createdLoanId.get();
+            // create re-age transaction
+            undoReAgeLoan(loanId);
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    reversedTransaction(250.0, "Repayment", "02 February 2023"), //
+                    reversedTransaction(250.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, true, "16 January 2023"), //
+                    installment(125.0, false, "31 January 2023"), //
+                    installment(125.0, false, "15 February 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 15));
+        });
+
+        runAt("02 March 2023", () -> {
+
+            long loanId = createdLoanId.get();
+            // create re-age transaction
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.undoReAge(loanId, new PostLoansLoanIdTransactionsRequest()));
+            assertEquals(404, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.transaction.not.found"));
         });
     }
 }

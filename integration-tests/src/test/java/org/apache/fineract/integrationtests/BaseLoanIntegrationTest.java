@@ -90,6 +90,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -824,6 +825,12 @@ public abstract class BaseLoanIntegrationTest {
         assertEquals(actualMaturityDate, loanDetails.getTimeline().getActualMaturityDate());
     }
 
+    protected void verifyLoanStatus(long loanId, LoanStatus loanStatus) {
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+
+        assertEquals(loanStatus.getCode(), loanDetails.getStatus().getCode());
+    }
+
     @RequiredArgsConstructor
     public static class BatchRequestBuilder {
 
@@ -964,6 +971,7 @@ public abstract class BaseLoanIntegrationTest {
 
         public static final Integer MONTHS = 2;
         public static final String MONTHS_STRING = "MONTHS";
+        public static final Integer DAYS = 0;
         public static final String DAYS_STRING = "DAYS";
     }
 

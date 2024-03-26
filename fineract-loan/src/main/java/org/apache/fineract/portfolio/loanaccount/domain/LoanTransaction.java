@@ -25,6 +25,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
@@ -47,6 +48,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
@@ -134,6 +136,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "fromTransaction")
     private Set<LoanTransactionRelation> loanTransactionRelations = new HashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
+    private LoanReAgeParameter loanReAgeParameter;
 
     protected LoanTransaction() {}
 
@@ -291,6 +296,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (LoanTransactionType.CHARGE_PAYMENT.equals(loanTransaction.getTypeOf())) {
             newTransaction.getLoanChargesPaid().addAll(loanTransaction.getLoanChargesPaid());
+        }
+        if (LoanTransactionType.REAGE.equals(loanTransaction.getTypeOf())) {
+            newTransaction.setLoanReAgeParameter(loanTransaction.getLoanReAgeParameter().getCopy(newTransaction));
         }
         return newTransaction;
     }
@@ -998,6 +1006,14 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isOn(final LocalDate date) {
         return DateUtils.isEqual(getTransactionDate(), date);
+    }
+
+    public LoanReAgeParameter getLoanReAgeParameter() {
+        return loanReAgeParameter;
+    }
+
+    public void setLoanReAgeParameter(LoanReAgeParameter loanReAgeParameter) {
+        this.loanReAgeParameter = loanReAgeParameter;
     }
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as
