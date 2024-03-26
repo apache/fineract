@@ -85,6 +85,8 @@ final class ClientIdentifiersApiResourceSwagger {
         public String documentKey;
         @Schema(example = "Document has been verified")
         public String description;
+        @Schema(example = "Active")
+        public String status;
     }
 
     @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdRequest")
@@ -98,6 +100,8 @@ final class ClientIdentifiersApiResourceSwagger {
         public String documentKey;
         @Schema(example = "Document has been updated")
         public String description;
+        @Schema(example = "Active")
+        public String status;
     }
 
     @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdResponse")
