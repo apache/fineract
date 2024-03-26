@@ -33,6 +33,7 @@ import org.apache.fineract.test.helper.CodeHelper;
 import org.apache.fineract.test.helper.ErrorHelper;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
+import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,9 @@ public class ClientStepDef extends AbstractStepDef {
     @Autowired
     private ClientRequestFactory clientRequestFactory;
 
+    @Autowired
+    private EventCheckHelper eventCheckHelper;
+
     @When("Admin creates a client with random data")
     public void createClientRandomFirstNameLastName() throws IOException {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest();
@@ -56,6 +60,8 @@ public class ClientStepDef extends AbstractStepDef {
         Response<PostClientsResponse> response = clientApi.create6(clientsRequest).execute();
         ErrorHelper.checkSuccessfulApiCall(response);
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
+
+        eventCheckHelper.clientEventCheck(response);
     }
 
     @When("Admin creates a second client with random data")
@@ -65,6 +71,8 @@ public class ClientStepDef extends AbstractStepDef {
         Response<PostClientsResponse> response = clientApi.create6(clientsRequest).execute();
         ErrorHelper.checkSuccessfulApiCall(response);
         testContext().set(TestContextKey.CLIENT_CREATE_SECOND_CLIENT_RESPONSE, response);
+
+        eventCheckHelper.clientEventCheck(response);
     }
 
     @When("Admin creates a client with Firstname {string} and Lastname {string}")
@@ -114,5 +122,7 @@ public class ClientStepDef extends AbstractStepDef {
         Response<PostClientsResponse> response = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
 
         assertThat(response.isSuccessful()).as(ErrorMessageHelper.requestFailed(response)).isTrue();
+
+        eventCheckHelper.clientEventCheck(response);
     }
 }
