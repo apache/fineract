@@ -48,6 +48,7 @@
         <class>org.apache.fineract.portfolio.group.domain.StaffAssignmentHistory</class>
         <class>org.apache.fineract.portfolio.group.domain.GroupRole</class>
         <class>org.apache.fineract.portfolio.client.domain.Client</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientIdentifier</class>
         <class>org.apache.fineract.portfolio.rate.domain.Rate</class>
         <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>

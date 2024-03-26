@@ -22,6 +22,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.jpa.CriteriaQueryFactory;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientIdentifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -62,13 +65,15 @@ public class SearchingClientRepositoryImpl implements SearchingClientRepository 
 
         Specification<Client> spec = (r, q, builder) -> {
             Path<Office> o = r.get("office");
+            Join<Client, ClientIdentifier> identity = r.join("identifiers", JoinType.LEFT);
 
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.like(o.get("hierarchy"), hierarchyLikeValue));
 
             String searchLikeValue = "%" + searchText + "%";
             predicates.add(cb.or(cb.like(r.get("accountNumber"), searchLikeValue), cb.like(r.get("displayName"), searchLikeValue),
-                    cb.like(r.get("externalId"), searchLikeValue), cb.like(r.get("mobileNo"), searchLikeValue)));
+                    cb.like(r.get("externalId"), searchLikeValue), cb.like(r.get("mobileNo"), searchLikeValue),
+                    cb.like(identity.get("documentKey"), searchLikeValue)));
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
