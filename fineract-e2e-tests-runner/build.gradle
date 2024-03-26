@@ -38,31 +38,31 @@ dependencies {
     implementation 'org.springframework:spring-test'
     testImplementation 'org.springframework:spring-jms'
 
-    testImplementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    testImplementation 'com.squareup.retrofit2:retrofit:2.10.0'
     testImplementation 'commons-httpclient:commons-httpclient:3.1'
     testImplementation 'org.apache.commons:commons-lang3:3.14.0'
     testImplementation 'com.googlecode.json-simple:json-simple:1.1.1'
     testImplementation 'com.google.code.gson:gson:2.10.1'
 
-    testImplementation 'io.cucumber:cucumber-java:7.15.0'
-    testImplementation 'io.cucumber:cucumber-junit:7.15.0'
-    testImplementation 'io.cucumber:cucumber-spring:7.15.0'
+    testImplementation 'io.cucumber:cucumber-java:7.16.1'
+    testImplementation 'io.cucumber:cucumber-junit:7.16.1'
+    testImplementation 'io.cucumber:cucumber-spring:7.16.1'
 
-    testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.25.0'
+    testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.26.0'
 
     testImplementation 'org.assertj:assertj-core:3.25.3'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.30'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok:1.18.32'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
 
     testImplementation "ch.qos.logback:logback-core:1.5.3"
     testImplementation "ch.qos.logback:logback-classic:1.5.3"
 
-    testImplementation 'org.apache.activemq:activemq-client:6.0.1'
+    testImplementation 'org.apache.activemq:activemq-client:6.1.0'
     testImplementation "org.apache.avro:avro:1.11.3"
-    testImplementation "org.awaitility:awaitility:4.2.0"
+    testImplementation "org.awaitility:awaitility:4.2.1"
     testImplementation 'io.github.classgraph:classgraph:4.8.168'
 
     testImplementation 'org.apache.commons:commons-collections4:4.4'
