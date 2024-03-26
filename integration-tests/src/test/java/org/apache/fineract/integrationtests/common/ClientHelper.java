@@ -52,6 +52,8 @@ import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
 import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
+import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
+import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsClientIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
@@ -103,6 +105,11 @@ public class ClientHelper extends IntegrationTest {
 
     public PostClientsResponse createClient(final PostClientsRequest request) {
         return ok(fineract().clients.create6(request));
+    }
+
+    public PostClientsClientIdIdentifiersResponse createClientIdentifer(final Long clientId,
+            final PostClientsClientIdIdentifiersRequest request) {
+        return ok(fineract().clientIdentifiers.createClientIdentifier(clientId, request));
     }
 
     public PageClientSearchData searchClients(String text) {
@@ -875,4 +882,10 @@ public class ClientHelper extends IntegrationTest {
     public GetLoanAccountLockResponse retrieveLockedAccounts(int page, int limit) {
         return ok(fineract().loanAccountLockApi.retrieveLockedAccounts(page, limit));
     }
+
+    public static PostClientsClientIdIdentifiersRequest createClientIdentifer(final Long documentType) {
+        return new PostClientsClientIdIdentifiersRequest().documentTypeId(documentType).documentKey(Utils.randomStringGenerator("ID_", 10))
+                .description(Utils.randomStringGenerator("Desc_", 50)).status("Active");
+    }
+
 }
