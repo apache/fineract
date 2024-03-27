@@ -36,4 +36,12 @@ public final class CobHelper {
         log.info("---------------------------------GET COB PARTITIONS---------------------------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, url, jsonReturn);
     }
+
+    public static void fastForwardLoansLastCOBDate(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanId, final String cobDate) {
+        final String url = "/fineract-provider/api/v1/internal/cob/fast-forward-cob-date-of-loan/" + loanId + "?" + Utils.TENANT_IDENTIFIER;
+        log.info("-------------------- -----------FAST FORWARD LAST COB DATE OF LOAN ----------------------------------------");
+        Utils.performServerPost(requestSpec, responseSpec, url, "{\"lastClosedBusinessDate\":\"" + cobDate + "\"}");
+    }
+
 }

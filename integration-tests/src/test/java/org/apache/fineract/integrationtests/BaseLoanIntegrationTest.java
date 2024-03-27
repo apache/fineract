@@ -108,6 +108,7 @@ public abstract class BaseLoanIntegrationTest {
     protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
 
     protected final ResponseSpecification responseSpec = createResponseSpecification(Matchers.is(200));
+    protected final ResponseSpecification responseSpec204 = createResponseSpecification(Matchers.is(204));
 
     private final String fullAdminAuthKey = getFullAdminAuthKey();
 

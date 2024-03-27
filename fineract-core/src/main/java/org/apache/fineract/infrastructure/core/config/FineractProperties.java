@@ -162,6 +162,7 @@ public class FineractProperties {
         private Integer threadPoolMaxPoolSize;
         private Integer threadPoolQueueCapacity;
         private Integer retryLimit;
+        private Integer pollInterval;
 
     }
 
