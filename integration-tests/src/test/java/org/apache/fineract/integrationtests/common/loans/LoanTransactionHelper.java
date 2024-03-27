@@ -1697,7 +1697,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public void printDelinquencyData(GetLoansLoanIdResponse getLoansLoanIdResponse) {
         GetLoansLoanIdDelinquencySummary getLoansLoanIdCollectionData = getLoansLoanIdResponse.getDelinquent();
         if (getLoansLoanIdCollectionData != null) {
-            log.info("Loan Delinquency {}", getLoansLoanIdCollectionData.toString());
+            log.info("Loan Delinquency {}", getLoansLoanIdCollectionData);
         }
     }
 

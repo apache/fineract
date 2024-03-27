@@ -220,6 +220,16 @@ public final class Utils {
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
+    public static <T> T performServerPatch(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String getURL, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().patch(getURL).andReturn()
+                .asString();
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
+        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
+    }
+
     public static List<String> performServerGetList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
         final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
