@@ -32,15 +32,15 @@ import org.springframework.stereotype.Component;
 public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsInOneYearCalculator {
 
     @Override
-    public Integer calculate(final PeriodFrequencyType repaymentFrequencyType) {
+    public Integer calculate(final PeriodFrequencyType repaymentFrequencyType,final PeriodFrequencyType interestRateFrequencyMethod) {
 
         Integer paymentPeriodsInOneYear = 0;
         switch (repaymentFrequencyType) {
             case DAYS:
-                paymentPeriodsInOneYear = 365;
+                paymentPeriodsInOneYear = interestRateFrequencyMethod.isMonthly() ? Integer.valueOf(360) : Integer.valueOf(365);
             break;
             case WEEKS:
-                paymentPeriodsInOneYear = 52;
+                paymentPeriodsInOneYear = interestRateFrequencyMethod.isMonthly() ? Integer.valueOf(48) : Integer.valueOf(52);
             break;
             case MONTHS:
                 paymentPeriodsInOneYear = 12;
