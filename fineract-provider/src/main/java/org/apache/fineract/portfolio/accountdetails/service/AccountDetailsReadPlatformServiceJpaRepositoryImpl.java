@@ -479,7 +479,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     .append(" l.charged_off_on_date as chargedOffOnDate, cobu.username as chargedOffByUsername, ")
                     .append(" cobu.firstname as chargedOffByFirstname, cobu.lastname as chargedOffByLastname ").append(" from m_loan l ")
                     .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id")
-                    .append(" join m_currency curr on curr.code = l.currency_code")
+                    .append(" left join m_currency curr on curr.code = l.currency_code")
                     .append(" left join m_appuser sbu on sbu.id = l.created_by")
                     .append(" left join m_appuser rbu on rbu.id = l.rejectedon_userid")
                     .append(" left join m_appuser wbu on wbu.id = l.withdrawnon_userid")
