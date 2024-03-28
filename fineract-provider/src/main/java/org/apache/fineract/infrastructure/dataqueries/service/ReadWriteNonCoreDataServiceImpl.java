@@ -60,12 +60,15 @@ import jakarta.persistence.PersistenceException;
 import jakarta.validation.constraints.NotNull;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,6 +123,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
@@ -1322,17 +1326,21 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             params.add(scoreValue);
         }
 
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = sqlGenerator.buildInsert(dataTableName, insertColumns, headersByName);
         try {
-            int updated = jdbcTemplate.update(sql, params.toArray(Object[]::new));
+            int updated = jdbcTemplate.update(con -> {
+                PreparedStatement ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+                setParameters(params, ps);
+                return ps;
+            }, keyHolder);
             if (updated != 1) {
                 throw new PlatformDataIntegrityException("error.msg.invalid.insert", "Expected one inserted row.");
             }
 
             Long resourceId = appTableId;
             if (isMultirowDatatable(columnHeaders)) {
-                resourceId = jdbcTemplate.queryForObject(DatabaseSpecificSQLGenerator.SELECT_CLAUSE.formatted(sqlGenerator.lastInsertId()),
-                        Long.class);
+                resourceId = sqlGenerator.fetchPK(keyHolder);
             }
             return CommandProcessingResult.fromCommandProcessingResult(commandProcessingResult, resourceId);
         } catch (final DataAccessException dve) {
@@ -1342,6 +1350,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             handleDataIntegrityIssues(dataTableName, appTableId, ExceptionUtils.getRootCause(e.getCause()), e);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private static void setParameters(ArrayList<Object> params, PreparedStatement ps) {
+        AtomicInteger parameterIndex = new AtomicInteger(1);
+        params.forEach(param -> {
+            try {
+                ps.setObject(parameterIndex.getAndIncrement(), param);
+            } catch (SQLException e) {
+                throw new IllegalArgumentException(e);
+            }
+        });
     }
 
     private static boolean isUserInsertable(@NotNull EntityTables entityTable, @NotNull ResultsetColumnHeaderData columnHeader) {
