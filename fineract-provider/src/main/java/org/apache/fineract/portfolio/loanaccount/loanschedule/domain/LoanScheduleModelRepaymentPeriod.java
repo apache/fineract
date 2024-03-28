@@ -55,6 +55,13 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
                 interestDue, feeChargesDue, penaltyChargesDue, totalDue, recalculatedInterestComponent);
     }
 
+    public static LoanScheduleModelRepaymentPeriod copyWithNewDueDate(final LoanScheduleModelRepaymentPeriod period,
+            final LocalDate dueDate) {
+        return new LoanScheduleModelRepaymentPeriod(period.periodNumber, period.fromDate, dueDate, period.principalDue,
+                period.outstandingLoanBalance, period.interestDue, period.feeChargesDue, period.penaltyChargesDue, period.totalDue,
+                period.recalculatedInterestComponent);
+    }
+
     public LoanScheduleModelRepaymentPeriod(final int periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final Money principalDue, final Money outstandingLoanBalance, final Money interestDue, final Money feeChargesDue,
             final Money penaltyChargesDue, final Money totalDue, final boolean recalculatedInterestComponent) {
