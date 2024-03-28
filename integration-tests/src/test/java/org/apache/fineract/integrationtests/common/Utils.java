@@ -98,7 +98,9 @@ public final class Utils {
     public static final String SOURCE_SET_NUMBERS_AND_LETTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static final String SOURCE_SET_NUMBERS = "1234567890";
 
-    private Utils() {}
+    private Utils() {
+
+    }
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
