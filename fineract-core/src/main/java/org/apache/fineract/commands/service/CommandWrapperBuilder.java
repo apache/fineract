@@ -1139,6 +1139,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder disburseWithoutAutoDownPayment(final Long loanId) {
+        this.actionName = "DISBURSEWITHOUTAUTODOWNPAYMENT";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
     public CommandWrapperBuilder undoLoanApplicationApproval(final Long loanId) {
         this.actionName = "APPROVALUNDO";
         this.entityName = "LOAN";
