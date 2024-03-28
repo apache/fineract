@@ -27,6 +27,8 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
+import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
+import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.SortOrder;
@@ -242,4 +244,29 @@ public class ClientSearchTest {
         assertThat(result.getTotalElements()).isEqualTo(0);
         assertThat(result.getContent()).isEmpty();
     }
+
+    @Test
+    public void testClientSearchWorks_ByClientIdentifier() {
+        // given
+        PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
+        request1.setMobileNo(Utils.randomNumberGenerator(8).toString());
+        PostClientsResponse clientResponse = clientHelper.createClient(request1);
+        final Long documentType = 1L;
+        PostClientsClientIdIdentifiersRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
+        final String documentKey = identifierRequest.getDocumentKey();
+        PostClientsClientIdIdentifiersResponse clientIdentifierResponse = clientHelper.createClientIdentifer(clientResponse.getClientId(),
+                identifierRequest);
+
+        PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request2);
+
+        PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request3);
+        // when
+        PageClientSearchData result = clientHelper.searchClients(documentKey);
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getMobileNo()).isEqualTo(request1.getMobileNo());
+    }
+
 }

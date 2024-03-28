@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,6 +26,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -219,6 +221,9 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "proposed_transfer_date")
     private LocalDate proposedTransferDate;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "client", orphanRemoval = true, fetch = FetchType.LAZY)
+    protected Set<ClientIdentifier> identifiers = new HashSet<>();
 
     public static Client instance(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
