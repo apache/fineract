@@ -470,6 +470,24 @@ final class ClientsApiResourceSwagger {
 
             private GetClientsLoanAccounts() {}
 
+            static final class GetClientsLoansAccountsCurrency {
+
+                private GetClientsLoansAccountsCurrency() {}
+
+                @Schema(example = "USD")
+                public String code;
+                @Schema(example = "US Dollar")
+                public String name;
+                @Schema(example = "2")
+                public Integer decimalPlaces;
+                @Schema(example = "$")
+                public String displaySymbol;
+                @Schema(example = "currency.USD")
+                public String nameCode;
+                @Schema(example = "US Dollar ($)")
+                public String displayLabel;
+            }
+
             static final class GetClientsLoanAccountsStatus {
 
                 private GetClientsLoanAccountsStatus() {}
@@ -520,6 +538,7 @@ final class ClientsApiResourceSwagger {
             public Long productId;
             @Schema(example = "TestOne")
             public String productName;
+            public GetClientsLoansAccountsCurrency currency;
             public GetClientsLoanAccountsStatus status;
             public GetClientsLoanAccountsType loanType;
             @Schema(example = "1")
