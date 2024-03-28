@@ -37,9 +37,7 @@ buildscript {
                 'twofactor-tests',
                 'oauth2-tests',
                 'fineract-client',
-                'fineract-avro-schemas',
-                'fineract-e2e-tests-core',
-                'fineract-e2e-tests-runner'
+                'fineract-avro-schemas'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -284,8 +282,7 @@ allprojects  {
             ".mailmap",
             '**/images/diag-*.svg',
             '**/*.avsc',
-            "**/generated/**/*MapperImpl.java",
-            '**/META-INF/fineract-test.config'
+            "**/generated/**/*MapperImpl.java"
         ]
     }
 }
