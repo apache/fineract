@@ -181,6 +181,13 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
             // }
         }
 
+        // Fixed Length validation
+        final int lastPeriodIdx = periods.size() - 1;
+        LoanScheduleModelRepaymentPeriod lastPeriod = (LoanScheduleModelRepaymentPeriod) periods.get(lastPeriodIdx);
+        if (lastPeriod.getDueDate().compareTo(loanEndDate) != 0) {
+            periods.set(lastPeriodIdx, LoanScheduleModelRepaymentPeriod.copyWithNewDueDate(lastPeriod, loanEndDate));
+        }
+
         // If the disbursement happened after maturity date
         if (loanApplicationTerms.isMultiDisburseLoan()) {
             processDisbursements(loanApplicationTerms, chargesDueAtTimeOfDisbursement, scheduleParams, periods,

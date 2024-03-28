@@ -103,12 +103,6 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             }
         }
 
-        final LocalDate maxDateForFixedLength = loanApplicationTerms.calculateMaxDateForFixedLength();
-        // Fixed Length validation
-        if (maxDateForFixedLength != null && DateUtils.isAfter(dueRepaymentPeriodDate, maxDateForFixedLength)) {
-            dueRepaymentPeriodDate = maxDateForFixedLength;
-        }
-
         return dueRepaymentPeriodDate;
     }
 

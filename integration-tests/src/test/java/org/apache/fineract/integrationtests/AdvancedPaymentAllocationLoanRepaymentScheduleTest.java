@@ -3819,6 +3819,54 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC133: Advanced payment allocation with higher Fixed Length for 50 days than Loan Term for 45 days (3 repayments
+    // every 15 days)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    @Test
+    public void uc133() {
+        final String operationDate = "22 November 2023";
+        runAt(operationDate, () -> {
+            final Integer fixedLength = 50; // 50 days
+            final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
+            final Integer numberOfRepayments = 3;
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(15).repaymentFrequencyType(repaymentFrequencyType.longValue())
+                    .fixedLength(fixedLength);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "22 November 2023",
+                    1000.0, numberOfRepayments)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("22 November 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("22 November 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            LOG.info("Loan {} {}", loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule().getPeriods()
+                    .get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate());
+            assertEquals(
+                    Utils.getDifferenceInDays(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue());
+            assertEquals(loanDetails.getNumberOfRepayments(), numberOfRepayments);
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
     private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
         AtomicInteger integer = new AtomicInteger(1);
         return Arrays.stream(paymentAllocationTypes).map(pat -> {
