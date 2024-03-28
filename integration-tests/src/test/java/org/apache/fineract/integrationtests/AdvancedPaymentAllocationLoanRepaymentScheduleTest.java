@@ -3819,6 +3819,198 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC133: Advanced payment allocation with higher Fixed Length for 50 days than Loan Term for 45 days (3 repayments
+    // every 15 days)
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    @Test
+    public void uc133() {
+        final String operationDate = "22 November 2023";
+        runAt(operationDate, () -> {
+            final Integer fixedLength = 50; // 50 days
+            final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
+            final Integer numberOfRepayments = 3;
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(15).repaymentFrequencyType(repaymentFrequencyType.longValue())
+                    .fixedLength(fixedLength);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "22 November 2023",
+                    1000.0, numberOfRepayments)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("22 November 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("22 November 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            LOG.info("Loan {} {}", loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule().getPeriods()
+                    .get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate());
+            assertEquals(
+                    Utils.getDifferenceInDays(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue());
+            assertEquals(loanDetails.getNumberOfRepayments(), numberOfRepayments);
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
+    // UC134: Advanced payment allocation with Fixed Length for 119 days and Loan Term for 120 days (4 repayments every
+    // 30
+    // days) and Reschedule
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    // 5. ReSchedule
+    @Test
+    public void uc134() {
+        final String operationDate = "1 January 2024";
+        runAt(operationDate, () -> {
+            final Integer fixedLength = 119; // 120 days
+            final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
+            final Integer numberOfRepayments = 4;
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(30).fixedLength(fixedLength);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 1000.0,
+                    numberOfRepayments);
+
+            applicationRequest = applicationRequest.numberOfRepayments(numberOfRepayments).loanTermFrequency(120)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(30);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 1, 31), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 3, 31), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2024, 4, 29), 250.0, 0.0, 250.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertEquals(loanDetails.getNumberOfRepayments(), numberOfRepayments);
+            assertEquals(
+                    Utils.getDifferenceInDays(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue());
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanDetails.getId()).locale("en")
+                            .dateFormat(DATETIME_PATTERN).rescheduleReasonId(1L).rescheduleFromDate("1 March 2024")
+                            .adjustedDueDate("15 March 2024").submittedOnDate("16 January 2024"));
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().approvedOnDate("16 January 2024").locale("en").dateFormat(DATETIME_PATTERN));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 1, 31), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 15), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 4, 14), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2024, 5, 13), 250.0, 0.0, 250.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertEquals(loanDetails.getNumberOfRepayments(), numberOfRepayments);
+            assertEquals(
+                    Utils.getDifferenceInDays(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue() + 14); // Days in Reschedule
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
+    // UC135: Advanced payment allocation with Fixed Length for 119 days and Loan Term for 120 days (4 repayments every
+    // 30
+    // days) and Reschedule
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    // 5. ReSchedule Last installment
+    @Test
+    public void uc135() {
+        final String operationDate = "1 January 2024";
+        runAt(operationDate, () -> {
+            final Integer fixedLength = 119; // 120 days
+            final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
+            final Integer numberOfRepayments = 4;
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(30).fixedLength(fixedLength);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 1000.0,
+                    numberOfRepayments);
+
+            applicationRequest = applicationRequest.numberOfRepayments(numberOfRepayments).loanTermFrequency(120)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(30);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 1, 31), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 3, 31), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2024, 4, 29), 250.0, 0.0, 250.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertEquals(loanDetails.getNumberOfRepayments(), numberOfRepayments);
+            assertEquals(
+                    Utils.getDifferenceInDays(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue());
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanDetails.getId()).locale("en")
+                            .dateFormat(DATETIME_PATTERN).rescheduleReasonId(1L).rescheduleFromDate("29 April 2024")
+                            .adjustedDueDate("5 May 2024").submittedOnDate("16 January 2024"));
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().approvedOnDate("16 January 2024").locale("en").dateFormat(DATETIME_PATTERN));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 1, 31), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 3, 31), 250.0, 0.0, 250.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2024, 5, 5), 250.0, 0.0, 250.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertEquals(loanDetails.getNumberOfRepayments(), numberOfRepayments);
+            assertEquals(
+                    Utils.getDifferenceInDays(loanDetails.getTimeline().getActualDisbursementDate(), loanDetails.getRepaymentSchedule()
+                            .getPeriods().get(loanDetails.getRepaymentSchedule().getPeriods().size() - 1).getDueDate()),
+                    fixedLength.longValue() + 6); // Days in Reschedule
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+    }
+
     private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
         AtomicInteger integer = new AtomicInteger(1);
         return Arrays.stream(paymentAllocationTypes).map(pat -> {

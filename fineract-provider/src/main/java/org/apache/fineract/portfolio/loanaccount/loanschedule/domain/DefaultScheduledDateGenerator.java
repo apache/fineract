@@ -103,10 +103,20 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             }
         }
 
-        final LocalDate maxDateForFixedLength = loanApplicationTerms.calculateMaxDateForFixedLength();
-        // Fixed Length validation
-        if (maxDateForFixedLength != null && DateUtils.isAfter(dueRepaymentPeriodDate, maxDateForFixedLength)) {
-            dueRepaymentPeriodDate = maxDateForFixedLength;
+        return dueRepaymentPeriodDate;
+    }
+
+    @Override
+    public LocalDate generateNextRepaymentDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms,
+            final boolean isFirstRepayment, final Integer periodNumber) {
+        LocalDate dueRepaymentPeriodDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment);
+
+        // Fixed Length validation only for Last Installment
+        if (loanApplicationTerms.isLastPeriod(periodNumber)) {
+            final LocalDate maxDateForFixedLength = loanApplicationTerms.calculateMaxDateForFixedLength();
+            if (maxDateForFixedLength != null && dueRepaymentPeriodDate.compareTo(maxDateForFixedLength) != 0) {
+                dueRepaymentPeriodDate = maxDateForFixedLength;
+            }
         }
 
         return dueRepaymentPeriodDate;

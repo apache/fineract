@@ -91,8 +91,8 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
         boolean isNextRepaymentAvailable = true;
 
         while (!scheduleParams.getOutstandingBalance().isZero()) {
-            scheduleParams.setActualRepaymentDate(getScheduledDateGenerator()
-                    .generateNextRepaymentDate(scheduleParams.getActualRepaymentDate(), loanApplicationTerms, isFirstRepayment));
+            scheduleParams.setActualRepaymentDate(getScheduledDateGenerator().generateNextRepaymentDate(
+                    scheduleParams.getActualRepaymentDate(), loanApplicationTerms, isFirstRepayment, scheduleParams.getPeriodNumber()));
             AdjustedDateDetailsDTO adjustedDateDetailsDTO = getScheduledDateGenerator()
                     .adjustRepaymentDate(scheduleParams.getActualRepaymentDate(), loanApplicationTerms, holidayDetailDTO);
             scheduleParams.setActualRepaymentDate(adjustedDateDetailsDTO.getChangedActualRepaymentDate());
@@ -601,6 +601,7 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
             LoanTermVariationsData loanTermVariationsData = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
             if (DateUtils.isEqual(modifiedScheduledDueDate, loanTermVariationsData.getTermVariationApplicableFrom())) {
                 modifiedScheduledDueDate = loanTermVariationsData.getDateValue();
+                loanApplicationTerms.updateVariationDays(DateUtils.getDifferenceInDays(scheduledDueDate, modifiedScheduledDueDate));
                 if (!loanTermVariationsData.isSpecificToInstallment()) {
                     scheduleParams.setActualRepaymentDate(modifiedScheduledDueDate);
                     loanApplicationTerms.setNewScheduledDueDateStart(modifiedScheduledDueDate);

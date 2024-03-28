@@ -69,6 +69,7 @@ public final class LoanApplicationTerms {
     private final Integer repaymentEvery;
     private final PeriodFrequencyType repaymentPeriodFrequencyType;
 
+    private long variationDays = 0L;
     private final Integer fixedLength;
     private final Integer nthDay;
 
@@ -1845,16 +1846,16 @@ public final class LoanApplicationTerms {
         }
         switch (repaymentPeriodFrequencyType) {
             case DAYS:
-                maxDateForFixedLength = startDate.plusDays(fixedLength);
+                maxDateForFixedLength = startDate.plusDays(fixedLength + variationDays);
             break;
             case WEEKS:
-                maxDateForFixedLength = startDate.plusWeeks(fixedLength);
+                maxDateForFixedLength = startDate.plusWeeks(fixedLength + variationDays);
             break;
             case MONTHS:
-                maxDateForFixedLength = startDate.plusMonths(fixedLength);
+                maxDateForFixedLength = startDate.plusMonths(fixedLength + variationDays);
             break;
             case YEARS:
-                maxDateForFixedLength = startDate.plusYears(fixedLength);
+                maxDateForFixedLength = startDate.plusYears(fixedLength + variationDays);
             break;
             case INVALID:
             break;
@@ -1869,6 +1870,14 @@ public final class LoanApplicationTerms {
         final RepaymentStartDateType repaymentStartDateType = getRepaymentStartDateType();
         return RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType) ? getExpectedDisbursementDate()
                 : getSubmittedOnDate();
+    }
+
+    public boolean isLastPeriod(final Integer periodNumber) {
+        return getNumberOfRepayments().equals(periodNumber);
+    }
+
+    public void updateVariationDays(final long daysToAdd) {
+        this.variationDays += daysToAdd;
     }
 
 }
