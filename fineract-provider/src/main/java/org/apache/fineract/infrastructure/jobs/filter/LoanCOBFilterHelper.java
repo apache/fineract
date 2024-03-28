@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.jobs.filter;
 import static org.apache.fineract.batch.command.CommandStrategyUtils.isRelativeUrlVersioned;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonit
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -61,7 +63,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @Conditional(LoanCOBEnabledCondition.class)
-public class LoanCOBFilterHelper {
+public class LoanCOBFilterHelper implements InitializingBean {
 
     private final GLIMAccountInfoRepository glimAccountInfoRepository;
     private final LoanAccountLockService loanAccountLockService;
@@ -72,7 +74,7 @@ public class LoanCOBFilterHelper {
     private final RetrieveLoanIdService retrieveLoanIdService;
 
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
@@ -259,4 +261,10 @@ public class LoanCOBFilterHelper {
     public void executeInlineCob(List<Long> loanIds) {
         inlineLoanCOBExecutorService.execute(loanIds, JOB_NAME);
     }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+    }
+
 }
