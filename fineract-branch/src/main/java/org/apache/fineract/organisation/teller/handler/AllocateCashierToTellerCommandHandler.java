@@ -18,41 +18,24 @@
  */
 package org.apache.fineract.organisation.teller.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.organisation.teller.service.TellerWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Handles a delete teller command.
- *
- * @author Markus Geiss
- * @see org.apache.fineract.organisation.teller.service.TellerWritePlatformService
- * @since 2.0.0
- */
 @Service
-@CommandType(entity = "TELLER", action = "UPDATE")
-public class UpdateTellerCommandHandler implements NewCommandSourceHandler {
+@RequiredArgsConstructor
+@CommandType(entity = "TELLER", action = "ALLOCATECASHIER")
+public class AllocateCashierToTellerCommandHandler implements NewCommandSourceHandler {
 
     private final TellerWritePlatformService writePlatformService;
 
-    /**
-     * Creates a new instance
-     *
-     * @param writePlatformService
-     *            the {@code TellerWritePlatformService} used to access the backend
-     */
-    @Autowired
-    public UpdateTellerCommandHandler(final TellerWritePlatformService writePlatformService) {
-
-        this.writePlatformService = writePlatformService;
-    }
-
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.modifyTeller(command.entityId(), command);
+
+        return this.writePlatformService.allocateCashierToTeller(command.entityId(), command);
     }
 }
