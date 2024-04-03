@@ -33,6 +33,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -50,10 +51,9 @@ public class CustomJobParameterRepositoryImpl implements CustomJobParameterRepos
                 .formatted(databaseSpecificSQLGenerator.castJson(":jsonString"));
         final String jsonString = gson.toJson(customJobParameters);
         SqlParameterSource parameters = new MapSqlParameterSource("jsonString", jsonString);
-        namedParameterJdbcTemplate.update(insertSQL, parameters);
-        final Long customParameterId = namedParameterJdbcTemplate.getJdbcTemplate().queryForObject(
-                DatabaseSpecificSQLGenerator.SELECT_CLAUSE.formatted(databaseSpecificSQLGenerator.lastInsertId()), Long.class);
-        return customParameterId;
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(insertSQL, parameters, keyHolder);
+        return databaseSpecificSQLGenerator.fetchPK(keyHolder);
     }
 
     @Override
