@@ -18,37 +18,30 @@
  */
 package org.apache.fineract.organisation.teller.handler;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.organisation.teller.service.CashierWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.fineract.organisation.teller.service.TellerWritePlatformService;
+import org.springframework.stereotype.Service;
 
 /**
- * Handles a modify cashier command.
+ * Handles a delete teller command.
  *
  * @author Markus Geiss
- * @see org.apache.fineract.organisation.teller.service.CashierWritePlatformService
+ * @see org.apache.fineract.organisation.teller.service.TellerWritePlatformService
  * @since 2.0.0
  */
-public class ModifyCashierCommandHandler implements NewCommandSourceHandler {
+@Service
+@RequiredArgsConstructor
+@CommandType(entity = "TELLER", action = "DELETE")
+public class DeleteTellerCommandHandler implements NewCommandSourceHandler {
 
-    private final CashierWritePlatformService writePlatformService;
-
-    /**
-     * Creates a new instance.
-     *
-     * @param writePlatformService
-     *            the {@code CashierWritePlatformService} used to access the backend
-     */
-    @Autowired
-    public ModifyCashierCommandHandler(final CashierWritePlatformService writePlatformService) {
-
-        this.writePlatformService = writePlatformService;
-    }
+    private final TellerWritePlatformService writePlatformService;
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.modifyCashier(command.entityId(), command);
+        return this.writePlatformService.deleteTeller(command.entityId());
     }
 }
