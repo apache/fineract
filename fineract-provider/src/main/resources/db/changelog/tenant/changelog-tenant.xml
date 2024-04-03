@@ -159,4 +159,5 @@
     <include file="parts/0137_add_external_event_for_loan_reamortization.xml" relativeToChangelogFile="true" />
     <include file="parts/0138_add_external_event_for_loan_reaging_reamortization_2.xml" relativeToChangelogFile="true" />
     <include file="parts/0139_add_disburse_without_auto_payment_command.xml" relativeToChangelogFile="true" />
+    <include file="parts/0140_trial_balance_with_asset_transfer_update.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
