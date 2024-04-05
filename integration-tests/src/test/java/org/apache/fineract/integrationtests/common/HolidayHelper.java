@@ -112,4 +112,10 @@ public class HolidayHelper {
         return response;
     }
 
+    public static Integer deleteHoliday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer holidayID) {
+        final String DELETE_HOLIDAY_URL = HOLIDAYS_URL + "/" + holidayID + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerDelete(requestSpec, responseSpec, DELETE_HOLIDAY_URL, "{}", "resourceId");
+    }
+
 }
