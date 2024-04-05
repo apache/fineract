@@ -250,7 +250,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 15 January 2024  | Repayment        | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 250.0        |
-      | 01 February 2024 | Re-amortize      | 375.0  | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
+      | 01 February 2024 | Re-amortize      | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 0.0          |
 
   @TestRailId:C3076 @AdvancedPaymentAllocation
   Scenario: Verify Loan re-amortization transaction - UC4: N+1 Installment scenario
