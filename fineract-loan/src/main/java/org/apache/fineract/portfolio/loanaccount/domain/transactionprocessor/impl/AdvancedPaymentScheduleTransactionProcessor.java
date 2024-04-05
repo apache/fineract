@@ -206,7 +206,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void handleReAmortization(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments) {
-        BigDecimal remainingAmount = loanTransaction.getAmount();
         LocalDate transactionDate = loanTransaction.getTransactionDate();
         List<LoanRepaymentScheduleInstallment> previousInstallments = installments.stream() //
                 .filter(installment -> !installment.getDueDate().isAfter(transactionDate)) //
@@ -224,28 +223,26 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             installment.updateDerivedFields(currency, transactionDate);
         }
 
-        if (overallOverDuePrincipal.compareTo(remainingAmount) != 0) {
-            remainingAmount = overallOverDuePrincipal;
-            loanTransaction.updateComponentsAndTotal(Money.of(currency, remainingAmount), Money.zero(currency), Money.zero(currency),
-                    Money.zero(currency));
-        }
+        loanTransaction.resetDerivedComponents();
+        loanTransaction.updateComponentsAndTotal(Money.of(currency, overallOverDuePrincipal), Money.zero(currency), Money.zero(currency),
+                Money.zero(currency));
 
         LoanRepaymentScheduleInstallment lastFutureInstallment = futureInstallments.stream()
                 .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)).get();
-        BigDecimal reAmortizationAmountPerInstallment = remainingAmount.divide(BigDecimal.valueOf(futureInstallments.size()),
+        BigDecimal reAmortizationAmountPerInstallment = overallOverDuePrincipal.divide(BigDecimal.valueOf(futureInstallments.size()),
                 MoneyHelper.getRoundingMode());
         Integer installmentAmountInMultiplesOf = loanTransaction.getLoan().getLoanProduct().getInstallmentAmountInMultiplesOf();
 
         for (LoanRepaymentScheduleInstallment installment : futureInstallments) {
             if (lastFutureInstallment.equals(installment)) {
-                installment.addToPrincipal(transactionDate, Money.of(currency, remainingAmount));
+                installment.addToPrincipal(transactionDate, Money.of(currency, overallOverDuePrincipal));
             } else {
                 if (installmentAmountInMultiplesOf != null) {
                     reAmortizationAmountPerInstallment = Money.roundToMultiplesOf(reAmortizationAmountPerInstallment,
                             installmentAmountInMultiplesOf);
                 }
                 installment.addToPrincipal(transactionDate, Money.of(currency, reAmortizationAmountPerInstallment));
-                remainingAmount = remainingAmount.subtract(reAmortizationAmountPerInstallment);
+                overallOverDuePrincipal = overallOverDuePrincipal.subtract(reAmortizationAmountPerInstallment);
             }
         }
     }
