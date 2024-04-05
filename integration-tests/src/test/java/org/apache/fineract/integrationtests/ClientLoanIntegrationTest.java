@@ -116,6 +116,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.util.StringUtils;
@@ -189,6 +190,12 @@ public class ClientLoanIntegrationTest {
 
     private static ResponseSpecification createResponseSpecification(int statusCode) {
         return new ResponseSpecBuilder().expectStatusCode(statusCode).build();
+    }
+
+    @BeforeEach
+    public void setup() {
+        Utils.initializeRESTAssured();
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
     }
 
     @Test

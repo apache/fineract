@@ -98,6 +98,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.businessDateHelper = new BusinessDateHelper();
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 
     @Test
@@ -498,7 +499,6 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testLoanClassificationRealtimeOlderLoan() {
-
         // Given
         final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
