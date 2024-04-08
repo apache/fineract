@@ -40,6 +40,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntr
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMappingRepository;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +70,8 @@ public class AccountingServiceImpl implements AccountingService {
     public void createJournalEntriesForBuybackAssetTransfer(final Loan loan, final ExternalAssetOwnerTransfer transfer) {
         List<JournalEntry> journalEntryList = createJournalEntries(loan, transfer, false);
         createMappingToTransfer(transfer, journalEntryList);
-        createMappingToOwner(transfer, journalEntryList, JournalEntryType.CREDIT);
+        createMappingToOwner(transfer, journalEntryList,
+                LoanStatus.OVERPAID.equals(loan.getStatus()) ? JournalEntryType.DEBIT : JournalEntryType.CREDIT);
     }
 
     @NotNull

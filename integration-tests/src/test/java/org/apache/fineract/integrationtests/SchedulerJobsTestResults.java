@@ -550,6 +550,8 @@ public class SchedulerJobsTestResults {
         Assertions.assertEquals(LocalDate.of(2024, 6, 4), dueDate,
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
 
+        // Remove the Holiday created
+        HolidayHelper.deleteHoliday(requestSpec, responseSpec, holidayId);
     }
 
     @Test

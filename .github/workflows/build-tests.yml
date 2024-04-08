@@ -1,0 +1,42 @@
+name: Fineract Tests
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 17
+        uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: gradle
+      - name: Build the image
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber
+      - name: Start the Fineract stack
+        run: docker compose -f docker-compose-postgresql.yml up -d
+      - name: Wait for stack to come up
+        run: sleep 400
+      - name: Check the stack
+        run: docker ps
+      - name: Check health Manager
+        run: curl -f -k --retry 10 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+      - name: Execute tests
+        env:
+          BASE_URL: https://localhost:8443
+          TEST_USERNAME: mifos
+          TEST_PASSWORD: password
+          TEST_TENANT_ID: default
+          INITIALIZATION_ENABLED: true
+          EVENT_VERIFICATION_ENABLED: false
+        run: ./gradlew --no-daemon --console=plain fineract-e2e-tests-runner:cucumber --tags 'not @Skip' allureReport

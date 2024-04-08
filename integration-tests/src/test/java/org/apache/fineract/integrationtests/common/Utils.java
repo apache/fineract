@@ -19,6 +19,9 @@
 package org.apache.fineract.integrationtests.common;
 
 import static io.restassured.RestAssured.given;
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MONTHS;
+import static java.time.temporal.ChronoUnit.WEEKS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -95,9 +98,7 @@ public final class Utils {
     public static final String SOURCE_SET_NUMBERS_AND_LETTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static final String SOURCE_SET_NUMBERS = "1234567890";
 
-    private Utils() {
-
-    }
+    private Utils() {}
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -213,6 +214,16 @@ public final class Utils {
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
+        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static <T> T performServerPatch(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String getURL, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().patch(getURL).andReturn()
+                .asString();
         if (jsonAttributeToGetBack == null) {
             return (T) json;
         }
@@ -521,5 +532,17 @@ public final class Utils {
 
     public static LocalDate getDateAsLocalDate(String dateAsString) {
         return LocalDate.parse(dateAsString, dateFormatter);
+    }
+
+    public static long getDifferenceInDays(final LocalDate localDateBefore, final LocalDate localDateAfter) {
+        return DAYS.between(localDateBefore, localDateAfter);
+    }
+
+    public static long getDifferenceInWeeks(final LocalDate localDateBefore, final LocalDate localDateAfter) {
+        return WEEKS.between(localDateBefore, localDateAfter);
+    }
+
+    public static long getDifferenceInMonths(final LocalDate localDateBefore, final LocalDate localDateAfter) {
+        return MONTHS.between(localDateBefore, localDateAfter);
     }
 }

@@ -199,6 +199,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanRepository loanRepository;
     private final GSIMReadPlatformService gsimReadPlatformService;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final LoanProductDataValidator loanProductDataValidator;
     private final EntityManager entityManager;
 
     @Transactional
@@ -257,6 +258,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
 
             final Loan newLoanApplication = this.loanAssembler.assembleFrom(command);
+            final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(command.parsedJson());
+            loanProductDataValidator.fixedLengthValidations(newLoanApplication.getTransactionProcessingStrategyCode(), loanApplicationTerms,
+                    this.fromJsonHelper.parse(command.json()), baseDataValidator);
 
             checkForProductMixRestrictions(newLoanApplication);
 
@@ -442,7 +446,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         CalendarEntityType.LOANS.getValue());
                 this.calendarInstanceRepository.save(calendarInstance);
             } else {
-                final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(command.parsedJson());
                 final Integer repaymentFrequencyNthDayType = command.integerValueOfParameterNamed("repaymentFrequencyNthDayType");
                 if (loanApplicationTerms.getRepaymentPeriodFrequencyType() == PeriodFrequencyType.MONTHS
                         && repaymentFrequencyNthDayType != null) {

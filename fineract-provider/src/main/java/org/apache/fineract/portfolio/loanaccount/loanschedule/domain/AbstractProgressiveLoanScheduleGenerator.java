@@ -282,8 +282,10 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
                     periods.add(downPaymentPeriod);
                 }
             } else {
+                Money disbursedAmount = loanScheduleParams.getDisburseDetailMap().getOrDefault(disbursementData.disbursementDate(),
+                        Money.zero(loanApplicationTerms.getCurrency()));
                 loanScheduleParams.getDisburseDetailMap().put(disbursementData.disbursementDate(),
-                        Money.of(loanApplicationTerms.getCurrency(), disbursementData.getPrincipal()));
+                        disbursedAmount.add(Money.of(loanApplicationTerms.getCurrency(), disbursementData.getPrincipal())));
             }
         }
 

@@ -98,7 +98,8 @@ public class ExternalAssetOwnerHelper extends IntegrationTest {
 
     public PagedRequestExternalAssetOwnerSearchRequest buildExternalAssetOwnerSearchRequest(String text, String attribute,
             LocalDate fromDate, LocalDate toDate, Integer page, Integer size) {
-        final Integer DEFAULT_PAGE_SIZE = 50;
+        // increase it if tests create more than 100 items
+        final Integer DEFAULT_PAGE_SIZE = 100;
         PagedRequestExternalAssetOwnerSearchRequest pagedRequest = new PagedRequestExternalAssetOwnerSearchRequest();
         ExternalAssetOwnerSearchRequest searchRequest = new ExternalAssetOwnerSearchRequest();
         searchRequest.text(text);

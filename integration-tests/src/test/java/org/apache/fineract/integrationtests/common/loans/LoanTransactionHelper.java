@@ -108,6 +108,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private static final String UNDO_APPROVAL_LOAN_COMMAND = "undoApproval";
     private static final String DISBURSE_LOAN_COMMAND = "disburse";
     private static final String DISBURSE_LOAN_TO_SAVINGS_COMMAND = "disburseToSavings";
+    private static final String DISBURSE_LOAN_WITHOUT_AUTO_PAYMENT_COMMAND = "disburseWithoutAutoDownPayment";
     private static final String UNDO_DISBURSE_LOAN_COMMAND = "undoDisbursal";
     private static final String REJECT_LOAN_COMMAND = "reject";
     private static final String UNDO_LAST_DISBURSE_LOAN_COMMAND = "undolastdisbursal";
@@ -343,6 +344,11 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanCharges.retrieveTemplate9(loanExternalId));
     }
 
+    public HashMap applyLoan(final String payload, final ResponseSpecification responseSpec) {
+        final String postURLForLoan = "/fineract-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoan, payload, null);
+    }
+
     public List getRepaymentTemplate(final Integer loanId) {
         final String GET_REPAYMENTS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/template?command=repayment&"
                 + Utils.TENANT_IDENTIFIER;
@@ -415,6 +421,12 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public HashMap disburseLoanWithTransactionAmount(final String date, final Integer loanID, final String transactionAmount) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, transactionAmount, null));
+    }
+
+    public HashMap disburseLoanWithTransactionAmountAndWithoutAutoPayment(final String date, final Integer loanID,
+            final String transactionAmount) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_WITHOUT_AUTO_PAYMENT_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, transactionAmount, null));
     }
 
@@ -1692,7 +1704,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public void printDelinquencyData(GetLoansLoanIdResponse getLoansLoanIdResponse) {
         GetLoansLoanIdDelinquencySummary getLoansLoanIdCollectionData = getLoansLoanIdResponse.getDelinquent();
         if (getLoansLoanIdCollectionData != null) {
-            log.info("Loan Delinquency {}", getLoansLoanIdCollectionData.toString());
+            log.info("Loan Delinquency {}", getLoansLoanIdCollectionData);
         }
     }
 

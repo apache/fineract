@@ -31,4 +31,6 @@ public interface PropertyService {
     Integer getThreadPoolMaxPoolSize(String jobName);
 
     Integer getThreadPoolQueueCapacity(String jobName);
+
+    Integer getPollInterval(String jobName);
 }

@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.service.database;
 import static java.lang.String.format;
 
 import jakarta.validation.constraints.NotNull;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -157,16 +159,6 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String lastInsertId() {
-        if (databaseTypeResolver.isMySQL()) {
-            return "LAST_INSERT_ID()";
-        } else if (databaseTypeResolver.isPostgreSQL()) {
-            return "LASTVAL()";
-        } else {
-            throw new IllegalStateException("Database type is not supported for last insert id " + databaseTypeResolver.databaseType());
-        }
-    }
-
     public String castChar(String sql) {
         if (databaseTypeResolver.isMySQL()) {
             return format("CAST(%s AS CHAR)", sql);
@@ -258,7 +250,7 @@ public class DatabaseSpecificSQLGenerator {
             return "";
         }
         return "INSERT INTO " + escape(definition) + '(' + fields.stream().map(this::escape).collect(Collectors.joining(", "))
-                + ") VALUES (" + fields.stream().map(e -> decoratePlaceHolder(headers, e, "?")).collect(Collectors.joining(", ")) + ')';
+                + ") VALUES (" + fields.stream().map(e -> decoratePlaceHolder(headers, e, "?")).collect(Collectors.joining(", ")) + ")";
     }
 
     public String buildUpdate(@NotNull String definition, List<String> fields, Map<String, ResultsetColumnHeaderData> headers) {
@@ -281,5 +273,20 @@ public class DatabaseSpecificSQLGenerator {
             }
         }
         return placeHolder;
+    }
+
+    public Long fetchPK(GeneratedKeyHolder keyHolder) {
+        return switch (getDialect()) {
+            case POSTGRESQL -> (Long) keyHolder.getKeys().get("id");
+            case MYSQL -> {
+                // Mariadb
+                BigInteger generatedKey = (BigInteger) keyHolder.getKeys().get("insert_id");
+                if (generatedKey == null) {
+                    // Mysql
+                    generatedKey = (BigInteger) keyHolder.getKeys().get("GENERATED_KEY");
+                }
+                yield generatedKey.longValue();
+            }
+        };
     }
 }
