@@ -2160,8 +2160,8 @@ Feature: LoanChargeback
       |    |      | 01 January 2024  |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
       | 1  | 0    | 01 January 2024  | 04 January 2024  | 375.0           | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 125.0 | 0.0         |
       | 2  | 15   | 16 January 2024  | 16 January 2024  | 250.0           | 125.0         | 0.0      | 0.0  | 3.0       | 128.0 | 128.0 | 0.0        | 0.0   | 0.0         |
-      | 3  | 15   | 31 January 2024  | 31 January 2024  | 128.0           | 250.0         | 0.0      | 0.0  | 3.0       | 253.0 | 253.0 | 0.0        | 0.0   | 0.0         |
-      | 4  | 15   | 15 February 2024 | 15 February 2024 | 3.0             | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0   | 0.0         |
+      | 3  | 15   | 31 January 2024  | 31 January 2024  | 125.0           | 250.0         | 0.0      | 0.0  | 3.0       | 253.0 | 253.0 | 0.0        | 0.0   | 0.0         |
+      | 4  | 15   | 15 February 2024 | 15 February 2024 | 0.0             | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0   | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
       | 625.0         | 0.0      | 0.0  | 6.0       | 631.0 | 631.0 | 0.0        | 125.0 | 0.0         |
@@ -2200,8 +2200,8 @@ Feature: LoanChargeback
       |    |      | 01 January 2024  |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
       | 1  | 0    | 01 January 2024  | 04 January 2024  | 375.0           | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 125.0 | 0.0         |
       | 2  | 15   | 16 January 2024  | 16 January 2024  | 250.0           | 125.0         | 0.0      | 0.0  | 3.0       | 128.0 | 128.0 | 0.0        | 0.0   | 0.0         |
-      | 3  | 15   | 31 January 2024  | 15 February 2024 | 128.0           | 175.0         | 0.0      | 0.0  | 3.0       | 178.0 | 178.0 | 0.0        | 3.0   | 0.0         |
-      | 4  | 15   | 15 February 2024 | 15 February 2024 | 3.0             | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0   | 0.0         |
+      | 3  | 15   | 31 January 2024  | 15 February 2024 | 125.0           | 175.0         | 0.0      | 0.0  | 3.0       | 178.0 | 178.0 | 0.0        | 3.0   | 0.0         |
+      | 4  | 15   | 15 February 2024 | 15 February 2024 | 0.0             | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0   | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
       | 550.0         | 0.0      | 0.0  | 6.0       | 556.0 | 556.0 | 0.0        | 128.0 | 0.0         |
@@ -2242,8 +2242,8 @@ Feature: LoanChargeback
       |    |      | 01 January 2024  |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
       | 1  | 0    | 01 January 2024  | 04 January 2024  | 375.0           | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 125.0 | 0.0         |
       | 2  | 15   | 16 January 2024  | 31 January 2024  | 250.0           | 125.0         | 0.0      | 4.0  | 3.0       | 132.0 | 132.0 | 0.0        | 7.0   | 0.0         |
-      | 3  | 15   | 31 January 2024  | 15 February 2024 | 132.0           | 168.0         | 0.0      | 4.0  | 3.0       | 175.0 | 175.0 | 0.0        | 57.0  | 0.0         |
-      | 4  | 15   | 15 February 2024 | 15 February 2024 | 7.0             | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0   | 0.0         |
+      | 3  | 15   | 31 January 2024  | 15 February 2024 | 125.0           | 168.0         | 0.0      | 4.0  | 3.0       | 175.0 | 175.0 | 0.0        | 57.0  | 0.0         |
+      | 4  | 15   | 15 February 2024 | 15 February 2024 | 0.0             | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0   | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
       | 543.0         | 0.0      | 8.0  | 6.0       | 557.0 | 557.0 | 0.0        | 189.0 | 0.0         |
@@ -2844,3 +2844,131 @@ Feature: LoanChargeback
       | LIABILITY | 145023       | Suspense/Clearing account |       | 280.0  |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 250.0 |        |
       | INCOME    | 404008       | Fee Charge Off            | 30.0  |        |
+
+  @TestRailId:C3111 @creditAllocation @AdvancedPaymentAllocationChargeback @AdvancedPaymentAllocation
+  Scenario: Verify chargeback function for advanced payment allocation - credit allocation accounting entries UC10: chargeback on overpaid loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROG_SCHEDULE_HOR_INST_LVL_DELINQUENCY_CREDIT_ALLOCATION | 01 January 2024   | 100            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 0    | 01 January 2024  |                  | 75.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 0.0   | 0.0        | 0.0   | 25.0        |
+      | 2  | 31   | 01 February 2024 |                  | 50.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 0.0   | 0.0        | 0.0   | 25.0        |
+      | 3  | 29   | 01 March 2024    |                  | 25.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 0.0   | 0.0        | 0.0   | 25.0        |
+      | 4  | 31   | 01 April 2024    |                  | 0.0             |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 0.0   | 0.0        | 0.0   | 25.0        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
+    When Admin adds "LOAN_NSF_FEE" due date charge with "05 January 2024" due date and 5 EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 0    | 01 January 2024  |                  | 75.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 0.0   | 0.0        | 0.0   | 25.0        |
+      | 2  | 31   | 01 February 2024 |                  | 50.0            |  25.0         | 0.0      | 0.0  | 5.0       | 30.0  | 0.0   | 0.0        | 0.0   | 30.0        |
+      | 3  | 29   | 01 March 2024    |                  | 25.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 0.0   | 0.0        | 0.0   | 25.0        |
+      | 4  | 31   | 01 April 2024    |                  | 0.0             |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 0.0   | 0.0        | 0.0   | 25.0        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
+    When Admin sets the business date to "01 February 2024"
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 105 EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   |  0.0  |            |       |             |
+      | 1  | 0    | 01 January 2024  | 01 February 2024 | 75.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  |  0.0       | 25.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 50.0            |  25.0         | 0.0      | 0.0  | 5.0       | 30.0  | 30.0  |  0.0       | 0.0   | 0.0         |
+      | 3  | 29   | 01 March 2024    | 01 February 2024 | 25.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 25.0       | 0.0   | 0.0         |
+      | 4  | 31   | 01 April 2024    | 01 February 2024 | 0.0             |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 25.0       | 0.0   | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
+      | 01 February 2024 | Repayment        | 105.0  | 100.0     | 0.0      | 0.0  | 5.0       | 0.0          |
+      | 01 February 2024 | Accrual          | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          |
+    Then Loan has 0 outstanding amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin sets the business date to "01 March 2024"
+    When Admin makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "19 January 2024" with 10 EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   |  0.0  |            |       |             |
+      | 1  | 0    | 01 January 2024  | 01 February 2024 | 75.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  |  0.0       | 25.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 50.0            |  25.0         | 0.0      | 0.0  | 5.0       | 30.0  | 30.0  |  0.0       | 0.0   | 0.0         |
+      | 3  | 29   | 01 March 2024    | 01 February 2024 | 25.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 25.0       | 0.0   | 0.0         |
+      | 4  | 31   | 01 April 2024    | 01 February 2024 | 0.0             |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 25.0       | 0.0   | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type         | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Overpayment |
+      | 01 January 2024  | Disbursement             | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
+      | 19 January 2024  | Merchant Issued Refund   | 10.0   | 10.0      | 0.0      | 0.0  |  0.0      | 90.0         | 0.0         |
+      | 01 February 2024 | Repayment                | 105.0  | 90.0      | 0.0      | 0.0  | 5.0       | 0.0          | 10.0        |
+      | 01 February 2024 | Accrual                  |  5.0   | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
+    Then Loan has 0 outstanding amount
+    Then Loan has 10 overpaid amount
+    Then Loan status will be "OVERPAID"
+    When Admin sets the business date to "15 April 2024"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 7 EUR transaction amount for Payment nr. 1
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 100.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 100.0  |
+    Then Loan Transactions tab has a "MERCHANT_ISSUED_REFUND" transaction with date "19 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 10.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 10.0  |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 90.0   |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 5.0    |
+      | LIABILITY | l1           | Overpayment account       |       | 10.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 105.0 |        |
+    Then Loan Repayment schedule has 5 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   |  0.0  |            |       |             |
+      | 1  | 0    | 01 January 2024  | 01 February 2024 | 75.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  |  0.0       | 25.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 50.0            |  25.0         | 0.0      | 0.0  | 5.0       | 30.0  | 30.0  |  0.0       | 0.0   | 0.0         |
+      | 3  | 29   | 01 March 2024    | 01 February 2024 | 25.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 25.0       | 0.0   | 0.0         |
+      | 4  | 31   | 01 April 2024    | 01 February 2024 | 0.0             |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 25.0       | 0.0   | 0.0         |
+      | 5  | 14   | 15 April 2024    | 15 April 2024    | 0.0             |  2.0          | 0.0      | 0.0  | 5.0       | 7.0   | 7.0   | 0.0        | 0.0   | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type         | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Overpayment |
+      | 01 January 2024  | Disbursement             | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
+      | 19 January 2024  | Merchant Issued Refund   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 90.0         | 0.0         |
+      | 01 February 2024 | Repayment                | 105.0  | 90.0      | 0.0      | 0.0  | 5.0       | 0.0          | 10.0        |
+      | 01 February 2024 | Accrual                  |  5.0   | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
+      | 15 April 2024    | Chargeback               | 7.0    | 2.0       | 0.0      | 0.0  | 5.0       | 0.0          | 7.0         |
+    Then Loan Transactions tab has a "CHARGEBACK" transaction with date "15 April 2024" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | l1           | Overpayment account       |  7.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 7.0    |
+    Then Loan has 0 outstanding amount
+    Then Loan has 3 overpaid amount
+    Then Loan status will be "OVERPAID"
+    When Admin sets the business date to "16 April 2024"
+    When Admin makes "REPAYMENT_ADJUSTMENT_REFUND" chargeback with 7 EUR transaction amount for Payment nr. 1
+    Then Loan Repayment schedule has 5 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   |  0.0  |            |       |             |
+      | 1  | 0    | 01 January 2024  | 01 February 2024 | 75.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  |  0.0       | 25.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 50.0            |  25.0         | 0.0      | 0.0  | 5.0       | 30.0  | 30.0  |  0.0       | 0.0   | 0.0         |
+      | 3  | 29   | 01 March 2024    | 01 February 2024 | 25.0            |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 25.0       | 0.0   | 0.0         |
+      | 4  | 31   | 01 April 2024    | 01 February 2024 | 0.0             |  25.0         | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 25.0       | 0.0   | 0.0         |
+      | 5  | 15   | 16 April 2024    |                  | 0.0             |  9.0          | 0.0      | 0.0  | 5.0       | 14.0  | 10.0  | 0.0        | 0.0   | 4.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type         | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Overpayment |
+      | 01 January 2024  | Disbursement             | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
+      | 19 January 2024  | Merchant Issued Refund   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 90.0         | 0.0         |
+      | 01 February 2024 | Repayment                | 105.0  | 90.0      | 0.0      | 0.0  | 5.0       | 0.0          | 10.0        |
+      | 01 February 2024 | Accrual                  |  5.0   | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
+      | 15 April 2024    | Chargeback               | 7.0    | 2.0       | 0.0      | 0.0  | 5.0       | 0.0          | 7.0         |
+      | 16 April 2024    | Chargeback               | 7.0    | 7.0       | 0.0      | 0.0  | 0.0       | 4.0          | 3.0         |
+    Then Loan Transactions tab has a "CHARGEBACK" transaction with date "16 April 2024" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | l1           | Overpayment account       |  3.0  |        |
+      | ASSET     | 112601       | Loans Receivable          |  4.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 7.0    |
+    Then Loan has 4 outstanding amount
+    Then Loan status will be "ACTIVE"
