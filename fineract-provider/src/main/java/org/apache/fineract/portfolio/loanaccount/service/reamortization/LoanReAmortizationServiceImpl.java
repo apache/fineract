@@ -22,7 +22,6 @@ import static java.math.BigDecimal.ZERO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,7 +43,6 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanReAmortizationApiConsta
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
@@ -135,18 +133,11 @@ public class LoanReAmortizationServiceImpl {
     }
 
     private void reProcessLoanTransactions(Loan loan) {
-        final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
-        List<LoanTransaction> trans = loan.getLoanTransactions();
-        for (final LoanTransaction transaction : trans) {
-            if (transaction.isNotReversed() && (transaction.isChargeOff() || !transaction.isNonMonetaryTransaction())) {
-                repaymentsOrWaivers.add(transaction);
-            }
-        }
-        repaymentsOrWaivers.sort(LoanTransactionComparator.INSTANCE);
+        final List<LoanTransaction> filteredTransactions = loan.retrieveListOfTransactionsForReprocessing();
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(), repaymentsOrWaivers,
+        loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(), filteredTransactions,
                 loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
     }
 

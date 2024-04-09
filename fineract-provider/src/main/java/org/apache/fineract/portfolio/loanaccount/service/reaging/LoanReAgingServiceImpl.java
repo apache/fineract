@@ -44,7 +44,6 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
@@ -181,8 +180,7 @@ public class LoanReAgingServiceImpl {
     }
 
     private void reProcessLoanTransactions(Loan loan) {
-        final List<LoanTransaction> filteredTransactions = loan.getLoanTransactions().stream().filter(LoanTransaction::isNotReversed)
-                .filter(t -> t.isChargeOff() || !t.isNonMonetaryTransaction()).sorted(LoanTransactionComparator.INSTANCE).toList();
+        final List<LoanTransaction> filteredTransactions = loan.retrieveListOfTransactionsForReprocessing();
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
