@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.cob.loan;
 
-import static org.apache.fineract.cob.loan.LoanCOBConstant.LOAN_COB_JOB_NAME;
+import static org.apache.fineract.cob.loan.LoanCOBConstant.JOB_NAME;
 
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
@@ -87,8 +87,8 @@ public class LoanCOBManagerConfiguration {
     @Bean
     public Step loanCOBStep() {
         return stepBuilderFactory.get(LoanCOBConstant.LOAN_COB_PARTITIONER_STEP)
-                .partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner())
-                .pollInterval(propertyService.getPollInterval(LOAN_COB_JOB_NAME)).outputChannel(outboundRequests).build();
+                .partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner()).pollInterval(propertyService.getPollInterval(JOB_NAME))
+                .outputChannel(outboundRequests).build();
     }
 
     @Bean
