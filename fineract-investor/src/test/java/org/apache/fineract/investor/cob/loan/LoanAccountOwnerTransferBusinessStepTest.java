@@ -383,6 +383,55 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         assertEquals("Execute external asset owner transfer", actualEnumName);
     }
 
+    @Test
+    public void givenLoanSaleAnsBuyBackButBalanceIsNegative() {
+        // given
+        final Loan loanForProcessing = Mockito.mock(Loan.class);
+        when(loanForProcessing.getId()).thenReturn(1L);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
+        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
+        when(loanForProcessing.getTotalOverpaid()).thenReturn(BigDecimal.ONE);
+        ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        secondResponseItem.setSettlementDate(actualDate.plusDays(2));
+
+        ExternalAssetOwnerTransfer firstSaveResult = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer secondSaveResult = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        secondSaveResult.setSettlementDate(actualDate.plusDays(2));
+        ExternalAssetOwnerTransfer thirdSaveResult = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer fourthSaveResult = Mockito.mock(ExternalAssetOwnerTransfer.class);
+
+        when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.PENDING);
+        when(externalAssetOwnerTransferRepository.save(any(ExternalAssetOwnerTransfer.class))).thenReturn(firstSaveResult)
+                .thenReturn(secondSaveResult).thenReturn(thirdSaveResult).thenReturn(fourthSaveResult);
+        List<ExternalAssetOwnerTransfer> response = List.of(firstResponseItem);
+        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id"))))
+                .thenReturn(response);
+        ArgumentCaptor<ExternalAssetOwnerTransfer> externalAssetOwnerTransferArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerTransfer.class);
+        // when
+        Loan processedLoan = underTest.execute(loanForProcessing);
+        // then
+        verify(externalAssetOwnerTransferRepository, times(1)).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "id")));
+        verify(firstResponseItem).setEffectiveDateTo(actualDate);
+        verify(externalAssetOwnerTransferRepository, times(2)).save(externalAssetOwnerTransferArgumentCaptor.capture());
+
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getOwner(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getOwner());
+        assertEquals(externalAssetOwnerTransferArgumentCaptor.getAllValues().get(0).getExternalId(),
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getExternalId());
+        assertEquals(ExternalTransferStatus.DECLINED, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getStatus());
+        assertEquals(ExternalTransferSubStatus.BALANCE_NEGATIVE,
+                externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getSubStatus());
+        assertEquals(actualDate, externalAssetOwnerTransferArgumentCaptor.getAllValues().get(1).getSettlementDate());
+
+        assertEquals(processedLoan, loanForProcessing);
+
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, secondSaveResult);
+    }
+
     @NotNull
     private ArgumentCaptor<BusinessEvent<?>> verifyBusinessEvents(int expectedBusinessEvents) {
         @SuppressWarnings("unchecked")
