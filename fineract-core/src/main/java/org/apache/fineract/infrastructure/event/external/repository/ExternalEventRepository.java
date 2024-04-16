@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.repository;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -40,6 +41,7 @@ public interface ExternalEventRepository extends JpaRepository<ExternalEvent, Lo
     void deleteOlderEventsWithSentStatus(@Param("status") ExternalEventStatus status,
             @Param("dateForPurgeCriteria") LocalDate dateForPurgeCriteria);
 
+    @Transactional
     @Modifying
     @Query("UPDATE ExternalEvent e SET e.status = org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus.SENT, e.sentAt = :sentAt WHERE e.id IN :ids")
     void markEventsSent(@Param("ids") List<Long> ids, @Param("sentAt") OffsetDateTime sentAt);
