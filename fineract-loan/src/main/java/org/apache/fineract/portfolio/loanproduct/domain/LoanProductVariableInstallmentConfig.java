@@ -25,14 +25,22 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 
 @Entity
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "m_product_loan_variable_installment_config")
 public class LoanProductVariableInstallmentConfig extends AbstractPersistableCustom {
 
+    @Setter
     @OneToOne
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -42,20 +50,6 @@ public class LoanProductVariableInstallmentConfig extends AbstractPersistableCus
 
     @Column(name = "maximum_gap")
     private Integer maximumGap;
-
-    protected LoanProductVariableInstallmentConfig() {
-
-    }
-
-    public LoanProductVariableInstallmentConfig(final LoanProduct loanProduct, final Integer minimumGap, final Integer maximumGap) {
-        this.loanProduct = loanProduct;
-        this.minimumGap = minimumGap;
-        this.maximumGap = maximumGap;
-    }
-
-    public void setLoanProduct(final LoanProduct loanProduct) {
-        this.loanProduct = loanProduct;
-    }
 
     public Map<? extends String, ?> update(JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(3);
@@ -74,13 +68,4 @@ public class LoanProductVariableInstallmentConfig extends AbstractPersistableCus
 
         return actualChanges;
     }
-
-    public Integer getMinimumGap() {
-        return this.minimumGap;
-    }
-
-    public Integer getMaximumGap() {
-        return this.maximumGap;
-    }
-
 }
