@@ -936,18 +936,33 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             Money penaltyPortion = Money.zero(currency);
 
             for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loan.getRepaymentScheduleInstallments()) {
+                // TODO: test with interest waiving
                 interestPortion = interestPortion.add(loanRepaymentScheduleInstallment.getInterestCharged(currency))
                         .minus(loanRepaymentScheduleInstallment.getInterestAccrued(currency))
                         .minus(loanRepaymentScheduleInstallment.getInterestWaived(currency));
-                feePortion = feePortion.add(loanRepaymentScheduleInstallment.getFeeChargesCharged(currency))
-                        .minus(loanRepaymentScheduleInstallment.getFeeAccrued(currency))
-                        .minus(loanRepaymentScheduleInstallment.getFeeChargesWaived(currency))
-                        .minus(loanRepaymentScheduleInstallment.getCreditedFee(currency));
-                penaltyPortion = penaltyPortion.add(loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency))
-                        .minus(loanRepaymentScheduleInstallment.getPenaltyAccrued(currency))
-                        .minus(loanRepaymentScheduleInstallment.getPenaltyChargesWaived(currency))
-                        .minus(loanRepaymentScheduleInstallment.getCreditedPenalty(currency));
             }
+
+            for (LoanCharge loanCharge : loan.getLoanCharges()) {
+                if (!loanCharge.isActive()) {
+                    continue;
+                }
+                BigDecimal accruedAmount = BigDecimal.ZERO;
+                BigDecimal waivedAmount = BigDecimal.ZERO;
+                for (LoanChargePaidBy loanChargePaidBy : loanCharge.getLoanChargePaidBySet()) {
+                    if (loanChargePaidBy.getLoanTransaction().isAccrual()) {
+                        accruedAmount = accruedAmount.add(loanChargePaidBy.getLoanTransaction().getAmount());
+                    } else if (loanChargePaidBy.getLoanTransaction().isChargesWaiver()) {
+                        waivedAmount = waivedAmount.add(loanChargePaidBy.getLoanTransaction().getAmount());
+                    }
+                }
+                Money needToAccrueAmount = MathUtil.negativeToZero(loanCharge.getAmount(currency).minus(accruedAmount).minus(waivedAmount));
+                if (loanCharge.isPenaltyCharge()) {
+                    penaltyPortion = penaltyPortion.add(needToAccrueAmount);
+                } else if (loanCharge.isFeeCharge()) {
+                    feePortion = feePortion.add(needToAccrueAmount);
+                }
+            }
+
             Money total = interestPortion.plus(feePortion).plus(penaltyPortion);
 
             if (total.isGreaterThanZero()) {
