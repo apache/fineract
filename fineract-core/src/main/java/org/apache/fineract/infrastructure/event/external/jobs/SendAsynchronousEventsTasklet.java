@@ -34,9 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.external.producer.ExternalEventProducer;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
@@ -106,14 +104,10 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         // Partitioning dataset to avoid exception: PreparedStatement can have at most 65,535 parameters
         final int partitionSize = fineractProperties.getEvents().getExternal().getPartitionSize();
         List<List<Long>> partitions = Lists.partition(eventIds, partitionSize);
-        FineractContext context = ThreadLocalContextUtil.getContext();
-        partitions.stream() //
-                .parallel() //
+        partitions //
                 .forEach(partitionedEventIds -> {
                     measure(() -> {
-                        ThreadLocalContextUtil.init(context);
                         repository.markEventsSent(partitionedEventIds, sentAt);
-                        ThreadLocalContextUtil.reset();
                     }, timeTaken -> {
                         log.debug("Took {}ms to update {} events", timeTaken.toMillis(), partitionedEventIds.size());
                     });
