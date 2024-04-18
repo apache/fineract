@@ -118,7 +118,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
-        if (loanProduct.useBorrowerCycle()) {
+        if (loanProduct.isUseBorrowerCycle()) {
             final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", query.parsedJson());
             final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", query.parsedJson());
             Integer cycleNumber = 0;

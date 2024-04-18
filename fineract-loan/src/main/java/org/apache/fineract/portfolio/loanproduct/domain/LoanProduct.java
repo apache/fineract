@@ -44,6 +44,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -77,6 +79,8 @@ import org.apache.fineract.portfolio.rate.domain.Rate;
  * They allow for constraints to be added at product level.
  */
 @Entity
+@Getter
+@Setter
 @Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
         @UniqueConstraint(columnNames = { "short_name" }, name = "unq_short_name") })
@@ -844,26 +848,6 @@ public class LoanProduct extends AbstractPersistableCustom {
         return this.loanProductRelatedDetail.getCurrency();
     }
 
-    public void update(final Fund fund) {
-        this.fund = fund;
-    }
-
-    public void setTransactionProcessingStrategyCode(final String transactionProcessingStrategyCode) {
-        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
-    }
-
-    public String getTransactionProcessingStrategyCode() {
-        return this.transactionProcessingStrategyCode;
-    }
-
-    public void setTransactionProcessingStrategyName(final String transactionProcessingStrategyName) {
-        this.transactionProcessingStrategyName = transactionProcessingStrategyName;
-    }
-
-    public String getRepaymentStrategy() {
-        return this.transactionProcessingStrategyCode;
-    }
-
     public boolean hasCurrencyCodeOf(final String currencyCode) {
         return this.loanProductRelatedDetail.hasCurrencyCodeOf(currencyCode);
     }
@@ -908,30 +892,6 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.rates = newProductRates;
         }
         return updated;
-    }
-
-    public Integer getAccountingType() {
-        return this.accountingRule;
-    }
-
-    public List<Charge> getLoanProductCharges() {
-        return this.charges;
-    }
-
-    public List<LoanProductPaymentAllocationRule> getPaymentAllocationRules() {
-        return this.paymentAllocationRules;
-    }
-
-    public List<LoanProductCreditAllocationRule> getCreditAllocationRules() {
-        return this.creditAllocationRules;
-    }
-
-    public void update(final LoanProductConfigurableAttributes loanConfigurableAttributes) {
-        this.loanConfigurableAttributes = loanConfigurableAttributes;
-    }
-
-    public LoanProductConfigurableAttributes getLoanProductConfigurableAttributes() {
-        return this.loanConfigurableAttributes;
     }
 
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
@@ -1395,10 +1355,6 @@ public class LoanProduct extends AbstractPersistableCustom {
         return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
     }
 
-    public boolean isAccrualBasedAccountingEnabled() {
-        return isUpfrontAccrualAccountingEnabled() || isPeriodicAccrualAccountingEnabled();
-    }
-
     public boolean isUpfrontAccrualAccountingEnabled() {
         return AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(this.accountingRule);
     }
@@ -1457,30 +1413,6 @@ public class LoanProduct extends AbstractPersistableCustom {
         return this.loanProductMinMaxConstraints;
     }
 
-    public boolean isIncludeInBorrowerCycle() {
-        return this.includeInBorrowerCycle;
-    }
-
-    public LocalDate getStartDate() {
-        return this.startDate;
-    }
-
-    public LocalDate getCloseDate() {
-        return this.closeDate;
-    }
-
-    public String productName() {
-        return this.name;
-    }
-
-    public ExternalId getExternalId() {
-        return this.externalId;
-    }
-
-    public boolean useBorrowerCycle() {
-        return this.useBorrowerCycle;
-    }
-
     public boolean isMultiDisburseLoan() {
         return this.loanProductTrancheDetails.isMultiDisburseLoan();
     }
@@ -1510,14 +1442,6 @@ public class LoanProduct extends AbstractPersistableCustom {
             }
         }
         return borrowerCycleVariation;
-    }
-
-    public boolean syncExpectedWithDisbursementDate() {
-        return syncExpectedWithDisbursementDate;
-    }
-
-    public void setSyncExpectedWithDisbursementDate(boolean syncExpectedWithDisbursementDate) {
-        this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
     }
 
     public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
@@ -1627,40 +1551,12 @@ public class LoanProduct extends AbstractPersistableCustom {
         return this.loanProductRelatedDetail.fetchDaysInYearType();
     }
 
-    public LoanProductInterestRecalculationDetails getProductInterestRecalculationDetails() {
-        return this.productInterestRecalculationDetails;
-    }
-
-    public boolean isHoldGuaranteeFundsEnabled() {
-        return this.holdGuaranteeFunds;
-    }
-
-    public LoanProductGuaranteeDetails getLoanProductGuaranteeDetails() {
-        return this.loanProductGuaranteeDetails;
-    }
-
-    public String getShortName() {
-        return this.shortName;
-    }
-
-    public BigDecimal getPrincipalThresholdForLastInstallment() {
-        return this.principalThresholdForLastInstallment;
-    }
-
     public boolean isArrearsBasedOnOriginalSchedule() {
         boolean isBasedOnOriginalSchedule = false;
         if (getProductInterestRecalculationDetails() != null) {
             isBasedOnOriginalSchedule = getProductInterestRecalculationDetails().isArrearsBasedOnOriginalSchedule();
         }
         return isBasedOnOriginalSchedule;
-    }
-
-    public boolean canDefineInstallmentAmount() {
-        return this.canDefineInstallmentAmount;
-    }
-
-    public Integer getInstallmentAmountInMultiplesOf() {
-        return this.installmentAmountInMultiplesOf;
     }
 
     public LoanPreClosureInterestCalculationStrategy preCloseInterestCalculationStrategy() {
@@ -1671,18 +1567,6 @@ public class LoanProduct extends AbstractPersistableCustom {
         return preCloseInterestCalculationStrategy;
     }
 
-    public LoanProductRelatedDetail getLoanProductRelatedDetail() {
-        return loanProductRelatedDetail;
-    }
-
-    public boolean isLinkedToFloatingInterestRate() {
-        return this.isLinkedToFloatingInterestRate;
-    }
-
-    public LoanProductFloatingRates getFloatingRates() {
-        return this.floatingRates;
-    }
-
     public Collection<FloatingRatePeriodData> fetchInterestRates(final FloatingRateDTO floatingRateDTO) {
         Collection<FloatingRatePeriodData> applicableRates = new ArrayList<>(1);
         if (isLinkedToFloatingInterestRate()) {
@@ -1691,92 +1575,15 @@ public class LoanProduct extends AbstractPersistableCustom {
         return applicableRates;
     }
 
-    public boolean allowVariabeInstallments() {
-        return this.allowVariabeInstallments;
-    }
-
-    public boolean canUseForTopup() {
-        return this.canUseForTopup;
-    }
-
     public boolean isEqualAmortization() {
         return loanProductRelatedDetail.isEqualAmortization();
-    }
-
-    public List<Rate> getRates() {
-        return rates;
-    }
-
-    public void setRates(List<Rate> rates) {
-        this.rates = rates;
-    }
-
-    public BigDecimal getFixedPrincipalPercentagePerInstallment() {
-        return fixedPrincipalPercentagePerInstallment;
-    }
-
-    public boolean isDisallowExpectedDisbursements() {
-        return disallowExpectedDisbursements;
-    }
-
-    public boolean isAllowApprovedDisbursedAmountsOverApplied() {
-        return allowApprovedDisbursedAmountsOverApplied;
-    }
-
-    public String getOverAppliedCalculationType() {
-        return overAppliedCalculationType;
-    }
-
-    public Integer getOverAppliedNumber() {
-        return overAppliedNumber;
-    }
-
-    public void setDisallowExpectedDisbursements(boolean disallowExpectedDisbursements) {
-        this.disallowExpectedDisbursements = disallowExpectedDisbursements;
-    }
-
-    public void setAllowApprovedDisbursedAmountsOverApplied(boolean allowApprovedDisbursedAmountsOverApplied) {
-        this.allowApprovedDisbursedAmountsOverApplied = allowApprovedDisbursedAmountsOverApplied;
-    }
-
-    public void setOverAppliedCalculationType(String overAppliedCalculationType) {
-        this.overAppliedCalculationType = overAppliedCalculationType;
-    }
-
-    public void setOverAppliedNumber(Integer overAppliedNumber) {
-        this.overAppliedNumber = overAppliedNumber;
-    }
-
-    public void setLoanProductTrancheDetails(LoanProductTrancheDetails loanProducTrancheDetails) {
-        this.loanProductTrancheDetails = loanProducTrancheDetails;
-    }
-
-    public DelinquencyBucket getDelinquencyBucket() {
-        return delinquencyBucket;
-    }
-
-    public void setDelinquencyBucket(DelinquencyBucket delinquencyBucket) {
-        this.delinquencyBucket = delinquencyBucket;
-    }
-
-    public Integer getDueDaysForRepaymentEvent() {
-        return this.dueDaysForRepaymentEvent;
-    }
-
-    public Integer getOverDueDaysForRepaymentEvent() {
-        return this.overDueDaysForRepaymentEvent;
     }
 
     public RepaymentStartDateType getRepaymentStartDateType() {
         return this.repaymentStartDateType == null ? RepaymentStartDateType.INVALID : this.repaymentStartDateType;
     }
 
-    public boolean isEnableInstallmentLevelDelinquency() {
-        return enableInstallmentLevelDelinquency;
-    }
-
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
-
 }

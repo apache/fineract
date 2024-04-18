@@ -107,7 +107,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     public void validateGuarantorBusinessRules(Loan loan) {
         LoanProduct loanProduct = loan.loanProduct();
         BigDecimal principal = loan.getPrincipal().getAmount();
-        if (loanProduct.isHoldGuaranteeFundsEnabled()) {
+        if (loanProduct.isHoldGuaranteeFunds()) {
             LoanProductGuaranteeDetails guaranteeData = loanProduct.getLoanProductGuaranteeDetails();
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             BigDecimal mandatoryAmount = principal.multiply(guaranteeData.getMandatoryGuarantee()).divide(BigDecimal.valueOf(100));
@@ -313,7 +313,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      *
      */
     private void holdGuarantorFunds(final Loan loan) {
-        if (loan.loanProduct().isHoldGuaranteeFundsEnabled()) {
+        if (loan.loanProduct().isHoldGuaranteeFunds()) {
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             List<GuarantorFundingDetails> guarantorFundingDetailList = new ArrayList<>();
             List<DepositAccountOnHoldTransaction> onHoldTransactions = new ArrayList<>();
