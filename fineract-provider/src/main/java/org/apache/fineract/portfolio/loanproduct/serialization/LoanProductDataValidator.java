@@ -1556,7 +1556,7 @@ public final class LoanProductDataValidator {
                 baseDataValidator);
 
         // Guarantee Funds
-        Boolean holdGuaranteeFunds = loanProduct.isHoldGuaranteeFundsEnabled();
+        Boolean holdGuaranteeFunds = loanProduct.isHoldGuaranteeFunds();
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.holdGuaranteeFundsParamName, element)) {
             holdGuaranteeFunds = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.holdGuaranteeFundsParamName, element);
             baseDataValidator.reset().parameter(LoanProductConstants.holdGuaranteeFundsParamName).value(holdGuaranteeFunds).notNull()
@@ -2378,7 +2378,7 @@ public final class LoanProductDataValidator {
                     variableInstallments = this.fromApiJsonHelper
                             .extractBooleanNamed(LoanProductConstants.allowVariableInstallmentsParamName, element);
                 } else if (loanProduct != null) {
-                    variableInstallments = loanProduct.allowVariabeInstallments();
+                    variableInstallments = loanProduct.isAllowVariabeInstallments();
                 }
                 if (variableInstallments != null && variableInstallments) {
                     baseDataValidator.reset().parameter(LoanProductConstants.allowVariableInstallmentsParamName)

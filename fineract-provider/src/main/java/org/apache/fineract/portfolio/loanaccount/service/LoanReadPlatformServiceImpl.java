@@ -1676,7 +1676,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 if (!backdatePenalties && !isDueToday) {
                     continue;
                 }
-                Optional<Charge> penaltyCharge = loan.getLoanProduct().getLoanProductCharges().stream()
+                Optional<Charge> penaltyCharge = loan.getLoanProduct().getCharges().stream()
                         .filter((e) -> ChargeTimeType.OVERDUE_INSTALLMENT.getValue().equals(e.getChargeTimeType()) && e.isLoanCharge())
                         .findFirst();
 

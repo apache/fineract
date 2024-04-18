@@ -1004,7 +1004,7 @@ public class LoanScheduleAssembler {
 
     private void extractLoanTermVariations(final Loan loan, final String json, final List<LoanTermVariations> loanTermVariations) {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        if (loan.loanProduct().allowVariabeInstallments()) {
+        if (loan.loanProduct().isAllowVariabeInstallments()) {
             if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(LoanApiConstants.exceptionParamName, element)) {
                 final JsonObject topLevelJsonElement = element.getAsJsonObject();
                 final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);

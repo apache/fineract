@@ -205,7 +205,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             if (changes.containsKey("fundId")) {
                 final Long fundId = (Long) changes.get("fundId");
                 final Fund fund = findFundByIdIfProvided(fundId);
-                product.update(fund);
+                product.setFund(fund);
             }
 
             if (changes.containsKey("delinquencyBucketId")) {
@@ -253,7 +253,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey("accountingRule");
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
-                    .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType());
+                    .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingRule());
             changes.putAll(accountingMappingChanges);
 
             if (changes.containsKey(LoanProductConstants.RATES_PARAM_NAME)) {

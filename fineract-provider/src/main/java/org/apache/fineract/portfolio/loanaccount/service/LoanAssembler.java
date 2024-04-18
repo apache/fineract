@@ -164,7 +164,7 @@ public class LoanAssembler {
         }
         List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
         BigDecimal fixedEmiAmount = null;
-        if (loanProduct.isMultiDisburseLoan() || loanProduct.canDefineInstallmentAmount()) {
+        if (loanProduct.isMultiDisburseLoan() || loanProduct.isCanDefineInstallmentAmount()) {
             fixedEmiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName, element);
         }
         BigDecimal maxOutstandingLoanBalance = null;
