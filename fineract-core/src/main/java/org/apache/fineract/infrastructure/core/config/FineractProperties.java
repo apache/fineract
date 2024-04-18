@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import io.github.resilience4j.common.retry.configuration.CommonRetryConfigurationProperties;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +76,15 @@ public class FineractProperties {
     private FineractSamplingProperties sampling;
 
     private FineractModulesProperties module;
+
+    private FineractResilience4jProperties resilience4j;
+
+    @Getter
+    @Setter
+    public static class FineractResilience4jProperties {
+
+        private CommonRetryConfigurationProperties.InstanceProperties executeCommand;
+    }
 
     @Getter
     @Setter

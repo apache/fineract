@@ -47,15 +47,18 @@ public class IdempotentCommandExceptionMapper implements FineractExceptionMapper
 
     @Override
     public Response toResponse(final AbstractIdempotentCommandException exception) {
-        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
+
         Integer status = null;
         if (exception instanceof IdempotentCommandProcessSucceedException pse) {
+            log.debug("Request was served from idempotency cache");
             Integer statusCode = pse.getStatusCode();
             status = statusCode == null ? SC_OK : statusCode;
         }
         if (exception instanceof IdempotentCommandProcessUnderProcessingException) {
+            log.warn("Request was still under processing", ErrorHandler.findMostSpecificException(exception));
             status = 425;
         } else if (exception instanceof IdempotentCommandProcessFailedException pfe) {
+            log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
             status = pfe.getStatusCode();
         }
         if (status == null) {

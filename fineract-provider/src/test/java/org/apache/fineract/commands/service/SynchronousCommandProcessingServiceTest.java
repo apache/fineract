@@ -20,10 +20,12 @@ package org.apache.fineract.commands.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.resilience4j.retry.Retry;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
@@ -37,6 +39,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.retry.RetryConfigurationAssembler;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,15 +72,14 @@ public class SynchronousCommandProcessingServiceTest {
     private IdempotencyKeyResolver idempotencyKeyResolver;
     @Mock
     private CommandSourceService commandSourceService;
-
     @Spy
     private FineractRequestContextHolder fineractRequestContextHolder;
-
-    @InjectMocks
-    private SynchronousCommandProcessingService underTest;
-
+    @Mock
+    private RetryConfigurationAssembler retryConfigurationAssembler;
     @Mock
     private HttpServletRequest request;
+    @InjectMocks
+    private SynchronousCommandProcessingService underTest;
 
     @BeforeEach
     public void setup() {
@@ -119,6 +121,8 @@ public class SynchronousCommandProcessingServiceTest {
 
         when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false, false))
                 .thenReturn(commandProcessingResult);
+
+        when(retryConfigurationAssembler.getRetryConfigurationForExecuteCommand()).thenReturn(Retry.ofDefaults("test"));
 
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
 
@@ -163,13 +167,14 @@ public class SynchronousCommandProcessingServiceTest {
 
         when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false, false))
                 .thenThrow(runtimeException);
+        when(retryConfigurationAssembler.getRetryConfigurationForExecuteCommand()).thenReturn(Retry.ofDefaults("test"));
 
         assertThrows(RuntimeException.class, () -> {
             underTest.executeCommand(commandWrapper, jsonCommand, false);
         });
 
-        verify(commandSourceService).getCommandSource(commandId);
-        verify(commandSourceService).generateErrorInfo(runtimeException);
+        verify(commandSourceService, times(3)).getCommandSource(commandId);
+        verify(commandSourceService, times(3)).generateErrorInfo(runtimeException);
     }
 
     @Test

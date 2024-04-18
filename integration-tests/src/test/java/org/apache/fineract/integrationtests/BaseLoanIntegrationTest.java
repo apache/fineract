@@ -128,7 +128,7 @@ public abstract class BaseLoanIntegrationTest {
 
     protected final LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(requestSpec,
             createResponseSpecification(Matchers.is(202)));
-    protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+    protected static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
     // asset
     protected final Account loansReceivableAccount = accountHelper.createAssetAccount("loanPortfolio");
@@ -262,7 +262,7 @@ public abstract class BaseLoanIntegrationTest {
                 .addPaymentAllocationItem(defaultAllocation);
     }
 
-    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
+    protected static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
         AtomicInteger integer = new AtomicInteger(1);
         return Arrays.stream(paymentAllocationTypes).map(pat -> {
             PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
@@ -272,9 +272,24 @@ public abstract class BaseLoanIntegrationTest {
         }).toList();
     }
 
-    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
+    protected static AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
         AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
         advancedPaymentData.setTransactionType("DEFAULT");
+        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
+
+        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
+                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
+                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
+                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
+                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
+
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
+        return advancedPaymentData;
+    }
+
+    protected static AdvancedPaymentData createDefaultPaymentAllocation(String transactionType, String futureInstallmentAllocationRule) {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType(transactionType);
         advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
 
         List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
