@@ -1581,23 +1581,23 @@ Feature: LoanCharge
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement       | 750.0  | 0.0       | 0.0      | 0.0  | 0.0       | 750.0        |
-      | 01 January 2023  | Down Payment       | 187.5  | 187.5     | 0.0      | 0.0  | 0.0       | 562.5        |
-      | 01 February 2023 | Repayment          | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 312.5        |
-      | 01 March 2023    | Repayment          | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 62.5         |
-      | 01 April 2023    | Repayment          | 250.0  | 62.5      | 0.0      | 0.0  | 0.0       | 0.0          |
-      | 05 April 2023    | Waive loan charges | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 62.5         |
+      | 01 January 2023  | Down Payment       | 188.0  | 188.0     | 0.0      | 0.0  | 0.0       | 562.0        |
+      | 01 February 2023 | Repayment          | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 312.0        |
+      | 01 March 2023    | Repayment          | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 62.0         |
+      | 01 April 2023    | Repayment          | 250.0  | 62.0      | 0.0      | 0.0  | 0.0       | 0.0          |
+      | 05 April 2023    | Waive loan charges | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 62.0         |
     Then On Loan Transactions tab the "Repayment" Transaction with date "01 April 2023" is reverted
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Waived | Outstanding |
       |    |      | 01 January 2023  |                  | 750.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |        |             |
-      | 1  | 0    | 01 January 2023  | 01 February 2023 | 562.0           | 188.0         | 0.0      | 0.0  | 0.0       | 188.0 | 188.0 | 0.0        | 0.5   | 0.0    | 0.0         |
+      | 1  | 0    | 01 January 2023  | 01 January 2023  | 562.0           | 188.0         | 0.0      | 0.0  | 0.0       | 188.0 | 188.0 | 0.0        | 0.0   | 0.0    | 0.0         |
       | 2  | 15   | 16 January 2023  | 01 February 2023 | 375.0           | 187.0         | 0.0      | 0.0  | 0.0       | 187.0 | 187.0 | 0.0        | 187.0 | 0.0    | 0.0         |
       | 3  | 15   | 31 January 2023  | 01 March 2023    | 188.0           | 187.0         | 0.0      | 0.0  | 0.0       | 187.0 | 187.0 | 0.0        | 187.0 | 0.0    | 0.0         |
-      | 4  | 15   | 15 February 2023 |                  | 0.0             | 188.0         | 0.0      | 0.0  | 0.0       | 188.0 | 125.5 | 0.0        | 125.5 | 0.0    | 62.5        |
+      | 4  | 15   | 15 February 2023 |                  | 0.0             | 188.0         | 0.0      | 0.0  | 0.0       | 188.0 | 126.0 | 0.0        | 126.0 | 0.0    | 62.0        |
       | 5  | 49   | 05 April 2023    | 05 April 2023    | 0.0             | 0.0           | 0.0      | 0.0  | 10.0      | 10.0  | 0.0   | 0.0        | 0.0   | 10.0   | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due | Paid  | In advance | Late | Waived | Outstanding |
-      | 750           | 0        | 0    | 10        | 760 | 687.5 | 0          | 500  | 10     | 62.5        |
+      | 750           | 0        | 0    | 10        | 760 | 688.0 | 0          | 500  | 10     | 62.0        |
 
   @TestRailId:C2994
   Scenario: Waive charge on PIN4 progressive loan
