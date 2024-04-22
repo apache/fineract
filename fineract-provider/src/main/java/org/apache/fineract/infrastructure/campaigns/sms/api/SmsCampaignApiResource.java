@@ -58,6 +58,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/smscampaigns")
@@ -74,6 +75,7 @@ public class SmsCampaignApiResource {
     private final DefaultToApiJsonSerializer<CampaignPreviewData> previewCampaignMessageDefaultToApiJsonSerializer;
     private final SmsCampaignWritePlatformService smsCampaignWritePlatformService;
     private final PlatformSecurityContext context;
+    private final SqlValidator sqlValidator;
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "SMS_CAMPAIGN";
 
@@ -142,7 +144,10 @@ public class SmsCampaignApiResource {
     public String retrieveAllEmails(@QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
-        final SearchParameters searchParameters = SearchParameters.forSMSCampaign(offset, limit, orderBy, sortOrder);
+        sqlValidator.validate(orderBy);
+        sqlValidator.validate(sortOrder);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
+                .sortOrder(sortOrder).build();
         Page<SmsCampaignData> smsCampaignDataCollection = smsCampaignReadPlatformService.retrieveAll(searchParameters);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializer.serialize(settings, smsCampaignDataCollection);

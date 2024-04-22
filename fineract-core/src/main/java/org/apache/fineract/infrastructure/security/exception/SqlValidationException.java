@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.security.utils;
+package org.apache.fineract.infrastructure.security.exception;
 
-import java.sql.SQLException;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import lombok.Getter;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-@Deprecated
-public class SQLInjectionException extends PlatformApiDataValidationException {
+@Getter
+public class SqlValidationException extends AbstractPlatformDomainRuleException {
 
-    public SQLInjectionException() {
-        super("error.msg.found.sql.injection", "Unexpected SQL Commands found", null);
+    public SqlValidationException(final String message) {
+        super("error.msg.sql.validation", "SQL validation error: " + message);
     }
-
-    public SQLInjectionException(SQLException e) {
-        super("error.msg.found.sql.injection", "Unexpected SQL Commands found", null, e);
-    }
-
 }

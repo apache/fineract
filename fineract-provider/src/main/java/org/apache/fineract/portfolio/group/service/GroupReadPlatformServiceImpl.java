@@ -137,15 +137,15 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final SQLBuilder extraCriteria = getGroupExtraCriteria(searchParameters);
         extraCriteria.addCriteria(" o.hierarchy like ", hierarchySearchString);
         sqlBuilder.append(" ").append(extraCriteria.getSQLTemplate());
-        if (parameters.isOrderByRequested()) {
+        if (parameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
                     searchParameters.getSortOrder());
         }
 
-        if (parameters.isLimited()) {
+        if (parameters.hasLimit()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(" offset ").append(searchParameters.getOffset());
             }
         }
@@ -168,17 +168,17 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         sqlBuilder.append(" ").append(extraCriteria.getSQLTemplate());
 
-        if (searchParameters != null && searchParameters.isOrphansOnly()) {
+        if (searchParameters != null && searchParameters.getOrphansOnly()) {
             sqlBuilder.append(" and g.parent_id is NULL");
         }
 
         if (parameters != null) {
-            if (parameters.isOrderByRequested()) {
+            if (parameters.hasOrderBy()) {
                 sqlBuilder.append(parameters.orderBySql());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.orderBySql());
             }
 
-            if (parameters.isLimited()) {
+            if (parameters.hasLimit()) {
                 sqlBuilder.append(parameters.limitSql());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
             }

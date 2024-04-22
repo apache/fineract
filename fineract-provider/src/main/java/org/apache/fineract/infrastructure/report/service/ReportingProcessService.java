@@ -20,11 +20,9 @@ package org.apache.fineract.infrastructure.report.service;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 
 public interface ReportingProcessService {
 
@@ -32,16 +30,5 @@ public interface ReportingProcessService {
 
     List<ReportExportType> getAvailableExportTargets();
 
-    default Map<String, String> getReportParams(final MultivaluedMap<String, String> queryParams) {
-        final Map<String, String> reportParams = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
-            if (entry.getKey().startsWith("R_")) {
-                String pKey = "${" + entry.getKey().substring(2) + "}";
-                String pValue = entry.getValue().get(0);
-                SQLInjectionValidator.validateSQLInput(pValue);
-                reportParams.put(pKey, pValue);
-            }
-        }
-        return reportParams;
-    }
+    Map<String, String> getReportParams(MultivaluedMap<String, String> queryParams);
 }
