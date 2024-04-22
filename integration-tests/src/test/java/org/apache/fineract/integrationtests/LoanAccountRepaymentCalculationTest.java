@@ -205,19 +205,19 @@ public class LoanAccountRepaymentCalculationTest {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 313.0, 1, LocalDate.of(2023, 3, 3),
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, 3, 3),
                     LocalDate.of(2023, 3, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.0, 2, LocalDate.of(2023, 3, 3),
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, 3, 3),
                     LocalDate.of(2023, 4, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.0, 3, LocalDate.of(2023, 4, 3),
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, 4, 3),
                     LocalDate.of(2023, 5, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 313.0, 4, LocalDate.of(2023, 5, 3),
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, 5, 3),
                     LocalDate.of(2023, 6, 3), false);
 
             // disbursement
@@ -228,19 +228,19 @@ public class LoanAccountRepaymentCalculationTest {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 313.0, 1, LocalDate.of(2023, 3, 3),
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, 3, 3),
                     LocalDate.of(2023, 3, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.0, 2, LocalDate.of(2023, 3, 3),
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, 3, 3),
                     LocalDate.of(2023, 4, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.0, 3, LocalDate.of(2023, 4, 3),
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, 4, 3),
                     LocalDate.of(2023, 5, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 313.0, 4, LocalDate.of(2023, 5, 3),
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, 5, 3),
                     LocalDate.of(2023, 6, 3), false);
 
         } finally {

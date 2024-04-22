@@ -76,10 +76,10 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
-                    installment(313.0, false, "31 January 2023"), //
-                    installment(313.0, false, "02 March 2023"), //
-                    installment(313.0, false, "01 April 2023"), //
-                    installment(311.0, false, "01 May 2023") //
+                    installment(312.0, false, "31 January 2023"), //
+                    installment(312.0, false, "02 March 2023"), //
+                    installment(312.0, false, "01 April 2023"), //
+                    installment(314.0, false, "01 May 2023") //
             );
 
             // delete all external events
@@ -124,10 +124,10 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
-                    installment(313.0, false, "31 January 2023"), //
-                    installment(313.0, false, "02 March 2023"), //
-                    installment(313.0, false, "01 April 2023"), //
-                    installment(311.0, false, "01 May 2023") //
+                    installment(312.0, false, "31 January 2023"), //
+                    installment(312.0, false, "02 March 2023"), //
+                    installment(312.0, false, "01 April 2023"), //
+                    installment(314.0, false, "01 May 2023") //
             );
 
             addRepaymentForLoan(loanId, 313.0, "31 January 2023");
@@ -135,10 +135,10 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
-                    installment(313.0, true, "31 January 2023"), //
-                    installment(313.0, false, "02 March 2023"), //
-                    installment(313.0, false, "01 April 2023"), //
-                    installment(311.0, false, "01 May 2023") //
+                    installment(312.0, true, "31 January 2023"), //
+                    installment(312.0, false, "02 March 2023"), //
+                    installment(312.0, false, "01 April 2023"), //
+                    installment(314.0, false, "01 May 2023") //
             );
 
             // delete all external events
@@ -181,10 +181,10 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
-                    installment(313.0, false, "31 January 2023"), //
-                    installment(313.0, false, "02 March 2023"), //
-                    installment(313.0, false, "01 April 2023"), //
-                    installment(311.0, false, "01 May 2023") //
+                    installment(312.0, false, "31 January 2023"), //
+                    installment(312.0, false, "02 March 2023"), //
+                    installment(312.0, false, "01 April 2023"), //
+                    installment(314.0, false, "01 May 2023") //
             );
 
             // delete all external events
@@ -227,10 +227,10 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
-                    installment(313.0, false, "31 January 2023"), //
-                    installment(313.0, false, "02 March 2023"), //
-                    installment(313.0, false, "01 April 2023"), //
-                    installment(311.0, false, "01 May 2023") //
+                    installment(312.0, false, "31 January 2023"), //
+                    installment(312.0, false, "02 March 2023"), //
+                    installment(312.0, false, "01 April 2023"), //
+                    installment(314.0, false, "01 May 2023") //
             );
 
             // delete all external events
@@ -271,10 +271,10 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
-                    installment(313.0, false, "31 January 2023"), //
-                    installment(313.0, false, "02 March 2023"), //
-                    installment(313.0, false, "01 April 2023"), //
-                    installment(311.0, false, "01 May 2023") //
+                    installment(312.0, false, "31 January 2023"), //
+                    installment(312.0, false, "02 March 2023"), //
+                    installment(312.0, false, "01 April 2023"), //
+                    installment(314.0, false, "01 May 2023") //
             );
 
             // delete all external events

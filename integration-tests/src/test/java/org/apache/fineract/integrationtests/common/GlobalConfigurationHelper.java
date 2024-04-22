@@ -614,6 +614,14 @@ public class GlobalConfigurationHelper {
                 updateGlobalConfigUpdateEnabledFlagAsJSON(enabled), "resourceId");
     }
 
+    public static void updateValueForGlobalConfigurationInternal(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String configId, final int value) {
+        final String GLOBAL_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/internal/configurations/" + configId + "/value/" + value + "?"
+                + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------UPDATE VALUE FOR GLOBAL CONFIG (internal) ---------------------------------------");
+        Utils.performServerPost(requestSpec, responseSpec, GLOBAL_CONFIG_UPDATE_URL, Utils.emptyJson());
+    }
+
     // Deprecated because it's using configId as a String
     @Deprecated
     public static Integer updateEnabledFlagForGlobalConfiguration(final RequestSpecification requestSpec,

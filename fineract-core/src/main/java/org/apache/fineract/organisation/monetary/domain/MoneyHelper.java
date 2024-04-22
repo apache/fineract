@@ -22,10 +22,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.annotation.PostConstruct;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class MoneyHelper {
 
@@ -59,4 +61,10 @@ public class MoneyHelper {
         }
         return mathContext;
     }
+
+    public static void fetchRoundingModeFromGlobalConfig() {
+        roundingMode = RoundingMode.valueOf(staticConfigurationDomainService.getRoundingMode());
+        log.info("Fetch Rounding Mode from Global Config {}", roundingMode.name());
+    }
+
 }

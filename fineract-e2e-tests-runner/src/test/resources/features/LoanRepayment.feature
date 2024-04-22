@@ -3139,10 +3139,10 @@ Feature: LoanRepayment
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 September 2023 |           | 1250.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
-      | 1  | 30   | 01 October 2023   |           | 936.62          | 313.38        | 15.62    | 0.0  | 0.0       | 329.0 | 0.0  | 0.0        | 0.0  | 329.0       |
-      | 2  | 31   | 01 November 2023  |           | 623.24          | 313.38        | 15.62    | 0.0  | 0.0       | 329.0 | 0.0  | 0.0        | 0.0  | 329.0       |
-      | 3  | 30   | 01 December 2023  |           | 309.86          | 313.38        | 15.62    | 0.0  | 0.0       | 329.0 | 0.0  | 0.0        | 0.0  | 329.0       |
-      | 4  | 31   | 01 January 2024   |           | 0.0             | 309.86        | 15.64    | 0.0  | 0.0       | 325.5 | 0.0  | 0.0        | 0.0  | 325.5       |
+      | 1  | 30   | 01 October 2023   |           | 937.62          | 312.38        | 15.62    | 0.0  | 0.0       | 328.0 | 0.0  | 0.0        | 0.0  | 328.0       |
+      | 2  | 31   | 01 November 2023  |           | 625.24          | 312.38        | 15.62    | 0.0  | 0.0       | 328.0 | 0.0  | 0.0        | 0.0  | 328.0       |
+      | 3  | 30   | 01 December 2023  |           | 312.86          | 312.38        | 15.62    | 0.0  | 0.0       | 328.0 | 0.0  | 0.0        | 0.0  | 328.0       |
+      | 4  | 31   | 01 January 2024   |           | 0.0             | 312.86        | 15.64    | 0.0  | 0.0       | 328.5 | 0.0  | 0.0        | 0.0  | 328.5       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1250.0        | 62.50    | 0.0  | 0.0       | 1312.50 | 0.0  | 0.0        | 0.0  | 1312.50     |
