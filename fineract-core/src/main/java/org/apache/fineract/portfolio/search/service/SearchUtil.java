@@ -39,6 +39,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -50,30 +52,34 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 import org.apache.fineract.infrastructure.core.service.database.SqlOperator;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.search.data.ColumnFilterData;
 import org.apache.fineract.portfolio.search.data.FilterData;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
-public final class SearchUtil {
+@Slf4j
+@RequiredArgsConstructor
+@Component
+public class SearchUtil {
 
     public static final int DEFAULT_PAGE_SIZE = 50;
 
     private static final JsonParserHelper helper = new JsonParserHelper();
 
-    private SearchUtil() {}
+    private final SqlValidator sqlValidator;
 
     @NotNull
-    public static Map<String, ResultsetColumnHeaderData> mapHeadersToName(@NotNull Collection<ResultsetColumnHeaderData> columnHeaders) {
+    public Map<String, ResultsetColumnHeaderData> mapHeadersToName(@NotNull Collection<ResultsetColumnHeaderData> columnHeaders) {
         return columnHeaders.stream().collect(Collectors.toMap(ResultsetColumnHeaderData::getColumnName, e -> e));
     }
 
-    public static ResultsetColumnHeaderData findFiltered(@NotNull Collection<ResultsetColumnHeaderData> columnHeaders,
+    public ResultsetColumnHeaderData findFiltered(@NotNull Collection<ResultsetColumnHeaderData> columnHeaders,
             @NotNull Predicate<ResultsetColumnHeaderData> filter) {
         return columnHeaders.stream().filter(filter).findFirst().orElse(null);
     }
 
-    public static ResultsetColumnHeaderData getFiltered(@NotNull Collection<ResultsetColumnHeaderData> columnHeaders,
+    public ResultsetColumnHeaderData getFiltered(@NotNull Collection<ResultsetColumnHeaderData> columnHeaders,
             @NotNull Predicate<ResultsetColumnHeaderData> filter) {
         ResultsetColumnHeaderData filtered = findFiltered(columnHeaders, filter);
         if (filtered == null) {
@@ -82,8 +88,8 @@ public final class SearchUtil {
         return filtered;
     }
 
-    public static void extractJsonResult(@NotNull SqlRowSet rowSet, @NotNull List<String> selectColumns,
-            @NotNull List<String> resultColumns, @NotNull List<JsonObject> results) {
+    public void extractJsonResult(@NotNull SqlRowSet rowSet, @NotNull List<String> selectColumns, @NotNull List<String> resultColumns,
+            @NotNull List<JsonObject> results) {
         JsonObject json = new JsonObject();
         for (int i = 0; i < selectColumns.size(); i++) {
             Object rowValue = rowSet.getObject(selectColumns.get(i));
@@ -115,15 +121,15 @@ public final class SearchUtil {
     }
 
     @NotNull
-    public static List<String> validateToJdbcColumnNames(List<String> columns, Map<String, ResultsetColumnHeaderData> headersByName,
+    public List<String> validateToJdbcColumnNames(List<String> columns, Map<String, ResultsetColumnHeaderData> headersByName,
             boolean allowEmpty) {
         List<ResultsetColumnHeaderData> columnHeaders = validateToJdbcColumns(columns, headersByName, allowEmpty);
         return columnHeaders.stream().map(e -> e == null ? null : e.getColumnName()).toList();
     }
 
     @NotNull
-    public static List<ResultsetColumnHeaderData> validateToJdbcColumns(List<String> columns,
-            Map<String, ResultsetColumnHeaderData> headersByName, boolean allowEmpty) {
+    public List<ResultsetColumnHeaderData> validateToJdbcColumns(List<String> columns, Map<String, ResultsetColumnHeaderData> headersByName,
+            boolean allowEmpty) {
         final List<ApiParameterError> errors = new ArrayList<>();
 
         List<ResultsetColumnHeaderData> result = new ArrayList<>();
@@ -140,13 +146,13 @@ public final class SearchUtil {
         return result;
     }
 
-    public static String validateToJdbcColumnName(String column, Map<String, ResultsetColumnHeaderData> headersByName, boolean allowEmpty) {
+    public String validateToJdbcColumnName(String column, Map<String, ResultsetColumnHeaderData> headersByName, boolean allowEmpty) {
         ResultsetColumnHeaderData columnHeader = validateToJdbcColumn(column, headersByName, allowEmpty);
         return columnHeader == null ? null : columnHeader.getColumnName();
     }
 
-    public static ResultsetColumnHeaderData validateToJdbcColumn(String column,
-            @NotNull Map<String, ResultsetColumnHeaderData> headersByName, boolean allowEmpty) {
+    public ResultsetColumnHeaderData validateToJdbcColumn(String column, @NotNull Map<String, ResultsetColumnHeaderData> headersByName,
+            boolean allowEmpty) {
         final List<ApiParameterError> errors = new ArrayList<>();
         ResultsetColumnHeaderData columnHeader = validateToJdbcColumnImpl(column, headersByName, errors, allowEmpty);
         if (!errors.isEmpty()) {
@@ -155,8 +161,8 @@ public final class SearchUtil {
         return columnHeader;
     }
 
-    private static ResultsetColumnHeaderData validateToJdbcColumnImpl(String column,
-            @NotNull Map<String, ResultsetColumnHeaderData> headersByName, @NotNull List<ApiParameterError> errors, boolean allowEmpty) {
+    private ResultsetColumnHeaderData validateToJdbcColumnImpl(String column, @NotNull Map<String, ResultsetColumnHeaderData> headersByName,
+            @NotNull List<ApiParameterError> errors, boolean allowEmpty) {
         if (!allowEmpty && column == null) {
             errors.add(parameterErrorWithValue("error.msg.column.empty", "Column filter is empty", API_PARAM_COLUMN, null));
         }
@@ -173,9 +179,9 @@ public final class SearchUtil {
         return columnHeader;
     }
 
-    public static boolean buildQueryCondition(List<ColumnFilterData> columnFilters, @NotNull StringBuilder where,
-            @NotNull List<Object> params, String alias, Map<String, ResultsetColumnHeaderData> headersByName, String dateFormat,
-            String dateTimeFormat, Locale locale, boolean embedded, @NotNull DatabaseSpecificSQLGenerator sqlGenerator) {
+    public boolean buildQueryCondition(List<ColumnFilterData> columnFilters, @NotNull StringBuilder where, @NotNull List<Object> params,
+            String alias, Map<String, ResultsetColumnHeaderData> headersByName, String dateFormat, String dateTimeFormat, Locale locale,
+            boolean embedded, @NotNull DatabaseSpecificSQLGenerator sqlGenerator) {
         if (columnFilters == null) {
             return false;
         }
@@ -192,7 +198,7 @@ public final class SearchUtil {
         return added;
     }
 
-    public static boolean buildFilterCondition(ColumnFilterData columnFilter, @NotNull StringBuilder where, @NotNull List<Object> params,
+    public boolean buildFilterCondition(ColumnFilterData columnFilter, @NotNull StringBuilder where, @NotNull List<Object> params,
             String alias, Map<String, ResultsetColumnHeaderData> headersByName, String dateFormat, String dateTimeFormat, Locale locale,
             boolean embedded, @NotNull DatabaseSpecificSQLGenerator sqlGenerator) {
         String columnName = columnFilter.getColumn();
@@ -221,9 +227,8 @@ public final class SearchUtil {
         return size > 0;
     }
 
-    public static void buildCondition(@NotNull String definition, JdbcJavaType columnType, @NotNull SqlOperator operator,
-            List<Object> values, @NotNull StringBuilder where, @NotNull List<Object> params, String alias,
-            @NotNull DatabaseSpecificSQLGenerator sqlGenerator) {
+    public void buildCondition(@NotNull String definition, JdbcJavaType columnType, @NotNull SqlOperator operator, List<Object> values,
+            @NotNull StringBuilder where, @NotNull List<Object> params, String alias, @NotNull DatabaseSpecificSQLGenerator sqlGenerator) {
         int paramCount = values == null ? 0 : values.size();
         where.append(operator.formatPlaceholder(sqlGenerator, definition, paramCount, alias));
         if (values != null) {
@@ -231,13 +236,13 @@ public final class SearchUtil {
         }
     }
 
-    public static Object parseJdbcColumnValue(@NotNull ResultsetColumnHeaderData columnHeader, String columnValue, String dateFormat,
+    public Object parseJdbcColumnValue(@NotNull ResultsetColumnHeaderData columnHeader, String columnValue, String dateFormat,
             String dateTimeFormat, Locale locale, boolean strict, @NotNull DatabaseSpecificSQLGenerator sqlGenerator) {
         return columnHeader.getColumnType().toJdbcValue(sqlGenerator.getDialect(),
                 parseColumnValue(columnHeader, columnValue, dateFormat, dateTimeFormat, locale, strict, sqlGenerator), false);
     }
 
-    public static Object parseColumnValue(@NotNull ResultsetColumnHeaderData columnHeader, String columnValue, String dateFormat,
+    public Object parseColumnValue(@NotNull ResultsetColumnHeaderData columnHeader, String columnValue, String dateFormat,
             String dateTimeFormat, Locale locale, boolean strict, @NotNull DatabaseSpecificSQLGenerator sqlGenerator) {
         JdbcJavaType colType = columnHeader.getColumnType();
         if (!colType.isStringType() || !columnHeader.isMandatory()) {
@@ -254,7 +259,7 @@ public final class SearchUtil {
             return columnValue;
         }
         if (strict) {
-            SQLInjectionValidator.validateDynamicQuery(columnValue);
+            sqlValidator.validate(columnValue);
         }
 
         if (columnHeader.hasColumnValues()) {
@@ -314,7 +319,7 @@ public final class SearchUtil {
         return columnValue;
     }
 
-    public static String camelToSnake(final String camelStr) {
+    public String camelToSnake(final String camelStr) {
         return camelStr == null ? null
                 : camelStr.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
     }

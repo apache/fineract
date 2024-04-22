@@ -54,6 +54,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
@@ -74,6 +75,7 @@ public class StandingInstructionApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
+    private final SqlValidator sqlValidator;
 
     @GET
     @Path("template")
@@ -182,7 +184,11 @@ public class StandingInstructionApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
-        final SearchParameters searchParameters = SearchParameters.forAccountTransfer(externalId, offset, limit, orderBy, sortOrder);
+        sqlValidator.validate(orderBy);
+        sqlValidator.validate(sortOrder);
+        sqlValidator.validate(externalId);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
+                .orderBy(orderBy).sortOrder(sortOrder).build();
 
         final LocalDate startDateRange = null;
         final LocalDate endDateRange = null;
@@ -212,8 +218,11 @@ public class StandingInstructionApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
+        sqlValidator.validate(orderBy);
+        sqlValidator.validate(sortOrder);
         StandingInstructionData standingInstructionData = this.standingInstructionReadPlatformService.retrieveOne(standingInstructionId);
-        final SearchParameters searchParameters = SearchParameters.forAccountTransfer(externalId, offset, limit, orderBy, sortOrder);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
+                .orderBy(orderBy).sortOrder(sortOrder).build();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         Page<AccountTransferData> transfers = null;
         if (!associationParameters.isEmpty()) {

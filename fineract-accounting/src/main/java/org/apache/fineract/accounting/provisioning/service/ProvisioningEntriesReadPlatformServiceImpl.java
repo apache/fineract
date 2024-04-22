@@ -319,33 +319,33 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         String whereClose = " where ";
         List<Object> items = new ArrayList<>();
 
-        if (searchParams.isProvisioningEntryIdPassed()) {
+        if (searchParams.hasProvisioningEntryId()) {
             sqlBuilder.append(whereClose + " entry.history_id = ?");
             items.add(searchParams.getProvisioningEntryId());
             whereClose = " and ";
         }
 
-        if (searchParams.isOfficeIdPassed()) {
+        if (searchParams.hasOfficeId()) {
             sqlBuilder.append(whereClose + " entry.office_id = ?");
             items.add(searchParams.getOfficeId());
             whereClose = " and ";
         }
 
-        if (searchParams.isProductIdPassed()) {
+        if (searchParams.hasProductId()) {
             sqlBuilder.append(whereClose + " entry.product_id = ?");
             items.add(searchParams.getProductId());
             whereClose = " and ";
         }
 
-        if (searchParams.isCategoryIdPassed()) {
+        if (searchParams.hasCategoryId()) {
             sqlBuilder.append(whereClose + " entry.category_id = ?");
             items.add(searchParams.getCategoryId());
         }
         sqlBuilder.append(" order by entry.id");
 
-        if (searchParams.isLimited()) {
+        if (searchParams.hasLimit()) {
             sqlBuilder.append(" limit ").append(searchParams.getLimit());
-            if (searchParams.isOffset()) {
+            if (searchParams.hasOffset()) {
                 sqlBuilder.append(" offset ").append(searchParams.getOffset());
             }
         }

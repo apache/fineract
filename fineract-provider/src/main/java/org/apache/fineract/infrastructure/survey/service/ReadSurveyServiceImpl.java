@@ -20,6 +20,8 @@ package org.apache.fineract.infrastructure.survey.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -27,32 +29,24 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.survey.data.ClientScoresOverview;
 import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
 import org.apache.fineract.infrastructure.survey.data.SurveyDataTableData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class ReadSurveyServiceImpl implements ReadSurveyService {
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
+    private final SqlValidator sqlValidator;
     private final GenericDataService genericDataService;
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
-
-    @Autowired
-    public ReadSurveyServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final GenericDataService genericDataService, final ReadWriteNonCoreDataService readWriteNonCoreDataService) {
-
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.genericDataService = genericDataService;
-        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
-    }
 
     @Override
     public List<SurveyDataTableData> retrieveAllSurveys() {
@@ -91,7 +85,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
     @Override
     public SurveyDataTableData retrieveSurvey(String surveyName) {
-        SQLInjectionValidator.validateSQLInput(surveyName);
+        sqlValidator.validate(surveyName);
         final String sql = "select cf.enabled, application_table_name, registered_table_name, entity_subtype" + " from x_registered_table "
                 + " left join c_configuration cf on x_registered_table.registered_table_name = cf.name " + " where exists" + " (select 'f'"
                 + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
@@ -153,13 +147,13 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
                     + " tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + surveyNames.getString("name") + "' AND enabled = '"
                     + LikelihoodStatus.ENABLED + "' JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
                     + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
-                    + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = " + clientId);
+                    + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ?");
         }
 
         List<ClientScoresOverview> scoresOverviews = new ArrayList<>();
 
         for (String sql : sqls) {
-            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, clientId);
 
             while (rs.next()) {
                 scoresOverviews.add(new ClientScoresOverview().setLikelihoodCode(rs.getString("code"))

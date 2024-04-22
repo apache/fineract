@@ -69,6 +69,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -105,6 +106,7 @@ public class FixedDepositAccountsApiResource {
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
     private final FixedDepositAccountInterestCalculationService fixedDepositAccountInterestCalculationService;
+    private final SqlValidator sqlValidator;
 
     @GET
     @Path("template")
@@ -144,7 +146,10 @@ public class FixedDepositAccountsApiResource {
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
-        final PaginationParameters paginationParameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
+        sqlValidator.validate(orderBy);
+        sqlValidator.validate(sortOrder);
+        final PaginationParameters paginationParameters = PaginationParameters.builder().paged(Boolean.TRUE.equals(paged)).limit(limit)
+                .offset(offset).orderBy(orderBy).sortOrder(sortOrder).build();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         if (paginationParameters.isPaged()) {

@@ -311,7 +311,7 @@ public class ClientTransactionsApiResource {
 
     private String getAllClientTransactions(Long clientId, UriInfo uriInfo, Integer offset, Integer limit) {
 
-        SearchParameters searchParameters = SearchParameters.forPagination(offset, limit);
+        SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).build();
         final Page<ClientTransactionData> clientTransactions = clientTransactionReadPlatformService.retrieveAllTransactions(clientId,
                 searchParameters);
 

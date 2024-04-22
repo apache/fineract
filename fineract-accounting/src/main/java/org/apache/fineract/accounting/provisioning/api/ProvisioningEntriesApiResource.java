@@ -147,7 +147,8 @@ public class ProvisioningEntriesApiResource {
             @QueryParam("productId") final Long productId, @QueryParam("categoryId") final Long categoryId,
             @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser();
-        SearchParameters params = SearchParameters.forProvisioningEntries(entryId, officeId, productId, categoryId, offset, limit);
+        SearchParameters params = SearchParameters.builder().limit(limit).offset(offset).provisioningEntryId(entryId).officeId(officeId)
+                .productId(productId).categoryId(categoryId).build();
         Page<LoanProductProvisioningEntryData> entries = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntries(params);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.entriesApiJsonSerializer.serialize(settings, entries, PROVISIONING_ENTRY_PARAMETERS);
