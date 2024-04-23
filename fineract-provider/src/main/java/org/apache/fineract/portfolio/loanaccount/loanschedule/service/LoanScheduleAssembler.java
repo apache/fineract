@@ -274,9 +274,16 @@ public class LoanScheduleAssembler {
          * If user has not passed the first repayments date then then derive the same based on loan type.
          */
         if (calculatedRepaymentsStartingFromDate == null) {
+            LocalDate tmpCalculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
+                    repaymentPeriodFrequencyType, 0, calendar, submittedOnDate, repaymentStartDateType);
             calculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
                     repaymentPeriodFrequencyType, loanProduct.getMinimumDaysBetweenDisbursalAndFirstRepayment(), calendar, submittedOnDate,
                     repaymentStartDateType);
+            // If calculated repayment start date does not match due to minimum days between disbursal and first
+            // repayment rule, we set repaymentsStartingFromDate (which will be used as seed date later)
+            if (!tmpCalculatedRepaymentsStartingFromDate.equals(calculatedRepaymentsStartingFromDate)) {
+                repaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
+            }
         }
 
         /*
@@ -1102,13 +1109,12 @@ public class LoanScheduleAssembler {
             final RepaymentStartDateType repaymentStartDateType) {
         LocalDate derivedFirstRepayment = null;
 
-        final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = RepaymentStartDateType.DISBURSEMENT_DATE.equals(
-                repaymentStartDateType) ? expectedDisbursementDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment) : submittedOnDate;
-
+        final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = expectedDisbursementDate
+                .plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
+        final LocalDate seedDate = repaymentStartDateType.isDisbursementDate() ? expectedDisbursementDate : submittedOnDate;
         if (calendar != null) {
-            derivedFirstRepayment = deriveFirstRepaymentDateForLoans(repaymentEvery, expectedDisbursementDate, expectedDisbursementDate,
-                    repaymentPeriodFrequencyType, minimumDaysBetweenDisbursalAndFirstRepayment, calendar, submittedOnDate,
-                    repaymentStartDateType);
+            derivedFirstRepayment = deriveFirstRepaymentDateForLoans(repaymentEvery, expectedDisbursementDate, seedDate,
+                    repaymentPeriodFrequencyType, minimumDaysBetweenDisbursalAndFirstRepayment, calendar, submittedOnDate);
         } else { // Individual or group account, or JLG not linked to a meeting
             LocalDate dateBasedOnRepaymentFrequency;
             // Derive the first repayment date as greater date among
@@ -1116,25 +1122,13 @@ public class LoanScheduleAssembler {
             // (disbursement date + minimum between disbursal and first
             // repayment )
             if (repaymentPeriodFrequencyType.isDaily()) {
-                dateBasedOnRepaymentFrequency = RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType)
-                        ? expectedDisbursementDate.plusDays(repaymentEvery)
-                        : submittedOnDate.plusDays(repaymentEvery);
-
+                dateBasedOnRepaymentFrequency = seedDate.plusDays(repaymentEvery);
             } else if (repaymentPeriodFrequencyType.isWeekly()) {
-                dateBasedOnRepaymentFrequency = RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType)
-                        ? expectedDisbursementDate.plusWeeks(repaymentEvery)
-                        : submittedOnDate.plusWeeks(repaymentEvery);
-
+                dateBasedOnRepaymentFrequency = seedDate.plusWeeks(repaymentEvery);
             } else if (repaymentPeriodFrequencyType.isMonthly()) {
-                dateBasedOnRepaymentFrequency = RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType)
-                        ? expectedDisbursementDate.plusMonths(repaymentEvery)
-                        : submittedOnDate.plusMonths(repaymentEvery);
-
+                dateBasedOnRepaymentFrequency = seedDate.plusMonths(repaymentEvery);
             } else { // yearly loan
-                dateBasedOnRepaymentFrequency = RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType)
-                        ? expectedDisbursementDate.plusYears(repaymentEvery)
-                        : submittedOnDate.plusYears(repaymentEvery);
-
+                dateBasedOnRepaymentFrequency = seedDate.plusYears(repaymentEvery);
             }
             derivedFirstRepayment = DateUtils.isAfter(dateBasedOnRepaymentFrequency,
                     dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment) ? dateBasedOnRepaymentFrequency
@@ -1146,20 +1140,16 @@ public class LoanScheduleAssembler {
 
     private LocalDate deriveFirstRepaymentDateForLoans(final Integer repaymentEvery, final LocalDate expectedDisbursementDate,
             final LocalDate refernceDateForCalculatingFirstRepaymentDate, final PeriodFrequencyType repaymentPeriodFrequencyType,
-            final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar, final LocalDate submittedOnDate,
-            final RepaymentStartDateType repaymentStartDateType) {
+            final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar, final LocalDate submittedOnDate) {
         boolean isMeetingSkipOnFirstDayOfMonth = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         int numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
         final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
         final LocalDate derivedFirstRepayment = CalendarUtils.getFirstRepaymentMeetingDate(calendar,
                 refernceDateForCalculatingFirstRepaymentDate, repaymentEvery, frequency, isMeetingSkipOnFirstDayOfMonth, numberOfDays);
-        final LocalDate minimumFirstRepaymentDate = RepaymentStartDateType.DISBURSEMENT_DATE.equals(repaymentStartDateType)
-                ? expectedDisbursementDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment)
-                : submittedOnDate;
+        final LocalDate minimumFirstRepaymentDate = expectedDisbursementDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
         return DateUtils.isBefore(minimumFirstRepaymentDate, derivedFirstRepayment) ? derivedFirstRepayment
                 : deriveFirstRepaymentDateForLoans(repaymentEvery, expectedDisbursementDate, derivedFirstRepayment,
-                        repaymentPeriodFrequencyType, minimumDaysBetweenDisbursalAndFirstRepayment, calendar, submittedOnDate,
-                        repaymentStartDateType);
+                        repaymentPeriodFrequencyType, minimumDaysBetweenDisbursalAndFirstRepayment, calendar, submittedOnDate);
     }
 
     private void validateMinimumDaysBetweenDisbursalAndFirstRepayment(final LocalDate disbursalDate, final LocalDate firstRepaymentDate,

@@ -431,10 +431,12 @@ public final class LoanApplicationTerms {
         this.variationsDataWrapper = new LoanTermVariationsDataWrapper(loanTermVariations);
         this.actualNumberOfRepayments = numberOfRepayments + getLoanTermVariations().adjustNumberOfRepayments();
         this.adjustPrincipalForFlatLoans = principal.zero();
-        if (this.calculatedRepaymentsStartingFromDate == null) {
-            this.seedDate = this.expectedDisbursementDate;
+        // We only change the seed date if `repaymentStartingFromDate was provided`
+        if (this.repaymentsStartingFromDate == null) {
+            this.seedDate = repaymentStartDateType.isDisbursementDate() ? expectedDisbursementDate : submittedOnDate;
         } else {
-            this.seedDate = this.calculatedRepaymentsStartingFromDate;
+            // When we change the seed date we are taking the `repaymentsStartingFromDate`
+            this.seedDate = repaymentsStartingFromDate;
         }
         this.calendarHistoryDataWrapper = calendarHistoryDataWrapper;
         this.isInterestChargedFromDateSameAsDisbursalDateEnabled = isInterestChargedFromDateSameAsDisbursalDateEnabled;
