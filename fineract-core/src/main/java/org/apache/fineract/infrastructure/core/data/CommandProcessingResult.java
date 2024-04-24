@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import java.io.Serializable;
 import java.util.Map;
 import lombok.Getter;
@@ -145,6 +146,13 @@ public class CommandProcessingResult implements Serializable {
             checkIfEmpty = this.changes;
         }
         return checkIfEmpty;
+    }
+
+    // TODO: Jackson uses getters to serialize fields. getChanges() never returns empty Map.
+    // Remove when getChanges() starts returning empty Map
+    @JsonGetter("changes")
+    public Map<String, Object> getChangesJacksonSerialization() {
+        return this.changes;
     }
 
     public boolean hasChanges() {
