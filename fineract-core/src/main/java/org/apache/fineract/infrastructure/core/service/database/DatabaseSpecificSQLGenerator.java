@@ -289,4 +289,13 @@ public class DatabaseSpecificSQLGenerator {
             }
         };
     }
+
+    public String incrementDateByOneDay(String dateColumn) {
+        return switch (getDialect()) {
+            case POSTGRESQL -> " " + dateColumn + "+1";
+            case MYSQL -> " DATE_ADD(" + dateColumn + ", INTERVAL 1 DAY) ";
+        };
+
+    }
+
 }
