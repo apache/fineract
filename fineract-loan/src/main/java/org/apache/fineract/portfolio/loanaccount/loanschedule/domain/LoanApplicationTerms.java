@@ -1417,8 +1417,12 @@ public final class LoanApplicationTerms {
     }
 
     @NotNull
-    public Money getMaxOutstandingBalance() {
+    public Money getMaxOutstandingBalanceMoney() {
         return Money.of(getCurrency(), this.maxOutstandingBalance);
+    }
+
+    public BigDecimal getMaxOutstandingBalance() {
+        return maxOutstandingBalance;
     }
 
     public BigDecimal getFixedEmiAmount() {
@@ -1882,4 +1886,7 @@ public final class LoanApplicationTerms {
         this.variationDays += daysToAdd;
     }
 
+    public LocalDate getLoanEndDate() {
+        return loanEndDate;
+    }
 }

@@ -91,7 +91,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // verify schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 0.0, 1000.0, false, "31 January 2023"));
         });
         runAt("02 February 2023", () -> {
@@ -108,7 +108,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // verify N+1 installment in schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 0.0, 1000.0, false, "31 January 2023"), //
                     installment(0.0, 0.0, 100.0, 100.0, false, "01 February 2023") //
             );
@@ -128,7 +128,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // verify N+1 installment completion
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 0.0, 0.0, true, "31 January 2023"), //
                     installment(0.0, 0.0, 100.0, 0.0, true, "01 February 2023") //
             );
@@ -184,7 +184,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // verify schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 0.0, 1000.0, false, "31 January 2023"));
         });
 
@@ -201,7 +201,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
             this.schedulerJobHelper.executeAndAwaitJob(LoanCoBJobName);
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 10.0, 1010.0, false, "31 January 2023") //
 
             );
@@ -231,7 +231,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
             );
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 19.0, 1010.0, false, "31 January 2023") //
             );
         });
@@ -260,7 +260,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
             );
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 27.0, 0.0, true, "31 January 2023") //
             );
         });

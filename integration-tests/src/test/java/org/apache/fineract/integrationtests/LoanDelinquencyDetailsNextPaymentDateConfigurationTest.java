@@ -69,7 +69,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
 
                 // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
-                        installment(0, null, "01 November 2023"), //
+                        installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, false, "01 November 2023"), //
                         installment(250.0, false, "16 November 2023"), //
                         installment(250.0, false, "01 December 2023"), //
@@ -103,7 +103,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
 
                 // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
-                        installment(0, null, "01 November 2023"), //
+                        installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, false, "01 November 2023"), //
                         installment(250.0, false, "16 November 2023"), //
                         installment(250.0, false, "01 December 2023"), //
@@ -155,7 +155,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
 
                 // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
-                        installment(0, null, "01 November 2023"), //
+                        installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, true, "01 November 2023"), //
                         installment(250.0, false, "16 November 2023"), //
                         installment(250.0, false, "01 December 2023"), //
@@ -177,7 +177,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
 
                 // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
-                        installment(0, null, "01 November 2023"), //
+                        installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, true, "01 November 2023"), //
                         installment(250.0, true, "16 November 2023"), //
                         installment(250.0, false, "01 December 2023"), //
@@ -198,7 +198,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
 
                 // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
-                        installment(0, null, "01 November 2023"), //
+                        installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, true, "01 November 2023"), //
                         installment(250.0, true, "16 November 2023"), //
                         installment(250.0, 0.0, 150.0, false, "01 December 2023"), //
@@ -219,7 +219,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
 
                 // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
-                        installment(0, null, "01 November 2023"), //
+                        installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, true, "01 November 2023"), //
                         installment(250.0, true, "16 November 2023"), //
                         installment(250.0, 0.0, 150.0, false, "01 December 2023"), //

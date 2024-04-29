@@ -77,7 +77,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(313.0, false, "01 February 2023"), //
                     installment(313.0, false, "01 March 2023"), //
                     installment(313.0, false, "01 April 2023"), //
@@ -89,7 +89,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(313.0, false, "01 February 2023"), //
                     installment(313.0, false, "01 March 2023"), //
                     installment(313.0, false, "01 April 2023"), //
@@ -141,7 +141,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(417.5, 12.5, 430.0, false, "01 February 2023"), //
                     installment(417.5, 12.5, 430.0, false, "01 March 2023"), //
                     installment(415.0, 12.5, 427.5, false, "01 April 2023") //
@@ -152,7 +152,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(417.5, 12.5, 430.0, false, "01 February 2023"), //
                     installment(417.5, 12.5, 430.0, false, "01 March 2023"), //
                     installment(415.0, 12.5, 427.5, false, "01 April 2023") //
@@ -204,7 +204,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(427.5, 12.5, 440.0, false, "01 February 2023"), //
                     installment(427.5, 12.5, 440.0, false, "01 March 2023"), //
                     installment(395.0, 12.5, 407.5, false, "01 April 2023") //
@@ -215,7 +215,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(427.5, 12.5, 440.0, false, "01 February 2023"), //
                     installment(427.5, 12.5, 440.0, false, "01 March 2023"), //
                     installment(395.0, 12.5, 407.5, false, "01 April 2023") //

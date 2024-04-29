@@ -73,7 +73,7 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(313.0, false, "31 January 2023"), // 120 days delinquent -> range4
                     installment(313.0, false, "02 March 2023"), // 90 days delinquent -> range4
                     installment(313.0, false, "01 April 2023"), // 60 days delinquent -> range3
@@ -134,7 +134,7 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(313.0, false, "31 January 2023"), // 120 days delinquent -> range2
                     installment(313.0, false, "02 March 2023"), // 90 days delinquent -> range2
                     installment(313.0, false, "01 April 2023"), // 60 days delinquent -> range1
@@ -184,7 +184,7 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
                     installment(313.0, false, "31 January 2023"), // 120 days delinquent -> range2
                     installment(313.0, false, "02 March 2023"), // 90 days delinquent -> range2
                     installment(313.0, false, "01 April 2023"), // 60 days delinquent -> range1
@@ -223,7 +223,7 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Verify Repayment Schedule and Due Dates
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), installment(313.0, false, "31 January 2023"),
+                    installment(1250.0, null, "01 January 2023"), installment(313.0, false, "31 January 2023"),
                     installment(313.0, false, "02 March 2023"), installment(313.0, false, "01 April 2023"),
                     installment(311.0, false, "01 May 2023"));
 
