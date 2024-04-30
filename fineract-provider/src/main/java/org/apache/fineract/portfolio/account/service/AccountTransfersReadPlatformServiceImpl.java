@@ -64,8 +64,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.QLoan;
 import org.apache.fineract.portfolio.loanaccount.domain.QLoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.QSavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.QSavingsAccountTransaction;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @AllArgsConstructor
@@ -79,7 +77,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     private final PaginationHelper paginationHelper;
     private final EntityManager entityManager;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public AccountTransferData retrieveTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
             final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
@@ -204,7 +201,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         return accountOptions;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Page<AccountTransferData> retrieveAll(final SearchParameters searchParameters, final Long accountDetailId) {
         final JPAQuery<AccountTransferData> query = getAccountTransferSelectQuery();
@@ -237,7 +233,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         return this.paginationHelper.createPageFromItems(query.fetch(), Objects.requireNonNull(totalCountQuery.fetchOne()));
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public AccountTransferData retrieveOne(final Long transferId) {
         final QAccountTransferTransaction qAccountTransferTransaction = QAccountTransferTransaction.accountTransferTransaction;
@@ -245,7 +240,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         return Optional.ofNullable(query.fetchOne()).orElseThrow(() -> new AccountTransferNotFoundException(transferId));
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Collection<Long> fetchPostInterestTransactionIds(final Long accountId) {
         final QAccountTransferTransaction qAccountTransferTransaction = QAccountTransferTransaction.accountTransferTransaction;
@@ -262,7 +256,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         return query.fetch();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Collection<Long> fetchPostInterestTransactionIdsWithPivotDate(final Long accountId, final LocalDate pivotDate) {
         final QAccountTransferTransaction qAccountTransferTransaction = QAccountTransferTransaction.accountTransferTransaction;
@@ -279,7 +272,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
                 .fetch();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public boolean isAccountTransfer(final Long transactionId, final PortfolioAccountType accountType) {
         final QAccountTransferTransaction qAccountTransferTransaction = QAccountTransferTransaction.accountTransferTransaction;
@@ -300,7 +292,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         return count != null && count > 0;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Page<AccountTransferData> retrieveByStandingInstruction(final Long id, final SearchParameters searchParameters) {
         final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
@@ -444,7 +435,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
                 toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public BigDecimal getTotalTransactionAmount(Long accountId, Integer accountType, LocalDate transactionDate) {
         final QAccountTransferDetails qAccountTransferDetails = QAccountTransferDetails.accountTransferDetails;

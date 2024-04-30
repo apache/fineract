@@ -18,11 +18,8 @@
  */
 package org.apache.fineract.portfolio.account.jobs.executestandinginstructions;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,9 +34,8 @@ import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
-import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstructionsHistory;
-import org.apache.fineract.portfolio.account.domain.QAccountTransferStandingInstruction;
-import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
+import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstructionCustomRepositoryImpl;
+import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstructionsHistoryCustomRepositoryImpl;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
@@ -53,8 +49,6 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -62,10 +56,9 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
-    private final EntityManager entityManager;
-    private final StandingInstructionRepository standingInstructionRepository;
+    private final AccountTransferStandingInstructionCustomRepositoryImpl accountTransferStandingInstructionCustomRepositoryImpl;
+    private final AccountTransferStandingInstructionsHistoryCustomRepositoryImpl accountTransferStandingInstructionsHistoryCustomRepositoryImpl;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws JobExecutionException {
         Collection<StandingInstructionData> instructionData = standingInstructionReadPlatformService
@@ -120,12 +113,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                 final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId());
 
                 if (transferCompleted) {
-                    final JPAQueryFactory queryFactory = new JPAQueryFactory(this.entityManager);
-                    final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
-
-                    queryFactory.update(qAccountTransferStandingInstruction)
-                            .set(qAccountTransferStandingInstruction.latsRunDate, transactionDate)
-                            .where(qAccountTransferStandingInstruction.id.eq(data.getId())).execute();
+                    accountTransferStandingInstructionCustomRepositoryImpl.updateLastRunDateById(data.getId(), transactionDate);
                 }
 
             }
@@ -165,15 +153,8 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             transferCompleted = false;
         }
 
-        final AccountTransferStandingInstructionsHistory newHistory = new AccountTransferStandingInstructionsHistory();
-        newHistory.setAccountTransferStandingInstruction(standingInstructionRepository.getReferenceById(instructionId));
-        newHistory.setStatus(transferCompleted ? "success" : "failed");
-        newHistory.setAmount(accountTransferDTO.getTransactionAmount());
-        newHistory.setExecutionTime(LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
-        newHistory.setErrorLog(String.valueOf(errorLog));
-
-        entityManager.persist(newHistory);
-        entityManager.flush();
+        accountTransferStandingInstructionsHistoryCustomRepositoryImpl.createNewHistory(instructionId,
+                accountTransferDTO.getTransactionAmount(), transferCompleted, String.valueOf(errorLog));
 
         return transferCompleted;
     }

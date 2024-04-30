@@ -80,8 +80,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.QLoanRepaymentScheduleIn
 import org.apache.fineract.portfolio.loanproduct.domain.QLoanProduct;
 import org.apache.fineract.portfolio.savings.domain.QSavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.QSavingsProduct;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @AllArgsConstructor
@@ -96,7 +94,6 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     private final PaginationHelper paginationHelper;
     private final EntityManager entityManager;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public StandingInstructionData retrieveTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
             final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
@@ -249,7 +246,6 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         return accountOptions;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Page<StandingInstructionData> retrieveAll(final StandingInstructionDTO standingInstructionDTO) {
 
@@ -313,7 +309,6 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
                 Objects.requireNonNull(totalCountQuery.fetchOne()));
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Collection<StandingInstructionData> retrieveAll(final Integer status) {
         final String businessDate = DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATTER);
@@ -330,7 +325,6 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         return queryResult.isEmpty() ? Collections.emptyList() : mapQueryResultToStandingInstructionDuesDataList(queryResult);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public StandingInstructionData retrieveOne(final Long instructionId) {
         final QAccountTransferStandingInstruction qAccountTransferStandingInstruction = QAccountTransferStandingInstruction.accountTransferStandingInstruction;
@@ -341,7 +335,6 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
                 .orElseThrow(() -> new AccountTransferNotFoundException(instructionId));
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public StandingInstructionDuesData retriveLoanDuesData(final Long loanId) {
         final QLoanRepaymentScheduleInstallment qLoanRepaymentSchedule = QLoanRepaymentScheduleInstallment.loanRepaymentScheduleInstallment;

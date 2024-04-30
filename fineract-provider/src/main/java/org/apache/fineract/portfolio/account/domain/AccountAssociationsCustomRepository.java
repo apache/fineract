@@ -18,10 +18,14 @@
  */
 package org.apache.fineract.portfolio.account.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.util.Collection;
+import org.apache.fineract.portfolio.account.data.AccountAssociationsData;
 
-public interface StandingInstructionRepository
-        extends JpaRepository<AccountTransferStandingInstruction, Long>, JpaSpecificationExecutor<AccountTransferStandingInstruction> {
+public interface AccountAssociationsCustomRepository {
 
+    AccountAssociationsData retrieveLoanLinkedAssociation(Long loanId);
+
+    AccountAssociationsData retrieveSavingsLinkedAssociation(Long savingsId);
+
+    Collection<AccountAssociationsData> retrieveLoanAssociations(Long loanId, Integer associationType);
 }

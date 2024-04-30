@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.account.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.math.BigDecimal;
 
-public interface StandingInstructionRepository
-        extends JpaRepository<AccountTransferStandingInstruction, Long>, JpaSpecificationExecutor<AccountTransferStandingInstruction> {
+public interface AccountTransferStandingInstructionsHistoryCustomRepository {
 
+    void createNewHistory(long instructionId, BigDecimal transactionAmount, boolean transferCompleted, String errorLog);
 }

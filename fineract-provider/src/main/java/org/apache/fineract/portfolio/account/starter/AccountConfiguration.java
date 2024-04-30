@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDataValidator;
+import org.apache.fineract.portfolio.account.domain.AccountAssociationsCustomRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferAssembler;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetailRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
@@ -63,8 +64,9 @@ public class AccountConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AccountAssociationsReadPlatformService.class)
-    public AccountAssociationsReadPlatformService accountAssociationsReadPlatformService(EntityManager entityManager) {
-        return new AccountAssociationsReadPlatformServiceImpl(entityManager);
+    public AccountAssociationsReadPlatformService accountAssociationsReadPlatformService(EntityManager entityManager,
+            final AccountAssociationsCustomRepository accountAssociationsCustomRepository) {
+        return new AccountAssociationsReadPlatformServiceImpl(entityManager, accountAssociationsCustomRepository);
     }
 
     @Bean

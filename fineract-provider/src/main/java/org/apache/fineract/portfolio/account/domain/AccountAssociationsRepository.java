@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.account.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
-public interface AccountAssociationsRepository extends JpaRepository<AccountAssociations, Long>,
-        JpaSpecificationExecutor<AccountAssociations>, QuerydslPredicateExecutor<AccountAssociations> {}
+public interface AccountAssociationsRepository
+        extends JpaRepository<AccountAssociations, Long>, JpaSpecificationExecutor<AccountAssociations> {}

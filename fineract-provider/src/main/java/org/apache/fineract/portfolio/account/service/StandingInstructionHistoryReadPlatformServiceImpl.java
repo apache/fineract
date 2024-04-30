@@ -57,8 +57,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.QLoan;
 import org.apache.fineract.portfolio.loanproduct.domain.QLoanProduct;
 import org.apache.fineract.portfolio.savings.domain.QSavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.QSavingsProduct;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 public class StandingInstructionHistoryReadPlatformServiceImpl implements StandingInstructionHistoryReadPlatformService {
@@ -67,7 +65,6 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
     private final PaginationHelper paginationHelper;
     private final EntityManager entityManager;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Page<StandingInstructionHistoryData> retrieveAll(StandingInstructionDTO standingInstructionDTO) {
         final QAccountTransferStandingInstructionsHistory qHistory = QAccountTransferStandingInstructionsHistory.accountTransferStandingInstructionsHistory;

@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.portfolio.account.jobs.executestandinginstructions;
 
-import jakarta.persistence.EntityManager;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
+import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstructionCustomRepositoryImpl;
+import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstructionsHistoryCustomRepositoryImpl;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
 import org.springframework.batch.core.Job;
@@ -46,9 +46,9 @@ public class ExecuteStandingInstructionsConfig {
     @Autowired
     private AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     @Autowired
-    private EntityManager entityManager;
+    private AccountTransferStandingInstructionCustomRepositoryImpl accountTransferStandingInstructionCustomRepositoryImpl;
     @Autowired
-    private StandingInstructionRepository standingInstructionRepository;
+    private AccountTransferStandingInstructionsHistoryCustomRepositoryImpl accountTransferStandingInstructionsHistoryCustomRepositoryImpl;
 
     @Bean
     protected Step executeStandingInstructionsStep() {
@@ -65,6 +65,6 @@ public class ExecuteStandingInstructionsConfig {
     @Bean
     public ExecuteStandingInstructionsTasklet executeStandingInstructionsTasklet() {
         return new ExecuteStandingInstructionsTasklet(standingInstructionReadPlatformService, accountTransfersWritePlatformService,
-                entityManager, standingInstructionRepository);
+                accountTransferStandingInstructionCustomRepositoryImpl, accountTransferStandingInstructionsHistoryCustomRepositoryImpl);
     }
 }

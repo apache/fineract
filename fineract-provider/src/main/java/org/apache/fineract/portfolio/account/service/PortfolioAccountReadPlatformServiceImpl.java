@@ -43,21 +43,17 @@ import org.apache.fineract.portfolio.loanaccount.domain.QLoanRepaymentScheduleIn
 import org.apache.fineract.portfolio.loanproduct.domain.QLoanProduct;
 import org.apache.fineract.portfolio.savings.domain.QSavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.QSavingsProduct;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccountReadPlatformService {
 
     private final EntityManager entityManager;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retrieveOne(final Long accountId, final Integer accountTypeId) {
         return retrieveOne(accountId, accountTypeId, null);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retrieveOne(final Long accountId, final Integer accountTypeId, final String currencyCode) {
 
@@ -88,7 +84,6 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
         return Optional.ofNullable(accountData).orElseThrow(() -> new AccountTransferNotFoundException(accountId));
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Collection<PortfolioAccountData> retrieveAllForLookup(final PortfolioAccountDTO portfolioAccountDTO) {
 
@@ -138,7 +133,6 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
         return accounts;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId) {
         // TODO Auto-generated method stub
