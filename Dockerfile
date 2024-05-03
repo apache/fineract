@@ -15,27 +15,20 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM azul/zulu-openjdk:17-latest AS builder
-
-RUN apt-get update -qq && apt-get install -y wget
+FROM azul/zulu-openjdk-alpine:17-latest AS builder
 
 COPY . fineract
 
 WORKDIR /fineract
 
-RUN ./gradlew --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
+RUN ./gradlew --no-build-cache --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
 # =========================================
 
-FROM azul/zulu-openjdk:17-latest AS fineract
+FROM azul/zulu-openjdk-alpine:17-latest AS fineract
 
 #Copy Apache Fineract binary
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
-
-#Apache Fineract storage area
-RUN mkdir -p /data
-#Apache Fineract plugin
-RUN mkdir -p /app/plugins/
 
 WORKDIR /app
 

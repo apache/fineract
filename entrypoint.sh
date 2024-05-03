@@ -24,4 +24,4 @@
 # see e.g. https://explainshell.com/explain?cmd=set+-eux
 set -ex
 
-java -cp "app:app/libs/*" -jar fineract-provider-0.1.0-SNAPSHOT.jar
+java -jar fineract-provider-0.1.0-SNAPSHOT.jar -Duser.home=/tmp -Dfile.encoding=UTF-8 -Duser.timezone=UTC -Djava.security.egd=file:/dev/./urandom
