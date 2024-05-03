@@ -24,4 +24,4 @@
 # see e.g. https://explainshell.com/explain?cmd=set+-eux
 set -ex
 
-java -jar fineract-provider-0.1.0-SNAPSHOT.jar -Duser.home=/tmp -Dfile.encoding=UTF-8 -Duser.timezone=UTC -Djava.security.egd=file:/dev/./urandom
+java -jar fineract-provider-*.jar -Duser.home=/tmp -Dfile.encoding=UTF-8 -Duser.timezone=UTC -Djava.security.egd=file:/dev/./urandom
