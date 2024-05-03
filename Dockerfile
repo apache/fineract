@@ -27,14 +27,11 @@ RUN ./gradlew --no-build-cache --no-daemon -q -x rat -x compileTestJava -x test 
 
 FROM azul/zulu-openjdk-alpine:17-latest AS fineract
 
-#Copy Apache Fineract binary
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 
 WORKDIR /app
 
-COPY entrypoint.sh /entrypoint.sh
-
-RUN chmod 775 /entrypoint.sh
+COPY --chmod=755 entrypoint.sh /entrypoint.sh
 
 EXPOSE 8080 8443
 
