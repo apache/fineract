@@ -59,6 +59,8 @@ import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -75,6 +77,8 @@ public class DatatablesApiResource {
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatatablesApiResource.class);
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -268,7 +272,7 @@ public class DatatablesApiResource {
         } else {
             json = this.genericDataService.generateJsonFromGenericResultsetData(results);
         }
-
+        LOGGER.info("REGRESO DATOS DE DATA TABLE CON ID");
         return json;
     }
 
@@ -293,7 +297,7 @@ public class DatatablesApiResource {
         } else {
             json = this.genericDataService.generateJsonFromGenericResultsetData(results);
         }
-
+        LOGGER.info("REGRESO DATOS DE DATA TABLE CON NOMBRE E ID");
         return json;
     }
 
