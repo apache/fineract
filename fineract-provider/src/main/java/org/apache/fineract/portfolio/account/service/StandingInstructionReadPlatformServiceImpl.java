@@ -107,6 +107,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         final EnumOptionData loanAccountType = accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = accountType(PortfolioAccountType.SAVINGS);
 
+        final Integer mostRelevantFromAccountType = fromAccountType;
         Collection<EnumOptionData> fromAccountTypeOptions;
         Collection<EnumOptionData> toAccountTypeOptions;
 
@@ -120,9 +121,10 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
             toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
         }
+        final Integer mostRelevantToAccountType = toAccountType;
 
-        final EnumOptionData fromAccountTypeData = accountType(fromAccountType);
-        final EnumOptionData toAccountTypeData = accountType(toAccountType);
+        final EnumOptionData fromAccountTypeData = accountType(mostRelevantFromAccountType);
+        final EnumOptionData toAccountTypeData = accountType(mostRelevantToAccountType);
 
         // from settings
         OfficeData fromOffice = null;
@@ -145,7 +147,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         if (fromAccountId != null) {
             Integer accountType;
-            if (fromAccountType == 1) {
+            if (mostRelevantFromAccountType == 1) {
                 accountType = PortfolioAccountType.LOAN.getValue();
             } else {
                 accountType = PortfolioAccountType.SAVINGS.getValue();
@@ -160,10 +162,11 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
             mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
-            if (fromAccountType == 1) {
+            if (mostRelevantFromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
             }
-            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(fromAccountType, mostRelevantFromClientId, loanStatus);
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
+                    loanStatus);
             fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
         }
 
@@ -181,7 +184,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         Collection<ClientData> toClientOptions = null;
 
         if (toAccountId != null && fromAccount != null) {
-            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, toAccountType, fromAccount.getCurrencyCode());
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
+                    fromAccount.getCurrencyCode());
             mostRelevantToClientId = toAccount.getClientId();
         }
 
@@ -191,7 +195,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 
-            toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
+            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
         }
 
         if (mostRelevantToOfficeId != null) {
@@ -202,7 +206,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             if (toClientOptions != null && toClientOptions.size() == 1) {
                 toClient = new ArrayList<>(toClientOptions).get(0);
 
-                toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
+                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
             }
         }
 
@@ -284,7 +288,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         totalCountQuery.where(whereClause);
 
         final SearchParameters searchParameters = standingInstructionDTO.searchParameters();
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             final Order order = searchParameters.getSortOrder().equalsIgnoreCase("desc") ? Order.DESC
                     : searchParameters.getSortOrder().equalsIgnoreCase("asc") || searchParameters.getSortOrder().isEmpty() ? Order.ASC
                             : null;
@@ -296,9 +300,9 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             query.orderBy(specifier);
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             query.limit(searchParameters.getLimit());
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 query.offset(searchParameters.getOffset());
             }
         }

@@ -28,8 +28,8 @@ import java.util.regex.Pattern;
  * Utility to assemble the WHERE clause of an SQL query without the risk of SQL injection.
  *
  * <p>
- * When using this utility instead of manually assembling SQL queries, then {@link SQLInjectionValidator} should not be
- * required anymore. (Correctly using this means only ever passing completely fixed String literals to .)
+ * When using this utility instead of manually assembling SQL queries, then {@link SqlValidator} should not be required
+ * anymore. (Correctly using this means only ever passing completely fixed String literals to .)
  *
  * @author Michael Vorburger <mike@vorburger.ch>
  */

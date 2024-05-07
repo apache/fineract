@@ -356,6 +356,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                     (ctx.getInstallments().size() + 1), pastDueDate, transactionDate, zeroMoney.getAmount(),
                                     zeroMoney.getAmount(), zeroMoney.getAmount(), zeroMoney.getAmount(), false, null);
                             recognizeAmountsAfterChargeback(ctx.getCurrency(), transactionDate, installment, chargebackAllocation);
+                            installment.markAsAdditional();
                             loan.addLoanRepaymentScheduleInstallment(installment);
                         }
                     }

@@ -104,8 +104,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         // Partitioning dataset to avoid exception: PreparedStatement can have at most 65,535 parameters
         final int partitionSize = fineractProperties.getEvents().getExternal().getPartitionSize();
         List<List<Long>> partitions = Lists.partition(eventIds, partitionSize);
-        partitions.stream() //
-                .parallel() //
+        partitions //
                 .forEach(partitionedEventIds -> {
                     measure(() -> {
                         repository.markEventsSent(partitionedEventIds, sentAt);

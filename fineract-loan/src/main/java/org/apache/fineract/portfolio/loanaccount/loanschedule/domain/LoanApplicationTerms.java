@@ -69,6 +69,7 @@ public final class LoanApplicationTerms {
     private final Integer repaymentEvery;
     private final PeriodFrequencyType repaymentPeriodFrequencyType;
 
+    private long variationDays = 0L;
     private final Integer fixedLength;
     private final Integer nthDay;
 
@@ -430,10 +431,12 @@ public final class LoanApplicationTerms {
         this.variationsDataWrapper = new LoanTermVariationsDataWrapper(loanTermVariations);
         this.actualNumberOfRepayments = numberOfRepayments + getLoanTermVariations().adjustNumberOfRepayments();
         this.adjustPrincipalForFlatLoans = principal.zero();
-        if (this.calculatedRepaymentsStartingFromDate == null) {
-            this.seedDate = this.expectedDisbursementDate;
+        // We only change the seed date if `repaymentStartingFromDate was provided`
+        if (this.repaymentsStartingFromDate == null) {
+            this.seedDate = repaymentStartDateType.isDisbursementDate() ? expectedDisbursementDate : submittedOnDate;
         } else {
-            this.seedDate = this.calculatedRepaymentsStartingFromDate;
+            // When we change the seed date we are taking the `repaymentsStartingFromDate`
+            this.seedDate = repaymentsStartingFromDate;
         }
         this.calendarHistoryDataWrapper = calendarHistoryDataWrapper;
         this.isInterestChargedFromDateSameAsDisbursalDateEnabled = isInterestChargedFromDateSameAsDisbursalDateEnabled;
@@ -1414,8 +1417,12 @@ public final class LoanApplicationTerms {
     }
 
     @NotNull
-    public Money getMaxOutstandingBalance() {
+    public Money getMaxOutstandingBalanceMoney() {
         return Money.of(getCurrency(), this.maxOutstandingBalance);
+    }
+
+    public BigDecimal getMaxOutstandingBalance() {
+        return maxOutstandingBalance;
     }
 
     public BigDecimal getFixedEmiAmount() {
@@ -1845,16 +1852,16 @@ public final class LoanApplicationTerms {
         }
         switch (repaymentPeriodFrequencyType) {
             case DAYS:
-                maxDateForFixedLength = startDate.plusDays(fixedLength);
+                maxDateForFixedLength = startDate.plusDays(fixedLength + variationDays);
             break;
             case WEEKS:
-                maxDateForFixedLength = startDate.plusWeeks(fixedLength);
+                maxDateForFixedLength = startDate.plusWeeks(fixedLength + variationDays);
             break;
             case MONTHS:
-                maxDateForFixedLength = startDate.plusMonths(fixedLength);
+                maxDateForFixedLength = startDate.plusMonths(fixedLength + variationDays);
             break;
             case YEARS:
-                maxDateForFixedLength = startDate.plusYears(fixedLength);
+                maxDateForFixedLength = startDate.plusYears(fixedLength + variationDays);
             break;
             case INVALID:
             break;
@@ -1871,4 +1878,15 @@ public final class LoanApplicationTerms {
                 : getSubmittedOnDate();
     }
 
+    public boolean isLastPeriod(final Integer periodNumber) {
+        return getNumberOfRepayments().equals(periodNumber);
+    }
+
+    public void updateVariationDays(final long daysToAdd) {
+        this.variationDays += daysToAdd;
+    }
+
+    public LocalDate getLoanEndDate() {
+        return loanEndDate;
+    }
 }

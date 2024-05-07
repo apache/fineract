@@ -112,7 +112,7 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
 
         final SearchParameters searchParameters = standingInstructionDTO.searchParameters();
         if (searchParameters != null) {
-            if (searchParameters.isOrderByRequested()) {
+            if (searchParameters.hasOrderBy()) {
                 final Order order = searchParameters.getSortOrder().equalsIgnoreCase("desc") ? Order.DESC
                         : searchParameters.getSortOrder().equalsIgnoreCase("asc") || searchParameters.getSortOrder().isEmpty() ? Order.ASC
                                 : null;
@@ -124,9 +124,9 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
                 query.orderBy(specifier);
             }
 
-            if (searchParameters.isLimited()) {
+            if (searchParameters.hasLimit()) {
                 query.limit(searchParameters.getLimit());
-                if (searchParameters.isOffset()) {
+                if (searchParameters.hasOffset()) {
                     query.offset(searchParameters.getOffset());
                 }
             }

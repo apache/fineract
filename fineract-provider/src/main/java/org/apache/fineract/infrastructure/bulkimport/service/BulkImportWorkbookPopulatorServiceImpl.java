@@ -272,7 +272,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         if (officeId == null) {
             Boolean includeAllOffices = Boolean.TRUE;
             offices = (List) this.officeReadPlatformService.retrieveAllOffices(includeAllOffices,
-                    new SearchParameters(null, null, null, null, null, null, null, null, "id", "asc", null, null, null, null, null, null));
+                    SearchParameters.builder().orderBy("id").sortOrder("asc").build());
         } else {
             offices = new ArrayList<>();
             offices.add(this.officeReadPlatformService.retrieveOffice(officeId));
@@ -341,7 +341,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         if (officeId == null) {
             centers = (List<CenterData>) this.centerReadPlatformService.retrieveAll(null, null);
         } else {
-            SearchParameters searchParameters = SearchParameters.from(officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.builder().officeId(officeId).build();
             centers = (List<CenterData>) centerReadPlatformService.retrieveAll(searchParameters, null);
         }
 
@@ -359,7 +359,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
                 }
             }
         } else {
-            SearchParameters searchParameters = SearchParameters.from(officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.builder().officeId(officeId).build();
             Page<ClientData> clientDataPage = this.clientReadPlatformService.retrieveAll(searchParameters);
             if (clientDataPage != null) {
                 clients = new ArrayList<>();
@@ -420,7 +420,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         if (officeId == null) {
             groups = (List<GroupGeneralData>) this.groupReadPlatformService.retrieveAll(null, null);
         } else {
-            SearchParameters searchParameters = SearchParameters.from(officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.builder().officeId(officeId).build();
             groups = (List<GroupGeneralData>) groupReadPlatformService.retrieveAll(searchParameters, null);
         }
 
@@ -448,7 +448,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         if (officeId == null) {
             loanAccounts = loanReadPlatformService.retrieveAll(null).getPageItems();
         } else {
-            SearchParameters searchParameters = SearchParameters.from(officeId, null, null, null);
+            SearchParameters searchParameters = SearchParameters.builder().officeId(officeId).build();
             loanAccounts = loanReadPlatformService.retrieveAll(searchParameters).getPageItems();
         }
         return loanAccounts;

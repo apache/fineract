@@ -34,7 +34,7 @@ public class PaginationParametersDataValidator {
     public void validateParameterValues(PaginationParameters parameters, final Set<String> supportedOrdeByValues,
             final String resourceName) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        if (parameters.isOrderByRequested() && !supportedOrdeByValues.contains(parameters.getOrderBy())) {
+        if (parameters.hasOrderBy() && !supportedOrdeByValues.contains(parameters.getOrderBy())) {
             final String defaultUserMessage = "The orderBy value '" + parameters.getOrderBy()
                     + "' is not supported. The supported orderBy values are " + supportedOrdeByValues;
             final ApiParameterError error = ApiParameterError.parameterError(
@@ -43,7 +43,7 @@ public class PaginationParametersDataValidator {
             dataValidationErrors.add(error);
         }
 
-        if (parameters.isSortOrderProvided() && !sortOrderValues.contains(parameters.getSortOrder().toUpperCase())) {
+        if (parameters.hasSortOrder() && !sortOrderValues.contains(parameters.getSortOrder().toUpperCase())) {
             final String defaultUserMessage = "The sortOrder value '" + parameters.getSortOrder()
                     + "' is not supported. The supported sortOrder values are " + sortOrderValues;
             final ApiParameterError error = ApiParameterError.parameterError(

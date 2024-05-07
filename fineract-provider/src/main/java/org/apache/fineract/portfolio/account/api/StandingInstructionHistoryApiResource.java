@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData;
 import org.apache.fineract.portfolio.account.service.StandingInstructionHistoryReadPlatformService;
@@ -59,6 +60,7 @@ public class StandingInstructionHistoryApiResource {
     private final DefaultToApiJsonSerializer<StandingInstructionHistoryData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService;
+    private final SqlValidator sqlValidator;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -88,7 +90,11 @@ public class StandingInstructionHistoryApiResource {
 
         final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
 
-        final SearchParameters searchParameters = SearchParameters.forAccountTransfer(externalId, offset, limit, orderBy, sortOrder);
+        sqlValidator.validate(orderBy);
+        sqlValidator.validate(sortOrder);
+        sqlValidator.validate(externalId);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
+                .orderBy(orderBy).sortOrder(sortOrder).build();
         LocalDate startDateRange = null;
         LocalDate endDateRange = null;
         if (fromDateParam != null) {

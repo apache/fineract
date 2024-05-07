@@ -32,6 +32,7 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -90,7 +91,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // verify schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 0.0, 1000.0, false, "31 January 2023"));
         });
         runAt("02 February 2023", () -> {
@@ -107,7 +108,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // verify N+1 installment in schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 0.0, 1000.0, false, "31 January 2023"), //
                     installment(0.0, 0.0, 100.0, 100.0, false, "01 February 2023") //
             );
@@ -127,7 +128,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // verify N+1 installment completion
             verifyRepaymentSchedule(loanId, //
-                    installment(0.0, null, "01 January 2023"), //
+                    installment(1000.0, null, "01 January 2023"), //
                     installment(1000.0, 0.0, 0.0, 0.0, true, "31 January 2023"), //
                     installment(0.0, 0.0, 100.0, 0.0, true, "01 February 2023") //
             );
@@ -138,5 +139,131 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
             LocalDate expected = LocalDate.of(2023, 2, 1);
             assertEquals(expected, obligationsMetOnDate);
         });
+    }
+
+    @ParameterizedTest
+    @MethodSource("processingStrategy")
+    public void accrualIsCalculatedWhenThereIsWaivedChargeAndLoanIsClosed(boolean advancedPaymentStrategy) {
+        double amount = 1000.0;
+        AtomicLong appliedLoanId = new AtomicLong();
+        String LoanCoBJobName = "Loan COB";
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product
+            PostLoanProductsRequest product;
+            if (advancedPaymentStrategy) {
+                product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation();
+            } else {
+                product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
+            }
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, 1);
+            if (advancedPaymentStrategy) {
+                applicationRequest = applicationRequest
+                        .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+            }
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+            appliedLoanId.set(loanId);
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "01 January 2023");
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(1000.0, 0.0, 0.0, 1000.0, false, "31 January 2023"));
+        });
+
+        runAt("10 January 2023", () -> {
+            Long loanId = appliedLoanId.get();
+
+            // create charge
+            double chargeAmount = 10.0;
+            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            Long chargeId = chargeResult.getResourceId();
+
+            PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "09 January 2023", chargeAmount);
+            loanChargeResult.getResourceId();
+            this.schedulerJobHelper.executeAndAwaitJob(LoanCoBJobName);
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(1000.0, 0.0, 10.0, 1010.0, false, "31 January 2023") //
+
+            );
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(10.0, "Accrual", "09 January 2023", 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0));
+        });
+        runAt("11 January 2023", () -> {
+            Long loanId = appliedLoanId.get();
+
+            // create charge
+            double chargeAmount = 9.0;
+            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            Long chargeId = chargeResult.getResourceId();
+
+            PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "10 January 2023", chargeAmount);
+            Long loanChargeId = loanChargeResult.getResourceId();
+            this.schedulerJobHelper.executeAndAwaitJob(LoanCoBJobName);
+            // waive charge
+            waiveLoanCharge(loanId, loanChargeId, 1);
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(10.0, "Accrual", "09 January 2023", 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0), //
+                    transaction(9.0, "Accrual", "10 January 2023", 0.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0), //
+                    transaction(9.0, "Waive loan charges", "10 January 2023", 1000.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0) //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(1000.0, 0.0, 19.0, 1010.0, false, "31 January 2023") //
+            );
+        });
+
+        runAt("12 January 2023", () -> {
+            Long loanId = appliedLoanId.get();
+
+            // create charge
+            double chargeAmount = 8.0;
+            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            Long chargeId = chargeResult.getResourceId();
+
+            PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "11 January 2023", chargeAmount);
+            loanChargeResult.getResourceId();
+
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("12 January 2023")
+                    .dateFormat("dd MMMM yyyy").locale("en").transactionAmount(1018.0));
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(10.0, "Accrual", "09 January 2023", 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0), //
+                    transaction(9.0, "Accrual", "10 January 2023", 0.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0), //
+                    transaction(9.0, "Waive loan charges", "10 January 2023", 1000.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0), //
+                    transaction(1018.0, "Repayment", "12 January 2023", 0.0, 1000.0, 0.0, 18.0, 0.0, 0.0, 0.0), //
+                    transaction(8.0, "Accrual", "12 January 2023", 0.0, 0.0, 0.0, 8.0, 0.0, 0.0, 0.0) //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(1000.0, 0.0, 27.0, 0.0, true, "31 January 2023") //
+            );
+        });
+
     }
 }

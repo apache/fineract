@@ -18,101 +18,62 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 
-/**
- * <p>
- * Immutable data object representing pagination parameter values.
- * </p>
- */
-public final class PaginationParameters {
+@Builder
+@Getter
+public class PaginationParameters {
 
-    private final boolean paged;
-    private final Integer offset;
-    private final Integer limit;
-    private final String orderBy;
-    private final String sortOrder;
+    // TODO: why do we really need this class? SearchParameters seems to provide similar functionality
 
-    public static PaginationParameters instance(Boolean paged, Integer offset, Integer limit, String orderBy, String sortOrder) {
-        if (null == paged) {
-            paged = false;
-        }
+    public static final int DEFAULT_MAX_LIMIT = 200;
 
-        final Integer maxLimitAllowed = getCheckedLimit(limit);
-
-        return new PaginationParameters(paged, offset, maxLimitAllowed, orderBy, sortOrder);
-    }
-
-    private PaginationParameters(boolean paged, Integer offset, Integer limit, String orderBy, String sortOrder) {
-        SQLInjectionValidator.validateSQLInput(orderBy);
-        SQLInjectionValidator.validateSQLInput(sortOrder);
-
-        this.paged = paged;
-        this.offset = offset;
-        this.limit = limit;
-        this.orderBy = orderBy;
-        this.sortOrder = sortOrder;
-    }
-
-    public static Integer getCheckedLimit(final Integer limit) {
-
-        final Integer maxLimitAllowed = 200;
-        // default to max limit first off
-        Integer checkedLimit = maxLimitAllowed;
-
-        if (limit != null && limit > 0) {
-            checkedLimit = limit;
-        } else if (limit != null) {
-            // unlimited case: limit provided and 0 or less
-            checkedLimit = null;
-        }
-
-        return checkedLimit;
-    }
-
-    public boolean isPaged() {
-        return this.paged;
-    }
-
-    public Integer getOffset() {
-        return this.offset;
-    }
+    private boolean paged;
+    private Integer offset;
+    @Getter(AccessLevel.NONE)
+    private Integer limit;
+    private String orderBy;
+    private String sortOrder;
 
     public Integer getLimit() {
-        return this.limit;
+        if (limit == null) {
+            return DEFAULT_MAX_LIMIT;
+        }
+
+        if (limit > 0) {
+            return limit;
+        }
+
+        return null; // unlimited (0 or less)
     }
 
-    public String getOrderBy() {
-        return this.orderBy;
-    }
-
-    public String getSortOrder() {
-        return this.sortOrder;
-    }
-
-    public boolean isOrderByRequested() {
+    public boolean hasOrderBy() {
         return StringUtils.isNotBlank(this.orderBy);
     }
 
-    public boolean isSortOrderProvided() {
+    public boolean hasSortOrder() {
         return StringUtils.isNotBlank(this.sortOrder);
     }
 
-    public boolean isLimited() {
-        return this.limit != null && this.limit.intValue() > 0;
+    public boolean hasLimit() {
+        return this.limit != null && this.limit > 0;
     }
 
-    public boolean isOffset() {
+    public boolean hasOffset() {
         return this.offset != null;
     }
+
+    // TODO: following functions are just doing too much in one place; will disappear with type safe queries
 
     public String orderBySql() {
         final StringBuilder sql = new StringBuilder();
 
-        if (this.isOrderByRequested()) {
+        if (this.hasOrderBy()) {
             sql.append(" order by ").append(this.getOrderBy());
-            if (this.isSortOrderProvided()) {
+            if (this.hasSortOrder()) {
                 sql.append(' ').append(this.getSortOrder());
             }
         }
@@ -121,9 +82,9 @@ public final class PaginationParameters {
 
     public String limitSql() {
         final StringBuilder sql = new StringBuilder();
-        if (this.isLimited()) {
+        if (this.hasLimit()) {
             sql.append(" limit ").append(this.getLimit());
-            if (this.isOffset()) {
+            if (this.hasOffset()) {
                 sql.append(" offset ").append(this.getOffset());
             }
         }
@@ -132,10 +93,10 @@ public final class PaginationParameters {
 
     public String paginationSql() {
         final StringBuilder sqlBuilder = new StringBuilder(50);
-        if (this.isOrderByRequested()) {
+        if (this.hasOrderBy()) {
             sqlBuilder.append(' ').append(this.orderBySql());
         }
-        if (this.isLimited()) {
+        if (this.hasLimit()) {
             sqlBuilder.append(' ').append(this.limitSql());
         }
 

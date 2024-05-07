@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourc
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseStateVerifier;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseUpgradeService;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
+import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.jobs.ScheduledJobRunnerConfig;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +46,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.batch.core.configuration.ListableJobLocator;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
@@ -97,18 +98,6 @@ public class TestConfiguration {
                 return mock(DataSource.class);
             }
         };
-    }
-
-    @Primary
-    @Bean
-    public JobExplorer jobExplorer() {
-        return mock(JobExplorer.class, RETURNS_MOCKS);
-    }
-
-    @Primary
-    @Bean
-    public JobLauncher jobLauncher() {
-        return mock(JobLauncher.class, RETURNS_MOCKS);
     }
 
     @Primary
@@ -189,8 +178,20 @@ public class TestConfiguration {
 
     @Primary
     @Bean
-    public ListableJobLocator listableJobLocator() {
-        return mock(ListableJobLocator.class, RETURNS_MOCKS);
+    public JobExplorer jobExplorer() {
+        return mock(JobExplorer.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public JobLauncher jobLauncher() {
+        return mock(JobLauncher.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public JobRegistry jobRegistry() {
+        return mock(JobRegistry.class, RETURNS_MOCKS);
     }
 
     @Primary
@@ -209,5 +210,11 @@ public class TestConfiguration {
     @Bean
     public OkHttpClient okHttpClient() {
         return mock(OkHttpClient.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public GenericDataService genericDataService() {
+        return mock(GenericDataService.class, RETURNS_MOCKS);
     }
 }

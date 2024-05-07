@@ -88,11 +88,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
 public class InitiateExternalAssetOwnerTransferTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(InitiateExternalAssetOwnerTransferTest.class);
     private static ResponseSpecification RESPONSE_SPEC;
     private static RequestSpecification REQUEST_SPEC;
     private static Account ASSET_ACCOUNT;

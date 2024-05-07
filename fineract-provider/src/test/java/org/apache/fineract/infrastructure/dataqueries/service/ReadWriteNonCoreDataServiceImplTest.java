@@ -32,31 +32,34 @@ import com.google.gson.JsonObject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.stream.Stream;
+import org.apache.fineract.TestConfiguration;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.test.context.ContextConfiguration;
 
+@SpringBootTest
+@ContextConfiguration(classes = TestConfiguration.class)
 @SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class ReadWriteNonCoreDataServiceImplTest {
 
-    @Mock
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Mock
+    @Autowired
     private GenericDataService genericDataService;
 
     @Mock
@@ -65,17 +68,13 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @Mock
     private DatabaseSpecificSQLGenerator sqlGenerator;
 
-    @InjectMocks
-    private ReadWriteNonCoreDataServiceImpl underTest;
-
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
+    @Autowired
+    private ReadWriteNonCoreDataService underTest;
 
     @Test
     public void testSqlInjectionCaughtQueryDataTable() {
-        mockDatatableValidation();
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
+
         assertThrows(PlatformApiDataValidationException.class, () -> {
             underTest.queryDataTable("table", "cf1", "vf1", "' or 1=1");
         });
@@ -83,7 +82,8 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
     @Test
     public void testSqlInjectionCaughtQueryDataTable2() {
-        mockDatatableValidation();
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
+
         assertThrows(PlatformApiDataValidationException.class, () -> {
             underTest.queryDataTable("table", "cf1", "vf1", "1; DROP TABLE m_loan; SELECT");
         });
@@ -91,8 +91,9 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
     @Test
     public void testQueryDataTableSuccess() {
-        mockDatatableValidation();
         SqlRowSet sqlRS = Mockito.mock(SqlRowSet.class);
+
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
         when(jdbcTemplate.queryForRowSet(eq("SELECT \"rc1\", \"rc2\" FROM \"table\" WHERE \"cf1\" = ?"), any(Object.class)))
                 .thenReturn(sqlRS);
         when(sqlRS.next()).thenReturn(true).thenReturn(false);
@@ -111,6 +112,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
                 false, dialect);
         ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, emptyList(), null, false,
                 false, dialect);
+
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
         List<JsonObject> results = underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2");
@@ -121,8 +123,9 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
     @Test
     public void testQueryDataTableValidationError() {
-        mockDatatableValidation();
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(emptyList());
+
         assertThrows(PlatformApiDataValidationException.class, () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));
     }
 
@@ -136,8 +139,9 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @ParameterizedTest
     @MethodSource("provideParameters")
     public void testQueryDataTableInvalidParameterError(String columnType, String errorMessage) {
-        mockDatatableValidation();
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
         when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.POSTGRESQL);
+
         DatabaseType dialect = databaseTypeResolver.databaseType();
         ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", columnType, 10L, false, false, emptyList(), null, false,
                 false, dialect);
@@ -152,10 +156,6 @@ public class ReadWriteNonCoreDataServiceImplTest {
 
         assertEquals(1, thrown.getErrors().size());
         assertEquals(errorMessage, thrown.getErrors().get(0).getUserMessageGlobalisationCode());
-    }
-
-    private void mockDatatableValidation() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
     }
 
     private static Stream<Arguments> provideParameters() {

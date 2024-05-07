@@ -278,7 +278,7 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(12000.0, null, "01 January 2023"), //
+                    installment(15000.0, null, "01 January 2023"), //
                     installment(3000.00, false, "01 January 2023"), //
                     installment(1764.21, false, "01 February 2023"), //
                     installment(1852.42, false, "01 March 2023"), //
@@ -357,7 +357,7 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(12000.0, null, "01 January 2023"), //
+                    installment(15000.0, null, "01 January 2023"), //
                     installment(3000.00, false, "01 January 2023"), //
                     installment(1764.21, false, "01 February 2023"), //
                     installment(1852.42, false, "01 March 2023"), //

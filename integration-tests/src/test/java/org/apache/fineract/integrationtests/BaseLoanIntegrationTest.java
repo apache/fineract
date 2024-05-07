@@ -91,6 +91,7 @@ import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -102,37 +103,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public abstract class BaseLoanIntegrationTest {
 
+    protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
+
     static {
         Utils.initializeRESTAssured();
     }
 
-    protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
-
     protected final ResponseSpecification responseSpec = createResponseSpecification(Matchers.is(200));
     protected final ResponseSpecification responseSpec204 = createResponseSpecification(Matchers.is(204));
-
+    protected final LoanProductHelper loanProductHelper = new LoanProductHelper();
     private final String fullAdminAuthKey = getFullAdminAuthKey();
-
     protected final RequestSpecification requestSpec = createRequestSpecification(fullAdminAuthKey);
     private final String nonByPassUserAuthKey = getNonByPassUserAuthKey(requestSpec, responseSpec);
-
     protected final AccountHelper accountHelper = new AccountHelper(requestSpec, responseSpec);
-    protected final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-    protected final LoanProductHelper loanProductHelper = new LoanProductHelper();
-    protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
-    protected ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-    protected SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-    protected final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
-
-    protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
-
-    protected final LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(requestSpec,
-            createResponseSpecification(Matchers.is(202)));
-    protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
-
     // asset
     protected final Account loansReceivableAccount = accountHelper.createAssetAccount("loanPortfolio");
-
     protected final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivable");
     protected final Account feeReceivableAccount = accountHelper.createAssetAccount("feeReceivable");
     protected final Account penaltyReceivableAccount = accountHelper.createAssetAccount("penaltyReceivable");
@@ -146,7 +131,6 @@ public abstract class BaseLoanIntegrationTest {
     protected final Account penaltyIncomeAccount = accountHelper.createIncomeAccount("penaltyIncome");
     protected final Account feeChargeOffAccount = accountHelper.createIncomeAccount("feeChargeOff");
     protected final Account penaltyChargeOffAccount = accountHelper.createIncomeAccount("penaltyChargeOff");
-
     protected final Account recoveriesAccount = accountHelper.createIncomeAccount("recoveries");
     protected final Account interestIncomeChargeOffAccount = accountHelper.createIncomeAccount("interestIncomeChargeOff");
     // expense
@@ -154,6 +138,61 @@ public abstract class BaseLoanIntegrationTest {
     protected final Account chargeOffFraudExpenseAccount = accountHelper.createExpenseAccount("chargeOffFraud");
     protected final Account writtenOffAccount = accountHelper.createExpenseAccount();
     protected final Account goodwillExpenseAccount = accountHelper.createExpenseAccount();
+    protected final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+    protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+    protected ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
+    protected SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+    protected final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+    protected final LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(requestSpec,
+            createResponseSpecification(Matchers.is(202)));
+    protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
+    protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+
+    protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
+            double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
+        GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
+                .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
+        assertEquals(dueDate, period.getDueDate());
+        assertEquals(principalDue, period.getPrincipalDue());
+        assertEquals(principalPaid, period.getPrincipalPaid());
+        assertEquals(principalOutstanding, period.getPrincipalOutstanding());
+        assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
+        assertEquals(paidLate, period.getTotalPaidLateForPeriod());
+    }
+
+    protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, double principalDue,
+            double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
+        GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
+                .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
+        assertEquals(principalDue, period.getPrincipalDue());
+        assertEquals(principalPaid, period.getPrincipalPaid());
+        assertEquals(principalOutstanding, period.getPrincipalOutstanding());
+        assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
+        assertEquals(paidLate, period.getTotalPaidLateForPeriod());
+    }
+
+    protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
+            double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
+            double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
+            double paidInAdvance, double paidLate) {
+        GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
+                .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
+        assertEquals(dueDate, period.getDueDate());
+        assertEquals(principalDue, period.getPrincipalDue());
+        assertEquals(principalPaid, period.getPrincipalPaid());
+        assertEquals(principalOutstanding, period.getPrincipalOutstanding());
+        assertEquals(feeDue, period.getFeeChargesDue());
+        assertEquals(feePaid, period.getFeeChargesPaid());
+        assertEquals(feeOutstanding, period.getFeeChargesOutstanding());
+        assertEquals(penaltyDue, period.getPenaltyChargesDue());
+        assertEquals(penaltyPaid, period.getPenaltyChargesPaid());
+        assertEquals(penaltyOutstanding, period.getPenaltyChargesOutstanding());
+        assertEquals(interestDue, period.getInterestDue());
+        assertEquals(interestPaid, period.getInterestPaid());
+        assertEquals(interestOutstanding, period.getInterestOutstanding());
+        assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
+        assertEquals(paidLate, period.getTotalPaidLateForPeriod());
+    }
 
     private String getNonByPassUserAuthKey(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
         // creates the user
@@ -285,6 +324,27 @@ public abstract class BaseLoanIntegrationTest {
 
         advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
         return advancedPaymentData;
+    }
+
+    protected PostLoanProductsRequest create4Period1MonthLongWithoutInterestProduct(String repaymentStrategy) {
+        PostLoanProductsRequest productRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().multiDisburseLoan(false)//
+                .disallowExpectedDisbursements(false)//
+                .allowApprovedDisbursedAmountsOverApplied(false)//
+                .overAppliedCalculationType(null)//
+                .overAppliedNumber(null)//
+                .principal(1000.0)//
+                .numberOfRepayments(4)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
+                .transactionProcessingStrategyCode(repaymentStrategy)//
+        ;
+        if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(repaymentStrategy)) {
+            productRequest.loanScheduleType("PROGRESSIVE").loanScheduleProcessingType("HORIZONTAL")
+                    .addPaymentAllocationItem(createDefaultPaymentAllocation("NEXT_INSTALLMENT"));
+        } else {
+            productRequest.loanScheduleType("CUMULATIVE").loanScheduleProcessingType(null).paymentAllocation(null);
+        }
+        return productRequest;
     }
 
     protected PostLoanProductsRequest create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
@@ -465,7 +525,7 @@ public abstract class BaseLoanIntegrationTest {
                 "Expected installments are not matching with the installments configured on the loan");
 
         int installmentNumber = 0;
-        for (int i = 1; i < installments.length; i++) {
+        for (int i = 0; i < installments.length; i++) {
             GetLoansLoanIdRepaymentPeriod period = loanResponse.getRepaymentSchedule().getPeriods().get(i);
             Double principalDue = period.getPrincipalDue();
             Double amount = installments[i].principalAmount;
@@ -611,6 +671,11 @@ public abstract class BaseLoanIntegrationTest {
     protected PostLoansLoanIdRequest approveLoanRequest(Double amount, String approvalDate) {
         return new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(amount)).dateFormat(DATETIME_PATTERN)
                 .approvedOnDate(approvalDate).locale("en");
+    }
+
+    protected PostLoansLoanIdRequest approveLoanRequest(Double amount, String approvalDate, String expectedDisbursementDate) {
+        return new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(amount))
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN).approvedOnDate(approvalDate).locale("en");
     }
 
     protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
@@ -771,52 +836,6 @@ public abstract class BaseLoanIntegrationTest {
         assertEquals(principalOutstanding, loanDetails.getSummary().getPrincipalOutstanding());
         assertEquals(principalPaid, loanDetails.getSummary().getPrincipalPaid());
         assertEquals(totalOverpaid, loanDetails.getTotalOverpaid());
-    }
-
-    protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
-            double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
-        GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
-                .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
-        assertEquals(dueDate, period.getDueDate());
-        assertEquals(principalDue, period.getPrincipalDue());
-        assertEquals(principalPaid, period.getPrincipalPaid());
-        assertEquals(principalOutstanding, period.getPrincipalOutstanding());
-        assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
-        assertEquals(paidLate, period.getTotalPaidLateForPeriod());
-    }
-
-    protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, double principalDue,
-            double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
-        GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
-                .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
-        assertEquals(principalDue, period.getPrincipalDue());
-        assertEquals(principalPaid, period.getPrincipalPaid());
-        assertEquals(principalOutstanding, period.getPrincipalOutstanding());
-        assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
-        assertEquals(paidLate, period.getTotalPaidLateForPeriod());
-    }
-
-    protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
-            double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
-            double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
-            double paidInAdvance, double paidLate) {
-        GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
-                .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
-        assertEquals(dueDate, period.getDueDate());
-        assertEquals(principalDue, period.getPrincipalDue());
-        assertEquals(principalPaid, period.getPrincipalPaid());
-        assertEquals(principalOutstanding, period.getPrincipalOutstanding());
-        assertEquals(feeDue, period.getFeeChargesDue());
-        assertEquals(feePaid, period.getFeeChargesPaid());
-        assertEquals(feeOutstanding, period.getFeeChargesOutstanding());
-        assertEquals(penaltyDue, period.getPenaltyChargesDue());
-        assertEquals(penaltyPaid, period.getPenaltyChargesPaid());
-        assertEquals(penaltyOutstanding, period.getPenaltyChargesOutstanding());
-        assertEquals(interestDue, period.getInterestDue());
-        assertEquals(interestPaid, period.getInterestPaid());
-        assertEquals(interestOutstanding, period.getInterestOutstanding());
-        assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
-        assertEquals(paidLate, period.getTotalPaidLateForPeriod());
     }
 
     protected void checkMaturityDates(long loanId, LocalDate expectedMaturityDate, LocalDate actualMaturityDate) {

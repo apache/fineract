@@ -1005,11 +1005,13 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                     && !DateUtils.isAfter(disburseDetail.getKey(), scheduledDueDate)) {
                 // validation check for amount not exceeds specified max
                 // amount as per the configuration
-                Money maxOutstandingBalance = loanApplicationTerms.getMaxOutstandingBalance();
-                if (scheduleParams.getOutstandingBalance().plus(disburseDetail.getValue()).isGreaterThan(maxOutstandingBalance)) {
-                    String errorMsg = "Outstanding balance must not exceed the amount: " + maxOutstandingBalance;
-                    throw new MultiDisbursementOutstandingAmoutException(errorMsg, maxOutstandingBalance.getAmount(),
-                            disburseDetail.getValue());
+                if (loanApplicationTerms.getMaxOutstandingBalance() != null) {
+                    Money maxOutstandingBalance = loanApplicationTerms.getMaxOutstandingBalanceMoney();
+                    if (scheduleParams.getOutstandingBalance().plus(disburseDetail.getValue()).isGreaterThan(maxOutstandingBalance)) {
+                        String errorMsg = "Outstanding balance must not exceed the amount: " + maxOutstandingBalance;
+                        throw new MultiDisbursementOutstandingAmoutException(errorMsg, maxOutstandingBalance.getAmount(),
+                                disburseDetail.getValue());
+                    }
                 }
 
                 // creates and add disbursement detail to the repayments

@@ -85,6 +85,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
 
+        final Integer mostRelevantFromAccountType = fromAccountType;
         final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
         final Collection<EnumOptionData> toAccountTypeOptions;
         if (fromAccountType != null && fromAccountType == 1) {
@@ -93,9 +94,10 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         } else {
             toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
         }
+        final Integer mostRelevantToAccountType = toAccountType;
 
-        final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(fromAccountType);
-        final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(toAccountType);
+        final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantFromAccountType);
+        final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantToAccountType);
 
         // from settings
         OfficeData fromOffice = null;
@@ -118,7 +120,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         if (fromAccountId != null) {
             Integer accountType;
-            if (fromAccountType == 1) {
+            if (mostRelevantFromAccountType == 1) {
                 accountType = PortfolioAccountType.LOAN.getValue();
             } else {
                 accountType = PortfolioAccountType.SAVINGS.getValue();
@@ -133,10 +135,11 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
             mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
-            if (fromAccountType == 1) {
+            if (mostRelevantFromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
             }
-            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(fromAccountType, mostRelevantFromClientId, loanStatus);
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
+                    loanStatus);
             fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
         }
 
@@ -154,7 +157,8 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         Collection<ClientData> toClientOptions = null;
 
         if (toAccountId != null && fromAccount != null) {
-            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, toAccountType, fromAccount.getCurrencyCode());
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
+                    fromAccount.getCurrencyCode());
             mostRelevantToClientId = toAccount.getClientId();
         }
 
@@ -164,7 +168,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 
-            toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
+            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
         }
 
         if (mostRelevantToOfficeId != null) {
@@ -175,7 +179,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             if (toClientOptions != null && toClientOptions.size() == 1) {
                 toClient = new ArrayList<>(toClientOptions).get(0);
 
-                toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
+                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
             }
         }
 
@@ -211,7 +215,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             totalCountQuery.where(QAccountTransferTransaction.accountTransferTransaction.accountTransferDetails.id.eq(accountDetailId));
         }
 
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             final Order order = searchParameters.getSortOrder().equalsIgnoreCase("desc") ? Order.DESC
                     : searchParameters.getSortOrder().equalsIgnoreCase("asc") || searchParameters.getSortOrder().isEmpty() ? Order.ASC
                             : null;
@@ -223,9 +227,9 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             query.orderBy(specifier);
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             query.limit(searchParameters.getLimit());
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 query.offset(searchParameters.getOffset());
             }
         }
@@ -305,7 +309,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
                 .where(eq(qAccountTransferStandingInstruction.id, id));
 
         if (searchParameters != null) {
-            if (searchParameters.isOrderByRequested()) {
+            if (searchParameters.hasOrderBy()) {
                 final Order order = searchParameters.getSortOrder().equalsIgnoreCase("desc") ? Order.DESC
                         : searchParameters.getSortOrder().equalsIgnoreCase("asc") || searchParameters.getSortOrder().isEmpty() ? Order.ASC
                                 : null;
@@ -317,9 +321,9 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
                 query.orderBy(specifier);
             }
 
-            if (searchParameters.isLimited()) {
+            if (searchParameters.hasLimit()) {
                 query.limit(searchParameters.getLimit());
-                if (searchParameters.isOffset()) {
+                if (searchParameters.hasOffset()) {
                     query.offset(searchParameters.getOffset());
                 }
             }
@@ -336,17 +340,19 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
 
+        final Integer mostRelevantFromAccountType = fromAccountType;
         final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
         final Collection<EnumOptionData> toAccountTypeOptions;
-        if (fromAccountType == 1) {
+        if (mostRelevantFromAccountType == 1) {
             // overpaid loan amt transfer to savings account
             toAccountTypeOptions = Collections.singletonList(savingsAccountType);
         } else {
             toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
         }
+        final Integer mostRelevantToAccountType = toAccountType;
 
-        final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(fromAccountType);
-        final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(toAccountType);
+        final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantFromAccountType);
+        final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantToAccountType);
 
         // from settings
         OfficeData fromOffice = null;
@@ -369,7 +375,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         if (fromAccountId != null) {
             Integer accountType;
-            if (fromAccountType == 1) {
+            if (mostRelevantFromAccountType == 1) {
                 accountType = PortfolioAccountType.LOAN.getValue();
             } else {
                 accountType = PortfolioAccountType.SAVINGS.getValue();
@@ -384,10 +390,11 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
             mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
-            if (fromAccountType == 1) {
+            if (mostRelevantFromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
             }
-            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(fromAccountType, mostRelevantFromClientId, loanStatus);
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
+                    loanStatus);
             fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
         }
 
@@ -405,7 +412,8 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         Collection<ClientData> toClientOptions = null;
 
         if (toAccountId != null && fromAccount != null) {
-            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, toAccountType, fromAccount.getCurrencyCode());
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
+                    fromAccount.getCurrencyCode());
             mostRelevantToClientId = toAccount.getClientId();
         }
 
@@ -415,7 +423,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 
-            toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
+            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
         }
 
         if (mostRelevantToOfficeId != null) {
@@ -426,7 +434,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             if (toClientOptions != null && toClientOptions.size() == 1) {
                 toClient = new ArrayList<>(toClientOptions).get(0);
 
-                toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
+                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
             }
         }
 
