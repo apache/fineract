@@ -1,21 +1,21 @@
 @ChargeFeature
 Feature: LoanCharge
 
-  @TestRailId:C50
+
   Scenario: Charge creation functionality with locale EN
     When Admin creates a client with random data
     When Admin successfully creates a new customised Loan submitted on date: "1 July 2022", with Principal: "6000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
     And Admin adds a 10 % Processing charge to the loan with "en" locale on date: "10 July 2022"
     Then Charge is successfully added to the loan with 600 EUR
 
-  @TestRailId:C51
+
   Scenario: Charge creation functionality with locale DE
     When Admin creates a client with random data
     When Admin successfully creates a new customised Loan submitted on date: "1 July 2022", with Principal: "6000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
     And Admin adds a 10 % Processing charge to the loan with "de_DE" locale on date: "10 Juli 2022"
     Then Charge is successfully added to the loan with 600 EUR
 
-  @TestRailId:C2450
+
   Scenario: Due date charge can be successfully applied when it is added on the loan account after the maturity date (NSF scenario of last installment)
     When Admin sets the business date to "1 January 2022"
     When Admin creates a client with random data
@@ -35,7 +35,7 @@ Feature: LoanCharge
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
 
-  @TestRailId:C2451
+
   Scenario: Due date charge can be successfully applied when it is added on the loan account which already has a N+1 scenario (by chargeback)
     When Admin sets the business date to "1 January 2022"
     When Admin creates a client with random data
@@ -59,7 +59,7 @@ Feature: LoanCharge
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
 
-  @TestRailId:C2452
+
   Scenario: Due date charge can be successfully applied, then waived when it is added on the loan account after the maturity date (NSF scenario of last installment)
     When Admin sets the business date to "1 January 2022"
     When Admin creates a client with random data
@@ -85,7 +85,7 @@ Feature: LoanCharge
     Then Loan has 250 outstanding amount
 
 
-  @TestRailId:C2453
+
   Scenario: Due date charge can be successfully applied, waived, then waive reversed when it is added on the loan account after the maturity date (NSF scenario of last installment)
     When Admin sets the business date to "1 January 2022"
     When Admin creates a client with random data
@@ -109,7 +109,7 @@ Feature: LoanCharge
     Then Loan has 260 outstanding amount
 
 #    TODO clear, make it work properly
-  @Skip @TestRailId:C2472
+  @Skip
   Scenario: Charge adjustment works properly
     When Admin sets the business date to "22 October 2022"
     When Admin creates a client with random data
@@ -375,7 +375,7 @@ Feature: LoanCharge
 #      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
 #      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
 
-  @TestRailId:C2532
+
   Scenario: Verify that charge can be added to loan on disbursement date (loan status is 'active')
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -389,7 +389,7 @@ Feature: LoanCharge
       | Snooze fee | false     | Specified due date | 01 January 2023 | Flat             | 10.0 | 0.0  | 0.0    | 10.0        |
     Then Loan's actualMaturityDate is "31 January 2023"
 
-  @TestRailId:C2533
+
   Scenario: Verify that charge can be added to loan after disbursement date (loan status is 'active')
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -404,7 +404,7 @@ Feature: LoanCharge
       | Snooze fee | false     | Specified due date | 10 January 2023 | Flat             | 10.0 | 0.0  | 0.0    | 10.0        |
     Then Loan's actualMaturityDate is "31 January 2023"
 
-  @TestRailId:C2534
+
   Scenario: Verify that charge can be added to loan after partial repayment (loan status is 'active')
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -420,7 +420,7 @@ Feature: LoanCharge
       | Snooze fee | false     | Specified due date | 10 January 2023 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
     Then Loan's actualMaturityDate is "31 January 2023"
 
-  @TestRailId:C2535
+
   Scenario: Verify that charge can be added to loan which is reopened by chargeback transaction after got overpaid by repayment  (loan status is 'active')
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -439,7 +439,7 @@ Feature: LoanCharge
       | Snooze fee | false     | Specified due date | 10 January 2023 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
     Then Loan's actualMaturityDate is "31 January 2023"
 
-  @TestRailId:C2536
+
   Scenario: Verify that charge can be added to loan which is reopened by payment undo transaction after got overpaid by repayment  (loan status is 'active')
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -460,7 +460,7 @@ Feature: LoanCharge
       | Snooze fee | false     | Specified due date | 10 January 2023 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
     Then Loan's actualMaturityDate is "31 January 2023"
 
-  @TestRailId:C2537
+
   Scenario: Verify that charge can be added to loan which is reopened by undo goodwill credit transaction after got overpaid by goodwill credit transaction  (loan status is 'active')
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -480,7 +480,7 @@ Feature: LoanCharge
       | Snooze fee | false     | Specified due date | 10 January 2023 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
     Then Loan's actualMaturityDate is "31 January 2023"
 
-  @TestRailId:C2538
+
   Scenario: Verify that charge can be added to loan which is reopened by undo repayment after got overpaid by goodwill credit transaction  (loan status is 'active')
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -500,7 +500,7 @@ Feature: LoanCharge
       | Snooze fee | false     | Specified due date | 10 January 2023 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
     Then Loan's actualMaturityDate is "31 January 2023"
 
-  @TestRailId:C2601
+
   Scenario: Verify that loanChargePaidByList section has the correct data in loanDetails and in LoanTransactionMakeRepaymentPostBusinessEvent
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -518,7 +518,7 @@ Feature: LoanCharge
       | 10.0   | Snooze fee |
       | 20.0   | NSF fee    |
 
-  @TestRailId:C2606
+
   Scenario: Verify that after COB job Accrual entry is made when loan has a fee-charge on disbursal date
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -532,7 +532,7 @@ Feature: LoanCharge
       | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2607
+
   Scenario: Verify that after COB job Accrual entry is made when loan has a penalty-charge on disbursal date
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -546,7 +546,7 @@ Feature: LoanCharge
       | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | Accrual          | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          |
 
-  @TestRailId:C2635
+
   Scenario: Verify that charge can be added to loan which is paid off and overpaid by refund
     When Admin sets the business date to "10 January 2023"
     When Admin creates a client with random data
@@ -564,7 +564,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 10 January 2023 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2672
+
   Scenario: FEE01 - Verify the loan creation with charge: disbursement percentage fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -589,7 +589,7 @@ Feature: LoanCharge
       | 1000          | 0        | 15   | 0         | 1015 | 15   | 0          | 0    | 1000        |
 
 
-  @TestRailId:C2673
+
   Scenario: FEE02 - Verify the loan creation with charge: flat fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -611,7 +611,7 @@ Feature: LoanCharge
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 15   | 0         | 1015 | 0    | 0          | 0    | 1015        |
 
-  @TestRailId:C2674
+
   Scenario: FEE03 - Verify the loan creation with charge: installment percentage fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -637,7 +637,7 @@ Feature: LoanCharge
       | Principal due | Interest | Fees  | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 3000          | 90       | 46.35 | 0         | 3136.35 | 0    | 0          | 0    | 3136.35     |
 
-  @TestRailId:C2675
+
   Scenario: FEE04 - Verify the loan creation with charge: overdue fee on principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -669,7 +669,7 @@ Feature: LoanCharge
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 3000          | 90       | 0.0  | 45        | 3135.0 | 0    | 0          | 0    | 3135.0      |
 
-  @TestRailId:C2676
+
   Scenario: FEE05 - Verify the loan creation with charge: overdue fee on principal+interest
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -702,7 +702,7 @@ Feature: LoanCharge
       | 3000          | 90       | 0.0  | 46.35     | 3136.35 | 0    | 0          | 0    | 3136.35     |
 
 # TODO Create loan product suitable for LOAN_TRANCHE_DISBURSEMENT_PERCENTAGE_FEE, replace, fix expected results
-  @Skip @TestRailId:C2677
+  @Skip
   Scenario: FEE06 - Verify the loan creation with charge: tranche disbursement percentage fee, multi disbursement
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -731,7 +731,7 @@ Feature: LoanCharge
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 15   | 0         | 1015 | 15   | 0          | 0    | 1000        |
 
-  @TestRailId:C2790
+
   Scenario: Verify that partially waived installment fee applied correctly in reverse-replay logic
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -762,7 +762,7 @@ Feature: LoanCharge
       | Name                       | isPenalty | Payment due at  | Due as of | Calculation type         | Due   | Paid | Waived | Outstanding |
       | Installment percentage fee | false     | Installment Fee |           | % Loan Amount + Interest | 100.0 | 5.0  | 95.0   | 0.0         |
 
-  @TestRailId:C2909
+
   Scenario: Verify that adding charge on a closed loan after maturity date is creating an N+1 installment - PIN30 product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -791,7 +791,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 01 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2910
+
   Scenario: Verify that adding charge on a closed loan after maturity date is creating an N+1 installment - PIN4 auto payment enabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -832,7 +832,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2911
+
   Scenario: Verify that adding charge on a closed loan after maturity date is creating an N+1 installment - PIN4 auto payment disabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -874,7 +874,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2912 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that adding charge on a closed loan after maturity date is creating an N+1 installment - PIN4 advanced payment allocation product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -915,7 +915,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2914
+
   Scenario: Verify that adding charge on a active loan / partial repayment after maturity date is creating an N+1 installment - PIN30 product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -944,7 +944,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 01 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2915
+
   Scenario: Verify that adding charge on a active loan / partial repayment after maturity date is creating an N+1 installment - PIN4 auto payment enabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -985,7 +985,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2916
+
   Scenario: Verify that adding charge on a active loan / partial repayment after maturity date is creating an N+1 installment - PIN4 auto payment disabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1027,7 +1027,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2917 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that adding charge on an active loan / partial repayment after maturity date is creating an N+1 installment - PIN4 advanced payment allocation product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1068,7 +1068,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2918
+
   Scenario: Verify that adding charge on a active loan / no repayment made, after maturity date is creating an N+1 installment - PIN30 product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1094,7 +1094,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 01 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2919
+
   Scenario: Verify that adding charge on a active loan / no repayment made, after maturity date is creating an N+1 installment - PIN4 auto payment enabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1126,7 +1126,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2920
+
   Scenario: Verify that adding charge on a active loan / no repayment made, after maturity date is creating an N+1 installment - PIN4 auto payment disabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1157,7 +1157,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2921 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that adding charge on an active loan / no repayment made, after maturity date is creating an N+1 installment - PIN4 advanced payment allocation product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1189,7 +1189,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 November 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2923 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC1
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1224,7 +1224,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 09 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2924 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC2
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1259,7 +1259,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 10 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2925 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC3
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1294,7 +1294,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 11 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2926 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC4
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1329,7 +1329,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2927 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC5
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1364,7 +1364,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 17 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2928 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC6
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1396,7 +1396,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 10 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2929 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC7
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1428,7 +1428,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 October 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2930 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC8
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1460,7 +1460,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 17 October 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2931 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC9
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1491,7 +1491,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 October 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2932 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC10
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1522,7 +1522,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 16 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2933 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan charge reverse-replaying logic for PIN4 advanced payment allocation product - UC11
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1554,7 +1554,7 @@ Feature: LoanCharge
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 15 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2993
+
   Scenario: Waive charge on PIN4 cumulative loan product
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -1599,7 +1599,7 @@ Feature: LoanCharge
       | Principal due | Interest | Fees | Penalties | Due | Paid  | In advance | Late | Waived | Outstanding |
       | 750           | 0        | 0    | 10        | 760 | 688.0 | 0          | 500  | 10     | 62.0        |
 
-  @TestRailId:C2994
+
   Scenario: Waive charge on PIN4 progressive loan
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -1642,7 +1642,7 @@ Feature: LoanCharge
       | Principal due | Interest | Fees | Penalties | Due | Paid | In advance | Late | Waived | Outstanding |
       | 750           | 0        | 0    | 10        | 760 | 500  | 0          | 500  | 10     | 250         |
 
-  @TestRailId:C2995
+
   Scenario: Verify that when a charge added after maturity had been waived the added N+1 installment will be paid with a paid by date (obligations met date) of the transaction date of the waive charge transaction
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data

@@ -1,7 +1,7 @@
 @WriteOffFeature
   Feature: Write-off
 
-    @TestRailId:C2934
+
     Scenario: As a user I want to do Write-off a loan and verify that undo repayment post write-off results in error
       When Admin sets the business date to "1 January 2023"
       And Admin creates a client with random data
@@ -21,7 +21,7 @@
       Then Admin fails to undo "1"th transaction made on "22 January 2023"
 
 
-    @TestRailId:C2935
+
     Scenario: As a user I want to do Write-off a loan and verify that backdate repayment post write-off results in error
       When Admin sets the business date to "1 January 2023"
       And Admin creates a client with random data
@@ -41,7 +41,7 @@
       Then Loan "AUTOPAY" repayment transaction on "26 January 2023" with 50 EUR transaction amount results in error
 
 
-    @TestRailId:C2936
+
     Scenario: As a user I want to do Write-off a loan and verify that undo write-off results in error
       When Admin sets the business date to "1 January 2023"
       And Admin creates a client with random data

@@ -1,7 +1,7 @@
 @ChargeOffFeature
 Feature: Charge-off
 
-  @TestRailId:C2565
+
   Scenario: As a user I want to do a Charge-off for non-fraud loan after disbursement
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -21,7 +21,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable     |        | 1000.0 |
       | EXPENSE | 744007       | Credit Loss/Bad Debt | 1000.0 |        |
 
-  @TestRailId:C2566
+
   Scenario: As a user I want to do a Charge-off for non-fraud loan after repayment
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -47,7 +47,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable     |       | 750.0  |
       | EXPENSE | 744007       | Credit Loss/Bad Debt | 750.0 |        |
 
-  @TestRailId:C2567
+
   Scenario: As a user I want to do a Repayment undo after Charge-off for non-fraud
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -77,7 +77,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable     |        | 1000.0 |
       | EXPENSE | 744007       | Credit Loss/Bad Debt | 1000.0 |        |
 
-  @TestRailId:C2568
+
   Scenario: As a user I want to do Charge-off for fraud loan when FEE is added
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -100,7 +100,7 @@ Feature: Charge-off
       | EXPENSE | 744007       | Credit Loss/Bad Debt    | 1000.0 |        |
       | INCOME  | 404008       | Fee Charge Off          | 10.0   |        |
 
-  @TestRailId:C2569
+
   Scenario: As a user I want to do a Merchant Refund after charge-off (fee portion)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -129,7 +129,7 @@ Feature: Charge-off
       | INCOME    | 404008       | Fee Charge Off            |       | 10.0   |
       | LIABILITY | 145023       | Suspense/Clearing account | 100.0 |        |
 
-  @TestRailId:C2570
+
   Scenario: As a user I want to do a Charge-off for non-fraud loan when FEE and PENALTY added
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -153,7 +153,7 @@ Feature: Charge-off
       | EXPENSE | 744007       | Credit Loss/Bad Debt    | 1000.0 |        |
       | INCOME  | 404008       | Fee Charge Off          | 110.0  |        |
 
-  @Skip @TestRailId:C2571 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to do Charge-off for non-fraud loan when FEE and PENALTY added (interest portion)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -180,7 +180,7 @@ Feature: Charge-off
       | INCOME  | 404001       | Interest Income Charge Off | 30.0   |        |
       | INCOME  | 404008       | Fee Charge Off             | 113.0  |        |
 
-  @Skip @TestRailId:C2572 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to do a Merchant Refund after charge-off for non fraud loan (interest portion)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -215,7 +215,7 @@ Feature: Charge-off
       | LIABILITY | 145023       | Suspense/Clearing account  | 500.0 |        |
 
 
-  @Skip @TestRailId:C2573 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to do a Payout refund after charge-off for non fraud loan (interest portion)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -249,7 +249,7 @@ Feature: Charge-off
       | INCOME    | 404008       | Fee Charge Off             |       | 113.0  |
       | LIABILITY | 145023       | Suspense/Clearing account  | 500.0 |        |
 
-  @Skip @TestRailId:C2574 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario:  As a user I want to do a Repayment after Charge-off for fraud loan when FEE and PENALTY added (product with interest)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -282,7 +282,7 @@ Feature: Charge-off
       | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
 
 
-  @TestRailId:C2575
+
   Scenario: As a user I want to do a Charge-off for fraud loan after disbursement
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -303,7 +303,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable           |        | 1000.0 |
       | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 1000.0 |        |
 
-  @TestRailId:C2576
+
   Scenario: As a user I want to do a Repayment undo after Charge-off for fraud loan
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -334,7 +334,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable           |        | 1000.0 |
       | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 1000.0 |        |
 
-  @TestRailId:C2577
+
   Scenario: As a user I want to do a Charge-off for fraud loan when FEE is added
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -358,7 +358,7 @@ Feature: Charge-off
       | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 1000.0 |        |
       | INCOME  | 404008       | Fee Charge Off             | 10.0   |        |
 
-  @TestRailId:C2578
+
   Scenario: As a user I want to do a Charge-off for fraud loan when FEE and PENALTY added
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -383,7 +383,7 @@ Feature: Charge-off
       | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 1000.0 |        |
       | INCOME  | 404008       | Fee Charge Off             | 110.0  |        |
 
-  @Skip @TestRailId:C2579 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to do a Charge-off for fraud loan when FEE and PENALTY added (interest portion)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -411,7 +411,7 @@ Feature: Charge-off
       | INCOME  | 404001       | Interest Income Charge Off | 30.0   |        |
       | INCOME  | 404008       | Fee Charge Off             | 113.0  |        |
 
-  @Skip @TestRailId:C2580 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to do a Merchant issue refund for fraud loan when FEE and PENALTY added (interest portion)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -446,7 +446,7 @@ Feature: Charge-off
       | INCOME    | 404008       | Fee Charge Off             |       | 113.0  |
       | LIABILITY | 145023       | Suspense/Clearing account  | 500.0 |        |
 
-  @Skip @TestRailId:C2581 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to do Payout refund for fraud loan when FEE and PENALTY added (interest portion)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -482,7 +482,7 @@ Feature: Charge-off
       | LIABILITY | 145023       | Suspense/Clearing account  | 500.0 |        |
 
 
-  @Skip @TestRailId:C2582 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to do a Repayment after Charge-off for fraud loan when FEE and PENALTY added
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -516,7 +516,7 @@ Feature: Charge-off
       | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
 
 
-  @Skip @TestRailId:C2591 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to repay a loan which was charged-off
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -575,7 +575,7 @@ Feature: Charge-off
       | INCOME    | 744008       | Recoveries                |       | 643.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 643.0 |        |
 
-  @Skip @TestRailId:C2592 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: As a user I want to do a charge-off undo before any other transactions on the loan
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -635,7 +635,7 @@ Feature: Charge-off
       | ASSET     | 112603       | Interest/Fee Receivable   |       | 20.0   |
       | LIABILITY | 145023       | Suspense/Clearing account | 200.0 |        |
 
-  @TestRailId:C2593
+
   Scenario: As a user I want to do a Charge-off before the last repayment
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -662,7 +662,7 @@ Feature: Charge-off
       | ASSET     | 112601       | Loans Receivable          |       | 200.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 200.0 |        |
 
-  @TestRailId:C2594
+
   Scenario: As a user I want to do a Charge-off between 2 repayments
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -691,7 +691,7 @@ Feature: Charge-off
       | ASSET     | 112601       | Loans Receivable          |       | 200.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 200.0 |        |
 
-  @TestRailId:C2595
+
   Scenario: As a user I want to do a backdated Charge-off when only disbursement transaction happened
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -716,7 +716,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable     |        | 1000.0 |
       | EXPENSE | 744007       | Credit Loss/Bad Debt | 1000.0 |        |
 
-  @TestRailId:C2596
+
   Scenario: As a user I want to do an undo on a transaction which was created before the Charge-off
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -737,7 +737,7 @@ Feature: Charge-off
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 0         | 1000 | 0    | 0          | 0    | 1000        |
 
-  @TestRailId:C2597
+
   Scenario: As a user I want to do an undo on a transaction which was created on the Charge-off day
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -757,7 +757,7 @@ Feature: Charge-off
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 0         | 1000 | 0    | 0          | 0    | 1000        |
 
-  @TestRailId:C2598
+
   Scenario: As a user I want to do a second Charge-off
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -783,7 +783,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable     |        | 1000.0 |
       | EXPENSE | 744007       | Credit Loss/Bad Debt | 1000.0 |        |
 
-  @TestRailId:C2599
+
   Scenario: As a user I want to do a second Charge-off undo
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -806,7 +806,7 @@ Feature: Charge-off
       | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
 
-  @TestRailId:C2600
+
   Scenario: As a user I want to add charge after Charge-off
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -835,7 +835,7 @@ Feature: Charge-off
     # TODO: Add reschedule related tests for "Reschedule" and "Close as Reschedule" actions if the reschedule API fixed
 
 
-  @TestRailId:C2706
+
   Scenario: Verify that Charge-off NOT results an error anymore when to be applied on a loan with an interest
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -862,7 +862,7 @@ Feature: Charge-off
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0   | 0.0       | 1000.0       |
       | 22 February 2023 | Charge-off       | 1143.0 | 1000.0    | 30.0     | 103.0 | 10.0      | 0.0          |
 
-  @TestRailId:C2761
+
   Scenario: Verify that charge-off is reversed/replayed if Scheduled repayment which was placed on a date before the charge-off is reversed after the charge-off
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -903,7 +903,7 @@ Feature: Charge-off
       | 01 June 2023     | Charge-off       | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
     Then On Loan Transactions tab the "Repayment" Transaction with date "01 March 2023" is reverted
 
-  @TestRailId:C2762
+
   Scenario: Verify that charge-off is reversed/replayed if Real time repayment which was placed on a date before the charge-off is reversed after the charge-off
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -950,7 +950,7 @@ Feature: Charge-off
       | 01 June 2023     | Charge-off       | 1035.0 | 1000.0    | 0.0      | 20.0 | 15.0      | 0.0          |
     Then On Loan Transactions tab the "Repayment" Transaction with date "10 February 2023" is reverted
 
-  @TestRailId:C2763
+
   Scenario: Verify that charge-off is reversed/replayed if Autopay repayment which was placed on a date before the charge-off is reversed after the charge-off
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -997,7 +997,7 @@ Feature: Charge-off
       | 01 June 2023     | Charge-off       | 1035.0 | 1000.0    | 0.0      | 20.0 | 15.0      | 0.0          |
     Then On Loan Transactions tab the "Repayment" Transaction with date "10 February 2023" is reverted
 
-  @TestRailId:C2764
+
   Scenario: Verify that charge-off is NOT reversed/replayed if OCA repayment which was placed and reversed on a date after the charge-off
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1036,7 +1036,7 @@ Feature: Charge-off
       | 10 June 2023     | Repayment        | 1000.0 | 980.0     | 0.0      | 20.0 | 0.0       | 20.0         |
     Then On Loan Transactions tab the "Repayment" Transaction with date "10 June 2023" is reverted
 
-  @TestRailId:C2765
+
   Scenario: Verify that charge-off is reversed/replayed if Goodwill credit transaction is placed on a date before the charge-off on business date after the charge-off
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1062,7 +1062,7 @@ Feature: Charge-off
       | 29 January 2023  | Goodwill Credit  | 500.0  | 480.0     | 0.0      | 20.0 | 0.0       | 520.0        |
       | 01 June 2023     | Charge-off       | 520.0  | 520.0     | 0.0      | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C2766
+
   Scenario: As a user I want to do a undo Charge-off with reversal external Id
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -1085,7 +1085,7 @@ Feature: Charge-off
     And Admin does a charge-off undo the loan with reversal external Id
     Then Loan Charge-off undo event has reversed on date "23 February 2023" for charge-off undo
 
-  @TestRailId:C2767
+
   Scenario: Verify that charge-off is reversed/replayed in case of partial payment, charge-off, second part of payment, reverse 1st payment
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1146,7 +1146,7 @@ Feature: Charge-off
       | INCOME    | 744008       | Recoveries                |       | 500.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
 
-  @TestRailId:C2768
+
   Scenario: Verify that charge-off is results an error in case of partial payment, charge-off, fee added after charge-off
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1174,7 +1174,7 @@ Feature: Charge-off
       | Charge type     | dueDate      | amount |
       | LOAN_SNOOZE_FEE | 10 June 2023 | 20     |
 
-  @TestRailId:C2779
+
   Scenario: Verify that on interest bearing loans the accrual of interest is stopped when the loan is charged-off
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1219,7 +1219,7 @@ Feature: Charge-off
       | 03 January 2023  | Accrual          | 0.33    | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          |
       | 05 January 2023  | Charge-off       | 1010.19 | 1000.0    | 10.19    | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C2780
+
   Scenario: Verify that on interest bearing loans the accrual of interest is resumed and aggregated when the charge-off is reverted
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1270,7 +1270,7 @@ Feature: Charge-off
       | 06 January 2023  | Accrual          | 1.31    | 0.0       | 1.31     | 0.0  | 0.0       | 0.0          |
     Then On Loan Transactions tab the "Charge-off" Transaction with date "04 January 2023" is reverted
 
-  @TestRailId:C2781
+
   Scenario: Verify that on interest bearing loans the accrual of interest is stopped when the loan is charged-off even if fully paid after the charge-off
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1318,7 +1318,7 @@ Feature: Charge-off
       | 04 January 2023  | Charge-off       | 1010.19 | 1000.0    | 10.19    | 0.0  | 0.0       | 0.0          |
       | 06 January 2023  | Repayment        | 1010.19 | 1000.0    | 10.19    | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C2782
+
   Scenario: Verify that the accrual of charges is not happened when the loan is charged-off on charge's due date but resumed when the charge-off is reverted
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1380,7 +1380,7 @@ Feature: Charge-off
       | 06 January 2023  | Accrual          | 15.0   | 0.0       | 0.0      | 15.0 | 0.0       | 0.0          |
     Then On Loan Transactions tab the "Charge-off" Transaction with date "04 January 2023" is reverted
 
-  @TestRailId:C2891 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that the user is able to do a Charge-off for fraud loan when FEE and PENALTY added - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION product
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -1407,7 +1407,7 @@ Feature: Charge-off
       | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 750.0 |        |
       | INCOME  | 404008       | Fee Charge Off             | 110.0 |        |
 
-  @TestRailId:C2892 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that the user is able to do a Charge-off for non-fraud loan after disbursement - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION product
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -1429,7 +1429,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable     |       | 750.0  |
       | EXPENSE | 744007       | Credit Loss/Bad Debt | 750.0 |        |
 
-  @TestRailId:C2893 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that the user is able to do a Charge-off for non-fraud loan after repayment - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION product
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -1457,7 +1457,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable     |       | 500.0  |
       | EXPENSE | 744007       | Credit Loss/Bad Debt | 500.0 |        |
 
-  @TestRailId:C2894 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that the user is able to do a Repayment undo after Charge-off for non-fraud - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION product
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -1489,7 +1489,7 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable     |       | 750.0  |
       | EXPENSE | 744007       | Credit Loss/Bad Debt | 750.0 |        |
 
-  @TestRailId:C2895 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that the user is able to do a backdated Charge-off when only disbursement transaction happened - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION product
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -1516,7 +1516,7 @@ Feature: Charge-off
       | 01 January 2023  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 10 February 2023 | Charge-off       | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C2896 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that charge-off is reversed/replayed if Goodwill credit transaction is placed on a date before the charge-off on business date after the charge-off - - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION product
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
@@ -1548,7 +1548,7 @@ Feature: Charge-off
       | 29 January 2023  | Goodwill Credit  | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 250.0        |
       | 01 June 2023     | Charge-off       | 270.0  | 250.0     | 0.0      | 20.0 | 0.0       | 0.0          |
 
-  @TestRailId:C3067 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify charge-off GL entries in case of reverse-replay on fraud loan
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data

@@ -1,7 +1,7 @@
 @LoanReAgingFeature
 Feature: LoanReAging
 
-  @TestRailId:C3050 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction happy path works properly
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -47,7 +47,7 @@ Feature: LoanReAging
       | 20 February 2024 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
     Then Admin checks that delinquency range is: "NO_DELINQUENCY" and has delinquentDate ""
 
-  @TestRailId:C3051 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction made by Loan external ID happy path works properly
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -83,7 +83,7 @@ Feature: LoanReAging
       | 01 January 2024  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
       | 20 February 2024 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
 
-  @TestRailId:C3052 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction undo works properly
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -137,7 +137,7 @@ Feature: LoanReAging
     Then Admin checks that delinquency range is: "RANGE_30" and has delinquentDate "2024-01-19"
 
 
-  @TestRailId:C3053 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction works properly when chargeback happens after re-aging
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -209,7 +209,7 @@ Feature: LoanReAging
       | 21 February 2024 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 25 February 2024 | Chargeback       | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
 
-  @Skip @TestRailId:C3054 @AdvancedPaymentAllocation
+  @Skip  @AdvancedPaymentAllocation
   Scenario: Verify Loan re-aging transaction - reverse-replay scenario 1
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -250,7 +250,7 @@ Feature: LoanReAging
 #      | 27 February 2024 | Re-age           | 375.0  | 375.0     | 0.0      | 0.0  | 0.0       | 125.0        | true     |
 #    Then Admin checks that delinquency range is: "RANGE_30" and has delinquentDate "2024-01-19"
 
-  @Skip @TestRailId:C3055 @AdvancedPaymentAllocation
+  @Skip  @AdvancedPaymentAllocation
   Scenario: Verify Loan re-aging transaction - reverse-replay scenario 2
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -268,7 +268,7 @@ Feature: LoanReAging
     When Admin successfully undo Loan re-aging transaction
     #    TODO fill with proper expected data and checks
 
-  @TestRailId:C3056 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction - chargeback before maturity and  prior to re-aging
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -335,7 +335,7 @@ Feature: LoanReAging
       | 02 February 2024 | Chargeback       | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 875.0        | false    |
       | 21 February 2024 | Re-age           | 875.0  | 875.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
 
-  @TestRailId:C3057 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction - chargeback after maturity date and prior to re-aging
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -404,7 +404,7 @@ Feature: LoanReAging
       | 20 February 2024 | Chargeback       | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 875.0        | false    |
       | 21 February 2024 | Re-age           | 875.0  | 875.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
 
-  @TestRailId:C3058 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction - chargeback after maturity date and prior to re-aging with charge N+1 installment
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -479,7 +479,7 @@ Feature: LoanReAging
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1125.0        | 0.0      | 0.0  | 20.0      | 1145.0 | 270.0| 0.0        | 20.0 | 875.0       |
 
-  @TestRailId:C3059 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan re-aging transaction - partial principal payment scenario + undo re-ageing
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -552,7 +552,7 @@ Feature: LoanReAging
       | 16 January 2024  | Repayment        | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 325.0        | false    |
       | 27 February 2024 | Re-age           | 325.0  | 325.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
 
-  @TestRailId:C3091 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify Loan re-age transaction - Event check
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data

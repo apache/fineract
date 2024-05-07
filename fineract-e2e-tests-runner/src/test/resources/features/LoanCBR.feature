@@ -1,7 +1,7 @@
 @LoanCBR
 Feature: Credit Balance Refund
 
-  @TestRailId:C2505
+
   Scenario: Verify that Loan status goes from overpaid to active in case of CBR transaction (with replaying when CBR>new balance → clears overpaid, remaining increasing loan balance)
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -48,7 +48,7 @@ Feature: Credit Balance Refund
       | LIABILITY | l1           | Overpayment account       | 100.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
-  @TestRailId:C2511
+
   Scenario: Verify that Loan status goes from overpaid to closed in case of CBR transaction when transaction amount equals overpaid amount
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -88,7 +88,7 @@ Feature: Credit Balance Refund
       | LIABILITY | l1           | Overpayment account       | 200.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
-  @TestRailId:C2515
+
   Scenario: Single repayment reversal
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -122,7 +122,7 @@ Feature: Credit Balance Refund
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
 
-  @TestRailId:C2516
+
   Scenario: Multi repayment reversal
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -161,7 +161,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 200.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
-  @TestRailId:C2517
+
   Scenario: Overpaid paid portion
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -202,7 +202,7 @@ Feature: Credit Balance Refund
       | LIABILITY | l1           | Overpayment account       | 100.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
-  @TestRailId:C2518
+
   Scenario: Repayment reversal
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -241,7 +241,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
 
-  @TestRailId:C2519
+
   Scenario: Refund reversal
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -280,7 +280,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
 
-  @TestRailId:C2520
+
   Scenario: Partial refund reversal
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -319,7 +319,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 500.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 500.0  |
 
-  @TestRailId:C2521
+
   Scenario: Chargeback after CBR
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -368,7 +368,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 500.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 500.0  |
 
-  @TestRailId:C2522
+
   Scenario: Refund after CBR scenario
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -422,7 +422,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 500.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 500.0  |
 
-  @TestRailId:C2523
+
   Scenario: Single repayment reversal (after maturity)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -455,7 +455,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 200.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
-  @TestRailId:C2524
+
   Scenario: Multi repayment reversal (after maturity)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -494,7 +494,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 200.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
-  @TestRailId:C2525
+
   Scenario: Overpaid paid portion (after maturity)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -535,7 +535,7 @@ Feature: Credit Balance Refund
       | LIABILITY | l1           | Overpayment account       | 100.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
-  @TestRailId:C2526
+
   Scenario: Repayment reversal (after maturity)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -574,7 +574,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
 
-  @TestRailId:C2527
+
   Scenario: Refund reversal (after maturity)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -613,7 +613,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
 
-  @TestRailId:C2528
+
   Scenario: Partial refund reversal (after maturity)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -652,7 +652,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 500.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 500.0  |
 
-  @TestRailId:C2529
+
   Scenario: Chargeback after CBR (after maturity)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -701,7 +701,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 500.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 500.0  |
 
-  @TestRailId:C2530
+
   Scenario: Refund after CBR scenario (after maturity)
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -755,7 +755,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 500.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 500.0  |
 
-  @TestRailId:C2841
+
   Scenario: Verify that accruals created for charges after CBR post-maturity
     When Admin sets the business date to "01 July 2023"
     And Admin creates a client with random data
@@ -804,7 +804,7 @@ Feature: Credit Balance Refund
       | 02 August 2023   | Credit Balance Refund  | 200.0  | 10.0      | 0.0      | 0.0  | 0.0       | 10.0         |
       | 03 August 2023   | Accrual                | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2885
+
   Scenario: Verify that Loan status goes from overpaid to active in case of CBR transaction (with replaying when CBR>new balance → clears overpaid, remaining increasing loan balance) - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION loan product
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -875,7 +875,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
 
-  @TestRailId:C2886
+
   Scenario: Verify that Loan status goes from overpaid to closed in case of CBR transaction when transaction amount equals overpaid amount - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION loan product
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -941,7 +941,7 @@ Feature: Credit Balance Refund
       | LIABILITY | l1           | Overpayment account       | 100.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
 
-  @TestRailId:C2887
+
   Scenario: Verify that Loan status goes from overpaid to active in case of Refund transaction was reverted - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION loan product
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -1018,7 +1018,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
 
-  @TestRailId:C2888
+
   Scenario: Multi repayment reversal (after maturity) - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION loan product
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -1091,7 +1091,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
 
-  @TestRailId:C2889
+
   Scenario: Verify that Loan status goes from overpaid to active in case of CBR transaction (after maturity) - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION loan product
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -1170,7 +1170,7 @@ Feature: Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
 
-  @TestRailId:C2890
+
   Scenario: Verify that accruals created for charges after CBR post-maturity - PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION loan product
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -1240,7 +1240,7 @@ Feature: Credit Balance Refund
       | 18 October 2023   | Credit Balance Refund  | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
       | 19 October 2023   | Accrual                | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2989
+
   Scenario: Verify that CBR transaction date cannot be in the future
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -1258,7 +1258,7 @@ Feature: Credit Balance Refund
     When Admin sets the business date to "15 September 2023"
     Then Credit Balance Refund transaction on future date "20 September 2023" with 250 EUR transaction amount will result an error
 
-  @TestRailId:C3020
+
   Scenario: Verify that Charge-off and CBR transaction GL entries are correct in case of repayment reversal after CBR and Fraud flagged loan
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -1305,7 +1305,7 @@ Feature: Credit Balance Refund
       | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud | 250.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account  |       | 250.0  |
 
-  @TestRailId:C3021
+
   Scenario: Verify that Charge-off and CBR transaction GL entries are correct in case of repayment reversal after CBR and Non-Fraud loan
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -1351,7 +1351,7 @@ Feature: Credit Balance Refund
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 250.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 250.0  |
 
-  @TestRailId:C3040
+
   Scenario: Verify that Charge-off and CBR transaction GL entries are correct before and after a repayment reversal taken place after CBR - UC1
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -1425,7 +1425,7 @@ Feature: Credit Balance Refund
       | LIABILITY | l1           | Overpayment account       | 250.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 350.0  |
 
-  @TestRailId:C3041
+
   Scenario: Verify that Charge-off and CBR transaction GL entries are correct before and after a repayment reversal taken place after CBR - UC2
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -1494,7 +1494,7 @@ Feature: Credit Balance Refund
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 250.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 250.0  |
 
-  @TestRailId:C3092
+
   Scenario: Verify that overpayment portion calculated properly in case of CBR reverse-replay
     When Admin sets the business date to "25 January 2024"
     When Admin creates a client with random data
