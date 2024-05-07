@@ -327,7 +327,13 @@ public class LoanAssembler {
             }
         }
 
-        loanApplication.updateEnableInstallmentLevelDelinquency(loanProduct.isEnableInstallmentLevelDelinquency());
+        final Boolean isEnableInstallmentLevelDelinquency = this.fromApiJsonHelper
+                .extractBooleanNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element);
+        if (isEnableInstallmentLevelDelinquency != null) {
+            loanApplication.updateEnableInstallmentLevelDelinquency(isEnableInstallmentLevelDelinquency);
+        } else {
+            loanApplication.updateEnableInstallmentLevelDelinquency(loanProduct.isEnableInstallmentLevelDelinquency());
+        }
 
         final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
