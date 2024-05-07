@@ -1,7 +1,7 @@
 @Product
 Feature: LoanProduct
 
-  @Scenario1 @TestRailId:C52
+  @Scenario1
   Scenario: As a user I would like to fully repay the loan in time
     When Admin sets the business date to "12 December 2021"
     When Admin creates a client with random data
@@ -14,7 +14,7 @@ Feature: LoanProduct
     Then Repayment transaction is created with 1000 amount and "AUTOPAY" type
     Then Loan has 0 outstanding amount
 
-  @Scenario2 @TestRailId:C53
+  @Scenario2
   Scenario: As a user I would like to fully repay a loan which was disbursed 2 times
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data
@@ -30,7 +30,7 @@ Feature: LoanProduct
     Then Repayment transaction is created with 1500 amount and "AUTOPAY" type
     Then Loan has 0 outstanding amount
 
-  @Scenario3 @TestRailId:C54
+  @Scenario3
   Scenario: As a user I would like to fully repay a multi disbursed loan with 2 repayments
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data
@@ -49,7 +49,7 @@ Feature: LoanProduct
     And Customer makes "AUTOPAY" repayment on "15 July 2022" with 1000 EUR transaction amount
     Then Loan has 0 outstanding amount
 
-  @Scenario4 @TestRailId:C55
+  @Scenario4
   Scenario: As a user I would like to multi disburse a loan which was previously fully paid
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data
@@ -68,7 +68,7 @@ Feature: LoanProduct
     And Customer makes "AUTOPAY" repayment on "15 July 2022" with 500 EUR transaction amount
     Then Loan has 0 outstanding amount
 
-  @Scenario5 @TestRailId:C57
+  @Scenario5
   Scenario: As a user I would like to fully repay a loan and check a repayment reversal with NSF fee
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data
@@ -88,7 +88,7 @@ Feature: LoanProduct
     And Customer makes "AUTOPAY" repayment on "18 June 2022" with 1010 EUR transaction amount
     Then Loan has 0 outstanding amount
 
-  @Scenario6 @TestRailId:C58
+  @Scenario6
   Scenario: As a user I would like to repay the half amount of the loan and check a repayment reversal with NSF fee
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data
@@ -108,7 +108,7 @@ Feature: LoanProduct
     And Customer makes "AUTOPAY" repayment on "18 June 2022" with 1010 EUR transaction amount
     Then Loan has 0 outstanding amount
 
-  @Scenario7 @TestRailId:C59
+  @Scenario7
   Scenario: As a user I would like to fully repay a loan then reverse the repayment + add an NSF fee after the 1 month period
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data
@@ -128,7 +128,7 @@ Feature: LoanProduct
     And Customer makes "AUTOPAY" repayment on "5 July 2022" with 1010 EUR transaction amount
     Then Loan has 0 outstanding amount
 
-  @Scenario8 @TestRailId:C60
+  @Scenario8
   Scenario: As a user I would like to repay the half amount of the loan and do a refund
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data
@@ -144,7 +144,7 @@ Feature: LoanProduct
     When Refund happens on "1 July 2022" with 500 EUR transaction amount
     Then Loan has 0 outstanding amount
 
-  @Scenario9 @TestRailId:C61
+  @Scenario9
   Scenario: As a user I would like to repay the half amount of the loan and do a refund + repayment reversal on the repayment
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data
@@ -162,7 +162,7 @@ Feature: LoanProduct
     When Customer makes a repayment undo on "25 June 2022"
     Then Loan has 500 outstanding amount
 
-  @Scenario10 @TestRailId:C62
+  @Scenario10
   Scenario: As a user I would like to repay the half amount of the loan and do a refund + repayment reversal + refund reversal
     When Admin sets the business date to "1 June 2022"
     When Admin creates a client with random data

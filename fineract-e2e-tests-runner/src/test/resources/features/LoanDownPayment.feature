@@ -1,7 +1,7 @@
 @LoanDownPaymentFeature
 Feature: Loan DownPayment
 
-  @TestRailId:C2812
+
   Scenario: Single disbursement normal flow - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -51,7 +51,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
 
-  @TestRailId:C2813
+
   Scenario: Single disbursement normal flow - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -112,7 +112,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
 
-  @TestRailId:C2814
+
   Scenario: Single disbursement charge flow - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -163,7 +163,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Repayment        | 300.0  | 250.0     | 0.0      | 0.0  | 50.0      | 500.0        |
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
 
-  @TestRailId:C2815
+
   Scenario: Single disbursement charge flow - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -225,7 +225,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Repayment        | 300.0  | 250.0     | 0.0      | 0.0  | 50.0      | 500.0        |
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
 
-  @TestRailId:C2816
+
   Scenario: Double disbursement different day - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -266,7 +266,7 @@ Feature: Loan DownPayment
       | 10 January 2022  | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
       | 10 January 2022  | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       |
 
-  @TestRailId:C2817
+
   Scenario: Double disbursement different day - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -318,7 +318,7 @@ Feature: Loan DownPayment
       | 10 January 2022  | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
 
 
-  @TestRailId:C2818
+
   Scenario: Double disbursement on installment day - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -360,7 +360,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       |
 
 
-  @TestRailId:C2819
+
   Scenario: Double disbursement on installment day - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -411,7 +411,7 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
 
-  @TestRailId:C2820
+
   Scenario: Downpayment with loan adjustment - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -456,7 +456,7 @@ Feature: Loan DownPayment
       | 01 April 2022    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
       | 01 April 2022    | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       |
 
-  @TestRailId:C2821
+
   Scenario: Downpayment with loan adjustment - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -521,7 +521,7 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 April 2022    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
 
-  @TestRailId:C2822
+
   Scenario: Downpayment creation date - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -576,7 +576,7 @@ Feature: Loan DownPayment
       | 01 April 2022    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
       | 01 April 2022    | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       |
 
-  @TestRailId:C2823
+
   Scenario: Downpayment creation date - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -641,7 +641,7 @@ Feature: Loan DownPayment
       | 10 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 April 2022    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
 
-  @TestRailId:C2824
+
   Scenario: Double disbursement normal flow - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -696,7 +696,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 01 February 2022 | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 1000.0       |
 
-  @TestRailId:C2825
+
   Scenario: Double disbursement normal flow - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -761,7 +761,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 01 February 2022 | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
 
-  @TestRailId:C2826
+
   Scenario: Double disbursement same day - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -801,7 +801,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
-  @TestRailId:C2827
+
   Scenario: Double disbursement same day - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -865,7 +865,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
-  @TestRailId:C2828
+
   Scenario: Double disbursement partial overpayment - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -905,7 +905,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
-  @TestRailId:C2829
+
   Scenario: Double disbursement partial overpayment - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -969,7 +969,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1600.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1350.0       |
 
-  @TestRailId:C2830
+
   Scenario: Double disbursement full overpayment - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1021,7 +1021,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
 
-  @TestRailId:C2831
+
   Scenario: Double disbursement full overpayment - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1085,7 +1085,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
 
-  @TestRailId:C2832
+
   Scenario: Double disbursement after installment overdue - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1125,7 +1125,7 @@ Feature: Loan DownPayment
       | 15 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 February 2022 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
-  @TestRailId:C2833
+
   Scenario: Double disbursement after installment overdue - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1189,7 +1189,7 @@ Feature: Loan DownPayment
       | 15 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
-  @TestRailId:C2834
+
   Scenario: Double disbursement after installment 2 - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1242,7 +1242,7 @@ Feature: Loan DownPayment
       | 15 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 February 2022 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
 
-  @TestRailId:C2835
+
   Scenario: Double disbursement after installment 2 - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1319,7 +1319,7 @@ Feature: Loan DownPayment
       | 15 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
 
-  @TestRailId:C2836
+
   Scenario: Double disbursement normal overdue - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1373,7 +1373,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
 
-  @TestRailId:C2837
+
   Scenario: Double disbursement normal overdue - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1425,7 +1425,7 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1750.0       |
 
-  @TestRailId:C2838
+
   Scenario: Double disbursement on Duedate - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1465,7 +1465,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 01 February 2022 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
-  @TestRailId:C2839
+
   Scenario: Double disbursement on Duedate - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1530,7 +1530,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
   #  To recheck after verifying that loan product details are correct
-  @Skip @TestRailId:C2852
+  @Skip
   Scenario: Single disbursement with interest - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1551,7 +1551,7 @@ Feature: Loan DownPayment
       | 1000.0        | 30       | 0    | 0         | 1030.0 | 0.0  | 0          | 0    | 1030        |
 
   #  To recheck after verifying that loan product details are correct
-  @Skip @TestRailId:C2853
+  @Skip
   Scenario: Single disbursement delinquency - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1574,7 +1574,7 @@ Feature: Loan DownPayment
     When Admin runs COB job
     Then Admin checks that delinquency range is: "RANGE_1" and has delinquentDate "2022-01-04"
 
-  @TestRailId:C2854
+
   Scenario: Single disbursement with undo disbursement when auto downpayment is enabled without manual transaction after last downpayment
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1600,7 +1600,7 @@ Feature: Loan DownPayment
     When Admin successfully undo disbursal
     Then Loan status has changed to "Approved"
 
-  @TestRailId:C2855
+
   Scenario: Single disbursement with undo disbursement when auto downpayment is disabled without manual transaction after last downpayment
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1637,7 +1637,7 @@ Feature: Loan DownPayment
     When Admin successfully undo disbursal
     Then Loan status has changed to "Approved"
 
-  @TestRailId:C2856
+
   Scenario: Single disbursement with undo disbursement when auto downpayment is disabled with manual transaction after last downpayment
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1700,7 +1700,7 @@ Feature: Loan DownPayment
     When Admin successfully undo disbursal
     Then Loan status has changed to "Approved"
 
-  @TestRailId:C2857
+
   Scenario: Single disbursement with undo disbursement when auto downpayment is enabled with manual transaction after last downpayment
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1753,7 +1753,7 @@ Feature: Loan DownPayment
     Then Loan status has changed to "Approved"
 
 
-  @TestRailId:C2858
+
   Scenario: Multi disbursement with undo last disbursement when auto downpayment is enabled without manual transaction after last downpayment
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1803,7 +1803,7 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
 
 
-  @TestRailId:C2859
+
   Scenario: Multi disbursement with undo last disbursement when auto downpayment is disabled without manual transaction after last downpayment
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -1865,7 +1865,7 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
 
 
-  @TestRailId:C2866
+
   Scenario: Verify backdated disbursement - after down payment, before first installment due date, installment start date calculated by loan disbursement date
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -1910,7 +1910,7 @@ Feature: Loan DownPayment
       | 05 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       |
       | 05 January 2023  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1750.0       |
 
-  @TestRailId:C2867
+
   Scenario: Verify backdated disbursement - second disbursement placed on after down payment, after first installment paid on due date, and takes place before first installment due date
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -1973,7 +1973,7 @@ Feature: Loan DownPayment
       | 01 February 2023 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 05 February 2023 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
-  @TestRailId:C2868
+
   Scenario: Verify backdated disbursement - after down payment, before first installment due date, installment start date calculated by loan submitted on date
     When Admin sets repaymentStartDateType for "PIN4_DOWNPAYMENT" loan product to "SUBMITTED_ON_DATE"
     When Admin sets the business date to "01 January 2023"
@@ -2020,7 +2020,7 @@ Feature: Loan DownPayment
       | 05 January 2023  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1750.0       |
     When Admin sets repaymentStartDateType for "PIN4_DOWNPAYMENT" loan product to "DISBURSEMENT_DATE"
 
-  @TestRailId:C2869
+
   Scenario: Verify correct Loan Repayment EMI Amount is calculated and is rounded off if loan product installmentAmountInMultiplesOf is set
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -2040,7 +2040,7 @@ Feature: Loan DownPayment
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1250.0        | 0        | 0    | 0         | 1250.0 | 0.0  | 0          | 0    | 1250        |
 
-  @TestRailId:C2882
+
   Scenario: Verify Loan Repayment Due and Overdue events for downpayment
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -2055,7 +2055,7 @@ Feature: Loan DownPayment
     When Admin runs inline COB job for Loan
     Then Loan Repayment Overdue Business Event is created
 
-  @TestRailId:C2883
+
   Scenario: Verify that with multiple disbursement when last disbursement is reverted, downpayment will be reverted too - autopayment disabled
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -2101,7 +2101,7 @@ Feature: Loan DownPayment
       | 01 September 2023 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 05 September 2023 | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 500.0        |
 
-  @TestRailId:C2884
+
   Scenario: Verify that with multiple disbursement when last disbursement is reverted, downpayment will be reverted too - autopayment enabled
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
@@ -2150,7 +2150,7 @@ Feature: Loan DownPayment
       | 01 September 2023 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 05 September 2023 | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 250.0        |
 
-  @TestRailId:C2913
+
   @AdvancedPaymentAllocation
   Scenario: Verify that down-payment Installments are available in the repayment schedule for CREATED, APPROVED and DISBURSED states of the loan account
     When Admin sets the business date to "01 September 2023"
@@ -2208,7 +2208,7 @@ Feature: Loan DownPayment
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       | 600.0         | 0        | 0.0  | 0         | 600.0 | 150.0 | 0.0        | 0.0  | 450.0       |
 
-  @TestRailId:C2938
+
   Scenario: Multiple disbursements on same day - auto enabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -2273,7 +2273,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       |
 
 
-  @TestRailId:C2939
+
   Scenario: Multiple disbursements on same day - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -2345,7 +2345,7 @@ Feature: Loan DownPayment
       | 01 February 2022 | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 950.0        |
       | 01 February 2022 | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
 
-  @TestRailId:C3017
+
   Scenario: Verify that repayment schedule is managed properly in case of PIN4 product with two disbursement on the same day
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -2374,7 +2374,7 @@ Feature: Loan DownPayment
       | 01 October 2023  | Disbursement     | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 975.0        |
       | 01 October 2023  | Down Payment     | 225.0  | 225.0     | 0.0      | 0.0  | 0.0       | 750.0        |
 
-  @TestRailId:C3031
+
   Scenario: Verify that in case of auto downpayment Loan details / summary.totalRepaymentTransaction has the downpayment amount
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -2385,7 +2385,7 @@ Feature: Loan DownPayment
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     Then Loan details has the downpayment amount "250" in summary.totalRepaymentTransaction
 
-  @TestRailId:C3061 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC1: overpaid amount > second disbursement amount AND overpaid amount > related downpayment amount
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
@@ -2422,7 +2422,7 @@ Feature: Loan DownPayment
       | 16 February 2024 | Repayment        | 1000.0 | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 20 February 2024 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C3062 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC2: overpaid amount = second disbursement amount AND overpaid amount > related downpayment amount
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
@@ -2458,7 +2458,7 @@ Feature: Loan DownPayment
       | 16 February 2024 | Repayment        | 1000.0 | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 20 February 2024 | Disbursement     | 625.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C3063 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC3: overpaid amount < second disbursement amount BUT overpaid amount > related downpayment amount
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
@@ -2495,7 +2495,7 @@ Feature: Loan DownPayment
       | 16 February 2024 | Repayment        | 575.0  | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 20 February 2024 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 200.0        |
 
-  @TestRailId:C3064 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC4: overpaid amount < second disbursement amount AND overpaid amount < related downpayment amount
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
@@ -2533,7 +2533,7 @@ Feature: Loan DownPayment
       | 20 February 2024 | Disbursement     | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 20 February 2024 | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 450.0        |
 
-  @TestRailId:C3065 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC5: repayment reverted
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data

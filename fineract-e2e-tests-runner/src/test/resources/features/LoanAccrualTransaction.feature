@@ -1,7 +1,7 @@
 @LoanAccrualFeature
 Feature: LoanAccrualTransaction
 
-  @TestRailId:C2647
+
   Scenario: Verify that after COB job Accrual event is raised when loan has a fee-charge on disbursal date
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -16,7 +16,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "01 January 2023"
 
-  @TestRailId:C2648
+
   Scenario: Verify that after COB job Accrual event is raised when loan has a fee-charge on disbursal date with partial repayment
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -32,7 +32,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "01 January 2023"
 
-  @TestRailId:C2649
+
   Scenario: Verify that after COB job Accrual event is raised when loan has a fee-charge on disbursal date with full repayment and loan is closed
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -48,7 +48,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
-  @TestRailId:C2650
+
   Scenario: Verify that after COB job Accrual event is raised when loan has a fee-charge added with chargeback
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -72,7 +72,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 January 2023"
 
-  @TestRailId:C2651
+
   Scenario: Verify that after periodic accrual transaction job accrual event is raised when loan has a fee-charge added with waive charge and undo waive charge
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -100,7 +100,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 0.0 | 10.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 April 2023"
 
-  @TestRailId:C2652
+
   Scenario: Verify that after periodic accrual transaction job accrual event is raised when loan has a fee-charge added when loan is closed
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -117,7 +117,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
-  @TestRailId:C2653
+
   Scenario: Verify that after disbursement and COB job Accrual event is raised when loan has a interest recalculation
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -133,7 +133,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 1.64   | 0.0       | 1.64     | 0.0  | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
-  @TestRailId:C2654
+
   Scenario: Verify that after loan is closed accrual event is raised when loan has a interest recalculation
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -150,7 +150,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.19  | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
-  @TestRailId:C2683
+
   Scenario: Verify that the final accrual is created when the loan goes to overpaid state
     When Admin sets the business date to "1 July 2023"
     When Admin creates a client with random data
@@ -174,7 +174,7 @@ Feature: LoanAccrualTransaction
       | 06 July 2023     | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 06 July 2023     | Repayment        | 5011.0 | 5000.0    | 0.0      | 10.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2684
+
   Scenario: Verify that the accrual transaction correctly created in case a CBR is applied on the loan
     When Admin sets the business date to "1 July 2023"
     When Admin creates a client with random data
@@ -213,7 +213,7 @@ Feature: LoanAccrualTransaction
       | 06 July 2023     | Repayment             | 5011.0 | 5000.0    | 0.0      | 10.0 | 0.0       | 0.0          |
       | 06 July 2023     | Credit Balance Refund | 1.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C2685
+
   Scenario: Verify that the accrual transaction correctly created (overpay, undo repayment, overpay)
     When Admin sets the business date to "1 July 2023"
     When Admin creates a client with random data
@@ -259,7 +259,7 @@ Feature: LoanAccrualTransaction
       | 06 July 2023     | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 07 July 2023     | Repayment        | 4011.0 | 4010.0    | 0.0      | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C2686
+
   Scenario: Verify that the accrual transaction correctly created (overpay, undo repayment, add charge, overpay)
     When Admin sets the business date to "1 July 2023"
     When Admin creates a client with random data
@@ -307,7 +307,7 @@ Feature: LoanAccrualTransaction
       | 07 July 2023     | Repayment        | 4061.0 | 4060.0    | 0.0      | 0.0  | 0.0       | 0.0          |
       | 07 July 2023     | Accrual          | 50.0   | 0.0       | 0.0      | 50.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2707 @Skip
+   @Skip
   Scenario: Verify that the accrual transaction is not reversed when multi disbursement happens
     When Admin sets the business date to "26 April 2023"
     When Admin creates a client with random data
@@ -339,7 +339,7 @@ Feature: LoanAccrualTransaction
       | 27 April 2023    | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 28 April 2023    | Disbursement     | 20.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1050.0       |
 
-  @TestRailId:C2708 @Skip
+   @Skip
   Scenario: Verify that the accrual is correct when it is on the installment start date
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
@@ -366,7 +366,7 @@ Feature: LoanAccrualTransaction
       | 01 May 2023      | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 08 May 2023      | Disbursement     | 20.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1020.0       |
 
-  @TestRailId:C2709
+
   Scenario:Verify that the accrual transaction is created for disbursement fee
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
@@ -380,7 +380,7 @@ Feature: LoanAccrualTransaction
       | 01 May 2023      | Repayment (at time of disbursement) | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 1000.0       |
       | 01 May 2023      | Accrual                             | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2710 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, multiple charges with different submitted date
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -409,7 +409,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 20   | 0         | 1020 | 0    | 0          | 0    | 1020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2711
+
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = due-date, multiple charges with different submitted date
     When Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 February 2023"
@@ -441,7 +441,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 20   | 0         | 1020 | 0    | 0          | 0    | 1020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2712 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, multiple charges with different submitted date, due dates in same repayment period
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -474,7 +474,7 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 20   | 0         | 3020 | 0    | 0          | 0    | 3020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2713
+
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = due-date, multiple charges with different submitted date, due dates in same repayment period
     When Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 February 2023"
@@ -510,7 +510,7 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 20   | 0         | 3020 | 0    | 0          | 0    | 3020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2714 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, multiple charges with different submitted date, due dates in different repayment periods
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -544,7 +544,7 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 20   | 0         | 3020 | 0    | 0          | 0    | 3020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2715
+
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = due-date, multiple charges with different submitted date, due dates in different repayment periods
     When Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 February 2023"
@@ -580,7 +580,7 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 20   | 0         | 3020 | 0    | 0          | 0    | 3020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2716 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, multi disbursement
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -612,7 +612,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 10   | 0         | 1010 | 0    | 0          | 0    | 1010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2717 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, repayment reversal
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -649,7 +649,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 10   | 0         | 1010 | 0    | 0          | 0    | 1010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2718 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, waive charge, undo waive
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -686,7 +686,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 10   | 0         | 1010 | 0    | 0          | 0    | 1010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2719 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, multi disbursement
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -722,7 +722,7 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 10   | 0         | 3010 | 0    | 0          | 0    | 3010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2720 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, repayment reversal
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -763,7 +763,7 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 10   | 0         | 3010 | 0    | 0          | 0    | 3010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2721 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, waive charge, undo waive
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -805,7 +805,7 @@ Feature: LoanAccrualTransaction
     When Global config "charge-accrual-date" value set to "due-date"
 
 
-  @TestRailId:C2789 @Specific
+   @Specific
   Scenario: Verify accrual transaction for new fee for loan with accrued snooze fee and schedule adjustment
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "19 May 2023"
