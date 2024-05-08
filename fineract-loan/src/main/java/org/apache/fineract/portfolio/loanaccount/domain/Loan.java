@@ -4186,7 +4186,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return getStatus().isClosedWithOutsandingAmountMarkedForReschedule();
     }
 
-    private boolean isCancelled() {
+    public boolean isCancelled() {
         return isRejected() || isWithdrawn();
     }
 
@@ -7273,5 +7273,4 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
-
 }

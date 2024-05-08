@@ -162,7 +162,9 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         }
         CollectionData collectionData = null;
         // If the Loan is not Active yet, return template data
-        if (loan.isSubmittedAndPendingApproval() || loan.isApproved()) {
+        // If the Loan is Rejected, Closed written-off, Withdrawn by Client, Closed with outstanding marked for
+        // reschedule, Closed obligation met, Overpaid, return template data
+        if (loan.isSubmittedAndPendingApproval() || loan.isApproved() || loan.isClosed() || loan.getStatus().isOverpaid()) {
             collectionData = CollectionData.template();
         } else {
             collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);

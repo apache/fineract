@@ -851,6 +851,15 @@ public abstract class BaseLoanIntegrationTest {
         assertEquals(loanStatus.getCode(), loanDetails.getStatus().getCode());
     }
 
+    protected void undoLoanApproval(Long loanId) {
+        loanTransactionHelper.undoApprovalForLoan(loanId, new PostLoansLoanIdRequest());
+    }
+
+    protected void rejectLoan(Long loanId, String rejectedOnDate) {
+        loanTransactionHelper.rejectLoan(loanId,
+                new PostLoansLoanIdRequest().rejectedOnDate(rejectedOnDate).locale("en").dateFormat(DATETIME_PATTERN));
+    }
+
     @RequiredArgsConstructor
     public static class BatchRequestBuilder {
 

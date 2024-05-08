@@ -2015,4 +2015,8 @@ public class LoanTransactionHelper extends IntegrationTest {
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_LOAN_PRODUCT_URL, request, null);
     }
 
+    public PostLoansLoanIdResponse undoApprovalForLoan(Long loanId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions(loanId, request, "undoapproval"));
+    }
+
 }

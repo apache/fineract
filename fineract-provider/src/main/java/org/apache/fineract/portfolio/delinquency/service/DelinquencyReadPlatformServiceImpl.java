@@ -126,8 +126,8 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         if (optLoan.isPresent()) {
             final Loan loan = optLoan.get();
 
-            // If the Loan is not Active yet, return template data
-            if (loan.isSubmittedAndPendingApproval() || loan.isApproved()) {
+            // If the Loan is not Active yet or is cancelled (rejected or withdrawn), return template data
+            if (loan.isSubmittedAndPendingApproval() || loan.isApproved() || loan.isCancelled()) {
                 return CollectionData.template();
             }
 
@@ -137,6 +137,9 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
             final String nextPaymentDueDateConfig = configurationDomainService.getNextPaymentDateConfigForLoan();
 
+            // Below method calculates delinquency for active loans only and returns template data for Closed or
+            // Overpaid
+            // loans
             collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
             collectionData.setAvailableDisbursementAmount(loan.getApprovedPrincipal().subtract(loan.getDisbursedAmount()));
             collectionData.setNextPaymentDueDate(loan.possibleNextRepaymentDate(nextPaymentDueDateConfig));
