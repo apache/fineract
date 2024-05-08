@@ -56,6 +56,14 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         boolean overdueSinceDateWasSet = false;
         boolean firstNotYetDueInstallment = false;
         log.debug("Loan id {} with {} installments", loan.getId(), loan.getRepaymentScheduleInstallments().size());
+
+        // If the Loan is not Active yet, return template data
+        // If the Loan is Rejected, Closed written-off, Withdrawn by Client, Closed with outstanding marked for
+        // reschedule, Closed obligation met, Overpaid return template data
+        if (loan.isSubmittedAndPendingApproval() || loan.isApproved() || loan.isClosed() || loan.getStatus().isOverpaid()) {
+            return CollectionData.template();
+        }
+
         // Get the oldest overdue installment if exists one
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             if (!installment.isObligationsMet()) {
@@ -124,6 +132,14 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         boolean overdueSinceDateWasSet = false;
         boolean firstNotYetDueInstallment = false;
         log.debug("Loan id {} with {} installments", loan.getId(), loan.getRepaymentScheduleInstallments().size());
+
+        // If the Loan is not Active yet, return template data
+        // If the Loan is Rejected, Closed written-off, Withdrawn by Client, Closed with outstanding marked for
+        // reschedule, Closed obligation met, Overpaid, return template data
+        if (loan.isSubmittedAndPendingApproval() || loan.isApproved() || loan.isClosed() || loan.getStatus().isOverpaid()) {
+            return new LoanDelinquencyData(collectionData, loanInstallmentsCollectionData);
+        }
+
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             CollectionData installmentCollectionData = CollectionData.template();
             if (!installment.isObligationsMet()) {
