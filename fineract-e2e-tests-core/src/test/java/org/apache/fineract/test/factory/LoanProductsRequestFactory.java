@@ -58,23 +58,23 @@ public class LoanProductsRequestFactory {
     private final PaymentTypeResolver paymentTypeResolver;
     private final AccountTypeResolver accountTypeResolver;
 
-    public static final String NAME_PREFIX = "Pin30-";
-    public static final String NAME_PREFIX_PIN4 = "Pin4-";
-    public static final String NAME_PREFIX_INTEREST_FLAT = "Pin30InterestFlat-";
-    public static final String NAME_PREFIX_INTEREST_FLAT_PIN4 = "Pin4InterestFlat-";
-    public static final String NAME_PREFIX_INTEREST_DECLINING = "Pin30InterestDeclining-";
-    public static final String NAME_PREFIX_INTEREST_DECLINING_RECALCULATION = "Pin30InterestDecliningRecalculation-";
+    public static final String NAME_PREFIX = "LP1-";
+    public static final String NAME_PREFIX_LP2 = "LP2-";
+    public static final String NAME_PREFIX_INTEREST_FLAT = "LP1InterestFlat-";
+    public static final String NAME_PREFIX_INTEREST_FLAT_LP2 = "LP2InterestFlat-";
+    public static final String NAME_PREFIX_INTEREST_DECLINING = "LP1InterestDeclining-";
+    public static final String NAME_PREFIX_INTEREST_DECLINING_RECALCULATION = "LP1InterestDecliningRecalculation-";
     public static final String SHORT_NAME_PREFIX = "p";
     public static final String SHORT_NAME_PREFIX_INTEREST = "i";
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String LOCALE_EN = "en";
     public static final String DESCRIPTION = "Pay in 30 days product";
-    public static final String DESCRIPTION_PIN4 = "Pay in 4 product";
+    public static final String DESCRIPTION_LP2 = "Pay in 4 product";
     public static final String DESCRIPTION_INTEREST_FLAT = "Pay in 30 days product with 12% interest - FLAT";
-    public static final String DESCRIPTION_INTEREST_FLAT_PIN4 = "Pay in 4 product with 12% interest - FLAT";
+    public static final String DESCRIPTION_INTEREST_FLAT_LP2 = "Pay in 4 product with 12% interest - FLAT";
     public static final String DESCRIPTION_INTEREST_DECLINING = "Pay in 30 days product with 12% interest - DECLINING BALANCE";
-    public static final String DESCRIPTION_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_MONTHLY = "PIN30-1MONTH with 12% DECLINING BALANCE interest, interest period: Daily, Interest recalculation-Monthly, Compounding:Interest";
-    public static final String DESCRIPTION_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE = "PIN30 with 12% DECLINING BALANCE interest, interest period: Daily, Interest recalculation-Daily, Compounding:none";
+    public static final String DESCRIPTION_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_MONTHLY = "LP1-1MONTH with 12% DECLINING BALANCE interest, interest period: Daily, Interest recalculation-Monthly, Compounding:Interest";
+    public static final String DESCRIPTION_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE = "LP1 with 12% DECLINING BALANCE interest, interest period: Daily, Interest recalculation-Daily, Compounding:none";
     public static final Long FUND_ID = FundId.LENDER_A.value;
     public static final String CURRENCY_CODE = "EUR";
     public static final Integer INTEREST_RATE_FREQUENCY_TYPE_MONTH = InterestRateFrequencyType.MONTH.value;
@@ -102,7 +102,7 @@ public class LoanProductsRequestFactory {
     public static final Integer FREQUENCY_FOR_RECALCULATE_OUTSTANDING_PRINCIPAL_SAME_AS_REPAYMENT = RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value;
     public static final Integer FREQUENCY_FOR_RECALCULATE_OUTSTANDING_DAILY = RecalculationRestFrequencyType.DAILY.value;
 
-    public PostLoanProductsRequest defaultLoanProductsRequestPin30() {
+    public PostLoanProductsRequest defaultLoanProductsRequestLP1() {
         String name = Utils.randomNameGenerator(NAME_PREFIX, 4);
         String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX, 3);
 
@@ -212,7 +212,7 @@ public class LoanProductsRequestFactory {
                 .incomeFromChargeOffPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF));//
     }
 
-    public PostLoanProductsRequest defaultLoanProductsRequestPin30InterestFlat() {
+    public PostLoanProductsRequest defaultLoanProductsRequestLP1InterestFlat() {
         String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_FLAT, 4);
         String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
 
@@ -320,7 +320,7 @@ public class LoanProductsRequestFactory {
                 .incomeFromChargeOffPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF));//
     }
 
-    public PostLoanProductsRequest defaultLoanProductsRequestPin30InterestDeclining() {
+    public PostLoanProductsRequest defaultLoanProductsRequestLP1InterestDeclining() {
         String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING, 4);
         String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
 
@@ -428,7 +428,7 @@ public class LoanProductsRequestFactory {
                 .incomeFromChargeOffPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF));//
     }
 
-    public PostLoanProductsRequest defaultLoanProductsRequestPin301MonthInterestDecliningBalanceDailyRecalculationCompoundingMonthly() {
+    public PostLoanProductsRequest defaultLoanProductsRequestLP11MonthInterestDecliningBalanceDailyRecalculationCompoundingMonthly() {
         String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING_RECALCULATION, 4);
         String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
 
@@ -541,7 +541,7 @@ public class LoanProductsRequestFactory {
                 .recalculationCompoundingFrequencyOnDayType(1);//
     }
 
-    public PostLoanProductsRequest defaultLoanProductsRequestPin30InterestDecliningBalanceDailyRecalculationCompoundingNone() {
+    public PostLoanProductsRequest defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone() {
         String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING_RECALCULATION, 4);
         String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
 
@@ -651,8 +651,8 @@ public class LoanProductsRequestFactory {
                 .recalculationRestFrequencyInterval(1);//
     }
 
-    public PostLoanProductsRequest defaultLoanProductsRequestPin4() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_PIN4, 4);
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2() {
+        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 4);
         String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX, 3);
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
@@ -671,7 +671,7 @@ public class LoanProductsRequestFactory {
         return new PostLoanProductsRequest()//
                 .name(name)//
                 .shortName(shortName)//
-                .description(DESCRIPTION_PIN4)//
+                .description(DESCRIPTION_LP2)//
                 .enableDownPayment(true)//
                 .enableAutoRepaymentForDownPayment(true)//
                 .disbursedAmountPercentageForDownPayment(new BigDecimal(25))//
@@ -764,8 +764,8 @@ public class LoanProductsRequestFactory {
                 .incomeFromChargeOffPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF));//
     }
 
-    public PostLoanProductsRequest defaultLoanProductsRequestPin4InterestFlat() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_FLAT_PIN4, 4);
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2InterestFlat() {
+        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_FLAT_LP2, 4);
         String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
@@ -784,7 +784,7 @@ public class LoanProductsRequestFactory {
         return new PostLoanProductsRequest()//
                 .name(name)//
                 .shortName(shortName)//
-                .description(DESCRIPTION_INTEREST_FLAT_PIN4)//
+                .description(DESCRIPTION_INTEREST_FLAT_LP2)//
                 .enableDownPayment(true)//
                 .enableAutoRepaymentForDownPayment(true)//
                 .disbursedAmountPercentageForDownPayment(new BigDecimal(25))//
