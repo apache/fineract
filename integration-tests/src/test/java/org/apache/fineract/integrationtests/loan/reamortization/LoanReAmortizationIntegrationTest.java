@@ -797,6 +797,105 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
         });
     }
 
+    @Test
+    public void undoReAmortizationAfterSecondDownPaymentWhenDisbursementIsReversedTest() {
+
+        runAt("01 January 2023", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
+
+            loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0, 3, req -> {
+                req.setRepaymentEvery(15);
+                req.setLoanTermFrequency(45);
+                req.setTransactionProcessingStrategyCode("advanced-payment-allocation-strategy");
+                req.setLoanScheduleProcessingType(LoanScheduleType.PROGRESSIVE.toString());
+                req.setLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString());
+            }));
+
+            disburseLoan(loanId.get(), BigDecimal.valueOf(500.00), "01 January 2023");
+
+            verifyRepaymentSchedule(loanId.get(), //
+                    installment(500, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, false, "16 January 2023"), //
+                    installment(125.0, false, "31 January 2023"), //
+                    installment(125.0, false, "15 February 2023") //
+            );
+        });
+        runAt("25 January 2023", () -> {
+
+            reAmortizeLoan(loanId.get());
+
+            verifyRepaymentSchedule(loanId.get(), //
+                    installment(500, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(0.0, true, "16 January 2023"), //
+                    installment(187.5, false, "31 January 2023"), //
+                    installment(187.5, false, "15 February 2023") //
+            );
+
+            // verify transactions
+            verifyTransactions(loanId.get(), //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Re-amortize", "25 January 2023") //
+            );
+        });
+        runAt("26 January 2023", () -> {
+            disburseLoan(loanId.get(), BigDecimal.valueOf(500.00), "26 January 2023");
+
+            verifyRepaymentSchedule(loanId.get(), //
+                    installment(500, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(0.0, true, "16 January 2023"), //
+                    installment(500.0, null, "26 January 2023"), //
+                    installment(125.0, true, "26 January 2023"), //
+                    installment(375.0, false, "31 January 2023"), //
+                    installment(375.0, false, "15 February 2023") //
+            );
+
+            // verify transactions
+            verifyTransactions(loanId.get(), //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Re-amortize", "25 January 2023"), //
+                    transaction(500.0, "Disbursement", "26 January 2023"), //
+                    transaction(125.0, "Down Payment", "26 January 2023") //
+            );
+
+            // undo second disbursal
+            undoLastDisbursement(loanId.get());
+
+            verifyRepaymentSchedule(loanId.get(), //
+                    installment(500, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(0.0, true, "16 January 2023"), //
+                    installment(187.5, false, "31 January 2023"), //
+                    installment(187.5, false, "15 February 2023") //
+            );
+
+            // verify transactions
+            verifyTransactions(loanId.get(), //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Re-amortize", "25 January 2023") //
+            );
+
+            // undo re-Amortization
+            undoReAmortizeLoan(loanId.get());
+
+            verifyRepaymentSchedule(loanId.get(), //
+                    installment(500, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, false, "16 January 2023"), //
+                    installment(125.0, false, "31 January 2023"), //
+                    installment(125.0, false, "15 February 2023") //
+            );
+
+        });
+
+    }
+
     private Long createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(int numberOfInstallments, int repaymentEvery) {
         return createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(numberOfInstallments, repaymentEvery,
                 DOWN_PAYMENT_PERCENTAGE);

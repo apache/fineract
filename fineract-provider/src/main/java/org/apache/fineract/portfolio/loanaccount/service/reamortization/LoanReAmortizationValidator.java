@@ -114,8 +114,8 @@ public class LoanReAmortizationValidator {
         }
 
         // validate if there's no payment between the reamortization and today
-        boolean repaymentExistsAfterReAmortization = loan.getLoanTransactions().stream()
-                .anyMatch(tx -> tx.getTypeOf().isRepaymentType() && transactionHappenedAfterOther(tx, optionalReAmortizationTx.get()));
+        boolean repaymentExistsAfterReAmortization = loan.getLoanTransactions().stream().anyMatch(tx -> tx.getTypeOf().isRepaymentType()
+                && !tx.isReversed() && transactionHappenedAfterOther(tx, optionalReAmortizationTx.get()));
         if (repaymentExistsAfterReAmortization) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.repayment.exists.after.reamortization",
                     "Undoing a reamortization can only be done if there hasn't been any repayment afterwards", loan.getId());

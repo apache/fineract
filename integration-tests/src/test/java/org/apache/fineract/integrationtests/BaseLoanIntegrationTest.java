@@ -481,6 +481,10 @@ public abstract class BaseLoanIntegrationTest {
         loanTransactionHelper.undoDisbursal(loanId);
     }
 
+    protected void undoLastDisbursement(Long loanId) {
+        loanTransactionHelper.undoLastDisbursalLoan(loanId, new PostLoansLoanIdRequest());
+    }
+
     protected void verifyJournalEntries(Long loanId, Journal... entries) {
         GetJournalEntriesTransactionIdResponse journalEntriesForLoan = journalEntryHelper.getJournalEntriesForLoan(loanId);
         Assertions.assertEquals(entries.length, journalEntriesForLoan.getPageItems().size());
