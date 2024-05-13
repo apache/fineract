@@ -196,10 +196,10 @@ dependencies {
 
     implementation 'io.github.classgraph:classgraph'
 
-    implementation('com.querydsl:querydsl-core:5.1.0',
-            'com.querydsl:querydsl-jpa:5.1.0:jakarta')
+    implementation('io.github.openfeign.querydsl:querydsl-core:6.2.1',
+            'io.github.openfeign.querydsl:querydsl-jpa:6.2.1')
     annotationProcessor(
-            'com.querydsl:querydsl-apt:5.1.0:jakarta',
+            'io.github.openfeign.querydsl:querydsl-apt:6.2.1:jakarta',
             'jakarta.persistence:jakarta.persistence-api:3.1.0',
             )
 

@@ -23,7 +23,6 @@ import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -157,19 +156,19 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                         qLoan.loanRepaymentScheduleDetail.currency.code.as("currencyCode"),
                         qLoan.loanRepaymentScheduleDetail.currency.digitsAfterDecimal.as("currencyDigits"),
                         qLoan.loanRepaymentScheduleDetail.currency.inMultiplesOf.as("inMultiplesOf"),
-                        JPAExpressions.select(qLoanRepaymentSchedule.principalCompleted.coalesce(BigDecimal.valueOf(0.0)).sum()
-                                .add(qLoanRepaymentSchedule.interestPaid.coalesce(BigDecimal.valueOf(0.0)).sum())
-                                .add(qLoanRepaymentSchedule.feeChargesPaid.coalesce(BigDecimal.valueOf(0.0)).sum())
-                                .add(qLoanRepaymentSchedule.penaltyChargesPaid.coalesce(BigDecimal.valueOf(0.0)).sum()).as("totalOverpaid"))
+                        JPAExpressions.select(qLoanRepaymentSchedule.principalCompleted.sumBigDecimal()
+                                .add(qLoanRepaymentSchedule.interestPaid.sumBigDecimal())
+                                .add(qLoanRepaymentSchedule.feeChargesPaid.sumBigDecimal())
+                                .add(qLoanRepaymentSchedule.penaltyChargesPaid.sumBigDecimal()).as("totalOverpaid"))
                                 .from(qLoanSubQuery).join(qLoanRepaymentSchedule).on(qLoanSubQuery.id.eq(qLoanRepaymentSchedule.loan.id))
                                 .where(qLoanRepaymentSchedule.loan.id.eq(qLoan.id).and(qLoan.loanStatus.eq(300))
                                         .and(qLoanRepaymentSchedule.dueDate.goe(LocalDate
                                                 .parse(DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATTER)))))
                                 .groupBy(qLoanSubQuery.id)
-                                .having(qLoanRepaymentSchedule.principalCompleted.coalesce(BigDecimal.valueOf(0.0)).sum()
-                                        .add(qLoanRepaymentSchedule.interestPaid.coalesce(BigDecimal.valueOf(0.0)).sum())
-                                        .add(qLoanRepaymentSchedule.feeChargesPaid.coalesce(BigDecimal.valueOf(0.0)).sum())
-                                        .add(qLoanRepaymentSchedule.penaltyChargesPaid.coalesce(BigDecimal.valueOf(0.0)).sum()).gt(0.0)),
+                                .having(qLoanRepaymentSchedule.principalCompleted.sumBigDecimal()
+                                        .add(qLoanRepaymentSchedule.interestPaid.sumBigDecimal())
+                                        .add(qLoanRepaymentSchedule.feeChargesPaid.sumBigDecimal())
+                                        .add(qLoanRepaymentSchedule.penaltyChargesPaid.sumBigDecimal()).gt(0.0)),
                         qCurrency.name.as("currencyName"), qCurrency.nameCode.as("currencyNameCode"),
                         qCurrency.displaySymbol.as("currencyDisplaySymbol"))
                 .from(qLoan).join(qLoan.loanProduct, qLoanProduct).on(qLoanProduct.id.eq(qLoan.loanProduct.id)).join(qCurrency)

@@ -107,7 +107,6 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         final EnumOptionData loanAccountType = accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = accountType(PortfolioAccountType.SAVINGS);
 
-        final Integer mostRelevantFromAccountType = fromAccountType;
         Collection<EnumOptionData> fromAccountTypeOptions;
         Collection<EnumOptionData> toAccountTypeOptions;
 
@@ -121,10 +120,9 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
             toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
         }
-        final Integer mostRelevantToAccountType = toAccountType;
 
-        final EnumOptionData fromAccountTypeData = accountType(mostRelevantFromAccountType);
-        final EnumOptionData toAccountTypeData = accountType(mostRelevantToAccountType);
+        final EnumOptionData fromAccountTypeData = accountType(fromAccountType);
+        final EnumOptionData toAccountTypeData = accountType(toAccountType);
 
         // from settings
         OfficeData fromOffice = null;
@@ -147,7 +145,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         if (fromAccountId != null) {
             Integer accountType;
-            if (mostRelevantFromAccountType == 1) {
+            if (fromAccountType == 1) {
                 accountType = PortfolioAccountType.LOAN.getValue();
             } else {
                 accountType = PortfolioAccountType.SAVINGS.getValue();
@@ -162,11 +160,10 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
             mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
-            if (mostRelevantFromAccountType == 1) {
+            if (fromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
             }
-            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
-                    loanStatus);
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(fromAccountType, mostRelevantFromClientId, loanStatus);
             fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
         }
 
@@ -184,8 +181,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         Collection<ClientData> toClientOptions = null;
 
         if (toAccountId != null && fromAccount != null) {
-            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.getCurrencyCode());
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, toAccountType, fromAccount.getCurrencyCode());
             mostRelevantToClientId = toAccount.getClientId();
         }
 
@@ -195,7 +191,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 
-            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
+            toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
         }
 
         if (mostRelevantToOfficeId != null) {
@@ -206,7 +202,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             if (toClientOptions != null && toClientOptions.size() == 1) {
                 toClient = new ArrayList<>(toClientOptions).get(0);
 
-                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
+                toAccountOptions = retrieveToAccounts(fromAccount, toAccountType, mostRelevantToClientId);
             }
         }
 
@@ -591,21 +587,21 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         final JPAQuery<StandingInstructionDuesData> query = new JPAQuery<>(entityManager);
 
-        query.select(qLoanRepaymentSchedule.dueDate.max().as("dueDate"), qLoanRepaymentSchedule.principal.sum().as("principalAmount"),
-                qLoanRepaymentSchedule.principalCompleted.sum().as("principalCompleted"),
-                qLoanRepaymentSchedule.principalWrittenOff.sum().as("principalWrittenOff"),
-                qLoanRepaymentSchedule.interestCharged.sum().as("interestAmount"),
-                qLoanRepaymentSchedule.interestPaid.sum().as("interestCompleted"),
-                qLoanRepaymentSchedule.interestWrittenOff.sum().as("interestWrittenOff"),
-                qLoanRepaymentSchedule.interestWaived.sum().as("interestWaived"),
-                qLoanRepaymentSchedule.penaltyCharges.sum().as("penalityAmount"),
-                qLoanRepaymentSchedule.penaltyChargesPaid.sum().as("penalityCompleted"),
-                qLoanRepaymentSchedule.penaltyChargesWrittenOff.sum().as("penaltyWrittenOff"),
-                qLoanRepaymentSchedule.penaltyChargesWaived.sum().as("penaltyWaived"),
-                qLoanRepaymentSchedule.feeChargesCharged.sum().as("feeAmount"),
-                qLoanRepaymentSchedule.feeChargesPaid.sum().as("feecompleted"),
-                qLoanRepaymentSchedule.feeChargesWrittenOff.sum().as("feeWrittenOff"),
-                qLoanRepaymentSchedule.feeChargesWaived.sum().as("feeWaived")).from(qLoanRepaymentSchedule).join(qLoan)
+        query.select(qLoanRepaymentSchedule.dueDate.max().as("dueDate"), qLoanRepaymentSchedule.principal.sumBigDecimal().as("principalAmount"),
+                qLoanRepaymentSchedule.principalCompleted.sumBigDecimal().as("principalCompleted"),
+                qLoanRepaymentSchedule.principalWrittenOff.sumBigDecimal().as("principalWrittenOff"),
+                qLoanRepaymentSchedule.interestCharged.sumBigDecimal().as("interestAmount"),
+                qLoanRepaymentSchedule.interestPaid.sumBigDecimal().as("interestCompleted"),
+                qLoanRepaymentSchedule.interestWrittenOff.sumBigDecimal().as("interestWrittenOff"),
+                qLoanRepaymentSchedule.interestWaived.sumBigDecimal().as("interestWaived"),
+                qLoanRepaymentSchedule.penaltyCharges.sumBigDecimal().as("penalityAmount"),
+                qLoanRepaymentSchedule.penaltyChargesPaid.sumBigDecimal().as("penalityCompleted"),
+                qLoanRepaymentSchedule.penaltyChargesWrittenOff.sumBigDecimal().as("penaltyWrittenOff"),
+                qLoanRepaymentSchedule.penaltyChargesWaived.sumBigDecimal().as("penaltyWaived"),
+                qLoanRepaymentSchedule.feeChargesCharged.sumBigDecimal().as("feeAmount"),
+                qLoanRepaymentSchedule.feeChargesPaid.sumBigDecimal().as("feecompleted"),
+                qLoanRepaymentSchedule.feeChargesWrittenOff.sumBigDecimal().as("feeWrittenOff"),
+                qLoanRepaymentSchedule.feeChargesWaived.sumBigDecimal().as("feeWaived")).from(qLoanRepaymentSchedule).join(qLoan)
                 .on(qLoan.id.eq(qLoanRepaymentSchedule.loan.id));
 
         return query;
