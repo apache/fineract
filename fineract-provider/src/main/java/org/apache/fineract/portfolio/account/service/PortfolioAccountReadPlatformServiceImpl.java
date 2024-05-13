@@ -156,10 +156,11 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                         qLoan.loanRepaymentScheduleDetail.currency.code.as("currencyCode"),
                         qLoan.loanRepaymentScheduleDetail.currency.digitsAfterDecimal.as("currencyDigits"),
                         qLoan.loanRepaymentScheduleDetail.currency.inMultiplesOf.as("inMultiplesOf"),
-                        JPAExpressions.select(qLoanRepaymentSchedule.principalCompleted.sumBigDecimal()
-                                .add(qLoanRepaymentSchedule.interestPaid.sumBigDecimal())
-                                .add(qLoanRepaymentSchedule.feeChargesPaid.sumBigDecimal())
-                                .add(qLoanRepaymentSchedule.penaltyChargesPaid.sumBigDecimal()).as("totalOverpaid"))
+                        JPAExpressions
+                                .select(qLoanRepaymentSchedule.principalCompleted.sumBigDecimal()
+                                        .add(qLoanRepaymentSchedule.interestPaid.sumBigDecimal())
+                                        .add(qLoanRepaymentSchedule.feeChargesPaid.sumBigDecimal())
+                                        .add(qLoanRepaymentSchedule.penaltyChargesPaid.sumBigDecimal()).as("totalOverpaid"))
                                 .from(qLoanSubQuery).join(qLoanRepaymentSchedule).on(qLoanSubQuery.id.eq(qLoanRepaymentSchedule.loan.id))
                                 .where(qLoanRepaymentSchedule.loan.id.eq(qLoan.id).and(qLoan.loanStatus.eq(300))
                                         .and(qLoanRepaymentSchedule.dueDate.goe(LocalDate

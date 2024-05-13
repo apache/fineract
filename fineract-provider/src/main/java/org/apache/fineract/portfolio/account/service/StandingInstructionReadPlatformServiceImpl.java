@@ -587,7 +587,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         final JPAQuery<StandingInstructionDuesData> query = new JPAQuery<>(entityManager);
 
-        query.select(qLoanRepaymentSchedule.dueDate.max().as("dueDate"), qLoanRepaymentSchedule.principal.sumBigDecimal().as("principalAmount"),
+        query.select(qLoanRepaymentSchedule.dueDate.max().as("dueDate"),
+                qLoanRepaymentSchedule.principal.sumBigDecimal().as("principalAmount"),
                 qLoanRepaymentSchedule.principalCompleted.sumBigDecimal().as("principalCompleted"),
                 qLoanRepaymentSchedule.principalWrittenOff.sumBigDecimal().as("principalWrittenOff"),
                 qLoanRepaymentSchedule.interestCharged.sumBigDecimal().as("interestAmount"),
