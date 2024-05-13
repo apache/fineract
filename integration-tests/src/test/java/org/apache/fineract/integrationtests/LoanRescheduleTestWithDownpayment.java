@@ -59,8 +59,8 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
                     installment(375.0, false, "01 January 2023"), //
-                    installment(563.0, false, "31 January 2023"), //
-                    installment(562.0, false, "02 March 2023") //
+                    installment(562.0, false, "31 January 2023"), //
+                    installment(563.0, false, "02 March 2023") //
             );
 
             // 1st Disburse Loan

@@ -2968,7 +2968,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         Money downPaymentMoney = Money.of(getCurrency(),
                 MathUtil.percentageOf(disbursementTransaction.getAmount(), disbursedAmountPercentageForDownPayment, 19));
-
+        if (getLoanProduct().getInstallmentAmountInMultiplesOf() != null) {
+            downPaymentMoney = Money.roundToMultiplesOf(downPaymentMoney, getLoanProduct().getInstallmentAmountInMultiplesOf());
+        }
         Money adjustedDownPaymentMoney = switch (getLoanProductRelatedDetail().getLoanScheduleType()) {
             // For Cumulative loan: To check whether the loan was overpaid when the disbursement happened and to get the
             // proper amount after the disbursement we are using two balances:
@@ -4184,7 +4186,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return getStatus().isClosedWithOutsandingAmountMarkedForReschedule();
     }
 
-    private boolean isCancelled() {
+    public boolean isCancelled() {
         return isRejected() || isWithdrawn();
     }
 
@@ -7271,5 +7273,4 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
-
 }

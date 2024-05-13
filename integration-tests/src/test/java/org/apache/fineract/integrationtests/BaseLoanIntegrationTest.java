@@ -481,6 +481,10 @@ public abstract class BaseLoanIntegrationTest {
         loanTransactionHelper.undoDisbursal(loanId);
     }
 
+    protected void undoLastDisbursement(Long loanId) {
+        loanTransactionHelper.undoLastDisbursalLoan(loanId, new PostLoansLoanIdRequest());
+    }
+
     protected void verifyJournalEntries(Long loanId, Journal... entries) {
         GetJournalEntriesTransactionIdResponse journalEntriesForLoan = journalEntryHelper.getJournalEntriesForLoan(loanId);
         Assertions.assertEquals(entries.length, journalEntriesForLoan.getPageItems().size());
@@ -849,6 +853,15 @@ public abstract class BaseLoanIntegrationTest {
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
 
         assertEquals(loanStatus.getCode(), loanDetails.getStatus().getCode());
+    }
+
+    protected void undoLoanApproval(Long loanId) {
+        loanTransactionHelper.undoApprovalForLoan(loanId, new PostLoansLoanIdRequest());
+    }
+
+    protected void rejectLoan(Long loanId, String rejectedOnDate) {
+        loanTransactionHelper.rejectLoan(loanId,
+                new PostLoansLoanIdRequest().rejectedOnDate(rejectedOnDate).locale("en").dateFormat(DATETIME_PATTERN));
     }
 
     @RequiredArgsConstructor

@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -123,6 +124,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getCurrency()).thenReturn(currency);
+        when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
         CollectionData collectionData = underTest.getOverdueCollectionData(loan, effectiveDelinquencyList);
 
@@ -150,6 +152,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getLoanTransactions(Mockito.any(Predicate.class))).thenReturn(Collections.emptyList());
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
+        when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         when(delinquencyEffectivePauseHelper.getPausedDaysBeforeDate(effectiveDelinquencyList, businessDate)).thenReturn(0L);
 
         CollectionData collectionData = underTest.getOverdueCollectionData(loan, effectiveDelinquencyList);
@@ -186,6 +189,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getCurrency()).thenReturn(currency);
+        when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
         CollectionData collectionData = underTest.getOverdueCollectionData(loan, effectiveDelinquencyList);
 
@@ -217,6 +221,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
         when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
+        when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         when(delinquencyEffectivePauseHelper.getPausedDaysBeforeDate(effectiveDelinquencyList, businessDate)).thenReturn(0L);
 
         LoanDelinquencyData collectionData = underTest.getLoanDelinquencyData(loan, effectiveDelinquencyList);
@@ -266,6 +271,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
         when(loan.getCurrency()).thenReturn(currency);
+        when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         when(loan.getLoanTransactions(Mockito.any(Predicate.class))).thenReturn(Arrays.asList(loanTransaction));
         when(delinquencyEffectivePauseHelper.getPausedDaysBeforeDate(effectiveDelinquencyList, businessDate)).thenReturn(0L);
 
