@@ -31,6 +31,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdLoanInstallmentLevelDelin
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -405,6 +406,55 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             Assertions.assertTrue(callFailedRuntimeException.getMessage().contains(
                     "Installment level delinquency cannot be enabled for a loan if Delinquency bucket is not configured for loan product"));
+
+        });
+
+    }
+
+    @Test
+    public void tesInstallmentLevelSettingForLoanProductWithoutDelinquencyBucketValidation() {
+
+        runAt("31 May 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product without delinquency bucket
+            PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
+                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+            // set installment level delinquency as true
+            loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
+
+            // Create loan product with installment level delinquency setting
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanProductHelper.createLoanProduct(loanProductsRequest));
+
+            Assertions.assertTrue(callFailedRuntimeException.getMessage()
+                    .contains("Installment level delinquency cannot be enabled if Delinquency bucket is not configured for loan product"));
+
+        });
+
+    }
+
+    @Test
+    public void tesUpdateInstallmentLevelSettingForLoanProductWithoutDelinquencyBucketValidation() {
+
+        runAt("31 May 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product without delinquency bucket
+            PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
+                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+
+            // Update loan product with installment level delinquency setting
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanProductHelper.updateLoanProductById(loanProductResponse.getResourceId(),
+                            new PutLoanProductsProductIdRequest().enableInstallmentLevelDelinquency(true).locale("en")));
+
+            Assertions.assertTrue(callFailedRuntimeException.getMessage()
+                    .contains("Installment level delinquency cannot be enabled if Delinquency bucket is not configured for loan product"));
 
         });
 

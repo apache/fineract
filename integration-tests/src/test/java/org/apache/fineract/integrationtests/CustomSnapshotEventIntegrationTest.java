@@ -64,7 +64,6 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
@@ -112,7 +111,6 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
@@ -169,7 +167,6 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
@@ -215,7 +212,6 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
@@ -259,7 +255,6 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan

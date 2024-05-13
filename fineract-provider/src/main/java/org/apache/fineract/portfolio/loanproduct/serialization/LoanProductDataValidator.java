@@ -342,9 +342,9 @@ public final class LoanProductDataValidator {
         // Validating whether the processor is existing
         loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(transactionProcessingStrategyCode);
 
+        Long delinquencyBucketId = null;
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element)) {
-            final Long delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
-                    element);
+            delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element);
             baseDataValidator.reset().parameter(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME).value(delinquencyBucketId)
                     .ignoreIfNull().integerGreaterThanZero();
         }
@@ -785,6 +785,13 @@ public final class LoanProductDataValidator {
                     .extractBooleanNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element);
             baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY)
                     .value(enableInstallmentLevelDelinquency).ignoreIfNull().validateForBooleanValue();
+            if (delinquencyBucketId == null) {
+                if (enableInstallmentLevelDelinquency) {
+                    baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY).failWithCode(
+                            "can.be.enabled.for.loan.product.having.valid.delinquency.bucket",
+                            "Installment level delinquency cannot be enabled if Delinquency bucket is not configured for loan product");
+                }
+            }
         }
 
         String loanScheduleType = LoanScheduleType.CUMULATIVE.name();
@@ -1301,9 +1308,9 @@ public final class LoanProductDataValidator {
                     .integerZeroOrGreater();
         }
 
+        Long delinquencyBucketId = null;
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element)) {
-            final Long delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
-                    element);
+            delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element);
             baseDataValidator.reset().parameter(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME).value(delinquencyBucketId)
                     .ignoreIfNull().integerGreaterThanZero();
         }
@@ -1770,6 +1777,13 @@ public final class LoanProductDataValidator {
                     .extractBooleanNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element);
             baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY)
                     .value(enableInstallmentLevelDelinquency).ignoreIfNull().validateForBooleanValue();
+            if (delinquencyBucketId == null) {
+                if (enableInstallmentLevelDelinquency) {
+                    baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY).failWithCode(
+                            "can.be.enabled.for.loan.product.having.valid.delinquency.bucket",
+                            "Installment level delinquency cannot be enabled if Delinquency bucket is not configured for loan product");
+                }
+            }
         }
 
         String loanScheduleType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleType().name();
