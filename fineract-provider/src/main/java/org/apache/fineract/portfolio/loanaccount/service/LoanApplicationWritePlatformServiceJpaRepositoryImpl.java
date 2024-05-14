@@ -970,6 +970,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanCharges(possiblyModifedLoanCharges);
             }
 
+            // update installment level delinquency
+            if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY,
+                    existingLoanApplication.isEnableInstallmentLevelDelinquency())) {
+                final Boolean enableInstallmentLevelDelinquency = command
+                        .booleanObjectValueOfParameterNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY);
+                existingLoanApplication.updateEnableInstallmentLevelDelinquency(enableInstallmentLevelDelinquency);
+            }
+
             if (changes.containsKey("recalculateLoanSchedule")) {
                 changes.remove("recalculateLoanSchedule");
 
