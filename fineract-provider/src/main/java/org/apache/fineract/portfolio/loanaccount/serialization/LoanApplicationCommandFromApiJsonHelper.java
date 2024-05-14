@@ -1134,6 +1134,20 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             advancedPaymentAllocationsValidator.checkGroupingOfAllocationRules(allocationRules);
         }
 
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element)) {
+            final Boolean isEnableInstallmentLevelDelinquency = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY)
+                    .value(isEnableInstallmentLevelDelinquency).validateForBooleanValue();
+            if (loanProduct.getDelinquencyBucket() == null) {
+                if (isEnableInstallmentLevelDelinquency) {
+                    baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY).failWithCode(
+                            "can.be.enabled.for.loan.with.loan.product.having.valid.delinquency.bucket",
+                            "Installment level delinquency cannot be enabled for a loan if Delinquency bucket is not configured for loan product");
+                }
+            }
+        }
+
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);

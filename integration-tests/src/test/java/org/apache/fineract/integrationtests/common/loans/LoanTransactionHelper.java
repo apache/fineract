@@ -2019,4 +2019,12 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loans.stateTransitions(loanId, request, "undoapproval"));
     }
 
+    public PutLoansLoanIdResponse modifyApplicationForLoan(final Long loanId, final String command, final PutLoansLoanIdRequest request) {
+        return ok(fineract().loans.modifyLoanApplication(loanId, request, command));
+    }
+
+    public PostLoansResponse calculateRepaymentScheduleForApplyLoan(PostLoansRequest request, String command) {
+        return ok(fineract().loans.calculateLoanScheduleOrSubmitLoanApplication(request, command));
+    }
+
 }
