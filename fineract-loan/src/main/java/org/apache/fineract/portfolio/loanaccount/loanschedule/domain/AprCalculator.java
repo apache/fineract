@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +44,7 @@ public class AprCalculator {
             break;
             case WHOLE_TERM:
                 final BigDecimal ratePerPeriod = interestRatePerPeriod.divide(BigDecimal.valueOf(numberOfRepayments * repaymentEvery), 8,
-                        RoundingMode.HALF_UP);
+                        MoneyHelper.getRoundingMode());
 
                 switch (repaymentPeriodFrequencyType) {
                     case DAYS:
