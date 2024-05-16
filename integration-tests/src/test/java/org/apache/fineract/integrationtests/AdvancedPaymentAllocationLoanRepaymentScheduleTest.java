@@ -4069,6 +4069,43 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC137: Loan Progressive processing type only with Advanced payment allocation
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product, Loan Progressive type and other transaction processing strategy code
+    // different than advanced-payment-allocation-strategy
+    // - > Expect validation error
+    @Test
+    public void uc137() {
+        runAt("22 February 2023", () -> {
+
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            AdvancedPaymentData defaultPaymentAllocation = createDefaultPaymentAllocationWithMixedGrouping();
+
+            // First scenario (Legacy): Loan product no Advanced Payment Allocation and Cumulative Loan Schedule type
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(
+                    createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().loanScheduleType(LoanScheduleType.CUMULATIVE.toString()));
+            assertNotNull(loanProductResponse.getResourceId());
+
+            // Second scenario: Loan product with Advanced Payment Allocation and Progressive Loan Schedule type
+            loanProductResponse = loanProductHelper
+                    .createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()));
+            assertNotNull(loanProductResponse.getResourceId());
+
+            // Third scenario: Loan product no Advanced Payment Allocation and Progressive Loan Schedule type,
+            // validation expected
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanProductHelper.createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct()
+                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
+                            .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())));
+            assertEquals(400, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("supported.only.with.advanced.payment.allocation.strategy"));
+        });
+    }
+
     private void createLoanForRoundingMethodValidation(boolean isHalfDown) {
         LOG.info("------------------------------ROUNDING HALF DOWN {} ---------------------------------------", isHalfDown);
 
