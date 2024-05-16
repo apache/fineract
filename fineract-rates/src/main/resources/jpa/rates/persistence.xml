@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+
+<persistence version="2.0"
+    xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+
+    <!--  This file is only used for static weaving, nothing more.  -->
+    <!--  You can find the runtime configuration in the JPAConfig class  -->
+    <persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <!-- Fineract core module -->
+        <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
+        <class>org.apache.fineract.accounting.journalentry.domain.JournalEntry</class>
+        <class>org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom</class>
+        <class>org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom</class>
+        <class>org.apache.fineract.infrastructure.codes.domain.Code</class>
+        <class>org.apache.fineract.infrastructure.codes.domain.CodeValue</class>
+        <class>org.apache.fineract.infrastructure.documentmanagement.domain.Image</class>
+        <class>org.apache.fineract.organisation.staff.domain.Staff</class>
+        <class>org.apache.fineract.organisation.office.domain.Office</class>
+        <class>org.apache.fineract.organisation.office.domain.OrganisationCurrency</class>
+        <class>org.apache.fineract.organisation.monetary.domain.ApplicationCurrency</class>
+        <class>org.apache.fineract.organisation.holiday.domain.Holiday</class>
+        <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
+        <class>org.apache.fineract.portfolio.group.domain.Group</class>
+        <class>org.apache.fineract.portfolio.group.domain.GroupLevel</class>
+        <class>org.apache.fineract.portfolio.group.domain.StaffAssignmentHistory</class>
+        <class>org.apache.fineract.portfolio.group.domain.GroupRole</class>
+        <class>org.apache.fineract.portfolio.client.domain.Client</class>
+        <class>org.apache.fineract.portfolio.rate.domain.Rate</class>
+        <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
+        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
+        <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
+        <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxGroupMappings</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxComponentHistory</class>
+        <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRate</class>
+        <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRatePeriod</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.Calendar</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.CalendarHistory</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.CalendarInstance</class>
+        <class>org.apache.fineract.useradministration.domain.AppUser</class>
+        <class>org.apache.fineract.useradministration.domain.Role</class>
+        <class>org.apache.fineract.useradministration.domain.Permission</class>
+        <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <property name="eclipselink.weaving" value="static" />
+        </properties>
+    </persistence-unit>
+</persistence>
