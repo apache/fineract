@@ -105,7 +105,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
             LoanApiConstants.DISALLOW_EXPECTED_DISBURSEMENTS, LoanApiConstants.FRAUD_ATTRIBUTE_NAME,
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
-            LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY));
+            LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanApiConstants.BALLOON_REPAYMENT_AMOUNT_PARAMNAME));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;

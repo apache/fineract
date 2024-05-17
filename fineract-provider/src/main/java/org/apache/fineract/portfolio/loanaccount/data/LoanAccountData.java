@@ -99,6 +99,7 @@ public class LoanAccountData {
     private BigDecimal approvedPrincipal;
     private BigDecimal proposedPrincipal;
     private BigDecimal netDisbursalAmount;
+    private BigDecimal balloonRepaymentAmount = BigDecimal.ZERO;
 
     private Integer termFrequency;
     private EnumOptionData termPeriodFrequencyType;
@@ -398,7 +399,8 @@ public class LoanAccountData {
                 .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
                 .setLoanScheduleType(acc.loanScheduleType).setLoanScheduleProcessingType(acc.loanScheduleProcessingType)
                 .setLoanScheduleTypeOptions(acc.loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions)
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     /**
@@ -472,7 +474,8 @@ public class LoanAccountData {
                 .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
                 .setLoanScheduleType(acc.loanScheduleType).setLoanScheduleProcessingType(acc.loanScheduleProcessingType)
                 .setLoanScheduleTypeOptions(acc.loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions)
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     public static LoanAccountData loanProductWithTemplateDefaults(final LoanProductData product,
@@ -645,7 +648,8 @@ public class LoanAccountData {
                 .setFixedPrincipalPercentagePerInstallment(product.getFixedPrincipalPercentagePerInstallment()).setDelinquent(delinquent)
                 .setDisallowExpectedDisbursements(product.getDisallowExpectedDisbursements()).setFraud(acc.fraud)
                 .setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff).setLoanScheduleType(acc.getLoanScheduleType())
-                .setLoanScheduleProcessingType(acc.getLoanScheduleProcessingType()).setFixedLength(product.getFixedLength());
+                .setLoanScheduleProcessingType(acc.getLoanScheduleProcessingType()).setFixedLength(product.getFixedLength())
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     /*
@@ -817,7 +821,8 @@ public class LoanAccountData {
                 .setEnableAutoRepaymentForDownPayment(acc.enableAutoRepaymentForDownPayment)
                 .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency).setLoanScheduleType(acc.loanScheduleType)
                 .setLoanScheduleProcessingType(acc.loanScheduleProcessingType).setLoanScheduleTypeOptions(loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(loanScheduleProcessingTypeOptions)
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final Collection<LoanProductData> productOptions,
@@ -896,7 +901,8 @@ public class LoanAccountData {
                 .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
                 .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency).setLoanScheduleType(acc.loanScheduleType)
                 .setLoanScheduleProcessingType(acc.loanScheduleProcessingType).setLoanScheduleTypeOptions(acc.loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions)
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     public static LoanAccountData associateMemberVariations(final LoanAccountData acc, final Map<Long, Integer> memberLoanCycle) {
@@ -996,7 +1002,8 @@ public class LoanAccountData {
                 .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
                 .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency).setLoanScheduleType(acc.loanScheduleType)
                 .setLoanScheduleProcessingType(acc.loanScheduleProcessingType).setLoanScheduleTypeOptions(acc.loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions)
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     public static LoanAccountData withInterestRecalculationCalendarData(final LoanAccountData acc, final CalendarData calendarData,
@@ -1064,7 +1071,8 @@ public class LoanAccountData {
                 .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
                 .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency).setLoanScheduleType(acc.loanScheduleType)
                 .setLoanScheduleProcessingType(acc.loanScheduleProcessingType).setLoanScheduleTypeOptions(acc.loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions)
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     public static LoanAccountData withLoanCalendarData(final LoanAccountData acc, final CalendarData calendarData) {
@@ -1125,7 +1133,8 @@ public class LoanAccountData {
                 .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
                 .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency).setLoanScheduleType(acc.loanScheduleType)
                 .setLoanScheduleProcessingType(acc.loanScheduleProcessingType).setLoanScheduleTypeOptions(acc.loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions)
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     public static LoanAccountData withOriginalSchedule(final LoanAccountData acc, final LoanScheduleData originalSchedule) {
@@ -1189,7 +1198,8 @@ public class LoanAccountData {
                 .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate).setChargedOff(acc.chargedOff)
                 .setEnableInstallmentLevelDelinquency(acc.enableInstallmentLevelDelinquency).setLoanScheduleType(acc.loanScheduleType)
                 .setLoanScheduleProcessingType(acc.loanScheduleProcessingType).setLoanScheduleTypeOptions(acc.loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(acc.loanScheduleProcessingTypeOptions)
+                .setBalloonRepaymentAmount(acc.balloonRepaymentAmount);
     }
 
     public static final Comparator<LoanAccountData> ClientNameComparator = (loan1, loan2) -> {

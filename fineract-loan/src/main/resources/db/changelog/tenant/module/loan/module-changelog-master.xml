@@ -44,4 +44,5 @@
   <include relativeToChangelogFile="true" file="parts/1019_add_fixed_length.xml"/>
   <include relativeToChangelogFile="true" file="parts/1020_add_re_aged_flag_to_loan_installment.xml"/>
   <include relativeToChangelogFile="true" file="parts/1021_add_loan_status_change_history.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1022_add_balloon_repayment_amount_to_loan.xml"/>
 </databaseChangeLog>

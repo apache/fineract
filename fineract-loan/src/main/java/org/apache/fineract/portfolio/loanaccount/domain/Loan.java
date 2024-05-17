@@ -471,6 +471,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "enable_installment_level_delinquency", nullable = false)
     private boolean enableInstallmentLevelDelinquency = false;
 
+    @Column(name = "balloon_repayment_amount", scale = 6, precision = 19)
+    private BigDecimal balloonRepaymentAmount = BigDecimal.ZERO;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final String transactionProcessingStrategyCode, final LoanProductRelatedDetail loanRepaymentScheduleDetail,
@@ -5927,11 +5930,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             interestChargedFromDate = getDisbursementDate();
         }
 
-        return LoanApplicationTerms.assembleFrom(scheduleGeneratorDTO.getApplicationCurrency(), loanTermFrequency,
-                loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(),
-                scheduleGeneratorDTO.getCalculatedRepaymentsStartingFromDate(), getInArrearsTolerance(), this.loanRepaymentScheduleDetail,
-                this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance,
-                interestChargedFromDate, this.loanProduct.getPrincipalThresholdForLastInstallment(),
+        LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(scheduleGeneratorDTO.getApplicationCurrency(),
+                loanTermFrequency, loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(),
+                getExpectedFirstRepaymentOnDate(), scheduleGeneratorDTO.getCalculatedRepaymentsStartingFromDate(), getInArrearsTolerance(),
+                this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
+                this.maxOutstandingLoanBalance, interestChargedFromDate, this.loanProduct.getPrincipalThresholdForLastInstallment(),
                 this.loanProduct.getInstallmentAmountInMultiplesOf(), recalculationFrequencyType, restCalendarInstance, compoundingMethod,
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
@@ -5939,6 +5942,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
                 scheduleGeneratorDTO.isInterestToBeRecoveredFirstWhenGreaterThanEMI(), this.fixedPrincipalPercentagePerInstallment,
                 scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans(), repaymentStartDateType, getSubmittedOnDate());
+        loanApplicationTerms.updateFutureValue(getBalloonRepaymentAmount());
+        return loanApplicationTerms;
     }
 
     public BigDecimal constructLoanTermVariations(FloatingRateDTO floatingRateDTO, BigDecimal annualNominalInterestRate,
@@ -7273,4 +7278,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
+
+    public BigDecimal getBalloonRepaymentAmount() {
+        if (this.balloonRepaymentAmount == null) {
+            this.balloonRepaymentAmount = BigDecimal.ZERO;
+        }
+        return this.balloonRepaymentAmount;
+    }
+
+    public void updateBalloonRepaymentAmount(BigDecimal balloonRepaymentAmount) {
+        this.balloonRepaymentAmount = balloonRepaymentAmount;
+    }
+
 }

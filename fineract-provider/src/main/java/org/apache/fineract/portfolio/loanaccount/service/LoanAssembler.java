@@ -335,6 +335,14 @@ public class LoanAssembler {
             loanApplication.updateEnableInstallmentLevelDelinquency(loanProduct.isEnableInstallmentLevelDelinquency());
         }
 
+        // Balloon Repayment Amount
+        BigDecimal balloonRepaymentAmount = fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanApiConstants.BALLOON_REPAYMENT_AMOUNT_PARAMNAME, element);
+        if (balloonRepaymentAmount == null) {
+            balloonRepaymentAmount = BigDecimal.ZERO;
+        }
+        loanApplication.updateBalloonRepaymentAmount(balloonRepaymentAmount);
+
         final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loanApplication.getOfficeId(),

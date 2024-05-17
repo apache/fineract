@@ -226,6 +226,8 @@ public final class LoanApplicationTerms {
     private final LoanScheduleType loanScheduleType;
     private final LoanScheduleProcessingType loanScheduleProcessingType;
 
+    private BigDecimal futureValue = BigDecimal.ZERO;
+
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, Integer nthDay, DayOfWeekType weekDayType,
@@ -1197,7 +1199,7 @@ public final class LoanApplicationTerms {
     private double paymentPerPeriod(final BigDecimal periodicInterestRate, final Money balance, final int periodsElapsed) {
 
         if (getFixedEmiAmount() == null) {
-            final double futureValue = 0;
+            final double futureValue = getFutureValue().doubleValue();
             final double principalDouble = balance.getAmount().multiply(BigDecimal.valueOf(-1)).doubleValue();
 
             final Integer periodsRemaining = calculateNumberOfRemainingPrincipalPaymentPeriods(this.actualNumberOfRepayments,
@@ -1890,4 +1892,13 @@ public final class LoanApplicationTerms {
     public LocalDate getLoanEndDate() {
         return loanEndDate;
     }
+
+    public BigDecimal getFutureValue() {
+        return futureValue;
+    }
+
+    public void updateFutureValue(BigDecimal futureValue) {
+        this.futureValue = futureValue;
+    }
+
 }

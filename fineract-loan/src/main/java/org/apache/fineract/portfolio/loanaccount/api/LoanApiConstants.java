@@ -172,4 +172,7 @@ public interface LoanApiConstants {
 
     // Data Validator names
     String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";
+
+    String BALLOON_REPAYMENT_AMOUNT_PARAMNAME = "balloonRepaymentAmount";
+
 }

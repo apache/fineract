@@ -622,6 +622,8 @@ final class LoansApiResourceSwagger {
             public Long chargeOffReasonId;
             @Schema(example = "reason")
             public String chargeOffReason;
+            @Schema(example = "800.000000")
+            public Double balloonRepaymentAmount;
         }
 
         static final class GetLoansLoanIdPaymentType {
@@ -1225,6 +1227,8 @@ final class LoansApiResourceSwagger {
         public String loanScheduleProcessingType;
         @Schema(example = "false")
         public Boolean enableInstallmentLevelDelinquency;
+        @Schema(example = "800.000000")
+        public Double balloonRepaymentAmount;
     }
 
     @Schema(description = "PostLoansResponse")
