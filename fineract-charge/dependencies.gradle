@@ -25,13 +25,7 @@ dependencies {
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(project(path: ':fineract-core'))
-    implementation(project(path: ':fineract-charge'))
-    implementation(project(path: ':fineract-accounting'))
-    implementation(project(path: ':fineract-loan'))
-    implementation('org.apache.avro:avro')
-    implementation(
-            project(path: ':fineract-avro-schemas')
-            )
+    implementation(project(path: ':fineract-tax'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
@@ -55,6 +49,7 @@ dependencies {
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot3',
+            'org.apache.httpcomponents:httpcore',
             )
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

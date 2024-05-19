@@ -26,6 +26,8 @@ dependencies {
     //
     implementation(project(path: ':fineract-core'))
     implementation(project(path: ':fineract-accounting'))
+    implementation(project(path: ':fineract-charge'))
+    implementation(project(path: ':fineract-tax'))
     implementation(project(path: ':fineract-rates'))
 
     implementation(
