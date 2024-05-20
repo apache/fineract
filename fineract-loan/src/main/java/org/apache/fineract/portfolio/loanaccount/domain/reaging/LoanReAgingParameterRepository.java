@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain.reaging;
 
+// TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after refactor of Loan and LoanTransaction classes
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+// TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after refactor of Loan and LoanTransaction classes
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;

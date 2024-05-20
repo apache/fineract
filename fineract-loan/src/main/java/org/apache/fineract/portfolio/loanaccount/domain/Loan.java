@@ -243,9 +243,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "loan_transaction_strategy_name")
     private String transactionProcessingStrategyName;
 
+    // TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after removing association
+    // from Loan entity
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanPaymentAllocationRule> paymentAllocationRules = new ArrayList<>();
 
+    // TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after removing association
+    // from Loan entity
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanCreditAllocationRule> creditAllocationRules = new ArrayList<>();
 

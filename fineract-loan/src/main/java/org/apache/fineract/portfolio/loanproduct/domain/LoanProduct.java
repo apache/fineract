@@ -96,9 +96,13 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "loan_transaction_strategy_name")
     private String transactionProcessingStrategyName;
 
+    // TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after removing association
+    // from LoanProduct entity
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<LoanProductPaymentAllocationRule> paymentAllocationRules = new ArrayList<>();
 
+    // TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after removing association
+    // from LoanProduct entity
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<LoanProductCreditAllocationRule> creditAllocationRules = new ArrayList<>();
 

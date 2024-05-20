@@ -43,7 +43,8 @@ buildscript {
                 'fineract-client',
                 'fineract-avro-schemas',
                 'fineract-e2e-tests-core',
-                'fineract-e2e-tests-runner'
+                'fineract-e2e-tests-runner',
+                'fineract-progressive-loan'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -60,7 +61,8 @@ buildscript {
                 'fineract-loan',
                 'fineract-savings',
                 'fineract-branch',
-                'fineract-document'
+                'fineract-document',
+                'fineract-progressive-loan'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
