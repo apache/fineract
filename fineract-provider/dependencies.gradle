@@ -33,6 +33,8 @@ dependencies {
     implementation(project(path: ':fineract-savings'))
     implementation(project(path: ':fineract-branch'))
     implementation(project(path: ':fineract-document'))
+    implementation(project(path: ':fineract-progressive-loan'))
+
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.

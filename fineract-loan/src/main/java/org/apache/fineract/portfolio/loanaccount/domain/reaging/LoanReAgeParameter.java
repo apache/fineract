@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
+// TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after refactor of Loan and LoanTransaction classes
 @Entity
 @Table(name = "m_loan_reage_parameter")
 @AllArgsConstructor
