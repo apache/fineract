@@ -53,7 +53,6 @@
         <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
-        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
         <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
         <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
         <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
@@ -69,6 +68,8 @@
         <class>org.apache.fineract.useradministration.domain.Role</class>
         <class>org.apache.fineract.useradministration.domain.Permission</class>
         <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
+        <!-- Fineract Charge module -->
+        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />

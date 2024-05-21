@@ -25,6 +25,7 @@ dependencies {
             project(path: ':fineract-core', configuration: 'runtimeElements'),
             project(path: ':fineract-accounting', configuration: 'runtimeElements'),
             project(path: ':fineract-investor', configuration: 'runtimeElements'),
+            project(path: ':fineract-charge', configuration: 'runtimeElements'),
             project(path: ':fineract-rates', configuration: 'runtimeElements'),
             project(path: ':fineract-loan', configuration: 'runtimeElements'),
             project(path: ':fineract-savings', configuration: 'runtimeElements'),
