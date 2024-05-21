@@ -221,7 +221,6 @@ public final class LoanApplicationTerms {
 
     private RepaymentStartDateType repaymentStartDateType;
     private LocalDate submittedOnDate;
-    private boolean isScheduleExtensionForDownPaymentDisabled;
     private Money disbursedPrincipal;
     private final LoanScheduleType loanScheduleType;
     private final LoanScheduleProcessingType loanScheduleProcessingType;
@@ -1825,10 +1824,6 @@ public final class LoanApplicationTerms {
         return submittedOnDate;
     }
 
-    public boolean isScheduleExtensionForDownPaymentDisabled() {
-        return isScheduleExtensionForDownPaymentDisabled;
-    }
-
     public Integer getInstallmentAmountInMultiplesOf() {
         return installmentAmountInMultiplesOf;
     }
@@ -1890,4 +1885,5 @@ public final class LoanApplicationTerms {
     public LocalDate getLoanEndDate() {
         return loanEndDate;
     }
+
 }
