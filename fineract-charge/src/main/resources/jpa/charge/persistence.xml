@@ -49,13 +49,18 @@
         <class>org.apache.fineract.portfolio.group.domain.GroupRole</class>
         <class>org.apache.fineract.portfolio.client.domain.Client</class>
         <class>org.apache.fineract.portfolio.client.domain.ClientIdentifier</class>
+        <class>org.apache.fineract.portfolio.rate.domain.Rate</class>
         <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
         <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
         <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
         <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
         <class>org.apache.fineract.portfolio.tax.domain.TaxGroupMappings</class>
         <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
         <class>org.apache.fineract.portfolio.tax.domain.TaxComponentHistory</class>
+        <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRate</class>
+        <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRatePeriod</class>
         <class>org.apache.fineract.portfolio.calendar.domain.Calendar</class>
         <class>org.apache.fineract.portfolio.calendar.domain.CalendarHistory</class>
         <class>org.apache.fineract.portfolio.calendar.domain.CalendarInstance</class>
@@ -63,8 +68,6 @@
         <class>org.apache.fineract.useradministration.domain.Role</class>
         <class>org.apache.fineract.useradministration.domain.Permission</class>
         <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
-        <!-- Fineract Charge module -->
-        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
