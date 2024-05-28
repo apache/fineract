@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.ratefactor;
+package org.apache.fineract.portfolio.loanproduct.calc.ratefactor;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
