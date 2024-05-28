@@ -40,6 +40,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.CreditAllocationData;
+import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -4104,6 +4106,179 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             assertEquals(400, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("supported.only.with.advanced.payment.allocation.strategy"));
         });
+    }
+
+    @Test
+    public void testChargebackTransactionForProgressiveWithLoanAdvancedPaymentAllocationStrategyAndChargebackAllocation() {
+        runAt("15 January 2023", () -> {
+            Integer numberOfRepayments = 4;
+            double amount = 1000.0;
+            String loanDisbursementDate = "1 January 2023";
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+            PostLoanProductsResponse loanProductResponse = loanProductHelper
+                    .createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                            .addCreditAllocationItem(createChargebackAllocation())
+                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()));
+
+            Long loanId = applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(clientId,
+                    loanProductResponse.getResourceId(), numberOfRepayments, loanDisbursementDate, amount);
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, false, "01 February 2023"), //
+                    installment(250.0, false, "01 March 2023"), //
+                    installment(250.0, false, "01 April 2023"), //
+                    installment(250.0, false, "01 May 2023") //
+            );
+
+            loanTransactionHelper.disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("1 January 2023")
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+
+            addCharge(loanId, true, 25, "1 January 2023");
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, 0, 0, 25, 275.0, false, "01 February 2023", 750.0), //
+                    installment(250.0, false, "01 March 2023"), //
+                    installment(250.0, false, "01 April 2023"), //
+                    installment(250.0, false, "01 May 2023") //
+            );
+
+            Long repayment1TransactionId = addRepaymentForLoan(loanId, 265.0, "2 January 2023");
+
+            assertNotNull(repayment1TransactionId);
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(265.0, "Repayment", "02 January 2023", 760.0, 240.0, 0.0, 0.0, 25.0, 0.0, 0.0));
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, 0, 0, 25, 10.0, false, "01 February 2023", 750.0), //
+                    installment(250.0, false, "01 March 2023"), //
+                    installment(250.0, false, "01 April 2023"), //
+                    installment(250.0, false, "01 May 2023") //
+            );
+
+            Long repayment2TransactionId = addRepaymentForLoan(loanId, 250.0, "3 January 2023");
+
+            assertNotNull(repayment2TransactionId);
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(265.0, "Repayment", "02 January 2023", 760.0, 240.0, 0.0, 0.0, 25.0, 0.0, 0.0),
+                    transaction(250.0, "Repayment", "03 January 2023", 510.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, 0, 0, 25, 0.0, true, "01 February 2023", 750.0), //
+                    installment(250.0, 0, 0, 0, 10.0, false, "01 March 2023", 500.0), //
+                    installment(250.0, false, "01 April 2023"), //
+                    installment(250.0, false, "01 May 2023") //
+            );
+
+            addChargebackForLoan(loanId, repayment2TransactionId, 250.0);
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(265.0, "Repayment", "02 January 2023", 760.0, 240.0, 0.0, 0.0, 25.0, 0.0, 0.0),
+                    transaction(250.0, "Repayment", "03 January 2023", 510.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(250.0, "Chargeback", "15 January 2023", 760.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(500.0, 0, 0, 25, 250.0, false, "01 February 2023", 750.0), //
+                    installment(250.0, 0, 0, 0, 10.0, false, "01 March 2023", 500.0), //
+                    installment(250.0, false, "01 April 2023"), //
+                    installment(250.0, false, "01 May 2023") //
+            );
+
+            loanTransactionHelper.reverseRepayment(Math.toIntExact(loanId), Math.toIntExact(repayment1TransactionId), "2 January 2023");
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(265.0, "Repayment", "02 January 2023", 760.0, 240.0, 0.0, 0.0, 25.0, 0.0, 0.0, true),
+                    transaction(250.0, "Repayment", "03 January 2023", 775.0, 225.0, 0.0, 0.0, 25.0, 0.0, 0.0),
+                    transaction(250.0, "Chargeback", "15 January 2023", 1000.0, 225.0, 0.0, 0.0, 25.0, 0.0, 0.0));
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(475.0, 0, 0, 50, 275.0, false, "01 February 2023", 750.0), //
+                    installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023", 500.0), //
+                    installment(250.0, false, "01 April 2023"), //
+                    installment(250.0, false, "01 May 2023") //
+            );
+
+            Long repayment3TransactionId = addRepaymentForLoan(loanId, 320.0, "1 January 2023");
+
+            assertNotNull(repayment3TransactionId);
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(265.0, "Repayment", "02 January 2023", 760.0, 240.0, 0.0, 0.0, 25.0, 0.0, 0.0, true),
+                    transaction(250.0, "Repayment", "03 January 2023", 455.0, 250.0, 0.0, 0.0, 0, 0.0, 0.0),
+                    transaction(250.0, "Chargeback", "15 January 2023", 705.0, 250.0, 0.0, 0.0, 0, 0.0, 0.0),
+                    transaction(320.0, "Repayment", "01 January 2023", 705.0, 295.0, 0.0, 0.0, 25.0, 0.0, 0.0));
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(500.0, 0, 0, 25, 250.0, false, "01 February 2023", 750.0), //
+                    installment(250.0, 0, 0, 0, 0, true, "01 March 2023", 500.0), //
+                    installment(250.0, 0, 0, 0, 205, false, "01 April 2023", 250.0), //
+                    installment(250.0, false, "01 May 2023") //
+            );
+
+        });
+    }
+
+    private Long applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanProductId,
+            Integer numberOfRepayments, String loanDisbursementDate, double amount) {
+        LOG.info("------------------------------APPLY AND APPROVE LOAN ---------------------------------------");
+        PostLoansRequest applicationRequest = applyLoanRequestProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(clientId,
+                loanProductId, amount, numberOfRepayments, loanDisbursementDate);
+
+        PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+        Long loanId = loanResponse.getLoanId();
+
+        assertNotNull(loanId);
+
+        loanTransactionHelper.approveLoan(loanId, new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(amount))
+                .dateFormat(DATETIME_PATTERN).approvedOnDate(loanDisbursementDate).locale("en"));
+
+        return loanId;
+    }
+
+    private PostLoansRequest applyLoanRequestProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanId,
+            double amount, Integer numberOfRepayments, String loanDisbursementDate) {
+        return new PostLoansRequest().clientId(clientId).productId(loanId).submittedOnDate(loanDisbursementDate)
+                .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN).locale("en").loanType("individual")
+                .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).amortizationType(1)
+                .interestRatePerPeriod(BigDecimal.ZERO).interestCalculationPeriodType(1).interestType(0)
+                .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)).principal(BigDecimal.valueOf(amount))
+                .loanTermFrequencyType(RepaymentFrequencyType.MONTHS).loanTermFrequency(numberOfRepayments)
+                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS).repaymentEvery(1).numberOfRepayments(numberOfRepayments);
+    }
+
+    private CreditAllocationData createChargebackAllocation() {
+        CreditAllocationData creditAllocationData = new CreditAllocationData();
+        creditAllocationData.setTransactionType("CHARGEBACK");
+        creditAllocationData.setCreditAllocationOrder(createCreditAllocationOrders("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
+        return creditAllocationData;
+    }
+
+    public List<CreditAllocationOrder> createCreditAllocationOrders(String... allocationRule) {
+        AtomicInteger integer = new AtomicInteger(1);
+        return Arrays.stream(allocationRule).map(allocation -> {
+            CreditAllocationOrder creditAllocationOrder = new CreditAllocationOrder();
+            creditAllocationOrder.setCreditAllocationRule(allocation);
+            creditAllocationOrder.setOrder(integer.getAndIncrement());
+            return creditAllocationOrder;
+        }).toList();
     }
 
     private void createLoanForRoundingMethodValidation(boolean isHalfDown) {
