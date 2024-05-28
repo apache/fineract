@@ -101,7 +101,7 @@ plugins {
     id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
-    id 'com.google.cloud.tools.jib' version '3.4.0' apply false
+    id 'com.google.cloud.tools.jib' version '3.4.2' apply false
     id 'org.sonarqube' version '4.4.1.3373'
     id 'com.github.andygoossens.modernizer' version '1.9.0' apply false
     // TODO: upgrade to 6.0.4
