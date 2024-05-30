@@ -73,7 +73,7 @@ dependencyManagement {
         dependency 'com.github.spullara.mustache.java:compiler:0.9.11'
         dependency 'com.jayway.jsonpath:json-path:2.9.0'
         dependency 'org.apache.tika:tika-core:2.9.1'
-        dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.1') {
+        dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.2') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
@@ -84,7 +84,6 @@ dependencyManagement {
             exclude 'commons-io:commons-io'
             exclude 'commons-logging:commons-logging'
             exclude 'commons-codec:commons-codec'
-            exclude 'org.apache.commons:commons-compress'
             exclude 'org.apache.commons:commons-lang3'
             exclude 'org.apache.poi:poi'
             exclude 'org.apache.poi:poi-scratchpad'
@@ -92,7 +91,7 @@ dependencyManagement {
             exclude 'org.apache.commons:commons-compress'
             exclude 'xml-apis:xml-apis'
         }
-        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.9.1') {
+        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.9.2') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
@@ -102,7 +101,6 @@ dependencyManagement {
             exclude 'org.slf4j:slf4j-api'
             exclude 'commons-io:commons-io'
             exclude 'commons-codec:commons-codec'
-            exclude 'org.apache.commons:commons-compress'
             exclude 'org.apache.commons:commons-lang3'
             exclude 'org.apache.poi:poi'
             exclude 'org.apache.poi:poi-scratchpad'
@@ -234,7 +232,7 @@ dependencyManagement {
             exclude 'org.slf4j:slf4j-api'
         }
 
-        dependency 'org.postgresql:postgresql:42.7.1'
+        dependency 'org.postgresql:postgresql:42.7.3'
 
         dependency 'org.assertj:assertj-core:3.25.3'
 
