@@ -72,18 +72,27 @@
         <class>org.apache.fineract.portfolio.collateral.domain.LoanCollateral</class>
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement</class>
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappings</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTag</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.Loan</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCharge</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge</class>
-        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanOfficerAssignmentHistory</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanOverdueInstallmentCharge</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusChangeHistory</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheCharge</class>
@@ -94,24 +103,24 @@
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProduct</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductBorrowerCycleVariations</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductFloatingRates</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductGuaranteeDetails</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductInterestRecalculationDetails</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductVariableInstallmentConfig</class>
-        <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.DueType</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationType</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
-        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule</class>
-        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule</class>
-        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest</class>
+        <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>
         <!-- Fineract Charge module -->
         <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
         <!-- Fineract Accounting module -->
