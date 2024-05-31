@@ -576,7 +576,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
             } else {
                 createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
+                checkAndUpdateReplayedChargebackRelationWithReplayedTransaction(loanTransaction, newLoanTransaction, ctx);
             }
+        }
+    }
+
+    private void checkAndUpdateReplayedChargebackRelationWithReplayedTransaction(LoanTransaction loanTransaction,
+            LoanTransaction newLoanTransaction, TransactionCtx ctx) {
+        // if chargeback is getting reverse-replayed
+        // find replayed transaction with CHARGEBACK relation with reversed chargeback transaction
+        // for replayed transaction, add relation to point to new Chargeback transaction
+        if (loanTransaction.getTypeOf().isChargeback()) {
+            LoanTransaction originalTransaction = findOriginalTransaction(newLoanTransaction, ctx);
+            originalTransaction.getLoanTransactionRelations()
+                    .add(LoanTransactionRelation.linkToTransaction(originalTransaction, newLoanTransaction, CHARGEBACK));
         }
     }
 

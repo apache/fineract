@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.ratefactor;
+package org.apache.fineract.portfolio.loanproduct.calc;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -28,6 +28,8 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanproduct.calc.emi.FnValueFunctions;
+import org.apache.fineract.portfolio.loanproduct.calc.ratefactor.RateFactorFunctions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,7 +40,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class RateFactorFunctionsTest {
+class EMICalculationFunctionsTest {
 
     private static MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
 
@@ -91,6 +93,33 @@ class RateFactorFunctionsTest {
             BigDecimal rateFactor = RateFactorFunctions.rateFactor(interestRate, daysInPeriod, daysInYear, MoneyHelper.getMathContext());
 
             Assertions.assertEquals(expectedValues[period.getInstallmentNumber() - 1], rateFactor.toString());
+        }
+    }
+
+    @Test
+    public void testFnValueFunctionDay365() {
+        // Given
+        final DaysInYearType daysInYearType = DaysInYearType.DAYS_365;
+        final MathContext mc = MoneyHelper.getMathContext();
+        final String[] expectedValues = new String[] { "1.0000000", "2.0075336", "3.0237007", "4.0472656", "5.0798590", "6.1194484" };
+
+        final List<BigDecimal> fnValuesCalculated = new ArrayList<>();
+        BigDecimal previousFnValue = BigDecimal.ZERO;
+        for (LoanRepaymentScheduleInstallment period : periods) {
+            final Long daysInPeriod = DateUtils.getDifferenceInDays(period.getFromDate(), period.getDueDate());
+            final Integer daysInYear = DateUtils.daysInYear(daysInYearType, period.getFromDate());
+            final BigDecimal rateFactor = RateFactorFunctions.rateFactor(interestRate, daysInPeriod, daysInYear,
+                    MoneyHelper.getMathContext());
+
+            final BigDecimal currentFnValue = FnValueFunctions.fnValue(previousFnValue, rateFactor, mc);
+            fnValuesCalculated.add(currentFnValue);
+
+            previousFnValue = currentFnValue;
+        }
+
+        int idx = 0;
+        for (BigDecimal fnValue : fnValuesCalculated) {
+            Assertions.assertEquals(expectedValues[idx++], fnValue.toString());
         }
     }
 
