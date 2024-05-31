@@ -1358,9 +1358,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             Money fee = Money.zero(getCurrency());
             Money penality = Money.zero(getCurrency());
             for (LoanTransaction loanTransaction : accruals) {
-                LocalDate transactionDateForRange = isBasedOnSubmittedOnDate
-                        ? loanTransaction.getLoanChargesPaid().stream().findFirst().get().getLoanCharge().getDueDate()
-                        : loanTransaction.getTransactionDate();
+                LocalDate transactionDateForRange = getDateForRangeCalculation(loanTransaction, isBasedOnSubmittedOnDate);
                 boolean isInPeriod = LoanRepaymentScheduleProcessingWrapper.isInPeriod(transactionDateForRange, installment, installments);
                 if (isInPeriod) {
                     interest = interest.plus(loanTransaction.getInterestPortion(getCurrency()));
@@ -1387,6 +1385,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 loanTransaction.reverse();
             }
         }
+    }
+
+    private LocalDate getDateForRangeCalculation(LoanTransaction loanTransaction, boolean isChargeAccrualBasedOnSubmittedOnDate) {
+        return isChargeAccrualBasedOnSubmittedOnDate && !loanTransaction.getLoanChargesPaid().isEmpty()
+                ? loanTransaction.getLoanChargesPaid().stream().findFirst().get().getLoanCharge().getEffectiveDueDate()
+                : loanTransaction.getTransactionDate();
     }
 
     private void updateAccrualsForNonPeriodicAccruals(final Collection<LoanTransaction> accruals) {
