@@ -173,6 +173,7 @@ dependencies {
         exclude group: 'commons-lang'
         exclude group: 'spotbugs-annotations'
         exclude group: 'xml-apis'
+        exclude group: 'org.owasp.antisamy'
     }
 
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
