@@ -1,0 +1,4 @@
+= INSTRUCTIONS: How to run Apache RAT (Release Audit Tool)
+
+1. Extract the archive file to your local directory.
+2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt

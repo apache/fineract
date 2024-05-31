@@ -1,0 +1,54 @@
+= Getting Started Guide
+
+Fineract is maintained by a large group of contributors, just like you! Getting started with a mature platform like Fineract can be daunting for new contributors. This guide will help you through your first contribution!
+
+== Read FAQ
+** First, have a look at the FAQ on our Wiki link:https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=91554327[here]
+** Is this Mifos?
+*** The Mifos Initiative, contributed the code that forms the basis of fineract, and it remains involved with a number of front end implementations and other systems that run "on top of" fineract, including a payment hub and API management. Many of the developers are on both listservs. However, Mifos as a separate non-Apache entity is not part of the project as it is considered a "vendor".
+
+== Communication Channels
+
+** Join our Slack Community and subscribe to our Mailing lists.
+*** link:mailto:dev-subscribe@fineract.apache.org[Apache Fineract Developers List]: Send a blank email to dev-subscribe@fineract.apache.org
+*** link:https://the-asf.slack.com/archives/C4QPZURQQ[Apache Fineract Slack Channel]
+*** link:https://bit.ly/mifos-slack[Mifos Slack Channel]: There's an active community of developers on the Mifos Slack channel, and you may consider joining it.
+
+== Communication Guidelines
+
+The Apache Software Foundation (ASF) adage is: *"If it didn't happen on the list, then it didn't happen."*
+
+All communications that happen off-list should be brought back to the list. Normally, you should not discuss things off list, but if you do, then you should summarize it on list.
+
+Example, if you discuss something "off list" on a slack channel, especially one at Mifos slack, then you should summarize that discussion on the dev list (dev@fineract.apache.org). By summarizing it, you are bringing into the official record of the project.
+
+== Dev environment setup:
+
+Follow link:../development/dev-env-setup.adoc[these] steps to set up your dev environment.
+
+== Identify something to work on
+
+* Browse existing link:https://issues.apache.org/jira/browse/FINERACT-2055?jql=project%20%3D%20FINERACT%20ORDER%20BY%20created%20DESC[issues]
+** Filter by tags - "volunteer", "gsoc", "new contributor", etc.
+
+== Open your first PR
+
+* When you've found an issue to work on, add a comment on the jira issue to say that you're looking to avoid conflicting work.
+* Follow our coding conventions through link:https://github.com/apache/fineract?tab=readme-ov-file#checkstyle-and-spotless[spotless].
+* Follow our link:https://github.com/apache/fineract?tab=readme-ov-file#error-handling-guidelines[error handling] and link:https://github.com/apache/fineract?tab=readme-ov-file#logging-guidelines[logging] guidelines.
+* Ensure that your changes are link:https://github.com/apache/fineract?tab=readme-ov-file#instructions-how-to-run-and-debug-in-eclipse-ide[tested].
+* Read our link:https://github.com/apache/fineract?tab=readme-ov-file#merge-strategy[merge strategy] guidelines before creating a Pull Request.
+* Ensure that your pull request follows link:https://github.com/apache/fineract?tab=readme-ov-file#pull-requests[these] guidelines.
+
+== What's next?
+
+link:https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer[Becoming a Committer] documents the process through which you can become a committer in this project.
+
+== Useful links
+
+* Apache Fineract link:https://fineract.apache.org/[website].
+* Apache Fineract link:https://cwiki.apache.org/confluence/display/FINERACT/Fineract+Home[wiki].
+* Understand the major architectural decisions in the platform link:https://fineract.apache.org/docs/current/#_architecture[here].
+* Understand how you can configure deployments link:https://fineract.apache.org/docs/current/#_deployment[here].
+
+Note also our link:https://github.com/apache/fineract/blob/develop/CODE_OF_CONDUCT.md[Code of Conduct].

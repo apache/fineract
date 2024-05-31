@@ -1,0 +1,4 @@
+= SWAGGER UI DEMONSTRATION
+
+We use Swagger-UI to generate and maintain our API documentation, you can see the demo video link:https://www.youtube.com/watch?v=FlVd-0YAo6c[here] or a live version
+link:https://demo.fineract.dev/fineract-provider/swagger-ui/index.html[here]. If you interested to know more about Swagger-UI you can check their link:https://swagger.io/[website].

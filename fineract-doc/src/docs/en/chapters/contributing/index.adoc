@@ -1,0 +1,8 @@
+= Contributing
+
+The Apache Fineract community welcomes contributors who want to support the Fineract technology. Our community builds everything from this website, to the Fineract code to documentation and best practices information.
+
+We especially welcome additions and corrections to the documentation, wiki, and website to improve the user experience. Bug reports and fixes and additions to the Apache Fineract code are welcome. Helping users learn best practices also earns good karma in our community.
+
+include::contributing.adoc[leveloffset=+1]
+include::governance.adoc[leveloffset=+1]

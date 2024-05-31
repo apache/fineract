@@ -1,0 +1,11 @@
+= Download Gradle
+
+The file `gradle/wrapper/gradle-wrapper.jar` binary is checked into this projects Git source repository,
+but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
+In that case, you need to download it using the commands below:
+
+    wget --no-check-certificate -P gradle/wrapper https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar
+
+(or)
+
+    curl --insecure -L https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar > gradle/wrapper/gradle-wrapper.jar
