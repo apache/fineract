@@ -8,6 +8,9 @@ Fineract provides a reliable, robust, and affordable solution for entrepreneurs,
 
 Fineract 1.x is a mature platform with open APIs. 
 
+```
+image:https://static.scarf.sh/a.png?x-pxid=c8fb6966-9836-4ad6-882f-0461000fcbc7[]
+```
 
 
 
