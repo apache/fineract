@@ -74,8 +74,10 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final String updatedByUsername = rs.getString("modifiedBy");
             final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc : createdDateLocal;
             final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc : lastModifiedDateLocal;
-            return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
-                    createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
+
+            return NoteData.builder().id(id).clientId(clientId).groupId(groupId).loanId(loanId).loanTransactionId(transactionId)
+                    .noteType(noteType).note(note).createdOn(createdDate).createdById(createdById).createdByUsername(createdByUsername)
+                    .updatedOn(lastModifiedDate).updatedById(lastModifiedById).updatedByUsername(updatedByUsername).build();
         }
     }
 

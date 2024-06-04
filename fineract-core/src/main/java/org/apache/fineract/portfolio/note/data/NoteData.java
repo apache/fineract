@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.note.data;
 
 import java.time.OffsetDateTime;
+import lombok.Builder;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
@@ -26,6 +27,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  * Immutable data object represent note or case information about a client, loan or loan transaction.
  */
 @Getter
+@Builder
 public class NoteData {
 
     private final Long id;
@@ -43,25 +45,4 @@ public class NoteData {
     private final Long updatedById;
     private final String updatedByUsername;
     private final OffsetDateTime updatedOn;
-
-    public NoteData(final Long id, final Long clientId, final Long groupId, final Long loanId, final Long transactionId,
-            final Long depositAccountId, final Long savingAccountId, final EnumOptionData noteType, final String note,
-            final OffsetDateTime createdDate, final Long createdById, final String createdByUsername, final OffsetDateTime lastModifiedDate,
-            final Long lastModifiedById, final String updatedByUsername) {
-        this.id = id;
-        this.clientId = clientId;
-        this.groupId = groupId;
-        this.loanId = loanId;
-        this.loanTransactionId = transactionId;
-        this.depositAccountId = depositAccountId;
-        this.savingAccountId = savingAccountId;
-        this.noteType = noteType;
-        this.note = note;
-        this.createdOn = createdDate;
-        this.createdById = createdById;
-        this.createdByUsername = createdByUsername;
-        this.updatedOn = lastModifiedDate;
-        this.updatedById = lastModifiedById;
-        this.updatedByUsername = updatedByUsername;
-    }
 }
