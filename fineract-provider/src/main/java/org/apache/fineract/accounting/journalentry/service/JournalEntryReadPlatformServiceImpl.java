@@ -198,7 +198,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 final Long noteId = JdbcSupport.getLong(rs, "noteId");
                 if (noteId != null) {
                     final String note = rs.getString("transactionNote");
-                    noteData = new NoteData(noteId, null, null, null, null, null, null, null, note, null, null, null, null, null, null);
+                    noteData = NoteData.builder().id(noteId).note(note).build();
                 }
                 Long transaction = null;
                 if (entityType != null && transactionId != null) {
