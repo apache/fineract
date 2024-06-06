@@ -66,6 +66,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.integrationtests.ConfigProperties;
 import org.apache.http.conn.HttpHostConnectException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ import org.slf4j.LoggerFactory;
 public final class Utils {
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
-    public static final String DEFAULT_TENANT = "default";
+    public static final String DEFAULT_TENANT = ConfigProperties.Backend.TENANT;
     public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
@@ -101,8 +102,8 @@ public final class Utils {
     private Utils() {}
 
     public static void initializeRESTAssured() {
-        RestAssured.baseURI = "https://localhost";
-        RestAssured.port = 8443;
+        RestAssured.baseURI = ConfigProperties.Backend.PROTOCOL + "://" + ConfigProperties.Backend.HOST;
+        RestAssured.port = ConfigProperties.Backend.PORT;
         RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
         RestAssured.useRelaxedHTTPSValidation();
     }
@@ -176,7 +177,7 @@ public final class Utils {
     }
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
-        return loginIntoServerAndGetBase64EncodedAuthenticationKey("mifos", "password");
+        return loginIntoServerAndGetBase64EncodedAuthenticationKey(ConfigProperties.Backend.USERNAME, ConfigProperties.Backend.PASSWORD);
     }
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey(String username, String password) {
