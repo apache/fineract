@@ -60,6 +60,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
@@ -104,10 +106,8 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
-import org.apache.fineract.portfolio.loanaccount.command.LoanChargeCommand;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
-import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
@@ -128,7 +128,6 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -153,6 +152,8 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Entity
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "loan_externalid_UNIQUE") })
+@Setter
+@Getter
 public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public static final String RECALCULATE_LOAN_SCHEDULE = "recalculateLoanSchedule";
@@ -475,62 +476,73 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "enable_installment_level_delinquency", nullable = false)
     private boolean enableInstallmentLevelDelinquency = false;
 
-    public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
+    public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final AccountType loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
-            final String transactionProcessingStrategyCode, final LoanProductRelatedDetail loanRepaymentScheduleDetail,
-            final Set<LoanCharge> loanCharges, final Set<LoanCollateralManagement> collateral, final BigDecimal fixedEmiAmount,
+            final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy,
+            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
+            final Set<LoanCollateralManagement> collateral, final BigDecimal fixedEmiAmount,
             final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
-            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment) {
-        return new Loan(accountNo, client, null, loanType, fund, officer, loanPurpose, transactionProcessingStrategyCode, loanProduct,
+            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,
+            final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final LoanScheduleModel loanScheduleModel,
+            final Boolean enableInstallmentLevelDelinquency, final LocalDate submittedOnDate) {
+        return new Loan(accountNo, client, null, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, null, loanCharges, collateral, null, fixedEmiAmount, disbursementDetails,
                 maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
-                fixedPrincipalPercentagePerInstallment);
+                fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, loanScheduleModel,
+                enableInstallmentLevelDelinquency, submittedOnDate);
     }
 
-    public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
+    public static Loan newGroupLoanApplication(final String accountNo, final Group group, final AccountType loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
-            final String transactionProcessingStrategyCode, final LoanProductRelatedDetail loanRepaymentScheduleDetail,
-            final Set<LoanCharge> loanCharges, final Set<LoanCollateralManagement> collateral, final Boolean syncDisbursementWithMeeting,
-            final BigDecimal fixedEmiAmount, final List<LoanDisbursementDetails> disbursementDetails,
-            final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
-            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final List<Rate> rates,
-            final BigDecimal fixedPrincipalPercentagePerInstallment) {
-        return new Loan(accountNo, null, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategyCode, loanProduct,
-                loanRepaymentScheduleDetail, null, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
-                disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
+            final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy,
+            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
+            final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
+            final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
+            final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
+            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,
+            final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final LoanScheduleModel loanScheduleModel,
+            final Boolean enableInstallmentLevelDelinquency, final LocalDate submittedOnDate) {
+        return new Loan(accountNo, null, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
+                loanRepaymentScheduleDetail, null, loanCharges, null, syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails,
+                maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
+                fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, loanScheduleModel,
+                enableInstallmentLevelDelinquency, submittedOnDate);
     }
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
-            final Integer loanType, final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
-            final String transactionProcessingStrategyCode, final LoanProductRelatedDetail loanRepaymentScheduleDetail,
-            final Set<LoanCharge> loanCharges, final Set<LoanCollateralManagement> collateral, final Boolean syncDisbursementWithMeeting,
-            final BigDecimal fixedEmiAmount, final List<LoanDisbursementDetails> disbursementDetails,
-            final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
-            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final List<Rate> rates,
-            final BigDecimal fixedPrincipalPercentagePerInstallment) {
-        return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategyCode, loanProduct,
-                loanRepaymentScheduleDetail, null, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
-                disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
+            final AccountType loanType, final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
+            final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy,
+            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
+            final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
+            final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
+            final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
+            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,
+            final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final LoanScheduleModel loanScheduleModel,
+            final Boolean enableInstallmentLevelDelinquency, final LocalDate submittedOnDate) {
+        return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
+                loanRepaymentScheduleDetail, null, loanCharges, null, syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails,
+                maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
+                fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, loanScheduleModel,
+                enableInstallmentLevelDelinquency, submittedOnDate);
     }
 
     protected Loan() {
         this.client = null;
     }
 
-    private Loan(final String accountNo, final Client client, final Group group, final Integer loanType, final Fund fund,
-            final Staff loanOfficer, final CodeValue loanPurpose, final String transactionProcessingStrategyCode,
-            final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
-            final Set<LoanCharge> loanCharges, final Set<LoanCollateralManagement> collateral, final Boolean syncDisbursementWithMeeting,
-            final BigDecimal fixedEmiAmount, final List<LoanDisbursementDetails> disbursementDetails,
-            final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
-            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final List<Rate> rates,
-            final BigDecimal fixedPrincipalPercentagePerInstallment) {
+    private Loan(final String accountNo, final Client client, final Group group, final AccountType loanType, final Fund fund,
+            final Staff loanOfficer, final CodeValue loanPurpose,
+            final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy, final LoanProduct loanProduct,
+            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus, final Set<LoanCharge> loanCharges,
+            final Set<LoanCollateralManagement> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
+            final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
+            final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
+            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,
+            final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final LoanScheduleModel loanScheduleModel,
+            final Boolean enableInstallmentLevelDelinquency, final LocalDate submittedOnDate) {
 
         this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
-        this.loanRepaymentScheduleDetail.validateRepaymentPeriodWithGraceSettings();
 
         this.isFloatingInterestRate = isFloatingInterestRate;
         this.interestRateDifferential = interestRateDifferential;
@@ -543,12 +555,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         this.client = client;
         this.group = group;
-        this.loanType = loanType;
+        this.loanType = loanType.getValue();
         this.fund = fund;
         this.loanOfficer = loanOfficer;
         this.loanPurpose = loanPurpose;
 
-        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
+        this.transactionProcessingStrategyCode = transactionProcessingStrategy.getCode();
+        this.transactionProcessingStrategyName = transactionProcessingStrategy.getName();
+
         this.loanProduct = loanProduct;
         if (loanStatus != null) {
             this.loanStatus = loanStatus.getValue();
@@ -563,7 +577,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.summary = new LoanSummary();
         }
 
-        if (loanType.equals(1) && collateral != null && !collateral.isEmpty()) {
+        if (loanType.isIndividualAccount() && collateral != null && !collateral.isEmpty()) {
             this.loanCollateralManagements = associateWithThisLoan(collateral);
         } else {
             this.loanCollateralManagements = null;
@@ -573,7 +587,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         this.syncDisbursementWithMeeting = syncDisbursementWithMeeting;
         this.fixedEmiAmount = fixedEmiAmount;
         this.maxOutstandingLoanBalance = maxOutstandingLoanBalance;
-        this.disbursementDetails = disbursementDetails;
+        if (disbursementDetails != null) {
+            this.disbursementDetails = disbursementDetails;
+            for (final LoanDisbursementDetails loanDisbursementDetails : disbursementDetails) {
+                loanDisbursementDetails.updateLoan(this);
+            }
+        }
         this.approvedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
         this.createStandingInstructionAtDisbursement = createStandingInstructionAtDisbursement;
 
@@ -590,7 +609,26 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         // Add net get net disbursal amount from charges and principal
         this.netDisbursalAmount = this.approvedPrincipal.subtract(deriveSumTotalOfChargesDueAtDisbursement());
+        this.loanStatus = LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue();
+        this.externalId = externalId;
+        this.termFrequency = loanApplicationTerms.getLoanTermFrequency();
+        this.termPeriodFrequencyType = loanApplicationTerms.getLoanTermPeriodFrequencyType().getValue();
+        this.expectedDisbursementDate = loanApplicationTerms.getExpectedDisbursementDate();
+        this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();
+        this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();
+        this.submittedOnDate = submittedOnDate != null ? submittedOnDate : DateUtils.getBusinessLocalDate();
 
+        updateLoanSchedule(loanScheduleModel);
+
+        updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
+
+        // Copy interest recalculation settings if interest recalculation is enabled
+        if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
+            this.loanInterestRecalculationDetails = LoanInterestRecalculationDetails
+                    .createFrom(this.loanProduct.getProductInterestRecalculationDetails());
+            this.loanInterestRecalculationDetails.updateLoan(this);
+        }
+        this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
 
     public Integer getNumberOfRepayments() {
@@ -650,10 +688,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isAccountNumberRequiresAutoGeneration() {
         return this.accountNumberRequiresAutoGeneration;
-    }
-
-    public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
-        this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
 
     public void addLoanCharge(final LoanCharge loanCharge) {
@@ -1456,274 +1490,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         doPostLoanTransactionChecks(getLastUserTransactionDate(), loanLifecycleStateMachine);
     }
 
-    public Map<String, Object> loanApplicationModification(final JsonCommand command, final Set<LoanCharge> possiblyModifedLoanCharges,
-            final Set<LoanCollateralManagement> possiblyModifiedLoanCollateralItems, final AprCalculator aprCalculator,
-            boolean isChargesModified, final LoanProduct loanProduct) {
-
-        final Map<String, Object> actualChanges = this.loanRepaymentScheduleDetail.updateLoanApplicationAttributes(command, aprCalculator);
-        final MonetaryCurrency currency = new MonetaryCurrency(loanProduct.getCurrency().getCode(),
-                loanProduct.getCurrency().getDigitsAfterDecimal(), loanProduct.getCurrency().getCurrencyInMultiplesOf());
-        this.loanRepaymentScheduleDetail.updateCurrency(currency);
-
-        if (!actualChanges.isEmpty()) {
-            final boolean recalculateLoanSchedule = !(actualChanges.size() == 1 && actualChanges.containsKey(IN_ARREARS_TOLERANCE));
-            actualChanges.put(RECALCULATE_LOAN_SCHEDULE, recalculateLoanSchedule);
-            isChargesModified = true;
-        }
-
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-
-        final String accountNoParamName = ACCOUNT_NO;
-        if (command.isChangeInStringParameterNamed(accountNoParamName, this.accountNumber)) {
-            final String newValue = command.stringValueOfParameterNamed(accountNoParamName);
-            actualChanges.put(accountNoParamName, newValue);
-            this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInBooleanParameterNamed(CREATE_STANDING_INSTRUCTION_AT_DISBURSEMENT,
-                shouldCreateStandingInstructionAtDisbursement())) {
-            final Boolean valueAsInput = command.booleanObjectValueOfParameterNamed(CREATE_STANDING_INSTRUCTION_AT_DISBURSEMENT);
-            actualChanges.put(CREATE_STANDING_INSTRUCTION_AT_DISBURSEMENT, valueAsInput);
-            this.createStandingInstructionAtDisbursement = valueAsInput;
-        }
-
-        if (command.isChangeInStringParameterNamed(EXTERNAL_ID, this.externalId.getValue())) {
-            final String newValue = command.stringValueOfParameterNamed(EXTERNAL_ID);
-            ExternalId externalId = ExternalIdFactory.produce(newValue);
-            if (externalId.isEmpty() && TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
-                externalId = ExternalId.generate();
-            }
-            actualChanges.put(EXTERNAL_ID, externalId);
-            this.externalId = externalId;
-        }
-
-        // add clientId, groupId and loanType changes to actual changes
-
-        final Long clientId = this.client == null ? null : this.client.getId();
-        if (command.isChangeInLongParameterNamed(CLIENT_ID, clientId)) {
-            final Long newValue = command.longValueOfParameterNamed(CLIENT_ID);
-            actualChanges.put(CLIENT_ID, newValue);
-        }
-
-        // FIXME: AA - We may require separate api command to move loan from one
-        // group to another
-        final Long groupId = this.group == null ? null : this.group.getId();
-        if (command.isChangeInLongParameterNamed(GROUP_ID, groupId)) {
-            final Long newValue = command.longValueOfParameterNamed(GROUP_ID);
-            actualChanges.put(GROUP_ID, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(PRODUCT_ID, this.loanProduct.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(PRODUCT_ID);
-            actualChanges.put(PRODUCT_ID, newValue);
-            actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
-        }
-
-        if (command.isChangeInBooleanParameterNamed(IS_FLOATING_INTEREST_RATE, this.isFloatingInterestRate)) {
-            final Boolean newValue = command.booleanObjectValueOfParameterNamed(IS_FLOATING_INTEREST_RATE);
-            actualChanges.put(IS_FLOATING_INTEREST_RATE, newValue);
-            this.isFloatingInterestRate = newValue;
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(INTEREST_RATE_DIFFERENTIAL, this.interestRateDifferential)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(INTEREST_RATE_DIFFERENTIAL);
-            actualChanges.put(INTEREST_RATE_DIFFERENTIAL, newValue);
-            this.interestRateDifferential = newValue;
-        }
-
-        Long existingFundId = null;
-        if (this.fund != null) {
-            existingFundId = this.fund.getId();
-        }
-        if (command.isChangeInLongParameterNamed(FUND_ID, existingFundId)) {
-            final Long newValue = command.longValueOfParameterNamed(FUND_ID);
-            actualChanges.put(FUND_ID, newValue);
-        }
-
-        Long existingLoanOfficerId = null;
-        if (this.loanOfficer != null) {
-            existingLoanOfficerId = this.loanOfficer.getId();
-        }
-
-        if (command.isChangeInLongParameterNamed(LOAN_OFFICER_ID, existingLoanOfficerId)) {
-            final Long newValue = command.longValueOfParameterNamed(LOAN_OFFICER_ID);
-            actualChanges.put(LOAN_OFFICER_ID, newValue);
-        }
-
-        Long existingLoanPurposeId = null;
-        if (this.loanPurpose != null) {
-            existingLoanPurposeId = this.loanPurpose.getId();
-        }
-
-        if (command.isChangeInLongParameterNamed(LOAN_PURPOSE_ID, existingLoanPurposeId)) {
-            final Long newValue = command.longValueOfParameterNamed(LOAN_PURPOSE_ID);
-            actualChanges.put(LOAN_PURPOSE_ID, newValue);
-        }
-
-        if (command.isChangeInStringParameterNamed(TRANSACTION_PROCESSING_STRATEGY_CODE, transactionProcessingStrategyCode)) {
-            final String newValue = command.stringValueOfParameterNamed(TRANSACTION_PROCESSING_STRATEGY_CODE);
-            actualChanges.put(TRANSACTION_PROCESSING_STRATEGY_CODE, newValue);
-        }
-
-        if (command.isChangeInLocalDateParameterNamed(SUBMITTED_ON_DATE, getSubmittedOnDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(SUBMITTED_ON_DATE);
-            actualChanges.put(SUBMITTED_ON_DATE, valueAsInput);
-            actualChanges.put(DATE_FORMAT, dateFormatAsInput);
-            actualChanges.put(LOCALE, localeAsInput);
-
-            this.submittedOnDate = command.localDateValueOfParameterNamed(SUBMITTED_ON_DATE);
-        }
-
-        if (command.isChangeInLocalDateParameterNamed(EXPECTED_DISBURSEMENT_DATE, getExpectedDisbursedOnLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(EXPECTED_DISBURSEMENT_DATE);
-            actualChanges.put(EXPECTED_DISBURSEMENT_DATE, valueAsInput);
-            actualChanges.put(DATE_FORMAT, dateFormatAsInput);
-            actualChanges.put(LOCALE, localeAsInput);
-            actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
-
-            this.expectedDisbursementDate = command.localDateValueOfParameterNamed(EXPECTED_DISBURSEMENT_DATE);
-            removeFirstDisbursementTransaction();
-        }
-
-        if (command.isChangeInLocalDateParameterNamed(REPAYMENTS_STARTING_FROM_DATE, getExpectedFirstRepaymentOnDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(REPAYMENTS_STARTING_FROM_DATE);
-            actualChanges.put(REPAYMENTS_STARTING_FROM_DATE, valueAsInput);
-            actualChanges.put(DATE_FORMAT, dateFormatAsInput);
-            actualChanges.put(LOCALE, localeAsInput);
-            actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
-
-            this.expectedFirstRepaymentOnDate = command.localDateValueOfParameterNamed(REPAYMENTS_STARTING_FROM_DATE);
-        }
-
-        if (command.isChangeInBooleanParameterNamed(SYNC_DISBURSEMENT_WITH_MEETING, isSyncDisbursementWithMeeting())) {
-            final Boolean valueAsInput = command.booleanObjectValueOfParameterNamed(SYNC_DISBURSEMENT_WITH_MEETING);
-            actualChanges.put(SYNC_DISBURSEMENT_WITH_MEETING, valueAsInput);
-            this.syncDisbursementWithMeeting = valueAsInput;
-        }
-
-        if (command.isChangeInLocalDateParameterNamed(INTEREST_CHARGED_FROM_DATE, getInterestChargedFromDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(INTEREST_CHARGED_FROM_DATE);
-            actualChanges.put(INTEREST_CHARGED_FROM_DATE, valueAsInput);
-            actualChanges.put(DATE_FORMAT, dateFormatAsInput);
-            actualChanges.put(LOCALE, localeAsInput);
-            actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
-
-            this.interestChargedFromDate = command.localDateValueOfParameterNamed(INTEREST_CHARGED_FROM_DATE);
-        }
-
-        // the comparison should be done with the tenant date
-        // (DateUtils.getBusinessDate()) and not the server date (new
-        // LocalDate())
-        if (DateUtils.isDateInTheFuture(getSubmittedOnDate())) {
-            final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, getSubmittedOnDate());
-        }
-
-        if (this.client != null && DateUtils.isBefore(getSubmittedOnDate(), this.client.getActivationDate())) {
-            final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage,
-                    getSubmittedOnDate());
-        } else if (this.group != null && DateUtils.isBefore(getSubmittedOnDate(), this.group.getActivationDate())) {
-            final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage,
-                    getSubmittedOnDate());
-        }
-
-        if (DateUtils.isAfter(getSubmittedOnDate(), getExpectedDisbursedOnLocalDate())) {
-            final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
-                    + getExpectedDisbursedOnLocalDate().toString();
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage,
-                    getSubmittedOnDate(), getExpectedDisbursedOnLocalDate());
-        }
-
-        if (isChargesModified) {
-            actualChanges.put(PARAM_CHARGES, getLoanCharges(possiblyModifedLoanCharges));
-            actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
-        }
-
-        if (command.parameterExists(PARAM_COLLATERAL) && possiblyModifiedLoanCollateralItems != null
-                && !possiblyModifiedLoanCollateralItems.isEmpty()) {
-            Set<LoanCollateralManagement> loanCollateralManagements = this.loanCollateralManagements;
-            boolean isTrue = possiblyModifiedLoanCollateralItems.equals(loanCollateralManagements);
-
-            if (!isTrue) {
-                actualChanges.put(PARAM_COLLATERAL, getLoanCollateralDataFormCommand(possiblyModifiedLoanCollateralItems));
-            }
-        }
-
-        if (command.isChangeInIntegerParameterNamed(LOAN_TERM_FREQUENCY, this.termFrequency)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LOAN_TERM_FREQUENCY);
-            actualChanges.put(LOAN_TERM_FREQUENCY, newValue);
-            this.termFrequency = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(LOAN_TERM_FREQUENCY_TYPE, this.termPeriodFrequencyType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LOAN_TERM_FREQUENCY_TYPE);
-            final PeriodFrequencyType newTermPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
-            actualChanges.put(LOAN_TERM_FREQUENCY_TYPE, newTermPeriodFrequencyType.getValue());
-            this.termPeriodFrequencyType = newValue;
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(PRINCIPAL, this.approvedPrincipal)) {
-            this.approvedPrincipal = command.bigDecimalValueOfParameterNamed(PRINCIPAL);
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(PRINCIPAL, this.proposedPrincipal)) {
-            this.proposedPrincipal = command.bigDecimalValueOfParameterNamed(PRINCIPAL);
-        }
-
-        if (loanProduct.isMultiDisburseLoan()) {
-            updateDisbursementDetails(command, actualChanges);
-            if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.maxOutstandingBalanceParameterName,
-                    this.maxOutstandingLoanBalance)) {
-                this.maxOutstandingLoanBalance = command
-                        .bigDecimalValueOfParameterNamed(LoanApiConstants.maxOutstandingBalanceParameterName);
-            }
-            final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
-
-            if (loanProduct.isDisallowExpectedDisbursements()) {
-                if (disbursementDataArray != null && !disbursementDataArray.isEmpty()) {
-                    final String errorMessage = "For this loan product, disbursement details are not allowed";
-                    throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
-                }
-            } else {
-                if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
-                    final String errorMessage = "For this loan product, disbursement details must be provided";
-                    throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
-                }
-
-                if (disbursementDataArray.size() > loanProduct.maxTrancheCount()) {
-                    final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
-                    throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
-                            loanProduct.maxTrancheCount(), disbursementDetails.size());
-                }
-            }
-        } else {
-            this.disbursementDetails.clear();
-        }
-
-        if (loanProduct.isMultiDisburseLoan() || loanProduct.isCanDefineInstallmentAmount()) {
-            if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.emiAmountParameterName, this.fixedEmiAmount)) {
-                this.fixedEmiAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.emiAmountParameterName);
-                actualChanges.put(LoanApiConstants.emiAmountParameterName, this.fixedEmiAmount);
-                actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
-            }
-        } else {
-            this.fixedEmiAmount = null;
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
-                this.fixedPrincipalPercentagePerInstallment)) {
-            this.fixedPrincipalPercentagePerInstallment = command
-                    .bigDecimalValueOfParameterNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName);
-            actualChanges.put(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
-                    this.fixedPrincipalPercentagePerInstallment);
-        }
-
-        return actualChanges;
-    }
-
     public void recalculateAllCharges() {
         Set<LoanCharge> charges = this.getActiveCharges();
         int penaltyWaitPeriod = 0;
@@ -2062,112 +1828,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             list.add(disbursementDetails.getId());
         }
         return list;
-    }
-
-    private LoanCollateralManagementData[] getLoanCollateralDataFormCommand(final Set<LoanCollateralManagement> setOfLoanCollateral) {
-
-        LoanCollateralManagementData[] existingLoanCollateral = null;
-
-        final List<LoanCollateralManagementData> loanCollateralList = new ArrayList<>();
-        for (final LoanCollateralManagement loanCollateral : setOfLoanCollateral) {
-
-            loanCollateralList.add(loanCollateral.toCommand());
-
-        }
-
-        existingLoanCollateral = loanCollateralList.toArray(new LoanCollateralManagementData[0]);
-
-        return existingLoanCollateral;
-    }
-
-    private LoanChargeCommand[] getLoanCharges(final Set<LoanCharge> setOfLoanCharges) {
-
-        LoanChargeCommand[] existingLoanCharges = null;
-
-        final List<LoanChargeCommand> loanChargesList = new ArrayList<>();
-        for (final LoanCharge loanCharge : setOfLoanCharges) {
-            loanChargesList.add(loanCharge.toCommand());
-        }
-
-        existingLoanCharges = loanChargesList.toArray(new LoanChargeCommand[0]);
-
-        return existingLoanCharges;
-    }
-
-    private void removeFirstDisbursementTransaction() {
-        List<LoanTransaction> transactions = getLoanTransactions();
-        for (final LoanTransaction loanTransaction : transactions) {
-            if (loanTransaction.isDisbursement()) {
-                removeLoanTransaction(loanTransaction);
-                break;
-            }
-        }
-    }
-
-    public void loanApplicationSubmittal(final LoanScheduleModel loanSchedule, final LoanApplicationTerms loanApplicationTerms,
-            final LoanLifecycleStateMachine lifecycleStateMachine, final LocalDate submittedOn, final ExternalId externalId,
-            final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
-            final boolean allowTransactionsOnNonWorkingDay) {
-        updateLoanSchedule(loanSchedule);
-
-        lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, this);
-
-        this.externalId = externalId;
-        this.termFrequency = loanApplicationTerms.getLoanTermFrequency();
-        this.termPeriodFrequencyType = loanApplicationTerms.getLoanTermPeriodFrequencyType().getValue();
-        this.submittedOnDate = submittedOn;
-        this.expectedDisbursementDate = loanApplicationTerms.getExpectedDisbursementDate();
-        this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();
-        this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();
-
-        updateLoanScheduleDependentDerivedFields();
-
-        if (DateUtils.isDateInTheFuture(submittedOn)) {
-            final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn,
-                    DateUtils.getBusinessLocalDate());
-        }
-
-        if (this.client != null && this.client.isActivatedAfter(submittedOn)) {
-            final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage, submittedOn,
-                    client.getActivationDate());
-        }
-
-        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_CREATED, submittedOn);
-
-        if (this.group != null && this.group.isActivatedAfter(submittedOn)) {
-            final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, submittedOn,
-                    group.getActivationDate());
-        }
-
-        if (DateUtils.isAfter(submittedOn, getExpectedDisbursedOnLocalDate())) {
-            final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
-                    + getExpectedDisbursedOnLocalDate().toString();
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage,
-                    submittedOn, getExpectedDisbursedOnLocalDate());
-        }
-
-        // charges are optional
-        int penaltyWaitPeriod = 0;
-        for (final LoanCharge loanCharge : getActiveCharges()) {
-            recalculateLoanCharge(loanCharge, penaltyWaitPeriod);
-        }
-
-        updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
-
-        // validate if disbursement date is a holiday or a non-working day
-        validateDisbursementDateIsOnNonWorkingDay(workingDays, allowTransactionsOnNonWorkingDay);
-        validateDisbursementDateIsOnHoliday(allowTransactionsOnHoliday, holidays);
-
-        // Copy interest recalculation settings if interest recalculation is enabled
-        if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
-            this.loanInterestRecalculationDetails = LoanInterestRecalculationDetails
-                    .createFrom(this.loanProduct.getProductInterestRecalculationDetails());
-            this.loanInterestRecalculationDetails.updateLoan(this);
-        }
-
     }
 
     private LocalDate determineExpectedMaturityDate() {
@@ -4872,7 +4532,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             break;
         }
         return dueRepaymentPeriodDate.minusDays(1);// get 2n-1 range date from
-                                                   // startDate
+        // startDate
     }
 
     private void validateDisbursementDateIsOnNonWorkingDay(final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay) {
@@ -4941,7 +4601,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void updateInterestRateFrequencyType() {
-        this.loanRepaymentScheduleDetail.updateInterestPeriodFrequencyType(this.loanProduct.getInterestPeriodFrequencyType());
+        this.loanRepaymentScheduleDetail.setInterestPeriodFrequencyType(this.loanProduct.getInterestPeriodFrequencyType());
     }
 
     public Integer getTermFrequency() {
@@ -4971,14 +4631,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         this.loanStatus = loanStatus;
     }
 
-    public void validateExpectedDisbursementForHolidayAndNonWorkingDay(final WorkingDays workingDays,
-            final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final boolean allowTransactionsOnNonWorkingDay) {
-        // validate if disbursement date is a holiday or a non-working day
-        validateDisbursementDateIsOnNonWorkingDay(workingDays, allowTransactionsOnNonWorkingDay);
-        validateDisbursementDateIsOnHoliday(allowTransactionsOnHoliday, holidays);
-
-    }
-
     private void validateActivityNotBeforeClientOrGroupTransferDate(final LoanEvent event, final LocalDate activityDate) {
         if (this.client != null && this.client.getOfficeJoiningDate() != null) {
             final LocalDate clientOfficeJoiningDate = this.client.getOfficeJoiningDate();
@@ -4987,11 +4639,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 String action = null;
                 String postfix = null;
                 switch (event) {
-                    case LOAN_CREATED:
-                        errorMessage = "The date on which a loan is submitted cannot be earlier than client's transfer date to this office";
-                        action = "submittal";
-                        postfix = "cannot.be.before.client.transfer.date";
-                    break;
                     case LOAN_APPROVED:
                         errorMessage = "The date on which a loan is approved cannot be earlier than client's transfer date to this office";
                         action = "approval";
@@ -5396,6 +5043,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return currentDisbursementDetails;
     }
 
+    public void clearDisbursementDetails() {
+        this.disbursementDetails.clear();
+    }
+
     public LoanDisbursementDetails getDisbursementDetails(final LocalDate transactionDate, final BigDecimal transactionAmount) {
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
             if (!disbursementDetail.isReversed() && disbursementDetail.getDisbursementDate().equals(transactionDate)
@@ -5521,7 +5172,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void updateIsInterestRecalculationEnabled() {
-        this.loanRepaymentScheduleDetail.updateIsInterestRecalculationEnabled(isInterestRecalculationEnabledForProduct());
+        this.loanRepaymentScheduleDetail.setInterestRecalculationEnabled(isInterestRecalculationEnabledForProduct());
     }
 
     public LoanInterestRecalculationDetails loanInterestRecalculationDetails() {
@@ -6192,11 +5843,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         // loanCalendar = loanCalendarInstance.getCalendar();
         // }
 
-        final Integer graceOnPrincipalPayment = this.loanRepaymentScheduleDetail.graceOnPrincipalPayment();
-        final Integer graceOnInterestPayment = this.loanRepaymentScheduleDetail.graceOnInterestPayment();
-        final Integer graceOnInterestCharged = this.loanRepaymentScheduleDetail.graceOnInterestCharged();
+        final Integer graceOnPrincipalPayment = this.loanRepaymentScheduleDetail.getGraceOnPrincipalPayment();
+        final Integer graceOnInterestPayment = this.loanRepaymentScheduleDetail.getGraceOnInterestPayment();
+        final Integer graceOnInterestCharged = this.loanRepaymentScheduleDetail.getGraceOnInterestCharged();
         final LocalDate interestChargedFromDate = getInterestChargedFromDate();
-        final Integer graceOnArrearsAgeing = this.loanRepaymentScheduleDetail.getGraceOnDueDate();
+        final Integer graceOnArrearsAgeing = this.loanRepaymentScheduleDetail.getGraceOnArrearsAgeing();
 
         final Money inArrearsToleranceMoney = this.loanRepaymentScheduleDetail.getInArrearsTolerance();
         final BigDecimal emiAmount = getFixedEmiAmount();
@@ -6254,7 +5905,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void updateNumberOfRepayments(Integer numberOfRepayments) {
-        this.loanRepaymentScheduleDetail.updateNumberOfRepayments(numberOfRepayments);
+        this.loanRepaymentScheduleDetail.setNumberOfRepayments(numberOfRepayments);
     }
 
     public void updateRescheduledOnDate(LocalDate rescheduledOnDate) {
@@ -7130,8 +6781,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return rates;
     }
 
-    public Integer getLoanType() {
-        return loanType;
+    public AccountType getLoanType() {
+        return AccountType.fromInt(loanType);
     }
 
     public void setLoanType(Integer loanType) {

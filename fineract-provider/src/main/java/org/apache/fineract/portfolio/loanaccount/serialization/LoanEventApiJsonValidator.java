@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
 public final class LoanEventApiJsonValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
+    private final LoanApplicationValidator fromApiJsonDeserializer;
     private final LoanRepository loanRepository;
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
@@ -79,12 +79,12 @@ public final class LoanEventApiJsonValidator {
 
         if (isAccountTransfer) {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale", "dateFormat",
-                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName,
+                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.fixedEmiAmountParameterName,
                     LoanApiConstants.disbursementNetDisbursalAmountParameterName));
         } else {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale", "dateFormat",
                     "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "adjustRepaymentDate",
-                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName,
+                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.fixedEmiAmountParameterName,
                     LoanApiConstants.postDatedChecks, LoanApiConstants.disbursementNetDisbursalAmountParameterName));
         }
 
@@ -111,9 +111,9 @@ public final class LoanEventApiJsonValidator {
         baseDataValidator.reset().parameter(LoanApiConstants.disbursementNetDisbursalAmountParameterName).value(netDisbursalAmount)
                 .ignoreIfNull().positiveAmount();
 
-        final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
+        final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedEmiAmountParameterName,
                 element);
-        baseDataValidator.reset().parameter(LoanApiConstants.emiAmountParameterName).value(emiAmount).ignoreIfNull().positiveAmount()
+        baseDataValidator.reset().parameter(LoanApiConstants.fixedEmiAmountParameterName).value(emiAmount).ignoreIfNull().positiveAmount()
                 .notGreaterThanMax(principal);
 
         validatePaymentDetails(baseDataValidator, element);

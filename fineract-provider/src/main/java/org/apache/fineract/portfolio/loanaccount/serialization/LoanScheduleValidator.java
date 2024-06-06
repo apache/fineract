@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class CalculateLoanScheduleQueryFromApiJsonHelper {
+public final class LoanScheduleValidator {
 
     /**
      * The parameters supported for this command.
@@ -64,7 +64,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             LoanApiConstants.submittedOnNoteParameterName, LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName,
             LoanApiConstants.chargesParameterName, LoanApiConstants.collateralParameterName,
             LoanApiConstants.syncDisbursementWithMeetingParameterName, LoanApiConstants.linkAccountIdParameterName,
-            LoanApiConstants.disbursementDataParameterName, LoanApiConstants.emiAmountParameterName,
+            LoanApiConstants.disbursementDataParameterName, LoanApiConstants.fixedEmiAmountParameterName,
             LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
             LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isFloatingInterestRateParameterName,
             LoanApiConstants.interestRateDifferentialParameterName, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
@@ -76,7 +76,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public CalculateLoanScheduleQueryFromApiJsonHelper(final FromJsonHelper fromApiJsonHelper) {
+    public LoanScheduleValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 

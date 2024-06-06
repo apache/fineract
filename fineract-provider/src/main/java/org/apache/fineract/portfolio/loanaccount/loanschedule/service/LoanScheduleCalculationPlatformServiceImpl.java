@@ -24,80 +24,46 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
-import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
-import org.apache.fineract.portfolio.loanaccount.serialization.CalculateLoanScheduleQueryFromApiJsonHelper;
-import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
-import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanScheduleValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
-import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
-import org.apache.fineract.portfolio.loanproduct.serialization.LoanProductDataValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleCalculationPlatformService {
 
-    private final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer;
+    private final LoanScheduleValidator fromApiJsonDeserializer;
     private final LoanScheduleAssembler loanScheduleAssembler;
-    private final FromJsonHelper fromJsonHelper;
-    private final LoanProductRepository loanProductRepository;
-    private final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer;
-    private final LoanReadPlatformService loanReadPlatformService;
-    private final LoanApplicationCommandFromApiJsonHelper loanApiJsonDeserializer;
-    private final LoanAssembler loanAssembler;
+    private final LoanApplicationValidator loanApiJsonDeserializer;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
-    private final ConfigurationDomainService configurationDomainService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final LoanUtilService loanUtilService;
-
-    @Autowired
-    public LoanScheduleCalculationPlatformServiceImpl(final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer,
-            final LoanScheduleAssembler loanScheduleAssembler, final FromJsonHelper fromJsonHelper,
-            final LoanProductRepository loanProductRepository, final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer,
-            final LoanReadPlatformService loanReadPlatformService, final LoanApplicationCommandFromApiJsonHelper loanApiJsonDeserializer,
-            final LoanAssembler loanAssembler,
-            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final ConfigurationDomainService configurationDomainService, final CurrencyReadPlatformService currencyReadPlatformService,
-            final LoanUtilService loanUtilService) {
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.loanScheduleAssembler = loanScheduleAssembler;
-        this.fromJsonHelper = fromJsonHelper;
-        this.loanProductRepository = loanProductRepository;
-        this.loanProductCommandFromApiJsonDeserializer = loanProductCommandFromApiJsonDeserializer;
-        this.loanReadPlatformService = loanReadPlatformService;
-        this.loanApiJsonDeserializer = loanApiJsonDeserializer;
-        this.loanAssembler = loanAssembler;
-        this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
-        this.configurationDomainService = configurationDomainService;
-        this.currencyReadPlatformService = currencyReadPlatformService;
-        this.loanUtilService = loanUtilService;
-    }
+    private final LoanRepositoryWrapper loanRepository;
+    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final LoanSummaryWrapper loanSummaryWrapper;
 
     @Override
     public LoanScheduleModel calculateLoanSchedule(final JsonQuery query, Boolean validateParams) {
@@ -105,36 +71,11 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         /***
          * TODO: Vishwas, this is probably not required, test and remove the same
          **/
-        final Long productId = this.fromJsonHelper.extractLongNamed("productId", query.parsedJson());
-        final LoanProduct loanProduct = this.loanProductRepository.findById(productId)
-                .orElseThrow(() -> new LoanProductNotFoundException(productId));
 
         if (validateParams) {
-            boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
-            this.loanApiJsonDeserializer.validateForCreate(query.json(), isMeetingMandatoryForJLGLoans, loanProduct);
+            this.loanApiJsonDeserializer.validateForCreate(query);
         }
         this.fromApiJsonDeserializer.validate(query.json());
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
-
-        if (loanProduct.isUseBorrowerCycle()) {
-            final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", query.parsedJson());
-            final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", query.parsedJson());
-            Integer cycleNumber = 0;
-            if (clientId != null) {
-                cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId, loanProduct.getId());
-            } else if (groupId != null) {
-                cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(), loanProduct.getId());
-            }
-            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator, loanProduct,
-                    cycleNumber);
-        } else {
-            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator, loanProduct);
-        }
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
 
         return this.loanScheduleAssembler.assembleLoanScheduleFrom(query.parsedJson());
     }
@@ -142,7 +83,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     @Override
     public void updateFutureSchedule(LoanScheduleData loanScheduleData, final Long loanId) {
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = fetchLoan(loanId);
 
         LocalDate today = DateUtils.getBusinessLocalDate();
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
@@ -210,7 +151,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     @Override
     @Transactional(readOnly = true)
     public LoanScheduleData generateLoanScheduleForVariableInstallmentRequest(Long loanId, final String json) {
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = fetchLoan(loanId);
         this.loanScheduleAssembler.assempleVariableScheduleFrom(loan, json);
         return constructLoanScheduleData(loan);
     }
@@ -262,19 +203,23 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
         CurrencyData currencyData = this.currencyReadPlatformService.retrieveCurrency(currency.getCode());
 
-        LoanScheduleData scheduleData = new LoanScheduleData(currencyData, installmentData,
-                loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments(), principal.getAmount(), principal.getAmount(),
-                totalInterest.getAmount(), totalCharge.getAmount(), totalPenalty.getAmount(),
+        return new LoanScheduleData(currencyData, installmentData, loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments(),
+                principal.getAmount(), principal.getAmount(), totalInterest.getAmount(), totalCharge.getAmount(), totalPenalty.getAmount(),
                 principal.plus(totalCharge).plus(totalInterest).plus(totalPenalty).getAmount());
-
-        return scheduleData;
     }
 
     private LoanApplicationTerms constructLoanApplicationTerms(final Loan loan) {
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-        LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
-        return loanApplicationTerms;
+        return loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+    }
+
+    private Loan fetchLoan(final Long accountId) {
+        final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
+                this.loanRepaymentScheduleTransactionProcessorFactory);
+
+        return loanAccount;
     }
 
 }

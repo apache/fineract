@@ -32,13 +32,13 @@ public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
 
     Money getPrincipal();
 
-    Integer graceOnInterestCharged();
+    Integer getGraceOnInterestCharged();
 
-    Integer graceOnInterestPayment();
+    Integer getGraceOnInterestPayment();
 
-    Integer graceOnPrincipalPayment();
+    Integer getGraceOnPrincipalPayment();
 
-    Integer recurringMoratoriumOnPrincipalPeriods();
+    Integer getRecurringMoratoriumOnPrincipalPeriods();
 
     Money getInArrearsTolerance();
 
@@ -60,5 +60,5 @@ public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
 
     AmortizationMethod getAmortizationMethod();
 
-    Integer getGraceOnDueDate();
+    Integer getGraceOnArrearsAgeing();
 }

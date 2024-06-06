@@ -34,8 +34,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -100,6 +102,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.serialization.VariableLoanScheduleFromApiJsonValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementDetailsAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
@@ -115,10 +118,10 @@ import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyTy
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LoanScheduleAssembler {
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -137,35 +140,7 @@ public class LoanScheduleAssembler {
     private final VariableLoanScheduleFromApiJsonValidator variableLoanScheduleFromApiJsonValidator;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanUtilService loanUtilService;
-
-    @Autowired
-    public LoanScheduleAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            final LoanScheduleGeneratorFactory loanScheduleFactory, final AprCalculator aprCalculator,
-            final LoanChargeAssembler loanChargeAssembler, final CalendarRepository calendarRepository,
-            final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
-            final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
-            final WorkingDaysRepositoryWrapper workingDaysRepository,
-            final FloatingRatesReadPlatformService floatingRatesReadPlatformService,
-            final VariableLoanScheduleFromApiJsonValidator variableLoanScheduleFromApiJsonValidator,
-            final CalendarInstanceRepository calendarInstanceRepository, final LoanUtilService loanUtilService) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.loanProductRepository = loanProductRepository;
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.loanScheduleFactory = loanScheduleFactory;
-        this.aprCalculator = aprCalculator;
-        this.loanChargeAssembler = loanChargeAssembler;
-        this.calendarRepository = calendarRepository;
-        this.holidayRepository = holidayRepository;
-        this.configurationDomainService = configurationDomainService;
-        this.clientRepository = clientRepository;
-        this.groupRepository = groupRepository;
-        this.workingDaysRepository = workingDaysRepository;
-        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
-        this.variableLoanScheduleFromApiJsonValidator = variableLoanScheduleFromApiJsonValidator;
-        this.calendarInstanceRepository = calendarInstanceRepository;
-        this.loanUtilService = loanUtilService;
-    }
+    private final LoanDisbursementDetailsAssembler loanDisbursementDetailsAssembler;
 
     public LoanApplicationTerms assembleLoanTerms(final JsonElement element) {
         final Long loanProductId = this.fromApiJsonHelper.extractLongNamed("productId", element);
@@ -177,6 +152,15 @@ public class LoanScheduleAssembler {
 
     private LoanApplicationTerms assembleLoanApplicationTermsFrom(final JsonElement element, final LoanProduct loanProduct) {
 
+        final Boolean allowOverridingAmortization = loanProduct.getLoanConfigurableAttributes().getAmortizationBoolean();
+        final Boolean allowOverridingArrearsTolerance = loanProduct.getLoanConfigurableAttributes().getArrearsToleranceBoolean();
+        final Boolean allowOverridingGraceOnArrearsAging = loanProduct.getLoanConfigurableAttributes().getGraceOnArrearsAgingBoolean();
+        final Boolean allowOverridingInterestCalcPeriod = loanProduct.getLoanConfigurableAttributes().getInterestCalcPeriodBoolean();
+        final Boolean allowOverridingInterestMethod = loanProduct.getLoanConfigurableAttributes().getInterestMethodBoolean();
+        final Boolean allowOverridingGraceOnPrincipalAndInterestPayment = loanProduct.getLoanConfigurableAttributes()
+                .getGraceOnPrincipalAndInterestPaymentBoolean();
+        final Boolean allowOverridingRepaymentEvery = loanProduct.getLoanConfigurableAttributes().getRepaymentEveryBoolean();
+
         final MonetaryCurrency currency = loanProduct.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
@@ -186,7 +170,9 @@ public class LoanScheduleAssembler {
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(loanTermFrequencyType);
 
         final Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
-        final Integer repaymentEvery = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
+        final Integer repaymentEvery = allowOverridingRepaymentEvery
+                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element)
+                : loanProduct.getLoanProductRelatedDetail().getRepayEvery();
         final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element);
         final PeriodFrequencyType repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(repaymentFrequencyType);
         final Integer nthDay = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyNthDayType", element);
@@ -194,7 +180,8 @@ public class LoanScheduleAssembler {
         final DayOfWeekType weekDayType = DayOfWeekType.fromInt(dayOfWeek);
 
         final Integer amortizationType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("amortizationType", element);
-        final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(amortizationType);
+        final AmortizationMethod amortizationMethod = allowOverridingAmortization ? AmortizationMethod.fromInt(amortizationType)
+                : loanProduct.getLoanProductRelatedDetail().getAmortizationMethod();
 
         boolean isEqualAmortization = false;
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.isEqualAmortizationParam, element)) {
@@ -206,12 +193,14 @@ public class LoanScheduleAssembler {
 
         // interest terms
         final Integer interestType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
-        final InterestMethod interestMethod = InterestMethod.fromInt(interestType);
+        final InterestMethod interestMethod = allowOverridingInterestMethod ? InterestMethod.fromInt(interestType)
+                : loanProduct.getLoanProductRelatedDetail().getInterestMethod();
 
         final Integer interestCalculationPeriodType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("interestCalculationPeriodType",
                 element);
-        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
-                .fromInt(interestCalculationPeriodType);
+        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = allowOverridingInterestCalcPeriod
+                ? InterestCalculationPeriodMethod.fromInt(interestCalculationPeriodType)
+                : loanProduct.getLoanProductRelatedDetail().getInterestCalculationPeriodMethod();
         Boolean allowPartialPeriodInterestCalcualtion = this.fromApiJsonHelper
                 .extractBooleanNamed(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, element);
         if (allowPartialPeriodInterestCalcualtion == null) {
@@ -322,23 +311,29 @@ public class LoanScheduleAssembler {
         }
 
         // grace details
-        final Integer graceOnPrincipalPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
+        final Integer graceOnPrincipalPayment = allowOverridingGraceOnPrincipalAndInterestPayment
+                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element)
+                : loanProduct.getLoanProductRelatedDetail().getGraceOnPrincipalPayment();
         final Integer recurringMoratoriumOnPrincipalPeriods = this.fromApiJsonHelper
                 .extractIntegerWithLocaleNamed("recurringMoratoriumOnPrincipalPeriods", element);
-        final Integer graceOnInterestPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
+        final Integer graceOnInterestPayment = allowOverridingGraceOnPrincipalAndInterestPayment
+                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element)
+                : loanProduct.getLoanProductRelatedDetail().getGraceOnInterestPayment();
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         final LocalDate interestChargedFromDate = this.fromApiJsonHelper.extractLocalDateNamed("interestChargedFromDate", element);
         final Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled = this.configurationDomainService
                 .isInterestChargedFromDateSameAsDisbursementDate();
 
-        final Integer graceOnArrearsAgeing = this.fromApiJsonHelper
-                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+        final Integer graceOnArrearsAgeing = allowOverridingGraceOnArrearsAging
+                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element)
+                : loanProduct.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
 
         // other
         final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
-        final Money inArrearsToleranceMoney = Money.of(currency, inArrearsTolerance);
+        final Money inArrearsToleranceMoney = allowOverridingArrearsTolerance ? Money.of(currency, inArrearsTolerance)
+                : loanProduct.getLoanProductRelatedDetail().getInArrearsTolerance();
 
-        final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
+        final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedEmiAmountParameterName,
                 element);
         final BigDecimal maxOutstandingBalance = this.fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.maxOutstandingBalanceParameterName, element);
@@ -638,8 +633,8 @@ public class LoanScheduleAssembler {
         }
     }
 
-    public LoanProductRelatedDetail assembleLoanProductRelatedDetail(final JsonElement element) {
-        final LoanApplicationTerms loanApplicationTerms = assembleLoanTerms(element);
+    public LoanProductRelatedDetail assembleLoanProductRelatedDetail(final JsonElement element, final LoanProduct loanProduct) {
+        final LoanApplicationTerms loanApplicationTerms = assembleLoanApplicationTermsFrom(element, loanProduct);
         return loanApplicationTerms.toLoanProductRelatedDetail();
     }
 
@@ -671,7 +666,8 @@ public class LoanScheduleAssembler {
         validateDisbursementDateIsOnNonWorkingDay(loanApplicationTerms.getExpectedDisbursementDate(), workingDays);
         validateDisbursementDateIsOnHoliday(loanApplicationTerms.getExpectedDisbursementDate(), isHolidayEnabled, holidays);
 
-        List<LoanDisbursementDetails> loanDisbursementDetails = this.loanUtilService.fetchDisbursementData(element.getAsJsonObject());
+        List<LoanDisbursementDetails> loanDisbursementDetails = this.loanDisbursementDetailsAssembler
+                .fetchDisbursementData(element.getAsJsonObject());
 
         return assembleLoanScheduleFrom(loanApplicationTerms, isHolidayEnabled, holidays, workingDays, element, loanDisbursementDetails);
     }
@@ -769,7 +765,7 @@ public class LoanScheduleAssembler {
         List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
         Set<LocalDate> dueDates = new TreeSet<>();
         LocalDate graceApplicable = loan.getExpectedDisbursedOnLocalDate();
-        Integer graceOnPrincipal = loan.getLoanProductRelatedDetail().graceOnPrincipalPayment();
+        Integer graceOnPrincipal = loan.getLoanProductRelatedDetail().getGraceOnPrincipalPayment();
         if (graceOnPrincipal == null) {
             graceOnPrincipal = 0;
         }
@@ -1158,6 +1154,234 @@ public class LoanScheduleAssembler {
         if (DateUtils.isBefore(firstRepaymentDate, minimumFirstRepaymentDate)) {
             throw new MinDaysBetweenDisbursalAndFirstRepaymentViolationException(disbursalDate, firstRepaymentDate,
                     minimumDaysBetweenDisbursalAndFirstRepayment);
+        }
+    }
+
+    public void updateProductRelatedDetails(LoanProductRelatedDetail productRelatedDetail, Loan loan) {
+        final Boolean amortization = loan.loanProduct().getLoanConfigurableAttributes().getAmortizationBoolean();
+        final Boolean arrearsTolerance = loan.loanProduct().getLoanConfigurableAttributes().getArrearsToleranceBoolean();
+        final Boolean graceOnArrearsAging = loan.loanProduct().getLoanConfigurableAttributes().getGraceOnArrearsAgingBoolean();
+        final Boolean interestCalcPeriod = loan.loanProduct().getLoanConfigurableAttributes().getInterestCalcPeriodBoolean();
+        final Boolean interestMethod = loan.loanProduct().getLoanConfigurableAttributes().getInterestMethodBoolean();
+        final Boolean graceOnPrincipalAndInterestPayment = loan.loanProduct().getLoanConfigurableAttributes()
+                .getGraceOnPrincipalAndInterestPaymentBoolean();
+        final Boolean repaymentEvery = loan.loanProduct().getLoanConfigurableAttributes().getRepaymentEveryBoolean();
+
+        if (!amortization) {
+            productRelatedDetail.setAmortizationMethod(loan.loanProduct().getLoanProductRelatedDetail().getAmortizationMethod());
+        }
+        if (!arrearsTolerance) {
+            productRelatedDetail
+                    .setInArrearsTolerance(loan.loanProduct().getLoanProductRelatedDetail().getInArrearsTolerance().getAmount());
+        }
+        if (!graceOnArrearsAging) {
+            productRelatedDetail.setGraceOnArrearsAgeing(loan.loanProduct().getLoanProductRelatedDetail().getGraceOnArrearsAgeing());
+        }
+        if (!interestCalcPeriod) {
+            productRelatedDetail.setInterestCalculationPeriodMethod(
+                    loan.loanProduct().getLoanProductRelatedDetail().getInterestCalculationPeriodMethod());
+        }
+        if (!interestMethod) {
+            productRelatedDetail.setInterestMethod(loan.loanProduct().getLoanProductRelatedDetail().getInterestMethod());
+        }
+        if (!graceOnPrincipalAndInterestPayment) {
+            productRelatedDetail.setGraceOnInterestPayment(loan.loanProduct().getLoanProductRelatedDetail().getGraceOnInterestPayment());
+            productRelatedDetail.setGraceOnPrincipalPayment(loan.loanProduct().getLoanProductRelatedDetail().getGraceOnPrincipalPayment());
+        }
+        if (!repaymentEvery) {
+            productRelatedDetail.setRepayEvery(loan.loanProduct().getLoanProductRelatedDetail().getRepayEvery());
+        }
+    }
+
+    public void updateLoanApplicationAttributes(JsonCommand command, Loan loan, Map<String, Object> changes) {
+        final String localeAsInput = command.locale();
+
+        final String principalParamName = "principal";
+        LoanProductRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
+        if (command.isChangeInBigDecimalParameterNamed(principalParamName, loanProductRelatedDetail.getPrincipal().getAmount())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(principalParamName);
+            changes.put(principalParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setPrincipal(newValue);
+        }
+
+        final String repaymentEveryParamName = "repaymentEvery";
+        if (command.isChangeInIntegerParameterNamed(repaymentEveryParamName, loanProductRelatedDetail.getRepayEvery())) {
+            final Integer newValue = command.integerValueOfParameterNamed(repaymentEveryParamName);
+            changes.put(repaymentEveryParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setRepayEvery(newValue);
+        }
+
+        final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";
+        if (command.isChangeInIntegerParameterNamed(repaymentFrequencyTypeParamName,
+                loanProductRelatedDetail.getRepaymentPeriodFrequencyType().getValue())) {
+            Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyTypeParamName);
+            changes.put(repaymentFrequencyTypeParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setRepaymentPeriodFrequencyType(PeriodFrequencyType.fromInt(newValue));
+        }
+        if (PeriodFrequencyType.MONTHS.equals(loanProductRelatedDetail.getRepaymentPeriodFrequencyType())) {
+            final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
+            Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
+            changes.put(repaymentFrequencyNthDayTypeParamName, newValue);
+
+            final String repaymentFrequencyDayOfWeekTypeParamName = "repaymentFrequencyDayOfWeekType";
+            newValue = command.integerValueOfParameterNamed(repaymentFrequencyDayOfWeekTypeParamName);
+            changes.put(repaymentFrequencyDayOfWeekTypeParamName, newValue);
+            changes.put("locale", localeAsInput);
+        }
+
+        final String numberOfRepaymentsParamName = "numberOfRepayments";
+        if (command.isChangeInIntegerParameterNamed(numberOfRepaymentsParamName, loanProductRelatedDetail.getNumberOfRepayments())) {
+            final Integer newValue = command.integerValueOfParameterNamed(numberOfRepaymentsParamName);
+            changes.put(numberOfRepaymentsParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setNumberOfRepayments(newValue);
+        }
+
+        final String amortizationTypeParamName = "amortizationType";
+        if (command.isChangeInIntegerParameterNamed(amortizationTypeParamName,
+                loanProductRelatedDetail.getAmortizationMethod().getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(amortizationTypeParamName);
+            changes.put(amortizationTypeParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setAmortizationMethod(AmortizationMethod.fromInt(newValue));
+        }
+
+        final String inArrearsToleranceParamName = "inArrearsTolerance";
+        if (command.isChangeInBigDecimalParameterNamed(inArrearsToleranceParamName,
+                loanProductRelatedDetail.getInArrearsTolerance().getAmount())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(inArrearsToleranceParamName);
+            changes.put(inArrearsToleranceParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setInArrearsTolerance(newValue);
+        }
+
+        final String interestRatePerPeriodParamName = "interestRatePerPeriod";
+        if (command.isChangeInBigDecimalParameterNamed(interestRatePerPeriodParamName,
+                loanProductRelatedDetail.getNominalInterestRatePerPeriod())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRatePerPeriodParamName);
+            changes.put(interestRatePerPeriodParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setNominalInterestRatePerPeriod(newValue);
+            loanProductRelatedDetail.updateInterestRateDerivedFields(aprCalculator);
+        }
+
+        final String interestRateFrequencyTypeParamName = "interestRateFrequencyType";
+        final int interestPeriodFrequencyType = loanProductRelatedDetail.getInterestPeriodFrequencyType() == null
+                ? PeriodFrequencyType.INVALID.getValue()
+                : loanProductRelatedDetail.getInterestPeriodFrequencyType().getValue();
+        if (command.isChangeInIntegerParameterNamed(interestRateFrequencyTypeParamName, interestPeriodFrequencyType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestRateFrequencyTypeParamName);
+            changes.put(interestRateFrequencyTypeParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setInterestPeriodFrequencyType(PeriodFrequencyType.fromInt(newValue));
+            loanProductRelatedDetail.updateInterestRateDerivedFields(aprCalculator);
+        }
+
+        final String interestTypeParamName = "interestType";
+        if (command.isChangeInIntegerParameterNamed(interestTypeParamName, loanProductRelatedDetail.getInterestMethod().getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestTypeParamName);
+            changes.put(interestTypeParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setInterestMethod(InterestMethod.fromInt(newValue));
+        }
+
+        final String interestCalculationPeriodTypeParamName = "interestCalculationPeriodType";
+        if (command.isChangeInIntegerParameterNamed(interestCalculationPeriodTypeParamName,
+                loanProductRelatedDetail.getInterestCalculationPeriodMethod().getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCalculationPeriodTypeParamName);
+            changes.put(interestCalculationPeriodTypeParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setInterestCalculationPeriodMethod(InterestCalculationPeriodMethod.fromInt(newValue));
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
+                loanProductRelatedDetail.isAllowPartialPeriodInterestCalcualtion())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME);
+            changes.put(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, newValue);
+            loanProductRelatedDetail.setAllowPartialPeriodInterestCalcualtion(newValue);
+        }
+
+        if (loanProductRelatedDetail.getInterestCalculationPeriodMethod().isDaily()) {
+            loanProductRelatedDetail.setAllowPartialPeriodInterestCalcualtion(false);
+        }
+
+        final String graceOnPrincipalPaymentParamName = "graceOnPrincipalPayment";
+        if (command.isChangeInIntegerParameterNamed(graceOnPrincipalPaymentParamName,
+                loanProductRelatedDetail.getGraceOnPrincipalPayment())) {
+            final Integer newValue = command.integerValueOfParameterNamed(graceOnPrincipalPaymentParamName);
+            changes.put(graceOnPrincipalPaymentParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setGraceOnPrincipalPayment(newValue);
+        }
+
+        final String recurringMoratoriumOnPrincipalPeriodsParamName = "recurringMoratoriumOnPrincipalPeriods";
+        if (command.isChangeInIntegerParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName,
+                loanProductRelatedDetail.getRecurringMoratoriumOnPrincipalPeriods())) {
+            final Integer newValue = command.integerValueOfParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName);
+            changes.put(recurringMoratoriumOnPrincipalPeriodsParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setRecurringMoratoriumOnPrincipalPeriods(newValue);
+        }
+
+        final String graceOnInterestPaymentParamName = "graceOnInterestPayment";
+        if (command.isChangeInIntegerParameterNamed(graceOnInterestPaymentParamName,
+                loanProductRelatedDetail.getGraceOnInterestPayment())) {
+            final Integer newValue = command.integerValueOfParameterNamed(graceOnInterestPaymentParamName);
+            changes.put(graceOnInterestPaymentParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setGraceOnInterestPayment(newValue);
+        }
+
+        final String graceOnInterestChargedParamName = "graceOnInterestCharged";
+        if (command.isChangeInIntegerParameterNamed(graceOnInterestChargedParamName,
+                loanProductRelatedDetail.getGraceOnInterestCharged())) {
+            final Integer newValue = command.integerValueOfParameterNamed(graceOnInterestChargedParamName);
+            changes.put(graceOnInterestChargedParamName, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setGraceOnInterestCharged(newValue);
+        }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
+                loanProductRelatedDetail.getGraceOnArrearsAgeing())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME);
+            changes.put(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setGraceOnArrearsAgeing(newValue);
+        }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME,
+                loanProductRelatedDetail.fetchDaysInMonthType().getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME);
+            changes.put(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setDaysInMonthType(newValue);
+        }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME,
+                loanProductRelatedDetail.fetchDaysInYearType().getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME);
+            changes.put(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, newValue);
+            changes.put("locale", localeAsInput);
+            loanProductRelatedDetail.setDaysInYearType(newValue);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,
+                loanProductRelatedDetail.isInterestRecalculationEnabled())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME);
+            changes.put(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME, newValue);
+            loanProductRelatedDetail.setInterestRecalculationEnabled(newValue);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM,
+                loanProductRelatedDetail.isEqualAmortization())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM);
+            changes.put(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, newValue);
+            loanProductRelatedDetail.setEqualAmortization(newValue);
         }
     }
 }

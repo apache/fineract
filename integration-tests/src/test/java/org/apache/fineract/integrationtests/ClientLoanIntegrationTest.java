@@ -7479,10 +7479,14 @@ public class ClientLoanIntegrationTest {
             map.put("amount", amount);
         }
         if (charge.get("dueDate") != null) {
-            map.put("dueDate", charge.get("dueDate"));
+            map.put("dueDate", DATE_TIME_FORMATTER.format(fromArrayToLocalDate((List) charge.get("dueDate"))));
         }
         map.put("chargeId", charge.get("chargeId"));
         return map;
+    }
+
+    private LocalDate fromArrayToLocalDate(List<Integer> dueDate) {
+        return LocalDate.of(dueDate.get(0), dueDate.get(1), dueDate.get(2));
     }
 
     private HashMap createTrancheDetail(final String date, final String amount) {

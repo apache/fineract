@@ -155,7 +155,7 @@ public class LoanApplicationApprovalTest {
         log.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientId);
 
         final Integer loanProductId = this.loanTransactionHelper
-                .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
+                .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(false)
                         .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
         log.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
                 loanProductId);
