@@ -72,6 +72,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.EarlyPaymentLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -2079,8 +2080,12 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     overpaymentAccount);
             assertNotNull(localLoanProductId);
 
+            Integer localLoanProductId2 = createLoanProduct("500", "15", "4", false, LoanScheduleType.CUMULATIVE, assetAccount,
+                    incomeAccount, expenseAccount, overpaymentAccount);
+            assertNotNull(localLoanProductId2);
+
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> applyForLoanApplication(client.getClientId(), localLoanProductId, BigDecimal.valueOf(500.0), 45, 15, 3,
+                    () -> applyForLoanApplication(client.getClientId(), localLoanProductId2, BigDecimal.valueOf(500.0), 45, 15, 3,
                             BigDecimal.ZERO, "01 January 2023", "01 January 2023",
                             FineractStyleLoanRepaymentScheduleTransactionProcessor.STRATEGY_CODE,
                             LoanScheduleProcessingType.VERTICAL.name()));
@@ -4393,6 +4398,21 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                 .withInterestTypeAsDecliningBalance().withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withLoanScheduleType(loanScheduleType).withLoanScheduleProcessingType(loanScheduleProcessingType).withDaysInMonth("30")
                 .withDaysInYear("365").withMoratorium("0", "0").build(null);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
+            boolean autoPayForDownPayment, LoanScheduleType loanScheduleType, final Account... accounts) {
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+                .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
+                .withEnableDownPayment(true, "25", autoPayForDownPayment).withinterestRatePerPeriod("0")
+                .withInterestRateFrequencyTypeAsMonths()
+                .withRepaymentStrategy(EarlyPaymentLoanRepaymentScheduleTransactionProcessor.STRATEGY_CODE)
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
+                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withInterestTypeAsDecliningBalance().withMultiDisburse()
+                .withDisallowExpectedDisbursements(true).withLoanScheduleType(loanScheduleType).withDaysInMonth("30").withDaysInYear("365")
+                .withMoratorium("0", "0").build(null);
         return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 

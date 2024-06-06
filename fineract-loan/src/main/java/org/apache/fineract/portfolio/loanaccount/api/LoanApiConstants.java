@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.api;
 
 public interface LoanApiConstants {
 
-    String emiAmountParameterName = "fixedEmiAmount";
+    String fixedEmiAmountParameterName = "fixedEmiAmount";
     String maxOutstandingBalanceParameterName = "maxOutstandingLoanBalance";
     String disbursementDataParameterName = "disbursementData";
     String expectedDisbursementDateParameterName = "expectedDisbursementDate";
@@ -36,6 +36,7 @@ public interface LoanApiConstants {
     String amountParameterName = "amount";
     String chargeTimeTypeParameterName = "chargeTimeType";
     String chargeCalculationTypeParameterName = "chargeCalculationType";
+    String chargePaymentModeParameterName = "chargePaymentMode";
     String principalDisbursedParameterName = "transactionAmount";
     String chargesParameterName = "charges";
     String loanIdTobeApproved = "loanId";

@@ -306,10 +306,10 @@ public final class LoanApplicationTerms {
         final Money principalMoney = loanProductRelatedDetail.getPrincipal();
 
         //
-        final Integer graceOnPrincipalPayment = loanProductRelatedDetail.graceOnPrincipalPayment();
-        final Integer recurringMoratoriumOnPrincipalPeriods = loanProductRelatedDetail.recurringMoratoriumOnPrincipalPeriods();
-        final Integer graceOnInterestPayment = loanProductRelatedDetail.graceOnInterestPayment();
-        final Integer graceOnInterestCharged = loanProductRelatedDetail.graceOnInterestCharged();
+        final Integer graceOnPrincipalPayment = loanProductRelatedDetail.getGraceOnPrincipalPayment();
+        final Integer recurringMoratoriumOnPrincipalPeriods = loanProductRelatedDetail.getRecurringMoratoriumOnPrincipalPeriods();
+        final Integer graceOnInterestPayment = loanProductRelatedDetail.getGraceOnInterestPayment();
+        final Integer graceOnInterestCharged = loanProductRelatedDetail.getGraceOnInterestCharged();
 
         // Interest recalculation settings
         final DaysInMonthType daysInMonthType = loanProductRelatedDetail.fetchDaysInMonthType();
@@ -334,7 +334,7 @@ public final class LoanApplicationTerms {
                 repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate,
                 inArrearsTolerance, multiDisburseLoan, emiAmount, disbursementDatas, maxOutstandingBalance,
-                loanProductRelatedDetail.getGraceOnDueDate(), daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
+                loanProductRelatedDetail.getGraceOnArrearsAgeing(), daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 rescheduleStrategyMethod, compoundingMethod, restCalendarInstance, recalculationFrequencyType, compoundingCalendarInstance,
                 compoundingFrequencyType, principalThresholdForLastInstalment, installmentAmountInMultiplesOf,
                 loanPreClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations, calendarHistoryDataWrapper,

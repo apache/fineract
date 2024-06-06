@@ -175,7 +175,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
         List<EntityDatatableChecks> tableRequiredBeforAction = entityDatatableChecksRepository.findByEntityStatusAndProduct(entityName,
                 statusCode, productId);
 
-        if (tableRequiredBeforAction == null || tableRequiredBeforAction.size() < 1) {
+        if (tableRequiredBeforAction == null || tableRequiredBeforAction.isEmpty()) {
             tableRequiredBeforAction = entityDatatableChecksRepository.findByEntityStatusAndNoProduct(entityName, statusCode);
         }
         if (tableRequiredBeforAction != null) {
@@ -190,7 +190,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                     reqDatatables.add(datatableName);
                 }
             }
-            if (reqDatatables.size() > 0) {
+            if (!reqDatatables.isEmpty()) {
                 throw new DatatableEntryRequiredException(reqDatatables.toString());
             }
         }

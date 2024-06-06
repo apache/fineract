@@ -18,44 +18,30 @@
  */
 package org.apache.fineract.portfolio.loanaccount.command;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Data;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 
 /**
  * Java object representation of {@link LoanCharge} API JSON.
  */
-public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
+@Data
+public class LoanChargeCommand implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unused")
-    private final Long id;
-    private final Long chargeId;
-    private final BigDecimal amount;
+    private Long id;
+    private Long chargeId;
+    private BigDecimal amount;
     @SuppressWarnings("unused")
-    private final Integer chargeTimeType;
+    private Integer chargeTimeType;
     @SuppressWarnings("unused")
-    private final Integer chargeCalculationType;
+    private Integer chargeCalculationType;
     @SuppressWarnings("unused")
-    private final LocalDate dueDate;
-
-    public LoanChargeCommand(final Long id, final Long chargeId, final BigDecimal amount, final Integer chargeTimeType,
-            final Integer chargeCalculationType, final LocalDate dueDate) {
-        this.id = id;
-        this.chargeId = chargeId;
-        this.amount = amount;
-        this.chargeTimeType = chargeTimeType;
-        this.chargeCalculationType = chargeCalculationType;
-        this.dueDate = dueDate;
-    }
-
-    @Override
-    @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
-    public int compareTo(final LoanChargeCommand o) {
-        int comparison = this.chargeId.compareTo(o.chargeId);
-        if (comparison == 0) {
-            comparison = this.amount.compareTo(o.amount);
-        }
-        return comparison;
-    }
+    private LocalDate dueDate;
 }

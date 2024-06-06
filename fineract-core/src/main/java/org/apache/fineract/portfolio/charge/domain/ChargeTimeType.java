@@ -143,47 +143,51 @@ public enum ChargeTimeType {
     }
 
     public boolean isTimeOfDisbursement() {
-        return ChargeTimeType.DISBURSEMENT.getValue().equals(this.value);
+        return ChargeTimeType.DISBURSEMENT.equals(this);
     }
 
     public boolean isOnSpecifiedDueDate() {
-        return this.value.equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue());
+        return this.equals(ChargeTimeType.SPECIFIED_DUE_DATE);
     }
 
     public boolean isSavingsActivation() {
-        return this.value.equals(ChargeTimeType.SAVINGS_ACTIVATION.getValue());
+        return this.equals(ChargeTimeType.SAVINGS_ACTIVATION);
     }
 
     public boolean isSavingsClosure() {
-        return this.value.equals(ChargeTimeType.SAVINGS_CLOSURE.getValue());
+        return this.equals(ChargeTimeType.SAVINGS_CLOSURE);
     }
 
     public boolean isWithdrawalFee() {
-        return this.value.equals(ChargeTimeType.WITHDRAWAL_FEE.getValue());
+        return this.equals(ChargeTimeType.WITHDRAWAL_FEE);
     }
 
     public boolean isSavingsNoActivityFee() {
-        return this.value.equals(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue());
+        return this.equals(ChargeTimeType.SAVINGS_NOACTIVITY_FEE);
     }
 
     public boolean isAnnualFee() {
-        return this.value.equals(ChargeTimeType.ANNUAL_FEE.getValue());
+        return this.equals(ChargeTimeType.ANNUAL_FEE);
     }
 
     public boolean isMonthlyFee() {
-        return this.value.equals(ChargeTimeType.MONTHLY_FEE.getValue());
+        return this.equals(ChargeTimeType.MONTHLY_FEE);
     }
 
     public boolean isWeeklyFee() {
-        return this.value.equals(ChargeTimeType.WEEKLY_FEE.getValue());
+        return this.equals(ChargeTimeType.WEEKLY_FEE);
     }
 
     public boolean isInstalmentFee() {
-        return this.value.equals(ChargeTimeType.INSTALMENT_FEE.getValue());
+        return this.equals(ChargeTimeType.INSTALMENT_FEE);
+    }
+
+    public boolean isSpecifiedDueDate() {
+        return this.equals(ChargeTimeType.SPECIFIED_DUE_DATE);
     }
 
     public boolean isOverdueInstallment() {
-        return this.value.equals(ChargeTimeType.OVERDUE_INSTALLMENT.getValue());
+        return this.equals(ChargeTimeType.OVERDUE_INSTALLMENT);
     }
 
     public boolean isAllowedLoanChargeTime() {
@@ -200,22 +204,22 @@ public enum ChargeTimeType {
     }
 
     public boolean isOverdraftFee() {
-        return this.value.equals(ChargeTimeType.OVERDRAFT_FEE.getValue());
+        return this.equals(ChargeTimeType.OVERDRAFT_FEE);
     }
 
     public boolean isTrancheDisbursement() {
-        return this.value.equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue());
+        return this.equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
     }
 
     public boolean isShareAccountActivation() {
-        return this.value.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue());
+        return this.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION);
     }
 
     public boolean isSharesPurchase() {
-        return this.value.equals(ChargeTimeType.SHARE_PURCHASE.getValue());
+        return this.equals(ChargeTimeType.SHARE_PURCHASE);
     }
 
     public boolean isSharesRedeem() {
-        return this.value.equals(ChargeTimeType.SHARE_REDEEM.getValue());
+        return this.equals(ChargeTimeType.SHARE_REDEEM);
     }
 }

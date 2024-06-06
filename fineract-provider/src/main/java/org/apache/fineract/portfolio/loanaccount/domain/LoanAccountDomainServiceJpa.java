@@ -81,7 +81,6 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstr
 import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
-import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -250,7 +249,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         // changes to closed
         disableStandingInstructionsLinkedToClosedLoan(loan);
 
-        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+        if (loan.getLoanType().isIndividualAccount()) {
             // Mark Post Dated Check as paid.
             final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = newRepaymentTransaction
                     .getLoanTransactionToRepaymentScheduleMappings();
