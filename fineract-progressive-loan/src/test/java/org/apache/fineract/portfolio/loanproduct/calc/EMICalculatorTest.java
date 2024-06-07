@@ -23,13 +23,12 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanproduct.calc.emi.FnValueFunctions;
-import org.apache.fineract.portfolio.loanproduct.calc.ratefactor.RateFactorFunctions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,12 +39,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class EMICalculationFunctionsTest {
+class EMICalculatorTest {
+
+    private static EMICalculator emiCalculator = new EMICalculator();
 
     private static MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
 
     private static List<LoanRepaymentScheduleInstallment> periods;
-    private final BigDecimal interestRate = BigDecimal.valueOf(0.09482);
+    private final BigDecimal interestRate = BigDecimal.valueOf(0.094822);
+    private final BigDecimal principal = BigDecimal.valueOf(100);
 
     @BeforeAll
     public static void init() {
@@ -60,20 +62,21 @@ class EMICalculationFunctionsTest {
 
         // When
         moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.HALF_EVEN);
-        moneyHelper.when(() -> MoneyHelper.getMathContext()).thenReturn(new MathContext(8, RoundingMode.HALF_EVEN));
+        moneyHelper.when(() -> MoneyHelper.getMathContext()).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
     }
 
     @Test
     public void testRateFactorFunctionDay365() {
         // Given
         final DaysInYearType daysInYearType = DaysInYearType.DAYS_365;
-        final String[] expectedValues = new String[] { "1.0080532", "1.0075336", "1.0080532", "1.0077934", "1.0080532", "1.0077934" };
+        final String[] expectedValues = new String[] { "1.00805337534", "1.00753380274", "1.00805337534", "1.00779358904", "1.00805337534",
+                "1.00779358904" };
 
         // Then
         for (LoanRepaymentScheduleInstallment period : periods) {
-            final Long daysInPeriod = DateUtils.getDifferenceInDays(period.getFromDate(), period.getDueDate());
+            final Integer daysInPeriod = Math.toIntExact(DateUtils.getDifferenceInDays(period.getFromDate(), period.getDueDate()));
             final Integer daysInYear = DateUtils.daysInYear(daysInYearType, period.getFromDate());
-            BigDecimal rateFactor = RateFactorFunctions.rateFactor(interestRate, daysInPeriod, daysInYear, MoneyHelper.getMathContext());
+            BigDecimal rateFactor = emiCalculator.rateFactor(interestRate, daysInPeriod, daysInYear, MoneyHelper.getMathContext());
 
             Assertions.assertEquals(expectedValues[period.getInstallmentNumber() - 1], rateFactor.toString());
         }
@@ -83,14 +86,15 @@ class EMICalculationFunctionsTest {
     public void testRateFactorFunctionActual() {
         // Given
         final DaysInYearType daysInYearType = DaysInYearType.ACTUAL;
-        final String[] expectedValues = new String[] { "1.0080312", "1.0075131", "1.0080312", "1.0077721", "1.0080312", "1.0077721" };
+        final String[] expectedValues = new String[] { "1.00803137158", "1.00751321858", "1.00803137158", "1.00777229508", "1.00803137158",
+                "1.00777229508" };
 
         // Then
         for (LoanRepaymentScheduleInstallment period : periods) {
-            final Long daysInPeriod = DateUtils.getDifferenceInDays(period.getFromDate(), period.getDueDate());
+            final Integer daysInPeriod = Math.toIntExact(DateUtils.getDifferenceInDays(period.getFromDate(), period.getDueDate()));
             final Integer daysInYear = DateUtils.daysInYear(daysInYearType, period.getFromDate());
 
-            BigDecimal rateFactor = RateFactorFunctions.rateFactor(interestRate, daysInPeriod, daysInYear, MoneyHelper.getMathContext());
+            BigDecimal rateFactor = emiCalculator.rateFactor(interestRate, daysInPeriod, daysInYear, MoneyHelper.getMathContext());
 
             Assertions.assertEquals(expectedValues[period.getInstallmentNumber() - 1], rateFactor.toString());
         }
@@ -101,17 +105,17 @@ class EMICalculationFunctionsTest {
         // Given
         final DaysInYearType daysInYearType = DaysInYearType.DAYS_365;
         final MathContext mc = MoneyHelper.getMathContext();
-        final String[] expectedValues = new String[] { "1.0000000", "2.0075336", "3.0237007", "4.0472656", "5.0798590", "6.1194484" };
+        final String[] expectedValues = new String[] { "1.00000000000", "2.00753380274", "3.02370122596", "4.04726671069", "5.07986086861",
+                "6.11945121660" };
 
         final List<BigDecimal> fnValuesCalculated = new ArrayList<>();
         BigDecimal previousFnValue = BigDecimal.ZERO;
         for (LoanRepaymentScheduleInstallment period : periods) {
-            final Long daysInPeriod = DateUtils.getDifferenceInDays(period.getFromDate(), period.getDueDate());
+            final Integer daysInPeriod = Math.toIntExact(DateUtils.getDifferenceInDays(period.getFromDate(), period.getDueDate()));
             final Integer daysInYear = DateUtils.daysInYear(daysInYearType, period.getFromDate());
-            final BigDecimal rateFactor = RateFactorFunctions.rateFactor(interestRate, daysInPeriod, daysInYear,
-                    MoneyHelper.getMathContext());
+            final BigDecimal rateFactor = emiCalculator.rateFactor(interestRate, daysInPeriod, daysInYear, MoneyHelper.getMathContext());
 
-            final BigDecimal currentFnValue = FnValueFunctions.fnValue(previousFnValue, rateFactor, mc);
+            final BigDecimal currentFnValue = emiCalculator.fnValue(previousFnValue, rateFactor, mc);
             fnValuesCalculated.add(currentFnValue);
 
             previousFnValue = currentFnValue;
@@ -121,6 +125,25 @@ class EMICalculationFunctionsTest {
         for (BigDecimal fnValue : fnValuesCalculated) {
             Assertions.assertEquals(expectedValues[idx++], fnValue.toString());
         }
+    }
+
+    @Test
+    public void testEMICalculation() {
+        final MathContext mc = MoneyHelper.getMathContext();
+        final List<Integer> repaymentPeriodDays = Arrays.asList(31, 29, 31, 30, 31, 30);
+
+        final EMICalculationResult result = emiCalculator.calculateEMI(repaymentPeriodDays, principal, interestRate,
+                DaysInYearType.DAYS_365.getValue(), mc);
+
+        // 17.13
+        Assertions.assertEquals(BigDecimal.valueOf(17.1293512777), result.getEqualMonthlyInstallmentValue());
+
+        Assertions.assertEquals(BigDecimal.valueOf(0.00805337534), result.getRateFactorMinus1ForRepaymentPeriod(1));
+        Assertions.assertEquals(BigDecimal.valueOf(0.00753380274), result.getRateFactorMinus1ForRepaymentPeriod(2));
+        Assertions.assertEquals(BigDecimal.valueOf(0.00805337534), result.getRateFactorMinus1ForRepaymentPeriod(3));
+        Assertions.assertEquals(BigDecimal.valueOf(0.00779358904), result.getRateFactorMinus1ForRepaymentPeriod(4));
+        Assertions.assertEquals(BigDecimal.valueOf(0.00805337534), result.getRateFactorMinus1ForRepaymentPeriod(5));
+        Assertions.assertEquals(BigDecimal.valueOf(0.00779358904), result.getRateFactorMinus1ForRepaymentPeriod(6));
     }
 
     @NotNull
