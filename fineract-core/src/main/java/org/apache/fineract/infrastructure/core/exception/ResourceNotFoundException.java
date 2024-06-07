@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.products.exception;
+package org.apache.fineract.infrastructure.core.exception;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.springframework.beans.BeansException;
 
 public class ResourceNotFoundException extends AbstractPlatformResourceNotFoundException {

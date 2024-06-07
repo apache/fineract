@@ -18,11 +18,26 @@
  */
 package org.apache.fineract.organisation.monetary.domain;
 
+import java.util.List;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface ApplicationCurrencyRepository
         extends JpaRepository<ApplicationCurrency, Long>, JpaSpecificationExecutor<ApplicationCurrency> {
 
+    String FIND_CURRENCY_DETAILS = "SELECT new org.apache.fineract.organisation.monetary.data.CurrencyData(ac.code, ac.name, ac.decimalPlaces, ac.inMultiplesOf, ac.displaySymbol, ac.nameCode) FROM ApplicationCurrency ac ";
+
     ApplicationCurrency findOneByCode(String currencyCode);
+
+    @Query(FIND_CURRENCY_DETAILS + " WHERE ac.code = :code")
+    CurrencyData findCurrencyDataByCode(@Param("code") String currencyCode);
+
+    @Query(FIND_CURRENCY_DETAILS)
+    List<CurrencyData> findAllSorted(Sort sort);
 }

@@ -9,13 +9,13 @@ NOTE: We chose the note service because it's interface is very simple and has no
 .Note Read Service Interface
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/note/service/NoteReadPlatformService.java[lines=19..]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/portfolio/note/service/NoteReadPlatformService.java[lines=19..]
 ----
 
 .Note Write Service Interface
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/note/service/NoteReadPlatformService.java[lines=19..]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/portfolio/note/service/NoteReadPlatformService.java[lines=19..]
 ----
 
 == Auto Start Configuration

@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.office.domain;
+package org.apache.fineract.portfolio.paymentdetail.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
-public interface OrganisationCurrencyRepository
-        extends JpaRepository<OrganisationCurrency, Long>, JpaSpecificationExecutor<OrganisationCurrency> {
-
-    OrganisationCurrency findOneByCode(String currencyCode);
+@Repository
+public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, Long>, JpaSpecificationExecutor<PaymentDetail> {
+    // no added behaviour
 }

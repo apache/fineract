@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.savings.domain;
+package org.apache.fineract.portfolio.savings.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
 public interface SavingsAccountDomainService {
 

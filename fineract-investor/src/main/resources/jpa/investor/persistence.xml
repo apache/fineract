@@ -38,7 +38,7 @@
         <class>org.apache.fineract.infrastructure.documentmanagement.domain.Image</class>
         <class>org.apache.fineract.organisation.staff.domain.Staff</class>
         <class>org.apache.fineract.organisation.office.domain.Office</class>
-        <class>org.apache.fineract.organisation.office.domain.OrganisationCurrency</class>
+        <class>org.apache.fineract.organisation.monetary.domain.OrganisationCurrency</class>
         <class>org.apache.fineract.organisation.monetary.domain.ApplicationCurrency</class>
         <class>org.apache.fineract.organisation.holiday.domain.Holiday</class>
         <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
