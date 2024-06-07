@@ -16,29 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.calc.emi;
+package org.apache.fineract.portfolio.loanproduct.calc;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-public class FnValueFunctions {
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+public class EMICalculationResult {
 
-    protected FnValueFunctions() {}
+    @Getter
+    private final BigDecimal equalMonthlyInstallmentValue;
+    private final List<BigDecimal> repaymentPeriodRateFactorMinus1List;
 
-    /**
-     * To calculate the function value for each period, we are going to use the next formula:
-     *
-     * fn = 1 + fnValueFrom * rateFactorEnd
-     *
-     * @param previousFnValue
-     *
-     * @param currentRateFactor
-     *
-     * @param mathContext
-     *
-     */
-    public static BigDecimal fnValue(final BigDecimal previousFnValue, final BigDecimal currentRateFactor, final MathContext mc) {
-        return BigDecimal.ONE.add(previousFnValue.multiply(currentRateFactor, mc));
+    public BigDecimal getRateFactorMinus1ForRepaymentPeriod(Integer repaymentPeriodNumber) {
+        return repaymentPeriodNumber != null && repaymentPeriodNumber > 0
+                && repaymentPeriodNumber <= repaymentPeriodRateFactorMinus1List.size()
+                        ? repaymentPeriodRateFactorMinus1List.get(repaymentPeriodNumber - 1)
+                        : BigDecimal.ZERO;
     }
-
 }
