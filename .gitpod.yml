@@ -40,4 +40,4 @@ tasks:
       ./gradlew createDB -PdbName=fineract_tenants
       ./gradlew createDB -PdbName=fineract_default
       ./gradlew build -x test
-  init: sdk default java 17.0.4.fx-zulu
+  init: sdk default jdk 21.0.3+9
