@@ -23,7 +23,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
 
 @Entity
 @Table(name = "m_currency")

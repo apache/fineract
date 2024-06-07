@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.producttoaccountmapping.domain;
+package org.apache.fineract.portfolio;
 
 public enum PortfolioProductType {
 

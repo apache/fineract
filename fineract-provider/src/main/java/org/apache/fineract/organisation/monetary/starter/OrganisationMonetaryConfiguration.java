@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.monetary.starter;
 
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.serialization.CurrencyCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformServiceImpl;
@@ -27,7 +28,6 @@ import org.apache.fineract.organisation.monetary.service.CurrencyWritePlatformSe
 import org.apache.fineract.organisation.monetary.service.CurrencyWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformServiceImpl;
-import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
