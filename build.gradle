@@ -19,10 +19,10 @@
 // TODO: this is work in progress, please follow FINERACT-1171
 buildscript {
     ext {
-        jacocoVersion = '0.8.11'
-        retrofitVersion = '2.9.0'
-        okhttpVersion = '4.9.3'
-        oltuVersion = '1.0.1'
+        jacocoVersion = '0.8.12'
+        retrofitVersion = '2.11.0'
+        okhttpVersion = '4.12.0'
+        oltuVersion = '1.0.2'
         fineractCustomProjects = []
         fineractJavaProjects = subprojects.findAll{
             [
