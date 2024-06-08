@@ -56,7 +56,7 @@ public class GLAccount extends AbstractPersistableCustom {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private List<GLAccount> children = new ArrayList<>();
+    private List<GLAccount>  children = new ArrayList<>();
 
     @Column(name = "name", nullable = false, length = 45)
     private String name;
